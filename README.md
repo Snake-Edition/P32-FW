@@ -21,6 +21,10 @@ a few goodies:
   `M301` (set hotend PID), and `M304` (set bed PID).
 * **Max Temps**: Raises the maximum bed temperature from 100C to 110C
   and nozzle temperature from 290C to 300C (use with caution!).
+* **Settings during print**: You can change Llama settings during printing.
+* **Faster nozzle cooling**: If you wait for nozzle cooling before MBL, you can call `M109 R170 C`
+  which uses print fan to speed up cooling.
+* **Game**: Instead of printing you can enjoy simple game.
 
 All settings are automatically saved to EEPROM and loaded on boot.
 
@@ -84,8 +88,8 @@ then rerun the setup wizard manually.
 ### Livestock to Stock
 
 Download Prusa's stock firmware [here](https://www.prusa3d.com/drivers/).
-The bootloader might not let you downgrade the firmware unless you
-explicitly give permission. Go to the Settings menu, scroll down to "FW Upgrade",
+Press knob at printer startup to force-install the firmware or go
+to the Settings menu, scroll down to "FW Upgrade",
 and change the option to "On Restart Older" (this option is only available
 in Llama firmware).
 
