@@ -631,6 +631,7 @@ if(GUI)
             src/gui/test/screen_test_dlg.cpp
             src/gui/test/screen_test_wizard_icons.cpp
             src/gui/test/screen_test_graph.cpp
+            src/gui/screen_snake.cpp
             src/gui/wizard/selftest.cpp
             src/gui/wizard/firstlay.cpp
             src/gui/wizard/screen_wizard.cpp
