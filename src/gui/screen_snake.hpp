@@ -1,4 +1,4 @@
-//screen_snake.hpp
+// screen_snake.hpp
 #pragma once
 #include "gui.hpp"
 #include "window_text.hpp"
@@ -8,13 +8,16 @@
 #include "scratch_buffer.hpp"
 #include "screen.hpp"
 
+using namespace buddy::scratch_buffer;
+
 using point_ui8_t = point_t<uint8_t>;
 using point_i8_t = point_t<int8_t>;
-const constexpr int snake_max_length = SCRATCH_BUFFER_SIZE / sizeof(point_ui8_t);
+const constexpr int snake_max_length = sizeof(ScratchBuffer::buffer) / sizeof(point_ui8_t);
 
 class screen_snake_data_t : public AddSuperWindow<screen_t> {
 public:
     screen_snake_data_t();
+    ~screen_snake_data_t() { scratch_buffer_ownership.release(); }
 
 protected:
     virtual void windowEvent(EventLock /*has private ctor*/, window_t *sender, GUI_event_t event, void *param) override;
@@ -23,7 +26,8 @@ private:
     uint32_t last_redraw = 0;
     point_i8_t direction = { 0, -1 };
     /// circular buffer
-    point_ui8_t *snake = (point_ui8_t *)scratch_buffer;
+    point_ui8_t *snake = nullptr;
+    Ownership scratch_buffer_ownership;
     int buffer_pos = 0;
     int snake_length = 1;
     point_ui8_t food;

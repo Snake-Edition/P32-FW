@@ -24,7 +24,7 @@
 #include "eeprom.h"
 #include "crc32.h"
 #include "app.h"
-#include "config_a3ides2209_02.h"
+#include "config_buddy_2209_02.h"
 #include "marlin_client.h"
 #include "marlin_server.h"
 #include "st25dv64k.h"
@@ -37,7 +37,7 @@ static eeprom_llama_vars_t _eeprom_llama_cache;
 static uint16_t eeprom_llama_var_size(uint8_t id);
 static uint16_t eeprom_llama_var_offset(uint8_t id);
 
-static int eeprom_llama_check_crc32(void);
+static bool eeprom_llama_check_crc32(void);
 static void eeprom_llama_update_crc32();
 
 // semaphore handle (lock/unlock)
@@ -52,42 +52,17 @@ static inline void eeprom_llama_unlock(void) {
 }
 
 void eeprom_llama_init(void) {
-    if (_eeprom_llama_cache_loaded) return;
+    if (_eeprom_llama_cache_loaded)
+        return;
 
     osSemaphoreDef(eepromLlamaSema);
     eeprom_llama_sema = osSemaphoreCreate(osSemaphore(eepromLlamaSema), 1);
 
-    // check for Llama at the new EEPROM address first
+    //     // check for Llama at the new EEPROM address first
     st25dv64k_user_read_bytes(EEPROM_LLAMA_ADDRESS, &_eeprom_llama_cache, sizeof(eeprom_llama_vars_t));
     if (!eeprom_llama_check_crc32()) {
-        // if invalid, check for Llama at the old EEPROM address
-        st25dv64k_user_read_bytes(EEPROM_LLAMA_OLD_ADDRESS, &_eeprom_llama_cache, sizeof(eeprom_llama_vars_t));
-        if (eeprom_llama_check_crc32()) {
-            // if found, move to the new EEPROM address
-            st25dv64k_user_write_bytes(EEPROM_LLAMA_ADDRESS, (void *)&_eeprom_llama_cache, EEPROM_LLAMA_DATASIZE);
-        } else {
-            // if not found, use defaults
-            eeprom_llama_defaults();
-        }
-    } else if (_eeprom_llama_cache.VERSION < 1 || _eeprom_llama_cache.VERSION > EEPROM_LLAMA_VERSION) {
+        // TODO implement version conversion
         eeprom_llama_defaults();
-    } else {
-        if (_eeprom_llama_cache.VERSION == 1) {
-            // upgrade to version 2: adds extruder reverse
-            // move data forward to account for addition of datasize field
-            memcpy(((void*)&_eeprom_llama_cache) + 4, ((void*)&_eeprom_llama_cache) + 2, 19);
-            _eeprom_llama_cache.EXTRUDER_REVERSE = 0;
-            if (_eeprom_llama_cache.EXTRUDER_TYPE == 2) {  // Bond-Rev
-                _eeprom_llama_cache.EXTRUDER_TYPE = 1;
-                _eeprom_llama_cache.EXTRUDER_REVERSE = 1;
-            } else if (_eeprom_llama_cache.EXTRUDER_TYPE == 3) {  // Custom
-                _eeprom_llama_cache.EXTRUDER_TYPE = 2;
-            }
-            _eeprom_llama_cache.VERSION = 2;
-            _eeprom_llama_cache.DATASIZE = EEPROM_LLAMA_DATASIZE;
-            _eeprom_llama_cache.CRC32 = crc32_eeprom((uint32_t *)(&_eeprom_llama_cache), (EEPROM_LLAMA_DATASIZE - 4) / 4);
-            st25dv64k_user_write_bytes(EEPROM_LLAMA_ADDRESS, (void *)&_eeprom_llama_cache, EEPROM_LLAMA_DATASIZE);
-        }
     }
     _eeprom_llama_cache_loaded = true;
 }
@@ -95,10 +70,10 @@ void eeprom_llama_init(void) {
 void eeprom_llama_defaults(void) {
     eeprom_llama_vars_t vars = eeprom_llama_var_defaults;
     // calculate crc32
-    vars.CRC32 = crc32_eeprom((uint32_t *)(&vars), (EEPROM_LLAMA_DATASIZE - 4) / 4);
+    vars.CRC32 = crc32_calc((uint8_t *)(&vars), EEPROM_LLAMA_DATASIZE - 4);
     // write data to eeprom
     st25dv64k_user_write_bytes(EEPROM_LLAMA_ADDRESS, (void *)&vars, EEPROM_LLAMA_DATASIZE);
-    memcpy(&_eeprom_llama_cache, (void*)&vars, EEPROM_LLAMA_DATASIZE);
+    memcpy(&_eeprom_llama_cache, (void *)&vars, EEPROM_LLAMA_DATASIZE);
 }
 
 variant8_t eeprom_llama_get_var(uint8_t id) {
@@ -115,7 +90,7 @@ variant8_t eeprom_llama_get_var(uint8_t id) {
         if (size == data_size) {
             offset = eeprom_llama_var_offset(id);
             data_ptr = variant8_data_ptr(&var);
-            memcpy((void*) data_ptr, ((void*) &_eeprom_llama_cache) + offset, size);
+            memcpy((void *)data_ptr, ((uint8_t *)&_eeprom_llama_cache) + offset, size);
         }
     }
     return var;
@@ -131,9 +106,9 @@ void eeprom_llama_set_var(uint8_t id, variant8_t var, bool update_crc32) {
             data_size = variant8_data_size(&var);
             if ((size == data_size) || ((variant8_get_type(var) == VARIANT8_PCHAR) && (data_size <= size))) {
                 uint16_t offset = eeprom_llama_var_offset(id);
-                void* data_ptr = variant8_data_ptr(&var);
+                void *data_ptr = variant8_data_ptr(&var);
                 st25dv64k_user_write_bytes(EEPROM_LLAMA_ADDRESS + offset, data_ptr, data_size);
-                memcpy(((void*)&_eeprom_llama_cache) + offset, data_ptr, data_size);
+                memcpy(((uint8_t *)&_eeprom_llama_cache) + offset, data_ptr, data_size);
 
                 if (update_crc32) {
                     eeprom_llama_update_crc32();
@@ -157,25 +132,24 @@ static uint16_t eeprom_llama_var_offset(uint8_t id) {
     return addr;
 }
 
-static int eeprom_llama_check_crc32() {
+static bool eeprom_llama_check_crc32() {
     uint16_t datasize = _eeprom_llama_cache.DATASIZE;
-    if (_eeprom_llama_cache.VERSION == 1)
-        datasize = EEPROM_LLAMA_MIN_DATASIZE;  // before datasize field was added
-    if (datasize < EEPROM_LLAMA_MIN_DATASIZE || datasize > EEPROM_LLAMA_DATASIZE) return 0;
-    uint32_t crc2 = crc32_eeprom((uint32_t *)&_eeprom_llama_cache, (datasize - 4) / 4);
-    uint32_t eeprom_crc2 = *((uint32_t*)(((uint8_t*)&_eeprom_llama_cache) + datasize - 4));
-    return eeprom_crc2 == crc2 ? 1 : 0;
+    if (datasize < EEPROM_LLAMA_MIN_DATASIZE || datasize > EEPROM_LLAMA_DATASIZE)
+        return false;
+    uint32_t crc2 = crc32_calc((uint8_t *)&_eeprom_llama_cache, datasize - 4);
+    uint32_t eeprom_crc2 = *((uint32_t *)(((uint8_t *)&_eeprom_llama_cache) + datasize - 4));
+    return eeprom_crc2 == crc2;
 }
 
 static void eeprom_llama_update_crc32() {
     uint16_t datasize = _eeprom_llama_cache.DATASIZE;
-    if (datasize < EEPROM_LLAMA_MIN_DATASIZE || datasize > EEPROM_LLAMA_DATASIZE) return;
+    if (datasize < EEPROM_LLAMA_MIN_DATASIZE || datasize > EEPROM_LLAMA_DATASIZE)
+        return;
     // calculate crc32
-    _eeprom_llama_cache.CRC32 = crc32_eeprom((uint32_t *)&_eeprom_llama_cache, (datasize - 4) / 4);
+    _eeprom_llama_cache.CRC32 = crc32_calc((uint8_t *)&_eeprom_llama_cache, datasize - 4);
     // write crc to eeprom
     st25dv64k_user_write_bytes(EEPROM_LLAMA_ADDRESS + sizeof(eeprom_llama_vars_t) - 4, &(_eeprom_llama_cache.CRC32), 4);
 }
-
 
 void llama_apply_fan_settings() {
     switch (_eeprom_llama_cache.HOTEND_FAN_SPEED) {

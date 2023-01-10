@@ -21,6 +21,8 @@ screen_snake_data_t::screen_snake_data_t()
     snake[0].y = blocks.y / 2;
     food.x = snake[0].x;
     food.y = snake[0].y - 1;
+    scratch_buffer_ownership.acquire(/*wait=*/true);
+    snake = (point_ui8_t *)scratch_buffer_ownership.get().buffer;
 }
 
 void screen_snake_data_t::draw_block(const point_ui8_t point, const color_t color) {

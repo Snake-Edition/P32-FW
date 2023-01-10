@@ -24,5 +24,6 @@ struct SpinCnf {
     static const SpinConfigInt steps_per_unit;
     static const SpinConfigInt microstep_exponential; // 2^0 - 2^8 .. 1, 2, 4, .. , 128, 256
     static const SpinConfigInt rms_current;
+    static const SpinConfigInt two_digits_uint;
     static const SpinConfig_t<float> skew_range;
 };
