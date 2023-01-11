@@ -8,10 +8,8 @@
 #include <stddef.h>
 
 enum {
-    EEPROM_ADDRESS = 0x0500,     // uint16_t
-    EEPROM_DATASIZE_H = 427,     // required for Llama EEPROM placement
-    EEPROM_MAX_DATASIZE_H = 512, // required for Llama EEPROM check
-    EEPROM_VERSION = 11,         // uint16_t
+    EEPROM_ADDRESS = 0x0500, // uint16_t
+    EEPROM_VERSION = 1011,   // uint16_t
 };
 
 #define EEPROM_LAST_VERSION_WITH_OLD_CRC 10
@@ -136,9 +134,18 @@ enum eevar_id {
     EEVAR_WIFI_AP_PASSWD = 0x4b, // 64char string
 #endif                           // (EEPROM_FEATURES & EEPROM_FEATURE_LAN)
 
-    EEVAR_USB_MSC_ENABLED = 0x4c, // bool, on/off
+    EEVAR_LLAMA_EXTRUDER_TYPE,
+    EEVAR_LLAMA_EXTRUDER_ESTEPS,
+    EEVAR_LLAMA_HOTEND_FAN_SPEED,
+    EEVAR_LLAMA_SKEW_ENABLED,
+    EEVAR_LLAMA_SKEW_XY,
+    EEVAR_LLAMA_SKEW_XZ,
+    EEVAR_LLAMA_SKEW_YZ,
+    EEVAR_LLAMA_EXTRUDER_REVERSE,
 
-    EEVAR_CRC32 = 0x4d, // uint32_t crc32 for
+    EEVAR_USB_MSC_ENABLED, // bool, on/off
+
+    EEVAR_CRC32, // uint32_t crc32 for
 };
 
 enum {

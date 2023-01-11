@@ -351,23 +351,23 @@ int marlin_server_cycle(void) {
 
     // write skew and esteps to EEPROM if changed
     if (changes & MARLIN_VAR_MSK(MARLIN_VAR_ESTEPS)) {
-        eeprom_llama_set_var(EEVAR_LLAMA_EXTRUDER_ESTEPS, variant8_flt(marlin_server.vars.esteps), false);
-        eeprom_llama_set_var(EEVAR_LLAMA_EXTRUDER_TYPE, variant8_ui8(eEXTRUDER_TYPE::EXTRUDER_TYPE_USER_USE_M92));
+        eeprom_set_var(EEVAR_LLAMA_EXTRUDER_ESTEPS, variant8_flt(marlin_server.vars.esteps));
+        eeprom_set_var(EEVAR_LLAMA_EXTRUDER_TYPE, variant8_ui8(eEXTRUDER_TYPE::EXTRUDER_TYPE_USER_USE_M92));
     }
     if (changes & MARLIN_VAR_MSK(MARLIN_VAR_SKEW_XY)) {
-        if (marlin_server.vars.skew_xy != 0.f && variant8_ui8(eeprom_llama_get_var(EEVAR_LLAMA_SKEW_ENABLED)) == 0)
-            eeprom_llama_set_var(EEVAR_LLAMA_SKEW_ENABLED, variant8_ui8(1), false);
-        eeprom_llama_set_var(EEVAR_LLAMA_SKEW_XY, variant8_flt(marlin_server.vars.skew_xy));
+        if (marlin_server.vars.skew_xy != 0.f && !eeprom_get_bool(EEVAR_LLAMA_SKEW_ENABLED))
+            eeprom_set_var(EEVAR_LLAMA_SKEW_ENABLED, variant8_bool(true));
+        eeprom_set_var(EEVAR_LLAMA_SKEW_XY, variant8_flt(marlin_server.vars.skew_xy));
     }
     if (changes & MARLIN_VAR_MSK(MARLIN_VAR_SKEW_XZ)) {
-        if (marlin_server.vars.skew_xz != 0.f && variant8_ui8(eeprom_llama_get_var(EEVAR_LLAMA_SKEW_ENABLED)) == 0)
-            eeprom_llama_set_var(EEVAR_LLAMA_SKEW_ENABLED, variant8_ui8(1), false);
-        eeprom_llama_set_var(EEVAR_LLAMA_SKEW_XZ, variant8_flt(marlin_server.vars.skew_xz));
+        if (marlin_server.vars.skew_xz != 0.f && !eeprom_get_bool(EEVAR_LLAMA_SKEW_ENABLED))
+            eeprom_set_var(EEVAR_LLAMA_SKEW_ENABLED, variant8_bool(true));
+        eeprom_set_var(EEVAR_LLAMA_SKEW_XZ, variant8_flt(marlin_server.vars.skew_xz));
     }
     if (changes & MARLIN_VAR_MSK(MARLIN_VAR_SKEW_YZ)) {
-        if (marlin_server.vars.skew_yz != 0.f && variant8_ui8(eeprom_llama_get_var(EEVAR_LLAMA_SKEW_ENABLED)) == 0)
-            eeprom_llama_set_var(EEVAR_LLAMA_SKEW_ENABLED, variant8_ui8(1), false);
-        eeprom_llama_set_var(EEVAR_LLAMA_SKEW_YZ, variant8_flt(marlin_server.vars.skew_yz));
+        if (marlin_server.vars.skew_yz != 0.f && !eeprom_get_bool(EEVAR_LLAMA_SKEW_ENABLED))
+            eeprom_set_var(EEVAR_LLAMA_SKEW_ENABLED, variant8_bool(true));
+        eeprom_set_var(EEVAR_LLAMA_SKEW_YZ, variant8_flt(marlin_server.vars.skew_yz));
     }
 
     if ((marlin_server.flags & MARLIN_SFLG_PROCESS) == 0)

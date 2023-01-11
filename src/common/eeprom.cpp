@@ -24,7 +24,6 @@ using namespace eeprom::current;
 LOG_COMPONENT_DEF(EEPROM, LOG_SEVERITY_INFO);
 
 static const constexpr uint16_t EEPROM_MAX_DATASIZE = 512; // maximum datasize
-static_assert(EEPROM_MAX_DATASIZE == EEPROM_MAX_DATASIZE_H, "Update EEPROM_MAX_DATASIZE_H.");
 
 // this pragma pack must remain intact, the ordering of EEPROM variables is not alignment-friendly
 #pragma pack(push, 1)
@@ -151,13 +150,22 @@ static const eeprom_entry_t eeprom_map[] = {
     { "WIFI_HOSTNAME",   VARIANT8_PCHAR, LAN_HOSTNAME_MAX_LEN + 1, 0 }, // EEVAR_WIFI_HOSTNAME
     { "WIFI_AP_SSID",    VARIANT8_PCHAR, WIFI_MAX_SSID_LEN + 1, 0 }, // EEVAR_WIFI_HOSTNAME
     { "WIFI_AP_PASSWD",  VARIANT8_PCHAR, WIFI_MAX_PASSWD_LEN + 1, 0 }, // EEVAR_WIFI_HOSTNAME
+
+    { "EXTRUDER_TYPE",   VARIANT8_UI8, 1, 0 },   // EEVAR_LLAMA_EXTRUDER_TYPE
+    { "EXTRUDER_ESTEPS", VARIANT8_FLT, 1, 0 },   // EEVAR_LLAMA_EXTRUDER_ESTEPS
+    { "HOTEND_FAN_SPD",  VARIANT8_UI8, 1, 0 },   // EEVAR_LLAMA_HOTEND_FAN_SPEED
+    { "SKEW_ENABLED",    VARIANT8_BOOL, 1, 0 },  // EEVAR_LLAMA_SKEW_ENABLED
+    { "SKEW_XY",         VARIANT8_FLT, 1, 0 },   // EEVAR_LLAMA_SKEW_XY
+    { "SKEW_XZ",         VARIANT8_FLT, 1, 0 },   // EEVAR_LLAMA_SKEW_XZ
+    { "SKEW_YZ",         VARIANT8_FLT, 1, 0 },   // EEVAR_LLAMA_SKEW_YZ
+    { "EXTRUDER_REV",    VARIANT8_UI8, 1, 0 },   // EEVAR_LLAMA_EXTRUDER_REVERSE
+
     { "USB_MSC_ENABLED", VARIANT8_BOOL,  1, 0}, // EEVAR_USB_MSC_ENABLED
     { "CRC32",           VARIANT8_UI32,  1, 0 }, // EEVAR_CRC32
 };
 
 static const constexpr uint32_t EEPROM_VARCOUNT = sizeof(eeprom_map) / sizeof(eeprom_entry_t);
 static const constexpr uint32_t EEPROM_DATASIZE = sizeof(eeprom_vars_t);
-static_assert(EEPROM_DATASIZE == EEPROM_DATASIZE_H, "Update EEPROM_DATASIZE_H.");
 
 static constexpr eeprom_head_t eeprom_head_defaults = {
     EEPROM_VERSION,  // EEVAR_VERSION

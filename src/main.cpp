@@ -22,7 +22,6 @@
 #include "gui.hpp"
 #include "config_buddy_2209_02.h"
 #include "eeprom.h"
-#include "llama.h"
 #include "crc32.h"
 #include "w25x.h"
 #include "timing.h"
@@ -174,7 +173,6 @@ extern "C" void EepromSystemInit() {
     buddy::DisableInterrupts disable_interrupts(false);
     __enable_irq();
 
-    eeprom_llama_init();
     eeprom_init();
 }
 
