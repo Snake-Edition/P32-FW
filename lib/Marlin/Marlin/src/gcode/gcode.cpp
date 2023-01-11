@@ -25,12 +25,15 @@
  *             Most will migrate to classes, by feature.
  */
 
+// clang-format off
+
 #include "gcode.h"
 GcodeSuite gcode;
 
 #include "parser.h"
 #include "queue.h"
 #include "../module/motion.h"
+#include "../module/planner.h"
 
 #if ENABLED(PRINTCOUNTER)
   #include "../module/printcounter.h"
@@ -152,7 +155,7 @@ void GcodeSuite::get_destination_from_command() {
  */
 void GcodeSuite::dwell(millis_t time) {
   time += millis();
-  while (PENDING(millis(), time)) idle();
+  while (!planner.draining() && PENDING(millis(), time)) idle(true);
 }
 
 /**
@@ -711,7 +714,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #endif
 
       #if ENABLED(SKEW_CORRECTION_GCODE)
-        case 852: M852(); break;                                  // M852: Set Skew factors
+        // case 852: M852(); break;                                  // M852: Set Skew factors
       #endif
 
       #if ENABLED(ADVANCED_PAUSE_FEATURE)

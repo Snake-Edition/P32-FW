@@ -3,7 +3,7 @@
 #include "ScreenPrintingModel.hpp"
 #include "gui.hpp"
 #include "window_header.hpp"
-#include "status_footer.h"
+#include "status_footer.hpp"
 #include "window_print_progress.hpp"
 #include "window_text.hpp"
 #include "window_lcd_message.hpp"
@@ -19,7 +19,7 @@ class screen_printing_serial_data_t : public AddSuperWindow<ScreenPrintingModel>
 
     window_icon_t octo_icon;
 
-    WindowPrintProgress w_progress;
+    WindowNumbPrintProgress w_progress;
     WindowLCDMessage w_message;
 
     int last_tick;
