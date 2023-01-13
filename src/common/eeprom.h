@@ -9,7 +9,7 @@
 
 enum {
     EEPROM_ADDRESS = 0x0500, // uint16_t
-    EEPROM_VERSION = 1011,   // uint16_t
+    EEPROM_VERSION = 1001,   // uint16_t
 };
 
 #define EEPROM_LAST_VERSION_WITH_OLD_CRC 10
@@ -133,6 +133,7 @@ enum eevar_id {
     EEVAR_WIFI_AP_SSID = 0x4a,   // 32char string
     EEVAR_WIFI_AP_PASSWD = 0x4b, // 64char string
 #endif                           // (EEPROM_FEATURES & EEPROM_FEATURE_LAN)
+    EEVAR_USB_MSC_ENABLED,       // bool, on/off
 
     EEVAR_LLAMA_EXTRUDER_TYPE,
     EEVAR_LLAMA_EXTRUDER_ESTEPS,
@@ -142,8 +143,6 @@ enum eevar_id {
     EEVAR_LLAMA_SKEW_XZ,
     EEVAR_LLAMA_SKEW_YZ,
     EEVAR_LLAMA_EXTRUDER_REVERSE,
-
-    EEVAR_USB_MSC_ENABLED, // bool, on/off
 
     EEVAR_CRC32, // uint32_t crc32 for
 };
