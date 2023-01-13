@@ -59,6 +59,7 @@ union eeprom_data {
             eeprom::v7::vars_body_t v7;
             eeprom::v9::vars_body_t v9;
             eeprom::v10::vars_body_t v10;
+            eeprom::v11::vars_body_t v11;
             eeprom::current::vars_body_t current;
         };
     };
@@ -150,17 +151,17 @@ static const eeprom_entry_t eeprom_map[] = {
     { "WIFI_HOSTNAME",   VARIANT8_PCHAR, LAN_HOSTNAME_MAX_LEN + 1, 0 }, // EEVAR_WIFI_HOSTNAME
     { "WIFI_AP_SSID",    VARIANT8_PCHAR, WIFI_MAX_SSID_LEN + 1, 0 }, // EEVAR_WIFI_HOSTNAME
     { "WIFI_AP_PASSWD",  VARIANT8_PCHAR, WIFI_MAX_PASSWD_LEN + 1, 0 }, // EEVAR_WIFI_HOSTNAME
-
-    { "EXTRUDER_TYPE",   VARIANT8_UI8, 1, 0 },   // EEVAR_LLAMA_EXTRUDER_TYPE
-    { "EXTRUDER_ESTEPS", VARIANT8_FLT, 1, 0 },   // EEVAR_LLAMA_EXTRUDER_ESTEPS
-    { "HOTEND_FAN_SPD",  VARIANT8_UI8, 1, 0 },   // EEVAR_LLAMA_HOTEND_FAN_SPEED
-    { "SKEW_ENABLED",    VARIANT8_BOOL, 1, 0 },  // EEVAR_LLAMA_SKEW_ENABLED
-    { "SKEW_XY",         VARIANT8_FLT, 1, 0 },   // EEVAR_LLAMA_SKEW_XY
-    { "SKEW_XZ",         VARIANT8_FLT, 1, 0 },   // EEVAR_LLAMA_SKEW_XZ
-    { "SKEW_YZ",         VARIANT8_FLT, 1, 0 },   // EEVAR_LLAMA_SKEW_YZ
-    { "EXTRUDER_REV",    VARIANT8_UI8, 1, 0 },   // EEVAR_LLAMA_EXTRUDER_REVERSE
-
     { "USB_MSC_ENABLED", VARIANT8_BOOL,  1, 0}, // EEVAR_USB_MSC_ENABLED
+
+    { "EXTRUDER_TYPE",   VARIANT8_UI8,   1, 0 }, // EEVAR_LLAMA_EXTRUDER_TYPE
+    { "EXTRUDER_ESTEPS", VARIANT8_FLT,   1, 0 }, // EEVAR_LLAMA_EXTRUDER_ESTEPS
+    { "HOTEND_FAN_SPD",  VARIANT8_UI8,   1, 0 }, // EEVAR_LLAMA_HOTEND_FAN_SPEED
+    { "SKEW_ENABLED",    VARIANT8_BOOL,  1, 0 }, // EEVAR_LLAMA_SKEW_ENABLED
+    { "SKEW_XY",         VARIANT8_FLT,   1, 0 }, // EEVAR_LLAMA_SKEW_XY
+    { "SKEW_XZ",         VARIANT8_FLT,   1, 0 }, // EEVAR_LLAMA_SKEW_XZ
+    { "SKEW_YZ",         VARIANT8_FLT,   1, 0 }, // EEVAR_LLAMA_SKEW_YZ
+    { "EXTRUDER_REV",    VARIANT8_UI8,   1, 0 }, // EEVAR_LLAMA_EXTRUDER_REVERSE
+
     { "CRC32",           VARIANT8_UI32,  1, 0 }, // EEVAR_CRC32
 };
 
@@ -596,8 +597,13 @@ static bool eeprom_convert_from(eeprom_data &data) {
     }
 
     if (version == 10) {
-        data.current = eeprom::current::convert(data.v10);
+        data.v11 = eeprom::v11::convert(data.v10);
         version = 11;
+    }
+
+    if (version == 11) {
+        data.current = eeprom::current::convert(data.v11);
+        version = 1001;
     }
 
     // after body was updated we can update head
