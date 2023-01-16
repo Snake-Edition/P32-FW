@@ -714,7 +714,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #endif
 
       #if ENABLED(SKEW_CORRECTION_GCODE)
-        // case 852: M852(); break;                                  // M852: Set Skew factors
+        case 852: M852(); break;                                  // M852: Set Skew factors
       #endif
 
       #if ENABLED(ADVANCED_PAUSE_FEATURE)
