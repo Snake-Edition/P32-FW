@@ -11,7 +11,7 @@ void PrusaGcodeSuite::M300() {
     float volume = parser.floatval('V', 1);
 
     // Limits the tone duration to 0-5 seconds.
-    //NOMORE(duration, 5000U);
+    NOMORE(duration, 5000U);
 
     Sound::getInstance().singleSound(frequency, duration, volume);
 }
