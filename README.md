@@ -2,7 +2,7 @@
 
 # Llama Mini
 
-[![Version](https://img.shields.io/github/v/release/matthewlloyd/Llama-Mini-Firmware?color=brightgreen&include_prereleases)]()
+[![Version](https://img.shields.io/github/v/release/Llama-FW/Llama-P32-FW?style=plastic)]()
 
 ### Unofficial Firmware for the Prusa Mini and Mini+
 
@@ -25,6 +25,8 @@ a few goodies:
 * **Faster nozzle cooling**: If you wait for nozzle cooling before MBL, you can call `M109 R170 C`
   which uses print fan to speed up cooling.
 * **Game**: Instead of printing you can enjoy simple game.
+* **Bigger time**: Printing and remaining time is now bigger.
+* **Startup wizard**: Now you can select `Ignore` at the wizard start screen to disable starting of the wizard at the printer startup.
 
 All settings are automatically saved to EEPROM and loaded on boot.
 
@@ -37,10 +39,10 @@ All settings are automatically saved to EEPROM and loaded on boot.
 
 #### Feed the Llama
 
-This plugin is developed in my spare time. If you like it, please
+This plugin is developed in spare time. If you like it, please
 consider supporting further development and updates by making a donation.
 
-[![Feed the Llama](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate?business=HPGUMVJFSCXZ4&no_recurring=0&currency_code=USD)
+[![Feed the Llama on Patreon](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3Despr14%26type%3Dpatrons&style=plastic)](https://patreon.com/espr14)
 
 ---
 
