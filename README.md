@@ -4,7 +4,10 @@
 
 [![Version](https://img.shields.io/github/v/release/Llama-FW/Llama-P32-FW?style=plastic)]()
 
-### Unofficial Firmware for the Prusa Mini and Mini+
+## Wanted
+FW developers and testers are welcome.
+
+## Unofficial Firmware for the Prusa Mini and Mini+
 
 One of Prusa's llamas escaped from HQ (:llama::running_man:) and decided to make his
 own version of the firmware for the Prusa Mini. He's added quite
@@ -37,10 +40,10 @@ All settings are automatically saved to EEPROM and loaded on boot.
 ![E-Steps](doc/llama/screenshot-esteps.jpg)
 ![Octoprint](doc/llama/screenshot-octoprint.jpg)
 
-#### Feed the Llama
+## Feed the Llama
 
-This plugin is developed in spare time. If you like it, please
-consider supporting further development and updates by making a donation.
+This FW is developed in spare time. If you like it, please
+consider supporting further development and updates by becoming a patron.
 
 [![Feed the Llama on Patreon](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3Despr14%26type%3Dpatrons&style=plastic)](https://patreon.com/espr14)
 
@@ -229,7 +232,7 @@ then all have the same length (within measurement error of course).
 
 ---
 
-### Flashing in DFU Mode
+## Flashing in DFU Mode
 
 If the bootloader refuses to accept firmware from a USB flash drive,
 it's possible to flash the board directly in DFU mode.
