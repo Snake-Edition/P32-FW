@@ -769,7 +769,7 @@ target_sources(
           src/common/scratch_buffer.cpp
           src/common/odometer.cpp
           src/common/footer_eeprom.cpp
-          src/common/llama.cpp
+          src/common/snake.cpp
           $<$<STREQUAL:${PRINTER},MINI>:src/common/minda_broken_cable_detection.cpp>
           $<$<STREQUAL:${PRINTER},MINI>:src/common/MindaRedscreen.cpp>
           src/marlin_stubs/M117.cpp

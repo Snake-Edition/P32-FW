@@ -1552,7 +1552,7 @@ msgstr ""
 
 #: src/gui/wizard/screen_wizard.cpp:126
 msgid ""
-"Welcome to the Original Llama MINI setup wizard. Would you like to continue?"
+"Welcome to the MINI setup wizard. Would you like to continue?"
 msgstr ""
 
 #: src/gui/MItem_menus.hpp:139

@@ -1,4 +1,4 @@
-# Original Llama MINI printer WiFI network connection #
+# Original Prusa MINI printer WiFI network connection #
 Recently you can find in our Prusa-Firmware-Buddy/Master repository a wireless printer network connection feature code. To be able to connect your MINI to the wireless network and run the PrusaLink feature, you will need an ESP01 board plugged in to the MINI and execute the below tasks. Some of the ESP01 boards are already flashed with a compatible FW therefore you could swap the ESP Flashing and Load network data routines.
 Be aware please, that the Prusa-Firmware-Buddy/Master repository is a **development environment** and features are under development as well. We cannot guarantee, that the feature will be 100% working. Building your own FW from these pages, instead of using official release, is on **your solely risk**.
 

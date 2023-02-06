@@ -15,7 +15,7 @@ LOG_COMPONENT_DEF(USBDevice, LOG_SEVERITY_INFO);
 #define USBD_PID                    0x000C /// Prusa MINI Product ID
 #define USBD_LANGID_STRING          1033
 #define USBD_MANUFACTURER_STRING    "Prusa Research (prusa3d.com)"
-#define USBD_PRODUCT_STRING_FS      ("Original Llama MINI")
+#define USBD_PRODUCT_STRING_FS      ("Snake MINI")
 #define USBD_SERIALNUMBER_STRING_FS "00000000001A"
 
 #define USB_SIZ_BOS_DESC 0x0C

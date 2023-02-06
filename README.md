@@ -1,17 +1,13 @@
-# ![Llama Mini](doc/llama/logo.png)
+# Snake Mini
 
-# Llama Mini
-
-[![Version](https://img.shields.io/github/v/release/Llama-FW/Llama-P32-FW?style=plastic)]()
+[![Version](https://img.shields.io/github/v/release/Snake-FW/P32-FW?style=plastic)]()
 
 ## Wanted
 FW developers and testers are welcome.
 
 ## Unofficial Firmware for the Prusa Mini and Mini+
 
-One of Prusa's llamas escaped from HQ (:llama::running_man:) and decided to make his
-own version of the firmware for the Prusa Mini. He's added quite
-a few goodies:
+Alternative FW for the Prusa Mini. There's quite few improvements:
 
 * **Hotend fan speed**: Adds a menu option to unlock the hotend fan speed
   and increase it from the Prusa Firmware's default 38% to anywhere from 50-100%.
@@ -19,12 +15,11 @@ a few goodies:
   to be configured directly through the Settings menu or with `M852`.
 * **OctoPrint screen**: Adds support for `M73` (print progress) and `M117`
   (LCD messages).
-* **Sound**: Adds support for `M300` (play a sound).
 * **PID tuning**: Automatically writes PID settings to EEPROM after `M303 U1` (autotune),
   `M301` (set hotend PID), and `M304` (set bed PID).
 * **Max Temps**: Raises the maximum bed temperature from 100C to 110C
   and nozzle temperature from 290C to 300C (use with caution!).
-* **Settings during print**: You can change Llama settings during printing.
+* **Settings during print**: You can change Snake settings during printing.
 * **Faster nozzle cooling**: If you wait for nozzle cooling before MBL, you can call `M109 R170 C`
   which uses print fan to speed up cooling.
 * **Game**: Instead of printing you can enjoy simple game.
@@ -33,23 +28,16 @@ a few goodies:
 
 All settings are automatically saved to EEPROM and loaded on boot.
 
-![Welcome](doc/llama/screenshot-welcome.jpg)
-![Main](doc/llama/screenshot-main.jpg)
-![Settings](doc/llama/screenshot-settings.jpg)
-![Llama Settings](doc/llama/screenshot-llama-settings.jpg)
-![E-Steps](doc/llama/screenshot-esteps.jpg)
-![Octoprint](doc/llama/screenshot-octoprint.jpg)
-
-## Feed the Llama
+## Feed the Snake
 
 This FW is developed in spare time. If you like it, please
 consider supporting further development and updates by becoming a patron.
 
-[![Feed the Llama on Patreon](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3Despr14%26type%3Dpatrons&style=plastic)](https://patreon.com/espr14)
+[![Feed the Snake on Patreon](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3Despr14%26type%3Dpatrons&style=plastic)](https://patreon.com/espr14)
 
 ---
 
-## Installing Livestock
+## Installing
 
 ### Jailbreak your Mini
 
@@ -58,8 +46,7 @@ Follow the instructions [here](https://help.prusa3d.com/en/article/flashing-cust
 This is irreversible and voids the warranty, although in the US
 you are protected by the [Magnuson-Moss Warranty Act](https://www.ftc.gov/news-events/press-releases/2018/04/ftc-staff-warns-companies-it-illegal-condition-warranty-coverage).
 
-Of course you could always buy a second Buddy board and let your Llama
-run wild on that instead.
+Of course you could always buy a second Buddy board and run it on that one.
 
 Alternatively, if you are good at very fine pitch soldering, you could
 lift the BOOT0 pin off the board entirely and make your own jumpers
@@ -69,15 +56,15 @@ to connect it directly to 3.3V or GND as you need (the appendix merely
 Once you have done that, you can live and let live-stock.
 
 
-### Flash Llama
+### Flashing
 
 Whenever you install new firmware, it's good practice to make a note of your
-settings first, particularly your Live Z Offset and your skew coefficients
-if you already have Llama installed.
+settings first, particularly your Live Z Offset and your skew coefficients. Not all
+FW changes keep settings saved.
 
-Download the latest release [here](https://github.com/matthewlloyd/Llama-Mini-Firmware/releases).
+Download [the latest release here](https://github.com/Snake-FW/P32-FW/releases).
 Copy the `.bbf` file to the root of your USB flash drive.
-Follow the instructions [here](https://help.prusa3d.com/en/guide/how-to-update-firmware-mini-mini_128421/)
+Follow [the instructions here](https://help.prusa3d.com/en/guide/how-to-update-firmware-mini-mini_128421/)
 to install the firmware. The bootloader will warn you the signature is
 incorrect - select "Ignore".
 
@@ -87,7 +74,7 @@ If you lose your Prusa EEPROM settings during the upgrade process,
 when you first run the firmware, Prusa will send you to the initial
 calibration wizard. This can be a problem if you need to set custom e-steps
 before printing anything. Just skip the initial setup wizard,
-use the Llama Settings menu to configure your e-steps, and
+use the Snake Settings menu to configure your e-steps, and
 then rerun the setup wizard manually.
 
 ### Livestock to Stock
@@ -96,7 +83,7 @@ Download Prusa's stock firmware [here](https://www.prusa3d.com/drivers/).
 Press knob at printer startup to force-install the firmware or go
 to the Settings menu, scroll down to "FW Upgrade",
 and change the option to "On Restart Older" (this option is only available
-in Llama firmware).
+in Snake firmware).
 
 To reflash the board in DFU mode, [see below](#flashing-in-dfu-mode).
 
@@ -104,28 +91,13 @@ To reflash the board in DFU mode, [see below](#flashing-in-dfu-mode).
 
 ## Configuration
 
-To configure Llama settings, open the Settings menu and select "Llama Settings".
+To configure Snake settings, open the Settings menu and select "Snake Settings".
 Llogical!
 
 ### Configuring E-steps
 
 New in v1.0.7: This can now be done using Prusa's own "Experimental Settings" menu,
-which is shown by default as a menu item next to "Llama Settings" in this firmware.
-
-#### For Llama versions v1.0.6 and below
-
-Select "Extruder" and click to select one of:
-
-- **Prusa**. Stock e-steps for the stock extruder.
-- **Bondtech**. Preset e-steps for the [Bondtech extruder upgrade](https://www.bondtech.se/product/prusa-mini/).
-  This option assumes you have reversed the motor wiring as per Bondtech's instructions -
-  if you haven't, you can reverse the extruder motor direction using the "Reverse E" option.
-- **Custom**. The e-steps can be configured using the jog wheel, or by
-  sending the `M92 E<steps>` command.
-
-Whether you use a preset, or set custom e-steps via the jog wheel
-or `M92`, your settings will automatically be saved to EEPROM.
-You do not need to use `M500`.
+which is shown by default as a menu item next to "Snake Settings" in this firmware.
 
 ### Configuring Hotend Fan Speed
 
@@ -144,12 +116,8 @@ in 10% steps. The setting is automatically saved to EEPROM and restored on boot.
 
 The Prusa Mini+ is inherently prone to skew, by virtue of its cantilever
 design. It is normal to see skew on all three axes. This affects the precision
-of any parts you print.
-
-Prusa disabled skew compensation in Marlin, because a happy user is a user
-with an imprecise but easy to use machine. Lluckily our Llama has reenabled it.
-All three skew compensation coefficients are available for use - I for XY, J for XZ,
-and K for YZ.
+of any parts you print. All three skew compensation coefficients are available
+for use - I for XY, J for XZ, and K for YZ.
 
 Note it is always preferable to remove as much skew as possible through physical
 adjustments before using firmware skew compensation. For excellent
@@ -170,7 +138,7 @@ so your usable print area will be reduced accordingly.
 ### Configuring PID Parameters
 
 The stock firmware allows you to run an `M303` PID autotune, but the new
-settings are lost on reset. In Llama, PID settings are *automatically* written
+settings are lost on reset. In this FW, PID settings are *automatically* written
 to EEPROM after any command that updates Marlin's PID values, which could be
 an `M301` (set hotend PID), `M304` (set bed PID), or an `M303 U1` (autotune and
 use the PID result). These values will then be restored on reset, too. You do not
@@ -190,7 +158,7 @@ and they won't get written to EEPROM.
 
 ### Print Progress
 
-Note that to take advantage of Llama's `M73` support with [OctoPrint](https://octoprint.org),
+Note that to take advantage of `M73` support with [OctoPrint](https://octoprint.org),
 you will need to install one or more plugins. I recommend these three:
 
 - [Print Time Genius](https://plugins.octoprint.org/plugins/PrintTimeGenius/),
@@ -223,7 +191,7 @@ Then, make a copy of [this spreadsheet](https://bit.ly/2SJ1hAU).
 Use [calipers](https://amzn.to/3vVRgOl) to measure the six diagonals,
 conveniently labeled A to F, and type the measurements
 into the spreadsheet. It will calculate your three skew correction factors.
-You can either input them using the Llama menu and jogwheel as described above,
+You can either input them using the Snake menu and jogwheel as described above,
 or send them directly to the printer using the supplied `M852` command.
 
 If you want to check your calibration is accurate,
@@ -267,9 +235,15 @@ Don't forget to remove the jumper before resetting.
 
 ---
 
-*Copyright (C) 2021 Matthew Lloyd*
+## Attribution
+Snake FW is
+- based on [Llama Mini Firmware](https://github.com/matthewlloyd/Llama-Mini-Firmware)
+- based on [Prusa Firmware Buddy](https://github.com/prusa3d/Prusa-Firmware-Buddy)
+- based on [Marlin Firmware](https://github.com/MarlinFirmware/Marlin)
 
-## Original Llama Mini Firmware README
+Precise information of who did what can be obtained byt `git blame` command or by `Blame` button in the Github file reader.
+
+## Original Prusa Mini Firmware README
 <details>
 <summary>Click to expand!</summary>
 
@@ -277,10 +251,10 @@ Don't forget to remove the jumper before resetting.
 [![GitHub release](https://img.shields.io/github/release/prusa3d/Prusa-Firmware-Buddy.svg)](https://github.com/prusa3d/Prusa-Firmware-Buddy/releases)
 [![Build Status](https://holly.prusa3d.com/buildStatus/icon?job=Prusa-Firmware-Buddy%2FMultibranch%2Fmaster)](https://holly.prusa3d.com/job/Prusa-Firmware-Buddy/job/Multibranch/job/master/)
 
-This repository includes source code and firmware releases for the Original Llama 3D printers based on the 32-bit ARM microcontrollers.
+This repository includes source code and firmware releases for the Original Prusa 3D printers based on the 32-bit ARM microcontrollers.
 
 The currently supported model is:
-- Original Llama MINI
+- Original Prusa MINI
 
 ## Getting Started
 
