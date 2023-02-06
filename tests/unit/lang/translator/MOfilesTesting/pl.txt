@@ -64,7 +64,7 @@ Test grzałki stołu
 Test grzałki
 Grzanie wyłączone po 30-minutowej bezczynności.
 Nagrzewanie...
-Cześć, jestem Twoją Original Llama Mini
+Cześć, jestem Twoją Mini
 EKRAN GŁÓWNY
 Ekran główny
 HOME TO MAX
@@ -241,7 +241,7 @@ Ostrzeżenie
 UWAGA:
 Czy udało się rozładować filament?
 Śr
-Witaj w Asystencie Konfiguracji Original Llama MINI. Kontynuować?
+Witaj w Asystencie Konfiguracji MINI. Kontynuować?
 Asystent
 ASYSTENT
 ASYSTENT - OK

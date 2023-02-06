@@ -10,7 +10,7 @@ XXYZZ
 
 Example: 12201
 
-12 - printer number 12: Original Llama MINI
+12 - printer number 12: Original Prusa MINI
 
 2 - error category: temperature error
 
@@ -19,7 +19,7 @@ Example: 12201
 ## Printer number
 10 - Original Prusa SL1
 
-12 - Original Llama MINI
+12 - Original Prusa MINI
 
 ## Error categories
 1. Mechanical - XYZ motors, tower, axis range

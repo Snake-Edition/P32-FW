@@ -64,7 +64,7 @@ Test chauf. plateau
 Test chauf.
 Chauffe désactivée du fait d'une inactivité de plus de 30 minutes.
 En chauffe...
-Bonjour, voici votre\nOriginal Llama MINI.
+Bonjour, voici votre\n MINI.
 ACCUEIL
 Accueil
 HOME TO MAX
@@ -241,7 +241,7 @@ Avertissement
 ATTENTION :
 Le filament a-t-il été bien chargé ?
 mer
-Bienvenue sur l'assistant de configuration de l'Original Llama MINI. Voulez-vous continuer ?
+Bienvenue sur l'assistant de configuration de l'MINI. Voulez-vous continuer ?
 Assistant
 ASSISTANT
 ASSISTANT - OK

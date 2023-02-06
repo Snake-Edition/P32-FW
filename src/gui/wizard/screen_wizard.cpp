@@ -123,7 +123,7 @@ void ScreenWizard::windowEvent(EventLock /*has private ctor*/, window_t *sender,
 const PhaseResponses Responses_IgnoreYesNo = { Response::Ignore, Response::Yes, Response::No, Response::_none };
 
 WizardState_t StateFnc_START() {
-    static const char en_text[] = N_("Welcome to the Original Llama MINI setup wizard. Would you like to continue?");
+    static const char en_text[] = N_("Welcome to the MINI setup wizard. Would you like to continue?");
     string_view_utf8 translatedText = _(en_text);
 #ifdef _DEBUG
     const PhaseResponses &resp = Responses_IgnoreYesNo;

@@ -60,7 +60,7 @@ void GcodeSuite::M303() {
     KEEPALIVE_STATE(NOT_BUSY);
   #endif
 
-  // Llama: work around https://github.com/prusa3d/Prusa-Firmware-Buddy/issues/798
+  // FIXME: work around https://github.com/prusa3d/Prusa-Firmware-Buddy/issues/798
   if (e == -1)
       e = (heater_ind_t) -2;
 
