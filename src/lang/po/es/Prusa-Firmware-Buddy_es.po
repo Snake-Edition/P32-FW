@@ -1536,8 +1536,8 @@ msgid "Wed"
 msgstr "Mie"
 
 #: src/gui/wizard/screen_wizard.cpp:126
-msgid "Welcome to the Original Llama MINI setup wizard. Would you like to continue?"
-msgstr "Bienvenido al asistente de configuración de la Original Llama MINI. ¿Te gustaria continuar?"
+msgid "Welcome to the MINI setup wizard. Would you like to continue?"
+msgstr "Bienvenido al asistente de configuración de la MINI. ¿Te gustaria continuar?"
 
 #: src/gui/MItem_menus.hpp:139
 msgid "Wi-Fi"

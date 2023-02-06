@@ -43,7 +43,7 @@
 #include "fsm_types.hpp"
 #include "odometer.hpp"
 #include "extruder_enum.h"
-#include "llama.h"
+#include "snake.h"
 #include "SteelSheets.hpp"
 static_assert(MARLIN_VAR_MAX < 64, "MarlinAPI: Too many variables");
 

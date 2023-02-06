@@ -3,7 +3,7 @@
     "presets": [
         {
             "name": "mini",
-            "description": "Original Llama MINI",
+            "description": "MINI",
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD_VERSION": "<default>",

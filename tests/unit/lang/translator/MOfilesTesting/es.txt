@@ -64,7 +64,7 @@ Comp. calor base
 Probando Calent.
 Calentamiento deshabilitado debido a 30 minutos de inactividad.
 Calentando...
-Hola, esta es tu Original Llama MINI.
+Hola, esta es tu MINI.
 INICIO
 Inicio
 HOME TO MAX
@@ -241,7 +241,7 @@ Cuidado
 CUIDADO:
 ¿Se descargó el filamento con éxito?
 Mie
-Bienvenido al asistente de configuración de la Original Llama MINI. ¿Te gustaria continuar?
+Bienvenido al asistente de configuración de la MINI. ¿Te gustaria continuar?
 Asistente
 ASISTENTE
 ASISTENTE - OK

@@ -26,7 +26,7 @@
 #include "safe_state.h"
 #include "crc32.h"
 #include "dump.h"
-#include "llama.h"
+#include "snake.h"
 
 #include <Arduino.h>
 #include "trinamic.h"

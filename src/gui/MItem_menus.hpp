@@ -237,7 +237,7 @@ protected:
 };
 
 class MI_LLAMA_SETTINGS : public WI_LABEL_t {
-    static constexpr const char *const label = N_("Llama Settings");
+    static constexpr const char *const label = N_("Snake Settings");
 
 public:
     MI_LLAMA_SETTINGS();

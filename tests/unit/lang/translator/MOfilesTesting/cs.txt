@@ -64,7 +64,7 @@ Výhřev podložky
 Testování výhřevu
 Vyhřívání vypnuto po 30 minutách neaktivity.
 Zahřívání...
-Vítá vás\nOriginal Llama MINI!
+Vítá vás\n MINI!
 MENU
 Domů
 HOME TO MAX
@@ -241,7 +241,7 @@ Varování
 VAROVÁNÍ:
 Proběhlo vyjmutí filamentu správně?
 St
-Vítejte v průvodci pro Original Llama MINI. Přejete si pokračovat?
+Vítejte v průvodci pro MINI. Přejete si pokračovat?
 Průvodce
 PRŮVODCE
 PRŮVODCE - OK

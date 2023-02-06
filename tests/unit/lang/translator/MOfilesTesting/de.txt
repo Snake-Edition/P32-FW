@@ -64,7 +64,7 @@ Heizbettheizung prüfen
 Heizungsprüfung
 Heizung wurde wegen 30 Minuten Inaktivität deaktiviert.
 Aufheizen...
-Hallo, hier ist Ihr\nOriginal Llama MINI.
+Hallo, hier ist Ihr\n MINI.
 HOME
 Home
 HOME TO MAX
@@ -241,7 +241,7 @@ Warnung
 WARNUNG:
 Filamententladen erfolgreich?
 Mi.
-Willkommen beim Original Llama MINI Einrichtungsassistenten. Möchten Sie fortfahren?
+Willkommen beim MINI Einrichtungsassistenten. Möchten Sie fortfahren?
 Assistent
 Assistent
 Assistent - OK

@@ -64,7 +64,7 @@ Heatbed heater check
 Heater testing
 Heating disabled due to 30 minutes of inactivity.
 Heating...
-Hi, this is your\nOriginal Llama MINI.
+Hi, this is your\n MINI.
 HOME
 Home
 HOME TO MAX
@@ -241,7 +241,7 @@ Warning
 WARNING:
 Was filament unload successful?
 Wed
-Welcome to the Original Llama MINI setup wizard. Would you like to continue?
+Welcome to the MINI setup wizard. Would you like to continue?
 Wizard
 WIZARD
 WIZARD - OK
