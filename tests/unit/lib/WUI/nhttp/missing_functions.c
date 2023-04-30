@@ -16,6 +16,7 @@
  */
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <lwip/tcpip.h>
 
 #include "../../../src/common/basename.h"
@@ -63,5 +64,20 @@ err_t tcpip_try_callback(tcpip_callback_fn fn, void *ctx) {
 }
 
 void get_LFN(char *lfn, size_t lfn_size, char *path) {
-    strlcpy(lfn, basename(path), lfn_size);
+    strlcpy(lfn, basename_b(path), lfn_size);
+}
+
+void mbedtls_platform_zeroize(void *b, size_t size) {
+    memset(b, 0, size);
+}
+
+bool wui_is_file_being_printed(const char *filename) {
+    return false;
+}
+
+int mkdir(const char *path, mode_t mode) {
+    return 0;
+}
+
+void get_SFN_path(char *path) {
 }

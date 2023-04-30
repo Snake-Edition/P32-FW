@@ -121,42 +121,147 @@ static_assert(sizeof(variant_t) == BaseDataSZ + sizeof(type_t), "Wrong size of v
 
 #pragma pack(pop)
 
-// Smart queue, discards events which can be discarded (no longer important events - if new event is inserted)
-// for instance destroy, erases all other events in buffer, because they are no longer important (but nothing can erase destroy)
-// merges multiple events into one ...
-// but can never loose important item
-// Originally wanted to store store openend state
-// but it is dangerous - causing 1 information stored on multiple places
-// wrong data input, can modify type (ClientFSM) of stored destroy command
+/**
+ * @brief Smart queue, discards events which can be discarded (no longer important events - if new event is inserted)
+ * for instance destroy, erases all other events in buffer, because they are no longer important (but nothing can erase destroy)
+ * merges multiple events into one, but can never loose important item
+ */
 class Queue {
-protected:
+public:
+    enum class ret_val {
+        ok,
+        //errors
+        er_type_none,
+        er_already_created,
+        er_already_destroyed,
+        er_opened_fsm_inconsistent,
+    };
+
+private:
     std::array<variant_t, 3> queue;
     uint8_t count;
-
-    constexpr void clear() { count = 0; }
-    constexpr void clear_last() {
-        if (count)
-            --count;
-    }
+    ClientFSM opened_fsm;
 
     //this functions do not check validity of given argument !!! (public ones do)
     void push(variant_t v); // this method is called by specific ones (pushCreate ...)
-    void pushCreate(create_t create);
-    void pushDestroy(destroy_t destroy);
-    void pushChange(change_t change);
+    ret_val pushCreate(create_t create);
+    ret_val pushDestroy(destroy_t destroy);
+    ret_val pushChange(change_t change);
 
 public:
     constexpr Queue()
         : queue({ variant_t(), variant_t(), variant_t() })
-        , count(0) {}
+        , count(0)
+        , opened_fsm(ClientFSM::_none) {}
 
-    variant_t Front() const; //returns ClientFSM_Command::none on empty
-    variant_t Back() const;  //returns ClientFSM_Command::none on empty
-    void Push(variant_t v);  // this method calls specific ones (PushCreate ...)
-    void Pop();
-    void PushCreate(ClientFSM type, uint8_t data);
-    void PushDestroy(ClientFSM type);
-    void PushChange(ClientFSM type, BaseData data);
+    variant_t Front() const; // returns ClientFSM_Command::none on empty
+    variant_t Back() const;  // returns ClientFSM_Command::none on empty
+                             // void Push(variant_t v);  // this method calls specific ones (PushCreate ...)
+    bool Pop();
+    ret_val PushCreate(ClientFSM type, uint8_t data);
+    ret_val PushDestroy(ClientFSM type);
+    ret_val PushChange(ClientFSM type, BaseData data);
+
+    constexpr void Clear() { count = 0; }
+    constexpr void Clear_last() {
+        if (count)
+            --count;
+    }
+    constexpr ClientFSM GetOpenFsm() const { return opened_fsm; }
+    constexpr size_t GetCount() const { return count; }
+    int GetCreateIndex() const {
+        if ((count == 3) && (queue[2].GetCommand() == ClientFSM_Command::create)) {
+            return 2;
+        }
+        if ((count >= 2) && (queue[1].GetCommand() == ClientFSM_Command::create)) {
+            return 1;
+        }
+        if ((count >= 1) && (queue[0].GetCommand() == ClientFSM_Command::create)) {
+            return 0;
+        }
+        return -1;
+    }
+};
+
+/**
+ * @brief 2nd level smart queue
+ * contains 2 smart queues to support 2 level fsm nesting
+ */
+class SmartQueue {
+protected:
+    Queue queue0;                        // base queue
+    Queue queue1;                        // next level queue
+    size_t prior_commands_in_queue0 = 0; // when inserting create to queue1, last inserted create in queue0 has priority
+
+    constexpr void clear() {
+        queue0.Clear();
+        queue1.Clear();
+    }
+
+public:
+    enum class Selector { q0,
+        q1,
+        error,
+        count_ = error }; // return type
+
+    variant_t Front() const;    // returns ClientFSM_Command::none on empty
+    variant_t Back() const;     // returns ClientFSM_Command::none on empty
+    Selector Push(variant_t v); // this method calls specific ones (PushCreate ...)
+    bool TryPush(variant_t v);  // this method calls specific ones (TryPushCreate ...)
+    Selector Pop();
+    Selector PushCreate(ClientFSM type, uint8_t data);
+    Selector PushDestroy(ClientFSM type);
+    Selector PushChange(ClientFSM type, BaseData data);
+    bool TryPushCreate(ClientFSM type, uint8_t data);
+    bool TryPushDestroy(ClientFSM type);
+    bool TryPushChange(ClientFSM type, BaseData data);
+
+    constexpr ClientFSM GetOpenFsmQ0() const { return queue0.GetOpenFsm(); }
+    constexpr ClientFSM GetOpenFsmQ1() const { return queue1.GetOpenFsm(); }
+};
+
+/**
+ * @brie parent of template QueueWrapper
+ */
+class IQueueWrapper {
+    ClientFSM fsm0 = ClientFSM::_none; // active fsm level 0
+    ClientFSM fsm1 = ClientFSM::_none; // active fsm level 1
+
+    /// Array of the last phase per fsm
+    /// Used for better logging experience in fsm_change
+    int fsm_last_phase[int(ClientFSM::_count)];
+
+protected:
+    bool pushCreate(SmartQueue *pQueues, size_t sz, ClientFSM type, uint8_t data, const char *fnc, const char *file, int line);
+    bool pushDestroy(SmartQueue *pQueues, size_t sz, ClientFSM type, const char *fnc, const char *file, int line);
+    bool pushChange(SmartQueue *pQueues, size_t sz, ClientFSM type, BaseData data, const char *fnc, const char *file, int line);
+
+public:
+    ClientFSM GetFsm0() const { return fsm0; }
+    ClientFSM GetFsm1() const { return fsm1; }
+};
+
+/**
+ * @brief wraps smart queues fo clients
+ * to be used on server side only
+ */
+template <size_t SZ>
+class QueueWrapper : public IQueueWrapper {
+    SmartQueue queues[SZ];
+
+public:
+    bool PushCreate(ClientFSM type, uint8_t data, const char *fnc, const char *file, int line) {
+        return pushCreate(queues, SZ, type, data, fnc, file, line);
+    }
+    bool PushDestroy(ClientFSM type, const char *fnc, const char *file, int line) {
+        return pushDestroy(queues, SZ, type, fnc, file, line);
+    }
+    bool PushChange(ClientFSM type, BaseData data, const char *fnc, const char *file, int line) {
+        return pushChange(queues, SZ, type, data, fnc, file, line);
+    }
+
+    variant_t Front(size_t queue) const { return queues[queue].Front(); }
+    bool Pop(size_t queue) { return queues[queue].Pop() != SmartQueue::Selector::error; }
 };
 
 }; //namespace fsm

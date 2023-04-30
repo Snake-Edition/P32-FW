@@ -24,7 +24,7 @@ pipeline {
             steps {
                 catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                     sh """
-                    ln -fs /.dependencies
+                    ln -fs /work/.dependencies
 
                     export XDG_CACHE_HOME=\$PWD/.precommit
                     pre-commit install
@@ -44,25 +44,37 @@ pipeline {
                     // required configurations
                     def configurations = [
                         [preset: "mini", build_type: "release", bootloader: "yes"],
+                        [preset: "mk404-xBuddy027c-400step-planetary", build_type: "release", bootloader: "no"],
+                        [preset: "xl", build_type: "release", bootloader: "yes"],
+                        [preset: "xl-xbuddy04", build_type: "release", bootloader: "yes"],
+                        [preset: "ix-xBuddy027c-200step", build_type: "release", bootloader: "empty"],
                     ]
 
                     // prepare version suffix
                     def commit_nr = sh(script: 'git rev-list HEAD --count', returnStdout: true).trim()
                     def short_suffix
                     def full_suffix
+                    def dev_items
                     if (env.CHANGE_ID) {
                         // This is a PR build
                         short_suffix = "-BETA+${commit_nr}"
                         full_suffix = "${short_suffix}.PR${env.CHANGE_ID}.B${env.BUILD_NUMBER}"
+                        dev_items = "yes"
                     } else if (env.BRANCH_NAME.startsWith("RELEASE-")) {
                         // This is an RC build
                         short_suffix = "-RC+${commit_nr}"
                         full_suffix = "${short_suffix}.B${env.BUILD_NUMBER}"
+                        dev_items = "no"
                     } else {
                         // This is build of an ordinary branch (not a release branch)
                         short_suffix = "-BETA+${commit_nr}"
                         def branch_spec = env.BRANCH_NAME.replaceAll("_", "-")
                         full_suffix = "${short_suffix}.BRANCH-${branch_spec}.B${env.BUILD_NUMBER}"
+                        dev_items = "yes"
+                    }
+
+                    if (env.BRANCH_NAME == "xl") {
+                        dev_items = "no"
                     }
 
                     if (params.VERSION_SUFFIX != '<default>') {
@@ -76,19 +88,26 @@ pipeline {
                     configurations.each { config ->
                         stage("Build - ${config.preset},${config.build_type},${config.bootloader}boot") {
                             catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                                sh """
-                                    ln -fs /.dependencies
-                                    python3 utils/build.py \
-                                        --preset ${config.preset} \
-                                        --build-type ${config.build_type} \
-                                        --bootloader ${config.bootloader} \
-                                        --generate-bbf \
-                                        --generate-dfu \
-                                        --no-store-output \
-                                        --version-suffix=${full_suffix} \
-                                        --version-suffix-short=${short_suffix} \
-                                        -DCUSTOM_COMPILE_OPTIONS:STRING=-Werror
-                                """
+                                sshagent(credentials: ['prusa_holly']) {
+                                    sh """
+                                        [ -d ~/.ssh ] || mkdir ~/.ssh && chmod 0700 ~/.ssh
+                                        ssh-keyscan -t rsa,dsa github.com >> ~/.ssh/known_hosts
+                                    """
+                                    sh """
+                                        ln -fs /work/.dependencies
+                                        python3 utils/build.py \
+                                            --preset ${config.preset} \
+                                            --build-type ${config.build_type} \
+                                            --bootloader ${config.bootloader} \
+                                            --generate-bbf \
+                                            --generate-dfu \
+                                            --no-store-output \
+                                            --version-suffix=${full_suffix} \
+                                            --version-suffix-short=${short_suffix} \
+                                            -DCUSTOM_COMPILE_OPTIONS:STRING="-Werror" \
+                                        -DDEVELOPMENT_ITEMS_ENABLED:BOOL=${dev_items}
+                                    """
+                                }
                             }
                         }
                     }
@@ -99,11 +118,10 @@ pipeline {
         stage('Test') {
             steps {
                 sh """
-                python3 utils/bootstrap.py
-                export PATH=\$PWD/.dependencies/cmake-3.21.3/bin:\$PWD/.dependencies/ninja-1.10.2:\$PATH
+                export PATH=/work/.dependencies/cmake-3.22.5/bin:/work/.dependencies/ninja-1.10.2:\$PATH
                 mkdir -p build-test
-                LD_LIBRARY_PATH=/usr/local/lib32 \$PWD/.dependencies/cmake-3.21.3/bin/ctest --build-and-test . build-test \
-                    -DCMAKE_MAKE_PROGRAM=\$PWD/.dependencies/ninja-1.10.2/ninja \
+                LD_LIBRARY_PATH=/usr/local/lib32 /work/.dependencies/cmake-3.22.5/bin/ctest --build-and-test . build-test \
+                    -DCMAKE_MAKE_PROGRAM=/work/.dependencies/ninja-1.10.2/ninja \
                     --build-generator Ninja \
                     --build-target tests \
                     --test-command ctest

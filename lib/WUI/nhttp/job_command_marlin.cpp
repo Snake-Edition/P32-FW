@@ -1,6 +1,6 @@
 #include "job_command.h"
 
-#include "../../../src/common/marlin_client.h"
+#include "../../../src/common/marlin_client.hpp"
 
 #include <cassert>
 
@@ -18,21 +18,33 @@ namespace {
         Printing,
         Paused,
         Busy,
+        Attention,
     };
 
     SimplePrintState get_state() {
         marlin_vars_t *vars = marlin_vars();
-        marlin_client_loop();
 
         switch (vars->print_state) {
         case mpsPrinting:
             return SimplePrintState::Printing;
+        case mpsPowerPanic_acFault:
+        case mpsPowerPanic_Resume:
+        case mpsPowerPanic_AwaitingResume:
         case mpsPausing_Begin:
         case mpsPausing_WaitIdle:
         case mpsPausing_ParkHead:
+        case mpsPausing_Failed_Code:
+        case mpsCrashRecovery_Begin:
+        case mpsCrashRecovery_Axis_NOK:
+        case mpsCrashRecovery_Retracting:
+        case mpsCrashRecovery_Lifting:
+        case mpsCrashRecovery_XY_Measure:
+        case mpsCrashRecovery_XY_HOME:
+        case mpsCrashRecovery_Repeated_Crash:
         case mpsResuming_Begin:
         case mpsResuming_Reheating:
-        case mpsResuming_UnparkHead:
+        case mpsResuming_UnparkHead_XY:
+        case mpsResuming_UnparkHead_ZE:
         case mpsAborting_Begin:
         case mpsAborting_WaitIdle:
         case mpsAborting_ParkHead:
@@ -44,7 +56,10 @@ namespace {
         case mpsAborted:
         case mpsFinished:
         case mpsIdle:
+        case mpsExit:
             return SimplePrintState::Idle;
+        case mpsPrintPreviewQuestions:
+            return SimplePrintState::Attention;
         default:
             assert(0);
             return SimplePrintState::Idle;
@@ -57,7 +72,7 @@ namespace {
 
 bool JobCommand::stop() {
     const auto state = get_state();
-    if (state == SimplePrintState::Printing || state == SimplePrintState::Paused) {
+    if (state == SimplePrintState::Printing || state == SimplePrintState::Paused || state == SimplePrintState::Attention) {
         marlin_print_abort();
         return true;
     } else {

@@ -10,6 +10,7 @@ Screens::Screens(screen_node screen_creator)
     , close(false)
     , close_all(false)
     , close_serial(false)
+    , display_reinitialized(false)
     , timeout_tick(0) {
 }
 
@@ -32,16 +33,16 @@ void Screens::Init(const screen_node *begin, const screen_node *end) {
     if (begin == end)
         return;
 
-    //find last enabled creator
+    // find last enabled creator
     iter node = find_enabled_node(begin, end);
     if (node == end)
         return;
 
-    //have creator
+    // have creator
     Init(*node);
 
-    //Must push rest of enabled creators on stack
-    Access()->PushBeforeCurrent(node + 1, end); //node + 1 excludes node
+    // Must push rest of enabled creators on stack
+    Access()->PushBeforeCurrent(node + 1, end); // node + 1 excludes node
 }
 
 void Screens::RInit(const screen_node *begin, const screen_node *end) {
@@ -50,19 +51,19 @@ void Screens::RInit(const screen_node *begin, const screen_node *end) {
     if (begin == end)
         return;
 
-    //initialize reverse iterators
+    // initialize reverse iterators
     r_iter r_begin(begin);
     r_iter r_end(end);
 
-    //find last enabled creator
+    // find last enabled creator
     r_iter r_node = rfind_enabled_node(r_begin, r_end);
     if (r_node == r_begin)
         return;
 
-    //have creator
+    // have creator
     Init(*r_node);
 
-    //Push rest of enabled creators on stack
+    // Push rest of enabled creators on stack
     Access()->RPushBeforeCurrent(begin, r_node.base());
 }
 
@@ -83,9 +84,9 @@ void Screens::PushBeforeCurrent(const screen_node *begin, const screen_node *end
     if (begin == end)
         return;
 
-    //initialize reverse iterators
+    // initialize reverse iterators
     r_iter r_begin(begin);
-    r_iter r_node(end + 1); //point behind end, first call of "r_node + 1" will revert this
+    r_iter r_node(end + 1); // point behind end, first call of "r_node + 1" will revert this
 
     do {
         r_node = rfind_enabled_node(r_begin, r_node + 1);
@@ -104,7 +105,7 @@ void Screens::RPushBeforeCurrent(const screen_node *begin, const screen_node *en
     if (begin == end)
         return;
 
-    iter node = begin - 1; //point before begin, first call of "node + 1" will revert this
+    iter node = begin - 1; // point before begin, first call of "node + 1" will revert this
 
     do {
         node = find_enabled_node(node + 1, end);
@@ -121,14 +122,14 @@ Screens *Screens::Access() {
     return instance;
 }
 
-void Screens::ScreenEvent(window_t *sender, GUI_event_t event, void *param) {
+void Screens::ScreenEvent(window_t *sender, GUI_event_t event, void *const param) {
     if (current == nullptr)
         return;
-    //todo shouldn't I use "sender ? sender : current.get()"?
+    // todo shouldn't I use "sender ? sender : current.get()"?
     current->ScreenEvent(current.get(), event, param);
 }
 
-void Screens::WindowEvent(GUI_event_t event, void *param) {
+void Screens::WindowEvent(GUI_event_t event, void *const param) {
     if (current == nullptr)
         return;
     current->WindowEvent(current.get(), event, param);
@@ -155,28 +156,43 @@ void Screens::Open(const ScreenFactory::Creator screen_creator) {
     Open(screen_node(screen_creator));
 }
 
+/**
+ * @brief close current screen
+ * it sets flag to close current screen
+ * it also clears creator_node, because order matters!
+ * In case you want to replace current screen, you must call Close() first and Open() after
+ */
 void Screens::Close() {
     close = true;
+    creator_node.MakeEmpty();
 }
 
+/**
+ * @brief close all screens (but top one - home)
+ * it sets flag to close all screens
+ * it also clears creator_node, because order matters!
+ * In case you want to open new screen, you must call CloseAll() first and Open() after
+ */
 void Screens::CloseAll() {
     close_all = true;
+    creator_node.MakeEmpty();
 }
 
+/**
+ * @brief close all screens with WindowFlags::serial_close (but top one - home)
+ * it sets flag to close all screens closable on serial print
+ * it also clears creator_node, because order matters!
+ * In case you want to open new screen, you must call CloseSerial() first and Open() after
+ */
 void Screens::CloseSerial() {
-    /// serial close logic:
-    /// when serial printing screen (M876) is open, Screens::SerialClose() is
-    /// called and it will iterate all screens to close those that should be closed
-    while (Get() && Get()->ClosedOnSerialPrint() && stack_iterator != stack.begin()) {
-        close = true;
-        InnerLoop();
-    }
+    close_serial = true;
+    creator_node.MakeEmpty();
 }
 
-//used to close blocking dialogs
+// used to close blocking dialogs
 bool Screens::ConsumeClose() {
     bool ret = close | close_all; // close_all must also close dialogs
-    close = false;                //close_all cannot be consumed
+    close = false;                // close_all cannot be consumed
     return ret;
 }
 
@@ -195,6 +211,12 @@ void Screens::ResetTimeout() {
 }
 
 void Screens::Loop() {
+    if (display_reinitialized) {
+        screen_t *pScr = Get();
+        if (pScr)
+            pScr->Invalidate();
+        display_reinitialized = false;
+    }
     /// menu timeout logic:
     /// when timeout is expired on current screen,
     /// we iterate through whole stack and close every screen that should be closed
@@ -214,26 +236,84 @@ void Screens::Loop() {
     InnerLoop();
 }
 
+/**
+ * @brief inner loop, actually does all the work
+ * it closes and opens screens
+ * open is indicated by creator_node
+ * top screen cannot be closed
+ *
+ * combinations are allowed
+ * close + close_all   == close_all
+ * close_all + open    == keep top screen + open new one
+ * close + open        == replace current screen with new one, will not work with top one
+ * close_serial + open == close all screens closable on serial print and open new one (until it finds one it cannot close)
+ *
+ * duplicity is not checked, so it is possible to open multiple screens of the same type
+ * it would complicate code and it is probably not necessary
+ * there is an exception combination of close/close_all + open, it does check opened screen type and does not recreate it
+ * if close_serial finds screen of the same type that should be opened, it will close it too
+ */
 void Screens::InnerLoop() {
     screen_init_variant screen_state;
     if (close_all) {
-        if (current) {                              // is there something to close?
-            if (creator_node.creator) {             // have creator, have to emulate opening
-                stack_iterator = stack.begin();     // point to screen[0], (screen[0] is home)
-                close = false;                      // clr close flag, creator will be pushed into screen[1] position
-            } else {                                // do not have creator, have to emulate closing
-                stack_iterator = stack.begin() + 1; // point behind screen[0], (screen[0] is home)
-                close = true;                       // set flag to close screen[1] == open screen[0] (home)
+        if (stack_iterator != stack.begin()) {                           // is there something to close? (we never close screen[0])
+            if (!creator_node.IsEmpty()) {                               // have creator, have to emulate opening
+                if ((stack_iterator)->creator == creator_node.creator) { // screen to be opened is already opened (on top of stack)
+                    *(stack.begin() + 1) = *stack_iterator;              // move (copy) current screen_node, init data does not matter - they are set after screen is closed
+                    stack_iterator = stack.begin() + 1;                  // point to current screen_node
+                    if (creator_node.init_data.IsValid())                // have some new meaningful data
+                        current->InitState(creator_node.init_data);      // reinitialize
+                    creator_node.MakeEmpty();                            // erase creator pointer, so we dont continue to open part of tis function
+                } else {                                                 // screen to be opened is not currently opened (but might be between the closed ones)
+                    stack_iterator = stack.begin();                      // point to screen[0] (screen[0]), keep creator_node, we will continue to open part of tis function
+                }                                                        //
+                close = false;                                           // clr close flag, creator will be pushed into screen[1] position
+            } else {                                                     // do not have creator, have to emulate closing
+                stack_iterator = stack.begin() + 1;                      // point behind screen[0], (screen[0] is home)
+                close = true;                                            // set flag to close screen[1] == open screen[0] (home)
             }
         }
-        close_all = false;
+        close_all = false;    // reset close all flag
+        close_serial = false; // all screens were closed, close serial has no meaning
     }
 
-    //open new screen
-    if (creator_node.creator || close) {
+    if (close_serial) {
+        // serial close logic:
+        // when serial printing screen (M876) is open, Screens::SerialClose() is
+        // called and it will iterate all screens to close those that should be closed
+        if (stack_iterator != stack.begin()) { // is there something to close?
+            auto backup = creator_node;        // backup creator (in case we need to both close and open at the same time)
+            creator_node.creator = nullptr;    // erase creator node
+            close_serial = false;              // reset close serial flag now, so following InnerLoop only closes a screen
+            while (stack_iterator != stack.begin() && ((Get() && Get()->ClosedOnSerialPrint()) || (stack_iterator)->creator == backup.creator)) {
+                close = true;
+                InnerLoop(); // call recursively - but with only single level of recursion .. this will just close single screen (we already know it should be closed)
+            }
+
+            creator_node = backup; // now all screens are closed, so we just restore creator to open screen if there was a request to do it
+        }
+    }
+
+    // special case open + close
+    if (close && !creator_node.IsEmpty()) {
+        if (stack_iterator != stack.begin()) {                       // is there something to close? (we never close screen[0])
+            if ((stack_iterator)->creator == creator_node.creator) { // screen to be opened is already opened (on top of stack)
+                *(stack_iterator - 1) = *stack_iterator;             // move (copy) current screen_node 1 position up on stack, init data does not matter - they are set after screen is closed
+                --stack_iterator;                                    // point to current screen_node
+                if (creator_node.init_data.IsValid())                // have some new meaningful data
+                    current->InitState(creator_node.init_data);      // reinitialize
+                creator_node.MakeEmpty();                            // erase creator pointer, so we dont continue to open part of tis function
+            } else {                                                 // screen to be opened is not currently opened (but might be between the closed ones)
+                --stack_iterator;                                    // point to screen_node 1 position up on stack
+            }
+        }
+        close = false; // clr close flag
+    }
+
+    // open new screen .. close means open old one from stack
+    if (!creator_node.IsEmpty() || close) {
         if (current) {
             screen_state = current->GetCurrentState();
-            current.reset(); //without a reset screens do not behave correctly, because they occupy the same memory space as the new screen to be created
             if (close) {
                 if (stack_iterator != stack.begin()) {
                     --stack_iterator;               // point to previous screen - will become "behind last creator"
@@ -253,6 +333,10 @@ void Screens::InnerLoop() {
             }
         }
 
+        /// without a reset screens does not behave correctly, because they occupy the same memory space as the new screen to be created
+        if (current)
+            current.reset();
+
         /// need to reset focused and capture ptr before calling current = creator();
         /// screen ctor can change those pointers
         /// screen was destroyed by unique_ptr.release()
@@ -268,6 +352,10 @@ void Screens::InnerLoop() {
             }
         }
         current->InitState(creator_node.init_data);
-        creator_node = nullptr;
+        creator_node.MakeEmpty();
     }
+}
+
+void Screens::SetDisplayReinitialized() {
+    display_reinitialized = true;
 }

@@ -277,6 +277,7 @@
  *
  * T0-T3 - Select an extruder (tool) by index: "T<n> F<units/min>"
  *
+ * R1 - Redirect nested gcode to another machine using uart
  */
 
 #include "../inc/MarlinConfig.h"
@@ -326,8 +327,9 @@ public:
     static int8_t active_coordinate_system;
     static xyz_pos_t coordinate_system[MAX_COORDINATE_SYSTEMS];
     static bool select_coordinate_system(const int8_t _new);
+    static int8_t get_coordinate_system();
+    static void set_coordinate_system_offset(int8_t system, AxisEnum axis, float offset);
   #endif
-
   static millis_t previous_move_ms;
   FORCE_INLINE static void reset_stepper_timeout() { previous_move_ms = millis(); }
 
@@ -341,7 +343,7 @@ public:
   #if ENABLED(PROCESS_CUSTOM_GCODE)
     static bool process_parsed_command_custom(const bool no_ok=false);
   #endif
-  
+
   // Execute G-code in-place, preserving current G-code parameters
   static void process_subcommands_now_P(PGM_P pgcode);
   static void process_subcommands_now(char * gcode);
@@ -372,7 +374,9 @@ public:
   #endif
 
   static void dwell(millis_t time);
-  static void G28_no_parser(bool always_home_all, bool O, float R, bool S, bool X, bool Y,bool Z);
+  static void G28_no_parser(bool always_home_all = true, bool O = false, float R = false, bool S = false, bool X = false, bool Y = false, bool Z = false
+    , bool no_change = false OPTARG(PRECISE_HOMING_COREXY, bool precise = true));
+  static void T(const uint8_t tool_index);
 
 private:
 
@@ -431,6 +435,10 @@ private:
     #endif
     static G29_TYPE G29();
   #endif
+  #if ENABLED(ADVANCED_HOMING)
+    static void G65();
+  #endif
+
 
   #if HAS_BED_PROBE
     static void G30();
@@ -540,6 +548,8 @@ private:
     static void M43();
   #endif
 
+  static void M46();
+
   #if ENABLED(Z_MIN_PROBE_REPEATABILITY_TEST)
     static void M48();
   #endif
@@ -636,6 +646,10 @@ private:
     static void M191();
   #endif
 
+  #if HAS_TEMP_HEATBREAK_CONTROL
+    static void M142();
+  #endif
+
   #if HOTENDS && HAS_LCD_MENU
     static void M145();
   #endif
@@ -662,6 +676,9 @@ private:
       static void M166();
     #endif
   #endif
+
+  static void M170();
+  static void M171();
 
   static void M200();
   static void M201();
@@ -752,8 +769,10 @@ private:
     static void M305();
   #endif
 
-  #if HAS_MICROSTEPS
+  #if HAS_DRIVER(TMC2130) ||HAS_MICROSTEPS
     static void M350();
+  #endif
+  #if HAS_MICROSTEPS
     static void M351();
   #endif
 
@@ -809,6 +828,10 @@ private:
     static void M428();
   #endif
 
+  #if ENABLED(CANCEL_OBJECTS)
+    static void M486();
+  #endif
+
   static void M500();
   static void M501();
   static void M502();
@@ -825,6 +848,13 @@ private:
 
   #if ENABLED(SD_ABORT_ON_ENDSTOP_HIT)
     static void M540();
+  #endif
+
+  static void M555();
+
+  #if ENABLED(MODULAR_HEATBED)
+    static void M556();
+    static void M557();
   #endif
 
   #if ENABLED(BAUD_RATE_GCODE)
@@ -944,7 +974,9 @@ private:
     static void M7219();
   #endif
 
-  static void T(const uint8_t tool_index);
+  #if ENABLED(REDIRECT_GCODE_SUPPORT)
+    static void R(const uint8_t machine_index);
+  #endif
 
 };
 

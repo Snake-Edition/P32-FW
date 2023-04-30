@@ -3,7 +3,6 @@ add_custom_target(tests)
 
 # include catch_discover_tests function from Catch2
 include(${Catch2_SOURCE_DIR}/contrib/Catch.cmake)
-
 add_library(catch_main ${CMAKE_CURRENT_SOURCE_DIR}/test_main.cpp)
 target_link_libraries(catch_main Catch2::Catch2)
 
@@ -23,3 +22,6 @@ add_subdirectory(common)
 add_subdirectory(lang)
 add_subdirectory(lib)
 add_subdirectory(logging)
+add_subdirectory(connect)
+add_subdirectory(puppies)
+add_subdirectory(transfers)

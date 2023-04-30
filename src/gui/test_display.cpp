@@ -6,9 +6,10 @@
 
 #include "cmsis_os.h"
 #include "gui.hpp"
-#include "resource.h"
 #include "display_helper.h"
 #include "log.h"
+
+LOG_COMPONENT_REF(Buddy);
 
 typedef void(test_display_t)(uint16_t cnt);
 
@@ -123,7 +124,7 @@ void test_display_random_chars_big(uint16_t cnt) {
 }
 
 void test_display_random_chars_terminal(uint16_t cnt) {
-    font_t *font = resource_font(IDR_FNT_TERMINAL);
+    font_t *font = resource_font(IDR_FNT_SPECIAL);
     test_display_random_chars(cnt, font);
 }
 
@@ -228,25 +229,21 @@ void test_display_spectrum(uint16_t cnt) {
         }
 }
 
-//extern uint8_t png_data[];
-//extern const uint8_t png_buddy_logo[];
-//extern const uint8_t png_splash_screen[];
-//extern const uint8_t png_status_screen[];
-//extern const uint8_t png_main_menu[];
-
 extern const uint8_t png_icon_64x64_noise[];
 extern const uint16_t png_icon_64x64_noise_size;
 
 void test_display_random_png_64x64(uint16_t count) {
+    png::Resource res("", 0, 0, 64, 64);
+
     uint16_t x;
     uint16_t y;
-    FILE *pf = fmemopen((void *)png_icon_64x64_noise, png_icon_64x64_noise_size, "rb");
+    res.file = fmemopen((void *)png_icon_64x64_noise, png_icon_64x64_noise_size, "rb");
     for (uint16_t n = 0; n < count; n++) {
         x = rand() % (display::GetW() - 64 + 1);
         y = rand() % (display::GetH() - 64 + 1);
-        display::DrawPng(point_ui16(x, y), pf);
+        display::DrawPng(point_ui16(x, y), res);
     }
-    fclose(pf);
+    fclose(res.file);
 }
 
 int __read(struct _reent *_r, void *pv, char *pc, int n) {
@@ -336,7 +333,7 @@ void test_display2(void) {
 		st7789v_display_clear(CLR565_GREEN);
 		osDelay(1000);
 		st7789v_display_clear(CLR565_BLUE);
-		display_ex_draw_text(10, 10, 0, 0, "Testik", &font_12x12, CLR565_YELLOW);
+		--display_ex_draw_text was replaced--(10, 10, 0, 0, "Testik", &font_12x12, CLR565_YELLOW);
 		osDelay(1000);
 		//osDelay(1000);
 		st7789v_spectrum();

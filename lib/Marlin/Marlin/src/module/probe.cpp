@@ -37,6 +37,10 @@ static inline void MINDA_BROKEN_CABLE_DETECTION__POST_XYMOVE() {}
 
 #include "probe.h"
 
+#ifdef EXTRA_PROBING_DBG
+  #include "dbg.h"
+#endif
+
 #include "../libs/buzzer.h"
 #include "motion.h"
 #include "temperature.h"
@@ -56,10 +60,6 @@ static inline void MINDA_BROKEN_CABLE_DETECTION__POST_XYMOVE() {}
   #include "delta.h"
 #endif
 
-#if ENABLED(BABYSTEP_ZPROBE_OFFSET)
-  #include "planner.h"
-#endif
-
 #if ENABLED(MEASURE_BACKLASH_WHEN_PROBING)
   #include "../feature/backlash.h"
 #endif
@@ -68,6 +68,10 @@ xyz_pos_t probe_offset; // Initialized by settings.load()
 
 #if ENABLED(BLTOUCH)
   #include "../feature/bltouch.h"
+#endif
+
+#if ENABLED(NOZZLE_LOAD_CELL)
+  #include "feature/prusa/loadcell.h"
 #endif
 
 #if ENABLED(HOST_PROMPT_SUPPORT)
@@ -93,6 +97,8 @@ xyz_pos_t probe_offset; // Initialized by settings.load()
 
 #define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
 #include "../core/debug_out.h"
+
+#include "metric.h"
 
 #if ENABLED(Z_PROBE_SLED)
 
@@ -251,7 +257,7 @@ xyz_pos_t probe_offset; // Initialized by settings.load()
     #if ENABLED(PROBING_STEPPERS_OFF)
       disable_e_steppers();
       #if NONE(DELTA, HOME_AFTER_DEACTIVATE)
-        disable_X(); disable_Y();
+        disable_XY();
       #endif
     #endif
     if (p) safe_delay(
@@ -377,8 +383,13 @@ bool set_probe_deployed(const bool deploy) {
     constexpr float unknown_condition = true;
   #endif
 
-  if (deploy_stow_condition && unknown_condition)
-    do_probe_raise(_MAX(Z_CLEARANCE_BETWEEN_PROBES, Z_CLEARANCE_DEPLOY_PROBE));
+  #if DISABLED(NOZZLE_LOAD_CELL)
+    if (deploy_stow_condition && unknown_condition)
+      do_probe_raise(_MAX(Z_CLEARANCE_BETWEEN_PROBES, Z_CLEARANCE_DEPLOY_PROBE));
+  #else
+    UNUSED(deploy_stow_condition);
+    UNUSED(unknown_condition);
+  #endif
 
   #if EITHER(Z_PROBE_SLED, Z_PROBE_ALLEN_KEY)
     if (axis_unhomed_error(
@@ -510,11 +521,13 @@ static bool do_probe_move(const float z, const feedRate_t fr_mm_s) {
   // Re-enable stealthChop if used. Disable diag1 pin on driver.
   #if ENABLED(SENSORLESS_PROBING)
     endstops.not_homing();
-    #if ENABLED(DELTA)
-      tmc_disable_stallguard(stepperX, stealth_states.x);
-      tmc_disable_stallguard(stepperY, stealth_states.y);
+    #if NEITHER(ENDSTOPS_ALWAYS_ON_DEFAULT, CRASH_RECOVERY)
+      #if ENABLED(DELTA)
+        tmc_disable_stallguard(stepperX, stealth_states.x);
+        tmc_disable_stallguard(stepperY, stealth_states.y);
+      #endif
+      tmc_disable_stallguard(stepperZ, stealth_states.z);
     #endif
-    tmc_disable_stallguard(stepperZ, stealth_states.z);
   #endif
 
   #if ENABLED(BLTOUCH) && DISABLED(BLTOUCH_HS_MODE)
@@ -535,6 +548,31 @@ static bool do_probe_move(const float z, const feedRate_t fr_mm_s) {
   return !probe_triggered;
 }
 
+// those metrics are intentionally not static, as it is expected that they might be referenced
+// from outside this file for early registration
+metric_t metric_probe_z = METRIC("probe_z", METRIC_VALUE_CUSTOM, 0, METRIC_HANDLER_DISABLE_ALL);
+metric_t metric_probe_z_diff = METRIC("probe_z_diff", METRIC_VALUE_CUSTOM, 0, METRIC_HANDLER_DISABLE_ALL);
+
+#if ENABLED(NOZZLE_LOAD_CELL)
+static xy_pos_t offset_for_probe_try(int try_idx) {
+  const float distance = 2.0;
+  float radius = 0;
+  int idx_offset = 0;
+
+  do {
+    float perimeter = 2 * radius * M_PI;
+    int tries_within_perimeter = static_cast<int>(perimeter / distance) + 1;
+    if (try_idx < idx_offset + tries_within_perimeter) {
+      int try_within_perimeter = try_idx - idx_offset;
+      float goniom_dist = (static_cast<float>(try_within_perimeter) / static_cast<float>(tries_within_perimeter)) * 2 * M_PI;
+      return {std::cos(goniom_dist) * radius, std::sin(goniom_dist) * radius};
+    } else {
+      idx_offset += tries_within_perimeter;
+      radius += distance;
+    }
+  } while (true);
+}
+#endif
 /**
  * @brief Probe at the current XY (possibly more than once) to find the bed Z.
  *
@@ -543,13 +581,19 @@ static bool do_probe_move(const float z, const feedRate_t fr_mm_s) {
  *
  * @return The Z position of the bed at the current XY or NAN on error.
  */
-static float run_z_probe() {
-
+float run_z_probe(float expected_trigger_z, bool single_only = false) {
   if (DEBUGGING(LEVELING)) DEBUG_POS(">>> run_z_probe", current_position);
 
   // Stop the probe before it goes too low to prevent damage.
   // If Z isn't known then probe to -10mm.
-  const float z_probe_low_point = TEST(axis_known_position, Z_AXIS) ? -probe_offset.z + Z_PROBE_LOW_POINT : -10.0;
+  float z_probe_low_point = expected_trigger_z + Z_PROBE_LOW_POINT;
+
+
+  #if ENABLED(NOZZLE_LOAD_CELL)
+    loadcell.analysis.Reset();
+    loadcell.Tare();
+    auto H = loadcell.CreateLoadAboveErrEnforcer();
+  #endif
 
   // Double-probing does a fast probe followed by a slow probe
   #if TOTAL_PROBING == 2
@@ -563,6 +607,9 @@ static float run_z_probe() {
         DEBUG_ECHOLNPGM("FAST Probe fail!");
         DEBUG_POS("<<< run_z_probe", current_position);
       }
+      #if ENABLED(HALT_ON_PROBING_ERROR)
+        kill("PROBING ERROR", "Could not reach the bed, FAST Probe fail!");
+      #endif
       return NAN;
     }
 
@@ -577,7 +624,7 @@ static float run_z_probe() {
 
     // If the nozzle is well over the travel height then
     // move down quickly before doing the slow probe
-    const float z = Z_CLEARANCE_DEPLOY_PROBE + 5.0 + (probe_offset.z < 0 ? -probe_offset.z : 0);
+    const float z = expected_trigger_z + Z_CLEARANCE_DEPLOY_PROBE + 5.0 + (probe_offset.z < 0 ? -probe_offset.z : 0);
     if (current_position.z > z) {
       // Probe down fast. If the probe never triggered, raise for probe clearance
       if (!do_probe_move(z, MMM_TO_MMS(Z_PROBE_SPEED_FAST)))
@@ -587,10 +634,18 @@ static float run_z_probe() {
 
   #ifdef EXTRA_PROBING
     float probes[TOTAL_PROBING];
+  #elif ENABLED(NOZZLE_LOAD_CELL)
+    xy_pos_t center_pos = current_position;
+    int probe_idx = 0;
+    bool success = false;
+    float last_probe_z = NAN;
+  #endif
+
+  #if TOTAL_PROBING > 2 && DISABLED(NOZZLE_LOAD_CELL)
+    float probes_total = 0;
   #endif
 
   #if TOTAL_PROBING > 2
-    float probes_total = 0;
     for (
       #if EXTRA_PROBING
         uint8_t p = 0; p < TOTAL_PROBING; p++
@@ -600,6 +655,31 @@ static float run_z_probe() {
     )
   #endif
     {
+      #if ENABLED(NOZZLE_LOAD_CELL)
+        auto center_offset = offset_for_probe_try(probe_idx++);
+        do_blocking_move_to_xy(center_pos + center_offset, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+
+        #if ENABLED(NOZZLE_LOAD_CELL) & ENABLED(NOZZLE_LOAD_CELL_ALLOWS_LONG_HIGH_PRECISION)
+          assert(loadcell.IsHighPrecisionEnabled());
+        #elif ENABLED(NOZZLE_LOAD_CELL) & DISABLED(NOZZLE_LOAD_CELL_ALLOWS_LONG_HIGH_PRECISION)
+          auto enabler = Loadcell::HighPrecisionEnabler(loadcell);
+        #endif
+
+
+        if (p != TOTAL_PROBING) {
+          loadcell.Tare();
+          loadcell.analysis.Reset();
+        }
+
+        SERIAL_ECHO_START();
+        SERIAL_ECHOLNPAIR_F("Starting probe at ", center_pos);
+
+        static metric_t probe_start = METRIC("probe_start", METRIC_VALUE_EVENT, 0, METRIC_HANDLER_ENABLE_ALL);
+        metric_record_event(&probe_start);
+
+        auto H = loadcell.CreateLoadAboveErrEnforcer();
+      #endif
+
       // Probe downward slowly to find the bed
       if (do_probe_move(z_probe_low_point, MMM_TO_MMS(Z_PROBE_SPEED_SLOW))) {
         if (planner.draining())
@@ -609,14 +689,27 @@ static float run_z_probe() {
           DEBUG_ECHOLNPGM("SLOW Probe fail!");
           DEBUG_POS("<<< run_z_probe", current_position);
         }
+        #if ENABLED(HALT_ON_PROBING_ERROR)
+          kill("PROBING ERROR", "Could not reach the bed, SLOW Probe fail!");
+        #endif
         return NAN;
       }
+
+      #if ENABLED(NOZZLE_LOAD_CELL)
+        // Return slowly back
+        uint32_t move_back_start = millis();
+        float move_back = 0.09f;
+        do_blocking_move_to_z(current_position.z + move_back, MMM_TO_MMS(Z_PROBE_SPEED_BACK_MOVE));
+      #endif
 
       #if ENABLED(MEASURE_BACKLASH_WHEN_PROBING)
         backlash.measure_with_probe();
       #endif
 
-      const float z = current_position.z;
+      #if DISABLED(NOZZLE_LOAD_CELL)
+        const float z = current_position.z;
+      #endif
+
 
       #if EXTRA_PROBING
         // Insert Z measurement into probes[]. Keep it sorted ascending.
@@ -627,11 +720,39 @@ static float run_z_probe() {
             break;                                                    // Only one to insert. Done!
           }
         }
+      #elif ENABLED(NOZZLE_LOAD_CELL)
+        // wait until the analysis' window is full of samples
+        constexpr uint32_t movement_delay_ms = 140
+          #if ENABLED(PRUSA_TOOLCHANGER)
+            + 20 // add a bit more of a delay to receive the samples from Dwarf
+          #endif
+            ;
+        uint32_t window_end = move_back_start + static_cast<uint32_t>(loadcell.analysis.analysisLookahead * 1000.f) + movement_delay_ms;
+        while (window_end > millis()) idle(true);
+
+        static metric_t analysis_result = METRIC("probe_analysis", METRIC_VALUE_CUSTOM, 0, METRIC_HANDLER_ENABLE_ALL);
+        auto result = loadcell.analysis.Analyse();
+
+        if (result.isGood) {
+          success = true;
+          last_probe_z = result.zCoordinate;
+          metric_record_custom(&analysis_result, " ok=%i,desc=\"all-good\"", true);
+          SERIAL_ECHO_MSG("Probe classified as clean and OK");
+          break;
+        } else {
+          metric_record_custom(&analysis_result, " ok=%i,desc=\"%s\"", false, result.description);
+          SERIAL_ECHO_START();
+          SERIAL_ECHOPAIR("Probe classified as NOK (", result.description);
+          SERIAL_ECHOLN(")");
+        }
       #elif TOTAL_PROBING > 2
         probes_total += z;
       #else
         UNUSED(z);
       #endif
+
+      if (single_only)
+        break;
 
       #if TOTAL_PROBING > 2
         // Small Z raise after all but the last probe
@@ -639,11 +760,15 @@ static float run_z_probe() {
           #if EXTRA_PROBING
             < TOTAL_PROBING - 1
           #endif
-        ) do_blocking_move_to_z(z + Z_CLEARANCE_MULTI_PROBE, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+        ) do_blocking_move_to_z(current_position.z + Z_CLEARANCE_MULTI_PROBE, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
       #endif
     }
 
-  #if TOTAL_PROBING > 2
+  #if ENABLED(NOZZLE_LOAD_CELL)
+
+    const float measured_z = success ? last_probe_z : NAN;
+
+  #elif TOTAL_PROBING > 2
 
     #if EXTRA_PROBING
       // Take the center value (or average the two middle values) as the median
@@ -686,6 +811,93 @@ static float run_z_probe() {
   return measured_z;
 }
 
+
+#if ENABLED(NOZZLE_LOAD_CELL) && ENABLED(PROBE_CLEANUP_SUPPORT)
+
+/**
+ * @brief Probe within a given rectangle in order to cleanup loadcell-based probe.
+ */
+void cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max) {
+  float radius = 1.0f;
+  bool probe_deployed = false;
+  const int required_clean_cnt = 3;
+  int consecutive_clean_cnt = 0;
+
+  #if ENABLED(NOZZLE_LOAD_CELL) & ENABLED(NOZZLE_LOAD_CELL_ALLOWS_LONG_HIGH_PRECISION)
+    auto precisionEnabler = Loadcell::HighPrecisionEnabler(loadcell);
+  #endif
+
+  // set acceleration to known value
+  auto saved_acceleration = planner.settings.travel_acceleration;
+  planner.settings.travel_acceleration = PROBE_CLEANUP_TRAVEL_ACCELERATION;
+
+  bool should_continue = true;
+  for (float y = rect_min.y + radius; (y + radius) <= rect_max.y && should_continue; y += 2 * radius) {
+    for (float x = rect_max.x - radius; (x - radius) >= rect_min.x && should_continue; x -= 2 * radius) {
+      // move above the probe point
+      xyz_pos_t pos = { x, y, PROBE_CLEANUP_CLEARANCE };
+      do_blocking_move_to(pos);
+        LCD_MESSAGEPGM_P("Nozzle cleaning");
+      // deploy probe
+      if(probe_deployed == false && DEPLOY_PROBE()) {
+        SERIAL_ECHOLNPGM("failed to deploy probe");
+        should_continue = false;
+        break;
+      }
+      probe_deployed = true;
+
+      // probe
+      float result = run_z_probe(0, /*single_only=*/true);
+      if (planner.draining()) {
+        should_continue = false;
+        break;
+      }
+      if (!std::isnan(result)) {
+        consecutive_clean_cnt += 1;
+      } else {
+        consecutive_clean_cnt = 0;
+      }
+
+      // exit in case the probe was successfull
+      if (consecutive_clean_cnt >= required_clean_cnt) {
+        should_continue = false;
+        break;
+      }
+    }
+  }
+
+  // restore acceleration
+  planner.settings.travel_acceleration = saved_acceleration;
+
+  if (probe_deployed) {
+    STOW_PROBE();
+  }
+  if (consecutive_clean_cnt < required_clean_cnt) {
+    LCD_MESSAGEPGM_P(MSG_ERR_NOZZLE_CLEANING_FAILED);
+  }
+}
+#endif
+
+
+/**
+ * @brief Probe down from current position, repeat probing untill we have one successfull
+ *
+ * May return NAN if after TOTAL_PROBING no probe was successfull
+ */
+float probe_here(float expected_trigger_z)
+{
+  float res = NAN;
+  DEPLOY_PROBE();
+  for(int i=0; i <= TOTAL_PROBING; i++){
+    res = run_z_probe(expected_trigger_z, true) + probe_offset.z;
+    if (!std::isnan(res))
+      break;
+  }
+  STOW_PROBE();
+
+  return res;
+}
+
 /**
  * - Move to the given XY
  * - Deploy the probe, if not already deployed
@@ -709,10 +921,20 @@ float probe_at_point(const float &rx, const float &ry, const ProbePtRaise raise_
   // TODO: Adapt for SCARA, where the offset rotates
   xyz_pos_t npos = { rx, ry };
   if (probe_relative) {
-    if (!position_is_reachable_by_probe(npos)) return NAN;  // The given position is in terms of the probe
-    npos -= probe_offset;                                   // Get the nozzle position
+    if (!position_is_reachable_by_probe(npos)) {
+      #if ENABLED(HALT_ON_PROBING_ERROR)
+        kill("PROBING ERROR", "Could not reach the bed, XY position not within machine coordinates!");
+      #endif
+      return NAN; // The given position is in terms of the probe
+    }
+    npos -= probe_offset; // Get the nozzle position
   }
-  else if (!position_is_reachable(npos)) return NAN;        // The given position is in terms of the nozzle
+  else if (!position_is_reachable(npos)) {
+    #if ENABLED(HALT_ON_PROBING_ERROR)
+      kill("PROBING ERROR", "Could not reach the bed, XY position not within machine coordinates!");
+    #endif
+    return NAN; // The given position is in terms of the nozzle
+  }
 
   npos.z =
     #if ENABLED(DELTA)
@@ -728,17 +950,19 @@ float probe_at_point(const float &rx, const float &ry, const ProbePtRaise raise_
 
   // Move the probe to the starting XYZ
   MINDA_BROKEN_CABLE_DETECTION__PRE_XYMOVE();
-  do_blocking_move_to(npos);
+  do_blocking_move_to(npos, MMM_TO_MMS(XY_PROBE_SPEED));
   MINDA_BROKEN_CABLE_DETECTION__POST_XYMOVE();
 
   float measured_z = NAN;
   if (!DEPLOY_PROBE()) {
-    measured_z = run_z_probe() + probe_offset.z;
+    measured_z = run_z_probe(0) + probe_offset.z;
+
+    const float move_away_from = std::isnan(measured_z) ? current_position.z : (measured_z - probe_offset.z);
 
     const bool big_raise = raise_after == PROBE_PT_BIG_RAISE;
-    if (big_raise || raise_after == PROBE_PT_RAISE)
-      do_blocking_move_to_z(current_position.z + (big_raise ? 25 : Z_CLEARANCE_BETWEEN_PROBES), MMM_TO_MMS(Z_PROBE_SPEED_FAST));
-    else if (raise_after == PROBE_PT_STOW)
+    if (big_raise || raise_after == PROBE_PT_RAISE) {
+      plan_park_move_to(current_position.x, current_position.y, move_away_from + (big_raise ? 25 : Z_CLEARANCE_BETWEEN_PROBES), MMM_TO_MMS(XY_PROBE_SPEED), MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+    } else if (raise_after == PROBE_PT_STOW)
       if (STOW_PROBE()) measured_z = NAN;
   }
 
@@ -748,12 +972,19 @@ float probe_at_point(const float &rx, const float &ry, const ProbePtRaise raise_
     SERIAL_ECHOLNPAIR_F(" Z: ", measured_z, 3);
   }
 
+  {
+      int logical_x = LOGICAL_X_POSITION(rx);
+      int logical_y = LOGICAL_Y_POSITION(ry);
+      metric_record_custom(&metric_probe_z, ",x=%i,y=%i v=%.3f", logical_x, logical_y, (double)measured_z);
+  }
+
   feedrate_mm_s = old_feedrate_mm_s;
 
   if (isnan(measured_z)) {
     STOW_PROBE();
-    LCD_MESSAGEPGM(MSG_LCD_PROBING_FAILED);
-    SERIAL_ERROR_MSG(MSG_ERR_PROBING_FAILED);
+    #if ENABLED(HALT_ON_PROBING_ERROR)
+      kill("PROBING ERROR", "Could not reach the bed, endstop was not triggered!");
+    #endif
   }
 
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("<<< probe_at_point");

@@ -7,19 +7,41 @@
 
 #include "hwio.h"
 #include "config.h"
-#include "stm32f4xx_hal.h"
+#include <device/hal.h>
 #include "cmsis_os.h"
 #include "gpio.h"
 #include "adc.hpp"
-#include "sim_nozzle.h"
-#include "sim_bed.h"
 #include "Arduino.h"
+#include "loadcell.h"
 #include "timer_defaults.h"
 #include "hwio_pindef.h"
 #include "bsod.h"
 #include "main.h"
-#include "fanctl.h"
+#include "config_buddy_2209_02.h"
+#include "fanctl.hpp"
+#include "appmain.hpp"
+#include "Marlin.h"
 #include "MarlinPin.hpp"
+#include <option/has_puppies.h>
+#include <option/has_loadcell.h>
+#include <option/has_gui.h>
+
+#if ENABLED(PRUSA_TOOLCHANGER)
+    #include "../../lib/Marlin/Marlin/src/module/prusa/toolchanger.h"
+#endif
+#if ENABLED(MODULAR_HEATBED)
+    #include "../../lib/Marlin/Marlin/src/module/modular_heatbed.h"
+#endif
+
+#if (BOARD_IS_XBUDDY && defined LOVEBOARD_HAS_EEPROM)
+    #include "calibrated_loveboard.hpp"
+#endif
+
+#if HAS_PUPPIES()
+    #include "puppies/Dwarf.hpp"
+#endif
+
+#define HAS_BEEPER_WITHOUT_PWM (BOARD_IS_XBUDDY && BOARD_VER_EQUAL_TO(0, 3, 4))
 
 namespace {
 /**
@@ -109,10 +131,17 @@ static constexpr int _pwm_analogWrite_max = 255;
 static int _pwm_analogWrite_val[_PWM_CNT] = { 0, 0, 0, 0 };
 
 static int hwio_jogwheel_enabled = 0;
-static int hwio_fan_control_enabled = 1;
 
 static float hwio_beeper_vol = 1.0F;
+#if HAS_BEEPER_WITHOUT_PWM
+static std::atomic<uint32_t> hwio_beeper_pulses = 0;
+static uint32_t hwio_beeper_period = 0;
+#else
 static uint32_t hwio_beeper_del = 0;
+#endif
+#if (BOARD_IS_XBUDDY && defined LOVEBOARD_HAS_PT100)
+static int32_t hotend_temp_raw = 0;
+#endif
 
 /*****************************************************************************
  * private function declarations
@@ -150,7 +179,7 @@ static constexpr int is_pwm_id_valid(int i_pwm) {
 int hwio_pwm_get_cnt(void) //number of pwm outputs
 { return _PWM_CNT; }
 
-constexpr int hwio_pwm_get_max(int i_pwm) //pwm output maximum value
+static constexpr int hwio_pwm_get_max(int i_pwm) //pwm output maximum value
 {
     if (!is_pwm_id_valid(i_pwm))
         return -1;
@@ -336,17 +365,6 @@ void hwio_fan_set_pwm(int i_fan, int val) {
 }
 
 //--------------------------------------
-// fan control - used for selftest
-
-void hwio_fan_control_enable(void) {
-    hwio_fan_control_enabled = 1;
-}
-
-void hwio_fan_control_disable(void) {
-    hwio_fan_control_enabled = 0;
-}
-
-//--------------------------------------
 // Jogwheel
 
 void hwio_jogwheel_enable(void) {
@@ -372,6 +390,7 @@ void hwio_beeper_set_vol(float vol) {
     hwio_beeper_vol = vol;
 }
 
+#if HAS_GUI() && !HAS_BEEPER_WITHOUT_PWM
 void hwio_beeper_set_pwm(uint32_t per, uint32_t pul) {
     TIM_OC_InitTypeDef sConfigOC = { 0 };
     if (per) {
@@ -394,6 +413,9 @@ void hwio_beeper_set_pwm(uint32_t per, uint32_t pul) {
     } else
         HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
 }
+#else
+void hwio_beeper_set_pwm(uint32_t per, uint32_t pul) {} //Without display, there is no beeper to beep.
+#endif
 
 void hwio_beeper_tone(float frq, uint32_t del) {
     uint32_t per;
@@ -403,12 +425,19 @@ void hwio_beeper_tone(float frq, uint32_t del) {
             frq *= -1;
         if (frq > 100000)
             frq = 100000;
+#if HAS_BEEPER_WITHOUT_PWM
+        per = (uint32_t)(1'000.0F / frq);
+        pul = (uint32_t)(del / per);
+        hwio_beeper_pulses = pul;
+        hwio_beeper_period = per;
+#else
         per = (uint32_t)(84000000.0F / frq);
         pul = (uint32_t)(per * hwio_beeper_vol / 2);
         hwio_beeper_set_pwm(per, pul);
         hwio_beeper_del = del;
+#endif
     } else
-        hwio_beeper_set_pwm(0, 0);
+        hwio_beeper_notone();
 }
 
 void hwio_beeper_tone2(float frq, uint32_t del, float vol) {
@@ -417,13 +446,61 @@ void hwio_beeper_tone2(float frq, uint32_t del, float vol) {
 }
 
 void hwio_beeper_notone(void) {
+#if HAS_BEEPER_WITHOUT_PWM
+    hwio_beeper_pulses = 0;
+#else
     hwio_beeper_set_pwm(0, 0);
+#endif
 }
 
 void hwio_update_1ms(void) {
+#if !HAS_BEEPER_WITHOUT_PWM
     if ((hwio_beeper_del) && ((--hwio_beeper_del) == 0))
         hwio_beeper_set_pwm(0, 0);
+#elif HAS_GUI() && !(_DEBUG)
+    static uint32_t skips = 0;
+    if (skips < hwio_beeper_period - 1) {
+        skips++;
+        return;
+    } else {
+        skips = 0;
+    }
+
+    if (hwio_beeper_pulses > 0) {
+        if (hwio_beeper_pulses % 2) {
+            buddy::hw::Buzzer.reset();
+        } else {
+            buddy::hw::Buzzer.set();
+        }
+        hwio_beeper_pulses -= 1;
+    }
+#endif
 }
+
+#if (BOARD_IS_XBUDDY && defined LOVEBOARD_HAS_PT100)
+void hwio_set_hotend_temp_raw(int32_t _hotend_temp_raw) {
+    hotend_temp_raw = _hotend_temp_raw;
+}
+    #if (defined LOVEBOARD_HAS_EEPROM)
+int32_t hwio_get_hotend_temp_raw() {
+    return hotend_temp_raw;
+}
+
+float hwio_get_hotend_resistance() {
+    return (float)LoveBoard->apply_calibration(hotend_temp_raw) / 1000;
+}
+    #endif
+#endif
+
+#if (BOARD_IS_XBUDDY && defined LOVEBOARD_HAS_EEPROM && !defined LOVEBOARD_HAS_PT100)
+uint8_t hwio_get_loveboard_bomid() {
+    if (LoveBoard->dataValid()) {
+        return LoveBoard->calib_data.bom_id;
+    } else {
+        return 0;
+    }
+}
+#endif
 
 //--------------------------------------
 // Arduino digital/analog read/write error handler
@@ -501,6 +578,14 @@ int digitalRead(uint32_t marlinPin) {
     }
 #endif //_DEBUG
     switch (marlinPin) {
+#if HAS_LOADCELL()
+    case MARLIN_PIN(Z_MIN):
+        if (Z_MIN_ENDSTOP_INVERTING) {
+            return !loadcell.GetMinZEndstop() && static_cast<bool>(buddy::hw::zDiag.read());
+        } else {
+            return loadcell.GetMinZEndstop() || static_cast<bool>(buddy::hw::zDiag.read());
+        }
+#endif
     default:
 #if _DEBUG
         if (!buddy::hw::physicalPinExist(marlinPin)) {
@@ -510,18 +595,6 @@ int digitalRead(uint32_t marlinPin) {
 #endif //_DEBUG
         return gpio_get(marlinPin);
     }
-}
-
-uint8_t hwio_fan_control_hotend_fan_speed_percent = 0;
-uint32_t hwio_fan_control_hotend_fan_state = 0;
-void hwio_fan_control_set_hotend_fan_speed_percent(uint8_t percent) {
-    hwio_fan_control_hotend_fan_speed_percent = percent;
-    if (hwio_fan_control_enabled) {
-        digitalWrite(MARLIN_PIN(FAN1), hwio_fan_control_hotend_fan_state);
-    }
-}
-uint8_t _hotend_fan_pwm() {
-    return ((uint32_t)hwio_fan_control_hotend_fan_speed_percent) * 50 / 100;
 }
 
 /**
@@ -542,35 +615,36 @@ void digitalWrite(uint32_t marlinPin, uint32_t ulVal) {
 #endif //_DEBUG
     switch (marlinPin) {
     case MARLIN_PIN(BED_HEAT):
-#ifdef SIM_HEATER_BED_ADC
-        sim_bed_set_power(ulVal ? 100 : 0);
-#else //SIM_HEATER_BED_ADC
         _hwio_pwm_analogWrite_set_val(HWIO_PWM_HEATER_BED, ulVal ? _pwm_analogWrite_max : 0);
-#endif
         return;
     case MARLIN_PIN(HEAT0):
-#ifdef SIM_HEATER_NOZZLE_ADC
-        sim_nozzle_set_power(ulVal ? 40 : 0);
-#else //SIM_HEATER_NOZZLE_ADC
         _hwio_pwm_analogWrite_set_val(HWIO_PWM_HEATER_0, ulVal ? _pwm_analogWrite_max : 0);
-#endif
         return;
     case MARLIN_PIN(FAN1):
-#ifdef NEW_FANCTL
-        if (hwio_fan_control_enabled)
-            fanctl_set_pwm(1, ulVal ? (100 * 50 / 255) : 0);
-#else  //NEW_FANCTL
+#if (PRINTER_TYPE == PRINTER_PRUSA_MK404 || PRINTER_TYPE == PRINTER_PRUSA_IXL)
+        _hwio_pwm_analogWrite_set_val(HWIO_PWM_FAN1, ulVal ? 80 : 0);
+#elif (PRINTER_TYPE == PRINTER_PRUSA_MINI)
+    #ifdef NEW_FANCTL
+        fanCtlHeatBreak[0].setPWM(ulVal);
+    #else  //NEW_FANCTL
         _hwio_pwm_analogWrite_set_val(HWIO_PWM_FAN1, ulVal ? 100 : 0);
-#endif //NEW_FANCTL
+    #endif //NEW_FANCTL
+#else
+    #ifdef NEW_FANCTL
+        fanCtlHeatBreak[0].setPWM(ulVal ? 255 : 0);
+    #else
+        _hwio_pwm_analogWrite_set_val(HWIO_PWM_FAN1, ulVal ? 80 : 0);
+    #endif
+#endif
         return;
     case MARLIN_PIN(FAN):
 #ifdef NEW_FANCTL
-        if (hwio_fan_control_enabled)
-            fanctl_set_pwm(0, ulVal ? 50 : 0);
+        fanCtlPrint[0].setPWM(ulVal ? 255 : 0);
 #else  //NEW_FANCTL
         _hwio_pwm_analogWrite_set_val(HWIO_PWM_FAN, ulVal ? _pwm_analogWrite_max : 0);
 #endif //NEW_FANCTL
         return;
+
     default:
 #if _DEBUG
         if (!buddy::hw::isOutputPin(marlinPin)) {
@@ -585,14 +659,24 @@ void digitalWrite(uint32_t marlinPin, uint32_t ulVal) {
 uint32_t analogRead(uint32_t ulPin) {
     if (HAL_ADC_Initialized) {
         switch (ulPin) {
+
         case MARLIN_PIN(TEMP_BED):
             return AdcGet::bed();
+
         case MARLIN_PIN(TEMP_0):
+#if (BOARD_IS_BUDDY || (BOARD_IS_XBUDDY && defined LOVEBOARD_HAS_NTC))
             return AdcGet::nozzle();
+#endif
         case MARLIN_PIN(TEMP_HEATBREAK):
-            return AdcGet::boardTemp();
-        case MARLIN_PIN(THERM2):
+#if (BOARD_IS_BUDDY)
             return AdcGet::pinda();
+#elif (BOARD_IS_XBUDDY)
+            return AdcGet::heatbreakTemp();
+#endif
+
+        case MARLIN_PIN(THERM2):
+            return AdcGet::boardTemp();
+
         default:
             hwio_arduino_error(HWIO_ERR_UNDEF_ANA_RD, ulPin); //error: undefined pin analog read
         }
@@ -605,14 +689,15 @@ void analogWrite(uint32_t ulPin, uint32_t ulValue) {
     if (HAL_PWM_Initialized) {
         switch (ulPin) {
         case MARLIN_PIN(FAN1):
-            //hwio_fan_set_pwm(_FAN1, ulValue);
+#ifdef NEW_FANCTL
+            fanCtlHeatBreak[0].setPWM(ulValue);
+#else
             _hwio_pwm_analogWrite_set_val(HWIO_PWM_FAN1, ulValue);
+#endif
             return;
         case MARLIN_PIN(FAN):
-            //hwio_fan_set_pwm(_FAN, ulValue);
 #ifdef NEW_FANCTL
-            if (hwio_fan_control_enabled)
-                fanctl_set_pwm(0, ulValue * 50 / 255);
+            fanCtlPrint[0].setPWM(ulValue);
 #else  //NEW_FANCTL
             _hwio_pwm_analogWrite_set_val(HWIO_PWM_FAN, ulValue);
 #endif //NEW_FANCTL

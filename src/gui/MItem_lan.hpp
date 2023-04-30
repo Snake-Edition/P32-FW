@@ -17,7 +17,7 @@ public:
 };
 
 class MI_WIFI_INIT_t : public WI_LABEL_t {
-    constexpr static const char *const label = N_("Setup Wi-Fi module");
+    constexpr static const char *const label = N_("Setup Wi-Fi Module");
 
 public:
     MI_WIFI_INIT_t();
@@ -27,7 +27,7 @@ protected:
 };
 
 class MI_WIFI_CREDENTIALS_t : public WI_LABEL_t {
-    constexpr static const char *const label = N_("Load credentials");
+    constexpr static const char *const label = N_("Load Credentials");
 
 public:
     MI_WIFI_CREDENTIALS_t();
@@ -37,7 +37,7 @@ protected:
 };
 
 class MI_WIFI_CREDENTIALS_INI_FILE_t : public WI_LABEL_t {
-    constexpr static const char *const label = N_("Create credentials");
+    constexpr static const char *const label = N_("Create Credentials");
 
 public:
     MI_WIFI_CREDENTIALS_INI_FILE_t();
@@ -46,10 +46,9 @@ protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
 
-class MI_NET_INTERFACE_t : public WI_SWITCH_t<3> {
-    constexpr static const char *const label = "Interface"; //do not translate
+class MI_NET_INTERFACE_t : public WI_SWITCH_t<2> {
+    constexpr static const char *const label = N_("Default");
 
-    constexpr static const char *str_off = "Off";    //do not translate
     constexpr static const char *str_eth = "Eth";    //do not translate
     constexpr static const char *str_wifi = "Wi-Fi"; //do not translate
 

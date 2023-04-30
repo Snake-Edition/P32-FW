@@ -1,17 +1,16 @@
 /**
  * @file footer_item_live_z.cpp
- * @author Radek Vana
- * @date 2021-04-17
  */
 
 #include "footer_item_live_z.hpp"
-#include "marlin_client.h"
-#include "resource.h"
+#include "marlin_client.hpp"
+#include "png_resources.hpp"
+#include "i18n.h"
 #include <algorithm>
 #include <cmath>
 
 FooterItemLiveZ::FooterItemLiveZ(window_t *parent)
-    : AddSuperWindow<FooterIconText_IntVal>(parent, IDR_PNG_z_axis_16px, static_makeView, static_readValue) {
+    : AddSuperWindow<FooterIconText_IntVal>(parent, &png::z_axis_16x16, static_makeView, static_readValue) {
 }
 
 int FooterItemLiveZ::static_readValue() {
@@ -35,3 +34,5 @@ string_view_utf8 FooterItemLiveZ::static_makeView(int value) {
 
     return string_view_utf8::MakeRAM((const uint8_t *)buff.data());
 }
+
+string_view_utf8 FooterItemLiveZ::GetName() { return _("Live Z"); }

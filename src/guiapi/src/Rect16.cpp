@@ -34,6 +34,22 @@ Rect16::Rect16(Rect16 const &rect, ShiftDir_t direction)
     : Rect16(rect, direction, rect.CalculateShift(direction)) {
 }
 
+Rect16::Rect16(Rect16 const &rect, ShiftDir_t direction, size_ui16_t size)
+    : Rect16(rect, direction, rect.CalculateShift(direction)) {
+    width_ = size.w;
+    height_ = size.h;
+}
+
+Rect16::Rect16(Rect16 const &rect, Width_t width)
+    : Rect16(rect, ShiftDir_t::Right, rect.CalculateShift(ShiftDir_t::Right)) {
+    width_ = width;
+}
+
+Rect16::Rect16(Rect16 const &rect, Height_t height)
+    : Rect16(rect, ShiftDir_t::Bottom, rect.CalculateShift(ShiftDir_t::Bottom)) {
+    height_ = height;
+}
+
 Rect16::Rect16(Rect16 const &rect, ShiftDir_t direction, uint16_t distance)
     : top_left_(
         [=] {
@@ -72,6 +88,22 @@ Rect16::Rect16(Rect16 const &rect, ShiftDir_t direction, uint16_t distance)
         }())
     , width_(rect.Width())
     , height_(rect.Height()) {
+}
+
+Rect16::Rect16(Rect16 const &rect, ShiftDir_t direction, size_ui16_t size, uint16_t distance)
+    : Rect16(rect, direction, distance) {
+    width_ = size.w;
+    height_ = size.h;
+}
+
+Rect16::Rect16(Rect16 const &rect, Width_t width, uint16_t distance)
+    : Rect16(rect, ShiftDir_t::Right, distance + rect.Width()) {
+    width_ = width;
+}
+
+Rect16::Rect16(Rect16 const &rect, Height_t height, uint16_t distance)
+    : Rect16(rect, ShiftDir_t::Bottom, distance + rect.Height()) {
+    height_ = height;
 }
 
 Rect16::Rect16(point_i16_t top_left, size_ui16_t s)
@@ -154,7 +186,7 @@ void Rect16::Align(Rect16 rc, Align_t align) {
     }
 }
 
-void Rect16::HorizontalSplit(Rect16 splits[], Rect16 spaces[], const size_t count, const uint16_t spacing, uint8_t text_width[]) const {
+void Rect16::HorizontalSplit(Rect16 splits[], Rect16 spaces[], const size_t count, const uint16_t spacing, const uint8_t text_width[]) const {
     if (count == 0)
         return;
     if (count == 1) {
@@ -188,14 +220,14 @@ void Rect16::HorizontalSplit(Rect16 splits[], Rect16 spaces[], const size_t coun
             final_width += spacing;
         }
     }
-    /// add not used pixels due to rounding to the middle split width
+    /// add not used pixels due to rounding to the last split width
     if (final_width < Width()) {
-        splits[count / 2].width_ += Width() - final_width;
+        splits[count - 1].width_ += Width() - final_width;
     }
 }
 
 /// TODO: this is not used, should share the code with HorizontalSplit
-void Rect16::VerticalSplit(Rect16 splits[], Rect16 spaces[], const size_t count, const uint16_t spacing, uint8_t ratio[]) const {
+void Rect16::VerticalSplit(Rect16 splits[], Rect16 spaces[], const size_t count, const uint16_t spacing, const uint8_t ratio[]) const {
     if (count == 0)
         return;
     if (count == 1) {

@@ -47,11 +47,10 @@ def get_dependency(name):
     """Return an installation path of a dependency."""
     install_dir = Path(
         bootstrap('--print-dependency-directory', name).stdout.strip())
-    suffix = '.exe' if platform.system() == 'Windows' else ''
     if name == 'ninja':
-        return install_dir / ('ninja' + suffix)
+        return install_dir / ('ninja')
     elif name == 'cmake':
-        return install_dir / 'bin' / ('cmake' + suffix)
+        return install_dir / 'bin' / ('cmake')
     else:
         return install_dir
 
@@ -97,6 +96,7 @@ class HostTool(CaseInsensitiveEnum):
     bin2cc = "bin2cc"
     hex2dfu = "hex2dfu"
     makefsdata = "makefsdata"
+    unittests = "unittests"
 
 
 class BuildConfiguration(ABC):
@@ -487,9 +487,21 @@ class CMakePresetsGenerator:
             return value
 
     @staticmethod
+    def build_dir_for_configuration(configuration: BuildConfiguration) -> str:
+        if isinstance(configuration, FirmwareBuildConfiguration):
+            if 'dwarf' in configuration.preset.name:
+                return 'build-vscode-dwarf'
+            elif 'modularbed' in configuration.preset.name:
+                return 'build-vscode-modularbed'
+            else:
+                return 'build-vscode-buddy'
+        else:
+            return 'build-vscode-host'
+
+    @staticmethod
     def generate_cmake_preset(configuration: BuildConfiguration):
-        build_dir = 'build-vscode' if isinstance(
-            configuration, FirmwareBuildConfiguration) else 'build-vscode-host'
+        build_dir = CMakePresetsGenerator.build_dir_for_configuration(
+            configuration)
         return {
             'name': configuration.name,
             'generator': configuration.generator,

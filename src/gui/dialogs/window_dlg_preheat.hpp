@@ -14,20 +14,21 @@
 #include "MItem_tools.hpp"
 
 namespace NsPreheat {
-class I_MI_Filament : public WI_LABEL_t {
+
+inline constexpr size_t info_len = sizeof("999/999 "); // extra space at the end is intended
+class I_MI_Filament : public WiInfo<info_len> {
 public:
-    I_MI_Filament(string_view_utf8 long_name)
-        : WI_LABEL_t(long_name, 0, is_enabled_t::yes, is_hidden_t::no) {}
+    I_MI_Filament(string_view_utf8 name, unsigned t_noz, unsigned t_bed);
 
 protected:
-    void click_at(filament_t filament_index);
+    void click_at(filament::Type filament_index);
 };
 
-template <filament_t T>
+template <filament::Type T>
 class MI_Filament : public I_MI_Filament {
 public:
     MI_Filament()
-        : I_MI_Filament(_(Filaments::Get(T).long_name)) {}
+        : I_MI_Filament(_(filament::get_description(T).name), filament::get_description(T).nozzle, filament::get_description(T).heatbed) {}
 
 protected:
     virtual void click(IWindowMenu & /*window_menu*/) override {
@@ -45,25 +46,46 @@ protected:
     virtual void click(IWindowMenu &window_menu);
 };
 
-#define ALL_FILAMENTS MI_Filament<filament_t::PLA>,  \
-                      MI_Filament<filament_t::PETG>, \
-                      MI_Filament<filament_t::ASA>,  \
-                      MI_Filament<filament_t::PC>,   \
-                      MI_Filament<filament_t::PVB>,  \
-                      MI_Filament<filament_t::ABS>,  \
-                      MI_Filament<filament_t::HIPS>, \
-                      MI_Filament<filament_t::PP>,   \
-                      MI_Filament<filament_t::FLEX>
+class MI_COOLDOWN : public WI_LABEL_t {
+public:
+    MI_COOLDOWN();
+
+protected:
+    virtual void click(IWindowMenu &window_menu);
+};
+
+#if (PRINTER_TYPE == PRINTER_PRUSA_IXL)
+    #define ALL_FILAMENTS MI_Filament<filament::Type::PLA>,     \
+                          MI_Filament<filament::Type::PETG>,    \
+                          MI_Filament<filament::Type::PETG_NH>, \
+                          MI_Filament<filament::Type::ASA>,     \
+                          MI_Filament<filament::Type::PC>,      \
+                          MI_Filament<filament::Type::PVB>,     \
+                          MI_Filament<filament::Type::ABS>,     \
+                          MI_Filament<filament::Type::HIPS>,    \
+                          MI_Filament<filament::Type::PP>,      \
+                          MI_Filament<filament::Type::FLEX>
+#else
+    #define ALL_FILAMENTS MI_Filament<filament::Type::PLA>,  \
+                          MI_Filament<filament::Type::PETG>, \
+                          MI_Filament<filament::Type::ASA>,  \
+                          MI_Filament<filament::Type::PC>,   \
+                          MI_Filament<filament::Type::PVB>,  \
+                          MI_Filament<filament::Type::ABS>,  \
+                          MI_Filament<filament::Type::HIPS>, \
+                          MI_Filament<filament::Type::PP>,   \
+                          MI_Filament<filament::Type::FLEX>
+#endif
 
 //TODO try to use HIDDEN on return and filament_t::NONE
 //has both return and cooldown
-using MenuContainerHasRetCool = WinMenuContainer<MI_RETURN, ALL_FILAMENTS, MI_Filament<filament_t::NONE>>;
+using MenuContainerHasRetCool = WinMenuContainer<MI_RETURN, ALL_FILAMENTS, MI_COOLDOWN>;
 
 //has return
 using MenuContainerHasRet = WinMenuContainer<MI_RETURN, ALL_FILAMENTS>;
 
 //has cooldown
-using MenuContainerHasCool = WinMenuContainer<ALL_FILAMENTS, MI_Filament<filament_t::NONE>>;
+using MenuContainerHasCool = WinMenuContainer<ALL_FILAMENTS, MI_COOLDOWN>;
 
 // no extra fields
 using MenuContainer = WinMenuContainer<ALL_FILAMENTS>;

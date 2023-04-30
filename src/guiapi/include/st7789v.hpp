@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "guitypes.h"
+#include "Rect16.h"
+#include "guiconfig.h"
 #include "display_math_helper.h"
 
 //public flags (config)
@@ -36,6 +38,8 @@ typedef struct _st7789v_config_t {
     uint8_t control;
 } st7789v_config_t;
 
+static constexpr uint8_t ST7789V_MAX_COMMAND_READ_LENGHT = 4;
+
 inline uint16_t color_to_565(uint32_t clr) {
     return swap_ui16(((clr >> 19) & 0x001f) | ((clr >> 5) & 0x07e0) | ((clr << 8) & 0xf800));
 }
@@ -48,9 +52,11 @@ inline uint32_t color_from_565(uint16_t clr565) {
 extern void st7789v_init(void);
 extern void st7789v_done(void);
 extern void st7789v_clear(uint16_t clr565);
+extern void st7789v_wr(uint8_t *pdata, uint16_t size);
 extern void st7789v_fill_rect_colorFormat565(uint16_t rect_x, uint16_t rect_y, uint16_t rect_w, uint16_t rect_h, uint16_t clr565);
 
-extern void st7789v_draw_png_ex(uint16_t point_x, uint16_t point_y, FILE *pf, uint32_t clr_back, uint8_t rop);
+extern void st7789v_draw_png_ex(FILE *pf, uint16_t point_x, uint16_t point_y, uint32_t back_color, uint8_t rop, Rect16 subrect);
+inline void st7789v_set_backlight(uint8_t bck) {}
 
 extern void st7789v_inversion_on(void);
 extern void st7789v_inversion_off(void);
@@ -79,3 +85,5 @@ extern uint16_t st7789v_reset_delay;
 extern void st7789v_enable_safe_mode(void);
 
 extern void st7789v_spi_tx_complete(void);
+extern void st7789v_cmd_madctlrd(uint8_t *pdata);
+extern void st7789v_reset(void);

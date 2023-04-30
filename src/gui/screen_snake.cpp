@@ -14,7 +14,7 @@ static const constexpr color_t color_dead = COLOR_RED;
 static const constexpr int block_size = 5;
 static const constexpr point_ui8_t blocks = { GuiDefaults::RectScreen.Width() / block_size, GuiDefaults::RectScreen.Height() / block_size };
 
-screen_snake_data_t::screen_snake_data_t()
+ScreenSnakeGame::screen_snake_data_t()
     : AddSuperWindow<screen_t>() {
     flags.timeout_close = is_closed_on_timeout_t::no;
     snake[0].x = blocks.x / 2;
@@ -25,15 +25,15 @@ screen_snake_data_t::screen_snake_data_t()
     snake = (point_ui8_t *)scratch_buffer_ownership.get().buffer;
 }
 
-void screen_snake_data_t::draw_block(const point_ui8_t point, const color_t color) {
+void ScreenSnakeGame::draw_block(const point_ui8_t point, const color_t color) {
     display::FillRect(Rect16(point.x * block_size, point.y * block_size, block_size, block_size), color);
 }
 
-void screen_snake_data_t::draw_food() {
+void ScreenSnakeGame::draw_food() {
     draw_block(food, color_food);
 }
 
-void screen_snake_data_t::generate_food() {
+void ScreenSnakeGame::generate_food() {
     bool ok;
     do {
         const uint32_t time = HAL_GetTick();
@@ -49,7 +49,7 @@ void screen_snake_data_t::generate_food() {
     } while (!ok);
 }
 
-void screen_snake_data_t::check_food() {
+void ScreenSnakeGame::check_food() {
     if (snake[buffer_pos].x == food.x && snake[buffer_pos].y == food.y) {
         if (snake_length < snake_max_length) {
             // snake[snake_length] = { 255, 255 };
@@ -59,7 +59,7 @@ void screen_snake_data_t::check_food() {
     }
 }
 
-bool screen_snake_data_t::collision() {
+bool ScreenSnakeGame::collision() {
     for (int i = 0; i < snake_length; ++i) {
         if (snake[i].x == snake[buffer_pos].x && snake[i].y == snake[buffer_pos].y && i != buffer_pos)
             return true;
@@ -67,7 +67,7 @@ bool screen_snake_data_t::collision() {
     return false;
 }
 
-void screen_snake_data_t::move_snake() {
+void ScreenSnakeGame::move_snake() {
     const int tip_idx = buffer_pos;
     buffer_pos = (buffer_pos + 1) % snake_length;
     draw_block(snake[buffer_pos], color_bg);
@@ -83,7 +83,7 @@ void screen_snake_data_t::move_snake() {
     check_food();
 }
 
-void screen_snake_data_t::windowEvent(EventLock /*has private ctor*/, window_t *sender, GUI_event_t event, void *param) {
+void ScreenSnakeGame::windowEvent(EventLock /*has private ctor*/, window_t *sender, GUI_event_t event, void *param) {
     if (event == GUI_event_t::CLICK) {
         Screens::Access()->Close();
     }

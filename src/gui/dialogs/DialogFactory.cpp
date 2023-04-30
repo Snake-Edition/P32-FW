@@ -5,6 +5,7 @@
 #include "window_dlg_preheat.hpp"
 DialogFactory::mem_space DialogFactory::all_dialogs;
 
+#if defined(USE_ST7789)
 constexpr static const char change[] = N_("CHANGE FILAMENT");
 constexpr static const char load[] = N_("LOAD FILAMENT");
 constexpr static const char unload[] = N_("UNLOAD FILAMENT");
@@ -13,6 +14,16 @@ constexpr static const char load_preheat[] = N_("PREHEAT for LOAD");
 constexpr static const char unload_preheat[] = N_("PREHEAT for UNLOAD");
 constexpr static const char purge_preheat[] = N_("PREHEAT for PURGE");
 constexpr static const char index_error[] = "INDEX ERROR"; // intentionally not to be translated
+#elif defined(USE_ILI9488)
+constexpr static const char change[] = N_("Changing filament");
+constexpr static const char load[] = N_("Loading filament");
+constexpr static const char unload[] = N_("Unloading filament");
+constexpr static const char purge[] = N_("Purging filament");
+constexpr static const char load_preheat[] = N_("Preheating for load");
+constexpr static const char unload_preheat[] = N_("Preheating for unload");
+constexpr static const char purge_preheat[] = N_("Preheating for purge");
+constexpr static const char index_error[] = "Index error"; // intentionally not to be translated
+#endif // USE_<DISPLAY>
 
 //screens .. not used, return nullptr (to pass check in GetAll)
 static_unique_ptr<IDialogMarlin> DialogFactory::screen_not_dialog(uint8_t /*data*/) {
@@ -41,12 +52,6 @@ static_unique_ptr<IDialogMarlin> DialogFactory::load_unload(uint8_t data) {
         name = string_view_utf8::MakeCPUFLASH((const uint8_t *)index_error); //not translated
     }
     return makePtr<DialogLoadUnload>(name);
-}
-
-static_unique_ptr<IDialogMarlin> DialogFactory::G162(uint8_t data) {
-    static const char *nm = N_("HOME TO MAX");
-    string_view_utf8 name = _(nm);
-    return makePtr<DialogG162>(name);
 }
 
 static_unique_ptr<IDialogMarlin> DialogFactory::Preheat(uint8_t data) {
@@ -84,14 +89,11 @@ DialogFactory::Ctors DialogFactory::GetAll() {
     std::array<fnc, size_t(ClientFSM::_count)> ret = { nullptr };
     ret[size_t(ClientFSM::Serial_printing)] = screen_not_dialog;
     ret[size_t(ClientFSM::Printing)] = screen_not_dialog;
-    ret[size_t(ClientFSM::FirstLayer)] = screen_not_dialog;
+    ret[size_t(ClientFSM::CrashRecovery)] = screen_not_dialog;
+    ret[size_t(ClientFSM::PrintPreview)] = screen_not_dialog;
     ret[size_t(ClientFSM::Load_unload)] = load_unload;
-    ret[size_t(ClientFSM::Selftest)] = screen_not_dialog;
-    ret[size_t(ClientFSM::G162)] = G162;
     ret[size_t(ClientFSM::Preheat)] = Preheat;
-    ret[size_t(ClientFSM::SelftestAxis)] = [](uint8_t) { return static_unique_ptr<IDialogMarlin>(makePtr<DialogSelftestAxis>()); };
-    ret[size_t(ClientFSM::SelftestFans)] = [](uint8_t) { return static_unique_ptr<IDialogMarlin>(makePtr<DialogSelftestFans>()); };
-    ret[size_t(ClientFSM::SelftestHeat)] = [](uint8_t) { return static_unique_ptr<IDialogMarlin>(makePtr<DialogSelftestTemp>()); };
+    ret[size_t(ClientFSM::Selftest)] = screen_not_dialog;
 
     if (std::find(std::begin(ret), std::end(ret), nullptr) != std::end(ret))
         bsod("Error missing dialog Ctor"); // GUI init will throw this

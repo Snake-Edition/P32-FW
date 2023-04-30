@@ -1,9 +1,7 @@
 /**
  * @file mock_display.hpp
- * @author Radek Vana
  * @brief class for display emulation
  *  all methods are static, because I need to pass them by function pointers
- * @date 2021-01-11
  */
 
 //mock_display.hpp
@@ -25,7 +23,7 @@ public:
     virtual uint8_t *GetBlock(uint16_t start_x, uint16_t start_y, uint16_t end_x, uint16_t end_y) const = 0;
     virtual void FillRectNativeColor(uint16_t rect_x, uint16_t rect_y, uint16_t rect_w, uint16_t rect_h, uint32_t nativeclr) = 0;
     virtual uint8_t *getBuff() = 0;
-    virtual void drawCharFromBuff(point_ui16_t pt, uint16_t w, uint16_t h) = 0;
+    virtual void drawFromBuff(point_ui16_t pt, uint16_t w, uint16_t h) = 0;
     virtual ~IMockDisplay() = default;
 };
 
@@ -57,7 +55,7 @@ public:
     }
 
     virtual uint8_t *getBuff() override { return (uint8_t *)buffer; }
-    virtual void drawCharFromBuff(point_ui16_t pt, uint16_t w, uint16_t h) override {
+    virtual void drawFromBuff(point_ui16_t pt, uint16_t w, uint16_t h) override {
         size_t buff_pos = 0;
         for (uint16_t Y = pt.y; Y < (h + pt.y); ++Y) {
             for (uint16_t X = pt.x; X < (w + pt.x); ++X) {
@@ -79,6 +77,14 @@ public:
     static uint16_t BuffRows();
     static void init();
     static void done() {}
+    static void set_backlight(uint8_t bck) {}
+
+    static void ReadMadctl(uint8_t *pdata) {
+        pdata[0] = 0x00;
+        pdata[1] = 0xE0;
+    }
+
+    static void Reset() {}
 
     static IMockDisplay &Instance();
     static void Bind(IMockDisplay &disp);

@@ -1,5 +1,7 @@
 // media.cpp
 
+#include <algorithm>
+
 #include "media.h"
 #include "log.h"
 #include "lfn.h"
@@ -13,7 +15,12 @@
 #include "gcode_filter.hpp"
 #include "stdio.h"
 #include <fcntl.h>
+#include "timing.h"
+#include "metric.h"
 #include <errno.h>
+
+LOG_COMPONENT_REF(USBHost);
+LOG_COMPONENT_REF(MarlinServer);
 
 #ifdef REENUMERATE_USB
 
@@ -48,35 +55,34 @@ static void _usbhost_reenum(void) {};
 
 extern "C" {
 
-/// File name (Long-File-Name) of the file being printed
-static char media_print_LFN[FILE_NAME_BUFFER_LEN] = { 0 };
+static volatile media_state_t media_state = media_state_REMOVED;
+static volatile media_error_t media_error = media_error_OK;
 
-/// Absolute path to the file being printed.
-/// MUST be in Short-File-Name (DOS 8.3) notation, since
-/// the transfer buffer is ~120B long (LFN paths would run out of space easily)
-static char media_print_SFN_path[FILE_PATH_BUFFER_LEN] = { 0 };
-
-char *media_print_filename() {
-    return media_print_LFN;
-}
-
-char *media_print_filepath() {
-    return media_print_SFN_path;
-}
-
-static media_state_t media_state = media_state_REMOVED;
-static media_error_t media_error = media_error_OK;
 static media_print_state_t media_print_state = media_print_state_NONE;
-static FILE *media_print_file;
+static FILE *media_print_file = nullptr;
 static uint32_t media_print_size = 0;
 static uint32_t media_current_position = 0; // Current position in the file
 static uint32_t media_gcode_position = 0;   // Beginning of the current G-Code
 static uint32_t media_queue_position[BUFSIZE];
 
+// Position where to start after pause / quick stop
+static uint32_t media_reset_position = MEDIA_PRINT_UNDEF_POSITION;
+
 char getByte(GCodeFilter::State *state);
 static char gcode_buffer[MAX_CMD_SIZE + 1]; // + 1 for NULL char
 static GCodeFilter gcode_filter(&getByte, gcode_buffer, sizeof(gcode_buffer));
 static uint32_t media_loop_read = 0;
+static bool skip_gcode = false;
+
+static uint32_t usbh_error_count = 0;
+uint32_t usb_host_reset_timestamp = 0; // USB Host timestamp in seconds
+
+typedef enum {
+    USB_host_recovery_start = 0,
+    USB_host_recovery_end = 1,
+} USB_host_recovery_state_t;
+
+static metric_t usbh_error_cnt = METRIC("usbh_err_cnt", METRIC_VALUE_INTEGER, 1000, METRIC_HANDLER_ENABLE_ALL);
 
 media_state_t media_get_state(void) {
     return media_state;
@@ -203,16 +209,26 @@ static void media_prefetch(const void *) {
         }
     }
 }
-osThreadDef(media_prefetch, media_prefetch, osPriorityHigh, 0, 256);
+osThreadDef(media_prefetch, media_prefetch, osPriorityHigh, 0, 380);
 
-void media_print_start(const char *sfnFilePath) {
+void media_print_start__prepare(const char *sfnFilePath) {
+    if (sfnFilePath) {
+        auto lock = MarlinVarsLockGuard();
+        // update media_SFN_path
+        strlcpy(marlin_vars()->media_SFN_path.get_modifiable_ptr(lock), sfnFilePath, marlin_vars()->media_SFN_path.max_length());
+
+        // set media_LFN
+        get_LFN(marlin_vars()->media_LFN.get_modifiable_ptr(lock), marlin_vars()->media_LFN.max_length(), marlin_vars()->media_SFN_path.get_modifiable_ptr(lock));
+    }
+}
+
+void media_print_start(const bool prefetch_start) {
     if (media_print_state != media_print_state_NONE) {
         return;
     }
 
-    media_preselect_file(sfnFilePath);
     struct stat info = { 0 };
-    int result = stat(sfnFilePath, &info);
+    int result = stat(marlin_vars()->media_SFN_path.get_ptr(), &info);
 
     if (result != 0) {
         return;
@@ -226,7 +242,11 @@ void media_print_start(const char *sfnFilePath) {
         // sanity check
     }
 
-    if ((media_print_file = fopen(sfnFilePath, "rb")) != nullptr) {
+    if (!prefetch_start) {
+        return;
+    }
+
+    if ((media_print_file = fopen(marlin_vars()->media_SFN_path.get_ptr(), "rb")) != nullptr) {
         media_gcode_position = media_current_position = 0;
         media_print_state = media_print_state_PRINTING;
         osSignalSet(prefetch_thread_id, PREFETCH_SIGNAL_START);
@@ -235,50 +255,70 @@ void media_print_start(const char *sfnFilePath) {
     }
 }
 
-void media_preselect_file(const char *sfnFilePath) {
-    if (media_print_state != media_print_state_NONE) {
-        return;
-    }
-
-    if (sfnFilePath) { // null sfnFilePath means use current filename media_print_SFN_path
-        strlcpy(media_print_SFN_path, sfnFilePath, sizeof(media_print_SFN_path));
-        get_LFN(media_print_LFN, sizeof(media_print_LFN), media_print_SFN_path);
-    }
-}
-
 inline void close_file() {
     osSignalSet(prefetch_thread_id, PREFETCH_SIGNAL_STOP);
     fclose(media_print_file);
     media_print_file = nullptr;
-    gcode_filter.reset();
 }
 
 void media_print_stop(void) {
     if ((media_print_state == media_print_state_PRINTING) || (media_print_state == media_print_state_PAUSED)) {
         close_file();
         media_print_state = media_print_state_NONE;
+        queue.sdpos = MEDIA_PRINT_UNDEF_POSITION;
     }
 }
 
-void media_print_pause(void) {
-    if (media_print_state == media_print_state_PRINTING) {
-        media_print_state = media_print_state_PAUSING;
-    }
+void media_print_quick_stop(uint32_t pos) {
+    skip_gcode = false;
+    media_print_state = media_print_state_PAUSED;
+    media_reset_position = pos;
+    queue.clear();
+}
+
+void media_print_pause(bool repeat_last = false) {
+    if (media_print_state != media_print_state_PRINTING)
+        return;
+
+    media_print_quick_stop(queue.get_current_sdpos());
+    close_file();
+
+    // when pausing the current instruction is fully processed, skip it on resume
+    skip_gcode = !repeat_last;
 }
 
 void media_print_resume(void) {
-    if (media_print_state == media_print_state_PAUSED) {
-        if ((media_print_file = fopen(media_print_SFN_path, "rb")) != nullptr) {
+    if ((media_print_state != media_print_state_PAUSED) && (media_print_state != media_print_state_DRAINING))
+        return;
+
+    if (media_reset_position != MEDIA_PRINT_UNDEF_POSITION) {
+        media_print_set_position(media_reset_position);
+        media_reset_position = MEDIA_PRINT_UNDEF_POSITION;
+    }
+
+    if (media_print_state == media_print_state_PAUSED || media_print_state == media_print_state_DRAINING) {
+        if (!media_print_file) {
+            // file was closed by media_print_pause, reopen
+            media_print_file = fopen(marlin_vars()->media_SFN_path.get_ptr(), "rb");
+        }
+        if (media_print_file != nullptr) {
+            // file was left open between pause/resume or re-opened successfully
             if (fseek(media_print_file, media_current_position, SEEK_SET) == 0) {
+                gcode_filter.reset();
                 media_print_state = media_print_state_PRINTING;
                 osSignalSet(prefetch_thread_id, PREFETCH_SIGNAL_START);
             } else {
                 set_warning(WarningType::USBFlashDiskError);
-                fclose(media_print_file);
-                media_print_file = nullptr;
+                close_file();
             }
         }
     }
+}
+
+void media_print_drain() {
+    media_reset_position = queue.get_current_sdpos();
+    media_print_state = media_print_state_DRAINING;
+    close_file();
 }
 
 media_print_state_t media_print_get_state(void) {
@@ -299,10 +339,15 @@ void media_print_set_position(uint32_t pos) {
     }
 }
 
+uint32_t media_print_get_pause_position(void) {
+    return media_reset_position;
+}
+
 float media_print_get_percent_done(void) {
-    if (media_print_size)
-        return 100 * ((float)media_current_position / media_print_size);
-    return 0;
+    if (media_print_size == 0)
+        return 100;
+
+    return 100 * ((float)media_current_position / media_print_size);
 }
 
 char getByte(GCodeFilter::State *state) {
@@ -333,7 +378,7 @@ char getByte(GCodeFilter::State *state) {
 }
 
 void media_loop(void) {
-    if (media_print_state == media_print_state_PAUSING) {
+    if (media_print_state == media_print_state_DRAINING) {
         close_file();
         int index_r = queue.index_r;
         media_gcode_position = media_current_position = media_queue_position[index_r];
@@ -346,72 +391,93 @@ void media_loop(void) {
     _usbhost_reenum();
 
     if (media_print_state != media_print_state_PRINTING) {
+        if (media_print_file) {
+            // complete closing the file in the main loop (for media_print_quick_stop)
+            close_file();
+
+            // TODO: The this(media_loop) is run by marlin server thread while the media_prefetch
+            // thread can be already reading the the file as this closes it.
+        }
         return;
     }
 
     media_loop_read = 0;
-
     while (queue.length < (BUFSIZE - 1)) { // Keep one free slot for serial commands
         GCodeFilter::State state;
         char *gcode = gcode_filter.nextGcode(&state);
 
-        if (state == GCodeFilter::State::Timeout) {
+        switch (state) {
+        case GCodeFilter::State::Timeout:
             // Unlock the loop
             return;
-        }
-        if (state == GCodeFilter::State::Error) {
+        case GCodeFilter::State::Error:
             // Pause in case of some issue
-            set_warning(WarningType::USBFlashDiskError);
-            media_print_pause();
-            return;
-        }
-
-        if (gcode == NULL || gcode[0] == '\0') {
-            if (state == GCodeFilter::State::Eof) {
-                // Stop print on EOF
-                media_print_stop();
-                return;
+            usbh_error_count++;
+            if (media_state == media_state_INSERTED) {
+                metric_record_integer(&usbh_error_cnt, usbh_error_count);
+                media_print_drain();
+            } else {
+                set_warning(WarningType::USBFlashDiskError);
+                media_print_pause();
             }
-            // Nothing to process, continue to the next G-Code
-            continue;
-        }
-
-        queue.enqueue_one(gcode, false);
-
-        // Calculate index_w because it is private
-        int index_w = queue.index_r + queue.length - 1;
-        if (index_w >= BUFSIZE)
-            index_w -= BUFSIZE;
-
-        // Save current position and line
-        media_queue_position[index_w] = media_gcode_position;
-
-        if (state == GCodeFilter::State::Eof) {
-            // Stop print on EOF, no need to update media_gcode_position
+            return;
+        case GCodeFilter::State::Eof:
+            // Stop print on EOF
+            // TODO: this is incorrect. We need to wait until the queue is drained before we can stop
             media_print_stop();
             return;
-        }
+        case GCodeFilter::State::Ok:
+            if (gcode == NULL || gcode[0] == '\0') {
+                // Nothing to process, continue to the next G-Code
+                break;
+            }
 
-        // Current position can be after ';' char or after new line.  We need
-        // to store the position before a semicolon. Position before a new line
-        // char is also safe, therefore decrement the position.
-        media_gcode_position = media_current_position - 1;
+            if (media_print_state == media_print_state_PAUSED
+                || media_print_state == media_print_state_NONE) {
+                // Exit from the loop if aborted early
+                // TODO: this is incorrect. We need to wait until the queue is drained before we can stop
+                return;
+            }
+
+            if (skip_gcode) {
+                skip_gcode = false;
+            } else {
+                // update the gcode position for the queue
+                queue.sdpos = media_gcode_position;
+                // FIXME: what if the gcode is not enqueued
+                // use 'enqueue_one_now' instead
+                queue.enqueue_one(gcode, false);
+            }
+
+            // Current position can be after ';' char or after new line.  We need
+            // to store the position before a semicolon. Position before a new line
+            // char is also safe, therefore decrement the position.
+            media_gcode_position = media_current_position - 1;
+            break;
+        }
     }
 }
 
+// callback from usb_host
 void media_set_removed(void) {
     media_state = media_state_REMOVED;
     media_error = media_error_OK;
 }
 
+// callback from usb_host
 void media_set_inserted(void) {
     media_state = media_state_INSERTED;
     media_error = media_error_OK;
 }
 
+// callback from usb_host
 void media_set_error(media_error_t error) {
-    media_state = media_state_ERROR;
     media_error = error;
+    media_state = media_state_ERROR;
+}
+
+void media_reset_usbh_error() {
+    usbh_error_count = 0;
 }
 
 } //extern "C"

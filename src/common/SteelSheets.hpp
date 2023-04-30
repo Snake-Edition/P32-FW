@@ -1,12 +1,14 @@
 #pragma once
-#include "marlin_client.h"
+#include "marlin_client.hpp"
 #include "eeprom.h"
 #include <optional>
 
+#include "gui_config_printer.hpp"
+
 class SteelSheets {
 public:
-    static constexpr float zOffsetMin = -2.0F;
-    static constexpr float zOffsetMax = 0.0F;
+    static constexpr float zOffsetMin = Z_OFFSET_MIN;
+    static constexpr float zOffsetMax = Z_OFFSET_MAX;
 
     ///////////////////////////////////////////////////////////////////////////////
     /// @brief Iterate across the profiles and switch to the next calibrated.

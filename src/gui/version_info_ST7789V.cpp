@@ -1,48 +1,17 @@
-/*
- * 	screen_version_info.cpp
- *
- *  Created on: 2019-10-14
- *      Author: Michal Rudolf
+/**
+ * @file version_info_ST7789V.cpp
  */
-//todo THIS SHOULD NOT BE MENU!!!
-#include <stdlib.h>
 
-#include "gui.hpp"
-#include "screen_menus.hpp"
-#include "screen_menu.hpp"
+#include "screen_menu_version_info.hpp"
 #include "config.h"
 #include "version.h"
-#include "resource.h"
-#include "WindowMenuItems.hpp"
-#include "i18n.h"
 #include "shared_config.h" //BOOTLOADER_VERSION_ADDRESS
 #include "../common/otp.h"
+#include "png_resources.hpp"
 
-static const constexpr uint8_t VERSION_INFO_STR_MAXLEN = 150;
-static const constexpr uint8_t blank_space_h = 10; // Visual bottom padding for HELP string
-
-using MenuContainer = WinMenuContainer<MI_RETURN>;
-
-class ScreenMenuVersionInfo : public AddSuperWindow<screen_t> {
-    std::array<char, VERSION_INFO_STR_MAXLEN> version_info_str;
-    constexpr static const char *label = N_("VERSION INFO");
-    static constexpr size_t helper_lines = 10;
-    static constexpr int helper_font = IDR_FNT_NORMAL;
-
-    MenuContainer container;
-    window_menu_t menu;
-    window_header_t header;
-    window_text_t help;
-    StatusFooter footer;
-
-public:
-    ScreenMenuVersionInfo();
-
-protected:
-    static inline uint16_t get_help_h() {
-        return helper_lines * (resource_font(helper_font)->h + 1); // +1 for line paddings
-    }
-};
+uint16_t ScreenMenuVersionInfo::get_help_h() {
+    return helper_lines * (resource_font(helper_font)->h + 1); // +1 for line paddings
+}
 
 ScreenMenuVersionInfo::ScreenMenuVersionInfo()
     : AddSuperWindow<screen_t>(nullptr)
@@ -55,22 +24,20 @@ ScreenMenuVersionInfo::ScreenMenuVersionInfo()
     CaptureNormalWindow(menu); // set capture to list
 
     //=============SCREEN INIT===============
-    header.SetIcon(IDR_PNG_info_16px);
+    header.SetIcon(&png::info_16x16);
 
     //=============VARIABLES=================
 
-    uint8_t board_version[3];
-    char serial_numbers[15];
     const version_t *bootloader = (const version_t *)BOOTLOADER_VERSION_ADDRESS;
 
     //=============ACCESS IN ADDR=================
-    for (uint8_t i = 0; i < 3; i++) {
-        board_version[i] = *(volatile uint8_t *)(OTP_BOARD_REVISION_ADDR + i);
+    board_revision_t board_revision;
+    if (otp_get_board_revision(&board_revision) == false) {
+        board_revision.br = 0;
     }
-    for (uint8_t i = 0; i < 15; i++) {
-        serial_numbers[i] = *(volatile char *)(OTP_SERIAL_NUMBER_ADDR + i);
-    }
-    serial_numbers[14] = '\0';
+
+    serial_nr_t serial_nr;
+    otp_get_serial_nr(&serial_nr);
 
     //=============SET TEXT================
     auto begin = version_info_str.begin();
@@ -99,21 +66,17 @@ ScreenMenuVersionInfo::ScreenMenuVersionInfo()
 
     if (end > begin) {
         // c=20 r=4
-        static const char fmt2Translate[] = N_("\nBootloader Version\n%d.%d.%d\n\nBuddy Board\n%d.%d.%d\n%s");
+        static const char fmt2Translate[] = N_("\nBootloader Version\n%d.%d.%d\n\nBuddy Board\n%d.%d\n%s");
         char fmt[20 * 4];
         _(fmt2Translate).copyToRAM(fmt, sizeof(fmt)); // note the underscore at the beginning of this line
         begin += snprintf(begin, end - begin,
             fmt,
             bootloader->major, bootloader->minor, bootloader->patch,
-            board_version[0], board_version[1], board_version[2],
-            serial_numbers);
+            board_revision.bytes[0], board_revision.bytes[1],
+            serial_nr.txt);
     }
 
     // this MakeRAM is safe - version_info_str is allocated in RAM for the lifetime of this
     help.SetText(string_view_utf8::MakeRAM((const uint8_t *)version_info_str.data()));
     EnableLongHoldScreenAction();
-}
-
-ScreenFactory::UniquePtr GetScreenMenuVersionInfo() {
-    return ScreenFactory::Screen<ScreenMenuVersionInfo>();
 }

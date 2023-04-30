@@ -1,37 +1,88 @@
 #include "print_utils.hpp"
-#include <stdint.h>
 #include "../Marlin/src/gcode/lcd/M73_PE.h"
 #include "../lib/Marlin/Marlin/src/module/temperature.h"
-#include "marlin_client.h"
+#include "marlin_client.hpp"
 #include "media.h"
-#include "timing.h"
 #include "marlin_server.hpp"
+#include "timing.h"
+#include "config.h"    // GUI_WINDOW_SUPPORT
 #include "guiconfig.h" // GUI_WINDOW_SUPPORT
 #include "unistd.h"
 
-#if AUTOSTART_GCODE
-static const char *autostart_filename = "/usb/AUTO.GCO";
+#include <option/bootloader.h>
+
+#if ENABLED(POWER_PANIC)
+    #include "power_panic.hpp"
+    #if BOOTLOADER()
+        #include "sys.h" // support for bootloader<1.2.3
+    #endif
 #endif
+
+static const char *autostart_filename = "/usb/AUTO.GCO";
 static bool run_once_done = false;
 static uint32_t current_time = 0;
 static uint32_t rescan_delay = 1500;
-static uint32_t max_rescan_time = 10000;
+static uint32_t max_rescan_time = 100000;
+
+#if ENABLED(POWER_PANIC)
+static bool file_exists(const char *filename) {
+    FILE *open_file = fopen(filename, "r");
+    bool file_exists = open_file != nullptr;
+    if (open_file)
+        fclose(open_file);
+    return file_exists;
+}
+#endif
 
 void run_once_after_boot() {
-    // g-code autostart
-#if AUTOSTART_GCODE
-    if (access(autostart_filename, F_OK) == 0) {
-        //call directly marlin server start print. This function is not safe
-        marlin_server_print_start(autostart_filename);
-        oProgressData.mInit();
+#if ENABLED(POWER_PANIC)
+    if (power_panic::state_stored()) {
+        // Data has been saved: ensure we're coming either from self-reset (we reached the end of
+        // the PP cycle due to a short power burst) OR brown-out has been detected. Clear the data
+        // if the user pressed the reset button explicitly!
+        bool reset_pp = !((HAL_RCC_CSR & (RCC_CSR_SFTRSTF | RCC_CSR_BORRSTF)));
+    #if BOOTLOADER()
+        if (version_less_than(&boot_version, 1, 2, 3)) {
+            // bootloader<1.2.3 clears the RCC_CSR register, so ignore reset flags completely.
+            // TODO: remove this compatibility hack for the final MK404 release
+            reset_pp = false;
+        }
+    #endif
+        if (!reset_pp) {
+            // load the panic data and setup print progress early
+            bool auto_recover = power_panic::setup_auto_recover_check();
+            const char *path = power_panic::stored_media_path();
+            bool resume = false;
+            bool path_exists = file_exists(path);
+            if (path_exists) {
+                resume = true;
+            } else if (!path_exists) {
+                // TODO: ask about wrong stick. do not clear the state yet!
+                reset_pp = false;
+            }
+            if (resume) {
+                // resume and bypass g-code autostart
+                power_panic::resume_print(!auto_recover);
+                return;
+            }
+        }
+        if (reset_pp)
+            power_panic::reset();
     }
 #endif
+
+    // g-code autostart
+    if (access(autostart_filename, F_OK) == 0) {
+        //call directly marlin server start print. This function is not safe
+        marlin_server_print_start(autostart_filename, true);
+        oProgressData.mInit();
+    }
 }
 
 void print_utils_loop() {
     if (run_once_done == false && HAL_GetTick() >= current_time + rescan_delay) {
         current_time += rescan_delay;
-        if (media_get_state() == media_state_INSERTED) {
+        if (media_get_state() == media_state_INSERTED && thermalManager.temperatures_ready()) {
             run_once_done = true;
             run_once_after_boot();
         } else if (current_time > max_rescan_time || !marlin_server_printer_idle()) {
@@ -41,25 +92,9 @@ void print_utils_loop() {
     }
 }
 
-#ifdef GUI_WINDOW_SUPPORT
-    #include "ScreenHandler.hpp"
-    #include "screen_printing.hpp"
-
-void print_begin(const char *filename) {
-    Screens::Access()->CloseAll();
-    marlin_print_start(filename);
-    // FIXME: This should not be here and it should be handled
-    // in Marlin. Needs refactoring!
-    oProgressData.mInit();
-    Screens::Access()->Open(ScreenFactory::Screen<screen_printing_data_t>);
-}
-
-#else  // GUI_WINDOW_SUPPORT
-
-void print_begin(const char *filename) {
-    marlin_print_start(filename);
+void print_begin(const char *filename, bool skip_preview) {
+    marlin_print_start(filename, skip_preview);
     // FIXME: This should not be here and it should be handled
     // in Marlin. Needs refactoring!
     oProgressData.mInit();
 }
-#endif // GUI_WINDOW_SUPPORT

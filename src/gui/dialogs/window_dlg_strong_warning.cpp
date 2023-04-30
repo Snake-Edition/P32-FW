@@ -2,39 +2,61 @@
 
 #include "window_dlg_strong_warning.hpp"
 #include "display_helper.h"
-#include "resource.h"
-#include "i18n.h"
 #include "ScreenHandler.hpp"
 #include "sound.hpp"
 #include "client_response_texts.hpp"
+#include "window_msgbox.hpp" // due AdjustLayout function
+#include "config_features.h"
+
+std::bitset<window_dlg_strong_warning_t::types::count_> window_dlg_strong_warning_t::shown;
+window_dlg_strong_warning_t::types window_dlg_strong_warning_t::on_top = window_dlg_strong_warning_t::types::count_;
 
 const PhaseResponses dlg_responses = { Response::Continue, Response::_none, Response::_none, Response::_none };
 
 static constexpr Rect16 textRectIcon = { 0, 104, 240, 120 };
 
 window_dlg_strong_warning_t::window_dlg_strong_warning_t()
-    : AddSuperWindow<IDialog>(GuiDefaults::RectScreen, IDialog::IsStrong::yes)
+    : AddSuperWindow<IDialog>()
     , header(this, _(Title))
     , footer(this)
-    , icon(this, IDR_PNG_exposure_times_48px, { 120 - 24, 48 })
-    , text(this, textRectIcon, is_multiline::yes)
-    , button(this, GuiDefaults::GetButtonRect(GetRect()) - Rect16::Top_t(64), dlg_responses, &ph_txt_continue) {
+    , icon(this, { 0, 0, 0, 0 }, &png::exposure_times_48x48)
+    , text(this, { 0, 0, 0, 0 }, is_multiline::yes)
+    , button(this, GuiDefaults::GetButtonRect(GetRect()) - (GuiDefaults::EnableDialogBigLayout ? Rect16::Top_t(0) : Rect16::Top_t(64)), dlg_responses, &ph_txt_continue) {
+    if (GuiDefaults::EnableDialogBigLayout) {
+        footer.Hide();
+        header.Hide();
+    } else {
+        icon.SetRect(Rect16(120 - 24, 48, 48, 48));
+        text.SetRect(textRectIcon);
+    }
 }
 
-void window_dlg_strong_warning_t::setIcon(int16_t resId) {
-    icon.SetIdRes(resId);
-    if (IDR_NULL == resId)
+void window_dlg_strong_warning_t::adjustLayout() {
+    icon.SetRect(GuiDefaults::MessageIconRect);
+    text.SetRect(GuiDefaults::MessageTextRect);
+    AdjustLayout(text, icon);
+}
+
+void window_dlg_strong_warning_t::show(types type) {
+    if (shown[type])
+        return;
+    shown[type] = true;
+    on_top = type;
+
+    icon.SetRes(icon_title_text[type].icon);
+    header.SetText(_(icon_title_text[type].title));
+    if (!icon_title_text[type].icon)
         text.SetRect(GuiDefaults::RectScreenBody);
     else
         text.SetRect(textRectIcon);
-}
+    text.SetText(_(icon_title_text[type].text));
+    adjustLayout(); //this could cause invalidation issue
 
-void window_dlg_strong_warning_t::show(string_view_utf8 txt) {
     if (!GetParent()) {
         window_t *parent = Screens::Access()->Get();
         if (parent) {
+            Sound_Play(eSOUND_TYPE::StandardAlert);
             parent->RegisterSubWin(*this);
-            text.SetText(txt);
         }
     }
 }
@@ -43,43 +65,45 @@ void window_dlg_strong_warning_t::windowEvent(EventLock /*has private ctor*/, wi
     if (!GetParent())
         return;
     if (event == GUI_event_t::CLICK) { //todo use timer
-        GetParent()->UnregisterSubWin(*this);
+        shown[on_top] = false;         // remove from mask
+        on_top = types::count_;        //erase on_top
+
+        if (shown.any()) {
+            for (types t = types(0); t < types::count_; t = types(t + 1)) {
+                if (shown[t]) {
+                    show(t);
+                    break;
+                }
+            }
+        } else {
+            GetParent()->UnregisterSubWin(*this);
+        }
+
     } else {
         SuperWindowEvent(sender, event, param);
     }
 }
 
 void window_dlg_strong_warning_t::ShowHotendFan() {
-    static window_dlg_strong_warning_t dlg;
-    Sound_Play(eSOUND_TYPE::StandardAlert);
-    dlg.show(_(HotendFanErrorMsg));
-    dlg.setIcon(IDR_PNG_fan_error);
+    Instance().show(HotendFan);
 }
 
 void window_dlg_strong_warning_t::ShowPrintFan() {
-    static window_dlg_strong_warning_t dlg;
-    Sound_Play(eSOUND_TYPE::StandardAlert);
-    dlg.show(_(PrintFanErrorMsg));
-    dlg.setIcon(IDR_PNG_fan_error);
+    Instance().show(PrintFan);
 }
 
 void window_dlg_strong_warning_t::ShowHotendTempDiscrepancy() {
-    static window_dlg_strong_warning_t dlg;
-    Sound_Play(eSOUND_TYPE::StandardAlert);
-    dlg.header.SetText(_(TitleNozzle));
-    dlg.show(_(HotendTempDiscrepancyMsg));
-    dlg.setIcon(IDR_NULL);
+    Instance().show(HotendTempDiscrepancy);
 }
 
 void window_dlg_strong_warning_t::ShowHeatersTimeout() {
-    static window_dlg_strong_warning_t dlg;
-    dlg.show(_(HeaterTimeoutMsg));
-    dlg.setIcon(IDR_PNG_exposure_times_48px);
+    Instance().show(HeatersTimeout);
 }
 
 void window_dlg_strong_warning_t::ShowUSBFlashDisk() {
-    static window_dlg_strong_warning_t dlg;
-    Sound_Play(eSOUND_TYPE::StandardAlert);
-    dlg.show(_(USBFlashDiskError));
-    dlg.setIcon(IDR_PNG_usb_error);
+    Instance().show(USBFlashDisk);
+}
+
+void window_dlg_strong_warning_t::ShowHeatBreakThermistorFail() {
+    Instance().show(HBThermistorFail);
 }

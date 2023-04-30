@@ -1,6 +1,8 @@
 /**
  * @file eeprom_current.hpp
  * @author Radek Vana
+ * @brief current version of eeprom
+ * without padding and crc since they are not imported and would not match anyway
  * @date 2022-01-17
  */
 
@@ -21,7 +23,7 @@ namespace eeprom::v11 {
 struct vars_body_t : public eeprom::v10::vars_body_t {
     uint8_t EEVAR_ACTIVE_NETDEV;
     uint8_t EEVAR_PL_RUN;
-    char EEVAR_PL_API_KEY[PL_API_KEY_SIZE];
+    char EEVAR_PL_PASSWORD[PL_PASSWORD_SIZE];
     uint8_t WIFI_FLAG;
     uint32_t WIFI_IP4_ADDR;
     uint32_t WIFI_IP4_MSK;
@@ -36,7 +38,7 @@ struct vars_body_t : public eeprom::v10::vars_body_t {
 
 #pragma pack(pop)
 
-static_assert(sizeof(vars_body_t) == sizeof(eeprom::v10::vars_body_t) + sizeof(uint8_t) * 3 + PL_API_KEY_SIZE + LAN_HOSTNAME_MAX_LEN + 1 + WIFI_MAX_SSID_LEN + 1 + WIFI_MAX_PASSWD_LEN + 1 + 1 + sizeof(uint32_t) * 5, "eeprom body size does not match");
+static_assert(sizeof(vars_body_t) == sizeof(eeprom::v10::vars_body_t) + sizeof(uint8_t) * 3 + PL_PASSWORD_SIZE + LAN_HOSTNAME_MAX_LEN + 1 + WIFI_MAX_SSID_LEN + 1 + WIFI_MAX_PASSWD_LEN + 1 + 1 + sizeof(uint32_t) * 5, "eeprom body size does not match");
 
 constexpr vars_body_t body_defaults = {
     eeprom::v10::body_defaults,

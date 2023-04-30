@@ -6,7 +6,6 @@
  *  Refactoring by DRracer 2020-04-08
  */
 #include <algorithm>
-
 #include "window_file_list.hpp"
 #include "gui.hpp"
 #include "config.h"
@@ -15,12 +14,33 @@
 #include "ScreenHandler.hpp"
 #include "cmath_ext.h"
 #include "gui_invalidate.hpp"
+#include "png_resources.hpp"
 #if _DEBUG
     #include "bsod.h"
 #endif
 
+GuiFileSort::GuiFileSort() {
+    sort = WF_Sort_t(eeprom_get_ui8(EEVAR_FILE_SORT));
+}
+
+GuiFileSort &GuiFileSort::instance() {
+    static GuiFileSort ret;
+    return ret;
+}
+
+WF_Sort_t GuiFileSort::Get() {
+    return instance().sort;
+}
+
+void GuiFileSort::Set(WF_Sort_t val) {
+    if (instance().sort == val)
+        return;
+
+    eeprom_set_ui8(EEVAR_FILE_SORT, (uint8_t)val);
+    instance().sort = val;
+}
+
 // static definitions
-LDV window_file_list_t::ldv;
 char *window_file_list_t::root = nullptr;
 
 bool window_file_list_t::IsPathRoot(const char *path) {
@@ -61,15 +81,17 @@ void window_file_list_t::SetItemIndex(int index) {
     }
 }
 
-const char *window_file_list_t::CurrentLFN(bool *isFile) {
+const char *window_file_list_t::CurrentLFN(bool *isFile) const {
     auto i = ldv.LongFileNameAt(index);
-    *isFile = i.second == LDV::EntryType::FILE;
+    if (isFile)
+        *isFile = i.second == LDV::EntryType::FILE;
     return i.first;
 }
 
-const char *window_file_list_t::CurrentSFN(bool *isFile) {
+const char *window_file_list_t::CurrentSFN(bool *isFile) const {
     auto i = ldv.ShortFileNameAt(index);
-    *isFile = i.second == LDV::EntryType::FILE;
+    if (isFile)
+        *isFile = i.second == LDV::EntryType::FILE;
     return i.first;
 }
 
@@ -77,12 +99,12 @@ const char *window_file_list_t::TopItemSFN() {
     return ldv.ShortFileNameAt(0).first;
 }
 
-window_file_list_t::window_file_list_t(window_t *parent, point_i16_t top_left, Rect16::Width_t width)
-    : AddSuperWindow<window_aligned_t>(parent, Rect16(top_left, width, item_height * LazyDirViewSize))
+window_file_list_t::window_file_list_t(window_t *parent, Rect16 rc)
+    : AddSuperWindow<window_aligned_t>(parent, rc = Rect16::Height_t(item_height * LazyDirViewSize))
     , color_text(GuiDefaults::ColorText)
     , font(GuiDefaults::Font)
     , entire_window_invalid(true)
-    , activeItem(string_view_utf8(), IDR_NULL) {
+    , activeItem(string_view_utf8(), nullptr) {
     DisableLongHoldScreenAction();
     SetAlignment(Align_t::LeftCenter());
     Enable();
@@ -129,9 +151,11 @@ void window_file_list_t::windowEvent(EventLock /*has private ctor*/, window_t *s
         selectNewItem();
         break;
     case GUI_event_t::TEXT_ROLL:
-        activeItem.Roll();
-        if (activeItem.IsInvalid()) {
-            invalidateItem(index);
+        if (IsFocused()) {
+            activeItem.Roll();
+            if (activeItem.IsInvalid()) {
+                invalidateItem(index);
+            }
         }
         break;
     default:
@@ -165,6 +189,53 @@ void window_file_list_t::inc(int dif) {
             } else {
                 --index;
             }
+        }
+    }
+
+    if (!middle) {
+        Sound_Play(eSOUND_TYPE::BlindAlert);
+    } else {
+        Sound_Play(eSOUND_TYPE::EncoderMove);
+    }
+
+    if (!repaint) {
+        if (index != old_index) {
+            invalidateItem(index);
+            invalidateItem(old_index);
+            selectNewItem();
+        }
+        return;
+    }
+
+    //can not use Invalidate, it would cause redraw of background
+    valid_items.fill(false);
+    activeItem.clrFocus();
+    selectNewItem();
+    super::invalidate(GetRect());
+}
+
+/**
+ * @brief ugly copy od inc method with some modifications
+ * TODO make window_file_list_t child of
+ *
+ * @param dif
+ */
+void window_file_list_t::roll_screen(int dif) {
+    if (dif == 0)
+        return;
+
+    bool repaint = false;
+    bool middle = true; ///< cursor ended in the middle of the list, not at the end (or start)
+    int old_index = index;
+    if (dif > 0) {
+        while (dif-- && middle) {
+            middle = ldv.MoveDown();     ///< last result defines end of list
+            repaint = repaint || middle; ///< any movement triggers repaint
+        }
+    } else {
+        while (dif++ && middle) {
+            middle = ldv.MoveUp();       ///< last result defines end of list
+            repaint = repaint || middle; ///< any movement triggers repaint
         }
     }
 
@@ -236,19 +307,19 @@ Rect16 window_file_list_t::itemRect(int index) const {
     return GetRect().Intersection(rc);
 }
 
-uint16_t window_file_list_t::itemIcon(int index) const {
+const png::Resource *window_file_list_t::itemIcon(int index) const {
     auto item = ldv.LongFileNameAt(index);
     const bool isFile = item.second == LDV::EntryType::FILE;
     if (!item.first) {
         // this should normally not happen, visible_count shall limit indices to valid items only
-        return IDR_NULL; // ... but getting ready for the unexpected
+        return nullptr; // ... but getting ready for the unexpected
     }
-    uint16_t id_icon = isFile ? IDR_NULL : IDR_PNG_folder_full_16px;
+    const png::Resource *icon = isFile ? nullptr : &png::folder_full_16x16;
 
     if (index == 0 && strcmp(item.first, "..") == 0 && IsPathRoot(sfn_path)) { // @@TODO clean up, this is probably unnecessarily complex
-        id_icon = IDR_PNG_home_full_16px;
+        icon = &png::folder_full_16x16;
     }
-    return id_icon;
+    return icon;
 }
 
 // special handling for the link back to printing screen - i.e. ".." will be renamed to "Home"
@@ -264,4 +335,12 @@ string_view_utf8 window_file_list_t::itemText(int index) const {
         itemText = string_view_utf8::MakeRAM((const uint8_t *)item.first);
     }
     return itemText;
+}
+
+void window_file_list_t::RollUp() {
+    roll_screen(1 - int(LazyDirViewSize));
+}
+
+void window_file_list_t::RollDown() {
+    roll_screen(LazyDirViewSize - 1);
 }

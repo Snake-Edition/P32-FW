@@ -6,6 +6,8 @@
 
 namespace nhttp::link_content {
 
+using http::Method;
+using http::Status;
 using std::nullopt;
 using std::optional;
 using std::string_view;
@@ -21,13 +23,13 @@ optional<ConnectionState> UsbFiles::accept(const RequestParser &parser) const {
     }
 
     // Content of the USB drive is only for authenticated, don't ever try anything without it.
-    if (!parser.authenticated()) {
-        return StatusPage(Status::Unauthorized, parser.status_page_handling(), parser.accepts_json);
+    if (auto unauthorized_status = parser.authenticated_status(); unauthorized_status.has_value()) {
+        return std::visit([](auto unauth_status) -> ConnectionState { return std::move(unauth_status); }, *unauthorized_status);
     }
 
     char fname[FILE_PATH_BUFFER_LEN];
     if (!parser.uri_filename(fname, sizeof(fname))) {
-        return StatusPage(Status::NotFound, parser.status_page_handling(), parser.accepts_json, "This doesn't look like file name");
+        return StatusPage(Status::NotFound, parser, "This doesn't look like file name");
     }
 
     if (parser.method == Method::Get) {
@@ -53,9 +55,9 @@ optional<ConnectionState> UsbFiles::accept(const RequestParser &parser) const {
             return std::move(step);
         }
 
-        return StatusPage(Status::NotFound, parser.status_page_handling(), parser.accepts_json);
+        return StatusPage(Status::NotFound, parser);
     } else {
-        return StatusPage(Status::MethodNotAllowed, parser.status_page_handling(), parser.accepts_json);
+        return StatusPage(Status::MethodNotAllowed, parser);
     }
 }
 

@@ -2,9 +2,16 @@
 #define SRC_GCODE_LCD_M73_PE_H_
 
 #include <stdint.h>
-#define PROGRESS_DATA_VALIDITY_PERIOD (60*5)      // [s] ~ 5min
-//#define PROGRESS_DATA_VALIDITY_PERIOD 20
+#include <optional>
 
+#include "config.h"
+
+#if PRINTER_TYPE == PRINTER_PRUSA_XL
+    // XL needs more time for initial 5 tool preheat/cleanup and MBL
+    #define PROGRESS_DATA_VALIDITY_PERIOD (60*10) // [s] ~ 10min
+#else
+    #define PROGRESS_DATA_VALIDITY_PERIOD (60*5) // [s] ~ 5min
+#endif
 
 class ClValidityValue
 {
@@ -45,6 +52,6 @@ void mInit(void);
 
 
 extern ClProgressData oProgressData;
-
+void M73_PE_no_parser(std::optional<uint8_t> P = std::nullopt, std::optional<uint32_t> R = std::nullopt, std::optional<uint32_t> T = std::nullopt);
 
 #endif /* SRC_GCODE_LCD_M73_PE_H_ */

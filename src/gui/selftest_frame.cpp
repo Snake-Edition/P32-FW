@@ -30,35 +30,17 @@ void SelftestFrame::Change(PhasesSelftest ph, fsm::PhaseData data) {
 
 /*****************************************************************************/
 //SelftestFrameWithRadio
-SelftestFrameWithRadio::SelftestFrameWithRadio(window_t *parent, PhasesSelftest ph, fsm::PhaseData data)
+SelftestFrameWithRadio::SelftestFrameWithRadio(window_t *parent, PhasesSelftest ph, fsm::PhaseData data, size_t lines_of_footer)
     : AddSuperWindow<SelftestFrame>(parent, ph, data)
-    , radio(this, GuiDefaults::GuiDefaults::GetButtonRect(GetRect()), ClientResponses::GetResponses(ph)) {
+    , radio(this, WizardDefaults::RectRadioButton(lines_of_footer), ph) {
     Enable();
-}
-
-//TODO make radio button events behave like normal button
-void SelftestFrameWithRadio::windowEvent(EventLock /*has private ctor*/, window_t * /*sender*/, GUI_event_t event, void *param) {
-    switch (event) {
-    case GUI_event_t::CLICK: {
-        Response response = radio.Click();
-        marlin_FSM_response(phase_current, response);
-        break;
-    }
-    case GUI_event_t::ENC_UP:
-        ++radio;
-        break;
-    case GUI_event_t::ENC_DN:
-        --radio;
-        break;
-    default:
-        break;
-    }
+    CaptureNormalWindow(radio);
 }
 
 void SelftestFrameWithRadio::pre_change() {
     if (phase_current == phase_previous)
         return;
-    radio.Change(ClientResponses::GetResponses(phase_current));
+    radio.Change(phase_current);
 }
 
 /*****************************************************************************/
@@ -67,36 +49,22 @@ SelftestFrameNamed::SelftestFrameNamed(window_t *parent, PhasesSelftest ph, fsm:
     : AddSuperWindow<SelftestFrame>(parent, ph, data)
     , test_name(this, WizardDefaults::RectSelftestName, is_multiline::no, is_closed_on_click_t::no, name) {
 }
+void SelftestFrameNamed::SetName(string_view_utf8 txt) {
+    test_name.SetText(txt);
+    test_name.Invalidate(); //force invalidate because we could be using the same buffer
+}
 
 /*****************************************************************************/
 //SelftestFrameNamedWithRadio
-SelftestFrameNamedWithRadio::SelftestFrameNamedWithRadio(window_t *parent, PhasesSelftest ph, fsm::PhaseData data, string_view_utf8 name)
+SelftestFrameNamedWithRadio::SelftestFrameNamedWithRadio(window_t *parent, PhasesSelftest ph, fsm::PhaseData data, string_view_utf8 name, size_t lines_of_footer)
     : AddSuperWindow<SelftestFrameNamed>(parent, ph, data, name)
-    , radio(this, WizardDefaults::RectRadioButton, ClientResponses::GetResponses(ph)) {
+    , radio(this, WizardDefaults::RectRadioButton(lines_of_footer), ph) {
     Enable();
-}
-
-//TODO make radio button events behave like normal button
-void SelftestFrameNamedWithRadio::windowEvent(EventLock /*has private ctor*/, window_t * /*sender*/, GUI_event_t event, void *param) {
-    switch (event) {
-    case GUI_event_t::CLICK: {
-        Response response = radio.Click();
-        marlin_FSM_response(phase_current, response);
-        break;
-    }
-    case GUI_event_t::ENC_UP:
-        ++radio;
-        break;
-    case GUI_event_t::ENC_DN:
-        --radio;
-        break;
-    default:
-        break;
-    }
+    CaptureNormalWindow(radio);
 }
 
 void SelftestFrameNamedWithRadio::pre_change() {
     if (phase_current == phase_previous)
         return;
-    radio.Change(ClientResponses::GetResponses(phase_current));
+    radio.Change(phase_current);
 }

@@ -1,26 +1,28 @@
 #include "screen_printing_serial.hpp"
 #include "config.h"
-#include "marlin_client.h"
+#include "marlin_client.hpp"
 #include "filament.hpp"
 #include "i18n.h"
 #include "ScreenHandler.hpp"
-#include "screen_menus.hpp"
 #include "odometer.hpp"
+#include "config_features.h"
+#include "window_icon.hpp"
+#include "screen_menu_tune.hpp"
 
-// octo icon, 172x69
-static point_ui16_t pt_ico() { return icon_meas(resource_ptr(IDR_PNG_serial_printing)); }
+#if ENABLED(CRASH_RECOVERY)
+    #include "../Marlin/src/feature/prusa/crash_recovery.h"
+#endif
 
 screen_printing_serial_data_t::screen_printing_serial_data_t()
     : AddSuperWindow<ScreenPrintingModel>(_(caption))
-    , octo_icon(this, Rect16(120 - pt_ico().x / 2, GuiDefaults::RectScreenBody.Top() + 8, pt_ico().x, pt_ico().y), IDR_PNG_serial_printing)
-    , w_progress(this, Rect16(10, GuiDefaults::RectScreenBody.Top() + pt_ico().y + 14, GuiDefaults::RectScreen.Width() - 2 * 10, 40))
-    , w_message(this, Rect16(10, GuiDefaults::RectScreenBody.Top() + pt_ico().y + 60, GuiDefaults::RectScreen.Width() - 2 * 10, 20))
+    , octo_icon(this, Rect16((240 - png::serial_printing_172x138.w) / 2, GuiDefaults::RectScreenBody.Top(), png::serial_printing_172x138.w, png::serial_printing_172x138.h), &png::serial_printing_172x138)
+    , w_progress(this, Rect16(10, GuiDefaults::RectScreenBody.Top() + 14, GuiDefaults::RectScreen.Width() - 2 * 10, 40))
+    , w_message(this, Rect16(10, GuiDefaults::RectScreenBody.Top() + 60, GuiDefaults::RectScreen.Width() - 2 * 10, 20))
     , last_tick(0)
     , connection(connection_state_t::connected) {
     ClrMenuTimeoutClose();
     ClrOnSerialClose(); // don't close on Serial print
 
-    octo_icon.SetIdRes(IDR_PNG_serial_printing);
     octo_icon.Disable();
     octo_icon.Unshadow();
 
@@ -59,13 +61,16 @@ void screen_printing_serial_data_t::windowEvent(EventLock /*has private ctor*/, 
         }
     }
 
-    if (connection == connection_state_t::disconnecting && marlin_get_gqueue() < 1) {
+    if (connection == connection_state_t::disconnecting && marlin_vars()->gqueue < 1) {
         connection = connection_state_t::disconnected;
         marlin_gcode("G27 P2");     /// park nozzle and raise Z axis
         marlin_gcode("M104 S0 D0"); /// set temperatures to zero
         marlin_gcode("M140 S0");    /// set temperatures to zero
         marlin_gcode("M107");       /// print fan off.
         Odometer_s::instance().force_to_eeprom();
+#if ENABLED(CRASH_RECOVERY)
+        crash_s.write_stat_to_eeprom();
+#endif
         return;
     }
     if (connection == connection_state_t::disconnected) {
@@ -76,7 +81,7 @@ void screen_printing_serial_data_t::windowEvent(EventLock /*has private ctor*/, 
 }
 
 void screen_printing_serial_data_t::tuneAction() {
-    Screens::Access()->Open(GetScreenMenuTune);
+    Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuTune>);
 }
 
 void screen_printing_serial_data_t::pauseAction() {

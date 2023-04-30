@@ -49,9 +49,6 @@ static uint32_t hal_tick = 0;
 uint32_t gui::GetTick() { return hal_tick; }
 void gui::TickLoop() {}
 
-const uint8_t *resource_ptr(uint16_t id) {
-    return 0;
-}
 point_ui16_t icon_meas(const uint8_t *pi) {
     point_ui16_t wh = { 0, 0 };
     return wh;
@@ -437,7 +434,7 @@ TEST_CASE("Timed dialog tests", "[window]") {
         REQUIRE(screen.GetInvalidationRect().IsEmpty()); //cleared by draw
     }
 
-    hal_tick = 1000;                                   //set openned on popup
+    hal_tick = 1000;                                   //set opened on popup
     screen.ScreenEvent(&screen, GUI_event_t::LOOP, 0); //loop will initialize popup timeout
     hal_tick = 10000;                                  //timeout popup
     screen.ScreenEvent(&screen, GUI_event_t::LOOP, 0); //loop event will unregister popup

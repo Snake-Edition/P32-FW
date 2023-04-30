@@ -1,0 +1,43 @@
+target_sources(
+  firmware
+  PRIVATE G163.cpp
+          G26.cpp
+          G425.cpp
+          G64.cpp
+          gcode.cpp
+          M117.cpp
+          M300.cpp
+          M330.cpp
+          M505.cpp
+          M650.cpp
+          M862_1.cpp
+          M862_2.cpp
+          M862_3.cpp
+          M862_4.cpp
+          M862_5.cpp
+          M876.cpp
+          M919-M920.cpp
+          M93X.cpp
+          M997.cpp
+          M999.cpp
+  )
+
+add_subdirectory(pause)
+add_subdirectory(sdcard)
+add_subdirectory(host)
+add_subdirectory(feature)
+
+if(HAS_SELFTEST)
+  target_sources(firmware PRIVATE G162.cpp)
+  if(WUI)
+    target_sources(firmware PRIVATE M1587.cpp)
+  endif()
+endif()
+
+if(HAS_LEDS)
+  target_sources(firmware PRIVATE M150.cpp)
+endif()
+
+if(HAS_TOOLCHANGER)
+  target_sources(firmware PRIVATE P.cpp)
+endif()

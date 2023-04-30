@@ -1,22 +1,25 @@
 /**
  * @file footer_item_filament.cpp
- * @author Radek Vana
- * @date 2021-04-16
  */
 
 #include "footer_item_filament.hpp"
+#include "marlin_client.hpp"
 #include "display_helper.h" // font_meas_text
-#include "resource.h"       // IDR_PNG_spool_16px
+#include "png_resources.hpp"
 #include "filament.hpp"
 
 FooterItemFilament::FooterItemFilament(window_t *parent)
-    : AddSuperWindow<FooterIconText_IntVal>(parent, IDR_PNG_spool_16px, static_makeView, static_readValue) {
+    : AddSuperWindow<FooterIconText_IntVal>(parent, &png::spool_16x16, static_makeView, static_readValue) {
 }
 
 int FooterItemFilament::static_readValue() {
-    return int(Filaments::CurrentIndex());
+    auto current_filament = filament::get_type_in_extruder(marlin_vars()->active_extruder);
+    return static_cast<int>(current_filament);
 }
 
 string_view_utf8 FooterItemFilament::static_makeView(int value) {
-    return string_view_utf8::MakeCPUFLASH((const uint8_t *)Filaments::Current().name);
+    auto filament = static_cast<filament::Type>(value);
+    return string_view_utf8::MakeCPUFLASH((const uint8_t *)filament::get_description(filament).name);
 }
+
+string_view_utf8 FooterItemFilament::GetName() { return _("Filament"); }

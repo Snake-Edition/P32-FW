@@ -3,157 +3,141 @@
 #include "screen_print_preview.hpp"
 #include "log.h"
 #include "gcode_file.h"
-#include "marlin_client.h"
-#include "resource.h"
+#include "marlin_client.hpp"
 #include "window_dlg_load_unload.hpp"
-#include "filament_sensor_api.hpp"
+#include "filament_sensors_handler.hpp"
 #include <stdarg.h>
 #include "sound.hpp"
 #include "DialogHandler.hpp"
 #include "ScreenHandler.hpp"
+#include "screen_printing.hpp"
 #include "print_utils.hpp"
+#include "client_response.hpp"
 #include "printers.h"
+#include "RAII.hpp"
+#include "box_unfinished_selftest.hpp"
+#include "window_msgbox_wrong_printer.hpp"
 
-const uint16_t menu_icons[2] = {
-    IDR_PNG_print_58px,
-    IDR_PNG_stop_58px,
+static GCodeInfo &gcode_init() {
+    {
+        // update printed filename from marlin_server, sample LFN+SFN atomically
+        auto lock = MarlinVarsLockGuard();
+        marlin_vars()->media_LFN.copy_to(gui_media_LFN, sizeof(gui_media_LFN), lock);
+        marlin_vars()->media_SFN_path.copy_to(gui_media_SFN_path, sizeof(gui_media_SFN_path), lock);
+    }
+    GCodeInfo::getInstance().initFile(GCodeInfo::GI_INIT_t::PREVIEW);
+    return GCodeInfo::getInstance();
+}
+
+#ifdef USE_ILI9488
+static const constexpr Rect16 title_rect = {
+    GuiDefaults::PreviewThumbnailRect.Left(),
+    GuiDefaults::HeaderHeight + 8,
+    display::GetW() - 2 * GuiDefaults::PreviewThumbnailRect.Left(),
+    TITLE_HEIGHT
 };
-
-/// \returns true if filament is (finally) present or FS is disabled
-static bool check_filament_presence(GCodeInfo &gcode) {
-    // While in non-MMU2 mode perform a pre-print filament check.
-    // While in MMU2 mode the operation is directly opposite
-    // - the filament must NOT be present and the G-code specifies which filament shall be loaded after the start of the print.
-    while (!FSensors_instance().CanStartPrint()) {
-        bool has_mmu = FSensors_instance().HasMMU();
-        Sound_Play(eSOUND_TYPE::SingleBeep);
-        const PhaseResponses btns = has_mmu ? Responses_YesNo : Responses_YesNoIgnore;
-        string_view_utf8 txt_fil_not_detected = has_mmu ? _("Filament detected. Unload filament now? Select NO to cancel.") : _("Filament not detected. Load filament now? Select NO to cancel, or IGNORE to disable the filament sensor and continue.");
-        // this MakeRAM is safe - gcode.gcode_file_name is valid during the lifetime of the MsgBox
-        switch (
-#ifdef USE_ST7789
-            MsgBoxWarning(txt_fil_not_detected, btns, 0, GuiDefaults::RectScreenNoHeader)
-#else
-            MsgBoxTitle(string_view_utf8::MakeRAM((const uint8_t *)gcode.GetGcodeFilename()), txt_fil_not_detected, btns, 0, GuiDefaults::RectScreenNoHeader)
+static const constexpr Rect16 vertical_radio_buttons_rect = {
+    int16_t(title_rect.Left() + title_rect.Width() - GuiDefaults::IconButtonSize),
+    GuiDefaults::PreviewThumbnailRect.Top(),
+    GuiDefaults::IconButtonSize,
+    GuiDefaults::PreviewThumbnailRect.Height()
+};
 #endif
-        ) {
-        case Response::Yes: //YES - load
-            if (has_mmu) {
-                PreheatStatus::DialogBlockingUnLoad(RetAndCool_t::Neither);
-            } else {
-                PreheatStatus::DialogBlockingLoad(RetAndCool_t::Return);
-            }
-            break;
-        case Response::No: //NO - cancel
-            return false;
-        case Response::Ignore: //IGNORE - disable, outside MMU mode only
-            FSensors_instance().Disable();
-            return true;
-        default:
-            //should happen only if the message box was closed because flash was removed
-            return false;
-        }
-    }
-    return true;
-}
 
-static bool is_same(const char *curr_filament, const char (&filament_type)[GCodeInfo::filament_type_len]) {
-    return strncmp(curr_filament, filament_type, GCodeInfo::filament_type_len) == 0;
-}
-static bool filament_known(const char *curr_filament) {
-    return strncmp(curr_filament, "---", 3) != 0;
-}
-
-/// \returns true if filament has (finally) the correct type or the type is ignored
-static bool check_filament_type(GCodeInfo &gcode) {
-    for (const char *curr_filament = Filaments::Current().name;
-         gcode.filament_described && filament_known(curr_filament) && !is_same(curr_filament, gcode.filament_type);
-         curr_filament = Filaments::Current().name) {
-        string_view_utf8 txt_wrong_fil_type = _("This G-CODE was set up for another filament type.");
-        switch (MsgBoxWarning(txt_wrong_fil_type, Responses_ChangeOkAbort, 0, GuiDefaults::RectScreenNoHeader)) {
-        case Response::Change:
-            PreheatStatus::DialogBlockingChangeLoad(RetAndCool_t::Return);
-            break;
-        case Response::Ok:
-            return true;
-        case Response::Abort:
-            return false;
-        default:
-            //should happen only if the message box was closed because flash was removed
-            return false;
-        }
-    }
-    return true;
-}
-
-/// \returns true if it's correct printer or printer type is ignored
-static bool check_printer_type(GCodeInfo &gcode) {
-    if (gcode.IsSettingsValid())
-        return true;
-    string_view_utf8 txt_wrong_printer_type = _("This G-CODE was set up for another printer type.");
-    switch (MsgBoxWarning(txt_wrong_printer_type, Responses_IgnoreAbort, 0, GuiDefaults::RectScreenNoHeader)) {
-    case Response::Abort:
-        return false;
-    case Response::Ignore:
-        return true;
-    default:
-        //should happen only if the message box was closed because flash was removed
-        return false;
-    }
-    return true;
-}
-
-static void print_button_pressed() {
-    GCodeInfo &gcode = GCodeInfo::getInstance();
-    if (!check_printer_type(gcode)
-        || !check_filament_presence(gcode)
-        || !check_filament_type(gcode)) {
-        Sound_Play(eSOUND_TYPE::SingleBeep);
-        Screens::Access()->Close();
-        return;
-    }
-
-    print_begin(gcode.GetGcodeFilepath());
-}
-
-screen_print_preview_data_t::screen_print_preview_data_t()
-    : AddSuperWindow<screen_t>()
-    , title_text(this, Rect16(PADDING, PADDING, SCREEN_WIDTH - 2 * PADDING, TITLE_HEIGHT))
-    , print_button(this, Rect16(PADDING, SCREEN_HEIGHT - PADDING - LINE_HEIGHT - 64, 64, 64), IDR_PNG_print_58px, print_button_pressed)
-    , print_label(this, Rect16(PADDING, SCREEN_HEIGHT - PADDING - LINE_HEIGHT, 64, LINE_HEIGHT), is_multiline::no)
-    , back_button(this, Rect16(SCREEN_WIDTH - PADDING - 64, SCREEN_HEIGHT - PADDING - LINE_HEIGHT - 64, 64, 64), IDR_PNG_back_32px, []() { Screens::Access()->Close(); })
-    , back_label(this, Rect16(SCREEN_WIDTH - PADDING - 64, SCREEN_HEIGHT - PADDING - LINE_HEIGHT, 64, LINE_HEIGHT), is_multiline::no)
+ScreenPrintPreview::ScreenPrintPreview()
+#ifdef USE_ST7789
+    : title_text(this, Rect16(PADDING, PADDING, display::GetW() - 2 * PADDING, TITLE_HEIGHT))
+    , radio(this, GuiDefaults::GetIconnedButtonRect(GetRect()), PhasesPrintPreview::main_dialog)
+#endif // USE_ST7789
+#ifdef USE_ILI9488
+    : header(this)
+    , title_text(this, title_rect)
+    , radio(this, vertical_radio_buttons_rect, PhasesPrintPreview::main_dialog)
+#endif // USE_ILI9488
+    , gcode(gcode_init())
+    , gcode_description(this, gcode)
     , thumbnail(this, GuiDefaults::PreviewThumbnailRect)
-    , gcode(GCodeInfo::getInstance())
-    , gcode_description(this, gcode) {
-
-    marlin_set_print_speed(100);
+    , phase(PhasesPrintPreview::_first) {
 
     super::ClrMenuTimeoutClose();
-    // Title
-    title_text.font = resource_font(IDR_FNT_BIG);
-    // this MakeRAM is safe - gcode_file_name is set to vars->media_LFN, which is statically allocated in RAM
+
+#ifdef USE_ILI9488 // It was not included in condition above because it broke clang formating
+    header.SetText(_("PRINT"));
+    header.SetIcon(&png::print_16x16);
+#endif // USE_ILI9488
+
+    // title_text.font = GuiDefaults::FontBig; //TODO big font somehow does not work
+    //  this MakeRAM is safe - gcode_file_name is set to vars->media_LFN, which is statically allocated in RAM
     title_text.SetText(string_view_utf8::MakeRAM((const uint8_t *)gcode.GetGcodeFilename()));
 
-    print_label.SetText(_("Print"));
-    print_label.SetAlignment(Align_t::Center());
-    print_label.font = resource_font(IDR_FNT_SMALL);
-
-    back_label.SetText(_("Back"));
-    back_label.SetAlignment(Align_t::Center());
-    back_label.font = resource_font(IDR_FNT_SMALL);
+    radio.SetHasIcon();
+    radio.SetBlackLayout(); // non iconned buttons have orange background
+    radio.SetBtnCount(2);
+    CaptureNormalWindow(radio);
+    ths = this;
 }
 
-bool screen_print_preview_data_t::gcode_file_exists() {
-    return access(gcode.GetGcodeFilepath(), F_OK) == 0;
+ScreenPrintPreview::~ScreenPrintPreview() {
+    ths = nullptr;
 }
 
-void screen_print_preview_data_t::windowEvent(EventLock /*has private ctor*/, window_t *sender, GUI_event_t event, void *param) {
-    // In case the file is no longer present, close this screen.
-    // (Most likely because of usb flash drive disconnection).
-    if (event == GUI_event_t::LOOP && !gcode_file_exists()) {
-        Screens::Access()->Close(); //if an dialog is openned, it will be closed first
+// static variables and member functions
+ScreenPrintPreview *ScreenPrintPreview::ths = nullptr;
+
+ScreenPrintPreview *ScreenPrintPreview::GetInstance() { return ths; }
+
+ScreenPrintPreview::UniquePtr ScreenPrintPreview::makeMsgBox(string_view_utf8 caption, string_view_utf8 text) {
+    return make_static_unique_ptr<MsgBoxTitled>(&msgBoxMemSpace, GuiDefaults::RectScreenNoHeader, Responses_NONE, 0, nullptr, text, is_multiline::yes, caption, &png::warning_16x16, is_closed_on_click_t::no);
+}
+
+void ScreenPrintPreview::Change(fsm::BaseData data) {
+    auto old_phase = phase;
+    phase = GetEnumFromPhaseIndex<PhasesPrintPreview>(data.GetPhase());
+
+    if (phase == old_phase)
+        return;
+
+    // need to call deleter before pointer is assigned, because new object is in same area of memory
+    pMsgbox.reset();
+
+    switch (phase) {
+    case PhasesPrintPreview::main_dialog:
+        break;
+    case PhasesPrintPreview::wrong_printer:
+    case PhasesPrintPreview::wrong_printer_abort:
+        pMsgbox = make_static_unique_ptr<MsgBoxInvalidPrinter>(&msgBoxMemSpace, GuiDefaults::RectScreenNoHeader, _(labelWarning), &png::warning_16x16);
+        break;
+    case PhasesPrintPreview::filament_not_inserted:
+        pMsgbox = makeMsgBox(_(labelWarning), _(txt_fil_not_detected));
+        break;
+    case PhasesPrintPreview::mmu_filament_inserted:
+        pMsgbox = makeMsgBox(_(labelWarning), _(txt_fil_detected_mmu));
+        break;
+    case PhasesPrintPreview::wrong_filament:
+        pMsgbox = makeMsgBox(_(labelWarning), _(txt_wrong_fil_type));
+        break;
+    }
+
+    if (pMsgbox)
+        pMsgbox->BindToFSM(phase);
+}
+
+void ScreenPrintPreview::on_enter() {
+    if (!first_event) {
         return;
     }
-    SuperWindowEvent(sender, event, param);
+    first_event = false;
+
+#if (!DEVELOPER_MODE() && PRINTER_TYPE == PRINTER_PRUSA_XL)
+    warn_unfinished_selftest_msgbox();
+#endif
+}
+
+void ScreenPrintPreview::windowEvent(EventLock /*has private ctor*/, window_t *sender, GUI_event_t event, void *param) {
+    if (event_in_progress)
+        return;
+
+    AutoRestore avoid_recursion(event_in_progress, true);
+
+    on_enter();
 }

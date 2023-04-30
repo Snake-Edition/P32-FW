@@ -1,36 +1,25 @@
 // liveadjustz.cpp
 
 #include "liveadjust_z.hpp"
-#include "resource.h"
 #include "sound.hpp"
 #include "ScreenHandler.hpp"
 #include "GuiDefaults.hpp"
-#include "marlin_client.h"
-#include "marlin_vars.h"
+#include "marlin_client.hpp"
 #include "display_helper.h"
 #include "SteelSheets.hpp"
+#include "png_resources.hpp"
 
 #include "config_features.h"
-#if (PRINTER_TYPE == PRINTER_PRUSA_MINI)
-    #include "gui_config_mini.h"
-#else
-    #error "Unknown PRINTER_TYPE."
-#endif
-
-const int axis_steps_per_unit[] = DEFAULT_AXIS_STEPS_PER_UNIT;
-const float z_offset_step = 1.0F / float(axis_steps_per_unit[2]);
-constexpr float z_offset_min = SteelSheets::zOffsetMin;
-constexpr float z_offset_max = SteelSheets::zOffsetMax;
+#include "gui_config_printer.hpp"
 
 /*****************************************************************************/
 //WindowScale
 
 WindowScale::WindowScale(window_t *parent, point_i16_t pt)
     : AddSuperWindow<window_frame_t>(parent, Rect16(pt, 10, 100))
-    , scaleNum0(parent, getNumRect(pt), 0)
-    , scaleNum1(parent, getNumRect(pt), -1)
-    , scaleNum2(parent, getNumRect(pt), -2) {
-    scaleNum0.SetFormat("% .0f");
+    , scaleNum0(parent, getNumRect(pt), z_offset_max, "% f")
+    , scaleNum1(parent, getNumRect(pt), (z_offset_max + z_offset_min) / 2, "% f")
+    , scaleNum2(parent, getNumRect(pt), z_offset_min, "% f") {
 
     scaleNum0 -= Rect16::Top_t(8);
     scaleNum1 += Rect16::Top_t((Height() / 2) - 8);
@@ -41,10 +30,10 @@ Rect16 WindowScale::getNumRect(point_i16_t pt) const {
     return Rect16(pt.x - 30, pt.y, 30, 20);
 }
 
-void WindowScale::SetMark(float percent) {
+void WindowScale::SetMark(float relative) {
     if (!mark_old_y)
         mark_old_y = mark_new_y;
-    mark_new_y = Height() * std::clamp(percent, 0.f, 100.f);
+    mark_new_y = Height() * std::clamp(relative, 0.f, 1.f);
     if (mark_old_y != mark_new_y) {
         Invalidate();
     } else {
@@ -100,7 +89,7 @@ void WindowLiveAdjustZ::Save() {
 
 void WindowLiveAdjustZ::Change(int dif) {
     float old = number.GetValue();
-    float z_offset = number.value;
+    float z_offset = number.GetValue();
 
     z_offset += (float)dif * z_offset_step;
     z_offset = dif >= 0 ? std::max(z_offset, old) : std::min(z_offset, old); //check overflow/underflow
@@ -171,15 +160,24 @@ void WindowLiveAdjustZ_withText::windowEvent(EventLock /*has private ctor*/, win
 
 /*****************************************************************************/
 //LiveAdjustZ
-
 static constexpr const padding_ui8_t textPadding = { 10, 5, 0, 0 };
+static constexpr const Rect16 nozzleRect = Rect16((display::GetW() / 2) - 24, 120, 48, 48);
+#if defined(USE_ST7789) || defined(USE_MOCK_DISPLAY)
+static constexpr const Rect16 textRect = Rect16(0, 32, display::GetW(), 4 * 30);
+static constexpr const point_i16_t adjuster_pt = point_i16_t(75, 205);
+static constexpr const point_i16_t scale_pt = point_i16_t(45, 125);
+#elif defined(USE_ILI9488)
+static constexpr const Rect16 textRect = Rect16(20, 40, display::GetW() - 40, 3 * 30);
+static constexpr const point_i16_t adjuster_pt = point_i16_t(210, 205);
+static constexpr const point_i16_t scale_pt = point_i16_t(180, 125);
+#endif
 
 LiveAdjustZ::LiveAdjustZ()
     : AddSuperWindow<IDialog>(GuiDefaults::RectScreenBody)
-    , text(this, getTextRect(), is_multiline::yes, is_closed_on_click_t::no)
-    , nozzle_icon(this, getNozzleRect(), IDR_PNG_nozzle_shape_48px)
-    , adjuster(this, { 75, 215 })
-    , scale(this, { 45, 125 }) {
+    , text(this, textRect, is_multiline::yes, is_closed_on_click_t::no)
+    , nozzle_icon(this, nozzleRect, &png::nozzle_shape_48x48)
+    , adjuster(this, adjuster_pt)
+    , scale(this, scale_pt) {
 
     /// using window_t 1bit flag
     flags.close_on_click = is_closed_on_click_t::yes;
@@ -192,24 +190,15 @@ LiveAdjustZ::LiveAdjustZ()
     moveNozzle();
 }
 
-const Rect16 LiveAdjustZ::getTextRect() {
-    // make space for 4 rows of text rendered with the default GUI font
-    return Rect16(0, 32, 240, 4 * GuiDefaults::Font->h + textPadding.bottom + textPadding.top);
-}
-
-const Rect16 LiveAdjustZ::getNozzleRect() {
-    return Rect16(120 - 24, 120, 48, 48);
-}
-
 void LiveAdjustZ::moveNozzle() {
     uint16_t old_top = nozzle_icon.Top();
-    Rect16 moved_rect = getNozzleRect();                // starting position - 0%
-    float percent = adjuster.GetValue() / z_offset_min; // z_offset value in percent
+    Rect16 moved_rect = nozzleRect;                                                        // starting position - 0%
+    float relative = (z_offset_max - adjuster.GetValue()) / (z_offset_max - z_offset_min); // relative z_offset value
 
-    // set move percent for a scale line indicator
-    scale.SetMark(percent);
+    // set move for a scale line indicator
+    scale.SetMark(relative);
 
-    moved_rect += Rect16::Top_t(int(40 * percent)); // how much will nozzle move
+    moved_rect += Rect16::Top_t(int(40 * relative)); // how much will nozzle move
     nozzle_icon.SetRect(moved_rect);
     if (old_top != nozzle_icon.Top()) {
         nozzle_icon.Invalidate();

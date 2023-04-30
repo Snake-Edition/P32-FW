@@ -9,14 +9,14 @@ FW developers and testers are welcome.
 
 Alternative FW for the Prusa Mini. There's quite few improvements:
 
-* **Hotend fan speed**: Adds a menu option to unlock the hotend fan speed
-  and increase it from the Prusa Firmware's default 38% to anywhere from 50-100%.
+* ~~**Hotend fan speed**: Adds a menu option to unlock the hotend fan speed~~
+  ~~and increase it from the Prusa Firmware's default 38% to anywhere from 50-100%.~~
 * **Skew compensation**: Turns on skew compensation in Marlin and allows it
   to be configured directly through the Settings menu or with `M852`.
 * **OctoPrint screen**: Adds support for `M73` (print progress) and `M117`
   (LCD messages).
-* **PID tuning**: Automatically writes PID settings to EEPROM after `M303 U1` (autotune),
-  `M301` (set hotend PID), and `M304` (set bed PID).
+* ~~**PID tuning**: Automatically writes PID settings to EEPROM after `M303 U1` (autotune),~~
+  ~~`M301` (set hotend PID), and `M304` (set bed PID).~~
 * **Max Temps**: Raises the maximum bed temperature from 100C to 110C
   and nozzle temperature from 290C to 300C (use with caution!).
 * **Settings during print**: You can change Snake settings during printing.
@@ -24,7 +24,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
   which uses print fan to speed up cooling.
 * **Game**: Instead of printing you can enjoy simple game.
 * **Bigger time**: Printing and remaining time is now bigger.
-* **Startup wizard**: Now you can select `Ignore` at the wizard start screen to disable starting of the wizard at the printer startup.
+* ~~**Startup wizard**: Now you can select `Ignore` at the wizard start screen to disable starting of the wizard at the printer startup.~~
 
 All settings are automatically saved to EEPROM and loaded on boot.
 
@@ -179,9 +179,8 @@ but the result will not be as accurate.
 ## Calibrating Skew
 
 Measuring skew on all three axes at once can be done by simply printing
-[this compact calibration tower](doc/llama/skew.stl):
-
-![Skew Tower](doc/llama/skew.jpg)
+[bar calibration tower](https://www.printables.com/model/70792-easy-3-axis-skew-calibration-tower-with-spreadshee)
+or [hourglass calibration tower](https://www.printables.com/model/343275-skew-calibration-hourglass).
 
 Turn off skew correction before you print. Use a normal layer height
 (0.15mm) and no supports. Do not rotate the model in your slicer -
@@ -255,6 +254,7 @@ This repository includes source code and firmware releases for the Original Prus
 
 The currently supported model is:
 - Original Prusa MINI
+- Original Prusa XL
 
 ## Getting Started
 
@@ -280,10 +280,10 @@ Run `python utils/build.py`. The binaries are then going to be stored under `./b
 
 #### Examples:
 
-Build the firmware for MINI in `debug` mode:
+Build the firmware for MINI and iX in `debug` mode:
 
 ```bash
-python utils/build.py --preset mini --build-type debug
+python utils/build.py --preset mini,ix --build-type debug
 ```
 
 Build _final_ version for all printers and create signed `.bbf` versions:
@@ -305,10 +305,10 @@ operable program or batch file.` Open `manage app execution aliases` and disable
 
 #### Python environment
 
-The `build.py` script wants to install some python packages. If you prefer not to have your system modified, it is possible to use `virtualenv` or a similar tool.
+The `build.py` script will install some Python packages. If you prefer not to have your system modified, we recommend to use `virtualenv` or a similar tool.
 
 ```bash
-virtualnev venv
+virtualenv venv
 . venv/bin/activate
 ```
 
@@ -330,6 +330,42 @@ All the source code in this repository is automatically formatted:
 - and CMake files using [cmake-format](https://github.com/cheshirekow/cmake_format).
 
 If you want to contribute, make sure to install [pre-commit](https://pre-commit.com) and then run `pre-commit install` within the repository. This makes sure that all your future commits will be formatted appropriately. Our build server automatically rejects improperly formatted pull requests.
+
+#### XL and Puppies
+
+With the XL, the situation gets a bit more complex. The firmware of xlBuddy contains firmwares for the puppies (Dwarf and Modularbed) to flash them when necessary. We support several ways of dealing with those firmwares when developing:
+
+1. Build Dwarf/Modularbed firmware automatically and flash it on startup by xlBuddy (the default)
+    - The Dwarf firmware will be built from this repo's state.
+    - The Modularbed firmware is going to be built from https://github.com/prusa3d/Prusa-Firmware-ModularBed.
+
+2. Build Dwarf/Modularbed from a given source directory and flash it on startup by xlBuddy.
+    - Specify `DWARF_SOURCE_DIR`/`MODULARBED_SOURCE_DIR` CMake cache variable with the local repo you want to use.
+    - Example below would build modularbed's firmware from /Projects/Prusa-Firmware-ModularBed and include it in the xlBuddy firmware.
+    ```
+    cmake .. --preset xl_release_boot -DMODULARBED_SOURCE_DIR=/Projects/Prusa-Firmware-ModularBed
+    ```
+    - You can also specify the build directory you want to use:
+    ```
+    cmake .. --preset xl_release_boot \
+        -DMODULARBED_SOURCE_DIR=/Projects/Prusa-Firmware-ModularBed  \
+        -DMODULARBED_BINARY_DIR=/Projects/Prusa-Firmware-ModularBed/build
+    ```
+3. Use pre-built Dwarf/Modularbed firmware and flash it on startup by xlBuddy
+    - Specify the location of the .bin file with `DWARF_BINARY_PATH`/`MODULARBED_BINARY_PATH`.
+    - For example
+    ```
+    cmake .. --preset xl_release_boot -DDWARF_BINARY_PATH=/Downloads/dwarf-4.4.0-boot.bin
+    ```
+
+4. Do not include any puppy firmware, and do not flash the puppies by xlBuddy.
+    ```
+    -DENABLE_PUPPY_BOOTLOAD=NO
+    ```
+    - With the `ENABLE_PUPPY_BOOTLOAD` set to false, the project will disable Puppy flashing & interaction with Puppy bootloaders.
+    - It is up to you to flash the correct firmware to the puppies (noboot variant).
+
+See /ProjectOptions.cmake for more information about those cache variables.
 
 #### Running tests
 

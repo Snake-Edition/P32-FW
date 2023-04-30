@@ -10,28 +10,26 @@
 #include "support_utils.h"
 
 /// QR Window
-window_qr_t::window_qr_t(window_t *parent, Rect16 rect, uint16_t err_num)
-    : window_qr_t(parent, rect) {
+window_qr_t::window_qr_t(window_t *parent, Rect16 rect, uint16_t err_num, Align_t align)
+    : window_qr_t(parent, rect, align) {
     SetQRHeader(err_num);
 }
 
-window_qr_t::window_qr_t(window_t *parent, Rect16 rect)
+window_qr_t::window_qr_t(window_t *parent, Rect16 rect, Align_t align)
     : AddSuperWindow<window_t>(parent, rect)
-    // , version(9)
-    // , ecc_level(qrcodegen_Ecc_HIGH)
-    // , mode(qrcodegen_Mode_ALPHANUMERIC)
-    , border(4)
+    , border(2)
     , px_per_module(2)
-    , align(Align_t::Center())
+    , align(align)
     , scale(true) {
 }
 
 window_qr_t::window_qr_t(window_t *parent, Rect16 rect, const char *txt)
-    : window_qr_t(parent, rect) {
+    : window_qr_t(parent, rect, Align_t::Center()) {
     strncpy(text, txt, sizeof(text));
 }
 
 void window_qr_t::SetQRHeader(uint16_t err_num) {
+    error_num = err_num;
     bool devhash_in_qr = eeprom_get_bool(EEVAR_DEVHASH_IN_QR);
     if (devhash_in_qr) {
         error_url_long(text, sizeof(text), err_num);
@@ -39,6 +37,16 @@ void window_qr_t::SetQRHeader(uint16_t err_num) {
         error_url_short(text, sizeof(text), err_num);
     }
     Invalidate();
+}
+
+const char *window_qr_t::GetQRLongText() {
+    error_url_long(text, sizeof(text), error_num);
+    return text;
+}
+
+const char *window_qr_t::GetQRShortText() {
+    error_url_short(text, sizeof(text), error_num);
+    return text;
 }
 
 void window_qr_t::unconditionalDraw() {

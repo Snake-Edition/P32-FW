@@ -14,10 +14,10 @@ using point_ui8_t = point_t<uint8_t>;
 using point_i8_t = point_t<int8_t>;
 const constexpr int snake_max_length = sizeof(ScratchBuffer::buffer) / sizeof(point_ui8_t);
 
-class screen_snake_data_t : public AddSuperWindow<screen_t> {
+class ScreenSnakeGame : public AddSuperWindow<screen_t> {
 public:
-    screen_snake_data_t();
-    ~screen_snake_data_t() { scratch_buffer_ownership.release(); }
+    ScreenSnakeGame();
+    ~ScreenSnakeGame() { scratch_buffer_ownership.release(); }
 
 protected:
     virtual void windowEvent(EventLock /*has private ctor*/, window_t *sender, GUI_event_t event, void *param) override;

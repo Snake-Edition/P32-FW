@@ -6,7 +6,7 @@
 #include "ScreenHandler.hpp"
 #include "gui_timer.h"
 #include "display.h"
-#include "marlin_client.h"
+#include "marlin_client.hpp"
 #include "knob_event.hpp"
 
 bool window_t::IsVisible() const { return flags.visible && !flags.hidden_behind_dialog; }
@@ -23,6 +23,33 @@ bool window_t::ClosedOnSerialPrint() const { return flags.serial_close == is_clo
 bool window_t::HasEnforcedCapture() const { return flags.enforce_capture_when_not_visible; }
 bool window_t::IsCapturable() const { return IsVisible() || HasEnforcedCapture(); }
 bool window_t::HasIcon() const { return flags.has_icon; }
+
+void window_t::SetHasIcon() {
+    if (flags.has_icon)
+        return;
+    flags.has_icon = true;
+    Invalidate();
+}
+void window_t::ClrHasIcon() {
+    if (!flags.has_icon)
+        return;
+    flags.has_icon = false;
+    Invalidate();
+}
+
+void window_t::SetRedLayout() {
+    setRedLayout();
+}
+void window_t::SetBlackLayout() {
+    setBlackLayout();
+}
+
+void window_t::setRedLayout() {
+    SetBackColor(COLOR_RED_ALERT);
+}
+void window_t::setBlackLayout() {
+    SetBackColor(COLOR_BLACK);
+}
 
 void window_t::Validate(Rect16 validation_rect) {
     if (validation_rect.IsEmpty() || rect.HasIntersection(validation_rect)) {
@@ -375,15 +402,20 @@ void window_t::addInvalidationRect(Rect16 rc) {
 }
 
 void window_t::unconditionalDraw() {
-    display::FillRect(GetRect(), GetBackColor());
+    if (flags.has_round_corners) {
+        color_t parent_back_color = GetParent() ? GetParent()->GetBackColor() : GetBackColor();
+        display::DrawRoundedRect(GetRect(), parent_back_color, GetBackColor(), GuiDefaults::DefaultCornerRadius, MIC_ALL_CORNERS);
+    } else {
+        display::FillRect(GetRect(), GetBackColor());
+    }
 }
 
-void window_t::WindowEvent(window_t *sender, GUI_event_t event, void *param) {
+void window_t::WindowEvent(window_t *sender, GUI_event_t event, void *const param) {
     static constexpr const char txt[] = "WindowEvent via public";
     windowEvent(EventLock(txt, sender, event), sender, event, param);
 }
 
-void window_t::ScreenEvent(window_t *sender, GUI_event_t event, void *param) {
+void window_t::ScreenEvent(window_t *sender, GUI_event_t event, void *const param) {
     static constexpr const char txt[] = "ScreenEvent via public";
     if (event == GUI_event_t::HELD_RELEASED && flags.has_long_hold_screen_action) {
         gui::knob::LongPressScreenAction();
@@ -396,13 +428,13 @@ void window_t::ScreenEvent(window_t *sender, GUI_event_t event, void *param) {
 //frame does something else - resend to all children
 // MUST BE PRIVATE
 // call nonvirtual ScreenEvent instead (contains debug output)
-void window_t::screenEvent(window_t *sender, GUI_event_t event, void *param) {
+void window_t::screenEvent(window_t *sender, GUI_event_t event, void *const param) {
     WindowEvent(sender, event, param);
 }
 
 // MUST BE PRIVATE
 // call nonvirtual WindowEvent instead (contains debug output)
-void window_t::windowEvent(EventLock /*has private ctor*/, window_t *sender, GUI_event_t event, void *param) {
+void window_t::windowEvent(EventLock /*has private ctor*/, window_t *sender, GUI_event_t event, void *const param) {
     if (event == GUI_event_t::CLICK && parent) {
         if (flags.close_on_click == is_closed_on_click_t::yes) {
             Screens::Access()->Close();

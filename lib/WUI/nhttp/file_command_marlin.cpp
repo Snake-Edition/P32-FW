@@ -32,7 +32,7 @@ FileCommand::StartResult FileCommand::start() {
         }
         return StartResult::NotFound;
     }
-    if (wui_start_print(filename)) {
+    if (wui_start_print(filename, true) == StartPrintResult::PrintStarted) {
         return StartResult::Started;
     } else {
         return StartResult::NotReady;

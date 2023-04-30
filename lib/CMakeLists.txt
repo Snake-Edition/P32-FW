@@ -1,3 +1,5 @@
+set_directory_properties(PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
 add_subdirectory(Drivers)
 add_subdirectory(Middlewares)
 add_subdirectory(Arduino_Core_Buddy)
@@ -16,3 +18,6 @@ include(AddJsmn.cmake)
 include(AddPrintf.cmake)
 include(AddSegger.cmake)
 include(AddTinyusb.cmake)
+include(AddLiblightmodbus.cmake)
+include(AddCrashCatcher.cmake)
+include(AddPrusaErrorCodes.cmake)

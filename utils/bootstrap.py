@@ -37,11 +37,11 @@ dependencies = {
         },
     },
     'cmake': {
-        'version': '3.21.3',
+        'version': '3.22.5',
         'url': {
-            'Linux': 'https://github.com/Kitware/CMake/releases/download/v3.21.3/cmake-3.21.3-linux-x86_64.tar.gz',
-            'Windows': 'https://github.com/Kitware/CMake/releases/download/v3.21.3/cmake-3.21.3-windows-x86_64.zip',
-            'Darwin': 'https://github.com/Kitware/CMake/releases/download/v3.21.3/cmake-3.21.3-macos-universal.tar.gz',
+            'Linux': 'https://github.com/Kitware/CMake/releases/download/v3.22.5/cmake-3.22.5-linux-x86_64.tar.gz',
+            'Windows': 'https://github.com/Kitware/CMake/releases/download/v3.22.5/cmake-3.22.5-windows-x86_64.zip',
+            'Darwin': 'https://github.com/Kitware/CMake/releases/download/v3.22.5/cmake-3.22.5-macos-universal.tar.gz',
         },
     },
     'gcc-arm-none-eabi': {
@@ -64,16 +64,16 @@ dependencies = {
         'version': '2.0.2',
         'url': 'https://prusa-buddy-firmware-dependencies.s3.eu-central-1.amazonaws.com/bootloader-mini-v2.0.2-FF7C65BF-1853-43B3-869C-C846FA39AB75.zip',
     },
-    'mini404': {
-        'version': '0.9.3',
-        'url': {
-            'Linux': 'https://github.com/vintagepc/MINI404/releases/download/v0.9.3/Mini404-v0.9.3-linux.tar.bz2',
-            'Windows': 'https://github.com/vintagepc/MINI404/releases/download/v0.9.3/Mini404-v0.9.3-w64.zip',
-            'Darwin': 'https://github.com/vintagepc/MINI404/releases/download/v0.9.3/Mini404-v0.9.3-macos.tar.bz2',
-        }
+    'bootloader-xl': {
+        'version': '2.0.7',
+        'url': 'https://prusa-buddy-firmware-dependencies.s3.eu-central-1.amazonaws.com/bootloader-xl-2.0.7-2BB59278-CED8-4CA6-AE95-4692646671D5.zip',
+    },
+    'cmsis-svd': {
+        'version': '0.4.9999',
+        'url': 'https://github.com/posborne/cmsis-svd/archive/45a1e90afe488f01df94b3e0eb89a67c1a900a9a.zip',
     },
 }
-pip_dependencies = ['ecdsa', 'polib', 'littlefs-python']
+pip_dependencies = ['ecdsa', 'polib', 'pyyaml', 'littlefs-python',"Pillow"]
 # yapf: enable
 
 
@@ -153,6 +153,15 @@ def install_dependency(dependency):
     fix_executable_permissions(dependency, installation_directory)
 
 
+def install_openocd_config_template():
+    debug_dir = project_root_dir / 'utils' / 'debug'
+    custom_config_path = debug_dir / '10_custom_config.cfg'
+    custom_config_template_path = debug_dir / '10_custom_config_template.cfg'
+    if not custom_config_path.exists():
+        print(f'Installing openocd user-config to {custom_config_path}')
+        shutil.copy(custom_config_template_path, custom_config_path)
+
+
 def get_dependency_version(dependency):
     return dependencies[dependency]['version']
 
@@ -206,6 +215,9 @@ def main() -> int:
         print('Installing Python package %s' % package)
         run(sys.executable, '-m', 'pip', 'install', package,
             '--disable-pip-version-check')
+
+    # also, install openocd config meant for customization
+    install_openocd_config_template()
 
     return 0
 

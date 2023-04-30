@@ -16,11 +16,14 @@
 #include "IPause.hpp"
 #include <array>
 
+// @brief With Z unhomed, ensure that it is at least amount_mm above bed.
+void unhomed_z_lift(float amount_mm);
+
 class PausePrivatePhase : public IPause {
     PhasesLoadUnload phase;       //needed for CanSafetyTimerExpire
     int load_unload_shared_phase; //shared variable for UnloadPhases_t and LoadPhases_t
 
-    float nozzle_restore_temp;
+    float nozzle_restore_temp[HOTENDS];
     float bed_restore_temp;
 
 public:
@@ -98,7 +101,7 @@ protected:
 public:
     virtual void RestoreTemp() override;
     virtual bool CanSafetyTimerExpire() const override; //evaluate if client can click == safety timer can expire
-    virtual void NotifyExpiredFromSafetyTimer(float hotend_temp, float bed_temp) override;
+    virtual void NotifyExpiredFromSafetyTimer() override;
     virtual bool HasTempToRestore() const override;
 };
 
@@ -182,6 +185,7 @@ private:
     bool check_user_stop(); //< stops motion and fsm and returns true it user triggered stop
     bool wait_or_stop();    //< waits until motion is finished; if stop is triggered then returns true
     bool process_stop();
+    void handle_filament_removal(LoadPhases_t phase_to_set); //<checks if filament is present if not it sets different phase
 
     enum class RammingType {
         unload,
@@ -199,10 +203,14 @@ private:
 
         void bindToSafetyTimer();
         void unbindFromSafetyTimer();
-
+        static bool active; // we currently support only 1 instance
     public:
-        FSM_HolderLoadUnload(Pause &p, LoadUnloadMode mode);
+        FSM_HolderLoadUnload(Pause &p, LoadUnloadMode mode, const char *fnc, const char *file, int line);
         ~FSM_HolderLoadUnload();
         friend class Pause;
     };
+#define FSM_HOLDER_LOAD_UNLOAD_LOGGING(pause, mode) FSM_HolderLoadUnload load_unload_from_macro(pause, mode, __PRETTY_FUNCTION__, __FILE__, __LINE__)
+
+public:
+    static bool IsFsmActive() { return FSM_HolderLoadUnload::active; }
 };

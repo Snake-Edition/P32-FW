@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "stm32f4xx_hal.h"
+#include <device/hal.h>
 
 /**
  * @name Macros manipulating PIN_TABLE macro
@@ -21,7 +21,7 @@
  * @brief Declare all pins supplied in PIN_TABLE parameter
  * @par Usage:
  * @code
- * DECLARE_PINS(PIN_TABLE)
+ * PIN_TABLE(DECLARE_PINS)
  * @endcode
  */
 #define DECLARE_PINS(TYPE, NAME, PORTPIN, PARAMETERS, INTERRUPT_HANDLER) inline constexpr TYPE NAME(PORTPIN, PARAMETERS);
@@ -30,7 +30,7 @@
  * @brief Declare all pins supplied in VIRTUAL_PIN_TABLE parameter
  * @par Usage:
  * @code
- * DECLARE_VIRTUAL_PINS(VIRTUAL_PIN_TABLE)
+ * VIRTUAL_PIN_TABLE(DECLARE_VIRTUAL_PINS)
  * @endcode
  */
 #define DECLARE_VIRTUAL_PINS(TYPE, READ_FN, ISR_FN, NAME, PORTPIN, PARAMETERS) inline constexpr TYPE<READ_FN, ISR_FN> NAME(PARAMETERS);
@@ -43,16 +43,28 @@
  * @endcode
  */
 #define CONFIGURE_PINS(TYPE, NAME, PORTPIN, PARAMETERS, INTERRUPT_HANDLER) buddy::hw::NAME.configure();
+
 /**
  * @brief Generate array of physical location of all pins supplied in PIN_TABLE parameter
  * @par Usage:
  * @code
  * constexpr PinChecker pinsToCheck[] = {
- *   PINS_TO_CHECK(PIN_TABLE)
+ *   PIN_TABLE(PINS_TO_CHECK)
  * };
  * @endcode
  */
 #define PINS_TO_CHECK(TYPE, NAME, PORTPIN, PARAMETERS, INTERRUPT_HANDLER) { PORTPIN },
+
+/**
+ * @brief Generate array of physical location of all pins supplied in VIRTUAL_PIN_TABLE parameter
+ * @par Usage:
+ * @code
+ * constexpr PinChecker pinsToCheck[] = {
+ *   VIRTUAL_PIN_TABLE(VIRTUAL_PINS_TO_CHECK)
+ * };
+ * @endcode
+ */
+#define VIRTUAL_PINS_TO_CHECK(TYPE, READ_FN, ISR_FN, NAME, PORTPIN, PARAMETERS) { PORTPIN },
 /**@}*/
 
 namespace buddy::hw {
@@ -67,7 +79,9 @@ enum class IoPort : uint8_t {
     D,
     E,
     F,
+#ifdef GPIOG_BASE
     G,
+#endif
 };
 
 enum class IoPin : uint8_t {
@@ -108,7 +122,7 @@ protected:
         : m_halPortBase(IoPortToHalBase(ioPort))
         , m_halPin(IoPinToHal(ioPin)) {}
 
-    GPIO_TypeDef *getHalPort() const {
+    __attribute__((always_inline)) inline GPIO_TypeDef *getHalPort() const {
         return reinterpret_cast<GPIO_TypeDef *>(m_halPortBase);
     }
 
@@ -132,7 +146,7 @@ public:
         : Pin(ioPort, ioPin) {}
     static_assert(Pin::IoPortToHalBase(IoPort::A) == GPIOA_BASE, "IoPortToHalBase broken.");
     static_assert(Pin::IoPortToHalBase(IoPort::B) == GPIOB_BASE, "IoPortToHalBase broken.");
-    static_assert(Pin::IoPortToHalBase(IoPort::G) == GPIOG_BASE, "IoPortToHalBase broken.");
+    static_assert(Pin::IoPortToHalBase(IoPort::F) == GPIOF_BASE, "IoPortToHalBase broken.");
     static_assert(Pin::IoPinToHal(IoPin::p0) == GPIO_PIN_0, "IoPinToHal broken");
     static_assert(Pin::IoPinToHal(IoPin::p1) == GPIO_PIN_1, "IoPinToHal broken");
     static_assert(Pin::IoPinToHal(IoPin::p15) == GPIO_PIN_15, "IoPinToHal broken");
@@ -273,6 +287,15 @@ public:
             getHalPort()->BSRR = static_cast<uint32_t>(m_halPin) << 16U;
         }
     }
+
+    __attribute__((always_inline)) inline void set() const {
+        getHalPort()->BSRR = m_halPin;
+    }
+
+    __attribute__((always_inline)) inline void reset() const {
+        getHalPort()->BSRR = static_cast<uint32_t>(m_halPin) << 16U;
+    }
+
     void configure() const;
 
 public:
@@ -304,6 +327,31 @@ private:
         configure();
     }
     friend class InputEnabler;
+};
+
+/**
+ * @brief This type of InputPin allows runtime change of pin direction.
+ *
+ * Use OutputEnabler to switch input pin to output and to write value.
+ */
+class InputOutputPin : public InputPin {
+public:
+    constexpr InputOutputPin(IoPort ioPort, IoPin ioPin, IMode iMode, Pull pull)
+        : InputPin(ioPort, ioPin, iMode, pull) {}
+
+private:
+    void write(State pinState) const {
+        if (pinState != State::low) {
+            getHalPort()->BSRR = m_halPin;
+        } else {
+            getHalPort()->BSRR = static_cast<uint32_t>(m_halPin) << 16U;
+        }
+    }
+    void enableInput() const {
+        configure();
+    }
+    void enableOutput(State pinState, OMode mode, OSpeed speed) const;
+    friend class OutputEnabler;
 };
 
 class DummyOutputPin : protected Pin {
@@ -342,6 +390,26 @@ public:
 
 private:
     const OutputInputPin &m_outputInputPin;
+};
+
+/**
+ * @brief Enable InputOutputPin output mode when constructed, implements write(), revert InputOutputPin to input when destroyed.
+ */
+class OutputEnabler {
+public:
+    OutputEnabler(const InputOutputPin &innputOutputPin, Pin::State pinState, OMode mode, OSpeed speed)
+        : m_innputOutputPin(innputOutputPin) {
+        innputOutputPin.enableOutput(pinState, mode, speed);
+    }
+    ~OutputEnabler() {
+        m_innputOutputPin.enableInput();
+    }
+    void write(Pin::State pinState) const {
+        m_innputOutputPin.write(pinState);
+    }
+
+private:
+    const InputOutputPin &m_innputOutputPin;
 };
 
 } // namespace buddy::hw

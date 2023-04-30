@@ -23,6 +23,8 @@
 
 // clang-format off
 
+#include "filename_defs.h"
+
 /**
  * Configuration_adv.h
  *
@@ -312,7 +314,7 @@
 #define E4_AUTO_FAN_PIN -1
 #define E5_AUTO_FAN_PIN -1
 #define CHAMBER_AUTO_FAN_PIN -1
-#define EXTRUDER_AUTO_FAN_TEMPERATURE 50
+#define EXTRUDER_AUTO_FAN_TEMPERATURE 45
 #define EXTRUDER_AUTO_FAN_SPEED 255 // 255 == full speed
 
 /**
@@ -477,19 +479,21 @@
 //kill command after probing fails
 //#define HALT_ON_PROBING_ERROR
 //after enabling HOMING_MAX_ATTEMPTS, homing can fail
-#define HOMING_MAX_ATTEMPTS 2
+#define HOMING_MAX_ATTEMPTS 10
 #ifdef HOMING_MAX_ATTEMPTS
     // ranges in mm - allowed distance between homing probes for XYZ axes
     constexpr float axis_home_min_diff[] = {-0.2, -0.2, -0.1};
     constexpr float axis_home_max_diff[] = { 0.2,  0.2,  0.1};
+    constexpr float axis_home_invert_min_diff[] = {-1, -1, -1};
+    constexpr float axis_home_invert_max_diff[] = { 1,  1,  1};
 #endif// HOMING_MAX_ATTEMPTS
 
 // Homing hits each endstop, retracts by these distances, then does a slower bump.
-#define X_HOME_BUMP_MM 0
-#define Y_HOME_BUMP_MM 0
+#define X_HOME_BUMP_MM 10
+#define Y_HOME_BUMP_MM 10
 #define Z_HOME_BUMP_MM 2
 #define HOMING_BUMP_DIVISOR \
-    { 2, 2, 4 } // Re-Bump Speed Divisor (Divides the Homing Feedrate)
+    { 1, 1, 4 } // Re-Bump Speed Divisor (Divides the Homing Feedrate)
 //#define QUICK_HOME                     // If homing includes X and Y, do a diagonal move initially
 
 // When G28 is called, this option will make Y home before X
@@ -1083,10 +1087,10 @@
 
 #if EITHER(MESH_BED_LEVELING, AUTO_BED_LEVELING_UBL)
 // Override the mesh area if the automatic (max) area is too large
-#define MESH_MIN_X MESH_INSET
-#define MESH_MIN_Y MESH_INSET
-#define MESH_MAX_X X_BED_SIZE - (MESH_INSET) - 29
-#define MESH_MAX_Y Y_BED_SIZE - (MESH_INSET) - 3
+#define MESH_MIN_X (-41)
+#define MESH_MIN_Y (-48)
+#define MESH_MAX_X (X_BED_SIZE + 15)
+#define MESH_MAX_Y (Y_BED_SIZE + 46)
 #endif
 
 /**
@@ -1355,7 +1359,7 @@
             { -30, 4000 }, \
         }
     #define PAUSE_PARK_RETRACT_FEEDRATE 66 // (mm/s) Initial retract feedrate.
-    #define PAUSE_PARK_RETRACT_LENGTH 2 // (mm) Initial retract.
+    #define PAUSE_PARK_RETRACT_LENGTH 5 // (mm) Initial retract.
 // This short retract is done immediately, before parking the nozzle.
     #define FILAMENT_CHANGE_UNLOAD_FEEDRATE 80 // (mm/s) Unload filament feedrate. This can be pretty fast.
     #define FILAMENT_CHANGE_UNLOAD_ACCEL 1250 // (mm/s^2) Lower acceleration may allow a faster feedrate.
@@ -1508,7 +1512,7 @@
  */
 #if HAS_TRINAMIC
 
-    #define HOLD_MULTIPLIER 1 //0.5  // Scales down the holding current from run current
+    constexpr float HOLD_MULTIPLIER[4] = {1, 1, 1, 1};  // Scales down the holding current from run current
     #define INTERPOLATE true // Interpolate X/Y/Z_MICROSTEPS to 256
 
     #if AXIS_IS_TMC(X)
@@ -1693,6 +1697,28 @@
     #define E4_HYBRID_THRESHOLD 30
     #define E5_HYBRID_THRESHOLD 30
 
+    /**
+     * Provides crash detection during printing and proper crash recovery.
+     * Sensorless homing must be turned on and sensitivities set accordingly.
+     */
+//    #define CRASH_RECOVERY
+    #ifdef CRASH_RECOVERY
+        #define CRASH_STALL_GUARD { 50, 40 }  // internal value representing sensitivity
+        #define CRASH_MAX_PERIOD { 381, 381 } // (steps per tick) - reciprocal value of minimal speed
+        #define CRASH_FILTER (false)          // Stallguard filtering for crash detection
+        #define CRASH_TIMER 45                // seconds before counter reset
+        #define CRASH_COUNTER_MAX 3           // max crashes with automatic recovery
+    #endif
+
+    /**
+     * Measure and check axis length on repeated crashes
+     */
+//    #define AXIS_MEASURE
+    #ifdef AXIS_MEASURE
+        #define AXIS_MEASURE_STALL_GUARD 1
+        #define AXIS_MEASURE_CRASH_PERIOD 210
+    #endif
+
 /**
    * TMC2130, TMC2160, TMC2660, TMC5130, and TMC5160 only
    * Use StallGuard2 to sense an obstacle and trigger an endstop.
@@ -1705,8 +1731,10 @@
    * Too low values can lead to false positives, while too high values will collide the axis without triggering.
    * It is advised to set X/Y/Z_HOME_BUMP_MM to 0.
    * M914 X/Y/Z to live tune the setting
+   *
+   * Stall threshold defines maximal period between steps to trigger a stallguard
    */
-//#define SENSORLESS_HOMING // TMC2130 only
+#define SENSORLESS_HOMING // TMC2130 only
 
 /**
    * Use StallGuard2 to probe the bed with the nozzle.
@@ -1717,9 +1745,20 @@
 //#define SENSORLESS_PROBING // TMC2130 only
 
     #if EITHER(SENSORLESS_HOMING, SENSORLESS_PROBING)
-        #define X_STALL_SENSITIVITY 8
-        #define Y_STALL_SENSITIVITY 8
-    //#define Z_STALL_SENSITIVITY  8
+        #if X_DRIVER_TYPE == TMC2209
+            #define X_STALL_SENSITIVITY 130
+        #endif
+
+        #if Y_DRIVER_TYPE == TMC2209
+            #define Y_STALL_SENSITIVITY 130
+        #endif
+
+        #if Z_DRIVER_TYPE == TMC2209
+            #define Z_STALL_SENSITIVITY 100
+        #endif
+
+        #define STALL_THRESHOLD_TMC2130 0xFFFFF
+        #define STALL_THRESHOLD_TMC2209 400
     #endif
 
     /**
@@ -2395,3 +2434,8 @@
  * M999 reset MCU. Prusa STM32 platform specific
  */
 #define M999_MCU_RESET
+
+/**
+ * M862.x support for print checking Q commands (P are always supported)
+ */
+#define PRINT_CHECKING_Q_CMDS

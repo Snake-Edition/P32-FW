@@ -1,6 +1,6 @@
 #include "job_command.h"
 #include "handler.h"
-#include "search_json.h"
+#include "json_parser.h"
 
 #include <cassert>
 #include <cstring>
@@ -8,6 +8,9 @@
 namespace nhttp::printer {
 
 using namespace handler;
+using http::Status;
+using json::Event;
+using json::Type;
 using std::string_view;
 
 namespace {
@@ -60,7 +63,12 @@ StatusPage JobCommand::process() {
     Command pause_command = Command::ErrUnknownCommand;
     Command top_command = Command::ErrUnknownCommand;
 
-    const auto parse_result = parse_command(reinterpret_cast<const char *>(buffer.data()), buffer_used, [&](string_view key, string_view value) {
+    const auto parse_result = parse_command(reinterpret_cast<const char *>(buffer.data()), buffer_used, [&](const Event &event) {
+        if (event.depth != 1 || event.type != Type::String) {
+            return;
+        }
+        const auto &key = event.key.value();
+        const auto &value = event.value.value();
         if (key == "command") {
             if (value == "cancel") {
                 top_command = Command::Stop;

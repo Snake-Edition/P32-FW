@@ -1,6 +1,8 @@
 #ifndef _STM32_DEF_
 #define _STM32_DEF_
 
+#include <device/cmsis.h>
+
 /**
  * @brief STM32 core version number
  */
@@ -20,7 +22,7 @@
     | (STM32_CORE_VERSION_EXTRA))
 
 #ifndef F_CPU
-    #define F_CPU SystemCoreClock
+    #define F_CPU SYSTEM_CORE_CLOCK
 #endif //F_CPU
 
 #ifndef USE_HAL_DRIVER
@@ -51,6 +53,8 @@
     #include "stm32l4xx.h"
 #elif defined(STM32WBxx)
     #include "stm32wbxx.h"
+#elif defined(STM32G0xx)
+    #include "stm32g0xx.h"
 #else
     #error "STM32YYxx chip series is not defined in boards.txt."
 #endif

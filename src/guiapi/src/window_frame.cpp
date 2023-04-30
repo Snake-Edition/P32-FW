@@ -3,6 +3,7 @@
 #include "gui_invalidate.hpp"
 #include "sound.hpp"
 #include "display.h"
+#include "marlin_client.hpp"
 
 window_frame_t::window_frame_t(window_t *parent, Rect16 rect, win_type_t type, is_closed_on_timeout_t timeout, is_closed_on_serial_t serial)
     : AddSuperWindow<window_t>(parent, rect, type)
@@ -224,6 +225,29 @@ void window_frame_t::windowEvent(EventLock /*has private ctor*/, window_t *sende
         }
 
         break;
+    case GUI_event_t::TOUCH:
+        if (pWin) { //check if a window has focus, to not give it if it does not
+            pWin = GetFirstEnabledSubWin();
+            event_conversion_union un;
+            un.pvoid = param;
+            while (pWin) {
+                Rect16 rc = pWin->GetRect();
+                if (rc.Contain(un.point)) {
+                    break; //found it
+                }
+                pWin = GetNextEnabledSubWin(pWin);
+            }
+        }
+        if (pWin) {
+            pWin->SetFocus();
+            if (pWin->IsFocused()) {
+                // sending click if sitting of focus failed can be harmful
+                // DialogTimed resends capture events if it is not active
+                // this generates unwanted click on focused window
+                pWin->WindowEvent(this, GUI_event_t::CLICK, nullptr);
+            }
+        }
+        break;
     case GUI_event_t::ENC_DN:
         while (pWin && dif--) {
             window_t *const pPrev = GetPrevEnabledSubWin(pWin);
@@ -242,11 +266,12 @@ void window_frame_t::windowEvent(EventLock /*has private ctor*/, window_t *sende
     case GUI_event_t::ENC_UP:
         while (pWin && dif--) {
             window_t *const pNext = GetNextEnabledSubWin(pWin);
-            if (!pNext) {
+
+            if (pNext && pNext->IsVisible()) {
+                Sound_Play(eSOUND_TYPE::EncoderMove);
+            } else {
                 Sound_Play(eSOUND_TYPE::BlindAlert);
                 break;
-            } else {
-                Sound_Play(eSOUND_TYPE::EncoderMove);
             }
             pWin = pNext;
         }
@@ -301,6 +326,7 @@ void window_frame_t::validate(Rect16 validation_rect) {
         ptr->Validate(validation_rect);
         ptr = ptr->GetNext();
     }
+    invalid_area = Rect16();
 }
 
 bool window_frame_t::IsChildFocused() {
@@ -410,10 +436,22 @@ window_t *window_frame_t::GetFirstEnabledSubWin(Rect16 intersection_rect) const 
     return GetNextEnabledSubWin(first_normal, intersection_rect);
 }
 
-Rect16 window_frame_t::GenerateRect(ShiftDir_t direction) {
+Rect16 window_frame_t::GenerateRect(ShiftDir_t direction, size_ui16_t sz, uint16_t distance) {
     if (!last_normal)
         return Rect16();
-    return Rect16(last_normal->GetRect(), direction);
+    return Rect16(last_normal->GetRect(), direction, sz, distance);
+}
+
+Rect16 window_frame_t::GenerateRect(Rect16::Width_t width, uint16_t distance) {
+    if (!last_normal)
+        return Rect16();
+    return Rect16(last_normal->GetRect(), width, distance);
+}
+
+Rect16 window_frame_t::GenerateRect(Rect16::Height_t height, uint16_t distance) {
+    if (!last_normal)
+        return Rect16();
+    return Rect16(last_normal->GetRect(), height, distance);
 }
 
 void window_frame_t::Shift(ShiftDir_t direction, uint16_t distance) {
@@ -471,4 +509,23 @@ window_t *window_frame_t::GetCapturedWindow() {
     }
 
     return ret;
+}
+
+void window_frame_t::RecursiveCall(mem_fnc fnc) {
+    window_t *pWin = first_normal;
+    if (!last_normal)
+        return;
+    while (pWin && pWin != GetNextSubWin(last_normal)) {
+        std::invoke(fnc, *pWin);
+        pWin = GetNextSubWin(pWin);
+    }
+}
+
+void window_frame_t::setRedLayout() {
+    super::setRedLayout();
+    RecursiveCall(&window_t::SetRedLayout); // SetRedLayout is non virtual one
+}
+void window_frame_t::setBlackLayout() {
+    super::setBlackLayout();
+    RecursiveCall(&window_t::SetBlackLayout); // SetBlackLayout is non virtual one
 }

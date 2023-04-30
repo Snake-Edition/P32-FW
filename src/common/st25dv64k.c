@@ -5,6 +5,7 @@
 #include <string.h>
 #include "cmsis_os.h"
 #include "main.h"
+#include "metric.h"
 
 #define ST25DV64K_RTOS
 
@@ -34,6 +35,8 @@ static const uint16_t ADDR_READ_SYS = 0xAF;
 
 static const uint8_t BLOCK_DELAY = 5; // block delay [ms]
 static const uint8_t BLOCK_BYTES = 4; // bytes per block
+
+static const uint8_t WRITE_RETRIES = 3;
 
 #define DELAY HAL_Delay
 
@@ -92,29 +95,41 @@ uint8_t st25dv64k_user_read(uint16_t address) {
     uint8_t _out[2] = { address >> 8, address & 0xff };
     uint8_t data;
     st25dv64k_lock();
-    I2C_Transmit(&EEPROM_I2C, ADDR_WRITE, _out, 2, HAL_MAX_DELAY);
-    I2C_Receive(&EEPROM_I2C, ADDR_READ, &data, 1, HAL_MAX_DELAY);
+    I2C_Transmit(&I2C_HANDLE_FOR(eeprom), ADDR_WRITE, _out, 2, HAL_MAX_DELAY);
+    I2C_Receive(&I2C_HANDLE_FOR(eeprom), ADDR_READ, &data, 1, HAL_MAX_DELAY);
     st25dv64k_unlock();
     return data;
 }
 
-void st25dv64k_user_write(uint16_t address, uint8_t data) {
+static void st25dv64k_user_write_unchecked(uint16_t address, uint8_t data) {
     uint8_t _out[3] = { address >> 8, address & 0xff, data };
     st25dv64k_lock();
-    I2C_Transmit(&EEPROM_I2C, ADDR_WRITE, _out, 3, HAL_MAX_DELAY);
+    I2C_Transmit(&I2C_HANDLE_FOR(eeprom), ADDR_WRITE, _out, 3, HAL_MAX_DELAY);
     DELAY(BLOCK_DELAY);
     st25dv64k_unlock(); // unlock must be here because other threads cannot access eeprom while writing/waiting
+}
+
+void st25dv64k_user_write(uint16_t address, uint8_t data) {
+    for (uint8_t i = 0; i < WRITE_RETRIES; ++i) {
+        st25dv64k_user_write_unchecked(address, data);
+        const uint8_t data_read = st25dv64k_user_read(address);
+        if (data_read == data) {
+            break;
+        }
+    }
 }
 
 void st25dv64k_user_read_bytes(uint16_t address, void *pdata, uint16_t size) {
     uint8_t _out[2] = { address >> 8, address & 0xff };
     st25dv64k_lock();
-    I2C_Transmit(&EEPROM_I2C, ADDR_WRITE, _out, 2, HAL_MAX_DELAY);
-    I2C_Receive(&EEPROM_I2C, ADDR_READ, pdata, size, HAL_MAX_DELAY);
+    I2C_Transmit(&I2C_HANDLE_FOR(eeprom), ADDR_WRITE, _out, 2, HAL_MAX_DELAY);
+    I2C_Receive(&I2C_HANDLE_FOR(eeprom), ADDR_READ, pdata, size, HAL_MAX_DELAY);
     st25dv64k_unlock();
 }
 
-void st25dv64k_user_write_bytes(uint16_t address, void const *pdata, uint16_t size) {
+static void st25dv64k_user_write_bytes_unchecked(uint16_t address, void const *pdata, uint16_t size) {
+    static metric_t metric_eeprom_write = METRIC("eeprom_write", METRIC_VALUE_EVENT, 0, METRIC_HANDLER_ENABLE_ALL);
+    metric_record_event(&metric_eeprom_write);
     uint8_t const *p = (uint8_t const *)pdata;
     uint8_t _out[6];
     uint8_t block_size;
@@ -126,7 +141,7 @@ void st25dv64k_user_write_bytes(uint16_t address, void const *pdata, uint16_t si
         _out[0] = address >> 8;
         _out[1] = address & 0xff;
         memcpy(_out + 2, p, block_size);
-        I2C_Transmit(&EEPROM_I2C, ADDR_WRITE, _out, 2 + block_size, HAL_MAX_DELAY);
+        I2C_Transmit(&I2C_HANDLE_FOR(eeprom), ADDR_WRITE, _out, 2 + block_size, HAL_MAX_DELAY);
         DELAY(BLOCK_DELAY);
         size -= block_size;
         address += block_size;
@@ -135,12 +150,40 @@ void st25dv64k_user_write_bytes(uint16_t address, void const *pdata, uint16_t si
     st25dv64k_unlock(); // unlock must be here because other threads cannot access eeprom while writing/waiting
 }
 
+static inline uint16_t min(const uint16_t a, const uint16_t b) {
+    return a < b ? a : b;
+}
+
+void st25dv64k_user_write_bytes(uint16_t address, void const *pdata, uint16_t size) {
+    for (uint8_t i = 0; i < WRITE_RETRIES; ++i) {
+        st25dv64k_user_write_bytes_unchecked(address, pdata, size);
+
+        // Verify the data being written correctly
+        uint8_t chunk_read[32];
+        uint16_t read_pos = 0;
+        bool match = true;
+        while (read_pos < size) {
+            uint16_t to_read = min(sizeof(chunk_read), size - read_pos);
+            st25dv64k_user_read_bytes(address + read_pos, chunk_read, to_read);
+            if (memcmp(chunk_read, ((uint8_t *)pdata) + read_pos, to_read)) {
+                match = false;
+            }
+            read_pos += to_read;
+        }
+
+        // Stop retrying on match
+        if (match) {
+            break;
+        }
+    }
+}
+
 uint8_t st25dv64k_rd_cfg(uint16_t address) {
     uint8_t _out[2] = { address >> 8, address & 0xff };
     uint8_t data;
     st25dv64k_lock();
-    I2C_Transmit(&EEPROM_I2C, ADDR_WRITE_SYS, _out, 2, HAL_MAX_DELAY);
-    I2C_Receive(&EEPROM_I2C, ADDR_READ_SYS, &data, 1, HAL_MAX_DELAY);
+    I2C_Transmit(&I2C_HANDLE_FOR(eeprom), ADDR_WRITE_SYS, _out, 2, HAL_MAX_DELAY);
+    I2C_Receive(&I2C_HANDLE_FOR(eeprom), ADDR_READ_SYS, &data, 1, HAL_MAX_DELAY);
     st25dv64k_unlock();
     return data;
 }
@@ -148,7 +191,7 @@ uint8_t st25dv64k_rd_cfg(uint16_t address) {
 void st25dv64k_wr_cfg(uint16_t address, uint8_t data) {
     uint8_t _out[3] = { address >> 8, address & 0xff, data };
     st25dv64k_lock();
-    I2C_Transmit(&EEPROM_I2C, ADDR_WRITE_SYS, _out, 3, HAL_MAX_DELAY);
+    I2C_Transmit(&I2C_HANDLE_FOR(eeprom), ADDR_WRITE_SYS, _out, 3, HAL_MAX_DELAY);
     DELAY(BLOCK_DELAY);
     st25dv64k_unlock(); // unlock must be here because other threads cannot access eeprom while writing/waiting
 }
@@ -160,6 +203,6 @@ void st25dv64k_present_pwd(uint8_t *pwd) {
         memcpy(_out + 11, pwd, 8);
     }
     st25dv64k_lock();
-    I2C_Transmit(&EEPROM_I2C, ADDR_WRITE_SYS, _out, 19, HAL_MAX_DELAY);
+    I2C_Transmit(&I2C_HANDLE_FOR(eeprom), ADDR_WRITE_SYS, _out, 19, HAL_MAX_DELAY);
     st25dv64k_unlock();
 }

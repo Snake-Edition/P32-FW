@@ -143,6 +143,50 @@ public:
     Rect16(Rect16 const &, ShiftDir_t);
 
     ////////////////////////////////////////////////////////////////////////////
+    /// @brief Create rectangle with given size and the shift in specific direction
+    /// @param[in] rect Existing rectangle to copy
+    /// @param[in] direction Direction where the created rectangle will be heading to
+    /// @param[in] offset Offset in pixels of the new rectangle shift
+    /// @param[in] size Size of new rectangle
+    Rect16(Rect16 const &, ShiftDir_t, size_ui16_t, uint16_t);
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Create rectangle with given size and the shift in specific direction
+    ///        with calculated offset to be next to the given rectangle
+    /// @param[in] rect Existing rectangle to copy
+    /// @param[in] direction Direction where the created rectangle will be heading to
+    /// @param[in] size Size of new rectangle
+    Rect16(Rect16 const &, ShiftDir_t, size_ui16_t);
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Create rectangle with given width and shifted right of the given rectangle
+    /// @param[in] rect Existing rectangle to copy
+    /// @param[in] width Width of new rectangle
+    /// @param[in] offset Offset in pixels of the new rectangle shift
+    Rect16(Rect16 const &, Width_t, uint16_t);
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Create rectangle with given width with calculated offset to be right
+    ///        of the given rectangle
+    /// @param[in] rect Existing rectangle to copy
+    /// @param[in] width Width of new rectangle
+    Rect16(Rect16 const &, Width_t);
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Create rectangle with given height and shifted under the given rectangle
+    /// @param[in] rect Existing rectangle to copy
+    /// @param[in] Height_t Height of new rectangle
+    /// @param[in] offset Offset in pixels of the new rectangle shift
+    Rect16(Rect16 const &, Height_t, uint16_t);
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Create rectangle with given height with calculated offset to be under
+    ///        the given rectangle
+    /// @param[in] rect Existing rectangle to copy
+    /// @param[in] Height_t Height of new rectangle
+    Rect16(Rect16 const &, Height_t);
+
+    ////////////////////////////////////////////////////////////////////////////
     /// @brief Calculate offset to be able to create same rectangle in given direction
     ///
     /// @param[in] direction Direction where the created rectangle will be heading to
@@ -506,7 +550,18 @@ public:
     ///          different value
     /// @param[in] padding Given padding structure that specify additional pixels
     template <class T>
-    void AddPadding(const padding_t<T>);
+    constexpr void AddPadding(const padding_t<T>);
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Add padding to given rectangle
+    /// @param[in] rc Given rectangle
+    /// @param[in] padding Given padding structure that specify deducted pixels
+    /// @return Return rectangle containing padding
+    template <class T>
+    static constexpr Rect16 AddPadding(Rect16 rc, const padding_t<T> padding) {
+        rc.AddPadding(padding);
+        return rc;
+    }
 
     ////////////////////////////////////////////////////////////////////////////
     /// @brief Subtract pixels from given direction
@@ -515,7 +570,18 @@ public:
     ///          returns different value
     /// @param[in] padding Given padding structure that specify deducted pixels
     template <class T>
-    void CutPadding(const padding_t<T>);
+    constexpr void CutPadding(const padding_t<T>);
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// @brief Subtract padding from given rectangle
+    /// @param[in] rc Given rectangle
+    /// @param[in] padding Given padding structure that specify deducted pixels
+    /// @return Return cut rectangle
+    template <class T>
+    static constexpr Rect16 CutPadding(Rect16 rc, const padding_t<T> padding) {
+        rc.CutPadding(padding);
+        return rc;
+    }
 
     ////////////////////////////////////////////////////////////////////////////
     /// @brief Static method determines the rectangle structure that represents
@@ -588,7 +654,7 @@ public:
     /// @param[in] count number of splits
     /// @param[in] spacing width of spaces between rectangle's splits (optional = 0)
     /// @param[in] text_width[] width of texts (optional = nullptr)
-    void HorizontalSplit(Rect16 splits[], Rect16 spaces[], const size_t count, const uint16_t spacing = 0, uint8_t text_width[] = nullptr) const;
+    void HorizontalSplit(Rect16 splits[], Rect16 spaces[], const size_t count, const uint16_t spacing = 0, const uint8_t text_width[] = nullptr) const;
 
     ////////////////////////////////////////////////////////////////////////////
     /// @brief Horizontal split with dynamic spaces from parent Rect16
@@ -635,7 +701,7 @@ public:
     /// @param[in] count number of splits
     /// @param[in] spacing with of spaces between rectangle's splits (optional = 0)
     /// @param[in] text_width[] text_width of wanted splits (optional = nullptr)
-    void VerticalSplit(Rect16 splits[], Rect16 spaces[], const size_t count, const uint16_t spacing = 0, uint8_t text_width[] = nullptr) const;
+    void VerticalSplit(Rect16 splits[], Rect16 spaces[], const size_t count, const uint16_t spacing = 0, const uint8_t text_width[] = nullptr) const;
 
     ////////////////////////////////////////////////////////////////////////////
     /// @brief Line operation substracts subtrahend
@@ -686,7 +752,7 @@ constexpr bool operator!=(Rect16 const &lhs, Rect16 const &rhs) {
 /// template definitions
 
 template <class T>
-void Rect16::AddPadding(const padding_t<T> p) {
+void constexpr Rect16::AddPadding(const padding_t<T> p) {
     top_left_.x = top_left_.x - p.left;
     top_left_.y = top_left_.y - p.top;
     width_ += (p.left + p.right);
@@ -694,7 +760,7 @@ void Rect16::AddPadding(const padding_t<T> p) {
 }
 
 template <class T>
-void Rect16::CutPadding(const padding_t<T> p) {
+void constexpr Rect16::CutPadding(const padding_t<T> p) {
     if ((p.left + p.right) >= width_
         || (p.top + p.bottom) >= height_) {
         width_ = height_ = 0;

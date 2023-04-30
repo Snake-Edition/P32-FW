@@ -27,6 +27,7 @@
 #define MBEDTLS_PK_C
 #define MBEDTLS_PK_PARSE_C
 #define MBEDTLS_SHA256_C
+#define MBEDTLS_MD5_C
 #define MBEDTLS_SSL_CLI_C
 #define MBEDTLS_SSL_TLS_C
 #define MBEDTLS_X509_CRT_PARSE_C
@@ -61,5 +62,8 @@
 // Prefer smaller code over fast computations (our CPU is idle most of the time anyway).
 #define MBEDTLS_AES_FEWER_TABLES
 #define MBEDTLS_SHA256_SMALLER
+
+// For symmetric connect transfer encrypiton
+#define MBEDTLS_CIPHER_MODE_CBC
 
 #include "mbedtls/check_config.h"

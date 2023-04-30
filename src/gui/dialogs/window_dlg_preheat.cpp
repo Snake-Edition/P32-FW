@@ -6,28 +6,46 @@
  */
 
 #include "window_dlg_preheat.hpp"
-#include "marlin_client.h"
-#include "resource.h"
+#include "png_resources.hpp"
+#include "marlin_client.hpp"
 #include "stdlib.h"
 #include "i18n.h"
 #include <limits>
 
 /*****************************************************************************/
 //NsPreheat::I_MI_Filament
-void NsPreheat::I_MI_Filament::click_at(filament_t filament_index) {
-    const Response response = Filaments::Get(filament_index).response;
+NsPreheat::I_MI_Filament::I_MI_Filament(string_view_utf8 name, unsigned t_noz, unsigned t_bed)
+    : WiInfo<info_len>(name, nullptr, is_enabled_t::yes, is_hidden_t::no, ExtensionLikeLabel::yes) {
+    char buff[info_len];
+    snprintf(buff, sizeof(buff), t_bed > 100 ? "%3u/%3u " : "%3u/%2u  ", t_noz, t_bed); // extra space(s) at the end are intended .. "260/100 " or  "215/60  "
+    ChangeInformation(buff);
+}
+
+void NsPreheat::I_MI_Filament::click_at(filament::Type filament) {
+    const Response response = filament::get_description(filament).response;
     marlin_FSM_response(PhasesPreheat::UserTempSelection, response);
 }
 
 /*****************************************************************************/
 //NsPreheat::MI_RETURN
 NsPreheat::MI_RETURN::MI_RETURN()
-    : WI_LABEL_t(_(label), IDR_PNG_folder_up_16px, is_enabled_t::yes, is_hidden_t::no) {
+    : WI_LABEL_t(_(label), &png::folder_up_16x16, is_enabled_t::yes, is_hidden_t::no) {
 }
 
 void NsPreheat::MI_RETURN::click(IWindowMenu &window_menu) {
     window_menu.Validate(); /// don't redraw since we leave the menu
     marlin_FSM_response(PhasesPreheat::UserTempSelection, Response::Abort);
+}
+
+/*****************************************************************************/
+//NsPreheat::MI_COOLDOWN
+NsPreheat::MI_COOLDOWN::MI_COOLDOWN()
+    : WI_LABEL_t(_(BtnResponse::GetText(Response::Cooldown)), nullptr, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void NsPreheat::MI_COOLDOWN::click(IWindowMenu &window_menu) {
+    const Response response = filament::get_description(filament::Type::NONE).response;
+    marlin_FSM_response(PhasesPreheat::UserTempSelection, response);
 }
 
 /*****************************************************************************/

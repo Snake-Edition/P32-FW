@@ -93,7 +93,7 @@ TEST_CASE("Window registration tests", "[window]") {
     SECTION("popup inside msgbox hiding w0 - w4") {
         MockMsgBox msgbox(Rect16::Merge_ParamPack(screen.w0.GetRect(), screen.w1.GetRect(), screen.w2.GetRect(), screen.w3.GetRect()));
         window_dlg_popup_t::Show(Rect16::Merge_ParamPack(screen.w0.GetRect(), screen.w1.GetRect(), screen.w2.GetRect(), screen.w3.GetRect()), string_view_utf8::MakeNULLSTR());
-        //popup cannot open so test is same as if only msgbox is openned
+        //popup cannot open so test is same as if only msgbox is opened
         REQUIRE(msgbox.GetParent() == &screen);
         REQUIRE(screen.GetCapturedWindow() == &msgbox); //msgbox does claim capture
         screen.CheckOrderAndVisibility(&msgbox);
@@ -109,10 +109,25 @@ TEST_CASE("Window registration tests", "[window]") {
         screen.CheckOrderAndVisibility(popup);
 
         MockMsgBox msgbox(Rect16::Merge_ParamPack(screen.w0.GetRect(), screen.w1.GetRect(), screen.w2.GetRect(), screen.w3.GetRect()));
-        //popup must autoclose so test is same as if only msgbox is openned
+        //popup must autoclose so test is same as if only msgbox is opened
         REQUIRE(msgbox.GetParent() == &screen);
         REQUIRE(screen.GetCapturedWindow() == &msgbox); //msgbox does claim capture
         screen.CheckOrderAndVisibility(&msgbox);
+    }
+
+    SECTION("hidden dialog and popup") {
+        MockMsgBox msgbox(Rect16::Merge_ParamPack(screen.w0.GetRect(), screen.w1.GetRect(), screen.w2.GetRect(), screen.w3.GetRect()));
+        //popup must autoclose so test is same as if only msgbox is opened
+        REQUIRE(msgbox.GetParent() == &screen);
+        REQUIRE(screen.GetCapturedWindow() == &msgbox); //msgbox does claim capture
+        msgbox.Hide();
+        REQUIRE_FALSE(screen.GetCapturedWindow() == &msgbox); //msgbox does not claim capture, because it is not visible
+
+        window_dlg_popup_t::Show(Rect16::Merge_ParamPack(screen.w0.GetRect(), screen.w1.GetRect(), screen.w2.GetRect(), screen.w3.GetRect()), string_view_utf8::MakeNULLSTR());
+        //use GetfirstPopUp next window after last screen is MockMsgBox
+        window_t *popup = screen.GetFirstPopUp();
+        REQUIRE_FALSE(popup == nullptr);
+        REQUIRE(popup->GetType() == win_type_t::popup);
     }
 
     SECTION("live adj Z + M600") {
@@ -334,7 +349,7 @@ TEST_CASE("Window registration tests", "[window]") {
         screen.ReleaseCaptureOfNormalWindow();
     }
 
-    hal_tick = 1000;                                   //set openned on popup
+    hal_tick = 1000;                                   //set opened on popup
     screen.ScreenEvent(&screen, GUI_event_t::LOOP, 0); //loop will initialize popup timeout
     hal_tick = 10000;                                  //timeout popup
     screen.ScreenEvent(&screen, GUI_event_t::LOOP, 0); //loop event will unregister popup

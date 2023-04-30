@@ -15,6 +15,8 @@ protected:
     static constexpr uint16_t icon_width = 16;
 
     const std::function<void(char *)> printAs;
+
+protected:
     constexpr static const char *NA = N_("N/A");
     constexpr static const char *NI = N_("Not initialized");
 
@@ -24,13 +26,13 @@ protected:
         printAs(text);
         stringView = string_view_utf8::MakeRAM((uint8_t *)text);
         render_text_align(extension_rect, stringView, InfoFont, color_back,
-            (IsFocused() && IsEnabled()) ? COLOR_DARK_GRAY : COLOR_SILVER, GuiDefaults::MenuPadding, Align_t::RightCenter());
+            (IsFocused() && IsEnabled()) ? COLOR_DARK_GRAY : COLOR_SILVER, GuiDefaults::MenuPaddingItems, Align_t::RightCenter(), false);
     }
     virtual void click(IWindowMenu &window_menu) override {}
 
 public:
-    WI_LAMBDA_LABEL_t(string_view_utf8 label, uint16_t id_icon, is_enabled_t enabled, is_hidden_t hidden, std::function<void(char *)> printAs)
-        : AddSuper<WI_LABEL_t>(label, id_icon ? icon_width : GuiDefaults::infoDefaultLen * InfoFont->w, id_icon, enabled, hidden)
+    WI_LAMBDA_LABEL_t(string_view_utf8 label, const png::Resource *icon, is_enabled_t enabled, is_hidden_t hidden, std::function<void(char *)> printAs)
+        : AddSuper<WI_LABEL_t>(label, icon ? icon_width : GuiDefaults::infoDefaultLen * InfoFont->w, icon, enabled, hidden)
         , printAs(printAs) {}
 };
 
@@ -45,18 +47,16 @@ protected:
     virtual void click(IWindowMenu &window_menu) {}
 
 public:
-    WI_FORMATABLE_LABEL_t(string_view_utf8 label, uint16_t id_icon, is_enabled_t enabled, is_hidden_t hidden, ValueType initVal, std::function<void(char *)> printAs)
-        : WI_LAMBDA_LABEL_t(label, id_icon, enabled, hidden, printAs)
+    WI_FORMATABLE_LABEL_t(string_view_utf8 label, const png::Resource *icon, is_enabled_t enabled, is_hidden_t hidden, ValueType initVal, std::function<void(char *)> printAs)
+        : WI_LAMBDA_LABEL_t(label, icon, enabled, hidden, printAs)
         , value(initVal)
         , oldVal(initVal) {
     }
-    invalidate_t UpdateValue(ValueType val) {
+    void UpdateValue(ValueType val) {
         value = val;
         if (value != oldVal) {
             oldVal = value;
-            return invalidate_t::yes;
-        } else {
-            return invalidate_t::no;
+            InValidateExtension();
         }
     }
 };

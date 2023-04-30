@@ -1,21 +1,28 @@
 /**
  * @file footer_item_fsensor.cpp
- * @author Radek Vana
- * @date 2021-12-12
  */
 
 #include "footer_item_fsensor.hpp"
-#include "filament_sensor_api.hpp"
-#include "resource.h"
+#include "filament_sensors_handler.hpp"
+#include "png_resources.hpp"
+#include "i18n.h"
 #include <algorithm>
 #include <cmath>
 
 FooterItemFSensor::FooterItemFSensor(window_t *parent)
-    : AddSuperWindow<FooterIconText_IntVal>(parent, IDR_PNG_filament_sensor_17x16, static_makeView, static_readValue) {
+    : AddSuperWindow<FooterIconText_IntVal>(parent, &png::filament_sensor_17x16, static_makeView, static_readValue) {
+}
+
+FooterItemFSensorSide::FooterItemFSensorSide(window_t *parent)
+    : AddSuperWindow<FooterIconText_IntVal>(parent, &png::side_filament_sensor_17x16, static_makeView, static_readValue) {
 }
 
 int FooterItemFSensor::static_readValue() {
-    return int(FSensors_instance().GetPrinter());
+    return int(FSensors_instance().GetCurrentExtruder());
+}
+
+int FooterItemFSensorSide::static_readValue() {
+    return int(FSensors_instance().GetCurrentSide());
 }
 
 //TODO FIXME last character is not shown, I do not know why, added space as workaround
@@ -51,3 +58,6 @@ string_view_utf8 FooterItemFSensor::static_makeView(int value) {
 
     return string_view_utf8(_(txt));
 }
+
+string_view_utf8 FooterItemFSensor::GetName() { return _("F. Sensor"); }
+string_view_utf8 FooterItemFSensorSide::GetName() { return _("Side F. Sensor"); }

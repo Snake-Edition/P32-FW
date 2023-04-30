@@ -10,6 +10,7 @@
 #include "timing.h"
 #include "selftest_esp_type.hpp"
 #include "marlin_server.hpp"
+#include <device/peripherals.h>
 
 #include "../../lib/Marlin/Marlin/src/Marlin.h"
 
@@ -27,29 +28,33 @@ extern "C" {
 
 #include "FreeRTOS.h"
 #include "task.h"
+#include "cmsis_os.h"
 }
 
-#define BOOT_ADDRESS            0x00000ul
-#define APPLICATION_ADDRESS     0x10000ul
-#define PARTITION_TABLE_ADDRESS 0x08000ul
-extern UART_HandleTypeDef huart6;
+LOG_COMPONENT_REF(Network);
+
+#if (PRINTER_TYPE == PRINTER_PRUSA_XL)
+static constexpr ESPUpdate::firmware_set_t FIRMWARE_SET({ { { .address = 0x08000, .filename = "/internal/res/esp32/partition-table.bin", .size = 0 },
+    { .address = 0x01000ul, .filename = "/internal/res/esp32/bootloader.bin", .size = 0 },
+    { .address = 0x10000ul, .filename = "/internal/res/esp32/uart_wifi.bin", .size = 0 } } });
+#else
+static constexpr ESPUpdate::firmware_set_t FIRMWARE_SET({ { { .address = 0x08000ul, .filename = "/internal/res/esp/partition-table.bin", .size = 0 },
+    { .address = 0x00000ul, .filename = "/internal/res/esp/bootloader.bin", .size = 0 },
+    { .address = 0x10000ul, .filename = "/internal/res/esp/uart_wifi.bin", .size = 0 } } });
+#endif
 
 std::atomic<uint32_t> ESPUpdate::status = 0;
 
+/*****************************************************************
+ *
+ * TODO: BIG FAT WARNING: This needs to be merged with ESPFlash to avoid code/functionality duplication
+ *
+*/
 ESPUpdate::ESPUpdate(uintptr_t mask)
-    : firmware_set({ { { .address = PARTITION_TABLE_ADDRESS, .filename = "/internal/res/esp/partition-table.bin", .size = 0 },
-        { .address = BOOT_ADDRESS, .filename = "/internal/res/esp/bootloader.bin", .size = 0 },
-        { .address = APPLICATION_ADDRESS, .filename = "/internal/res/esp/uart_wifi.bin", .size = 0 } } })
+    : firmware_set(FIRMWARE_SET)
     , progress_state(esp_upload_action::Initial)
     , current_file(firmware_set.begin())
     , readCount(0)
-    , loader_config({
-          .huart = &huart6,
-          .port_io0 = GPIOE,
-          .pin_num_io0 = GPIO_PIN_6,
-          .port_rst = GPIOC,
-          .pin_num_rst = GPIO_PIN_13,
-      })
     , phase(PhasesSelftest::_none)
     , from_menu(mask & init_mask::msk_from_menu)
     , credentials_already_set(mask & init_mask::msk_credentials_already_set)
@@ -77,8 +82,14 @@ void ESPUpdate::Loop() {
         switch (ClientResponseHandler::GetResponseFromPhase(phase)) {
         case Response::Continue:
             continue_pressed = true;
+            netdev_set_enabled(NETDEV_ESP_ID, true);
             break;
         case Response::Abort:
+        case Response::NotNow:
+            progress_state = esp_upload_action::Aborted;
+            break;
+        case Response::Never:
+            netdev_set_enabled(NETDEV_ESP_ID, false);
             progress_state = esp_upload_action::Aborted;
             break;
         default:
@@ -92,7 +103,7 @@ void ESPUpdate::Loop() {
             break;
         case esp_upload_action::Initial_wait_user:
             if (continue_pressed) {
-                espif_flash_initialize();
+                espif_flash_initialize(true);
                 struct stat fs;
                 for (esp_entry *chunk = firmware_set.begin();
                      chunk != firmware_set.end(); ++chunk) {
@@ -246,6 +257,7 @@ void ESPUpdate::Loop() {
         case esp_upload_action::Error_wait_user:
             if (continue_pressed) {
                 progress_state = esp_upload_action::Done;
+                aborted = true;
             }
             break;
         case esp_upload_action::Aborted:
@@ -334,7 +346,7 @@ void EspCredentials::Loop() {
             capture_timestamp();
             last_state = progress_state;
         }
-        usb_inserted = marlin_server_read_vars().media_inserted;
+        usb_inserted = marlin_server_get_media_inserted();
         wifi_enabled = netdev_get_active_id() == NETDEV_ESP_ID;
         continue_pressed = false;
 
@@ -383,7 +395,7 @@ void EspCredentials::Loop() {
 
         // update
         if (phase)
-            rfsm.Change(*phase, {}); //we dont need data, only phase
+            FSM_HOLDER_CHANGE_METHOD__LOGGING(rfsm, *phase, {}); //we dont need data, only phase
 
         //call idle loop to prevent watchdog
         idle(true, true);
@@ -589,12 +601,12 @@ void update_esp(bool force) {
         &xHandle);        // Used to pass out the created task's handle.
 
     // update did not start yet
-    // no fsm was openned, it is safe to just return in case sask was not created
+    // no fsm was opened, it is safe to just return in case sask was not created
     if (!xHandle)
         return;
 
     task_state = ESPUpdate::state::did_not_finished;
-    FSM_Holder fsm_holder(ClientFSM::Selftest, 0);
+    FSM_HOLDER__LOGGING(Selftest, 0);
     status_t status;
     status.Empty();
 
@@ -605,7 +617,7 @@ void update_esp(bool force) {
         if (current != status) {
             status = current;
             SelftestESP_t data(status.progress, status.current_file, status.count_of_files);
-            fsm_holder.Change(status.phase, data);
+            FSM_HOLDER_CHANGE_METHOD__LOGGING(Selftest_from_macro, status.phase, data);
         }
 
         // call idle loop to prevent watchdog
@@ -618,24 +630,24 @@ void update_esp(bool force) {
 
     // need scope to not have 2 instances of credentials at time
     {
-        EspCredentials credentials(fsm_holder, EspCredentials::type_t::ini_creation);
+        EspCredentials credentials(Selftest_from_macro, EspCredentials::type_t::ini_creation);
         credentials.Loop();
     }
     // credentials will run even when ini file was skipped
     {
-        EspCredentials credentials(fsm_holder, EspCredentials::type_t::credentials_sequence);
+        EspCredentials credentials(Selftest_from_macro, EspCredentials::type_t::credentials_sequence);
         credentials.Loop();
     }
 }
 
 void update_esp_credentials() {
-    FSM_Holder fsm_holder(ClientFSM::Selftest, 0);
-    EspCredentials credentials(fsm_holder, EspCredentials::type_t::credentials_standalone);
+    FSM_HOLDER__LOGGING(Selftest, 0);
+    EspCredentials credentials(Selftest_from_macro, EspCredentials::type_t::credentials_standalone);
     credentials.Loop();
 }
 
 void credentials_generate_ini() {
-    FSM_Holder fsm_holder(ClientFSM::Selftest, 0);
-    EspCredentials credentials(fsm_holder, EspCredentials::type_t::ini_creation);
+    FSM_HOLDER__LOGGING(Selftest, 0);
+    EspCredentials credentials(Selftest_from_macro, EspCredentials::type_t::ini_creation);
     credentials.Loop();
 }

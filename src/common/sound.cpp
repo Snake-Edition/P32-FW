@@ -77,7 +77,7 @@ void Sound_Update1ms() {
  * Sound signals implementation
  * Simple sound implementation supporting few sound modes and having different sound types.
  * [Sound] is updated every 1ms with tim14 tick from [appmain.cpp] for measured durations of sound signals for non-blocking GUI.
- * Beeper is controled over [hwio_buddy_2209_02.c] functions for beeper.
+ * Beeper is controlled over [hwio_buddy_2209_02.c] functions for beeper.
  */
 Sound::Sound()
     : duration_active(0)
@@ -156,7 +156,12 @@ void Sound::_playSound(eSOUND_TYPE sound, const eSOUND_TYPE types[],
  */
 void Sound::play(eSOUND_TYPE eSoundType) {
     int t_size = 0;
-    switch (eSoundMode) {
+    eSOUND_MODE mode = eSoundMode;
+
+    if (eSoundType == eSOUND_TYPE::CriticalAlert)
+        mode = eSOUND_MODE::LOUD;
+
+    switch (mode) {
     case eSOUND_MODE::ONCE:
         t_size = sizeof(onceTypes) / sizeof(onceTypes[0]);
         _playSound(eSoundType, onceTypes, onceRepeats, onceDurations, onceDelays, t_size);
@@ -182,11 +187,16 @@ void Sound::_sound(int rep, float frq, int16_t dur, int16_t del, float vol, bool
     /// forced non-repeat sounds - can be played when another
     /// repeating sound is playing
     float tmpVol;
+
+#if BOARD_IS_BUDDY
     if (varVolume > 1) {
         tmpVol = 1.F;
     } else {
         tmpVol = f ? 0.3F : (vol * varVolume) * 0.3F;
     }
+#else
+    tmpVol = varVolume;
+#endif
     if (rep == 1) {
         singleSound(frq, dur, tmpVol);
     } else {
@@ -207,7 +217,7 @@ void Sound::_sound(int rep, float frq, int16_t dur, int16_t del, float vol, bool
         }
 
         /// end previous beep
-        hwio_beeper_set_pwm(0, 0);
+        hwio_beeper_notone();
         nextRepeat();
     }
 }
@@ -224,18 +234,26 @@ void Sound::nextRepeat() {
 }
 
 float Sound::real_volume(int displayed_volume) {
+#if BOARD_IS_BUDDY
     return displayed_volume == 11 ? displayed_volume : displayed_volume / 10.F;
+#else
+    return displayed_volume == 0 ? 0 : 1.51F - displayed_volume / 2.F;
+#endif
 }
 
 uint8_t Sound::displayed_volume(float real_volume) {
+#if BOARD_IS_BUDDY
     return real_volume > 1.1F ? real_volume : real_volume * 10.F;
+#else
+    return real_volume == 0 ? 0 : -(real_volume - 1.51F) * 2.F;
+#endif
 }
 
 /// starts single sound when it's not playing another
 /// this is usable when some infinitely repeating sound is playing.
 void Sound::singleSound(float frq, int16_t dur, float vol) {
     if (duration_active <= 0) {
-        hwio_beeper_set_pwm(0, 0);
+        hwio_beeper_notone();
         hwio_beeper_tone2(frq, dur, vol);
     }
 }

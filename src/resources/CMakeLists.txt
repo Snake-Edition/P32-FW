@@ -1,3 +1,4 @@
+include(PngGenerator.cmake)
 #
 # Common Functions
 #
@@ -37,7 +38,7 @@ function(add_header_with_revision revision_name image_name)
     )
 
   # set dependency on the main target
-  add_custom_target(resources-header-${revision_name} DEPENDS "${header_hash_file}")
+  add_custom_target(resources-header-${revision_name} DEPENDS "${header_hash_file}" png_generator)
   add_dependencies(firmware resources-header-${revision_name})
 endfunction()
 
@@ -45,25 +46,43 @@ endfunction()
 # General
 #
 
-target_sources(firmware PUBLIC bootstrap.cpp revision.cpp hash.cpp)
+target_sources(firmware PUBLIC bootstrap.cpp hash.cpp revision.cpp)
 target_include_directories(firmware PUBLIC "${resources_include_dir}")
 
 #
 # Standard Resources Image
 #
 
-add_lfs_image(resources-image BLOCK_SIZE 4096 BLOCK_COUNT 256)
+add_lfs_image(resources-image BLOCK_SIZE 4096 BLOCK_COUNT 512)
 
 # /esp directory
-add_resource("esp/uart_wifi.bin" "/esp/uart_wifi.bin")
-add_resource("esp/bootloader.bin" "/esp/bootloader.bin")
-add_resource("esp/partition-table.bin" "/esp/partition-table.bin")
+if(PRINTER STREQUAL "XL")
+  add_resource("esp32/uart_wifi.bin" "/esp32/uart_wifi.bin")
+  add_resource("esp32/bootloader.bin" "/esp32/bootloader.bin")
+  add_resource("esp32/partition-table.bin" "/esp32/partition-table.bin")
+else()
+  add_resource("esp/uart_wifi.bin" "/esp/uart_wifi.bin")
+  add_resource("esp/bootloader.bin" "/esp/bootloader.bin")
+  add_resource("esp/partition-table.bin" "/esp/partition-table.bin")
+endif()
+
+if(PUPPY_FLASH_FW)
+  add_resource("${DWARF_BINARY_PATH}" "/puppies/fw-dwarf.bin")
+  add_resource("${MODULARBED_BINARY_PATH}" "/puppies/fw-modularbed.bin")
+endif()
 
 # /web directory
 add_gzip_resource("web/favicon.ico" "/web/favicon.ico")
 add_gzip_resource("web/index.html" "/web/index.html")
-add_gzip_resource("web/main.2db555ec7e6e55de710c.js" "/web/main.2db555ec7e6e55de710c.js")
-add_gzip_resource("web/main.112d6e1a4344fea4f149.css" "/web/main.112d6e1a4344fea4f149.css")
+add_gzip_resource("web/main.bc8a0b73424dc62038c4.js" "/web/main.bc8a0b73424dc62038c4.js")
+add_gzip_resource("web/main.06c3456edb83cfb04a3d.css" "/web/main.06c3456edb83cfb04a3d.css")
+
+# /png directory
+add_resource("${png_data_file}" "pngs")
+add_resource("pre_bootstrap_pngs/marlin_logo_79x61.png" "marlin_logo_79x61.png")
+if(PRINTER STREQUAL "MINI")
+  add_resource("pre_bootstrap_pngs/prusa_mini_splash_207x47.png" "printer_logo.png")
+endif()
 
 # generate header with hash
 add_header_with_revision(standard resources-image)
@@ -71,28 +90,30 @@ add_header_with_revision(standard resources-image)
 #
 # Bootloader Resources Image
 #
+if(BOOTLOADER_UPDATE)
 
-add_lfs_image(resources-bootloader-image BLOCK_SIZE 4096 BLOCK_COUNT 64)
+  add_lfs_image(resources-bootloader-image BLOCK_SIZE 4096 BLOCK_COUNT 64)
 
-string(TOLOWER ${PRINTER} printer_name_low)
-get_dependency_directory("bootloader-${printer_name_low}" bootloader_dir)
-get_dependency_version("bootloader-${printer_name_low}" bootloader_version_str)
-set(bootloader_bin "${bootloader_dir}/bootloader.bin")
+  get_dependency_directory("bootloader-${BOOTLOADER_VARIANT}" bootloader_dir)
+  get_dependency_version("bootloader-${BOOTLOADER_VARIANT}" bootloader_version_str)
+  set(bootloader_bin "${bootloader_dir}/bootloader.bin")
 
-# add the bootloader.bin to the image
-add_resource("${bootloader_bin}" "/bootloader.bin" IMAGE_NAME resources-bootloader-image)
+  # add the bootloader.bin to the image
+  add_resource("${bootloader_bin}" "/bootloader.bin" IMAGE_NAME resources-bootloader-image)
 
-# generate header with hash
-add_header_with_revision(bootloader resources-bootloader-image)
+  # generate header with hash
+  add_header_with_revision(bootloader resources-bootloader-image)
 
-# parse bootloader version
-string(REGEX MATCH "([0-9]+)\.([0-9]+)\.([0-9]+)" result "${bootloader_version_str}")
-if(NOT result)
-  message(FATAL_ERROR "Failed to parse bootloader version ${bootloader_version_str}")
+  # parse bootloader version
+  string(REGEX MATCH "([0-9]+)\.([0-9]+)\.([0-9]+)" result "${bootloader_version_str}")
+  if(NOT result)
+    message(FATAL_ERROR "Failed to parse bootloader version ${bootloader_version_str}")
+  endif()
+  set(bootloader_version ${CMAKE_MATCH_0})
+
+  # generate header file with bootloader version
+  configure_file(
+    required_bootloader_version.hpp.in "${resources_include_dir}/bootloader/required_version.hpp"
+    )
+
 endif()
-set(bootloader_version ${CMAKE_MATCH_0})
-
-# generate header file with bootloader version
-configure_file(
-  required_bootloader_version.hpp.in "${resources_include_dir}/bootloader/required_version.hpp"
-  )
