@@ -472,6 +472,26 @@ public:
     virtual void OnClick() override;
 };
 
+class MI_CALIBRATE_NOZZLE_PID : public WI_LABEL_t {
+    constexpr static const char *const label = N_("Calibrate nozzle temperature");
+
+public:
+    MI_CALIBRATE_NOZZLE_PID();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_CALIBRATE_BED_PID : public WI_LABEL_t {
+    constexpr static const char *const label = N_("Calibrate bed temperature");
+
+public:
+    MI_CALIBRATE_BED_PID();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
 class MI_ODOMETER_DIST : public WI_FORMATABLE_LABEL_t<float> {
 public:
     MI_ODOMETER_DIST(string_view_utf8 label, uint16_t id_icon, is_enabled_t enabled, is_hidden_t hidden, float initVal);

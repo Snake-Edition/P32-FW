@@ -9,7 +9,7 @@
 #include "extruder_enum.h"
 
 using Screen = ScreenMenu<EFooter::On, MI_RETURN,
-    MI_HOTEND_FAN_SPEED, MI_SKEW_ENABLED, MI_SKEW_XY, MI_SKEW_XZ, MI_SKEW_YZ>;
+    MI_HOTEND_FAN_SPEED, MI_SKEW_ENABLED, MI_SKEW_XY, MI_SKEW_XZ, MI_SKEW_YZ, MI_CALIBRATE_NOZZLE_PID, MI_CALIBRATE_BED_PID>;
 
 class ScreenMenuSnakeSettings : public Screen {
 public:

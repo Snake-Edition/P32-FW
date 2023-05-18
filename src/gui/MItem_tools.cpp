@@ -594,6 +594,26 @@ void MI_SKEW_YZ::OnClick() {
 }
 
 /*****************************************************************************/
+// MI_CALIBRATE_NOZZLE_PID
+MI_CALIBRATE_NOZZLE_PID::MI_CALIBRATE_NOZZLE_PID()
+    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_CALIBRATE_NOZZLE_PID::click(IWindowMenu & /*window_menu*/) {
+    marlin_gcode("M303 S250 U1");
+}
+
+/*****************************************************************************/
+// MI_CALIBRATE_BED_PID
+MI_CALIBRATE_BED_PID::MI_CALIBRATE_BED_PID()
+    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_CALIBRATE_BED_PID::click(IWindowMenu & /*window_menu*/) {
+    marlin_gcode("M304 S250 U1");
+}
+
+/*****************************************************************************/
 // MI_FAN_CHECK
 MI_FAN_CHECK::MI_FAN_CHECK()
     : WI_SWITCH_OFF_ON_t(marlin_get_bool(MARLIN_VAR_FAN_CHECK_ENABLED), _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
