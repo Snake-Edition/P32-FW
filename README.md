@@ -3,22 +3,23 @@
 [![Version](https://img.shields.io/github/v/release/Snake-FW/P32-FW?style=plastic)]()
 
 ## Wanted
-FW developers and testers are welcome.
+FW developer, testers, and graphic designers are welcome.
 
 ## Unofficial Firmware for the Prusa Mini and Mini+
 
 Alternative FW for the Prusa Mini. There's quite few improvements:
 
-* **Hotend fan speed**: Adds a menu option to unlock the hotend fan speed
-  and increase it from the Prusa Firmware's default 38% to anywhere from 50-100%.
+~~* **Hotend fan speed**: Adds a menu option to unlock the hotend fan speed~~
+  ~~and increase it from the Prusa Firmware's default 38% to anywhere from 50-100%.~~
 * **Skew compensation**: Turns on skew compensation in Marlin and allows it
   to be configured directly through the Settings menu or with `M852`.
-* **OctoPrint screen**: Adds support for `M73` (print progress) and `M117`
-  (LCD messages).
+~~* **OctoPrint screen**: Adds support for `M73` (print progress) and `M117`~~
+  ~~(LCD messages).~~
 * **PID tuning**: Automatically writes PID settings to EEPROM after `M303 U1` (autotune),
   `M301` (set hotend PID), and `M304` (set bed PID).
 * **Max Temps**: Raises the maximum bed temperature from 100C to 110C
   and nozzle temperature from 290C to 300C (use with caution!).
+~~* **EEPROM upgrade/sidegrade/downgrade**: Saved values (live-z, skew etc.) are kept during upgrade/sidegrade/downgrade.~~
 * **Settings during print**: You can change Snake settings during printing.
 * **Faster nozzle cooling**: If you wait for nozzle cooling before MBL, you can call `M109 R170 C`
   which uses print fan to speed up cooling.
