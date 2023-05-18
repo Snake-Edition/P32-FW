@@ -21,7 +21,7 @@ ScreenFactory::UniquePtr GetScreenMenuWifiSettings();
 ScreenFactory::UniquePtr GetScreenMenuHwSetup();
 ScreenFactory::UniquePtr GetScreenMenuSteelSheets();
 ScreenFactory::UniquePtr GetScreenEeprom();
-ScreenFactory::UniquePtr GetScreenMenuLlamaSettings();
+ScreenFactory::UniquePtr GetScreenMenuSnakeSettings();
 ScreenFactory::UniquePtr GetScreenMenuFooterSettings();
 ScreenFactory::UniquePtr GetScreenMenuFooterSettingsAdv();
 ScreenFactory::UniquePtr GetScreenPrusaLink();

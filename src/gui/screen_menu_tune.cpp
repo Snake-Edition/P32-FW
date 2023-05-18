@@ -16,7 +16,7 @@ using Screen = ScreenMenu<EFooter::On, MI_RETURN, MI_LIVE_ADJUST_Z, MI_M600, MI_
     MI_TEST,
 #endif                       //_DEBUG
     /* MI_FOOTER_SETTINGS,*/ //currently experimental, but we want it in future
-    MI_LLAMA_SETTINGS, MI_MESSAGES>;
+    MI_SNAKE_SETTINGS, MI_MESSAGES>;
 
 class ScreenMenuTune : public Screen {
 public:

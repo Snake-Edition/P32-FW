@@ -11,8 +11,8 @@
 #include "cmsis_os.h"
 #include "../../lib/Marlin/Marlin/src/module/planner.h"
 
-void llama_apply_fan_settings() {
-    switch (eeprom_get_ui8(EEVAR_LLAMA_HOTEND_FAN_SPEED)) {
+void snake_apply_fan_settings() {
+    switch (eeprom_get_ui8(EEVAR_SNAKE_HOTEND_FAN_SPEED)) {
     case eHOTEND_FAN_SPEED::HOTEND_FAN_SPEED_100:
         hwio_fan_control_set_hotend_fan_speed_percent(100);
         break;
@@ -38,12 +38,12 @@ void llama_apply_fan_settings() {
     }
 }
 
-void llama_apply_skew_settings() {
+void snake_apply_skew_settings() {
     double xy, xz, yz;
-    if (eeprom_get_bool(EEVAR_LLAMA_SKEW_ENABLED)) {
-        xy = eeprom_get_flt(EEVAR_LLAMA_SKEW_XY);
-        xz = eeprom_get_flt(EEVAR_LLAMA_SKEW_XZ);
-        yz = eeprom_get_flt(EEVAR_LLAMA_SKEW_YZ);
+    if (eeprom_get_bool(EEVAR_SNAKE_SKEW_ENABLED)) {
+        xy = eeprom_get_flt(EEVAR_SNAKE_SKEW_XY);
+        xz = eeprom_get_flt(EEVAR_SNAKE_SKEW_XZ);
+        yz = eeprom_get_flt(EEVAR_SNAKE_SKEW_YZ);
     } else {
         xy = xz = yz = 0.f;
     }

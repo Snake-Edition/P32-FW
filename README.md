@@ -242,7 +242,7 @@ Snake FW is
 - based on [Prusa Firmware Buddy](https://github.com/prusa3d/Prusa-Firmware-Buddy)
 - based on [Marlin Firmware](https://github.com/MarlinFirmware/Marlin)
 
-Precise information of who did what can be obtained byt `git blame` command or by `Blame` button in the Github file reader.
+Precise information of who did what can be obtained by `git blame` command or by `Blame` button in the Github file reader.
 
 ## Original Prusa Mini Firmware README
 <details>

@@ -11,12 +11,12 @@
 using Screen = ScreenMenu<EFooter::On, MI_RETURN,
     MI_HOTEND_FAN_SPEED, MI_SKEW_ENABLED, MI_SKEW_XY, MI_SKEW_XZ, MI_SKEW_YZ>;
 
-class ScreenMenuLlamaSettings : public Screen {
+class ScreenMenuSnakeSettings : public Screen {
 public:
     constexpr static const char *label = N_("SNAKE");
-    ScreenMenuLlamaSettings()
+    ScreenMenuSnakeSettings()
         : Screen(_(label)) {
-        // last_extruder_type = variant8_get_ui8(eeprom_llama_get_var(EEVAR_LLAMA_EXTRUDER_TYPE));
+        // last_extruder_type = variant8_get_ui8(eeprom_snake_get_var(EEVAR_SNAKE_EXTRUDER_TYPE));
     }
 
     uint8_t last_extruder_type;
@@ -29,6 +29,6 @@ public:
     }
 };
 
-ScreenFactory::UniquePtr GetScreenMenuLlamaSettings() {
-    return ScreenFactory::Screen<ScreenMenuLlamaSettings>();
+ScreenFactory::UniquePtr GetScreenMenuSnakeSettings() {
+    return ScreenFactory::Screen<ScreenMenuSnakeSettings>();
 }

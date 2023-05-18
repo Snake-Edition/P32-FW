@@ -21,14 +21,14 @@ namespace eeprom::current {
  * eeprom setting storage has changed to using 5 bits pre item and last 3 bits are ones to force default footer setting on FW < 3.3.4
  */
 struct vars_body_t : public eeprom::v11::vars_body_t {
-    uint8_t EEVAR_LLAMA_EXTRUDER_TYPE;
-    float EEVAR_LLAMA_EXTRUDER_ESTEPS;
-    uint8_t EEVAR_LLAMA_HOTEND_FAN_SPEED;
-    uint8_t EEVAR_LLAMA_SKEW_ENABLED;
-    float EEVAR_LLAMA_SKEW_XY;
-    float EEVAR_LLAMA_SKEW_XZ;
-    float EEVAR_LLAMA_SKEW_YZ;
-    uint8_t EEVAR_LLAMA_EXTRUDER_REVERSE;
+    uint8_t EEVAR_SNAKE_EXTRUDER_TYPE;
+    float EEVAR_SNAKE_EXTRUDER_ESTEPS;
+    uint8_t EEVAR_SNAKE_HOTEND_FAN_SPEED;
+    uint8_t EEVAR_SNAKE_SKEW_ENABLED;
+    float EEVAR_SNAKE_SKEW_XY;
+    float EEVAR_SNAKE_SKEW_XZ;
+    float EEVAR_SNAKE_SKEW_YZ;
+    uint8_t EEVAR_SNAKE_EXTRUDER_REVERSE;
 };
 
 #pragma pack(pop)
@@ -37,14 +37,14 @@ static_assert(sizeof(vars_body_t) == sizeof(eeprom::v11::vars_body_t) + 4 * size
 
 constexpr vars_body_t body_defaults = {
     eeprom::v11::body_defaults,
-    0,     // EEVAR_LLAMA_EXTRUDER_TYPE,
-    0,     // EEVAR_LLAMA_EXTRUDER_ESTEPS,
-    0,     // EEVAR_LLAMA_HOTEND_FAN_SPEED,
-    false, // EEVAR_LLAMA_SKEW_ENABLED,
-    0,     // EEVAR_LLAMA_SKEW_XY,
-    0,     // EEVAR_LLAMA_SKEW_XZ,
-    0,     // EEVAR_LLAMA_SKEW_YZ,
-    0,     // EEVAR_LLAMA_EXTRUDER_REVERSE,
+    0,     // EEVAR_SNAKE_EXTRUDER_TYPE,
+    0,     // EEVAR_SNAKE_EXTRUDER_ESTEPS,
+    0,     // EEVAR_SNAKE_HOTEND_FAN_SPEED,
+    false, // EEVAR_SNAKE_SKEW_ENABLED,
+    0,     // EEVAR_SNAKE_SKEW_XY,
+    0,     // EEVAR_SNAKE_SKEW_XZ,
+    0,     // EEVAR_SNAKE_SKEW_YZ,
+    0,     // EEVAR_SNAKE_EXTRUDER_REVERSE,
 };
 
 inline vars_body_t convert(const eeprom::v11::vars_body_t &src) {

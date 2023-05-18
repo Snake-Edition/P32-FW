@@ -236,11 +236,11 @@ protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
 
-class MI_LLAMA_SETTINGS : public WI_LABEL_t {
+class MI_SNAKE_SETTINGS : public WI_LABEL_t {
     static constexpr const char *const label = N_("Snake Settings");
 
 public:
-    MI_LLAMA_SETTINGS();
+    MI_SNAKE_SETTINGS();
 
 protected:
     virtual void click(IWindowMenu &window_menu) override;

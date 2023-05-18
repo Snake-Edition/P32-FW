@@ -913,7 +913,7 @@ if(GUI)
             src/gui/screen_temperror.cpp
             src/gui/dialogs/DialogMoveZ.cpp
             src/gui/screen_qr_error.cpp
-            src/gui/screen_menu_llama_settings.cpp
+            src/gui/screen_menu_snake_settings.cpp
             src/gui/screen_sheet_rename.cpp
             src/gui/screen_prusa_link.cpp
             src/gui/screen_snake.cpp

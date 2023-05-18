@@ -550,47 +550,47 @@ void MI_MINDA::Loop() {
 /*****************************************************************************/
 // MI_HOTEND_FAN_SPEED
 MI_HOTEND_FAN_SPEED::MI_HOTEND_FAN_SPEED()
-    : WI_SWITCH_t<7>(eeprom_get_ui8(EEVAR_LLAMA_HOTEND_FAN_SPEED), _(label), 0, is_enabled_t::yes, is_hidden_t::no,
+    : WI_SWITCH_t<7>(eeprom_get_ui8(EEVAR_SNAKE_HOTEND_FAN_SPEED), _(label), 0, is_enabled_t::yes, is_hidden_t::no,
         _(str_Default), _(str_50), _(str_60), _(str_70), _(str_80), _(str_90), _(str_100)) {}
 void MI_HOTEND_FAN_SPEED::OnChange(size_t old_type) {
-    eeprom_set_ui8(EEVAR_LLAMA_HOTEND_FAN_SPEED, index);
-    llama_apply_fan_settings();
+    eeprom_set_ui8(EEVAR_SNAKE_HOTEND_FAN_SPEED, index);
+    snake_apply_fan_settings();
 }
 
 /*****************************************************************************/
 // MI_SKEW_ENABLED
 MI_SKEW_ENABLED::MI_SKEW_ENABLED()
-    : WI_SWITCH_OFF_ON_t(eeprom_get_bool(EEVAR_LLAMA_SKEW_ENABLED), _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
+    : WI_SWITCH_OFF_ON_t(eeprom_get_bool(EEVAR_SNAKE_SKEW_ENABLED), _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
 void MI_SKEW_ENABLED::OnChange(size_t old_index) {
-    eeprom_set_bool(EEVAR_LLAMA_SKEW_ENABLED, index);
-    llama_apply_skew_settings();
+    eeprom_set_bool(EEVAR_SNAKE_SKEW_ENABLED, index);
+    snake_apply_skew_settings();
 }
 
 /*****************************************************************************/
 // MI_SKEW_XY
 MI_SKEW_XY::MI_SKEW_XY()
-    : WiSpinFlt(eeprom_get_flt(EEVAR_LLAMA_SKEW_XY), SpinCnf::skew_range, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
+    : WiSpinFlt(eeprom_get_flt(EEVAR_SNAKE_SKEW_XY), SpinCnf::skew_range, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
 void MI_SKEW_XY::OnClick() {
-    eeprom_set_flt(EEVAR_LLAMA_SKEW_XY, GetVal());
-    llama_apply_skew_settings();
+    eeprom_set_flt(EEVAR_SNAKE_SKEW_XY, GetVal());
+    snake_apply_skew_settings();
 }
 
 /*****************************************************************************/
 // MI_SKEW_XZ
 MI_SKEW_XZ::MI_SKEW_XZ()
-    : WiSpinFlt(eeprom_get_flt(EEVAR_LLAMA_SKEW_XZ), SpinCnf::skew_range, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
+    : WiSpinFlt(eeprom_get_flt(EEVAR_SNAKE_SKEW_XZ), SpinCnf::skew_range, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
 void MI_SKEW_XZ::OnClick() {
-    eeprom_set_flt(EEVAR_LLAMA_SKEW_XZ, GetVal());
-    llama_apply_skew_settings();
+    eeprom_set_flt(EEVAR_SNAKE_SKEW_XZ, GetVal());
+    snake_apply_skew_settings();
 }
 
 /*****************************************************************************/
 // MI_SKEW_YZ
 MI_SKEW_YZ::MI_SKEW_YZ()
-    : WiSpinFlt(eeprom_get_flt(EEVAR_LLAMA_SKEW_YZ), SpinCnf::skew_range, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
+    : WiSpinFlt(eeprom_get_flt(EEVAR_SNAKE_SKEW_YZ), SpinCnf::skew_range, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
 void MI_SKEW_YZ::OnClick() {
-    eeprom_set_flt(EEVAR_LLAMA_SKEW_YZ, GetVal());
-    llama_apply_skew_settings();
+    eeprom_set_flt(EEVAR_SNAKE_SKEW_YZ, GetVal());
+    snake_apply_skew_settings();
 }
 
 /*****************************************************************************/
