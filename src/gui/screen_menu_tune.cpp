@@ -9,13 +9,13 @@
 #include "MItem_menus.hpp"
 
 /*****************************************************************************/
-//parent alias
+// parent alias
 using Screen = ScreenMenu<EFooter::On, MI_RETURN, MI_LIVE_ADJUST_Z, MI_M600, MI_SPEED, MI_NOZZLE,
     MI_HEATBED, MI_PRINTFAN, MI_FLOWFACT, MI_FILAMENT_SENSOR, MI_SOUND_MODE, MI_SOUND_VOLUME, MI_FAN_CHECK, MI_NETWORK, MI_TIMEZONE, MI_VERSION_INFO,
 #ifdef _DEBUG
     MI_TEST,
-#endif                       //_DEBUG
-    /* MI_FOOTER_SETTINGS,*/ //currently experimental, but we want it in future
+#endif //_DEBUG
+    MI_FOOTER_SETTINGS,
     MI_SNAKE_SETTINGS, MI_MESSAGES>;
 
 class ScreenMenuTune : public Screen {
@@ -24,8 +24,8 @@ public:
     ScreenMenuTune()
         : Screen(_(label)) {
         Screen::ClrMenuTimeoutClose();
-        //todo test if needed
-        //marlin_update_vars(MARLIN_VAR_MSK_TEMP_TARG | MARLIN_VAR_MSK(MARLIN_VAR_Z_OFFSET) | MARLIN_VAR_MSK(MARLIN_VAR_FANSPEED) | MARLIN_VAR_MSK(MARLIN_VAR_PRNSPEED) | MARLIN_VAR_MSK(MARLIN_VAR_FLOWFACT));
+        // todo test if needed
+        // marlin_update_vars(MARLIN_VAR_MSK_TEMP_TARG | MARLIN_VAR_MSK(MARLIN_VAR_Z_OFFSET) | MARLIN_VAR_MSK(MARLIN_VAR_FANSPEED) | MARLIN_VAR_MSK(MARLIN_VAR_PRNSPEED) | MARLIN_VAR_MSK(MARLIN_VAR_FLOWFACT));
     }
 
 protected:

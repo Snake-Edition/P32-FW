@@ -22,6 +22,7 @@ ScreenFactory::UniquePtr GetScreenMenuHwSetup();
 ScreenFactory::UniquePtr GetScreenMenuSteelSheets();
 ScreenFactory::UniquePtr GetScreenEeprom();
 ScreenFactory::UniquePtr GetScreenMenuSnakeSettings();
+ScreenFactory::UniquePtr GetScreenMenuSnakeTuneSettings();
 ScreenFactory::UniquePtr GetScreenMenuFooterSettings();
 ScreenFactory::UniquePtr GetScreenMenuFooterSettingsAdv();
 ScreenFactory::UniquePtr GetScreenPrusaLink();
