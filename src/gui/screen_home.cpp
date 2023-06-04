@@ -56,7 +56,7 @@ screen_home_data_t::screen_home_data_t()
     , esp_flash_being_openned(false)
     , header(this)
     , footer(this)
-    , logo(this, Rect16(41, 31, 158, 40), IDR_PNG_prusa_printer_logo)
+    , logo(this, Rect16(41, 31, 158, 40), IDR_NULL /*IDR_PNG_prusa_printer_logo*/)
     , w_buttons { { this, Rect16(), 0, []() { Screens::Access()->Open(ScreenFactory::Screen<screen_filebrowser_data_t>); } },
         { this, Rect16(), 0, []() { marlin_gcode_printf("M1700"); } },
         { this, Rect16(), 0, []() { Screens::Access()->Open(GetScreenMenuFilament); } },
@@ -148,7 +148,7 @@ void screen_home_data_t::windowEvent(EventLock /*has private ctor*/, window_t *s
     }
 
     if (event == GUI_event_t::LOOP && !DialogHandler::Access().IsOpen()) {
-        //esp update has bigger priority tha one click print
+        // esp update has bigger priority tha one click print
         const auto fw_state = esp_fw_state();
         if (try_esp_flash && (fw_state == EspFwState::WrongVersion || fw_state == EspFwState::NoFirmware)) {
             try_esp_flash = false;          // do esp flash only once (user can press abort)

@@ -15,8 +15,8 @@ enum {
 
     //pngs
     IDR_PNG_marlin_logo,
-    IDR_PNG_prusa_printer_splash,
-    IDR_PNG_prusa_printer_logo,
+    // IDR_PNG_prusa_printer_splash,
+    // IDR_PNG_prusa_printer_logo,
 
     IDR_PNG_nozzle_16px,
     IDR_PNG_heatbed_16px,

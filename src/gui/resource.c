@@ -123,9 +123,9 @@ RESOURCE_ENTRY_FNT(font_9x15)  //IDR_FNT_TERMINAL
 RESOURCE_ENTRY_FNT(font_9x16)  //IDR_FNT_SPECIAL
 
 //pngs
-RESOURCE_ENTRY_PNG(png_marlin_logo)          //IDR_PNG_malin_logo
-RESOURCE_ENTRY_PNG(png_prusa_printer_splash) //IDR_PNG_prusa_printer_splash
-RESOURCE_ENTRY_PNG(png_prusa_printer_logo)   //IDR_PNG_prusa_printer_logo
+RESOURCE_ENTRY_PNG(png_marlin_logo) //IDR_PNG_malin_logo
+// RESOURCE_ENTRY_PNG(png_prusa_printer_splash) //IDR_PNG_prusa_printer_splash
+// RESOURCE_ENTRY_PNG(png_prusa_printer_logo)   //IDR_PNG_prusa_printer_logo
 
 RESOURCE_ENTRY_PNG(png_nozzle_16px)
 RESOURCE_ENTRY_PNG(png_heatbed_16px)
