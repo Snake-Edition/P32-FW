@@ -9,23 +9,24 @@ FW developer, testers, and graphic designers are welcome.
 
 Alternative FW for the Prusa Mini. There's quite few improvements:
 
-~~* **Hotend fan speed**: Adds a menu option to unlock the hotend fan speed~~
+* ~~**Hotend fan speed**: Adds a menu option to unlock the hotend fan speed~~
   ~~and increase it from the Prusa Firmware's default 38% to anywhere from 50-100%.~~
 * **Skew compensation**: Turns on skew compensation in Marlin and allows it
   to be configured directly through the Settings menu or with `M852`.
-~~* **OctoPrint screen**: Adds support for `M73` (print progress) and `M117`~~
+* ~~**OctoPrint screen**: Adds support for `M73` (print progress) and `M117`~~
   ~~(LCD messages).~~
 * **PID tuning**: Automatically writes PID settings to EEPROM after `M303 U1` (autotune),
   `M301` (set hotend PID), and `M304` (set bed PID).
 * **Max Temps**: Raises the maximum bed temperature from 100C to 110C
   and nozzle temperature from 290C to 300C (use with caution!).
-~~* **EEPROM upgrade/sidegrade/downgrade**: Saved values (live-z, skew etc.) are kept during upgrade/sidegrade/downgrade.~~
+* ~~**EEPROM upgrade/sidegrade/downgrade**: Saved values (live-z, skew etc.) are kept during upgrade/sidegrade/downgrade.~~
 * **Settings during print**: You can change Snake settings during printing.
 * **Faster nozzle cooling**: If you wait for nozzle cooling before MBL, you can call `M109 R170 C`
   which uses print fan to speed up cooling.
 * **Game**: Instead of printing you can enjoy simple game.
 * **Bigger time**: Printing and remaining time is now bigger.
 * **Startup wizard**: Now you can select `Ignore` at the wizard start screen to disable starting of the wizard at the printer startup.
+* **Temperature calibration**: You can calibrate PID temperature control for your hotend/bed directly from the menu. Calibration does 5 cycles.
 
 All settings are automatically saved to EEPROM and loaded on boot.
 
