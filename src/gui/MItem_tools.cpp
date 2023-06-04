@@ -548,9 +548,8 @@ void MI_MINDA::Loop() {
 }
 
 /*****************************************************************************/
-// MI_HOTEND_FAN_SPEED
 MI_HOTEND_FAN_SPEED::MI_HOTEND_FAN_SPEED()
-    : WI_SWITCH_t<7>(eeprom_get_ui8(EEVAR_SNAKE_HOTEND_FAN_SPEED), _(label), 0, is_enabled_t::yes, is_hidden_t::no,
+    : WI_SWITCH_t<7>(eeprom_get_ui8(EEVAR_SNAKE_HOTEND_FAN_SPEED), _(label), 0, is_enabled_t::no, is_hidden_t::no,
         _(str_Default), _(str_50), _(str_60), _(str_70), _(str_80), _(str_90), _(str_100)) {}
 void MI_HOTEND_FAN_SPEED::OnChange(size_t old_type) {
     eeprom_set_ui8(EEVAR_SNAKE_HOTEND_FAN_SPEED, index);
@@ -558,7 +557,6 @@ void MI_HOTEND_FAN_SPEED::OnChange(size_t old_type) {
 }
 
 /*****************************************************************************/
-// MI_SKEW_ENABLED
 MI_SKEW_ENABLED::MI_SKEW_ENABLED()
     : WI_SWITCH_OFF_ON_t(eeprom_get_bool(EEVAR_SNAKE_SKEW_ENABLED), _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
 void MI_SKEW_ENABLED::OnChange(size_t old_index) {
@@ -567,7 +565,6 @@ void MI_SKEW_ENABLED::OnChange(size_t old_index) {
 }
 
 /*****************************************************************************/
-// MI_SKEW_XY
 MI_SKEW_XY::MI_SKEW_XY()
     : WiSpinFlt(eeprom_get_flt(EEVAR_SNAKE_SKEW_XY), SpinCnf::skew_range, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
 void MI_SKEW_XY::OnClick() {
@@ -576,7 +573,6 @@ void MI_SKEW_XY::OnClick() {
 }
 
 /*****************************************************************************/
-// MI_SKEW_XZ
 MI_SKEW_XZ::MI_SKEW_XZ()
     : WiSpinFlt(eeprom_get_flt(EEVAR_SNAKE_SKEW_XZ), SpinCnf::skew_range, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
 void MI_SKEW_XZ::OnClick() {
@@ -585,7 +581,6 @@ void MI_SKEW_XZ::OnClick() {
 }
 
 /*****************************************************************************/
-// MI_SKEW_YZ
 MI_SKEW_YZ::MI_SKEW_YZ()
     : WiSpinFlt(eeprom_get_flt(EEVAR_SNAKE_SKEW_YZ), SpinCnf::skew_range, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
 void MI_SKEW_YZ::OnClick() {
@@ -593,24 +588,45 @@ void MI_SKEW_YZ::OnClick() {
     snake_apply_skew_settings();
 }
 
+static uint16_t nozzle_calibration_temp = 250;
+static uint8_t bed_calibration_temp = 80;
+
 /*****************************************************************************/
-// MI_CALIBRATE_NOZZLE_PID
+MI_NOZZLE_CALIBRATION_TEMP::MI_NOZZLE_CALIBRATION_TEMP()
+    : WiSpinInt(static_cast<uint8_t>(Sound_GetVolume()), SpinCnf::nozzle, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+    SetVal(nozzle_calibration_temp);
+}
+
+void MI_NOZZLE_CALIBRATION_TEMP::OnClick() {
+    nozzle_calibration_temp = GetVal();
+}
+
+/*****************************************************************************/
 MI_CALIBRATE_NOZZLE_PID::MI_CALIBRATE_NOZZLE_PID()
     : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
 }
 
 void MI_CALIBRATE_NOZZLE_PID::click(IWindowMenu & /*window_menu*/) {
-    marlin_gcode("M303 S250 U1");
+    marlin_gcode_printf("M303 S%d U1", nozzle_calibration_temp);
 }
 
 /*****************************************************************************/
-// MI_CALIBRATE_BED_PID
+MI_BED_CALIBRATION_TEMP::MI_BED_CALIBRATION_TEMP()
+    : WiSpinInt(static_cast<uint8_t>(Sound_GetVolume()), SpinCnf::bed, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+    SetVal(bed_calibration_temp);
+}
+
+void MI_BED_CALIBRATION_TEMP::OnClick() {
+    bed_calibration_temp = GetVal();
+}
+
+/*****************************************************************************/
 MI_CALIBRATE_BED_PID::MI_CALIBRATE_BED_PID()
     : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
 }
 
 void MI_CALIBRATE_BED_PID::click(IWindowMenu & /*window_menu*/) {
-    marlin_gcode("M304 S250 U1");
+    marlin_gcode_printf("M303 S%d U1 E-1", bed_calibration_temp);
 }
 
 /*****************************************************************************/

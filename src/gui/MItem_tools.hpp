@@ -1,5 +1,5 @@
 /*****************************************************************************/
-//menu items running tools
+// menu items running tools
 #pragma once
 #include "WindowMenuItems.hpp"
 #include "i18n.h"
@@ -472,6 +472,14 @@ public:
     virtual void OnClick() override;
 };
 
+class MI_NOZZLE_CALIBRATION_TEMP : public WiSpinInt {
+    constexpr static const char *const label = N_("Nozzle calibration temperature");
+
+public:
+    MI_NOZZLE_CALIBRATION_TEMP();
+    virtual void OnClick() override;
+};
+
 class MI_CALIBRATE_NOZZLE_PID : public WI_LABEL_t {
     constexpr static const char *const label = N_("Calibrate nozzle temperature");
 
@@ -480,6 +488,14 @@ public:
 
 protected:
     virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_BED_CALIBRATION_TEMP : public WiSpinInt {
+    constexpr static const char *const label = N_("Bed calibration temperature");
+
+public:
+    MI_BED_CALIBRATION_TEMP();
+    virtual void OnClick() override;
 };
 
 class MI_CALIBRATE_BED_PID : public WI_LABEL_t {
