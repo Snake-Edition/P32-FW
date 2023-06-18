@@ -43,7 +43,7 @@ enum {
 //FANCTLPRINT - printing fan
 //static const uint8_t FANCTLPRINT_PWM_MIN = 15;
 static const uint8_t FANCTLPRINT_PWM_MIN = 10;
-static const uint8_t FANCTLPRINT_PWM_MAX = 100;
+static const uint8_t FANCTLPRINT_PWM_MAX = 50;
 static const uint16_t FANCTLPRINT_RPM_MIN = 150;
 static const uint16_t FANCTLPRINT_RPM_MAX = 5000;
 static const uint8_t FANCTLPRINT_PWM_THR = 20;
