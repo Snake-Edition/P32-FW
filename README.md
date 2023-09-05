@@ -94,7 +94,6 @@ To reflash the board in DFU mode, [see below](#flashing-in-dfu-mode).
 ## Configuration
 
 To configure Snake settings, open the Settings menu and select "Snake Settings".
-Llogical!
 
 ### Configuring E-steps
 
@@ -189,7 +188,7 @@ Turn off skew correction before you print. Use a normal layer height
 (0.15mm) and no supports. Do not rotate the model in your slicer -
 it must be printed in the same orientation as supplied in the STL.
 
-Then, make a copy of [this spreadsheet](https://bit.ly/2SJ1hAU).
+Open [this spreadsheet](doc/Skew_Calibration_Calculator.ods).
 Use [calipers](https://amzn.to/3vVRgOl) to measure the six diagonals,
 conveniently labeled A to F, and type the measurements
 into the spreadsheet. It will calculate your three skew correction factors.
