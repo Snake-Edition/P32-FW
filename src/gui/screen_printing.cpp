@@ -25,11 +25,11 @@ enum class Btn {
 const uint16_t printing_icons[static_cast<size_t>(item_id_t::count)] = {
     IDR_PNG_settings_58px,
     IDR_PNG_pause_58px,
-    IDR_PNG_pause_58px, //same as pause
+    IDR_PNG_pause_58px, // same as pause
     IDR_PNG_stop_58px,
     IDR_PNG_resume_48px,
     IDR_PNG_resume_48px,
-    IDR_PNG_resume_48px, //reheating is same as resume, bud disabled
+    IDR_PNG_resume_48px, // reheating is same as resume, bud disabled
     IDR_PNG_reprint_48px,
     IDR_PNG_home_58px,
 };
@@ -119,17 +119,21 @@ screen_printing_data_t::screen_printing_data_t()
     , w_filename(this, Rect16(10, 33, 220, 29))
     , w_progress(this, Rect16(10, 70, GuiDefaults::RectScreen.Width() - 2 * 10, 16))
     , w_progress_txt(this, Rect16(10, 86, GuiDefaults::RectScreen.Width() - 2 * 10, 30))
-    , w_time_label(this, Rect16(10, 128, 101, 20), is_multiline::no)
-    , w_time_value(this, Rect16(10, 148 + 5, 101, 20), is_multiline::no)
-    , w_etime_label(this, Rect16(130, 128, 101, 20), is_multiline::no)
-    , w_etime_value(this, Rect16(30, 148 + 5, 201, 20), is_multiline::no)
+    , w_time_label(this, Rect16(10, 148 - 30, 101, 20), is_multiline::no)
+    , w_time_value(this, Rect16(90, 148 - 30, 231 - 90, 20), is_multiline::no)
+    , w_etime_label(this, Rect16(10, 148 - 10, 101, 20), is_multiline::no)
+    , w_etime_value(this, Rect16(90, 148 - 10, 231 - 90, 20), is_multiline::no)
+
+    , w_end_time_label(this, Rect16(10, 148 + 10, 101, 20), is_multiline::no)
+    , w_end_time_value(this, Rect16(90, 148 + 10, 231 - 90, 20), is_multiline::no)
+
     , last_print_duration(-1)
     , last_time_to_end(-1)
     , message_timer(0)
     , stop_pressed(false)
     , waiting_for_abort(false)
     , state__readonly__use_change_print_state(printing_state_t::COUNT)
-    , popup_rect(Rect16::Merge(std::array<Rect16, 4>({ w_time_label.GetRect(), w_time_value.GetRect(), w_etime_label.GetRect(), w_etime_value.GetRect() }))) {
+    , popup_rect(Rect16::Merge(std::array<Rect16, 4>({ w_time_label.GetRect(), w_time_value.GetRect(), w_end_time_label.GetRect(), w_end_time_value.GetRect() }))) {
     marlin_error_clr(MARLIN_ERR_ProbingFailed);
     // we will handle HELD_RELEASED event in this window
     DisableLongHoldScreenAction();
@@ -147,7 +151,7 @@ screen_printing_data_t::screen_printing_data_t()
 
     // we could use shadow flag and color scheme for labels and values to be more clear
     w_etime_label.font = resource_font(IDR_FNT_SMALL);
-    w_etime_label.SetAlignment(Align_t::RightBottom());
+    w_etime_label.SetAlignment(Align_t::LeftBottom());
     w_etime_label.SetPadding({ 0, 2, 0, 2 });
     w_etime_label.SetText(_("Remaining"));
 
@@ -157,8 +161,18 @@ screen_printing_data_t::screen_printing_data_t()
     // this MakeRAM is safe - text_etime is allocated in RAM for the lifetime of pw
     w_etime_value.SetText(string_view_utf8::MakeRAM((const uint8_t *)text_etime.data()));
 
+    w_end_time_label.font = resource_font(IDR_FNT_SMALL);
+    w_end_time_label.SetAlignment(Align_t::LeftBottom());
+    w_end_time_label.SetPadding({ 0, 2, 0, 2 });
+    w_end_time_label.SetText(_("Remaining"));
+
+    w_end_time_value.font = resource_font(IDR_FNT_NORMAL);
+    w_end_time_value.SetAlignment(Align_t::RightBottom());
+    w_end_time_value.SetPadding({ 0, 2, 0, 2 });
+    w_end_time_value.SetText(string_view_utf8::MakeRAM((const uint8_t *)text_end_time.data()));
+
     w_time_label.font = resource_font(IDR_FNT_SMALL);
-    w_time_label.SetAlignment(Align_t::RightBottom());
+    w_time_label.SetAlignment(Align_t::LeftBottom());
     w_time_label.SetPadding({ 0, 2, 0, 2 });
     w_time_label.SetText(_("Elapsed"));
 
@@ -225,9 +239,11 @@ void screen_printing_data_t::windowEvent(EventLock /*has private ctor*/, window_
 
     change_print_state();
 
-    if (marlin_vars()->print_duration != last_print_duration)
-        update_print_duration(marlin_vars()->print_duration);
     if (marlin_vars()->time_to_end != last_time_to_end) {
+        update_total_time(marlin_vars()->time_to_end, marlin_vars()->print_speed);
+    }
+    if (marlin_vars()->print_duration != last_print_duration) {
+        update_print_duration(marlin_vars()->print_duration);
         change_etime();
     }
 
@@ -259,13 +275,13 @@ void screen_printing_data_t::change_etime() {
     if (sec != 0) {
         // store string_view_utf8 for later use - should be safe, we get some static string from flash, no need to copy it into RAM
         // theoretically it can be removed completely in case the string is constant for the whole run of the screen
-        w_etime_label.SetText(label_etime = _("Print will end"));
+        w_end_time_label.SetText(label_etime = _("Print will end"));
         update_end_timestamp(sec, marlin_vars()->print_speed);
     } else {
         // store string_view_utf8 for later use - should be safe, we get some static string from flash, no need to copy it into RAM
-        w_etime_label.SetText(label_etime = _("Remaining"));
-        update_remaining_time(marlin_vars()->time_to_end, marlin_vars()->print_speed);
+        w_end_time_label.SetText(label_etime = _("Total time      "));
     }
+    update_remaining_time(marlin_vars()->time_to_end, marlin_vars()->print_speed);
     last_time_to_end = marlin_vars()->time_to_end;
 }
 
@@ -286,24 +302,41 @@ void screen_printing_data_t::enable_tune_button() {
     btn_tune.ico.Invalidate();
 }
 
+void screen_printing_data_t::update_total_time(uint32_t sec, uint16_t print_speed) {
+    bool is_time_valid = sec < (60 * 60 * 24 * 365); // basic check, check of year in tm struct, does not work
+    time_t rawtime;
+    if (is_time_valid) {
+        rawtime = time_t(sec);
+        if (print_speed != 100) {
+            // multiply by 100 is safe, it limits time_to_end to ~21mil. seconds (248 days)
+            rawtime = (rawtime * 100) / print_speed;
+        }
+        total_time = marlin_vars()->print_duration + rawtime;
+    }
+}
+
 void screen_printing_data_t::update_remaining_time(uint32_t sec, uint16_t print_speed) {
+    sec = total_time - marlin_vars()->print_duration;
     bool is_time_valid = sec < (60 * 60 * 24 * 365); // basic check, check of year in tm struct, does not work
     w_etime_value.SetTextColor(is_time_valid ? GuiDefaults::COLOR_VALUE_VALID : GuiDefaults::COLOR_VALUE_INVALID);
+    time_t rawtime;
     if (is_time_valid) {
-        time_t rawtime = time_t(sec);
+        rawtime = time_t(sec);
         if (print_speed != 100) {
             // multiply by 100 is safe, it limits time_to_end to ~21mil. seconds (248 days)
             rawtime = (rawtime * 100) / print_speed;
         }
         const struct tm *timeinfo = localtime(&rawtime);
-        //standard would be:
-        //strftime(array.data(), array.size(), "%jd %Hh", timeinfo);
+        // standard would be:
+        // strftime(array.data(), array.size(), "%jd %Hh", timeinfo);
         if (timeinfo->tm_yday) {
-            snprintf(text_etime.data(), MAX_END_TIMESTAMP_SIZE, "%id %2ih", timeinfo->tm_yday, timeinfo->tm_hour);
+            snprintf(text_etime.data(), MAX_END_TIMESTAMP_SIZE, "%id %02i:%02i:%02i", timeinfo->tm_yday, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
         } else if (timeinfo->tm_hour) {
-            snprintf(text_etime.data(), MAX_END_TIMESTAMP_SIZE, "%ih %2im", timeinfo->tm_hour, timeinfo->tm_min);
+            snprintf(text_etime.data(), MAX_END_TIMESTAMP_SIZE, "%i:%02i:%02i", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+        } else if (timeinfo->tm_min) {
+            snprintf(text_etime.data(), MAX_END_TIMESTAMP_SIZE, "%i:%02i", timeinfo->tm_min, timeinfo->tm_sec);
         } else {
-            snprintf(text_etime.data(), MAX_END_TIMESTAMP_SIZE, "%im", timeinfo->tm_min);
+            snprintf(text_etime.data(), MAX_END_TIMESTAMP_SIZE, "%i", timeinfo->tm_sec);
         }
     } else {
         if (print_speed != 100)
@@ -314,16 +347,33 @@ void screen_printing_data_t::update_remaining_time(uint32_t sec, uint16_t print_
     // this MakeRAM is safe - text_etime is allocated in RAM for the lifetime of pw
     w_etime_value.SetText(string_view_utf8::MakeRAM((const uint8_t *)text_etime.data()));
     w_etime_value.Invalidate(); // invalidation is needed here because we are using the same static array for the text and text will invalidate only when the memory address is different
+
+    // write "Total time"
+    if (0 == sntp_get_system_time()) {
+        const struct tm *timeinfo = localtime(&total_time);
+
+        if (timeinfo->tm_yday) {
+            snprintf(text_end_time.data(), MAX_END_TIMESTAMP_SIZE, "%id %02i:%02i:%02i", timeinfo->tm_yday, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+        } else if (timeinfo->tm_hour) {
+            snprintf(text_end_time.data(), MAX_END_TIMESTAMP_SIZE, "%i:%02i:%02i", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+        } else if (timeinfo->tm_min) {
+            snprintf(text_end_time.data(), MAX_END_TIMESTAMP_SIZE, "%i:%02i", timeinfo->tm_min, timeinfo->tm_sec);
+        } else {
+            snprintf(text_end_time.data(), MAX_END_TIMESTAMP_SIZE, "%i", timeinfo->tm_sec);
+        }
+        w_end_time_value.SetText(string_view_utf8::MakeRAM((const uint8_t *)text_end_time.data()));
+        w_end_time_value.Invalidate(); // invalidation is needed here because we are using the same static array for the text and text will invalidate only when the memory address is different
+    }
 }
 
 void screen_printing_data_t::update_end_timestamp(time_t now_sec, uint16_t print_speed) {
 
     bool time_invalid = false;
     if (marlin_vars()->time_to_end == TIME_TO_END_INVALID) {
-        w_etime_value.SetTextColor(GuiDefaults::COLOR_VALUE_INVALID);
+        w_end_time_value.SetTextColor(GuiDefaults::COLOR_VALUE_INVALID);
         time_invalid = true;
     } else {
-        w_etime_value.SetTextColor(GuiDefaults::COLOR_VALUE_VALID);
+        w_end_time_value.SetTextColor(GuiDefaults::COLOR_VALUE_VALID);
     }
 
     static const uint32_t full_day_in_seconds = 86400;
@@ -344,37 +394,38 @@ void screen_printing_data_t::update_end_timestamp(time_t now_sec, uint16_t print
 
     if (now.tm_mday == print_end.tm_mday && // if print end is today
         now.tm_mon == print_end.tm_mon && now.tm_year == print_end.tm_year) {
-        //strftime(pw->text_etime.data(), MAX_END_TIMESTAMP_SIZE, "Today at %H:%M?", &print_end); //@@TODO translate somehow
-        FormatMsgPrintWillEnd::Today(text_etime.data(), MAX_END_TIMESTAMP_SIZE, &print_end, true);
+        // strftime(pw->text_etime.data(), MAX_END_TIMESTAMP_SIZE, "Today at %H:%M?", &print_end); //@@TODO translate somehow
+        FormatMsgPrintWillEnd::Today(text_end_time.data(), MAX_END_TIMESTAMP_SIZE, &print_end, true);
     } else if (tomorrow.tm_mday == print_end.tm_mday && // if print end is tomorrow
         tomorrow.tm_mon == print_end.tm_mon && tomorrow.tm_year == print_end.tm_year) {
         //        strftime(pw->text_etime.data(), MAX_END_TIMESTAMP_SIZE, "%a at %H:%MM", &print_end);
-        FormatMsgPrintWillEnd::DayOfWeek(text_etime.data(), MAX_END_TIMESTAMP_SIZE, &print_end, true);
+        FormatMsgPrintWillEnd::DayOfWeek(text_end_time.data(), MAX_END_TIMESTAMP_SIZE, &print_end, true);
     } else {
         //        strftime(pw->text_etime.data(), MAX_END_TIMESTAMP_SIZE, "%m-%d at %H:%MM", &print_end);
-        FormatMsgPrintWillEnd::Date(text_etime.data(), MAX_END_TIMESTAMP_SIZE, &print_end, true, FormatMsgPrintWillEnd::ISO);
+        FormatMsgPrintWillEnd::Date(text_end_time.data(), MAX_END_TIMESTAMP_SIZE, &print_end, true, FormatMsgPrintWillEnd::ISO);
     }
     if (print_speed != 100)
-        strlcat(text_etime.data(), "?", MAX_END_TIMESTAMP_SIZE);
+        strlcat(text_end_time.data(), "?", MAX_END_TIMESTAMP_SIZE);
 
     if (time_invalid == false) {
-        text_etime[text_etime.size() - 1] = 0; // safety \0 termination in all cases
+        text_end_time[text_end_time.size() - 1] = 0; // safety \0 termination in all cases
     }
     // this MakeRAM is safe - text_etime is allocated in RAM for the lifetime of pw
-    w_etime_value.SetText(string_view_utf8::MakeRAM((const uint8_t *)text_etime.data()));
-    w_etime_value.Invalidate(); // invalidation is needed here because we are using the same static array for the text and text will invalidate only when the memory address is different
+    w_end_time_value.SetText(string_view_utf8::MakeRAM((const uint8_t *)text_end_time.data()));
+    w_end_time_value.Invalidate(); // invalidation is needed here because we are using the same static array for the text and text will invalidate only when the memory address is different
 }
+
 void screen_printing_data_t::update_print_duration(time_t rawtime) {
     w_time_value.SetTextColor(GuiDefaults::COLOR_VALUE_VALID);
     const struct tm *timeinfo = localtime(&rawtime);
     if (timeinfo->tm_yday) {
-        snprintf(text_time_dur.data(), MAX_TIMEDUR_STR_SIZE, "%id %2ih", timeinfo->tm_yday, timeinfo->tm_hour);
+        snprintf(text_time_dur.data(), MAX_TIMEDUR_STR_SIZE, "%id %02i:%02i:%02i", timeinfo->tm_yday, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
     } else if (timeinfo->tm_hour) {
-        snprintf(text_time_dur.data(), MAX_TIMEDUR_STR_SIZE, "%ih %2im", timeinfo->tm_hour, timeinfo->tm_min);
+        snprintf(text_time_dur.data(), MAX_TIMEDUR_STR_SIZE, "%i:%02i:%02i", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
     } else if (timeinfo->tm_min) {
-        snprintf(text_time_dur.data(), MAX_TIMEDUR_STR_SIZE, "%im %2is", timeinfo->tm_min, timeinfo->tm_sec);
+        snprintf(text_time_dur.data(), MAX_TIMEDUR_STR_SIZE, "%i:%02i", timeinfo->tm_min, timeinfo->tm_sec);
     } else {
-        snprintf(text_time_dur.data(), MAX_TIMEDUR_STR_SIZE, "%is", timeinfo->tm_sec);
+        snprintf(text_time_dur.data(), MAX_TIMEDUR_STR_SIZE, "%i", timeinfo->tm_sec);
     }
     // this MakeRAM is safe - text_time_dur is allocated in RAM for the lifetime of pw
     w_time_value.SetText(string_view_utf8::MakeRAM((const uint8_t *)text_time_dur.data()));
@@ -392,7 +443,7 @@ void screen_printing_data_t::screen_printing_reprint() {
 #endif
 }
 
-//todo use it
+// todo use it
 /*static void mesh_err_stop_print() {
     float target_nozzle = marlin_vars()->target_nozzle;
     float target_bed = marlin_vars()->target_bed;
@@ -437,8 +488,8 @@ void screen_printing_data_t::set_pause_icon_and_label() {
     window_icon_t *const p_button = &btn_pause.ico;
     window_text_t *const pLabel = &btn_pause.txt;
 
-    //todo it is static, because menu tune is not dialog
-    //switch (state__readonly__use_change_print_state)
+    // todo it is static, because menu tune is not dialog
+    // switch (state__readonly__use_change_print_state)
     switch (GetState()) {
     case printing_state_t::COUNT:
     case printing_state_t::INITIAL:
@@ -481,7 +532,7 @@ void screen_printing_data_t::set_tune_icon_and_label() {
     window_icon_t *const p_button = &btn_tune.ico;
     window_text_t *const pLabel = &btn_tune.txt;
 
-    //must be before switch
+    // must be before switch
     set_icon_and_label(item_id_t::settings, p_button, pLabel);
 
     switch (GetState()) {
