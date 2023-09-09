@@ -1,4 +1,4 @@
-//screen_printing.hpp
+// screen_printing.hpp
 #pragma once
 #include "status_footer.hpp"
 #include "window_header.hpp"
@@ -20,7 +20,7 @@ enum class printing_state_t : uint8_t {
     REHEATING_DONE,
     MBL_FAILED,
     PRINTED,
-    COUNT //setting this state == forced update
+    COUNT // setting this state == forced update
 };
 
 enum class item_id_t {
@@ -38,7 +38,7 @@ enum class item_id_t {
 
 constexpr static const size_t POPUP_MSG_DUR_MS = 5000;
 constexpr static const size_t MAX_END_TIMESTAMP_SIZE = 14 + 12 + 5; // "dd.mm.yyyy at hh:mm:ss" + safty measures for 3digit where 2 digits should be
-constexpr static const size_t MAX_TIMEDUR_STR_SIZE = 9;
+constexpr static const size_t MAX_TIMEDUR_STR_SIZE = 12 + 1;
 
 class screen_printing_data_t : public AddSuperWindow<ScreenPrintingModel> {
     static constexpr const char *caption = N_("PRINTING");
@@ -51,12 +51,16 @@ class screen_printing_data_t : public AddSuperWindow<ScreenPrintingModel> {
     window_text_t w_etime_label;
     window_text_t w_etime_value;
 
+    window_text_t w_end_time_label;
+    window_text_t w_end_time_value;
+
     uint32_t last_print_duration;
     uint32_t last_time_to_end;
 
     std::array<char, MAX_TIMEDUR_STR_SIZE> text_time_dur;
     std::array<char, MAX_END_TIMESTAMP_SIZE> text_etime;
-    //std::array<char, 15> label_etime;  // "Remaining" or "Print will end" // nope, if you have only 2 static const strings, you can swap pointers
+    std::array<char, MAX_END_TIMESTAMP_SIZE> text_end_time;
+    // std::array<char, 15> label_etime;  // "Remaining" or "Print will end" // nope, if you have only 2 static const strings, you can swap pointers
     string_view_utf8 label_etime;      // not sure if we really must keep this in memory
     std::array<char, 5> text_filament; // 999m\0 | 1.2m\0
     uint32_t message_timer;
@@ -77,6 +81,7 @@ private:
     void invalidate_print_state();
     void disable_tune_button();
     void enable_tune_button();
+    void update_total_time(uint32_t sec, uint16_t print_speed);
     void update_remaining_time(uint32_t sec, uint16_t print_speed); // must use uint32_t instead time_t, because of validity check
     void update_end_timestamp(time_t now_sec, uint16_t print_speed);
     void update_print_duration(time_t rawtime);
@@ -93,6 +98,8 @@ private:
     virtual void stopAction() override;
     virtual void pauseAction() override;
     virtual void tuneAction() override;
+
+    time_t total_time;
 
 public:
     printing_state_t GetState() const;
