@@ -1,5 +1,5 @@
 /*****************************************************************************/
-//Screen openning menu items
+// Screen openning menu items
 #pragma once
 #include "WindowMenuItems.hpp"
 #include "i18n.h"
@@ -253,6 +253,17 @@ class MI_SNAKE_TUNE_SETTINGS : public WI_LABEL_t {
 
 public:
     MI_SNAKE_TUNE_SETTINGS();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+/**********************************************************************************************/
+class MI_CHANGE_FILAMENT : public WI_LABEL_t {
+    static constexpr const char *const label = N_("Change Filament");
+
+public:
+    MI_CHANGE_FILAMENT();
 
 protected:
     virtual void click(IWindowMenu &window_menu) override;
