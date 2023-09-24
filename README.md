@@ -29,6 +29,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 * **Temperature calibration**: You can calibrate PID temperature control for your hotend/bed directly from the menu. Calibration does 5 cycles.
 * **Total time**: Elapsed, Remaining and Total or End time are shown during printing.
 * **Change filament**: Change of filament in Tune menu is moved to submenu to avoid unwanted interruption.
+* **Adjust brightness**: You can change brightness of the display. It does not dimm the light but what is drawn.
 
 All settings are automatically saved to EEPROM and loaded on boot.
 
