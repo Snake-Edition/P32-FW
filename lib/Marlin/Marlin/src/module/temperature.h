@@ -34,6 +34,8 @@
   #include "../feature/power.h"
 #endif
 
+extern uint8_t cold_mode;
+
 #ifndef SOFT_PWM_SCALE
   #define SOFT_PWM_SCALE 0
 #endif
@@ -617,7 +619,8 @@ class Temperature {
 
     #if HOTENDS
 
-      static void setTargetHotend(const int16_t celsius, const uint8_t E_NAME) {
+      static void setTargetHotend(int16_t celsius, const uint8_t E_NAME) {
+        if (cold_mode && celsius < 30) celsius = 30; //< keep at least 30 deg.C
         const uint8_t ee = HOTEND_INDEX;
         #ifdef MILLISECONDS_PREHEAT_TIME
           if (celsius == 0)
@@ -670,7 +673,8 @@ class Temperature {
         static inline void start_watching_bed() {}
       #endif
 
-      static void setTargetBed(const int16_t celsius) {
+      static void setTargetBed(int16_t celsius) {
+        if (cold_mode && celsius < 30) celsius = 30; //< keep at least 30 deg.C
         #if ENABLED(AUTO_POWER_CONTROL)
           powerManager.power_on();
         #endif
