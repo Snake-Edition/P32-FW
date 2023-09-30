@@ -565,6 +565,14 @@ void MI_BRIGHTNESS::OnClick() {
 }
 
 /*****************************************************************************/
+uint8_t cold_mode = false;
+MI_COLD_MODE::MI_COLD_MODE()
+    : WI_SWITCH_OFF_ON_t(cold_mode, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
+void MI_COLD_MODE::OnChange(size_t old_index) {
+    cold_mode = index;
+}
+
+/*****************************************************************************/
 MI_SKEW_ENABLED::MI_SKEW_ENABLED()
     : WI_SWITCH_OFF_ON_t(eeprom_get_bool(EEVAR_SNAKE_SKEW_ENABLED), _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
 void MI_SKEW_ENABLED::OnChange(size_t old_index) {
