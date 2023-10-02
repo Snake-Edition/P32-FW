@@ -464,7 +464,6 @@ public:
     virtual void OnChange(size_t old_index) override;
 };
 
-
 class MI_SKEW_XY : public WiSpinFlt {
     constexpr static const char *const label = N_("Skew XY");
 
@@ -487,6 +486,16 @@ class MI_SKEW_YZ : public WiSpinFlt {
 public:
     MI_SKEW_YZ();
     virtual void OnClick() override;
+};
+
+class MI_XY_CALIBRATION : public WI_LABEL_t {
+    constexpr static const char *const label = N_("Calibrate XY");
+
+public:
+    MI_XY_CALIBRATION();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
 };
 
 class MI_NOZZLE_CALIBRATION_TEMP : public WiSpinInt {

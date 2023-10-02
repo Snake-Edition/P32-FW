@@ -53,6 +53,8 @@
     extern const char msg_wait_for_bed_heating[25];
   #endif
 
+  bool do_probe_move(const float z, const feedRate_t fr_mm_s);
+
 #else
 
   constexpr xyz_pos_t probe_offset{0};

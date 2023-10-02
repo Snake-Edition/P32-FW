@@ -11,6 +11,9 @@ bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
     switch (parser.command_letter) {
     case 'M':
         switch (parser.codenum) {
+        case 45:
+            PrusaGcodeSuite::M45(); // XY calibration
+            return true;
         case 50:
             PrusaGcodeSuite::M50(); //selftest
             return true;
