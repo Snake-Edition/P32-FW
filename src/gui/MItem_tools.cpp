@@ -604,6 +604,15 @@ void MI_SKEW_YZ::OnClick() {
     snake_apply_skew_settings();
 }
 
+/*****************************************************************************/
+MI_XY_CALIBRATION::MI_XY_CALIBRATION()
+    : WI_LABEL_t(_(label), 0, is_enabled_t::no, is_hidden_t::no) {
+}
+
+void MI_XY_CALIBRATION::click(IWindowMenu & /*window_menu*/) {
+    marlin_gcode_printf("M45");
+}
+
 static uint16_t nozzle_calibration_temp = 250;
 static uint8_t bed_calibration_temp = 80;
 
