@@ -918,6 +918,7 @@ if(GUI)
             src/gui/screen_sheet_rename.cpp
             src/gui/screen_prusa_link.cpp
             src/gui/screen_snake.cpp
+            src/gui/screen_mbl_values.cpp
             src/gui/wizard/selftest.cpp
             src/gui/wizard/firstlay.cpp
             src/gui/wizard/screen_wizard.cpp

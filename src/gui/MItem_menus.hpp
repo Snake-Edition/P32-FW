@@ -280,6 +280,17 @@ protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
 
+/**********************************************************************************************/
+class MI_MBL_VALUES : public WI_LABEL_t {
+    static constexpr const char *const label = "MBL values";
+
+public:
+    MI_MBL_VALUES();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
 class MI_EEPROM_DIAGNOSTICS : public WI_LABEL_t {
     static constexpr const char *const label = N_("Experimental Settings");
 

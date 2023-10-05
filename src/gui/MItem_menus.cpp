@@ -11,6 +11,7 @@
 #include "filament_sensor_api.hpp"
 #include "translator.hpp"
 #include "SteelSheets.hpp"
+#include "screen_mbl_values.hpp"
 
 /*****************************************************************************/
 //MI_VERSION_INFO
@@ -286,7 +287,16 @@ void MI_SNAKE::click(IWindowMenu & /*window_menu*/) {
 }
 
 /*****************************************************************************/
-//MI_PRUSALINK
+MI_MBL_VALUES::MI_MBL_VALUES()
+    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_MBL_VALUES::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<screen_mbl_values_t>);
+}
+
+/*****************************************************************************/
+// MI_PRUSALINK
 MI_PRUSALINK::MI_PRUSALINK()
     : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
 }
