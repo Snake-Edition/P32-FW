@@ -8,7 +8,6 @@
 #include "../../lib/Marlin/Marlin/src/module/stepper.h"
 #include "../../lib/Marlin/Marlin/src/module/probe.h"
 #include "../../lib/Marlin/Marlin/src/gcode/queue.h"
-#include "../../lib/Marlin/Marlin/src/gcode/motion/G2_G3.h"
 #include "../../lib/Marlin/Marlin/src/module/endstops.h"
 
 const float radius_8 = 3.f;
