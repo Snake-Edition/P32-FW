@@ -780,6 +780,7 @@ target_sources(
           src/marlin_stubs/gcode.cpp
           src/marlin_stubs/G26.cpp
           src/marlin_stubs/G162.cpp
+          src/marlin_stubs/M45.cpp
           src/marlin_stubs/M50.cpp
           src/marlin_stubs/M300.cpp
           src/marlin_stubs/M330.cpp
