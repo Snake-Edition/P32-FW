@@ -10,7 +10,7 @@
 
 /*****************************************************************************/
 // Submenu for change filamnet (avoids interruption of print by mistaken click)
-using Screen600 = ScreenMenu<EFooter::On, MI_M600>;
+using Screen600 = ScreenMenu<EFooter::On, MI_RETURN, MI_M600>;
 
 class ScreenMenuM600 : public Screen600 {
 public:
