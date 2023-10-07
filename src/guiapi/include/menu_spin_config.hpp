@@ -26,4 +26,5 @@ struct SpinCnf {
     static const SpinConfigInt rms_current;
     static const SpinConfigInt two_digits_uint;
     static const SpinConfig_t<float> skew_range;
+    static const SpinConfigInt brightness;
 };

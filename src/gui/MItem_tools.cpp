@@ -557,6 +557,14 @@ void MI_HOTEND_FAN_SPEED::OnChange(size_t old_type) {
 }
 
 /*****************************************************************************/
+extern uint8_t brightness;
+MI_BRIGHTNESS::MI_BRIGHTNESS()
+    : WiSpinInt(brightness, SpinCnf::brightness, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
+void MI_BRIGHTNESS::OnClick() {
+    brightness = GetVal();
+}
+
+/*****************************************************************************/
 MI_SKEW_ENABLED::MI_SKEW_ENABLED()
     : WI_SWITCH_OFF_ON_t(eeprom_get_bool(EEVAR_SNAKE_SKEW_ENABLED), _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
 void MI_SKEW_ENABLED::OnChange(size_t old_index) {

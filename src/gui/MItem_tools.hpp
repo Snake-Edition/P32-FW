@@ -440,6 +440,14 @@ public:
     virtual void OnChange(size_t old_index) override;
 };
 
+class MI_BRIGHTNESS : public WiSpinInt {
+    constexpr static const char *const label = N_("Brightness");
+
+public:
+    MI_BRIGHTNESS();
+    virtual void OnClick() override;
+};
+
 class MI_SKEW_ENABLED : public WI_SWITCH_OFF_ON_t {
     constexpr static const char *const label = N_("Skew Correct");
 
@@ -447,6 +455,7 @@ public:
     MI_SKEW_ENABLED();
     virtual void OnChange(size_t old_index) override;
 };
+
 
 class MI_SKEW_XY : public WiSpinFlt {
     constexpr static const char *const label = N_("Skew XY");
