@@ -30,6 +30,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 * **Total time**: Elapsed, Remaining and Total or End time are shown during printing.
 * **Change filament**: Change of filament in Tune menu is moved to submenu to avoid unwanted interruption.
 * **Adjust brightness**: You can change brightness of the display. It does not dimm the light but what is drawn.
+* **Cold mode (min.temp.)**: If you enable Cold Mode, temperatures (once set) won't drop below 30°C. For safety reasons cold mode must be enabled after every start of the printer.
 
 All settings are automatically saved to EEPROM and loaded on boot.
 
