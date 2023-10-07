@@ -333,6 +333,15 @@ void MI_SNAKE_TUNE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
 }
 
 /**********************************************************************************************/
+MI_CHANGE_FILAMENT::MI_CHANGE_FILAMENT()
+    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_CHANGE_FILAMENT::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(GetScreenMenuM600);
+}
+
+/**********************************************************************************************/
 // MI_EEPROM_DIAGNOSTICS
 MI_EEPROM_DIAGNOSTICS::MI_EEPROM_DIAGNOSTICS()
     : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::dev, expands_t::yes) {
