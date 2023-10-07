@@ -31,6 +31,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 * **Change filament**: Change of filament in Tune menu is moved to submenu to avoid unwanted interruption.
 * **Adjust brightness**: You can change brightness of the display. It does not dimm the light but what is drawn.
 * **Cold mode (min.temp.)**: If you enable Cold Mode, temperatures (once set) won't drop below 30°C. For safety reasons cold mode must be enabled after every start of the printer.
+* **Show MBL and tilt**: After mesh bed leveling (G29) you can go to `Snake Settings` and see the MBL Z levels at the measured points and check the tilt of the axes. Levels are shifted to avoid negative numbers.
 
 All settings are automatically saved to EEPROM and loaded on boot.
 
