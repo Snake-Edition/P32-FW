@@ -9,29 +9,30 @@ FW developer, testers, and graphic designers are welcome.
 
 Alternative FW for the Prusa Mini. There's quite few improvements:
 
-* ~~**Hotend fan speed**: Adds a menu option to unlock the hotend fan speed~~
+1. ~~**Hotend fan speed**: Adds a menu option to unlock the hotend fan speed~~
   ~~and increase it from the Prusa Firmware's default 38% to anywhere from 50-100%.~~
-* **Skew compensation**: Turns on skew compensation in Marlin and allows it
+2. **Skew compensation**: Turns on skew compensation in Marlin and allows it
   to be configured directly through the Settings menu or with `M852`.
-* ~~**OctoPrint screen**: Adds support for `M73` (print progress) and `M117`~~
+3. ~~**OctoPrint screen**: Adds support for `M73` (print progress) and `M117`~~
   ~~(LCD messages).~~
-* **PID tuning**: Automatically writes PID settings to EEPROM after `M303 U1` (autotune),
+4. **PID tuning**: Automatically writes PID settings to EEPROM after `M303 U1` (autotune),
   `M301` (set hotend PID), and `M304` (set bed PID).
-* **Max Temps**: Raises the maximum bed temperature from 100C to 110C
+5. **Max Temps**: Raises the maximum bed temperature from 100C to 110C
   and nozzle temperature from 290C to 300C (use with caution!).
-* ~~**EEPROM upgrade/sidegrade/downgrade**: Saved values (live-z, skew etc.) are kept during upgrade/sidegrade/downgrade.~~
-* **Settings during print**: You can change Snake settings during printing.
-* **Faster nozzle cooling**: If you wait for nozzle cooling before MBL, you can call `M109 R170 C`
+6. ~~**EEPROM upgrade/sidegrade/downgrade**: Saved values (live-z, skew etc.) are kept during upgrade/sidegrade/downgrade.~~
+7. **Settings during print**: You can change Snake settings during printing.
+8. **Faster nozzle cooling**: If you wait for nozzle cooling before MBL, you can call `M109 R170 C`
   which uses print fan to speed up cooling.
-* **Game**: Instead of printing you can enjoy simple game.
-* **Bigger time**: Printing and remaining time is now bigger.
-* **Startup wizard**: Now you can select `Ignore` at the wizard start screen to disable starting of the wizard at the printer startup.
-* **Temperature calibration**: You can calibrate PID temperature control for your hotend/bed directly from the menu. Calibration does 5 cycles.
-* **Total time**: Elapsed, Remaining and Total or End time are shown during printing.
-* **Change filament**: Change of filament in Tune menu is moved to submenu to avoid unwanted interruption.
-* **Adjust brightness**: You can change brightness of the display. It does not dimm the light but what is drawn.
-* **Cold mode (min.temp.)**: If you enable Cold Mode, temperatures (once set) won't drop below 30°C. For safety reasons cold mode must be enabled after every start of the printer.
-* **Show MBL and tilt**: After mesh bed leveling (G29) you can go to `Snake Settings` and see the MBL Z levels at the measured points and check the tilt of the axes. Levels are shifted to avoid negative numbers.
+9. **Game**: Instead of printing you can enjoy simple game.
+10. **Bigger time**: Printing and remaining time is now bigger.
+11. **Startup wizard**: Now you can select `Ignore` at the wizard start screen to disable starting of the wizard at the printer startup.
+12. **Temperature calibration**: You can calibrate PID temperature control for your hotend/bed directly from the menu. Calibration does 5 cycles.
+13. **Total time**: Elapsed, Remaining and Total or End time are shown during printing.
+14. **Change filament**: Change of filament in Tune menu is moved to submenu to avoid unwanted interruption.
+15. **Adjust brightness**: You can change brightness of the display. It does not dimm the light but what is drawn.
+16. **Cold mode (min.temp.)**: If you enable Cold Mode, temperatures (once set) won't drop below 30°C. For safety reasons cold mode must be enabled after every start of the printer.
+17. **Show MBL and tilt**: After mesh bed leveling (G29) you can go to `Snake Settings` and see the MBL Z levels at the measured points and check the tilt of the axes. Levels are shifted to avoid negative numbers.
+18. **Speed up (un)parking**: Parking and unparking is done at the highest speed to shorten maintanance (change filament) time during printing.
 
 All settings are automatically saved to EEPROM and loaded on boot.
 

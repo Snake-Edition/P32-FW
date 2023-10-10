@@ -21,6 +21,8 @@
  */
 #pragma once
 
+#include "../feature/macros.h"
+
 // clang-format off
 
 /**
@@ -1442,11 +1444,11 @@
     // Specify a park position as { X, Y, Z }
     #define NOZZLE_PARK_POINT \
         { (X_MAX_POS - 10), (Y_MAX_POS - 10), 20 }
-        #define NOZZLE_PARK_POINT_M600 \
+    #define NOZZLE_PARK_POINT_M600 \
         {(X_MIN_POS + 10), (Y_MIN_POS + 10), 20 }
-    #define NOZZLE_PARK_XY_FEEDRATE 100 // (mm/s) X and Y axes feedrate (also used for delta Z axis)
-    #define NOZZLE_UNPARK_XY_FEEDRATE 30 // (mm/s) X and Y axes feedrate for unparking after m600
-    #define NOZZLE_PARK_Z_FEEDRATE 5 // (mm/s) Z axis feedrate (not used for delta printers)
+    #define NOZZLE_PARK_XY_FEEDRATE 999 // (mm/s) X and Y axes feedrate (also used for delta Z axis)
+    #define NOZZLE_UNPARK_XY_FEEDRATE 999 // (mm/s) X and Y axes feedrate for unparking after m600
+    #define NOZZLE_PARK_Z_FEEDRATE 999 // (mm/s) Z axis feedrate (not used for delta printers)
 
     /**
      * Park the nozzle after print is finished
