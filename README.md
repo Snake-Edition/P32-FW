@@ -33,8 +33,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 16. **Cold mode (min.temp.)**: If you enable Cold Mode, temperatures (once set) won't drop below 30°C. For safety reasons cold mode must be enabled after every start of the printer.
 17. **Show MBL and tilt**: After mesh bed leveling (G29) you can go to `Snake Settings` and see the MBL Z levels at the measured points and check the tilt of the axes. Levels are shifted to avoid negative numbers.
 18. **Speed up (un)parking**: Parking and unparking is done at the highest speed to shorten maintanance (change filament) time during printing.
-
-All settings are automatically saved to EEPROM and loaded on boot.
+19. **One click preheat**: If the filament is known the preheat will set temperatures immediatelly. Second click enters the submenu.
 
 ## Feed the Snake
 

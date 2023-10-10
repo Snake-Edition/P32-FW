@@ -3,11 +3,13 @@
 #include "screen_menus.hpp"
 #include "screen_menu.hpp"
 #include "filament.h"
-#include "marlin_client.h"
+#include "filament.hpp"
+#include "marlin_client.hpp"
 #include "screen_menu.hpp"
 #include "MItem_tools.hpp"
 #include "i18n.h"
 #include "ScreenHandler.hpp"
+#include "temperature.h"
 
 using Screen = ScreenMenu<EFooter::On, MI_RETURN,
     MI_Filament<FILAMENT_PLA>,
@@ -21,11 +23,19 @@ using Screen = ScreenMenu<EFooter::On, MI_RETURN,
     MI_Filament<FILAMENT_FLEX>,
     MI_Filament<FILAMENT_NONE>>;
 
+int8_t one_click_preheat = true;
+
 class ScreenMenuPreheat : public Screen {
 public:
     constexpr static const char *label = N_("PREHEAT");
     ScreenMenuPreheat()
-        : Screen(_(label)) {}
+        : Screen(_(label)) {
+        if (one_click_preheat && Filaments::CurrentIndex() != filament_t::NONE) {
+            thermalManager.setTargetHotend(Filaments::Current().nozzle_preheat, 0);
+            Screens::Access()->Close();
+        }
+        one_click_preheat = !one_click_preheat;
+    }
 };
 
 ScreenFactory::UniquePtr GetScreenMenuPreheat() {
