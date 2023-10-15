@@ -542,7 +542,9 @@
 
 // Uncomment one of these options to enable CoreXY, CoreXZ, or CoreYZ kinematics
 // either in the usual order or reversed
-//#define COREXY
+#ifdef MINI_COREXY
+    #define COREXY
+#endif
 //#define COREXZ
 //#define COREYZ
 //#define COREYX

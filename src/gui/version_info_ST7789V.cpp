@@ -97,6 +97,10 @@ ScreenMenuVersionInfo::ScreenMenuVersionInfo()
             begin += snprintf(begin, end - begin, "%.*s\n", line_length, project_version_full + i);
     }
 
+    #ifdef MINI_COREXY
+        begin += snprintf(begin, end - begin, "COREXY\n");
+    #endif
+
     if (end > begin) {
         // c=20 r=4
         static const char fmt2Translate[] = N_("\nBootloader Version\n%d.%d.%d\n\nBuddy Board\n%d.%d.%d\n%s");
