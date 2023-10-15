@@ -633,6 +633,8 @@ void marlin_server_nozzle_timeout_loop() {
 
 static void marlin_server_resuming_reheating() {
     if (hotendErrorChecker.isFailed()) {
+        if (cold_mode && degTargetHotend(0) == cold_mode_temp)
+            return;
         set_warning(WarningType::HotendTempDiscrepancy);
         thermalManager.setTargetHotend(0, 0);
 #if FAN_COUNT > 0
