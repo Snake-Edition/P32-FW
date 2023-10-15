@@ -9,6 +9,15 @@
                 "BOARD_VERSION": "<default>",
                 "PRESET_COMPILE_OPTIONS": ""
             }
+        },
+        {
+            "name": "minixy",
+            "description": "MINI",
+            "cacheVariables": {
+                "PRINTER": "MINI",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_COREXY"
+            }
         }
     ]
 }
