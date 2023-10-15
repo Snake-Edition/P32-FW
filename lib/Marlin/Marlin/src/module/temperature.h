@@ -35,6 +35,7 @@
 #endif
 
 extern uint8_t cold_mode;
+const constexpr cold_mode_temp = 30;
 
 #ifndef SOFT_PWM_SCALE
   #define SOFT_PWM_SCALE 0
@@ -620,7 +621,7 @@ class Temperature {
     #if HOTENDS
 
       static void setTargetHotend(int16_t celsius, const uint8_t E_NAME) {
-        if (cold_mode && celsius < 30) celsius = 30; //< keep at least 30 deg.C
+        if (cold_mode && celsius < cold_mode_temp) celsius = cold_mode_temp;
         const uint8_t ee = HOTEND_INDEX;
         #ifdef MILLISECONDS_PREHEAT_TIME
           if (celsius == 0)
@@ -674,7 +675,7 @@ class Temperature {
       #endif
 
       static void setTargetBed(int16_t celsius) {
-        if (cold_mode && celsius < 30) celsius = 30; //< keep at least 30 deg.C
+        if (cold_mode && celsius < cold_mode_temp) celsius = cold_mode_temp;
         #if ENABLED(AUTO_POWER_CONTROL)
           powerManager.power_on();
         #endif
