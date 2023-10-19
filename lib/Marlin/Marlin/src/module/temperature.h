@@ -35,7 +35,7 @@
 #endif
 
 extern uint8_t cold_mode;
-const constexpr cold_mode_temp = 30;
+const constexpr uint8_t cold_mode_temp = 30;
 
 #ifndef SOFT_PWM_SCALE
   #define SOFT_PWM_SCALE 0
