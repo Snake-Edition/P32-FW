@@ -451,7 +451,7 @@ void MI_HARDWARE_TUNE::click(IWindowMenu & /*window_menu*/) {
 /**********************************************************************************************/
 // MI_EXPERIMENTAL_SETTINGS
 MI_EXPERIMENTAL_SETTINGS::MI_EXPERIMENTAL_SETTINGS()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev) {
+    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
 
 void MI_EXPERIMENTAL_SETTINGS::click(IWindowMenu & /*window_menu*/) {
