@@ -285,6 +285,61 @@ protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
 
+/**********************************************************************************************/
+class MI_SNAKE_SETTINGS : public WI_LABEL_t {
+    static constexpr const char *const label = N_("Snake Settings");
+
+public:
+    MI_SNAKE_SETTINGS();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+/**********************************************************************************************/
+class MI_SNAKE_TUNE_SETTINGS : public WI_LABEL_t {
+    static constexpr const char *const label = N_("Snake Settings");
+
+public:
+    MI_SNAKE_TUNE_SETTINGS();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+/**********************************************************************************************/
+class MI_CHANGE_FILAMENT : public WI_LABEL_t {
+    static constexpr const char *const label = N_("Change Filament");
+
+public:
+    MI_CHANGE_FILAMENT();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+/**********************************************************************************************/
+class MI_SNAKE : public WI_LABEL_t {
+    static constexpr const char *const label = "Snake";
+
+public:
+    MI_SNAKE();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+/**********************************************************************************************/
+class MI_MBL_VALUES : public WI_LABEL_t {
+    static constexpr const char *const label = "MBL values";
+
+public:
+    MI_MBL_VALUES();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
 class MI_EEPROM_DIAGNOSTICS : public WI_LABEL_t {
     static constexpr const char *const label = N_("Eeprom Diagnostics");
 

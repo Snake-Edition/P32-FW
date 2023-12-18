@@ -8,7 +8,7 @@
 #include "window_dlg_strong_warning.hpp"
 #include "client_response.hpp"
 
-static const char *test_text = "Welcome to the Original Prusa MINI setup wizard. Would you like to continue?";
+static const char *test_text = "Welcome to theMINI setup wizard. Would you like to continue?";
 static const string_view_utf8 test_text_view = string_view_utf8::MakeCPUFLASH((const uint8_t *)(test_text));
 static const char *test_header = "Header";
 static const string_view_utf8 test_header_view = string_view_utf8::MakeCPUFLASH((const uint8_t *)(test_header));

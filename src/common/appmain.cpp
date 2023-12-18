@@ -29,6 +29,7 @@
 #include "crc32.h"
 #include <crash_dump/dump.hpp>
 #include "hwio_pindef.h"
+#include "snake.h"
 #include <Arduino.h>
 #include "trinamic.h"
 #include "../Marlin/src/module/configuration_store.h"

@@ -16,6 +16,8 @@
 // st7789v specific variables objects and function aliases
 static constexpr Rect16 DisplayClip() { return Rect16(0, 0, ST7789V_COLS, ST7789V_ROWS); }
 
+uint8_t brightness = 100;
+
 inline uint16_t color_to_native(uint32_t clr) {
     return color_to_565(clr);
 }
@@ -181,6 +183,7 @@ void display_ex_clear(const color_t clr) {
 }
 
 static inline void draw_qoi_ex_C(FILE *pf, uint16_t point_x, uint16_t point_y, uint32_t back_color, ropfn rop, Rect16 subrect) {
+    // todo
     // todo
 }
 

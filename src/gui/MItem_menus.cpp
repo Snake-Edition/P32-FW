@@ -30,7 +30,6 @@
 #include "power_panic.hpp"
 #include "screen_menu_filament.hpp"
 #include "screen_menu_temperature.hpp"
-#include "screen_menu_move.hpp"
 #include "screen_menu_sensor_info.hpp"
 #include "screen_menu_odometer.hpp"
 #include "screen_menu_version_info.hpp"
@@ -55,6 +54,9 @@
 #include "screen_menu_factory_reset.hpp"
 #include "screen_menu_error_test.hpp"
 #include "screen_menu_input_shaper.hpp"
+
+#include "screen_snake.hpp"
+#include "screen_mbl_values.hpp"
 
 #include <printers.h>
 
@@ -384,6 +386,25 @@ void MI_LANG_AND_TIME::click(IWindowMenu & /*window_menu*/) {
 }
 
 /*****************************************************************************/
+// MI_SNAKE
+MI_SNAKE::MI_SNAKE()
+    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_SNAKE::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<screen_snake_data_t>);
+}
+
+/*****************************************************************************/
+MI_MBL_VALUES::MI_MBL_VALUES()
+    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_MBL_VALUES::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<screen_mbl_values_t>);
+}
+
+/*****************************************************************************/
 // MI_PRUSALINK
 MI_PRUSA_CONNECT::MI_PRUSA_CONNECT()
     : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
@@ -395,7 +416,6 @@ void MI_PRUSA_CONNECT::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuConnect>);
 }
 
-/**********************************************************************************************/
 // MI_LOAD_SETTINGS
 
 MI_LOAD_SETTINGS::MI_LOAD_SETTINGS()
@@ -456,6 +476,33 @@ MI_EXPERIMENTAL_SETTINGS::MI_EXPERIMENTAL_SETTINGS()
 
 void MI_EXPERIMENTAL_SETTINGS::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuExperimentalSettings>);
+}
+
+/**********************************************************************************************/
+MI_SNAKE_SETTINGS::MI_SNAKE_SETTINGS()
+    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_SNAKE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(GetScreenMenuSnakeSettings);
+}
+
+/**********************************************************************************************/
+MI_SNAKE_TUNE_SETTINGS::MI_SNAKE_TUNE_SETTINGS()
+    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_SNAKE_TUNE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(GetScreenMenuSnakeTuneSettings);
+}
+
+/**********************************************************************************************/
+MI_CHANGE_FILAMENT::MI_CHANGE_FILAMENT()
+    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_CHANGE_FILAMENT::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(GetScreenMenuM600);
 }
 
 /**********************************************************************************************/

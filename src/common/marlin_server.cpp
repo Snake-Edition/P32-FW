@@ -60,6 +60,7 @@
 #include "fsm_types.hpp"
 #include "odometer.hpp"
 #include "metric.h"
+#include "snake.h"
 
 #include <option/has_leds.h>
 #if HAS_LEDS()
@@ -309,7 +310,7 @@ namespace {
                 break;
             default:
                 media_print_pause(false);
-            }
+            } // end anonymous namespace
         }
 
         SerialPrinting::pause();
@@ -517,6 +518,30 @@ int cycle(void) {
     send_notifications_to_clients();
     server_update_vars();
 
+    // // write skew and esteps to EEPROM if changed
+    // if (changes & MARLIN_VAR_MSK(MARLIN_VAR_ESTEPS)) {
+    //     eeprom_set_var(EEVAR_SNAKE_EXTRUDER_ESTEPS, variant8_flt(marlin_server.vars.esteps));
+    //     eeprom_set_var(EEVAR_SNAKE_EXTRUDER_TYPE, variant8_ui8(eEXTRUDER_TYPE::EXTRUDER_TYPE_USER_USE_M92));
+    // }
+    // if (changes & MARLIN_VAR_MSK(MARLIN_VAR_SKEW_XY)) {
+    //     if (marlin_server.vars.skew_xy != 0.f && !eeprom_get_bool(EEVAR_SNAKE_SKEW_ENABLED)) {
+    //         eeprom_set_var(EEVAR_SNAKE_SKEW_ENABLED, variant8_bool(true));
+    //     }
+    //     eeprom_set_var(EEVAR_SNAKE_SKEW_XY, variant8_flt(marlin_server.vars.skew_xy));
+    // }
+    // if (changes & MARLIN_VAR_MSK(MARLIN_VAR_SKEW_XZ)) {
+    //     if (marlin_server.vars.skew_xz != 0.f && !eeprom_get_bool(EEVAR_SNAKE_SKEW_ENABLED)) {
+    //         eeprom_set_var(EEVAR_SNAKE_SKEW_ENABLED, variant8_bool(true));
+    //     }
+    //     eeprom_set_var(EEVAR_SNAKE_SKEW_XZ, variant8_flt(marlin_server.vars.skew_xz));
+    // }
+    // if (changes & MARLIN_VAR_MSK(MARLIN_VAR_SKEW_YZ)) {
+    //     if (marlin_server.vars.skew_yz != 0.f && !eeprom_get_bool(EEVAR_SNAKE_SKEW_ENABLED)) {
+    //         eeprom_set_var(EEVAR_SNAKE_SKEW_ENABLED, variant8_bool(true));
+    //     }
+    //     eeprom_set_var(EEVAR_SNAKE_SKEW_YZ, variant8_flt(marlin_server.vars.skew_yz));
+    // }
+
     if ((server.flags & MARLIN_SFLG_PROCESS) == 0) {
         wdt_iwdg_refresh(); // this prevents iwdg reset while processing disabled
     }
@@ -704,6 +729,20 @@ void settings_save(void) {
 #endif
 }
 
+void marlin_server_settings_save_bed_pid(void) {
+    eeprom_set_var(EEVAR_PID_BED_P, variant8_flt(Temperature::temp_bed.pid.Kp));
+    eeprom_set_var(EEVAR_PID_BED_I, variant8_flt(Temperature::temp_bed.pid.Ki));
+    eeprom_set_var(EEVAR_PID_BED_D, variant8_flt(Temperature::temp_bed.pid.Kd));
+}
+
+void marlin_server_settings_save_noz_pid(void) {
+#if ENABLED(PIDTEMP)
+    eeprom_set_var(EEVAR_PID_NOZ_P, variant8_flt(Temperature::temp_hotend[0].pid.Kp));
+    eeprom_set_var(EEVAR_PID_NOZ_I, variant8_flt(Temperature::temp_hotend[0].pid.Ki));
+    eeprom_set_var(EEVAR_PID_NOZ_D, variant8_flt(Temperature::temp_hotend[0].pid.Kd));
+#endif
+}
+
 void settings_load(void) {
     (void)settings.reset();
 #if HAS_BED_PROBE
@@ -722,7 +761,8 @@ void settings_load(void) {
     }
     thermalManager.updatePID();
 #endif
-
+    snake_apply_fan_settings();
+    snake_apply_skew_settings();
     marlin_vars()->fan_check_enabled = config_store().fan_check_enabled.get();
     marlin_vars()->fs_autoload_enabled = config_store().fs_autoload_enabled.get();
 
@@ -1224,6 +1264,9 @@ bool heatbreak_fan_check() {
 
 static void resuming_reheating() {
     if (hotendErrorChecker.isFailed()) {
+        if (cold_mode && thermalManager.degTargetHotend(0) == cold_mode_temp) {
+            return;
+        }
         set_warning(WarningType::HotendTempDiscrepancy);
         thermalManager.setTargetHotend(0, 0);
 #if FAN_COUNT > 0
@@ -2103,6 +2146,7 @@ void resuming_begin(void) {
     media_reset_usbh_error();
 }
 
+// homed check
 void retract() {
     // server.motion_param.save_reset();  // TODO: currently disabled (see Crash_s::save_parameters())
 #if ENABLED(ADVANCED_PAUSE_FEATURE)
@@ -2274,6 +2318,7 @@ static bool _send_FSM_event_to_client(int client_id, osMessageQId queue) {
             // unable to send all messages
             return false;
         }
+        // erase sent item from queue
     }
 }
 
@@ -2488,6 +2533,9 @@ static void _server_update_vars() {
         uint8_t progress = 0;
         if (oProgressData.oPercentDone.mIsActual(marlin_vars()->print_duration)) {
             progress = static_cast<uint8_t>(oProgressData.oPercentDone.mGetValue());
+            else if (oProgressData.oPercentDirectControl.mIsActual(marlin_server.vars.print_duration))
+                progress
+                = static_cast<uint8_t>(oProgressData.oPercentDirectControl.mGetValue());
         } else {
             progress = static_cast<uint8_t>(media_print_get_percent_done());
         }
@@ -2546,6 +2594,37 @@ static void _server_update_vars() {
     marlin_vars()->mmu2_finda = mmu2FindaPressed;
 
     marlin_vars()->active_extruder = active_extruder;
+
+    if (update & MARLIN_VAR_MSK(MARLIN_VAR_ESTEPS)) {
+        if (marlin_server.vars.esteps != planner.settings.axis_steps_per_mm[3]) {
+            marlin_server.vars.esteps = planner.settings.axis_steps_per_mm[3];
+            changes |= MARLIN_VAR_MSK(MARLIN_VAR_ESTEPS);
+        }
+    }
+
+    if (update & MARLIN_VAR_MSK(MARLIN_VAR_SKEW_XY)) {
+        float skew_xy = planner.skew_factor.xy;
+        if (marlin_server.vars.skew_xy != skew_xy) {
+            marlin_server.vars.skew_xy = skew_xy;
+            changes |= MARLIN_VAR_MSK(MARLIN_VAR_SKEW_XY);
+        }
+    }
+
+    if (update & MARLIN_VAR_MSK(MARLIN_VAR_SKEW_XZ)) {
+        float skew_xz = planner.skew_factor.xz;
+        if (marlin_server.vars.skew_xz != skew_xz) {
+            marlin_server.vars.skew_xz = skew_xz;
+            changes |= MARLIN_VAR_MSK(MARLIN_VAR_SKEW_XZ);
+        }
+    }
+
+    if (update & MARLIN_VAR_MSK(MARLIN_VAR_SKEW_YZ)) {
+        float skew_yz = planner.skew_factor.yz;
+        if (marlin_server.vars.skew_yz != skew_yz) {
+            marlin_server.vars.skew_yz = skew_yz;
+            changes |= MARLIN_VAR_MSK(MARLIN_VAR_SKEW_YZ);
+        }
+    }
 
     // print state is updated last, to make sure other related variables (like job_id, filenames) are already set when we start print
     marlin_vars()->print_state = static_cast<State>(server.print_state);
@@ -2676,6 +2755,7 @@ bool _process_server_valid_request(const char *request, int client_id) {
         // We need this workaround for app startup.
         if ((server.notify_events[client_id] & make_mask(Event::MediaInserted)) && marlin_vars()->media_inserted) {
             server.client_events[client_id] |= make_mask(Event::MediaInserted);
+            // set exclusive mode
         }
         return true;
     case Msg::TestStart:
@@ -2774,6 +2854,7 @@ static void _server_set_var(const char *const request) {
         feedrate_percentage = (int16_t)marlin_vars()->print_speed;
         return;
     }
+
     if (variable_identifier == reinterpret_cast<uintptr_t>(&marlin_vars()->fan_check_enabled)) {
         marlin_vars()->fan_check_enabled.from_string(request_value, request_end);
         return;
@@ -2807,6 +2888,35 @@ static void _server_set_var(const char *const request) {
             return;
         }
     }
+
+    /*    case MARLIN_VAR_ESTEPS:
+            changed = true;
+            planner.settings.axis_steps_per_mm[3] = marlin_server.vars.esteps;
+            planner.refresh_positioning();
+            break;
+        case MARLIN_VAR_EXTRUDER_REVERSE:
+            changed = true;
+            marlin_config_extruder_reverse = (marlin_server.vars.extruder_reverse != 0);
+            break;
+        case MARLIN_VAR_SKEW_XY:
+        case MARLIN_VAR_SKEW_XZ:
+        case MARLIN_VAR_SKEW_YZ:
+            switch (var_id) {
+            case MARLIN_VAR_SKEW_XY:
+                planner.skew_factor.xy = marlin_server.vars.skew_xy;
+                break;
+            case MARLIN_VAR_SKEW_XZ:
+                planner.skew_factor.xz = marlin_server.vars.skew_xz;
+                break;
+            case MARLIN_VAR_SKEW_YZ:
+                planner.skew_factor.yz = marlin_server.vars.skew_yz;
+                break;
+            }
+            // When skew is changed the current position changes
+            set_current_from_steppers_for_axis(ALL_AXES);
+            sync_plan_position();
+            break;
+    */
 
     // if we got here, no variable was set, return error
     bsod("unimplemented _server_set_var for var_id %i", (int)variable_identifier);
@@ -2949,6 +3059,7 @@ void onIdle() {
     if (idle_cb) {
         idle_cb();
     }
+    // todo remove me after new thermal manager
 }
 
 void onPrinterKilled(PGM_P const msg, PGM_P const component) {
@@ -3089,4 +3200,16 @@ void onMeshUpdate(const uint8_t xpos, const uint8_t ypos, const float zval) {
 } // namespace ExtUI
 
 alignas(std::max_align_t) uint8_t FSMExtendedDataManager::extended_data_buffer[FSMExtendedDataManager::buffer_size] = { 0 };
+// FSM_notifier
 size_t FSMExtendedDataManager::identifier = { 0 };
+// static method
+// notifies clients about progress rise
+// scales "bound" variable via following formula to calculate progress
+// x = (actual - s_data.min) * s_data.scale + s_data.progress_min;
+// x = actual * s_data.scale - s_data.min * s_data.scale + s_data.progress_min;
+// s_data.offset == -s_data.min * s_data.scale + s_data.progress_min
+// simplified formula
+// x = actual * s_data.scale + s_data.offset;
+// ClientResponseHandler
+// define static member
+// UINT32_MAX is used as no response from client

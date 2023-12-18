@@ -108,6 +108,7 @@ constexpr const int32_t MIN_MSTEPS_PER_SEGMENT = MIN_STEPS_PER_SEGMENT * PLANNER
 #define BLOCK_DELAY_FOR_1ST_MOVE 100
 
 Planner planner;
+bool marlin_config_extruder_reverse = false;
 
   // public:
 

@@ -8,6 +8,7 @@
 #include "../../module/endstops.h"
 #include "../stepper.h"
 #include <config_store/store_instance.hpp>
+#include "../planner.h"
 
 #if HAS_WORKSPACE_OFFSET
 static workspace_xyz_t disable_workspace(bool do_x, bool do_y, bool do_z) {

@@ -94,6 +94,9 @@ class screen_printing_data_t : public AddSuperWindow<ScreenPrintingModel> {
     window_text_t w_etime_label;
     window_text_t w_etime_value;
 
+    window_text_t w_end_time_label;
+    window_text_t w_end_time_value;
+
     /**
      * @brief Shows fields related to time (eg remaining time label + value)
      *
@@ -144,6 +147,7 @@ private:
     void invalidate_print_state();
     void updateTimes();
 
+    void update_total_time(uint32_t sec, uint16_t print_speed);
 #if defined(USE_ST7789)
     void update_print_duration(time_t rawtime);
 #endif // USE_ST7789
@@ -156,6 +160,8 @@ private:
     virtual void stopAction() override;
     virtual void pauseAction() override;
     virtual void tuneAction() override;
+
+    time_t total_time;
 
 public:
     printing_state_t GetState() const;

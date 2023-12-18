@@ -3,7 +3,7 @@
     "presets": [
         {
             "name": "mini",
-            "description": "Original Prusa MINI",
+            "description": "MINI",
             "cacheVariables": {
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
                 "PRINTER": "MINI",
@@ -239,6 +239,24 @@
                 "BOARD": "MODULARBED",
                 "BOARD_VERSION": "0.6.0",
                 "PRESET_COMPILE_OPTIONS": ""
+            }
+        },
+        {
+            "name": "minixy",
+            "description": "MINI",
+            "cacheVariables": {
+                "PRINTER": "MINI",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_COREXY"
+            }
+        },
+        {
+            "name": "miniLG",
+            "description": "MINI",
+            "cacheVariables": {
+                "PRINTER": "MINI",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_LONG_BED"
             }
         }
     ]

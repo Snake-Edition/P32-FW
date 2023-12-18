@@ -23,6 +23,7 @@ void G162(); ///< calibrate Z
 void G163(); ///< measure length of axis
 
 void M0();
+void M45(); /// XYZ calibration
 void M50(); ///< selftest
 
 void M123(); ///< Fan speed reporting

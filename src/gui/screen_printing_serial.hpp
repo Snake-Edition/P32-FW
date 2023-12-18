@@ -4,13 +4,18 @@
 #include "gui.hpp"
 #include "window_header.hpp"
 #include "status_footer.hpp"
+#include "window_print_progress.hpp"
 #include "window_text.hpp"
+#include "window_lcd_message.hpp"
 #include <array>
 
 class screen_printing_serial_data_t : public AddSuperWindow<ScreenPrintingModel> {
     static constexpr const char *caption = N_("SERIAL PRINTING");
 
     window_icon_t octo_icon;
+
+    WindowNumbPrintProgress w_progress;
+    WindowLCDMessage w_message;
 
     int last_tick;
     enum class connection_state_t { connected,

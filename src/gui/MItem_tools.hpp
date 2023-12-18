@@ -459,6 +459,116 @@ public:
     virtual void OnChange(size_t old_index) override;
 };
 
+class MI_HOTEND_FAN_SPEED : public WI_SWITCH_t<7> {
+    constexpr static const char *const label = "Hotend Fan";
+
+    constexpr static const char *str_Default = "Default";
+    constexpr static const char *str_50 = "50%";
+    constexpr static const char *str_60 = "60%";
+    constexpr static const char *str_70 = "70%";
+    constexpr static const char *str_80 = "80%";
+    constexpr static const char *str_90 = "90%";
+    constexpr static const char *str_100 = "100%";
+
+public:
+    MI_HOTEND_FAN_SPEED();
+    virtual void OnChange(size_t old_index) override;
+};
+
+class MI_BRIGHTNESS : public WiSpinInt {
+    constexpr static const char *const label = N_("Brightness");
+
+public:
+    MI_BRIGHTNESS();
+    virtual void OnClick() override;
+};
+
+class MI_COLD_MODE : public WI_ICON_SWITCH_OFF_ON_t {
+    constexpr static const char *const label = N_("Cold Mode");
+
+public:
+    MI_COLD_MODE();
+    virtual void OnChange(size_t old_index) override;
+};
+
+class MI_SKEW_ENABLED : public WI_ICON_SWITCH_OFF_ON_t {
+    constexpr static const char *const label = N_("Skew Correct");
+
+public:
+    MI_SKEW_ENABLED();
+    virtual void OnChange(size_t old_index) override;
+};
+
+class MI_SKEW_XY : public WiSpinFlt {
+    constexpr static const char *const label = N_("Skew XY");
+
+public:
+    MI_SKEW_XY();
+    virtual void OnClick() override;
+};
+
+class MI_SKEW_XZ : public WiSpinFlt {
+    constexpr static const char *const label = N_("Skew XZ");
+
+public:
+    MI_SKEW_XZ();
+    virtual void OnClick() override;
+};
+
+class MI_SKEW_YZ : public WiSpinFlt {
+    constexpr static const char *const label = N_("Skew YZ");
+
+public:
+    MI_SKEW_YZ();
+    virtual void OnClick() override;
+};
+
+class MI_XY_CALIBRATION : public WI_LABEL_t {
+    constexpr static const char *const label = N_("Calibrate XY");
+
+public:
+    MI_XY_CALIBRATION();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_NOZZLE_CALIBRATION_TEMP : public WiSpinInt {
+    constexpr static const char *const label = N_("Nozzle calibration temperature");
+
+public:
+    MI_NOZZLE_CALIBRATION_TEMP();
+    virtual void OnClick() override;
+};
+
+class MI_CALIBRATE_NOZZLE_PID : public WI_LABEL_t {
+    constexpr static const char *const label = N_("Calibrate nozzle temperature");
+
+public:
+    MI_CALIBRATE_NOZZLE_PID();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_BED_CALIBRATION_TEMP : public WiSpinInt {
+    constexpr static const char *const label = N_("Bed calibration temperature");
+
+public:
+    MI_BED_CALIBRATION_TEMP();
+    virtual void OnClick() override;
+};
+
+class MI_CALIBRATE_BED_PID : public WI_LABEL_t {
+    constexpr static const char *const label = N_("Calibrate bed temperature");
+
+public:
+    MI_CALIBRATE_BED_PID();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
 class MI_INFO_BED_TEMP : public WI_TEMP_LABEL_t {
     static constexpr const char *const label = N_("Bed Temperature");
 
@@ -511,6 +621,7 @@ public:
     MI_PRINT_PROGRESS_TIME();
     virtual void OnClick() override;
 };
+
 class MI_ODOMETER_DIST : public WI_FORMATABLE_LABEL_t<float> {
 public:
     MI_ODOMETER_DIST(string_view_utf8 label, const img::Resource *icon, is_enabled_t enabled, is_hidden_t hidden, float initVal);

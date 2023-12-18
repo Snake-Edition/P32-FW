@@ -61,6 +61,7 @@ extern void hwio_fan_set_pwm(int i_fan, int val);
 //--------------------------------------
 // misc I/O functions
 
+extern void hwio_fan_control_set_hotend_fan_speed_percent(uint8_t percent);
 // jogwheel
 extern void hwio_jogwheel_enable(void);
 extern void hwio_jogwheel_disable(void);

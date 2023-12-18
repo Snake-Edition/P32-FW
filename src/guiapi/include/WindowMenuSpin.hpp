@@ -74,6 +74,7 @@ class WI_SPIN_t : public AddSuper<IWiSpin> {
 public: // todo private
     using Config = SpinConfig_t<T>;
     const Config &config;
+    const char *prt_format = config.prt_format;
 
 protected:
     void printSpinToBuffer();

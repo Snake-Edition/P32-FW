@@ -22,6 +22,10 @@
 #include "hwio_pindef.h"
 #include "config.h"
 #include "menu_spin_config.hpp"
+
+#include "extruder_enum.h"
+#include "snake.h"
+
 #include "time_tools.hpp"
 #include "footer_eeprom.hpp"
 #include "version.h"
@@ -186,7 +190,7 @@ void MI_MESH_BED::click(IWindowMenu & /*window_menu*/) {
 }
 
 /*****************************************************************************/
-// MI_CALIB_Z
+// MI_SELFTEST
 
 MI_CALIB_Z::MI_CALIB_Z()
     : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
@@ -197,7 +201,7 @@ void MI_CALIB_Z::click(IWindowMenu & /*window_menu*/) {
 }
 
 /*****************************************************************************/
-// MI_DISABLE_STEP
+// MI_SELFTEST_RESULT
 MI_DISABLE_STEP::MI_DISABLE_STEP()
     : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
@@ -211,6 +215,7 @@ void MI_DISABLE_STEP::click(IWindowMenu & /*window_menu*/) {
 }
 
 /*****************************************************************************/
+// MI_CALIB_FIRST
 
 namespace {
 void do_factory_reset(bool wipe_fw) {
@@ -232,9 +237,11 @@ void do_factory_reset(bool wipe_fw) {
     }
     MsgBoxInfo(_("Reset complete. The system will now restart."), Responses_Ok);
     sys_reset();
+    // MI_TEST_XYZ
 }
 } // anonymous namespace
 
+// MI_TEST_HEAT
 MI_FACTORY_SOFT_RESET::MI_FACTORY_SOFT_RESET()
     : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
@@ -243,8 +250,10 @@ void MI_FACTORY_SOFT_RESET::click(IWindowMenu & /*window_menu*/) {
     if (MsgBoxWarning(_("This operation cannot be undone. Current user configuration and passwords will be lost!\nDo you want to reset the printer to factory defaults?"), Responses_YesNo, 1) == Response::Yes) {
         do_factory_reset(false);
     }
+    // MI_TEST_FANS_fine
 }
 
+// MI_TEST_ABORT
 MI_FACTORY_HARD_RESET::MI_FACTORY_HARD_RESET()
     : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
@@ -259,6 +268,7 @@ void MI_FACTORY_HARD_RESET::click(IWindowMenu & /*window_menu*/) {
     }
 
     if (MsgBoxWarning(_(buff), Responses_YesNo, 1) == Response::Yes) {
+        // MI_FACTORY_DEFAULTS
         do_factory_reset(true);
     }
 }
@@ -290,6 +300,7 @@ void MI_SAVE_DUMP::click(IWindowMenu & /*window_menu*/) {
     } else {
         MsgBoxError(_("Error saving crash dump report to the USB drive. Please reinsert the USB drive and try again."), Responses_Ok);
     }
+    // MI_XFLASH_DELETE
 }
 
 /*****************************************************************************/
@@ -303,7 +314,14 @@ void MI_XFLASH_RESET::click(IWindowMenu & /*window_menu*/) {
 }
 
 /*****************************************************************************/
-// MI_EE_SAVEXML
+// MI_HF_TEST_0
+// MI_HF_TEST_1
+// MI_EE_LOAD_400
+// MI_EE_LOAD_401
+// MI_EE_LOAD_402
+// MI_EE_LOAD_403RC1
+// MI_EE_LOAD_403
+// MI_EE_LOAD
 MI_EE_SAVEXML::MI_EE_SAVEXML()
     : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
@@ -313,7 +331,7 @@ void MI_EE_SAVEXML::click(IWindowMenu & /*window_menu*/) {
 }
 
 /*****************************************************************************/
-// MI_EE_CLEAR
+// MI_EE_SAVE
 MI_EE_CLEAR::MI_EE_CLEAR()
     : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev) {
 }
@@ -322,6 +340,7 @@ void MI_EE_CLEAR::click(IWindowMenu & /*window_menu*/) {
     static constexpr uint32_t empty = 0xffffffff;
     for (uint16_t address = 0; address <= (8096 - 4); address += 4) {
         st25dv64k_user_write_bytes(address, &empty, sizeof(empty));
+        // MI_EE_SAVEXML
     }
 }
 
@@ -491,6 +510,113 @@ void IMI_FS_REF::OnClick() {
     {
         config_store().set_extruder_fs_ref_nins_value(index, GetVal());
     }
+}
+
+/*****************************************************************************/
+MI_HOTEND_FAN_SPEED::MI_HOTEND_FAN_SPEED()
+    : WI_SWITCH_t<7>(eeprom_get_ui8(EEVAR_SNAKE_HOTEND_FAN_SPEED), _(label), 0, is_enabled_t::no, is_hidden_t::no,
+        _(str_Default), _(str_50), _(str_60), _(str_70), _(str_80), _(str_90), _(str_100)) {}
+void MI_HOTEND_FAN_SPEED::OnChange(size_t old_type) {
+    eeprom_set_ui8(EEVAR_SNAKE_HOTEND_FAN_SPEED, index);
+    snake_apply_fan_settings();
+}
+
+/*****************************************************************************/
+extern uint8_t brightness;
+MI_BRIGHTNESS::MI_BRIGHTNESS()
+    : WiSpinInt(brightness, SpinCnf::brightness, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
+void MI_BRIGHTNESS::OnClick() {
+    brightness = GetVal();
+}
+
+/*****************************************************************************/
+uint8_t cold_mode = false;
+MI_COLD_MODE::MI_COLD_MODE()
+    : WI_ICON_SWITCH_OFF_ON_t(cold_mode, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
+void MI_COLD_MODE::OnChange(size_t old_index) {
+    cold_mode = index;
+}
+
+/*****************************************************************************/
+MI_SKEW_ENABLED::MI_SKEW_ENABLED()
+    : WI_ICON_SWITCH_OFF_ON_t(eeprom_get_bool(EEVAR_SNAKE_SKEW_ENABLED), _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
+void MI_SKEW_ENABLED::OnChange(size_t old_index) {
+    eeprom_set_bool(EEVAR_SNAKE_SKEW_ENABLED, index);
+    snake_apply_skew_settings();
+}
+
+/*****************************************************************************/
+MI_SKEW_XY::MI_SKEW_XY()
+    : WiSpinFlt(eeprom_get_flt(EEVAR_SNAKE_SKEW_XY), SpinCnf::skew_range, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
+void MI_SKEW_XY::OnClick() {
+    eeprom_set_flt(EEVAR_SNAKE_SKEW_XY, GetVal());
+    snake_apply_skew_settings();
+}
+
+/*****************************************************************************/
+MI_SKEW_XZ::MI_SKEW_XZ()
+    : WiSpinFlt(eeprom_get_flt(EEVAR_SNAKE_SKEW_XZ), SpinCnf::skew_range, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
+void MI_SKEW_XZ::OnClick() {
+    eeprom_set_flt(EEVAR_SNAKE_SKEW_XZ, GetVal());
+    snake_apply_skew_settings();
+}
+
+/*****************************************************************************/
+MI_SKEW_YZ::MI_SKEW_YZ()
+    : WiSpinFlt(eeprom_get_flt(EEVAR_SNAKE_SKEW_YZ), SpinCnf::skew_range, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
+void MI_SKEW_YZ::OnClick() {
+    eeprom_set_flt(EEVAR_SNAKE_SKEW_YZ, GetVal());
+    snake_apply_skew_settings();
+}
+
+/*****************************************************************************/
+MI_XY_CALIBRATION::MI_XY_CALIBRATION()
+    : WI_LABEL_t(_(label), 0, is_enabled_t::no, is_hidden_t::no) {
+}
+
+void MI_XY_CALIBRATION::click(IWindowMenu & /*window_menu*/) {
+    marlin_gcode_printf("M45");
+}
+
+static uint16_t nozzle_calibration_temp = 250;
+static uint8_t bed_calibration_temp = 80;
+
+/*****************************************************************************/
+MI_NOZZLE_CALIBRATION_TEMP::MI_NOZZLE_CALIBRATION_TEMP()
+    : WiSpinInt(static_cast<uint8_t>(Sound_GetVolume()), SpinCnf::nozzle, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+    SetVal(nozzle_calibration_temp);
+}
+
+void MI_NOZZLE_CALIBRATION_TEMP::OnClick() {
+    nozzle_calibration_temp = GetVal();
+}
+
+/*****************************************************************************/
+MI_CALIBRATE_NOZZLE_PID::MI_CALIBRATE_NOZZLE_PID()
+    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_CALIBRATE_NOZZLE_PID::click(IWindowMenu & /*window_menu*/) {
+    marlin_gcode_printf("M303 S%d U1", nozzle_calibration_temp);
+}
+
+/*****************************************************************************/
+MI_BED_CALIBRATION_TEMP::MI_BED_CALIBRATION_TEMP()
+    : WiSpinInt(static_cast<uint8_t>(Sound_GetVolume()), SpinCnf::bed, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+    SetVal(bed_calibration_temp);
+}
+
+void MI_BED_CALIBRATION_TEMP::OnClick() {
+    bed_calibration_temp = GetVal();
+}
+
+/*****************************************************************************/
+MI_CALIBRATE_BED_PID::MI_CALIBRATE_BED_PID()
+    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_CALIBRATE_BED_PID::click(IWindowMenu & /*window_menu*/) {
+    marlin_gcode_printf("M303 S%d U1 E-1", bed_calibration_temp);
 }
 
 /*****************************************************************************/

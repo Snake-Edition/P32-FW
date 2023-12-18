@@ -41,6 +41,9 @@ MI_UPDATE_LABEL::MI_UPDATE_LABEL()
     : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {};
 
 size_t MI_UPDATE::init_index() const {
+    if (sys_fw_update_older_on_restart_is_enabled()) {
+        return 3;
+    }
     return size_t(data_exchange::is_fw_update_on_restart()
             ? 1
             : sys_fw_update_is_enabled()
@@ -49,7 +52,7 @@ size_t MI_UPDATE::init_index() const {
 }
 
 MI_UPDATE::MI_UPDATE()
-    : WI_SWITCH_t<3>(init_index(), string_view_utf8::MakeNULLSTR(), nullptr, is_enabled_t::yes, is_hidden_t::no, _(str_0), _(str_1), _(str_2)) {
+    : WI_SWITCH_t<4>(init_index(), string_view_utf8::MakeNULLSTR(), 0, is_enabled_t::yes, is_hidden_t::no, _(str_0), _(str_1), _(str_2), _(str_3)) {
 }
 
 void MI_UPDATE::OnChange(size_t /*old_index*/) {
@@ -59,6 +62,9 @@ void MI_UPDATE::OnChange(size_t /*old_index*/) {
     } else if (index == 2) {
         data_exchange::fw_update_on_restart_disable();
         sys_fw_update_enable();
+    } else if (index == 3) {
+        sys_fw_update_older_on_restart_enable();
+        sys_fw_update_disable();
     } else if (index == 0) {
         data_exchange::fw_update_on_restart_disable();
         sys_fw_update_disable();

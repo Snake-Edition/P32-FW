@@ -25,6 +25,7 @@
  * temperature.h - temperature controller
  */
 
+#include <optional>
 #include "thermistor/thermistors.h"
 
 #include "../inc/MarlinConfig.h"
@@ -32,6 +33,9 @@
 #if ENABLED(AUTO_POWER_CONTROL)
   #include "../feature/power.h"
 #endif
+
+extern uint8_t cold_mode;
+const constexpr uint8_t cold_mode_temp = 30;
 
 
 #if ENABLED(MODULAR_HEATBED)
@@ -485,6 +489,8 @@ class Temperature {
       static bool paused;
     #endif
 
+    static std::optional<uint8_t> previous_fan_speed[EXTRUDERS];
+
   public:
     #if HAS_ADC_BUTTONS
       static uint32_t current_ADCKey_raw;
@@ -560,6 +566,21 @@ class Temperature {
       #define FANS_LOOP(I) LOOP_L_N(I, FAN_COUNT)
 
       static void set_fan_speed(const uint8_t target, const uint16_t speed);
+      
+      /**
+       * Save current fan speed and turns fan to full blast for fast nozzle cooling
+       */
+      static void start_nozzle_cooling(const uint8_t target);
+      
+      /**
+       * Set fan speed to previous speed if fan was used for cooling the nozzle
+       */
+      static void reset_fan_speed(const uint8_t target);
+      
+      /**
+       * Reset fans if temperature is low enough
+       */
+      static void check_and_reset_fan_speeds();
 
       #if EITHER(PROBING_FANS_OFF, ADVANCED_PAUSE_FANS_PAUSE)
         static bool fans_paused;
@@ -673,7 +694,8 @@ class Temperature {
 
     #if HOTENDS
 
-      static void setTargetHotend(const int16_t celsius, const uint8_t E_NAME) {
+      static void setTargetHotend(int16_t celsius, const uint8_t E_NAME) {
+        if (cold_mode && celsius < cold_mode_temp) celsius = cold_mode_temp;
         const uint8_t ee = HOTEND_INDEX;
         const int16_t new_temp = _MIN(celsius, temp_range[ee].maxtemp - HEATER_MAXTEMP_SAFETY_MARGIN);
 
@@ -771,7 +793,8 @@ class Temperature {
         static inline void start_watching_bed() {}
       #endif
 
-      static void setTargetBed(const int16_t celsius) {
+      static void setTargetBed(int16_t celsius) {
+        if (cold_mode && celsius < cold_mode_temp) celsius = cold_mode_temp;
         #if ENABLED(AUTO_POWER_CONTROL)
           if (celsius) {
             powerManager.power_on();
@@ -897,10 +920,12 @@ private:
      * used by disable_all_heaters and disable_hotend
      */
     static void disable_heaters(disable_bed_t disable_bed);
-  
     #if TEMP_RESIDENCY_TIME > 0
       static void update_temp_residency_hotend(uint8_t hotend);
     #endif
+	
+    static void set_fan_speed_(const uint8_t target, const uint16_t speed);
+
 public:
     /**
      * Switch off all heaters, set all target temperatures to 0

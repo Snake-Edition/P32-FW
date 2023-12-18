@@ -56,6 +56,13 @@ ScreenMenuVersionInfo::ScreenMenuVersionInfo()
         }
     }
 
+#ifdef MINI_COREXY
+    begin += snprintf(begin, end - begin, "COREXY\n");
+#endif
+#ifdef MINI_LONG_BED
+    begin += snprintf(begin, end - begin, "long bed\n");
+#endif
+
     if (end > begin) {
         // c=20 r=4
         static const char fmt2Translate[] = N_("\nBootloader Version\n%d.%d.%d\n\nBuddy Board\n%d\n%s");

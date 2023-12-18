@@ -397,7 +397,7 @@
 // Above this temperature the heater will be switched off.
 // This can protect components from overheating, but NOT from shorts and failures.
 // (Use MINTEMP for thermistor short/failure protection.)
-#define HEATER_0_MAXTEMP 290
+#define HEATER_0_MAXTEMP 290 + 15
 #define HEATER_1_MAXTEMP 275
 #define HEATER_2_MAXTEMP 275
 #define HEATER_3_MAXTEMP 275
@@ -409,7 +409,7 @@
 // Thus all usage in the UI must be lowered by 10C to offer a valid temperature limit.
 // Those 10C are a safety margin used throughout the whole Marlin code
 // (without a proper #define though :( )
-#define BED_MAXTEMP 110
+#define BED_MAXTEMP 120
 #define BED_MAXTEMP_SAFETY_MARGIN 10
 #define BOARD_MAXTEMP 120
 #define CHAMBER_MAXTEMP 100
@@ -547,7 +547,9 @@
 
 // Uncomment one of these options to enable CoreXY, CoreXZ, or CoreYZ kinematics
 // either in the usual order or reversed
-//#define COREXY
+#ifdef MINI_COREXY
+    #define COREXY
+#endif
 //#define COREXZ
 //#define COREYZ
 //#define COREYX
@@ -1009,7 +1011,11 @@
 
 // The size of the print bed
 #define X_BED_SIZE 180
-#define Y_BED_SIZE 180
+#ifdef MINI_LONG_BED
+    #define Y_BED_SIZE 250
+#else
+    #define Y_BED_SIZE 180
+#endif
 #define Z_SIZE 185
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
@@ -1373,7 +1379,7 @@
  *    +-------------->X     +-------------->X     +-------------->Y
  *     XY_SKEW_FACTOR        XZ_SKEW_FACTOR        YZ_SKEW_FACTOR
  */
-//#define SKEW_CORRECTION
+#define SKEW_CORRECTION
 
 #if ENABLED(SKEW_CORRECTION)
     // Input all length measurements here:
@@ -1385,7 +1391,7 @@
     // to override the above measurements:
     #define XY_SKEW_FACTOR 0.0
 
-    //#define SKEW_CORRECTION_FOR_Z
+    #define SKEW_CORRECTION_FOR_Z
     #if ENABLED(SKEW_CORRECTION_FOR_Z)
         #define XZ_DIAG_AC 282.8427124746
         #define XZ_DIAG_BD 282.8427124746
@@ -1397,7 +1403,7 @@
     #endif
 
 // Enable this option for M852 to set skew at runtime
-//#define SKEW_CORRECTION_GCODE
+#define SKEW_CORRECTION_GCODE
 #endif
 
 //=============================================================================
@@ -1485,11 +1491,11 @@
     // Specify a park position as { X, Y, Z }
     #define NOZZLE_PARK_POINT \
         { (X_MAX_POS - 10), (Y_MAX_POS - 10), 20 }
-        #define NOZZLE_PARK_POINT_M600 \
+    #define NOZZLE_PARK_POINT_M600 \
         {(X_MIN_POS + 10), (Y_MIN_POS + 10), 20 }
-    #define NOZZLE_PARK_XY_FEEDRATE 100 // (mm/s) X and Y axes feedrate (also used for delta Z axis)
-    #define NOZZLE_UNPARK_XY_FEEDRATE 30 // (mm/s) X and Y axes feedrate for unparking after m600
-    #define NOZZLE_PARK_Z_FEEDRATE 5 // (mm/s) Z axis feedrate (not used for delta printers)
+    #define NOZZLE_PARK_XY_FEEDRATE 999 // (mm/s) X and Y axes feedrate (also used for delta Z axis)
+    #define NOZZLE_UNPARK_XY_FEEDRATE 999 // (mm/s) X and Y axes feedrate for unparking after m600
+    #define NOZZLE_PARK_Z_FEEDRATE 999 // (mm/s) Z axis feedrate (not used for delta printers)
 
     /**
      * Park the nozzle after print is finished
