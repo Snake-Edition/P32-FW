@@ -50,6 +50,7 @@
 #include "screen_menu_lang_and_time.hpp"
 #include "screen_menu_hardware.hpp"
 #include "screen_menu_hardware_tune.hpp"
+#include "screen_menu_snake_settings.hpp"
 #include "screen_menu_system.hpp"
 #include "screen_menu_statistics.hpp"
 #include "screen_menu_factory_reset.hpp"
@@ -456,6 +457,24 @@ MI_EXPERIMENTAL_SETTINGS::MI_EXPERIMENTAL_SETTINGS()
 
 void MI_EXPERIMENTAL_SETTINGS::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuExperimentalSettings>);
+}
+
+/**********************************************************************************************/
+MI_SNAKE_SETTINGS::MI_SNAKE_SETTINGS()
+    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_SNAKE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuSnakeSettings>);
+}
+
+/**********************************************************************************************/
+MI_SNAKE_TUNE_SETTINGS::MI_SNAKE_TUNE_SETTINGS()
+    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_SNAKE_TUNE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuSnakeTuneSettings>);
 }
 
 /**********************************************************************************************/

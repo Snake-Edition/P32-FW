@@ -80,6 +80,7 @@ if(BOARD MATCHES ".*BUDDY")
             Marlin/Marlin/src/gcode/calibrate/G65.cpp
             Marlin/Marlin/src/gcode/calibrate/G80.cpp
             Marlin/Marlin/src/gcode/calibrate/M666.cpp
+            Marlin/Marlin/src/gcode/calibrate/M852.cpp
             Marlin/Marlin/src/gcode/calibrate/M958.cpp
             Marlin/Marlin/src/gcode/config/M200-M205.cpp
             Marlin/Marlin/src/gcode/config/M217.cpp

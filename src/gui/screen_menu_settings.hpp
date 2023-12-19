@@ -31,6 +31,7 @@ protected:
 /*****************************************************************************/
 
 using ScreenMenuSettings__ = ScreenMenu<GuiDefaults::MenuFooter, MI_RETURN,
+    MI_SNAKE_SETTINGS,
 #if !HAS_LOADCELL()
     MI_CURRENT_PROFILE,
 #endif

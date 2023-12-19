@@ -285,6 +285,28 @@ protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
 
+/* -===============================================(:>- */
+class MI_SNAKE_SETTINGS : public WI_LABEL_t {
+    static constexpr const char *const label = N_("Snake Settings");
+
+public:
+    MI_SNAKE_SETTINGS();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_SNAKE_TUNE_SETTINGS : public WI_LABEL_t {
+    static constexpr const char *const label = N_("Snake Settings");
+
+public:
+    MI_SNAKE_TUNE_SETTINGS();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+/* -===============================================(:>- */
+
 class MI_EEPROM_DIAGNOSTICS : public WI_LABEL_t {
     static constexpr const char *const label = N_("Eeprom Diagnostics");
 
