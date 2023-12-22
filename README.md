@@ -16,8 +16,8 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
   ~~(LCD messages).~~
 4. ~~**PID tuning**: Automatically writes PID settings to EEPROM after `M303 U1` (autotune),~~
   ~~`M301` (set hotend PID), and `M304` (set bed PID).~~
-5. ~~**Max Temps**: Raises the maximum bed temperature from 100C to 110C~~
-  ~~and nozzle temperature from 290C to 300C (use with caution!).~~
+5. **Max Temps**: Raises the maximum bed temperature from 100C to 110C
+  and nozzle temperature from 275C to 285C (use with caution!).
 6. ~~**EEPROM upgrade/sidegrade/downgrade**: Saved values (live-z, skew etc.) are kept during upgrade/sidegrade/downgrade.~~
 7. ~~**Settings during print**: You can change Snake settings during printing.~~
 8. ~~**Faster nozzle cooling**: If you wait for nozzle cooling before MBL, you can call `M109 R170 C`~~
