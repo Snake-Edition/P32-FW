@@ -664,13 +664,9 @@ msgstr "Charge CPU"
 msgid "CRASH DETECTED"
 msgstr "CRASH DÉTECTÉ"
 
-#: src/gui/screen_home.cpp:278
-msgid "Crash detected. Save it to USB?"
-msgstr "Crash détecté. L'enregistrer sur USB ?"
-
 #: src/gui/screen_home.cpp:270
-msgid "Crash detected. Save it to USB and send it to Prusa?"
-msgstr "Crash détecté. L'enregistrer sur USB et l'envoyer à Prusa ?"
+msgid "Crash detected. Save it to USB?\n\nDo not share the file publicly, the crash dump may include unencrypted sensitive information. Send it to: reports@prusa3d.com"
+msgstr "Erreur détectée. Enregistrer sur USB?\n\nNe partagez pas le fichier; rapport peut inclure des infos sensibles. Envoyez-le à : reports@prusa3d.com"
 
 #: src/gui/MItem_crash.hpp:14
 msgid "Crash Detection"
@@ -898,6 +894,10 @@ msgstr "Division par zéro"
 msgid "%d Loadcell Test"
 msgstr "%d Test du capteur de force"
 
+#: src/gui/include_XL/selftest_snake_config.hpp:127
+#, c-format
+msgid "%d Nozzle Diameter Confirmation"
+msgstr "%d Confirmation du diamètre de la buse"
 #: src/gui/include_XL/selftest_snake_config.hpp:127
 #, c-format
 msgid "%d Nozzle Heaters Test"
@@ -3701,6 +3701,10 @@ msgstr "Test chauf. buse"
 msgid "NOZZLE HEATER OVERCURRENT"
 msgstr "SURINTENSITÉ DE L'ÉLÉMENT CHAUFFANT DE LA BUSE"
 
+#: src/gui/screen_menu_no_tools.hpp:10 src/gui/MItem_print.hpp:14
+msgid "Nozzle Diameter Confirmation"
+msgstr "Confirmation du diamètre de la buse"
+
 #: src/gui/wizard/selftest_frame_loadcell.cpp:95
 msgid "Nozzle temperature"
 msgstr "Température de la buse"
@@ -4643,6 +4647,10 @@ msgid "Save Touch Registers to Flash Disc"
 msgstr "Enregistrer les registres du tactile sur le disque flash"
 
 #: src/gui/screen_home.cpp:282
+msgid "Saving selected value"
+msgstr "Enregistrement de la valeur sélectionnée"
+
+#: src/gui/screen_home.cpp:282
 msgid "Saving to USB"
 msgstr "Enregistrement sur USB"
 
@@ -4699,6 +4707,22 @@ msgstr ""
 "Le sélecteur ne peut pas bouger car la FINDA détecte un filament. Assurez-"
 "vous qu'aucun filament n'est dans le sélecteur et que la FINDA fonctionne "
 "correctement."
+
+#: src/gui/screen_menu_fw_update.cpp:37
+msgid ""
+"Select the correct nozzle diameter by counting the markings (dots) on the "
+"nozzle:\n"
+"  0.40 mm nozzle: 3 dots\n"
+"  0.60 mm nozzle: 4 dots\n"
+"\n"
+"For more information, visit prusa.io/nozzle-types"
+msgstr ""
+"Sélectionnez le bon diamètre de buse en comptant les marques (points) "
+"sur la buse:\n"
+"  Buse de 0,40 mm: 3 points\n"
+"  Buse de 0,60 mm: 4 points\n"
+"\n"
+"Pour plus d'informations, visitez prusa.io/nozzle-types"
 
 #: src/gui/screen_menu_fw_update.cpp:37
 msgid ""

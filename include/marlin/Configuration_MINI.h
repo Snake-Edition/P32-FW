@@ -397,7 +397,7 @@
 // Above this temperature the heater will be switched off.
 // This can protect components from overheating, but NOT from shorts and failures.
 // (Use MINTEMP for thermistor short/failure protection.)
-#define HEATER_0_MAXTEMP 290 + 10
+#define HEATER_0_MAXTEMP 290
 #define HEATER_1_MAXTEMP 275
 #define HEATER_2_MAXTEMP 275
 #define HEATER_3_MAXTEMP 275
@@ -409,7 +409,7 @@
 // Thus all usage in the UI must be lowered by 10C to offer a valid temperature limit.
 // Those 10C are a safety margin used throughout the whole Marlin code
 // (without a proper #define though :( )
-#define BED_MAXTEMP 110 + 10
+#define BED_MAXTEMP 110
 #define BED_MAXTEMP_SAFETY_MARGIN 10
 #define BOARD_MAXTEMP 120
 #define CHAMBER_MAXTEMP 100
@@ -547,9 +547,7 @@
 
 // Uncomment one of these options to enable CoreXY, CoreXZ, or CoreYZ kinematics
 // either in the usual order or reversed
-#ifdef MINI_COREXY
-    #define COREXY
-#endif
+//#define COREXY
 //#define COREXZ
 //#define COREYZ
 //#define COREYX
@@ -1004,53 +1002,29 @@
 // Direction of endstops when homing; 1=MAX, -1=MIN
 // :[-1,1]
 #define X_HOME_DIR 1
-#ifdef MINI_COREXY
-    #define Y_HOME_DIR 1
-#else
-    #define Y_HOME_DIR -1
-#endif
+#define Y_HOME_DIR -1
 #define Z_HOME_DIR -1
 
 // @section machine
 
 // The size of the print bed
 #define X_BED_SIZE 180
-#ifdef MINI_LONG_BED
-    #define Y_BED_SIZE 250
-#else
-    #define Y_BED_SIZE 180
-#endif
-#ifdef MINI_COREXY
-    #define Z_SIZE 255
-#else
-    #define Z_SIZE 185
-#endif
+#define Y_BED_SIZE 180
+#define Z_SIZE 185
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
 #define X_MIN_POS -2
-
-#ifdef MINI_COREXY
-    #define Y_MIN_POS -2
-#else
-    #define Y_MIN_POS -3
-#endif
-
+#define Y_MIN_POS -3
 #define Z_MIN_POS 0
 #define X_MAX_POS X_BED_SIZE
-
-#ifdef MINI_COREXY
-    #define Y_MAX_POS (Y_BED_SIZE + 1)
-#else
-    #define Y_MAX_POS Y_BED_SIZE
-#endif
-
+#define Y_MAX_POS Y_BED_SIZE
 #ifdef USE_PRUSA_EEPROM_AS_SOURCE_OF_DEFAULT_VALUES
-    #define DEFAULT_Z_MAX_POS Z_SIZE
+    #define DEFAULT_Z_MAX_POS 185
     #define Z_MIN_LEN_LIMIT 1
     #define Z_MAX_LEN_LIMIT 10000
     #define Z_MAX_POS (get_z_max_pos_mm())
 #else
-    #define Z_MAX_POS Z_SIZE
+    #define Z_MAX_POS 185
 #endif
 
 /// Distance between start of the axis to the position where ordinary movement is allowed
@@ -1399,7 +1373,7 @@
  *    +-------------->X     +-------------->X     +-------------->Y
  *     XY_SKEW_FACTOR        XZ_SKEW_FACTOR        YZ_SKEW_FACTOR
  */
-#define SKEW_CORRECTION
+//#define SKEW_CORRECTION
 
 #if ENABLED(SKEW_CORRECTION)
     // Input all length measurements here:
@@ -1411,7 +1385,7 @@
     // to override the above measurements:
     #define XY_SKEW_FACTOR 0.0
 
-    #define SKEW_CORRECTION_FOR_Z
+    //#define SKEW_CORRECTION_FOR_Z
     #if ENABLED(SKEW_CORRECTION_FOR_Z)
         #define XZ_DIAG_AC 282.8427124746
         #define XZ_DIAG_BD 282.8427124746
@@ -1423,7 +1397,7 @@
     #endif
 
 // Enable this option for M852 to set skew at runtime
-#define SKEW_CORRECTION_GCODE
+//#define SKEW_CORRECTION_GCODE
 #endif
 
 //=============================================================================

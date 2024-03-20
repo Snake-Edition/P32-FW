@@ -642,13 +642,9 @@ msgstr "CPU vyt."
 msgid "CRASH DETECTED"
 msgstr "DETEKOVÁN NÁRAZ"
 
-#: src/gui/screen_home.cpp:278
-msgid "Crash detected. Save it to USB?"
-msgstr "Detekován náraz. Uložit na USB?"
-
 #: src/gui/screen_home.cpp:270
-msgid "Crash detected. Save it to USB and send it to Prusa?"
-msgstr "Detekován náraz. Uložit na USB a odeslat data do Prusa Research?"
+msgid "Crash detected. Save it to USB?\n\nDo not share the file publicly, the crash dump may include unencrypted sensitive information. Send it to: reports@prusa3d.com"
+msgstr "Detekován pád firmware. Uložit na USB?\n\nSoubor nesdílejte veřejně, záznam pádu může obsahovat nešifrované citlivé informace. Pošlete ho na: reports@prusa3d.com"
 
 #: src/gui/MItem_crash.hpp:14
 msgid "Crash Detection"
@@ -874,6 +870,10 @@ msgstr "Dělení nulou"
 msgid "%d Loadcell Test"
 msgstr "%d Test loadcell senzoru"
 
+#: src/gui/include_XL/selftest_snake_config.hpp:127
+#, c-format
+msgid "%d Nozzle Diameter Confirmation"
+msgstr "%d Potvrzení průměru trysky"
 #: src/gui/include_XL/selftest_snake_config.hpp:127
 #, c-format
 msgid "%d Nozzle Heaters Test"
@@ -3686,6 +3686,10 @@ msgstr "Výhřev trysky"
 msgid "NOZZLE HEATER OVERCURRENT"
 msgstr "NADPROUD VÝHŘEVU TRYSKY"
 
+#: src/gui/screen_menu_no_tools.hpp:10 src/gui/MItem_print.hpp:14
+msgid "Nozzle Diameter Confirmation"
+msgstr "Potvrzení průměru trysky"
+
 #: src/gui/wizard/selftest_frame_loadcell.cpp:95
 msgid "Nozzle temperature"
 msgstr "Teplota trysky"
@@ -4610,6 +4614,10 @@ msgid "Save Touch Registers to Flash Disc"
 msgstr "Uložit dotykové registry na USB"
 
 #: src/gui/screen_home.cpp:282
+msgid "Saving selected value"
+msgstr "Ukládání vybrané hodnoty"
+
+#: src/gui/screen_home.cpp:282
 msgid "Saving to USB"
 msgstr "Ukládám na USB"
 
@@ -4663,6 +4671,22 @@ msgid ""
 msgstr ""
 "Selektor se nemůže hýbat, FINDA detekuje zavedený filament. Vysuňte filament "
 "ze Selektoru, případně zkontrolujte senzor."
+
+#: src/gui/screen_menu_fw_update.cpp:37
+msgid ""
+"Select the correct nozzle diameter by counting the markings (dots) on the "
+"nozzle:\n"
+"  0.40 mm nozzle: 3 dots\n"
+"  0.60 mm nozzle: 4 dots\n"
+"\n"
+"For more information, visit prusa.io/nozzle-types"
+msgstr ""
+"Vyberte správný průměr trysky počítáním značek (teček) na "
+"trysce:\n"
+"  Tryska 0.40 mm: 3 tečky\n"
+"  Tryska 0.60 mm: 4 tečky\n"
+"\n"
+"Pro více informací navštivte prusa.io/nozzle-types"
 
 #: src/gui/screen_menu_fw_update.cpp:37
 msgid ""

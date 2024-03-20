@@ -661,13 +661,9 @@ msgstr "Carga del procesador"
 msgid "CRASH DETECTED"
 msgstr "CHOQUE DETECTADO"
 
-#: src/gui/screen_home.cpp:278
-msgid "Crash detected. Save it to USB?"
-msgstr "Choque detectado. ¿Guardar al USB?"
-
 #: src/gui/screen_home.cpp:270
-msgid "Crash detected. Save it to USB and send it to Prusa?"
-msgstr "Choque detectado. ¿Guardar al USB y enviar a Prusa?"
+msgid "Crash detected. Save it to USB?\n\nDo not share the file publicly, the crash dump may include unencrypted sensitive information. Send it to: reports@prusa3d.com"
+msgstr "Error detectado. ¿Guardar en USB?\n\nNo comparta el archivo; informe puede incluir información sensible. Envíelo a: reports@prusa3d.com"
 
 #: src/gui/MItem_crash.hpp:14
 msgid "Crash Detection"
@@ -895,6 +891,10 @@ msgstr "División por cero"
 msgid "%d Loadcell Test"
 msgstr "%d Test Célula de carga"
 
+#: src/gui/include_XL/selftest_snake_config.hpp:127
+#, c-format
+msgid "%d Nozzle Diameter Confirmation"
+msgstr "%d Confirmación del diámetro de la boquilla"
 #: src/gui/include_XL/selftest_snake_config.hpp:127
 #, c-format
 msgid "%d Nozzle Heaters Test"
@@ -3749,6 +3749,10 @@ msgstr "Comp. calor boquilla"
 msgid "NOZZLE HEATER OVERCURRENT"
 msgstr "SOBRECORRIENTE CALENTADOR BOQUILLA"
 
+#: src/gui/screen_menu_no_tools.hpp:10 src/gui/MItem_print.hpp:14
+msgid "Nozzle Diameter Confirmation"
+msgstr "Confirmación del diámetro de la boquilla %d"
+
 #: src/gui/wizard/selftest_frame_loadcell.cpp:95
 msgid "Nozzle temperature"
 msgstr "Temperatura de la boquilla"
@@ -4691,6 +4695,10 @@ msgid "Save Touch Registers to Flash Disc"
 msgstr "Guardar Registros Táctiles en Memoria Flash"
 
 #: src/gui/screen_home.cpp:282
+msgid "Saving selected value"
+msgstr "Guardando el valor seleccionado"
+
+#: src/gui/screen_home.cpp:282
 msgid "Saving to USB"
 msgstr "Guardar al USB"
 
@@ -4747,6 +4755,22 @@ msgstr ""
 "El selector no puede moverse debido a que el FINDA detecta un filamento. "
 "Asegúrate de que no hay filamento en el Selector y que el FINDA funciona "
 "correctamente."
+
+#: src/gui/screen_menu_fw_update.cpp:37
+msgid ""
+"Select the correct nozzle diameter by counting the markings (dots) on the "
+"nozzle:\n"
+"  0.40 mm nozzle: 3 dots\n"
+"  0.60 mm nozzle: 4 dots\n"
+"\n"
+"For more information, visit prusa.io/nozzle-types"
+msgstr ""
+"Selecciona el diámetro correcto de la boquilla contando las marcas (puntos) "
+"en la boquilla:\n"
+"  Boquilla de 0,40 mm: 3 puntos\n"
+"  Boquilla de 0,60 mm: 4 puntos\n"
+"\n"
+"Para obtener más información, visita prusa.io/nozzle-types"
 
 #: src/gui/screen_menu_fw_update.cpp:37
 msgid ""

@@ -30,8 +30,6 @@ struct SpinCnf {
     static const SpinConfigInt crash_max_period;
 
     // private repo
-    static const SpinConfig_t<float> skew_range;
-    static const SpinConfigInt brightness;
     static const SpinConfigInt fs_range;
     static const SpinConfigInt loadcell_range;
     static const SpinConfigInt print_progress;

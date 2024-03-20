@@ -37,6 +37,16 @@
  */
 #define CONFIGURATION_ADV_H_VERSION 020000
 
+/**
+ * Cancel Objects
+ *
+ * Implement M486 to allow Marlin to skip objects
+ */
+#define CANCEL_OBJECTS
+#ifdef CANCEL_OBJECTS
+  #define CANCEL_OBJECTS_REPORTING // Emit the current object as a status message
+#endif
+
 // @section temperature
 
 //===========================================================================
@@ -1786,19 +1796,11 @@
 
     #if EITHER(SENSORLESS_HOMING, SENSORLESS_PROBING)
         #if X_DRIVER_TYPE == TMC2209
-            #ifdef MINI_COREXY
-                #define X_STALL_SENSITIVITY 110
-            #else
-                #define X_STALL_SENSITIVITY 130
-            #endif
+            #define X_STALL_SENSITIVITY 130
         #endif
 
         #if Y_DRIVER_TYPE == TMC2209
-            #ifdef MINI_COREXY
-                #define Y_STALL_SENSITIVITY X_STALL_SENSITIVITY
-            #else
-                #define Y_STALL_SENSITIVITY 130
-            #endif
+            #define Y_STALL_SENSITIVITY 130
         #endif
 
         #if Z_DRIVER_TYPE == TMC2209
