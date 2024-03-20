@@ -64,6 +64,7 @@ using ScreenMenuTune__ = ScreenMenu<EFooter::On, MI_RETURN,
     MI_HARDWARE_TUNE,
 #endif /*(!PRINTER_IS_PRUSA_MINI) || defined(_DEBUG)*/
     MI_TIMEZONE, MI_INFO, MI_TRIGGER_POWER_PANIC,
+    MI_SNAKE_TUNE_SETTINGS,
 
 #ifdef _DEBUG
     MI_TEST,
