@@ -11,8 +11,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 
 1. ~~**Hotend fan speed**: Adds a menu option to unlock the hotend fan speed~~
   ~~and increase it from the Prusa Firmware's default 38% to anywhere from 50-100%.~~
-2. ~~**Skew compensation**: Turns on skew compensation in Marlin and allows it~~
-  ~~to be configured directly through the Settings menu or with `M852`.~~
+2. **Skew compensation**: Turns on skew compensation in Marlin and allows it to be configured with `M852`.
 3. ~~**OctoPrint screen**: Adds support for `M73` (print progress) and `M117`~~
   ~~(LCD messages).~~
 4. ~~**PID tuning**: Automatically writes PID settings to EEPROM after `M303 U1` (autotune),~~
@@ -103,21 +102,7 @@ To configure Snake settings, open the Settings menu and select "Snake Settings".
 
 ### Configuring E-steps
 
-New in v1.0.7: This can now be done using Prusa's own "Experimental Settings" menu,
-which is shown by default as a menu item next to "Snake Settings" in this firmware.
-
-### Configuring Hotend Fan Speed
-
-The Prusa firmware limits the hotend fan speed to 38% because a happy user is a user with
-an underperforming but quiet machine. The fan is capable of running at much
-higher RPMs. There are a few reasons you might want to do this:
-
-- Reduce heat creep.
-- Print higher temperature filaments.
-- Change the fan to one which requires full voltage, e.g. a Noctua.
-
-This menu option allows you to set the hotend fan speed anywhere from 50% to 100%,
-in 10% steps. The setting is automatically saved to EEPROM and restored on boot.
+New in v1.0.7: This can now be done using Prusa's own "Experimental Settings" menu.
 
 ### Configuring Skew Compensation
 
@@ -163,47 +148,24 @@ and they won't get written to EEPROM.
 
 ---
 
-### Print Progress
-
-Note that to take advantage of `M73` support with [OctoPrint](https://octoprint.org),
-you will need to install one or more plugins. I recommend these three:
-
-- [Print Time Genius](https://plugins.octoprint.org/plugins/PrintTimeGenius/),
-  an excellent plugin to compute accurate progress estimates. It doesn't send
-  `M73` or `M117` on its own, so you will need the next two plugins too.
-- [DisplayLayerProgress](https://github.com/OllisGit/OctoPrint-DisplayLayerProgress).
-  Turn on the "Printer Display" option and customize to your preference.
-  This will send `M117`. I like to set the message to `[printtime_left] L=[current_layer]/[total_layers]`
-  and the update interval to 10 seconds.
-- [M73 Progress](https://plugins.octoprint.org/plugins/m73progress/).
-  Be sure to enable the "Use time estimate" option.
-
-It may also be possible to arrange for your slicer to insert these commands,
-but the result will not be as accurate.
-
----
-
 ## Calibrating Skew
 
 Measuring skew on all three axes at once can be done by simply printing
-[this compact calibration tower](doc/llama/skew.stl):
+[this compact calibration tower](doc/skew/skew.stl):
 
-![Skew Tower](doc/llama/skew.jpg)
-
-Turn off skew correction before you print. Use a normal layer height
-(0.15mm) and no supports. Do not rotate the model in your slicer -
+Use a normal layer height (0.15 or 0.2 mm) and no supports. Do not rotate the model in your slicer -
 it must be printed in the same orientation as supplied in the STL.
 
-Open [this spreadsheet](doc/Skew_Calibration_Calculator.ods).
+Open [this spreadsheet](doc/skew/Skew_Calibration_Calculator.ods).
 Use [calipers](https://amzn.to/3vVRgOl) to measure the six diagonals,
 conveniently labeled A to F, and type the measurements
 into the spreadsheet. It will calculate your three skew correction factors.
-You can either input them using the Snake menu and jogwheel as described above,
-or send them directly to the printer using the supplied `M852` command.
+Add the `M852` command with the factors to the start G-code in your slicer.
 
 If you want to check your calibration is accurate,
 print the same tower with skew correction enabled. The diagonals should
-then all have the same length (within measurement error of course).
+then all have the same length (within measurement error of course). If not,
+update the table and the factors.
 
 ---
 
