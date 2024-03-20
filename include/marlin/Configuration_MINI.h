@@ -1004,7 +1004,11 @@
 // Direction of endstops when homing; 1=MAX, -1=MIN
 // :[-1,1]
 #define X_HOME_DIR 1
-#define Y_HOME_DIR -1
+#ifdef MINI_COREXY
+    #define Y_HOME_DIR 1
+#else
+    #define Y_HOME_DIR -1
+#endif
 #define Z_HOME_DIR -1
 
 // @section machine
@@ -1016,21 +1020,37 @@
 #else
     #define Y_BED_SIZE 180
 #endif
-#define Z_SIZE 185
+#ifdef MINI_COREXY
+    #define Z_SIZE 255
+#else
+    #define Z_SIZE 185
+#endif
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
 #define X_MIN_POS -2
-#define Y_MIN_POS -3
+
+#ifdef MINI_COREXY
+    #define Y_MIN_POS -2
+#else
+    #define Y_MIN_POS -3
+#endif
+
 #define Z_MIN_POS 0
 #define X_MAX_POS X_BED_SIZE
-#define Y_MAX_POS Y_BED_SIZE
+
+#ifdef MINI_COREXY
+    #define Y_MAX_POS (Y_BED_SIZE + 1)
+#else
+    #define Y_MAX_POS Y_BED_SIZE
+#endif
+
 #ifdef USE_PRUSA_EEPROM_AS_SOURCE_OF_DEFAULT_VALUES
-    #define DEFAULT_Z_MAX_POS 185
+    #define DEFAULT_Z_MAX_POS Z_SIZE
     #define Z_MIN_LEN_LIMIT 1
     #define Z_MAX_LEN_LIMIT 10000
     #define Z_MAX_POS (get_z_max_pos_mm())
 #else
-    #define Z_MAX_POS 185
+    #define Z_MAX_POS Z_SIZE
 #endif
 
 /// Distance between start of the axis to the position where ordinary movement is allowed
