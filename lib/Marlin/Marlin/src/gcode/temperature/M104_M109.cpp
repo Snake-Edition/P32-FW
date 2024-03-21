@@ -73,6 +73,10 @@ void GcodeSuite::M104() {
       if (target_extruder != active_extruder) return;
     #endif
     thermalManager.setTargetHotend(temp, target_extruder);
+    if (parser.seen('C') && thermalManager.isCoolingHotend(target_extruder))
+      thermalManager.start_nozzle_cooling(target_extruder);
+    else
+      thermalManager.reset_fan_speed(target_extruder);
 
     #if ENABLED(DUAL_X_CARRIAGE)
       if (dxc_is_duplicating() && target_extruder == 0)
