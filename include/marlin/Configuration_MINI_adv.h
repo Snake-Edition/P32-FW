@@ -1797,7 +1797,7 @@
     #if EITHER(SENSORLESS_HOMING, SENSORLESS_PROBING)
         #if X_DRIVER_TYPE == TMC2209
             #ifdef MINI_COREXY
-                #define X_STALL_SENSITIVITY 110
+                #define X_STALL_SENSITIVITY 120
             #else
                 #define X_STALL_SENSITIVITY 130
             #endif

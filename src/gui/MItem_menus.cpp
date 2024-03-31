@@ -461,7 +461,7 @@ void MI_EXPERIMENTAL_SETTINGS::click(IWindowMenu & /*window_menu*/) {
 
 /**********************************************************************************************/
 MI_SNAKE_SETTINGS::MI_SNAKE_SETTINGS()
-    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_SNAKE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
@@ -470,7 +470,7 @@ void MI_SNAKE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
 
 /**********************************************************************************************/
 MI_SNAKE_TUNE_SETTINGS::MI_SNAKE_TUNE_SETTINGS()
-    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_SNAKE_TUNE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
