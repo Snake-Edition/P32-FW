@@ -305,6 +305,16 @@ public:
 protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
+
+class MI_M600_MENU : public WI_LABEL_t {
+    static constexpr const char *const label = N_("Change Filament");
+
+public:
+    MI_M600_MENU();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
 /* -===============================================(:>- */
 
 class MI_EEPROM_DIAGNOSTICS : public WI_LABEL_t {
