@@ -119,10 +119,21 @@ protected:
 };
 
 class MI_SNAKE_TUNE_SETTINGS : public IWindowMenuItem {
+
     static constexpr const char *const label = N_("Snake Settings");
 
 public:
     MI_SNAKE_TUNE_SETTINGS();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_M600_MENU : public IWindowMenuItem {
+    static constexpr const char *const label = N_("Change Filament");
+
+public:
+    MI_M600_MENU();
 
 protected:
     virtual void click(IWindowMenu &window_menu) override;
