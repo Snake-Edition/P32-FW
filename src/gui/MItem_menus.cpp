@@ -51,6 +51,7 @@
 #include "screen_menu_hardware.hpp"
 #include "screen_menu_hardware_tune.hpp"
 #include "screen_menu_snake_settings.hpp"
+#include "screen_menu_change_filament.hpp"
 #include "screen_menu_system.hpp"
 #include "screen_menu_statistics.hpp"
 #include "screen_menu_factory_reset.hpp"
@@ -467,7 +468,7 @@ void MI_EXPERIMENTAL_SETTINGS::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuExperimentalSettings>);
 }
 
-/**********************************************************************************************/
+/* -===============================================(:>- */
 MI_SNAKE_SETTINGS::MI_SNAKE_SETTINGS()
     : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
@@ -476,7 +477,6 @@ void MI_SNAKE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuSnakeSettings>);
 }
 
-/**********************************************************************************************/
 MI_SNAKE_TUNE_SETTINGS::MI_SNAKE_TUNE_SETTINGS()
     : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
@@ -484,6 +484,15 @@ MI_SNAKE_TUNE_SETTINGS::MI_SNAKE_TUNE_SETTINGS()
 void MI_SNAKE_TUNE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuSnakeTuneSettings>);
 }
+
+MI_M600_MENU::MI_M600_MENU()
+    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+}
+
+void MI_M600_MENU::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuM600>);
+}
+/* -===============================================(:>- */
 
 /**********************************************************************************************/
 // MI_SYSTEM

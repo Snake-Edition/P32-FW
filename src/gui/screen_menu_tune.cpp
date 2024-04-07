@@ -26,16 +26,16 @@ ScreenMenuTune::ScreenMenuTune()
 void ScreenMenuTune::windowEvent(EventLock /*has private ctor*/, window_t *sender, GUI_event_t event, void *param) {
     switch (event) {
     case GUI_event_t::LOOP:
-        if (marlin_server::all_axes_homed()
-            && marlin_server::all_axes_known()
-            && (marlin_client::get_command() != marlin_server::Cmd::G28)
-            && (marlin_client::get_command() != marlin_server::Cmd::G29)
-            && (marlin_client::get_command() != marlin_server::Cmd::M109)
-            && (marlin_client::get_command() != marlin_server::Cmd::M190)) {
-            Item<MI_M600>().Enable();
-        } else {
-            Item<MI_M600>().Disable();
-        }
+        // if (marlin_server::all_axes_homed()
+        //     && marlin_server::all_axes_known()
+        //     && (marlin_client::get_command() != marlin_server::Cmd::G28)
+        //     && (marlin_client::get_command() != marlin_server::Cmd::G29)
+        //     && (marlin_client::get_command() != marlin_server::Cmd::M109)
+        //     && (marlin_client::get_command() != marlin_server::Cmd::M190)) {
+        //     Item<MI_M600>().Enable();
+        // } else {
+        //     Item<MI_M600>().Disable();
+        // }
 
 #if XL_ENCLOSURE_SUPPORT()
         /* Once is Enclosure enabled in menu with ON/OFF switch (MI_ENCLOSURE_ENABLED), it tests the fan and if it passes, Enclosure is declared Active */
