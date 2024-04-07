@@ -52,6 +52,7 @@ target_sources(
           screen_home.cpp
           screen_menu.cpp
           screen_menu_cancel_object.cpp
+          screen_menu_change_filament.cpp
           screen_menu_control.cpp
           screen_menu_eeprom.cpp
           screen_menu_enclosure.cpp

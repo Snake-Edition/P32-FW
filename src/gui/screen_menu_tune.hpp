@@ -39,7 +39,7 @@ using ScreenMenuTune__ = ScreenMenu<EFooter::On, MI_RETURN,
 #if !HAS_LOADCELL()
     MI_LIVE_ADJUST_Z, // position without loadcell
 #endif
-    MI_M600,
+    MI_M600_MENU,
 #if ENABLED(CANCEL_OBJECTS)
     MI_CO_CANCEL_OBJECT,
 #endif
