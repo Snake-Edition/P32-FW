@@ -480,11 +480,12 @@ class ClientResponses {
         {}, // _none == _first
 
         { Response::Continue, Response::Cancel }, // WizardPrologue_ask_run
-        { Response::Continue, Response::Cancel
-#if not PRINTER_IS_PRUSA_MINI
+        {
+            Response::Continue, Response::Cancel
+            // #if not PRINTER_IS_PRUSA_MINI
             ,
             Response::Ignore
-#endif
+            // #endif
         }, // WizardPrologue_ask_run_dev
         { Response::Continue, Response::Cancel }, // WizardPrologue_info
         { Response::Continue, Response::Cancel }, // WizardPrologue_info_detailed

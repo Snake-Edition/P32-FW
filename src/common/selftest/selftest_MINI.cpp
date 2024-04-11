@@ -211,10 +211,10 @@ void CSelftest::Loop() {
         phaseStart();
         break;
     case stsPrologueAskRun:
-        FSM_CHANGE__LOGGING(Selftest, GuiDefaults::ShowDevelopmentTools ? PhasesSelftest::WizardPrologue_ask_run_dev : PhasesSelftest::WizardPrologue_ask_run);
+        FSM_CHANGE__LOGGING(Selftest, PhasesSelftest::WizardPrologue_ask_run_dev);
         break;
     case stsPrologueAskRun_wait_user:
-        if (phaseWaitUser(GuiDefaults::ShowDevelopmentTools ? PhasesSelftest::WizardPrologue_ask_run_dev : PhasesSelftest::WizardPrologue_ask_run)) {
+        if (phaseWaitUser(PhasesSelftest::WizardPrologue_ask_run_dev)) {
             return;
         }
         break;
