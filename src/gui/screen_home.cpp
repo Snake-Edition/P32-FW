@@ -158,7 +158,7 @@ screen_home_data_t::screen_home_data_t()
     , header(this)
     , footer(this)
 #ifdef USE_ST7789
-    , logo(this, logoRect, nullptr)
+    , logo(this, logoRect, &img::printer_logo)
 #endif // USE_ST7789
     , w_buttons {
         { this, Rect16(), nullptr, []() { Screens::Access()->Open(ScreenFactory::Screen<screen_filebrowser_data_t>); } },
