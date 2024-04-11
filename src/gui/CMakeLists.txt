@@ -45,6 +45,7 @@ target_sources(
           screen_home.cpp
           screen_menu.cpp
           screen_menu_cancel_object.cpp
+          screen_menu_change_filament.cpp
           screen_menu_connect.cpp
           screen_menu_control.cpp
           screen_menu_eeprom.cpp
@@ -82,6 +83,7 @@ target_sources(
           screen_qr_error.cpp
           screen_reset_error.cpp
           screen_sheet_rename.cpp
+          screen_snake.cpp
           screen_splash.cpp
           screen_stack_overflow.cpp
           screen_sysinf.cpp

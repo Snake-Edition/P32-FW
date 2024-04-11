@@ -19,19 +19,19 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 5. **Max Temps**: Raises the maximum bed temperature from 100C to 110C
   and nozzle temperature from 275C to 285C (use with caution!).
 6. ~~**EEPROM upgrade/sidegrade/downgrade**: Saved values (live-z, skew etc.) are kept during upgrade/sidegrade/downgrade.~~
-7. ~~**Settings during print**: You can change Snake settings during printing.~~
+7. **Settings during print**: You can change Snake settings during printing.
 8. **Faster nozzle cooling**: If you wait for nozzle cooling before MBL, you can call `M109 R170 C`
   which uses print fan to speed up cooling.
-9. ~~**Game**: Instead of printing you can enjoy simple game.~~
+9. **Game**: Instead of printing you can enjoy simple game.
 10. ~~**Bigger time**: Printing and remaining time is now bigger.~~
 11. ~~**Startup wizard**: Now you can select `Ignore` at the wizard start screen to disable starting of the wizard at the printer startup.~~
 12. ~~**Temperature calibration**: You can calibrate PID temperature control for your hotend/bed directly from the menu. Calibration does 5 cycles.~~
 13. ~~**Total time**: Elapsed, Remaining and Total or End time are shown during printing.~~
-14. ~~**Change filament**: Change of filament in Tune menu is moved to submenu to avoid unwanted interruption.~~
+14. **Change filament**: Change of filament in Tune menu is moved to submenu to avoid unwanted interruption.
 15. **Adjust brightness**: You can change brightness of the display. It does not dim the light but draws darker colors.
 16. ~~**Cold mode (min.temp.)**: If you enable Cold Mode, temperatures (once set) won't drop below 30°C. For safety reasons cold mode must be enabled after every start of the printer.~~
 17. ~~**Show MBL and tilt**: After mesh bed leveling (G29) you can go to `Snake Settings` and see the MBL Z levels at the measured points and check the tilt of the axes. Levels are shifted to avoid negative numbers.~~
-18. ~~**Speed up (un)parking**: Parking and unparking is done at the highest speed to shorten maintanance (change filament) time during printing.~~
+18. **Speed up (un)parking**: Parking and unparking is done at the highest speed to shorten maintenance (change filament) time during printing.
 19. **Different printers**: Next to a standard version, a coreXY and a long bed version is released. The latter is suited for beds of length 250 mm ([long bed HW](https://www.aliexpress.com/item/1005001632020501.html)).
 
 All settings are automatically saved to EEPROM and loaded on boot.

@@ -267,7 +267,7 @@ void screen_home_data_t::handle_crash_dump() {
     if (present_dumps.size() == 0) {
         return;
     }
-    if (MsgBoxWarning(_("Crash detected. Save it to USB?"
+      if (MsgBoxWarning(_("Crash detected. Save it to USB?"
                         "\n\nDo not share the file publicly,"
                         " the crash dump may include unencrypted sensitive information."
                         " Send it to: reports@prusa3d.com"),
