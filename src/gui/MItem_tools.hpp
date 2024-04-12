@@ -468,6 +468,14 @@ public:
     virtual void OnClick() override;
 };
 
+class MI_COLD_MODE : public WI_ICON_SWITCH_OFF_ON_t {
+    constexpr static const char *const label = N_("Cold Mode");
+
+public:
+    MI_COLD_MODE();
+    virtual void OnChange(size_t old_index) override;
+};
+
 class MI_SKEW_XY : public WiSpinFlt {
     constexpr static const char *const label = N_("Skew XY");
 

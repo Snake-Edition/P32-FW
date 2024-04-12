@@ -29,7 +29,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 13. ~~**Total time**: Elapsed, Remaining and Total or End time are shown during printing.~~
 14. **Change filament**: Change of filament in Tune menu is moved to submenu to avoid unwanted interruption.
 15. **Adjust brightness**: You can change brightness of the display. It does not dim the light but draws darker colors.
-16. ~~**Cold mode (min.temp.)**: If you enable Cold Mode, temperatures (once set) won't drop below 30°C. For safety reasons cold mode must be enabled after every start of the printer.~~
+16. **Cold mode (min.temp.)**: If you enable Cold Mode, temperatures (once set) won't drop below 30°C. For safety reasons cold mode must be enabled after every start of the printer.
 17. ~~**Show MBL and tilt**: After mesh bed leveling (G29) you can go to `Snake Settings` and see the MBL Z levels at the measured points and check the tilt of the axes. Levels are shifted to avoid negative numbers.~~
 18. **Speed up (un)parking**: Parking and unparking is done at the highest speed to shorten maintenance (change filament) time during printing.
 19. **Different printers**: Next to a standard version, a coreXY and a long bed version is released. The latter is suited for beds of length 250 mm ([long bed HW](https://www.aliexpress.com/item/1005001632020501.html)).
