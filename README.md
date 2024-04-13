@@ -33,6 +33,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 17. ~~**Show MBL and tilt**: After mesh bed leveling (G29) you can go to `Snake Settings` and see the MBL Z levels at the measured points and check the tilt of the axes. Levels are shifted to avoid negative numbers.~~
 18. **Speed up (un)parking**: Parking and unparking is done at the highest speed to shorten maintenance (change filament) time during printing.
 19. **Different printers**: Next to a standard version, a coreXY and a long bed version is released. The latter is suited for beds of length 250 mm ([long bed HW](https://www.aliexpress.com/item/1005001632020501.html)).
+20. **Avoid display flashing**: Some displays flash with original FW.
 
 All settings are automatically saved to EEPROM and loaded on boot.
 

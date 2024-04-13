@@ -7,18 +7,22 @@
 #include "ScreenHandler.hpp"
 
 namespace {
+#if (!PRINTER_IS_PRUSA_MINI)
 void reinit_lcd_and_redraw() {
     display::CompleteReinitLCD();
     display::Init();
     Screens::Access()->SetDisplayReinitialized();
 }
+#endif
 
 void check_lcd() {
     uint8_t data_buff[ST7789V_MAX_COMMAND_READ_LENGHT] = { 0x00 };
     display::ReadMADCTL(data_buff);
 
     if ((data_buff[1] != 0xE0 && data_buff[1] != 0xF0 && data_buff[1] != 0xF8)) {
+#if (!PRINTER_IS_PRUSA_MINI)
         reinit_lcd_and_redraw();
+#endif
     }
 }
 } // anonymous namespace
