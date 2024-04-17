@@ -5,7 +5,7 @@
 #include "MItem_tools.hpp"
 #include "menu_spin_config.hpp"
 
-using ScreenMenuSnakeSettings__ = ScreenMenu<EFooter::On, MI_RETURN>;
+using ScreenMenuSnakeSettings__ = ScreenMenu<EFooter::On, MI_RETURN, MI_SKEW_XY, MI_SKEW_XZ, MI_SKEW_YZ>;
 
 class ScreenMenuSnakeSettings : public ScreenMenuSnakeSettings__ {
 public:
@@ -15,7 +15,7 @@ public:
 
 /*********************************************************************************/
 
-using ScreenMenuSnakeTuneSettings__ = ScreenMenu<EFooter::On, MI_RETURN>;
+using ScreenMenuSnakeTuneSettings__ = ScreenMenu<EFooter::On, MI_RETURN, MI_SKEW_XY, MI_SKEW_XZ, MI_SKEW_YZ>;
 
 class ScreenMenuSnakeTuneSettings : public ScreenMenuSnakeTuneSettings__ {
 public:

@@ -511,6 +511,18 @@ void IMI_FS_REF::OnClick() {
 }
 
 /*****************************************************************************/
+MI_SKEW_XY::MI_SKEW_XY()
+    : WiSpinFlt(planner.skew_factor.xy, SpinCnf::skew_range, _(label), 0, is_enabled_t::no, is_hidden_t::no) {}
+
+/*****************************************************************************/
+MI_SKEW_XZ::MI_SKEW_XZ()
+    : WiSpinFlt(planner.skew_factor.xz, SpinCnf::skew_range, _(label), 0, is_enabled_t::no, is_hidden_t::no) {}
+
+/*****************************************************************************/
+MI_SKEW_YZ::MI_SKEW_YZ()
+    : WiSpinFlt(planner.skew_factor.yz, SpinCnf::skew_range, _(label), 0, is_enabled_t::no, is_hidden_t::no) {}
+
+/*****************************************************************************/
 // MI_FAN_CHECK
 MI_FAN_CHECK::MI_FAN_CHECK()
     : WI_ICON_SWITCH_OFF_ON_t(bool(marlin_vars()->fan_check_enabled), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}

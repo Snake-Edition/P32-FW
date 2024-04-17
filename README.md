@@ -11,7 +11,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 
 1. ~~**Hotend fan speed**: Adds a menu option to unlock the hotend fan speed~~
   ~~and increase it from the Prusa Firmware's default 38% to anywhere from 50-100%.~~
-2. ~~**Skew compensation**: Turns on skew compensation in Marlin and allows it to be configured with `M852`.~~
+2. **Skew compensation**: Turns on skew compensation in Marlin and allows it to be configured with `M852`.
 3. ~~**OctoPrint screen**: Adds support for `M73` (print progress) and `M117`~~
   ~~(LCD messages).~~
 4. ~~**PID tuning**: ~~
