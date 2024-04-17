@@ -6,6 +6,7 @@ target_sources(
           selftest_${PRINTER}.cpp
           selftest_axis.cpp
           selftest_axis_interface.cpp
+          selftest_data.cpp
           selftest_esp_update.cpp
           selftest_fan.cpp
           selftest_fans_interface.cpp
@@ -23,7 +24,11 @@ if(HAS_LOADCELL)
 endif()
 
 if(PRINTER STREQUAL "MK4")
-  target_sources(firmware PRIVATE selftest_gears.cpp selftest_hot_end_sock.cpp)
+  target_sources(firmware PRIVATE selftest_gears.cpp selftest_hotend_specify.cpp)
+endif()
+
+if(PRINTER STREQUAL "MK3.5")
+  target_sources(firmware PRIVATE selftest_hotend_specify.cpp)
 endif()
 
 if(PRINTER STREQUAL "XL")
@@ -34,6 +39,8 @@ endif()
 
 if(HAS_ADVANCED_POWER)
   target_sources(firmware PRIVATE power_check.cpp power_check_both.cpp)
+else()
+  target_sources(firmware PRIVATE power_check.cpp power_check_both_dummy.cpp)
 endif()
 
 if(FILAMENT_SENSOR STREQUAL ADC)

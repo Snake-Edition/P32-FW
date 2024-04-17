@@ -1796,19 +1796,11 @@
 
     #if EITHER(SENSORLESS_HOMING, SENSORLESS_PROBING)
         #if X_DRIVER_TYPE == TMC2209
-            #ifdef MINI_COREXY
-                #define X_STALL_SENSITIVITY 120
-            #else
-                #define X_STALL_SENSITIVITY 130
-            #endif
+            #define X_STALL_SENSITIVITY 130
         #endif
 
         #if Y_DRIVER_TYPE == TMC2209
-            #ifdef MINI_COREXY
-                #define Y_STALL_SENSITIVITY X_STALL_SENSITIVITY
-            #else
-                #define Y_STALL_SENSITIVITY 130
-            #endif
+            #define Y_STALL_SENSITIVITY 130
         #endif
 
         #if Z_DRIVER_TYPE == TMC2209

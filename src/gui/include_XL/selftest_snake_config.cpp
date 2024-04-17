@@ -74,13 +74,15 @@ TestResult get_test_result(Action action, Tool tool) {
         }
     case Action::NozzleDiameter:
         return evaluate_results(config_store().selftest_result_nozzle_diameter.get());
+    case Action::PhaseSteppingCalibration:
+        return evaluate_results(config_store().selftest_result_phase_stepping.get());
     case Action::_count:
         break;
     }
     return TestResult_Unknown;
 }
 
-uint8_t get_tool_mask(Tool tool) {
+ToolMask get_tool_mask(Tool tool) {
 #if HAS_TOOLCHANGER()
     switch (tool) {
     case Tool::Tool1:
@@ -130,6 +132,8 @@ uint64_t get_test_mask(Action action) {
         return stmToolOffsets;
     case Action::NozzleDiameter:
         return stmNozzleDiameter;
+    case Action::PhaseSteppingCalibration:
+        return stmPhaseStepping;
     case Action::_count:
         break;
     }

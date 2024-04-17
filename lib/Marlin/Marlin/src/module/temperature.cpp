@@ -38,7 +38,10 @@
 #include "bsod.h"
 #include "metric.h"
 #include "../../../../src/common/hwio.h"
-#include "../../../../src/common/config_buddy_2209_02.h"
+#include <stdint.h>
+#include <device/board.h>
+#include "printers.h"
+#include "MarlinPin.h"
 #include "../../../../src/common/adc.hpp"
 
 #define MAX6675_SEPARATE_SPI (EITHER(HEATER_0_USES_MAX6675, HEATER_1_USES_MAX6675) && PINS_EXIST(MAX6675_SCK, MAX6675_DO))
@@ -181,9 +184,9 @@ Temperature thermalManager;
   #endif
 
   /**
-   * Private set of fan speed
+   * Set the print fan speed for a target extruder
    */
-  void Temperature::set_fan_speed_(uint8_t target, uint16_t speed) {
+  void Temperature::set_fan_speed(uint8_t target, uint16_t speed) {
 
     NOMORE(speed, 255U);
 
@@ -202,44 +205,6 @@ Temperature thermalManager;
     if (target >= FAN_COUNT) return;
 
     fan_speed[target] = speed;
-  }
-
-  /**
-   * Set the print fan speed for a target extruder
-   */
-  void Temperature::set_fan_speed(uint8_t target, uint16_t speed) {
-    if (target >= EXTRUDERS)
-      return;
-    if (previous_fan_speed[target]) {
-      previous_fan_speed[target] = speed;
-      return;
-    }
-    set_fan_speed_(target, speed);
-  }
-
-  constexpr int nozzle_cooling_fan_speed = 255;
-  constexpr int nozzle_min_temp_cooling = 50;
-
-  void Temperature::start_nozzle_cooling(const uint8_t target) {    
-    if (target < EXTRUDERS && !previous_fan_speed[target]) {
-      previous_fan_speed[target] = fan_speed[target];
-      set_fan_speed_(target, nozzle_cooling_fan_speed);
-    }
-  }
-
-  void Temperature::reset_fan_speed(uint8_t target) {
-    if (target < EXTRUDERS && previous_fan_speed[target]) {
-      if (fan_speed[target] == nozzle_cooling_fan_speed)
-        set_fan_speed_(target, *previous_fan_speed[target]);
-      previous_fan_speed[target] = std::nullopt;
-    }
-  }
-
-  void Temperature::check_and_reset_fan_speeds(){
-    for (int i = 0; i < EXTRUDERS; ++i) {
-      if (previous_fan_speed[i] && (degTargetHotend(i) + TEMP_HYSTERESIS > degHotend(i) || degHotend(i) < nozzle_min_temp_cooling))
-        reset_fan_speed(i);
-    }
   }
 
   #if EITHER(PROBING_FANS_OFF, ADVANCED_PAUSE_FANS_PAUSE)
@@ -384,8 +349,6 @@ volatile bool Temperature::temp_meas_ready = false;
   millis_t Temperature::next_auto_fan_check_ms = 0;
 #endif
 
-std::optional<uint8_t> Temperature::previous_fan_speed[EXTRUDERS];
-
 #if ENABLED(FAN_SOFT_PWM)
   uint8_t Temperature::soft_pwm_amount_fan[FAN_COUNT],
           Temperature::soft_pwm_count_fan[FAN_COUNT];
@@ -435,7 +398,17 @@ std::optional<uint8_t> Temperature::previous_fan_speed[EXTRUDERS];
     #if HAS_PID_FOR_BOTH
       #define GHV(B,H) (isbed ? (B) : (H))
       #if ENABLED(HW_PWM_HEATERS)
-        #define SHV(B,H) do{ if (isbed) analogWrite(HEATER_BED_PIN, B); else analogWrite(HEATER_0_PIN, H); }while(0)
+        // Need to write soft_pwm_amount even when using hardware pwm heater to prevent
+        // power manager from shutting us down, leading to temperature check failure.
+        #define SHV(B,H) do {                         \
+          if (isbed) {                                \
+            analogWrite(HEATER_BED_PIN, B);           \
+            temp_bed.soft_pwm_amount = B;             \
+          } else {                                    \
+            analogWrite(HEATER_0_PIN, H);             \
+            temp_hotend[heater].soft_pwm_amount = H;  \
+          }                                           \
+        } while (0)
       #else
         #define SHV(B,H) do{ if (isbed) temp_bed.soft_pwm_amount = B; else temp_hotend[heater].soft_pwm_amount = H; }while(0)
       #endif
@@ -490,6 +463,7 @@ std::optional<uint8_t> Temperature::previous_fan_speed[EXTRUDERS];
     SERIAL_ECHOLNPGM(MSG_PID_AUTOTUNE_START);
 
     disable_all_heaters();
+    TERN_(AUTO_POWER_CONTROL, powerManager.power_on());
 
     SHV(bias = d = (MAX_BED_POWER) >> soft_pwm_bit_shift, bias = d = (PID_MAX) >> soft_pwm_bit_shift);
 
@@ -924,7 +898,7 @@ void Temperature::max_temp_error(const heater_ind_t heater) {
   #if HAS_TEMP_HEATBREAK
     //we have multiple heartbreak thermistors and they have always the highest ID
     if(heater >= H_HEATBREAK_E0){
-        _temp_error(heater, PSTR(MSG_T_MINTEMP), GET_TEXT(MSG_ERR_MAXTEMP_HEATBREAK));
+        _temp_error(heater, PSTR(MSG_T_MAXTEMP), GET_TEXT(MSG_ERR_MAXTEMP_HEATBREAK));
     }
   #endif
   _temp_error(heater, PSTR(MSG_T_MAXTEMP), GET_TEXT(MSG_ERR_MAXTEMP));
@@ -2730,7 +2704,7 @@ void Temperature::init() {
     static millis_t timer[HOTENDS] = {};
     // Expected interval is 1000 ms. min_interval_ms set to 100 ms, so it will be visible in samples collected if
     // expected interval doesn't hold.
-    static metric_t heating_model_discrepancy = METRIC("heating_model_discrepancy", METRIC_VALUE_INTEGER, 100, METRIC_HANDLER_DISABLE_ALL);
+    METRIC_DEF(heating_model_discrepancy, "heating_model_discrepancy", METRIC_VALUE_INTEGER, 100, METRIC_HANDLER_DISABLE_ALL);
 
     // Start the timer if already not started. In case millis() == 0 it will not start the timer.
     // But it will do no harm, as it will be started in the next call to this function.

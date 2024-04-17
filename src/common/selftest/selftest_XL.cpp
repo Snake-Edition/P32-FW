@@ -9,11 +9,10 @@
 #include "selftest_loadcell.h"
 #include "selftest_dock.h"
 #include "stdarg.h"
-#include "app.h"
 #include "otp.hpp"
 #include "hwio.h"
 #include "marlin_server.hpp"
-#include "wizard_config.hpp"
+#include <guiconfig/wizard_config.hpp>
 #include "../../Marlin/src/module/stepper.h"
 #include "../../Marlin/src/module/temperature.h"
 #include "selftest_fans_type.hpp"
@@ -37,6 +36,7 @@
 #include "timing.h"
 #include "selftest_result_type.hpp"
 #include <config_store/store_instance.hpp>
+#include "common/selftest/selftest_data.hpp"
 
 using namespace selftest;
 
@@ -264,7 +264,7 @@ bool CSelftest::IsAborted() const {
     return (m_State == stsAborted);
 }
 
-bool CSelftest::Start(const uint64_t test_mask, const uint8_t tool_mask) {
+bool CSelftest::Start(const uint64_t test_mask, const selftest::TestData test_data) {
     m_result = config_store().selftest_result.get();
     m_Mask = SelftestMask_t(test_mask);
     if (m_Mask & stmFans) {
@@ -285,7 +285,11 @@ bool CSelftest::Start(const uint64_t test_mask, const uint8_t tool_mask) {
     m_Mask = (SelftestMask_t)(m_Mask | uint64_t(stmSelftestStart)); // any selftest state will trigger selftest additional init
     m_Mask = (SelftestMask_t)(m_Mask | uint64_t(stmSelftestStop)); // any selftest state will trigger selftest additional deinit
 
-    this->tool_mask = static_cast<ToolMask>(tool_mask);
+    if (std::holds_alternative<ToolMask>(test_data)) {
+        this->tool_mask = std::get<ToolMask>(test_data);
+    } else {
+        this->tool_mask = ToolMask::AllTools;
+    }
 
     m_State = stsStart;
     return true;
@@ -317,6 +321,9 @@ void CSelftest::Loop() {
         if ((ret = selftest::phaseToolOffsets(tool_mask, pToolOffsets, Config_ToolOffsets))) {
             return;
         }
+        break;
+    case stsPhaseStepping:
+        bsod("this should be gcode not selftest");
         break;
     case stsFans:
         if (selftest::phaseFans(pFans, fans_configs)) {
@@ -421,7 +428,7 @@ void CSelftest::Loop() {
 
 void CSelftest::phaseShowResult() {
     m_result = config_store().selftest_result.get();
-    FSM_CHANGE_WITH_DATA__LOGGING(Selftest, PhasesSelftest::Result, FsmSelftestResult().Serialize());
+    FSM_CHANGE_WITH_DATA__LOGGING(PhasesSelftest::Result, FsmSelftestResult().Serialize());
 }
 
 void CSelftest::phaseDidSelftestPass() {
@@ -527,8 +534,8 @@ void CSelftest::restoreAfterSelftest() {
     }
 
     // restore fan behavior
-    Fans::print(0).ExitSelftestMode();
-    Fans::heat_break(0).ExitSelftestMode();
+    Fans::print(0).exitSelftestMode();
+    Fans::heat_break(0).exitSelftestMode();
 
     thermalManager.disable_all_heaters();
 

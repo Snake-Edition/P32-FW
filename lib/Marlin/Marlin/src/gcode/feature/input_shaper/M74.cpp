@@ -38,6 +38,10 @@ void M74_internal(const M74Params &params) {
 
 } // namespace input_shaper
 
+/** \addtogroup G-Codes
+ * @{
+ */
+
 /**
  * @brief Set mass.
  *
@@ -48,12 +52,14 @@ void GcodeSuite::M74() {
 
     if (parser.seen('W')) {
         const float m = parser.value_float();
-        if (m > 0) {
+        if (m >= 0.f) {
             params.mass = m;
         } else {
-            SERIAL_ECHO_MSG("?Mass (W) must be greater than 0");
+            SERIAL_ECHO_MSG("?Mass (W) must be greater or equal 0");
         }
     }
 
     input_shaper::M74_internal(params);
 }
+
+/** @}*/

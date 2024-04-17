@@ -4,7 +4,7 @@
 #include <window_header.hpp>
 #include <window_qr.hpp>
 #include "radio_button.hpp"
-#include "wizard_config.hpp"
+#include <guiconfig/wizard_config.hpp>
 
 #include <connect/status.hpp>
 
@@ -12,7 +12,7 @@ class DialogConnectRegister : public AddSuperWindow<IDialog> {
 private:
     char attempt_buffer[30];
     char detail_buffer[70];
-    char error_buffer[88];
+    char error_buffer[90];
 
     // TODO: Doesn't fit
     constexpr static const char *const headerLabel = N_("PRUSA CONNECT");

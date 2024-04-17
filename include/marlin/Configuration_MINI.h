@@ -287,12 +287,6 @@
 //#define HOTEND_OFFSET_Y {0.0, 5.00}  // (mm) relative Y-offset for each nozzle
 //#define HOTEND_OFFSET_Z {0.0, 0.00}  // (mm) relative Z-offset for each nozzle
 
-//#define ACCELEROMETER
-#if ENABLED(ACCELEROMETER)
-    #define LOCAL_ACCELEROMETER
-    //#define REMOTE_ACCELEROMETER
-#endif
-
 // @section temperature
 
 //===========================================================================
@@ -397,7 +391,7 @@
 // Above this temperature the heater will be switched off.
 // This can protect components from overheating, but NOT from shorts and failures.
 // (Use MINTEMP for thermistor short/failure protection.)
-#define HEATER_0_MAXTEMP 290 + 10
+#define HEATER_0_MAXTEMP 295
 #define HEATER_1_MAXTEMP 275
 #define HEATER_2_MAXTEMP 275
 #define HEATER_3_MAXTEMP 275
@@ -409,7 +403,7 @@
 // Thus all usage in the UI must be lowered by 10C to offer a valid temperature limit.
 // Those 10C are a safety margin used throughout the whole Marlin code
 // (without a proper #define though :( )
-#define BED_MAXTEMP 110 + 10
+#define BED_MAXTEMP 110
 #define BED_MAXTEMP_SAFETY_MARGIN 10
 #define BOARD_MAXTEMP 120
 #define CHAMBER_MAXTEMP 100
@@ -547,9 +541,7 @@
 
 // Uncomment one of these options to enable CoreXY, CoreXZ, or CoreYZ kinematics
 // either in the usual order or reversed
-#ifdef MINI_COREXY
-    #define COREXY
-#endif
+//#define COREXY
 //#define COREXZ
 //#define COREYZ
 //#define COREYX
@@ -695,6 +687,12 @@
 #define DEFAULT_MAX_FEEDRATE \
     { 180, 180, 12, 80 }
 
+/// HW limits of feed rate
+#define HWLIMIT_NORMAL_MAX_FEEDRATE \
+    { 400, 400, 12, 80 }
+#define HWLIMIT_STEALTH_MAX_FEEDRATE \
+    { 180, 180, 12, 80 }
+
 /**
  * Default Max Acceleration (change/s) change = mm/s
  * (Maximum start speed for accelerated moves)
@@ -703,6 +701,12 @@
  */
 #define DEFAULT_MAX_ACCELERATION \
     { 1250, 1250, 400, 4000 }
+
+/// HW limits of max acceleration
+#define HWLIMIT_NORMAL_MAX_ACCELERATION \
+    { 4000, 4000, 400, 5000 }
+#define HWLIMIT_STEALTH_MAX_ACCELERATION \
+    { 2500, 2500, 400, 5000 }
 
 /**
  * Default Acceleration (change/s) change = mm/s
@@ -715,6 +719,14 @@
 #define DEFAULT_ACCELERATION 1250 // X, Y, Z and E acceleration for printing moves
 #define DEFAULT_RETRACT_ACCELERATION 1250 // E acceleration for retracts
 #define DEFAULT_TRAVEL_ACCELERATION 1250 // X, Y, Z acceleration for travel (non printing) moves
+
+/// HW limits of Acceleration
+#define HWLIMIT_NORMAL_ACCELERATION 4000
+#define HWLIMIT_STEALTH_ACCELERATION 2500
+#define HWLIMIT_NORMAL_RETRACT_ACCELERATION 1250
+#define HWLIMIT_STEALTH_RETRACT_ACCELERATION 1250
+#define HWLIMIT_NORMAL_TRAVEL_ACCELERATION 4000
+#define HWLIMIT_STEALTH_TRAVEL_ACCELERATION 2500
 
 //
 // Use Junction Deviation instead of traditional Jerk Limiting
@@ -741,6 +753,10 @@
 #endif
 
 #define DEFAULT_EJERK 10 // May be used by Linear Advance
+
+/// HW limits of Jerk
+#define HWLIMIT_NORMAL_JERK { 8, 8, 2, 10 }
+#define HWLIMIT_STEALTH_JERK { 8, 8, 2, 10 }
 
 /**
  * S-Curve Acceleration
@@ -1004,53 +1020,29 @@
 // Direction of endstops when homing; 1=MAX, -1=MIN
 // :[-1,1]
 #define X_HOME_DIR 1
-#ifdef MINI_COREXY
-    #define Y_HOME_DIR 1
-#else
-    #define Y_HOME_DIR -1
-#endif
+#define Y_HOME_DIR -1
 #define Z_HOME_DIR -1
 
 // @section machine
 
 // The size of the print bed
 #define X_BED_SIZE 180
-#ifdef MINI_LONG_BED
-    #define Y_BED_SIZE 250
-#else
-    #define Y_BED_SIZE 180
-#endif
-#ifdef MINI_COREXY
-    #define Z_SIZE 255
-#else
-    #define Z_SIZE 185
-#endif
+#define Y_BED_SIZE 180
+#define Z_SIZE 185
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
 #define X_MIN_POS -2
-
-#ifdef MINI_COREXY
-    #define Y_MIN_POS -2
-#else
-    #define Y_MIN_POS -3
-#endif
-
+#define Y_MIN_POS -3
 #define Z_MIN_POS 0
 #define X_MAX_POS X_BED_SIZE
-
-#ifdef MINI_COREXY
-    #define Y_MAX_POS (Y_BED_SIZE + 1)
-#else
-    #define Y_MAX_POS Y_BED_SIZE
-#endif
-
+#define Y_MAX_POS Y_BED_SIZE
 #ifdef USE_PRUSA_EEPROM_AS_SOURCE_OF_DEFAULT_VALUES
-    #define DEFAULT_Z_MAX_POS Z_SIZE
+    #define DEFAULT_Z_MAX_POS 185
     #define Z_MIN_LEN_LIMIT 1
     #define Z_MAX_LEN_LIMIT 10000
     #define Z_MAX_POS (get_z_max_pos_mm())
 #else
-    #define Z_MAX_POS Z_SIZE
+    #define Z_MAX_POS 185
 #endif
 
 /// Distance between start of the axis to the position where ordinary movement is allowed
@@ -1399,7 +1391,7 @@
  *    +-------------->X     +-------------->X     +-------------->Y
  *     XY_SKEW_FACTOR        XZ_SKEW_FACTOR        YZ_SKEW_FACTOR
  */
-#define SKEW_CORRECTION
+//#define SKEW_CORRECTION
 
 #if ENABLED(SKEW_CORRECTION)
     // Input all length measurements here:
@@ -1411,7 +1403,7 @@
     // to override the above measurements:
     #define XY_SKEW_FACTOR 0.0
 
-    #define SKEW_CORRECTION_FOR_Z
+    //#define SKEW_CORRECTION_FOR_Z
     #if ENABLED(SKEW_CORRECTION_FOR_Z)
         #define XZ_DIAG_AC 282.8427124746
         #define XZ_DIAG_BD 282.8427124746
@@ -1423,7 +1415,7 @@
     #endif
 
 // Enable this option for M852 to set skew at runtime
-#define SKEW_CORRECTION_GCODE
+//#define SKEW_CORRECTION_GCODE
 #endif
 
 //=============================================================================
@@ -1511,11 +1503,11 @@
     // Specify a park position as { X, Y, Z }
     #define NOZZLE_PARK_POINT \
         { (X_MAX_POS - 10), (Y_MAX_POS - 10), 20 }
-    #define NOZZLE_PARK_POINT_M600 \
+        #define NOZZLE_PARK_POINT_M600 \
         {(X_MIN_POS + 10), (Y_MIN_POS + 10), 20 }
-    #define NOZZLE_PARK_XY_FEEDRATE 999 // (mm/s) X and Y axes feedrate (also used for delta Z axis)
-    #define NOZZLE_UNPARK_XY_FEEDRATE 999 // (mm/s) X and Y axes feedrate for unparking after m600
-    #define NOZZLE_PARK_Z_FEEDRATE 999 // (mm/s) Z axis feedrate (not used for delta printers)
+    #define NOZZLE_PARK_XY_FEEDRATE 100 // (mm/s) X and Y axes feedrate (also used for delta Z axis)
+    #define NOZZLE_UNPARK_XY_FEEDRATE 30 // (mm/s) X and Y axes feedrate for unparking after m600
+    #define NOZZLE_PARK_Z_FEEDRATE 5 // (mm/s) Z axis feedrate (not used for delta printers)
 
     /**
      * Park the nozzle after print is finished

@@ -10,7 +10,7 @@
 #include "img_resources.hpp"
 
 uint16_t ScreenMenuVersionInfo::get_help_h() {
-    return helper_lines * (resource_font(helper_font)->h + 1); // +1 for line paddings
+    return helper_lines * (height(helper_font) + 1); // +1 for line paddings
 }
 
 ScreenMenuVersionInfo::ScreenMenuVersionInfo()
@@ -20,7 +20,7 @@ ScreenMenuVersionInfo::ScreenMenuVersionInfo()
     , help(this, Rect16(GuiDefaults::MenuPaddingItems.left, uint16_t(GuiDefaults::RectFooter.Top()) - get_help_h() - blank_space_h, GuiDefaults::RectScreen.Width() - GuiDefaults::MenuPaddingItems.left, get_help_h()), is_multiline::yes)
     , footer(this) {
     header.SetText(_(label));
-    help.set_font(resource_font(helper_font));
+    help.set_font(helper_font);
     CaptureNormalWindow(menu); // set capture to list
 
     header.SetIcon(&img::info_16x16);
@@ -44,25 +44,6 @@ ScreenMenuVersionInfo::ScreenMenuVersionInfo()
     const int max_chars_per_line = 18;
     int project_version_full_len = strlen(project_version_full);
 
-    /* -===============================================(:>- */
-    // convert version from 1.2.34 to 1.2.3.4
-    char snake_version[18];
-    project_version_full_len = std::min(18, project_version_full_len);
-    strncpy(snake_version, project_version_full, project_version_full_len);
-    if (project_version_full[project_version_full_len - 2] == '.') {
-        snake_version[project_version_full_len + 2] = 0;
-        snake_version[project_version_full_len + 1] = snake_version[project_version_full_len - 1];
-        snake_version[project_version_full_len - 0] = '.';
-        snake_version[project_version_full_len - 1] = '0';
-        project_version_full_len += 2;
-    } else {
-        snake_version[project_version_full_len + 1] = 0;
-        snake_version[project_version_full_len - 0] = snake_version[project_version_full_len - 1];
-        snake_version[project_version_full_len - 1] = '.';
-        project_version_full_len += 1;
-    }
-    /* -===============================================(:>- */
-
     for (int i = 0; i < project_version_full_len; i += max_chars_per_line) {
         int line_length;
         if ((project_version_full_len - i) < max_chars_per_line) {
@@ -71,16 +52,9 @@ ScreenMenuVersionInfo::ScreenMenuVersionInfo()
             line_length = max_chars_per_line;
         }
         if (end > begin) {
-            begin += snprintf(begin, end - begin, "%.*s\n", line_length, snake_version + i);
+            begin += snprintf(begin, end - begin, "%.*s\n", line_length, project_version_full + i);
         }
     }
-
-#ifdef MINI_COREXY
-    begin += snprintf(begin, end - begin, "COREXY\n");
-#endif
-#ifdef MINI_LONG_BED
-    begin += snprintf(begin, end - begin, "long bed\n");
-#endif
 
     if (end > begin) {
         // c=20 r=4

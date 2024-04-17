@@ -3,26 +3,18 @@
  */
 #include "display.h"
 #include "display_hw_checks.hpp"
-#include "touch_dependency.hpp"
 #include "ScreenHandler.hpp"
 
 namespace {
-#if (!PRINTER_IS_PRUSA_MINI)
 void reinit_lcd_and_redraw() {
     display::CompleteReinitLCD();
     display::Init();
     Screens::Access()->SetDisplayReinitialized();
 }
-#endif
 
 void check_lcd() {
-    uint8_t data_buff[ST7789V_MAX_COMMAND_READ_LENGHT] = { 0x00 };
-    display::ReadMADCTL(data_buff);
-
-    if ((data_buff[1] != 0xE0 && data_buff[1] != 0xF0 && data_buff[1] != 0xF8)) {
-#if (!PRINTER_IS_PRUSA_MINI)
+    if (display::IsResetRequired()) {
         reinit_lcd_and_redraw();
-#endif
     }
 }
 } // anonymous namespace
@@ -36,8 +28,4 @@ void lcd::communication_check() {
         last_touch_check_ms = now;
         check_lcd();
     }
-}
-
-int touch::get_touch_read_err_total() {
-    return 0;
 }
