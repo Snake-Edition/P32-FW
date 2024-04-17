@@ -403,6 +403,27 @@ public:
     virtual void OnChange(size_t old_index) override;
 };
 
+class MI_SKEW_XY : public WiSpin {
+    constexpr static const char *const label = N_("Skew XY");
+
+public:
+    MI_SKEW_XY();
+};
+
+class MI_SKEW_XZ : public WiSpin {
+    constexpr static const char *const label = N_("Skew XZ");
+
+public:
+    MI_SKEW_XZ();
+};
+
+class MI_SKEW_YZ : public WiSpin {
+    constexpr static const char *const label = N_("Skew YZ");
+
+public:
+    MI_SKEW_YZ();
+};
+
 class MI_INFO_BED_TEMP : public WI_TEMP_LABEL_t {
     static constexpr const char *const label = N_("Bed Temperature");
 
