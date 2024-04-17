@@ -568,6 +568,24 @@ MI_TIME_NOW::MI_TIME_NOW()
 }
 
 /*****************************************************************************/
+static const NumericInputConfig skew_spin_config = {
+    .min_value = -1,
+    .max_value = 1,
+    .max_decimal_places = 4,
+};
+
+MI_SKEW_XY::MI_SKEW_XY()
+    : WiSpin(planner.skew_factor.xy, skew_spin_config, _(label), 0, is_enabled_t::no) {}
+
+/*****************************************************************************/
+MI_SKEW_XZ::MI_SKEW_XZ()
+    : WiSpin(planner.skew_factor.xz, skew_spin_config, _(label), 0, is_enabled_t::no) {}
+
+/*****************************************************************************/
+MI_SKEW_YZ::MI_SKEW_YZ()
+    : WiSpin(planner.skew_factor.yz, skew_spin_config, _(label), 0, is_enabled_t::no) {}
+
+/*****************************************************************************/
 // MI_FAN_CHECK
 MI_FAN_CHECK::MI_FAN_CHECK()
     : WI_ICON_SWITCH_OFF_ON_t(bool(marlin_vars().fan_check_enabled), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
