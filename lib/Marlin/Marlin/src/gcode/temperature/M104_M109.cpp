@@ -73,6 +73,10 @@ void GcodeSuite::M104() {
       if (target_extruder != active_extruder) return;
     #endif
     thermalManager.setTargetHotend(temp, target_extruder);
+    if (parser.seen('C') && thermalManager.isCoolingHotend(target_extruder))
+      thermalManager.start_nozzle_cooling(target_extruder);
+    else
+      thermalManager.reset_fan_speed(target_extruder);
 
     #if ENABLED(DUAL_X_CARRIAGE)
       if (dxc_is_duplicating() && target_extruder == 0)
@@ -159,7 +163,7 @@ void GcodeSuite::M109() {
 
   if (set_temp) {
     marlin_server::set_temp_to_display(parser.seenval('D') ? parser.value_celsius() : thermalManager.degTargetHotend(target_extruder), target_extruder);
-    (void)thermalManager.wait_for_hotend(target_extruder, no_wait_for_cooling, parser.seen('F'));
+    (void)thermalManager.wait_for_hotend(target_extruder, no_wait_for_cooling, parser.seen('C'));
   }
 }
 
