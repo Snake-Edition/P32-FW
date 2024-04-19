@@ -7,9 +7,11 @@
 
 namespace {
 void reinit_lcd_and_redraw() {
+#if (!PRINTER_IS_PRUSA_MINI)
     display::CompleteReinitLCD();
     display::Init();
     Screens::Access()->SetDisplayReinitialized();
+#endif
 }
 
 void check_lcd() {

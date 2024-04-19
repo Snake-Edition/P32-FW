@@ -32,7 +32,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 17. **Speed up (un)parking**: Parking and unparking is done at the highest speed to shorten maintenance (change filament) time during printing.
 18. **Different printers**: Next to a standard version, a coreXY and a long bed version is released. The latter is suited for beds of length 250 mm ([long bed HW](https://www.aliexpress.com/item/1005001632020501.html)).
 19. ~~**Different languages**~~
-20. ~~**Avoid display flashing**: Some displays flash with original FW.~~
+20. **Avoid display flashing**: Some displays flash with original FW.
 
 All settings are automatically saved to EEPROM and loaded on boot.
 
