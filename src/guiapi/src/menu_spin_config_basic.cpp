@@ -36,6 +36,7 @@ const SpinConfigInt SpinCnf::crash_max_period = SpinConfigInt({ 0, 0xFFFFF, 1 },
 
 // private repo
 const SpinConfig_t<float> SpinCnf::skew_range = { { -1.0, 1.0, 0.0001 } };
+const SpinConfigInt SpinCnf::brightness = { { 30, 150, 10 } };
 const SpinConfigInt SpinCnf::fs_range = SpinConfigInt({ 50000, 2500000, 1000 });
 const SpinConfigInt SpinCnf::loadcell_range = SpinConfigInt({ 5, 30, 1 });
 const SpinConfigInt SpinCnf::print_progress = SpinConfigInt({ 30, 200, 1 });

@@ -5,14 +5,24 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <algorithm>
 
 enum {
     ST7789V_COLS = 240,
     ST7789V_ROWS = 320,
     ST7789V_BUFF_ROWS = 3,
 };
+extern uint8_t brightness; //< in percents
 
 inline uint16_t color_to_565(uint32_t clr) {
+    /* -===============================================(:>- */
+    // dim the screen
+    const float dim = std::clamp(brightness, uint8_t(30), uint8_t(150)) / 100.f;
+    const uint8_t b = std::min(0xff, int(dim * (clr & 0xff)));
+    const uint8_t g = std::min(0xff, int(dim * ((clr & 0xff00) >> 8)));
+    const uint8_t r = std::min(0xff, int(dim * ((clr & 0xff0000) >> 16)));
+    clr = b | (g << 8) | (r << 16);
+    /* -===============================================(:>- */
     return swap_ui16(((clr >> 19) & 0x001f) | ((clr >> 5) & 0x07e0) | ((clr << 8) & 0xf800));
 }
 
