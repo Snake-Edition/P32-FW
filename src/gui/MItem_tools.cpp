@@ -532,6 +532,14 @@ MI_SKEW_YZ::MI_SKEW_YZ()
     : WiSpinFlt(planner.skew_factor.yz, SpinCnf::skew_range, _(label), 0, is_enabled_t::no, is_hidden_t::no) {}
 
 /*****************************************************************************/
+uint8_t cold_mode = false;
+MI_COLD_MODE::MI_COLD_MODE()
+    : WI_ICON_SWITCH_OFF_ON_t(cold_mode, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
+void MI_COLD_MODE::OnChange(size_t /*old_index*/) {
+    cold_mode = index;
+}
+
+/*****************************************************************************/
 // MI_FAN_CHECK
 MI_FAN_CHECK::MI_FAN_CHECK()
     : WI_ICON_SWITCH_OFF_ON_t(bool(marlin_vars()->fan_check_enabled), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
