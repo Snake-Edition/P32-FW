@@ -88,6 +88,7 @@ target_sources(
           screen_qr_error.cpp
           screen_reset_error.cpp
           screen_sheet_rename.cpp
+          screen_snake.cpp
           screen_splash.cpp
           screen_stack_overflow.cpp
           screen_sysinf.cpp

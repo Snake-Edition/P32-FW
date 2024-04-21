@@ -57,6 +57,7 @@
 #include "screen_menu_factory_reset.hpp"
 #include "screen_menu_error_test.hpp"
 #include "screen_menu_input_shaper.hpp"
+#include "screen_snake.hpp"
 
 #if PRINTER_IS_PRUSA_MK3_5 || PRINTER_IS_PRUSA_MINI
     #include <screen_menu_bed_level_correction.hpp>
@@ -491,6 +492,14 @@ MI_M600_MENU::MI_M600_MENU()
 
 void MI_M600_MENU::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuM600>);
+}
+
+MI_SNAKE::MI_SNAKE()
+    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_SNAKE::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<screen_snake_data_t>);
 }
 /* -===============================================(:>- */
 

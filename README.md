@@ -20,7 +20,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 6. **Settings during print**: You can change Snake settings during printing.
 7. **Faster nozzle cooling**: If you wait for nozzle cooling before MBL, you can call `M109 R170 C`
   which uses print fan to speed up cooling.
-8. ~~**Game**: Instead of printing you can enjoy simple game.~~
+8. **Game**: Instead of printing you can enjoy simple game.
 9. ~~**Bigger time**: Printing and remaining time is now bigger.~~
 10. ~~**Startup wizard**: Now you can select `Ignore` at the wizard start screen to disable starting of the wizard at the printer startup.~~
 11. ~~**Temperature calibration**: You can calibrate PID temperature control for your hotend/bed directly from the menu. Calibration does 5 cycles.~~

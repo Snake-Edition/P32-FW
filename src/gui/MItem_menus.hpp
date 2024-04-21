@@ -320,7 +320,19 @@ public:
 protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
+
+class MI_SNAKE : public IWindowMenuItem {
+    static constexpr const char *const label = "Snake";
+
+public:
+    MI_SNAKE();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
 /* -===============================================(:>- */
+
+/**********************************************************************************************/
 
 class MI_EEPROM_DIAGNOSTICS : public IWindowMenuItem {
     static constexpr const char *const label = N_("Eeprom Diagnostics");
