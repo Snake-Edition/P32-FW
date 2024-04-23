@@ -14,25 +14,25 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 2. **Skew compensation**: Turns on skew compensation in Marlin and allows it to be configured with `M852`.
 3. ~~**OctoPrint screen**: Adds support for `M73` (print progress) and `M117`~~
   ~~(LCD messages).~~
-4. ~~**PID tuning**: Automatically writes PID settings to EEPROM after `M303 U1` (autotune),~~
-  ~~`M301` (set hotend PID), and `M304` (set bed PID).~~
+4. ~~**PID tuning**: ~~
 5. **Max Temps**: Raises the maximum bed temperature from 100C to 110C
   and nozzle temperature from 275C to 285C (use with caution!).
-6. ~~**EEPROM upgrade/sidegrade/downgrade**: Saved values (live-z, skew etc.) are kept during upgrade/sidegrade/downgrade.~~
-7. **Settings during print**: You can change Snake settings during printing.
-8. **Faster nozzle cooling**: If you wait for nozzle cooling before MBL, you can call `M109 R170 C`
+6. **Settings during print**: You can change Snake settings during printing.
+7. **Faster nozzle cooling**: If you wait for nozzle cooling before MBL, you can call `M109 R170 C`
   which uses print fan to speed up cooling.
-9. **Game**: Instead of printing you can enjoy simple game.
-10. ~~**Bigger time**: Printing and remaining time is now bigger.~~
-11. ~~**Startup wizard**: Now you can select `Ignore` at the wizard start screen to disable starting of the wizard at the printer startup.~~
-12. ~~**Temperature calibration**: You can calibrate PID temperature control for your hotend/bed directly from the menu. Calibration does 5 cycles.~~
-13. ~~**Total time**: Elapsed, Remaining and Total or End time are shown during printing.~~
-14. **Change filament**: Change of filament in Tune menu is moved to submenu to avoid unwanted interruption.
-15. **Adjust brightness**: You can change brightness of the display. It does not dim the light but draws darker colors.
-16. ~~**Cold mode (min.temp.)**: If you enable Cold Mode, temperatures (once set) won't drop below 30°C. For safety reasons cold mode must be enabled after every start of the printer.~~
-17. ~~**Show MBL and tilt**: After mesh bed leveling (G29) you can go to `Snake Settings` and see the MBL Z levels at the measured points and check the tilt of the axes. Levels are shifted to avoid negative numbers.~~
-18. **Speed up (un)parking**: Parking and unparking is done at the highest speed to shorten maintenance (change filament) time during printing.
-19. **Different printers**: Next to a standard version, a coreXY and a long bed version is released. The latter is suited for beds of length 250 mm ([long bed HW](https://www.aliexpress.com/item/1005001632020501.html)).
+8. **Game**: Instead of printing you can enjoy simple game.
+9. ~~**Bigger time**: Printing and remaining time is now bigger.~~
+10. ~~**Startup wizard**: Now you can select `Ignore` at the wizard start screen to disable starting of the wizard at the printer startup.~~
+11. ~~**Temperature calibration**: You can calibrate PID temperature control for your hotend/bed directly from the menu. Calibration does 5 cycles.~~
+12. ~~**Total time**: Elapsed, Remaining and Total or End time are shown during printing.~~
+13. **Change filament**: Change of filament in Tune menu is moved to submenu to avoid unwanted interruption.
+14. **Adjust brightness**: You can change brightness of the display. It does not dim the light but draws darker colors.
+15. **Cold mode (min.temp.)**: If you enable Cold Mode, temperatures (once set) won't drop below 30°C. For safety reasons cold mode must be enabled after every start of the printer.
+16. ~~**Show MBL and tilt**: After mesh bed leveling (G29) you can go to `Snake Settings` and see the MBL Z levels at the measured points and check the tilt of the axes. Levels are shifted to avoid negative numbers.~~
+17. **Speed up (un)parking**: Parking and unparking is done at the highest speed to shorten maintenance (change filament) time during printing.
+18. **Different printers**: Next to a standard version, a coreXY and a long bed version is released. The latter is suited for beds of length 250 mm ([long bed HW](https://www.aliexpress.com/item/1005001632020501.html)).
+19. ~~**Different languages**~~
+20. **Avoid display flashing**: Some displays flash with original FW.
 
 All settings are automatically saved to EEPROM and loaded on boot.
 
@@ -218,13 +218,16 @@ Precise information of who did what can be obtained by `git blame` command or by
 <summary>Click to expand!</summary>
 
 # Buddy
-[![GitHub release](https://img.shields.io/github/release/prusa3d/Prusa-Firmware-Buddy.svg)](https://github.com/prusa3d/Prusa-Firmware-Buddy/releases)
-[![Build Status](https://holly.prusa3d.com/buildStatus/icon?job=Prusa-Firmware-Buddy%2FMultibranch%2Fmaster)](https://holly.prusa3d.com/job/Prusa-Firmware-Buddy/job/Multibranch/job/master/)
+[![Build Status](<https://holly.prusa3d.com/buildStatus/icon?job=Prusa-Firmware-Buddy-Private%2FMultibranch%2Fprivate&subject=private>)](https://holly.prusa3d.com/job/Prusa-Firmware-Buddy-Private/job/Multibranch/job/private/)
+[![Build Status](<https://holly.prusa3d.com/buildStatus/icon?job=Prusa-Firmware-Buddy-Private%2FMultibranch%2Fmaster&subject=master>)](https://holly.prusa3d.com/job/Prusa-Firmware-Buddy-Private/job/Multibranch/job/master/)
+[![Build Status](<https://holly.prusa3d.com/buildStatus/icon?job=Prusa-Firmware-Buddy-Private%2FAuto-Pull-Master&subject=auto-update-master>)](https://holly.prusa3d.com/job/Prusa-Firmware-Buddy-Private/job/Auto-Pull-Master/)
+[![Build Status](<https://holly.prusa3d.com/buildStatus/icon?job=Prusa-Firmware-Buddy-Private%2FMerge-Master-To-Private&subject=merge-master-to-private-daily>)](https://holly.prusa3d.com/job/Prusa-Firmware-Buddy-Private/job/Merge-Master-To-Private/)
 
 This repository includes source code and firmware releases for the Original Prusa 3D printers based on the 32-bit ARM microcontrollers.
 
 The currently supported models are:
-- Original Prusa MINI
+- Original Prusa MINI/MINI+
+- Original Prusa MK3.9
 - Original Prusa MK4
 - Original Prusa XL
 
@@ -278,15 +281,9 @@ The build process of this project is driven by CMake and `build.py` is just a hi
 - [Eclipse, STM32CubeIDE](doc/editor/stm32cubeide.md)
 - [Other LSP-based IDEs (Atom, Sublime Text, ...)](doc/editor/lsp-based-ides.md)
 
-#### Formatting
+#### Contributing
 
-All the source code in this repository is automatically formatted:
-
-- C/C++ files using [clang-format](https://clang.llvm.org/docs/ClangFormat.html),
-- Python files using [yapf](https://github.com/google/yapf),
-- and CMake files using [cmake-format](https://github.com/cheshirekow/cmake_format).
-
-If you want to contribute, make sure to install [pre-commit](https://pre-commit.com) and then run `pre-commit install` within the repository. This makes sure that all your future commits will be formatted appropriately. Our build server automatically rejects improperly formatted pull requests.
+If you want to contribute to the codebase, please read the [Contribution Guidelines](doc/contributing.md).
 
 #### XL and Puppies
 

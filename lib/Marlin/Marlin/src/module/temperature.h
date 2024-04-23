@@ -34,6 +34,9 @@
   #include "../feature/power.h"
 #endif
 
+extern uint8_t cold_mode;
+const constexpr uint8_t cold_mode_temp = 30;
+
 
 #if ENABLED(MODULAR_HEATBED)
   #include "modular_heatbed.h"
@@ -172,9 +175,11 @@ enum ADCSensorState : char {
 
 // A temperature sensor
 typedef struct TempInfo {
+  static constexpr float celsius_uninitialized = -1.0f;
+
   uint16_t acc;
   int16_t raw;
-  float celsius;
+  float celsius = celsius_uninitialized;
   inline void reset() { acc = 0; }
   inline void sample(const uint16_t s) { acc += s; }
   inline void update() { raw = acc; }
@@ -195,7 +200,6 @@ struct PIDHeaterInfo : public HeaterInfo {
 // Modular heater
 #if ENABLED(MODULAR_HEATBED)
 struct ModularBedHeater: public HeaterInfo {
-  HeaterInfo bedlets[X_HBL_COUNT][Y_HBL_COUNT];
   uint16_t enabled_mask = 0xffff;
 };
 #endif
@@ -691,7 +695,8 @@ class Temperature {
 
     #if HOTENDS
 
-      static void setTargetHotend(const int16_t celsius, const uint8_t E_NAME) {
+      static void setTargetHotend(int16_t celsius, const uint8_t E_NAME) {
+        if (cold_mode && celsius < cold_mode_temp) celsius = cold_mode_temp;
         const uint8_t ee = HOTEND_INDEX;
         const int16_t new_temp = _MIN(celsius, temp_range[ee].maxtemp - HEATER_MAXTEMP_SAFETY_MARGIN);
 
@@ -757,9 +762,6 @@ class Temperature {
       FORCE_INLINE static bool isCoolingBed()     { return temp_bed.target < temp_bed.celsius; }
 
       #if ENABLED(MODULAR_HEATBED)
-        FORCE_INLINE static float degBedlet(const uint8_t x, const uint8_t y) {
-          return temp_bed.bedlets[x][y].celsius;
-        }
         FORCE_INLINE static uint16_t getEnabledBedletMask() {
           return temp_bed.enabled_mask;
         }
@@ -771,7 +773,6 @@ class Temperature {
               if(temp_bed.enabled_mask & (1 << advanced_modular_bed->idx(x, y))) {
                 target_temp = temp_bed.target;
               }
-              temp_bed.bedlets[x][y].target = target_temp;
               advanced_modular_bed->set_target(x, y, target_temp);
             }
           }
@@ -789,7 +790,8 @@ class Temperature {
         static inline void start_watching_bed() {}
       #endif
 
-      static void setTargetBed(const int16_t celsius) {
+      static void setTargetBed(int16_t celsius) {
+        if (cold_mode && celsius < cold_mode_temp) celsius = cold_mode_temp;
         #if ENABLED(AUTO_POWER_CONTROL)
           if (celsius) {
             powerManager.power_on();
@@ -810,7 +812,6 @@ class Temperature {
               if(temp_bed.enabled_mask & (1 << advanced_modular_bed->idx(x, y))) {
                 target_temp = temp_bed.target;
               }
-              temp_bed.bedlets[x][y].target = target_temp;
               advanced_modular_bed->set_target(x, y, target_temp);
             }
           }

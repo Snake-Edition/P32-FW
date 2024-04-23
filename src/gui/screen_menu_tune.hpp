@@ -15,7 +15,10 @@
 #include <option/has_toolchanger.h>
 #include <option/developer_mode.h>
 #include <option/has_mmu2.h>
-
+#include <device/board.h>
+#if XL_ENCLOSURE_SUPPORT()
+    #include "MItem_enclosure.hpp"
+#endif
 /*****************************************************************************/
 // parent alias
 using ScreenMenuTune__ = ScreenMenu<EFooter::On, MI_RETURN,
@@ -39,15 +42,27 @@ using ScreenMenuTune__ = ScreenMenu<EFooter::On, MI_RETURN,
 #if HAS_TOOLCHANGER()
     MI_FLOWFACT<1>, MI_FLOWFACT<2>, MI_FLOWFACT<3>, MI_FLOWFACT<4>,
 #endif /*HAS_TOOLCHANGER()*/
+#if HAS_FILAMENT_SENSORS_MENU()
+    MI_FILAMENT_SENSORS,
+#else
     MI_FILAMENT_SENSOR,
+#endif
 #if HAS_LOADCELL()
     MI_STUCK_FILAMENT_DETECTION,
 #endif
+#if XL_ENCLOSURE_SUPPORT()
+    MI_ENCLOSURE_ENABLE,
+    MI_ENCLOSURE,
+#endif
+    MI_STEALTH_MODE,
     MI_SOUND_MODE,
 #if PRINTER_IS_PRUSA_MINI
     MI_SOUND_VOLUME,
 #endif
     MI_INPUT_SHAPER,
+#if HAS_PHASE_STEPPING()
+    MI_PHASE_STEPPING,
+#endif
     MI_FAN_CHECK
 #if HAS_MMU2()
     ,
@@ -63,7 +78,7 @@ using ScreenMenuTune__ = ScreenMenu<EFooter::On, MI_RETURN,
 #if (!PRINTER_IS_PRUSA_MINI) || defined(_DEBUG) // Save space in MINI release
     MI_HARDWARE_TUNE,
 #endif /*(!PRINTER_IS_PRUSA_MINI) || defined(_DEBUG)*/
-    MI_TIMEZONE, MI_INFO, MI_TRIGGER_POWER_PANIC,
+    MI_TIMEZONE, MI_TIMEZONE_MIN, MI_TIMEZONE_SUMMER, MI_INFO, MI_TRIGGER_POWER_PANIC,
     MI_SNAKE_TUNE_SETTINGS,
 
 #ifdef _DEBUG

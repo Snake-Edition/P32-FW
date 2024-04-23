@@ -9,7 +9,7 @@
 #include "screen.hpp"
 #include "window_header.hpp"
 #include "status_footer.hpp"
-#include "fsm_base_types.hpp"
+#include <common/fsm_base_types.hpp>
 #include "selftest_frame_axis.hpp"
 #include "selftest_frame_fans.hpp"
 #include "selftest_frame_fsensor.hpp"
@@ -17,7 +17,7 @@
 #include "selftest_frame_loadcell.hpp"
 #include "selftest_frame_calib_z.hpp"
 #include "selftest_frame_temp.hpp"
-#include "selftest_frame_hot_end_sock.hpp"
+#include "selftest_frame_hotend_specify.hpp"
 #include "selftest_frame_firstlayer.hpp"
 #include "selftest_frame_firstlayer_questions.hpp"
 #include "selftest_frame_result.hpp"

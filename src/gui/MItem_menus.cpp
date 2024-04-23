@@ -57,8 +57,12 @@
 #include "screen_menu_factory_reset.hpp"
 #include "screen_menu_error_test.hpp"
 #include "screen_menu_input_shaper.hpp"
-
 #include "screen_snake.hpp"
+
+#if PRINTER_IS_PRUSA_MK3_5 || PRINTER_IS_PRUSA_MINI
+    #include <screen_menu_bed_level_correction.hpp>
+#endif
+
 #include <printers.h>
 
 #if HAS_SELFTEST()
@@ -76,12 +80,16 @@
     #include <leds/side_strip_control.hpp>
 #endif
 
+#if HAS_FILAMENT_SENSORS_MENU()
+    #include "screen_menu_filament_sensors.hpp"
+#endif
+
 #include <config_store/store_instance.hpp>
 
 /*****************************************************************************/
 // MI_VERSION_INFO
 MI_VERSION_INFO::MI_VERSION_INFO()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_VERSION_INFO::click(IWindowMenu & /*window_menu*/) {
@@ -91,7 +99,7 @@ void MI_VERSION_INFO::click(IWindowMenu & /*window_menu*/) {
 /*****************************************************************************/
 // MI_SENSOR_INFO
 MI_SENSOR_INFO::MI_SENSOR_INFO()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_SENSOR_INFO::click(IWindowMenu & /*window_menu*/) {
@@ -100,7 +108,7 @@ void MI_SENSOR_INFO::click(IWindowMenu & /*window_menu*/) {
 
 /*****************************************************************************/
 MI_ODOMETER::MI_ODOMETER()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
 
 void MI_ODOMETER::click(IWindowMenu & /*window_menu*/) {
@@ -110,7 +118,7 @@ void MI_ODOMETER::click(IWindowMenu & /*window_menu*/) {
 /*****************************************************************************/
 // MI_FILAMENT
 MI_FILAMENT::MI_FILAMENT()
-    : WI_LABEL_t(_(label), &img::spool_16x16, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), &img::spool_16x16, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_FILAMENT::click(IWindowMenu & /*window_menu*/) {
@@ -120,7 +128,7 @@ void MI_FILAMENT::click(IWindowMenu & /*window_menu*/) {
 /*****************************************************************************/
 // MI_SYS_INFO
 MI_SYS_INFO::MI_SYS_INFO()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_SYS_INFO::click(IWindowMenu & /*window_menu*/) {
@@ -129,13 +137,13 @@ void MI_SYS_INFO::click(IWindowMenu & /*window_menu*/) {
 
 // MI_STATISTIC_disabled
 MI_STATISTIC_disabled::MI_STATISTIC_disabled()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::no, is_hidden_t::no) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::no, is_hidden_t::no) {
 }
 
 /*****************************************************************************/
 // MI_FAIL_STAT
 MI_FAIL_STAT::MI_FAIL_STAT()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
 
 void MI_FAIL_STAT::click(IWindowMenu & /*window_menu*/) {
@@ -145,13 +153,13 @@ void MI_FAIL_STAT::click(IWindowMenu & /*window_menu*/) {
 /*****************************************************************************/
 // MI_SUPPORT_disabled
 MI_SUPPORT_disabled::MI_SUPPORT_disabled()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::no, is_hidden_t::no) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::no, is_hidden_t::no) {
 }
 
 /*****************************************************************************/
 // MI_TEMPERATURE
 MI_TEMPERATURE::MI_TEMPERATURE()
-    : WI_LABEL_t(_(label), &img::temperature_16x16, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), &img::temperature_16x16, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_TEMPERATURE::click(IWindowMenu & /*window_menu*/) {
@@ -161,7 +169,7 @@ void MI_TEMPERATURE::click(IWindowMenu & /*window_menu*/) {
 /*****************************************************************************/
 // MI_MOVE_AXIS
 MI_MOVE_AXIS::MI_MOVE_AXIS()
-    : WI_LABEL_t(_(label), &img::move_16x16, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), &img::move_16x16, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_MOVE_AXIS::click(IWindowMenu & /*window_menu*/) {
@@ -171,7 +179,7 @@ void MI_MOVE_AXIS::click(IWindowMenu & /*window_menu*/) {
 /*****************************************************************************/
 // MI_SERVICE
 MI_SERVICE::MI_SERVICE()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
 
 void MI_SERVICE::click(IWindowMenu & /*window_menu*/) {
@@ -182,7 +190,7 @@ void MI_SERVICE::click(IWindowMenu & /*window_menu*/) {
 // MI_ERROR_TEST
 #if DEVELOPER_MODE()
 MI_ERROR_TEST::MI_ERROR_TEST()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev, expands_t::yes) {
 }
 
 void MI_ERROR_TEST::click(IWindowMenu & /*window_menu*/) {
@@ -193,7 +201,7 @@ void MI_ERROR_TEST::click(IWindowMenu & /*window_menu*/) {
 /*****************************************************************************/
 // MI_TEST
 MI_TEST::MI_TEST()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev, expands_t::yes) {
 }
 
 void MI_TEST::click(IWindowMenu & /*window_menu*/) {
@@ -203,7 +211,7 @@ void MI_TEST::click(IWindowMenu & /*window_menu*/) {
 /*****************************************************************************/
 // MI_FW_UPDATE
 MI_FW_UPDATE::MI_FW_UPDATE()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev, expands_t::yes) {
 }
 
 void MI_FW_UPDATE::click(IWindowMenu & /*window_menu*/) {
@@ -213,7 +221,7 @@ void MI_FW_UPDATE::click(IWindowMenu & /*window_menu*/) {
 /*****************************************************************************/
 // MI_METRICS_SETTINGS
 MI_METRICS_SETTINGS::MI_METRICS_SETTINGS()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
     SetIconId(&img::speed_16x16);
 }
 
@@ -224,7 +232,7 @@ void MI_METRICS_SETTINGS::click(IWindowMenu & /*window_menu*/) {
 /*****************************************************************************/
 // MI_ETH_SETTINGS
 MI_ETH_SETTINGS::MI_ETH_SETTINGS()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
     SetIconId(&img::lan_16x16);
 }
 
@@ -235,7 +243,7 @@ void MI_ETH_SETTINGS::click(IWindowMenu & /*window_menu*/) {
 /*****************************************************************************/
 // MI_WIFI_SETTINGS
 MI_WIFI_SETTINGS::MI_WIFI_SETTINGS()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
     SetIconId(&img::wifi_16x16);
 }
 
@@ -246,7 +254,7 @@ void MI_WIFI_SETTINGS::click(IWindowMenu & /*window_menu*/) {
 /*****************************************************************************/
 // MI_MESSAGES
 MI_MESSAGES::MI_MESSAGES()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_MESSAGES::click(IWindowMenu & /*window_menu*/) {
@@ -256,7 +264,7 @@ void MI_MESSAGES::click(IWindowMenu & /*window_menu*/) {
 /*****************************************************************************/
 // MI_HW_SETUP
 MI_HW_SETUP::MI_HW_SETUP()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::yes, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::yes, expands_t::yes) {
 }
 
 void MI_HW_SETUP::click(IWindowMenu & /*window_menu*/) {
@@ -265,31 +273,31 @@ void MI_HW_SETUP::click(IWindowMenu & /*window_menu*/) {
 
 /*****************************************************************************/
 // MI_CURRENT_PROFILE
-MI_CURRENT_PROFILE::MI_CURRENT_PROFILE()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, SteelSheets::NumOfCalibrated() > 1 ? is_hidden_t::no : is_hidden_t::yes) {
-    if (SteelSheets::NumOfCalibrated() > 1) {
-        UpdateLabel();
-    }
+MI_CURRENT_SHEET_PROFILE::MI_CURRENT_SHEET_PROFILE()
+    : IWindowMenuItem(_(label), extension_width, nullptr, is_enabled_t::yes, SteelSheets::NumOfCalibrated() > 1 ? is_hidden_t::no : is_hidden_t::yes) {
 }
 
-void MI_CURRENT_PROFILE::click(IWindowMenu & /*window_menu*/) {
+void MI_CURRENT_SHEET_PROFILE::printExtension(Rect16 extension_rect, color_t color_text, color_t color_back, ropfn) const {
+    std::array<char, MAX_SHEET_NAME_LENGTH + 3> nameBuf;
+    char *name = nameBuf.data();
+    *(name++) = '[';
+    name += SteelSheets::ActiveSheetName(name, nameBuf.size() - 3);
+    *(name++) = ']';
+    *(name++) = '\0';
+
+    render_text_align(extension_rect, string_view_utf8::MakeRAM((uint8_t *)nameBuf.data()), font, color_back,
+        is_focused() ? COLOR_ORANGE : color_text, GuiDefaults::MenuPaddingItems, Align_t::RightCenter(), false);
+}
+
+void MI_CURRENT_SHEET_PROFILE::click(IWindowMenu &) {
     SteelSheets::NextSheet();
-    UpdateLabel();
-}
-
-void MI_CURRENT_PROFILE::UpdateLabel() {
-    name[0] = '[';
-    uint32_t cnt = SteelSheets::ActiveSheetName(name + 1, MAX_SHEET_NAME_LENGTH);
-    name[cnt + 1] = ']';
-    name[cnt + 2] = 0;
-    // string_view_utf8::MakeRAM is safe. "name" is member var, exists until MI_CURRENT_PROFILE is destroyed
-    SetLabel(string_view_utf8::MakeRAM((const uint8_t *)name));
+    InValidateExtension();
 }
 
 /*****************************************************************************/
 // MI_EEPROM
 MI_EEPROM::MI_EEPROM()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev, expands_t::yes) {
 }
 
 void MI_EEPROM::click(IWindowMenu & /*window_menu*/) {
@@ -307,7 +315,7 @@ void MI_DEVHASH_IN_QR::OnChange(size_t old_index) {
 /*****************************************************************************/
 // MI_FOOTER_SETTINGS
 MI_FOOTER_SETTINGS::MI_FOOTER_SETTINGS()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_FOOTER_SETTINGS::click(IWindowMenu & /*window_menu*/) {
@@ -327,7 +335,7 @@ void MI_WAVETABLE_XYZ::OnChange(size_t old_index) {
 /*****************************************************************************/
 // MI_FOOTER_SETTINGS_ADV
 MI_FOOTER_SETTINGS_ADV::MI_FOOTER_SETTINGS_ADV()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev) {
 }
 
 void MI_FOOTER_SETTINGS_ADV::click(IWindowMenu & /*window_menu*/) {
@@ -337,7 +345,7 @@ void MI_FOOTER_SETTINGS_ADV::click(IWindowMenu & /*window_menu*/) {
 /*****************************************************************************/
 // MI_PRUSALINK
 MI_PRUSALINK::MI_PRUSALINK()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_PRUSALINK::click(IWindowMenu & /*window_menu*/) {
@@ -348,7 +356,7 @@ void MI_PRUSALINK::click(IWindowMenu & /*window_menu*/) {
 // MI_DIAGNOSTICS
 
 MI_DIAGNOSTICS::MI_DIAGNOSTICS()
-    : WI_LABEL_t(_(label), nullptr,
+    : IWindowMenuItem(_(label), nullptr,
 #if HAS_SELFTEST()
         is_enabled_t::yes
 #else
@@ -368,7 +376,7 @@ void MI_DIAGNOSTICS::click(IWindowMenu & /*window_menu*/) {
 // MI_USER_INTERFACE
 
 MI_USER_INTERFACE::MI_USER_INTERFACE()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_USER_INTERFACE::click(IWindowMenu & /*window_menu*/) {
@@ -379,7 +387,7 @@ void MI_USER_INTERFACE::click(IWindowMenu & /*window_menu*/) {
 // MI_LANG_AND_TIME
 
 MI_LANG_AND_TIME::MI_LANG_AND_TIME()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_LANG_AND_TIME::click(IWindowMenu & /*window_menu*/) {
@@ -387,19 +395,9 @@ void MI_LANG_AND_TIME::click(IWindowMenu & /*window_menu*/) {
 }
 
 /*****************************************************************************/
-// MI_SNAKE
-MI_SNAKE::MI_SNAKE()
-    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
-}
-
-void MI_SNAKE::click(IWindowMenu & /*window_menu*/) {
-    Screens::Access()->Open(ScreenFactory::Screen<screen_snake_data_t>);
-}
-
-/*****************************************************************************/
 // MI_PRUSALINK
 MI_PRUSA_CONNECT::MI_PRUSA_CONNECT()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 /**********************************************************************************************/
@@ -408,10 +406,11 @@ void MI_PRUSA_CONNECT::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuConnect>);
 }
 
+/**********************************************************************************************/
 // MI_LOAD_SETTINGS
 
 MI_LOAD_SETTINGS::MI_LOAD_SETTINGS()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
 
 void MI_LOAD_SETTINGS::click(IWindowMenu & /*window_menu*/) {
@@ -431,7 +430,7 @@ void MI_LOAD_SETTINGS::click(IWindowMenu & /*window_menu*/) {
 // MI_NETWORK
 
 MI_NETWORK::MI_NETWORK()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_NETWORK::click(IWindowMenu & /*window_menu*/) {
@@ -442,7 +441,7 @@ void MI_NETWORK::click(IWindowMenu & /*window_menu*/) {
 // MI_HARDWARE
 
 MI_HARDWARE::MI_HARDWARE()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_HARDWARE::click(IWindowMenu & /*window_menu*/) {
@@ -453,7 +452,7 @@ void MI_HARDWARE::click(IWindowMenu & /*window_menu*/) {
 // MI_HARDWARE_TUNE
 
 MI_HARDWARE_TUNE::MI_HARDWARE_TUNE()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev, expands_t::yes) {
 }
 
 void MI_HARDWARE_TUNE::click(IWindowMenu & /*window_menu*/) {
@@ -463,37 +462,44 @@ void MI_HARDWARE_TUNE::click(IWindowMenu & /*window_menu*/) {
 /**********************************************************************************************/
 // MI_EXPERIMENTAL_SETTINGS
 MI_EXPERIMENTAL_SETTINGS::MI_EXPERIMENTAL_SETTINGS()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
 
 void MI_EXPERIMENTAL_SETTINGS::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuExperimentalSettings>);
 }
 
-/**********************************************************************************************/
+/* -===============================================(:>- */
 MI_SNAKE_SETTINGS::MI_SNAKE_SETTINGS()
-    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_SNAKE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuSnakeSettings>);
 }
 
-/**********************************************************************************************/
 MI_SNAKE_TUNE_SETTINGS::MI_SNAKE_TUNE_SETTINGS()
-    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_SNAKE_TUNE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuSnakeTuneSettings>);
 }
-/* -===============================================(:>- */
+
 MI_M600_MENU::MI_M600_MENU()
-    : WI_LABEL_t(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_M600_MENU::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuM600>);
+}
+
+MI_SNAKE::MI_SNAKE()
+    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_SNAKE::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<screen_snake_data_t>);
 }
 /* -===============================================(:>- */
 
@@ -501,7 +507,7 @@ void MI_M600_MENU::click(IWindowMenu & /*window_menu*/) {
 // MI_SYSTEM
 
 MI_SYSTEM::MI_SYSTEM()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_SYSTEM::click(IWindowMenu & /*window_menu*/) {
@@ -512,7 +518,7 @@ void MI_SYSTEM::click(IWindowMenu & /*window_menu*/) {
 // MI_PRINT_STATISTICS
 
 MI_PRINT_STATISTICS::MI_PRINT_STATISTICS()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_PRINT_STATISTICS::click(IWindowMenu & /*window_menu*/) {
@@ -523,7 +529,7 @@ void MI_PRINT_STATISTICS::click(IWindowMenu & /*window_menu*/) {
 // MI_INFO
 
 MI_INFO::MI_INFO()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_INFO::click(IWindowMenu & /*window_menu*/) {
@@ -533,7 +539,7 @@ void MI_INFO::click(IWindowMenu & /*window_menu*/) {
 /**********************************************************************************************/
 // MI_EEPROM_DIAGNOSTICS
 MI_EEPROM_DIAGNOSTICS::MI_EEPROM_DIAGNOSTICS()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev, expands_t::yes) {
 }
 
 void MI_EEPROM_DIAGNOSTICS::click(IWindowMenu & /*window_menu*/) {
@@ -575,6 +581,18 @@ void MI_SIDE_LEDS_ENABLE::OnChange(size_t old_index) {
 }
 #endif
 
+#if HAS_SIDE_LEDS()
+/**********************************************************************************************/
+// MI_SIDE_LEDS_DIMMING
+MI_SIDE_LEDS_DIMMING::MI_SIDE_LEDS_DIMMING()
+    : WI_ICON_SWITCH_OFF_ON_t(config_store().side_leds_dimming_enabled.get(), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
+}
+void MI_SIDE_LEDS_DIMMING::OnChange(size_t) {
+    config_store().side_leds_dimming_enabled.set(index);
+    leds::side_strip_control.set_dimming_enabled(index);
+}
+#endif
+
 #if ENABLED(PRUSA_TOOLCHANGER)
 /**********************************************************************************************/
 // MI_TOOL_LEDS_ENABLE
@@ -591,7 +609,7 @@ void MI_TOOL_LEDS_ENABLE::OnChange(size_t old_index) {
 /*****************************************************************************/
 // MI_TOOLS_SETUP
 MI_TOOLS_SETUP::MI_TOOLS_SETUP()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, prusa_toolchanger.is_toolchanger_enabled() ? is_hidden_t::no : is_hidden_t::yes, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, prusa_toolchanger.is_toolchanger_enabled() ? is_hidden_t::no : is_hidden_t::yes, expands_t::yes) {
 }
 
 void MI_TOOLS_SETUP::click(IWindowMenu & /*window_menu*/) {
@@ -599,9 +617,21 @@ void MI_TOOLS_SETUP::click(IWindowMenu & /*window_menu*/) {
 }
 #endif
 
+#if HAS_FILAMENT_SENSORS_MENU()
+/*****************************************************************************/
+// MI_FILAMENT_SENSORS
+MI_FILAMENT_SENSORS::MI_FILAMENT_SENSORS()
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+}
+
+void MI_FILAMENT_SENSORS::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuFilamentSensors>);
+}
+#endif
+
 // MI_TRIGGER_POWER_PANIC
 MI_TRIGGER_POWER_PANIC::MI_TRIGGER_POWER_PANIC()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev, expands_t::no) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev, expands_t::no) {
 }
 
 void MI_TRIGGER_POWER_PANIC::click([[maybe_unused]] IWindowMenu &windowMenu) {
@@ -612,7 +642,7 @@ void MI_TRIGGER_POWER_PANIC::click([[maybe_unused]] IWindowMenu &windowMenu) {
 #if ENABLED(PRUSA_TOOLCHANGER)
 /*****************************************************************************/
 MI_PICK_PARK_TOOL::MI_PICK_PARK_TOOL()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, prusa_toolchanger.is_toolchanger_enabled() ? is_hidden_t::no : is_hidden_t::yes, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, prusa_toolchanger.is_toolchanger_enabled() ? is_hidden_t::no : is_hidden_t::yes, expands_t::yes) {
 }
 
 void MI_PICK_PARK_TOOL::click(IWindowMenu & /*window_menu*/) {
@@ -621,7 +651,7 @@ void MI_PICK_PARK_TOOL::click(IWindowMenu & /*window_menu*/) {
 
 /*****************************************************************************/
 MI_CALIBRATE_DOCK::MI_CALIBRATE_DOCK()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, prusa_toolchanger.is_toolchanger_enabled() ? is_hidden_t::no : is_hidden_t::yes, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, prusa_toolchanger.is_toolchanger_enabled() ? is_hidden_t::no : is_hidden_t::yes, expands_t::yes) {
 }
 
 void MI_CALIBRATE_DOCK::click(IWindowMenu & /*window_menu*/) {
@@ -635,7 +665,7 @@ void MI_CALIBRATE_DOCK::click(IWindowMenu & /*window_menu*/) {
 // MI_SELFTEST_SNAKE
 
 MI_SELFTEST_SNAKE::MI_SELFTEST_SNAKE()
-    : WI_LABEL_t(_(label), &img::calibrate_white_16x16,
+    : IWindowMenuItem(_(label), &img::calibrate_white_16x16,
     #if HAS_SELFTEST()
         is_enabled_t::yes
     #else
@@ -656,7 +686,7 @@ void MI_SELFTEST_SNAKE::click(IWindowMenu & /*window_menu*/) {
 
 /**********************************************************************************************/
 MI_OPEN_FACTORY_RESET::MI_OPEN_FACTORY_RESET()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_OPEN_FACTORY_RESET::click(IWindowMenu & /*window_menu*/) {
@@ -664,9 +694,22 @@ void MI_OPEN_FACTORY_RESET::click(IWindowMenu & /*window_menu*/) {
 }
 
 MI_INPUT_SHAPER::MI_INPUT_SHAPER()
-    : WI_LABEL_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
 void MI_INPUT_SHAPER::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuInputShaper>);
 }
+
+#if PRINTER_IS_PRUSA_MK3_5 || PRINTER_IS_PRUSA_MINI
+/*****************************************************************************/
+// MI_BED_LEVEL_CORRECTION
+
+MI_BED_LEVEL_CORRECTION::MI_BED_LEVEL_CORRECTION()
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+}
+
+void MI_BED_LEVEL_CORRECTION::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuBedLevelCorrection>);
+}
+#endif

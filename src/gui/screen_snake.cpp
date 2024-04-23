@@ -3,7 +3,6 @@
 #include "screen_snake.hpp"
 #include "display.h"
 #include "ScreenHandler.hpp"
-#include "GuiDefaults.hpp"
 
 /// this defines movement speed in miliseconds
 static const constexpr int movement_delay = 100;
