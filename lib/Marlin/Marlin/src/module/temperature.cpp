@@ -1691,8 +1691,9 @@ void Temperature::manage_heater() {
         else
       #endif
       {
-        #if ENABLED(PIDTEMPBED)
-          temp_bed.soft_pwm_amount = WITHIN(temp_bed.celsius, BED_MINTEMP, BED_MAXTEMP) ? (int)get_pid_output_bed() >> soft_pwm_bit_shift : 0;
+        #if ENABLED(PIDTEMPBED)          
+          bool heat = temp_bed.celsius <= BED_MAXTEMP && (cold_mode || temp_bed.celsius >= BED_MINTEMP);
+          temp_bed.soft_pwm_amount = heat ? (int)get_pid_output_bed() >> soft_pwm_bit_shift : 0;
         #else
           // Check if temperature is within the correct band
           if (WITHIN(temp_bed.celsius, BED_MINTEMP, BED_MAXTEMP)) {
