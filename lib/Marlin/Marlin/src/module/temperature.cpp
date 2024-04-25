@@ -1592,7 +1592,7 @@ void Temperature::manage_heater() {
           float feed_forward = .0f;
       #endif
 
-          temp_hotend[e].soft_pwm_amount = (temp_hotend[e].celsius > temp_range[e].mintemp || is_preheating(e)) && temp_hotend[e].celsius < temp_range[e].maxtemp ?
+          temp_hotend[e].soft_pwm_amount = (temp_hotend[e].celsius > temp_range[e].mintemp || is_preheating(e) || cold_mode) && temp_hotend[e].celsius < temp_range[e].maxtemp ?
       #if ENABLED(MODEL_DETECT_STUCK_THERMISTOR)
               (int)(pid_output = get_pid_output_hotend(feed_forward, e))
       #else
@@ -1602,12 +1602,16 @@ void Temperature::manage_heater() {
       #if ENABLED(MODEL_DETECT_STUCK_THERMISTOR)
           thermal_model_protection(pid_output, feed_forward, e);
       #endif
+          // Use 20% power only if too cold (does not overheat if thermistor fails)
+          if (cold_mode && temp_hotend[e].celsius < temp_range[e].mintemp) temp_hotend[e].soft_pwm_amount *= .2f;
         }
 
       #if WATCH_HOTENDS
         if (hotend_idle[e].timed_out)
           start_watching_hotend(e);
-        else
+        else {
+          if (cold_mode && temp_hotend[e].celsius <= temp_range[e].mintemp)
+            start_watching_hotend(e);
           // Make sure temperature is increasing
           if (watch_hotend[e].next_ms && ELAPSED(ms, watch_hotend[e].next_ms)) { // Time to check this extruder?
             if (degHotend(e) < watch_hotend[e].target)                           // Failed to increase enough?
@@ -1615,6 +1619,7 @@ void Temperature::manage_heater() {
             else                                                                 // Start again if the target is still far off
               start_watching_hotend(e);
           }
+        }
       #endif
 
       #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
@@ -3146,7 +3151,7 @@ void Temperature::readings_ready() {
           #ifdef MAX_CONSECUTIVE_LOW_TEMPERATURE_ERROR_ALLOWED
             if (++consecutive_low_temperature_error[e] >= MAX_CONSECUTIVE_LOW_TEMPERATURE_ERROR_ALLOWED)
           #endif
-              min_temp_error((heater_ind_t)e);
+              if (!cold_mode) min_temp_error((heater_ind_t)e);
         }
         #ifdef MAX_CONSECUTIVE_LOW_TEMPERATURE_ERROR_ALLOWED
           else
