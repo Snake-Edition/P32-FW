@@ -59,7 +59,6 @@
 #include "module/printcounter.h" // PrintCounter or Stopwatch
 #include "feature/closedloop.h"
 #include "feature/safety_timer.h"
-#include "feature/bed_preheat.hpp"
 #if !BOARD_IS_DWARF()
 #include "pause_stubbed.hpp"
 #endif
@@ -610,9 +609,6 @@ void idle(bool waiting, bool no_stepper_sleep/*=false*/) {
 
   thermalManager.manage_heater();
 
-  #if HAS_HEATED_BED
-    bed_preheat.update();
-  #endif
 
   #if ENABLED(PRINTCOUNTER)
     print_job_timer.tick();

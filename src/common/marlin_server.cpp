@@ -53,7 +53,6 @@
 #include "../Marlin/src/feature/input_shaper/input_shaper.hpp"
 #include "../Marlin/src/feature/pause.h"
 #include "../Marlin/src/feature/prusa/measure_axis.h"
-#include "Marlin/src/feature/bed_preheat.hpp"
 #include "../Marlin/src/libs/nozzle.h"
 #include "../Marlin/src/core/language.h" //GET_TEXT(MSG)
 #include "../Marlin/src/gcode/gcode.h"

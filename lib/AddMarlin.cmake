@@ -44,7 +44,6 @@ if(BOARD_IS_MASTER_BOARD)
     Marlin
     PRIVATE Marlin/Marlin/src/feature/babystep.cpp
             Marlin/Marlin/src/feature/backlash.cpp
-            Marlin/Marlin/src/feature/bed_preheat.cpp
             Marlin/Marlin/src/feature/bedlevel/bedlevel.cpp
             Marlin/Marlin/src/feature/bedlevel/ubl/ubl.cpp
             Marlin/Marlin/src/feature/bedlevel/ubl/ubl_G29.cpp

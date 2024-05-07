@@ -38,7 +38,6 @@
   #include "../../../gcode/gcode.h"
   #include "../../../libs/least_squares_fit.h"
   #include "../../../feature/print_area.h"
-  #include "../../../feature/bed_preheat.hpp"
   #include <fanctl.hpp>
   #include <option/has_love_board.h>
   #include <scope_guard.hpp>
@@ -359,7 +358,7 @@
     if (g29_parameter_parsing()) return; // Abort on parameter error
 
     if (g29_wait_for_preheat) {
-        bed_preheat.wait_for_preheat();
+        Temperature::wait_for_frame_heatup();
     }
 
     // Check for commands that require the printer to be homed
