@@ -68,6 +68,7 @@ using PerAxisArray = std::array<T, SUPPORTED_AXIS_COUNT>;
 
 // Buddy pin abstraction for dir signals
 static constexpr PerAxisArray<OutputPin> dir_signals = { { xDir, yDir } };
+static PerAxisArray<const OutputPin *> step_signals = { nullptr, nullptr };
 
 // Bitmasks for step pins on the port
 static GPIO_TypeDef *step_gpio_port = nullptr;
@@ -81,6 +82,7 @@ static std::array<GpioEventBuffer<GPIO_BUFFER_SIZE>, 2> porta_event_buffers;
 static GpioEventBuffer<GPIO_BUFFER_SIZE>
     *setup_buffer = &porta_event_buffers[0],
     *fire_buffer = &porta_event_buffers[1];
+static std::atomic<bool> burst_busy = false;
 
 static void setup_pinout_1() {
     step_gpio_port = GPIOA;
@@ -105,6 +107,14 @@ void burst_stepping::init() {
         setup_pinout_1();
     }
 
+    // initial step state
+    step_signals[X_AXIS] = buddy::hw::XStep;
+    step_signals[Y_AXIS] = buddy::hw::YStep;
+    for (int axis = 0; axis != SUPPORTED_AXIS_COUNT; ++axis) {
+        axis_step_state[axis] = (step_signals[axis]->read() == Pin::State::high);
+        axis_direction[axis] = (dir_signals[axis].read() == Pin::State::high);
+    }
+
     HAL_TIM_Base_Start(&TIM_HANDLE_FOR(burst_stepping));
     __HAL_TIM_ENABLE_DMA(&TIM_HANDLE_FOR(burst_stepping), TIM_DMA_UPDATE);
 }
@@ -117,6 +127,10 @@ FORCE_OFAST void burst_stepping::set_phase_diff(AxisEnum axis, int diff) {
         bsod("Unsupported axis");
     }
 
+    if (diff == 0) {
+        return;
+    }
+
     if (diff < 0) {
         diff = -diff;
         axis_direction[axis] = false;
@@ -126,10 +140,6 @@ FORCE_OFAST void burst_stepping::set_phase_diff(AxisEnum axis, int diff) {
 
     if (diff > GPIO_BUFFER_SIZE) {
         bsod("Axis speed over limit");
-    }
-
-    if (diff == 0) {
-        return;
     }
 
     // We use fixed 16.16 number to find the transition points
@@ -154,8 +164,12 @@ FORCE_OFAST void burst_stepping::set_phase_diff(AxisEnum axis, int diff) {
     axis_was_set[axis] = true;
 }
 
+FORCE_OFAST static bool burst_dma_busy() {
+    return (BURST_DMA->NDTR > 0) && (BURST_DMA->CR & DMA_SxCR_EN_Msk);
+}
+
 FORCE_OFAST static void setup_and_fire_dma() {
-    assert(!busy());
+    assert(!burst_dma_busy());
     BURST_DMA->CR = BURST_DMA->CR & (~DMA_SxCR_EN_Msk);
     BURST_DMA->NDTR = fire_buffer->max_event_count();
     BURST_DMA->PAR = reinterpret_cast<uint32_t>(&step_gpio_port->BSRR);
@@ -168,10 +182,16 @@ FORCE_OFAST static void setup_and_fire_dma() {
 }
 
 FORCE_OFAST bool burst_stepping::busy() {
-    return (BURST_DMA->NDTR > 0) && (BURST_DMA->CR & DMA_SxCR_EN_Msk);
+    return burst_busy;
 }
 
-FORCE_OFAST void burst_stepping::fire() {
+FORCE_OFAST bool burst_stepping::fire() {
+    if (burst_dma_busy()) {
+        // old burst didn't finish yet, skip this cycle
+        return false;
+    }
+
+    // set axis directions
     for (std::size_t i = 0; i != axis_direction.size(); i++) {
         if (!axis_was_set[i]) {
             continue;
@@ -183,9 +203,14 @@ FORCE_OFAST void burst_stepping::fire() {
             dir_signals[i].write(Pin::State::high);
         }
     }
-    if (setup_buffer->max_event_count()) {
+
+    // setup a new burst
+    burst_busy = setup_buffer->max_event_count();
+    if (burst_busy) {
         std::swap(setup_buffer, fire_buffer);
         setup_and_fire_dma();
         setup_buffer->clear();
     }
+
+    return true;
 }
