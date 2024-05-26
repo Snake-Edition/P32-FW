@@ -15,6 +15,7 @@
 // clang-format off
 inline constexpr PhaseResponses Responses_NONE                 = { Response::_none,    Response::_none,  Response::_none,       Response::_none };
 inline constexpr PhaseResponses Responses_Ok                   = { Response::Ok,       Response::_none,  Response::_none,       Response::_none };
+inline constexpr PhaseResponses Responses_OkIgnore             = { Response::Ok,       Response::Ignore, Response::_none,       Response::_none };
 inline constexpr PhaseResponses Responses_AbortRetryIgnore     = { Response::Abort,    Response::Retry,  Response::Ignore,      Response::_none };
 inline constexpr PhaseResponses Responses_RetryAbort           = { Response::Retry,    Response::Abort,  Response::_none,       Response::_none };
 inline constexpr PhaseResponses Responses_YesNo                = { Response::Yes,      Response::No,     Response::_none,       Response::_none };
