@@ -106,6 +106,13 @@ bool selftest_warning_selftest_finished() {
 
 void warn_unfinished_selftest_msgbox() {
     if (!selftest_warning_selftest_finished()) {
-        MsgBoxWarning(_("Please complete Calibrations & Tests before using the printer."), Responses_Ok);
+        if (Response::Ignore == MsgBoxWarning(_("Please complete Calibrations & Tests before using the printer."), Responses_OkIgnore)) {
+            SelftestResult sr = config_store().selftest_result.get();
+            sr.xaxis = sr.yaxis = sr.zaxis = sr.bed = TestResult_Passed;
+            HOTEND_LOOP()
+            sr.tools[e].printFan = sr.tools[e].heatBreakFan = sr.tools[e].nozzle = TestResult_Passed;
+
+            config_store().selftest_result.set(sr);
+        }
     }
 }
