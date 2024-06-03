@@ -11,6 +11,7 @@
 
     #include "common.hpp"
     #include "lut.hpp"
+    #include "axes.hpp"
 
     #include <libs/circularqueue.h>
     #include <core/types.h>
@@ -26,18 +27,20 @@ namespace phase_stepping {
 
 struct MoveTarget {
     MoveTarget() = default;
-    MoveTarget(float position);
-    MoveTarget(const move_t &move, int axis, uint64_t move_duration_ticks);
-    MoveTarget(const input_shaper_state_t &is_state, uint64_t move_duration_ticks);
+    MoveTarget(float initial_pos);
+    MoveTarget(float initial_pos, const move_t &move, int axis, uint64_t move_duration_ticks);
+    MoveTarget(float initial_pos, const input_shaper_state_t &is_state, uint64_t move_duration_ticks);
 
     float initial_pos = 0;
     float half_accel = 0;
     float start_v = 0;
     uint32_t duration = 0; // Movement duration in us
-    float target;
+    float target_pos = 0;
+    float end_time = 0; // Absolute movement end (s)
 
 private:
     float target_position() const;
+    float move_end_time(double end_time) const;
 };
 
 struct AxisState {
@@ -55,20 +58,28 @@ struct AxisState {
     int last_phase = 0; // Last known physical rotor phase
     #if HAS_BURST_STEPPING()
     int driver_phase = 0; // Last known phase the driver uses
-    int phase_correction = 0; // Currently applied phase correction
     #else
     CoilCurrents last_currents; // Currently applied coil currents
     #endif
     float last_position = 0.f; // Last known logical position
-    bool direction = true; // Last non-zero movement direction
+    const move_t *last_processed_move = nullptr; // Move reference when using classic stepping
+    bool direction = true; // Last non-zero physical movement direction
 
-    CircularQueue<MoveTarget, 16> pending_targets; // 16 element queue of pre-processed elements
-
-    const move_t *last_processed_move = nullptr;
     uint64_t current_print_time_ticks = 0;
-
     uint32_t initial_time = 0; // Initial timestamp when the movement start
-    std::optional<MoveTarget> target; // Current target to move
+
+    // As move_t is being processed by the step generator its data is buffered into next_target.
+    // Once complete it is pushed to pending_targets. When current_target is empty, the refresh loop
+    // will dequeue items from pending_targets and set it as the current_target. When the position
+    // is reached the cycle repeats, until no more targets are present and current_target is reset.
+    std::optional<MoveTarget> current_target; // Current target to move
+    CircularQueue<MoveTarget, 16> pending_targets; // 16 element queue of pre-processed elements
+    MoveTarget next_target; // Next planned target to move
+
+    // current_target_end_time is used to ensure pending_targets is replenished from the move ISR
+    // whenever the current_target completes, and we want to ensure the type is lock free
+    std::atomic<float> current_target_end_time; // Absolute end time (s) for the current target
+    static_assert(decltype(current_target_end_time)::is_always_lock_free);
 
     std::atomic<bool> is_moving = false;
     std::atomic<bool> is_cruising = false;
@@ -80,10 +91,8 @@ struct AxisState {
     uint32_t missed_tx_cnt = 0;
     uint32_t last_timer_tick = 0;
 
-    #if HAS_BURST_STEPPING()
     int original_microsteps = 0;
     bool had_interpolation = false;
-    #endif
 };
 
 /**
@@ -124,10 +133,10 @@ void enable_phase_stepping(AxisEnum axis_num);
 void disable_phase_stepping(AxisEnum axis_num);
 
 /**
- * Kill immediately all motion on phase-stepped axes. Doesn't perform any
- * ramp-down.
+ * Clear any current and all pending targets, stopping all motion on
+ * phase-stepped axes. Doesn't perform any ramp-down.
  **/
-void stop_immediately();
+void clear_targets();
 
 /**
  * Public interface for PreciseStepping - given a move and other states, setup
@@ -175,45 +184,6 @@ void handle_periodic_refresh();
 bool any_axis_active();
 
 /**
- * Given position, compute coefficient for converting position to motor phase
- **/
-int32_t pos_to_phase(int axis, float position);
-
-/**
- * Given position, compute step equivalent
- **/
-int32_t pos_to_steps(int axis, float position);
-
-/**
- * Given position, compute planner msteps equivalent
- **/
-int32_t pos_to_msteps(int axis, float position);
-
-/**
- * Given position or speed in length unit, return it in revolution units
- **/
-float mm_to_rev(int motor, float mm);
-
-/**
- * Given axis, report number of phase steps for single µstep
- */
-int phase_per_ustep(int axis);
-
-/**
- * Return a motor step count for given axis
- **/
-constexpr int get_motor_steps(AxisEnum axis) {
-    if (axis == AxisEnum::X_AXIS || axis == AxisEnum::Y_AXIS) {
-    #ifdef HAS_LDO_400_STEP
-        return 400;
-    #else
-        return 200;
-    #endif
-    }
-    return 200;
-}
-
-/**
  * Given axis state and time in µs ticks from movement start, compute axis
  * speed and position.
  */
@@ -244,12 +214,10 @@ float extract_physical_position(AxisEnum axis, const Pos &pos) {
  */
 int phase_difference(int a, int b);
 
-    #if HAS_BURST_STEPPING()
 /**
  * Given an axis, report the current µstep without phase correction
  */
 int logical_ustep(AxisEnum axis);
-    #endif
 
 /**
  * A simple wrapper around planner.synchronize() to avoid recursive planner inclusion

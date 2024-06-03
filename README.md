@@ -14,7 +14,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 2. **Skew compensation**: Turns on skew compensation in Marlin and allows it to be configured with `M852`.
 3. ~~**OctoPrint screen**: Adds support for `M73` (print progress) and `M117`~~
   ~~(LCD messages).~~
-4. ~~**PID tuning**: ~~
+4. ~~ [**PID tuning**:](https://github.com/Snake-Edition/P32-FW#configuring-pid-parameters) ~~
 5. **Max Temps**: Raises the maximum bed temperature from 100C to 110C
   and nozzle temperature from 275C to 285C (use with caution!).
 6. **Settings during print**: You can change Snake settings during printing.
@@ -22,7 +22,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
   which uses print fan to speed up cooling.
 8. **Game**: Instead of printing you can enjoy simple game.
 9. ~~**Bigger time**: Printing and remaining time is now bigger.~~
-10. ~~**Startup wizard**: Now you can select `Ignore` at the wizard start screen to disable starting of the wizard at the printer startup.~~
+10. **Selftest check**: Now you can select `Ignore` to immediately pass all selftests.
 11. ~~**Temperature calibration**: You can calibrate PID temperature control for your hotend/bed directly from the menu. Calibration does 5 cycles.~~
 12. ~~**Total time**: Elapsed, Remaining and Total or End time are shown during printing.~~
 13. **Change filament**: Change of filament in Tune menu is moved to submenu to avoid unwanted interruption.
@@ -130,22 +130,7 @@ so your usable print area will be reduced accordingly.
 
 ### Configuring PID Parameters
 
-The stock firmware allows you to run an `M303` PID autotune, but the new
-settings are lost on reset. In this FW, PID settings are *automatically* written
-to EEPROM after any command that updates Marlin's PID values, which could be
-an `M301` (set hotend PID), `M304` (set bed PID), or an `M303 U1` (autotune and
-use the PID result). These values will then be restored on reset, too. You do not
-need to use `M500`.
-
-If you need to restore the default PID values, they can be reset by running
-the following commands:
-
-* Hotend: `M301 P7.00 I0.50 D45.00`
-* Bed: `M304 P120.00 I1.50 D600.0`
-
-Note that if you run `M303` (autotune) without the `U1` parameter, Marlin
-will just print out the suggested PID values without changing the settings,
-and they won't get written to EEPROM.
+Prusa [disabled M303 PID Autotune](https://github.com/prusa3d/Prusa-Firmware-Buddy/issues/3351#issuecomment-1866926815) due to memory restraints, this may be brought back in future releases.
 
 ---
 

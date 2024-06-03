@@ -73,7 +73,7 @@ msgstr "Voltaggio 5V"
 msgid "ABORT"
 msgstr "INTERROMPI"
 
-#: src/gui/screen_printing.cpp:610
+#: src/gui/screen_printing.cpp:608
 msgid "ABORTING ..."
 msgstr "INTERRUZIONE ..."
 
@@ -95,8 +95,8 @@ msgstr ""
 msgid "Add Printer to Connect"
 msgstr "Aggiungi Stampante a Connect"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:373
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:401
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:373
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:401
 msgid "Address assignment error"
 msgstr "Errore nell'assegnazione dell'indirizzo"
 
@@ -113,10 +113,10 @@ msgstr "Regola l'altezza ugello sopra il piano ruotando la manopola"
 msgid "Advanced"
 msgstr "Avanzate"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:660
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:492
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:443
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:688
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:492
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:443
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:660
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:688
 msgid "A filament specified in the G-code is either not loaded or wrong type."
 msgstr ""
 "Un filamento specificato nel G-Code non è caricato o è di tipo sbagliato."
@@ -145,11 +145,11 @@ msgstr "Tutti i sensori del filamento sono abilitati."
 msgid "All nozzles"
 msgstr "Tutti gli ugelli"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:247
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:359
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:261
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:254
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:387
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:261
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:247
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:254
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:359
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:387
 msgid "Allocation of dynamic buffer for PNG failed - out of memory."
 msgstr ""
 "Allocazione del buffer dinamico per il PNG non riuscita - memoria esaurita."
@@ -183,7 +183,7 @@ msgstr ""
 "È stata rilevata una \n"
 "collisione di stampa."
 
-#: src/gui/screen_printing.cpp:99
+#: src/gui/screen_printing_serial.cpp:80 src/gui/screen_printing.cpp:99
 msgid "Are you sure to stop this printing?"
 msgstr "Vuoi interrompere la stampa?"
 
@@ -292,27 +292,27 @@ msgstr ""
 "In base al test, sembra che i connettori delle ventole siano invertiti. "
 "Ricontrolla il cablaggio e ripeti il test."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:267
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:512
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:330
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:288
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:540
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:330
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:267
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:288
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:512
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:540
 msgid "BBF ALLOCATION FAILED"
 msgstr "ALLOCAZIIONE BBF NON RIUSCITA"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:274
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:519
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:337
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:295
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:547
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:337
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:274
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:295
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:519
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:547
 msgid "BBF INITIALIZATION FAILED"
 msgstr "INIZIALIZZAZIONE BBF NON RIUSCITA"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:275
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:520
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:338
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:296
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:548
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:338
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:275
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:296
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:520
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:548
 msgid "BBF initialization failed, repeat the action or try another USB drive."
 msgstr ""
 "Inizializzazione BBF non riuscita, ripeti l'azione o prova con una memoria "
@@ -322,7 +322,7 @@ msgstr ""
 msgid "Bed"
 msgstr "Piano"
 
-#: src/gui/MItem_menus.hpp:549
+#: src/gui/MItem_menus.hpp:540
 msgid "Bed Level Correction"
 msgstr "Correzione Livello Piano"
 
@@ -330,11 +330,11 @@ msgstr "Correzione Livello Piano"
 msgid "BED LEVEL CORRECTION"
 msgstr "CORREZIONE LIVELLO PIANO"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:541
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:793
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:639
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:597
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:870
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:639
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:541
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:597
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:793
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:870
 msgid "Bed leveling failed. Try again?"
 msgstr "Livellamento del piano non riuscito. Riprovare?"
 
@@ -495,7 +495,7 @@ msgstr ""
 "Parametro 1: avanti %3d%%, indietro %3d%%\n"
 "Parametro 2: avanti %3d%%, indietro %3d%%"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:51
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:51
 msgid ""
 "Calibration pin has not been reached. Please check the pin installation."
 msgstr ""
@@ -523,16 +523,12 @@ msgstr "Annullato"
 msgid "Cancel Object"
 msgstr "Cancella Oggetto"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:270
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:270
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:270
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:270
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:270
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:270
 msgid "Cannot perform the action, filament is already loaded. Unload it first."
 msgstr ""
 "Impossibile eseguire l'azione, il filamento è già caricato. Scaricarlo prima."
 
-#: src/gui/MItem_mmu.cpp:215
+#: src/gui/MItem_mmu.cpp:220
 msgid "Can't enable MMU: enable the printer's filament sensor first."
 msgstr ""
 "Impossibile abilitare la MMU: abilita prima il sensore di filamento della "
@@ -570,9 +566,9 @@ msgstr "Cambia filamento in tutti gli strumenti"
 msgid "Change Filter"
 msgstr "Cambia Filtro"
 
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:548
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:499
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:744
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:548
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:499
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:744
 msgid ""
 "Changes of mapping available only in the Printer UI. Select Print to start "
 "the print with defaults."
@@ -597,7 +593,7 @@ msgstr "Cambio filamento"
 msgid "Changing tool"
 msgstr "Cambio strumento"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:9
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:9
 msgid "Check all tools if they are properly parked or picked."
 msgstr ""
 "Controlla che tutti gli strumenti vengano parcheggiati o prelevati "
@@ -617,76 +613,55 @@ msgstr "Controllo ventole invertite"
 msgid "CHECKS"
 msgstr "CONTROLLI"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:9
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:16
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:16
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:9
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:16
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:9
 msgid "Check the heatbed heater & thermistor wiring for possible damage."
 msgstr ""
 "Controllare eventuali danni sui cavi del piano riscaldato e del termistore."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:23
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:37
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:51
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:30
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:44
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:58
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:30
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:44
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:58
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:23
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:37
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:51
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:72
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:30
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:44
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:58
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:23
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:37
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:51
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:72
 msgid "Check the heatbed thermistor wiring for possible damage."
 msgstr ""
 "Controllare eventuali danni sul cavo del termistore del piano riscaldato."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:79
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:86
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:86
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:93
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:86
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:93
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:79
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:86
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:114
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:121
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:86
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:93
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:79
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:114
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:121
 msgid "Check the heatbreak thermistor wiring for possible damage."
 msgstr ""
 "Controlla che il cablaggio del termistore heatbreak non sia danneggiato."
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:65
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:65
 msgid "Check the heater and thermistor wiring for potential damage."
 msgstr ""
 "Controlla che il cablaggio del riscaldatore e del termistore non sia "
 "danneggiato."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:16
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:23
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:23
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:16
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:23
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:16
 msgid "Check the print head heater & thermistor wiring for possible damage."
 msgstr "Controllare eventuali danni sui cavi del hotend e del termistore."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:30
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:44
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:58
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:37
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:51
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:65
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:37
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:51
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:65
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:30
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:44
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:58
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:37
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:51
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:65
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:30
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:44
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:58
 msgid "Check the print head thermistor wiring for possible damage."
 msgstr "Controllare eventuali danni sul cavo del termistore del hotend."
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:79
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:86
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:93
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:79
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:86
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:93
 msgid "Check the thermistor wiring for potential damage."
 msgstr "Controlla che il cablaggio del termistore non sia danneggiato."
 
@@ -714,7 +689,7 @@ msgstr ""
 "calibrazione è completa!"
 
 #: src/gui/MItem_tools.hpp:753
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:456
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:456
 msgid "Cold Pull"
 msgstr "Tiro a freddo"
 
@@ -736,11 +711,11 @@ msgstr ""
 "nel raccordo. Puoi continuare a stampare. Se il problema persiste, ripeti "
 "questa procedura."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:262
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:262
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:262
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:262
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:262
+#: src/gui/MItem_mmu.cpp:310
+msgid "Comm err"
+msgstr "Err. comunicazione"
+
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:262
 msgid "COMMUNICATION ERROR"
 msgstr "ERRORE DI COMUNICAZIONE"
 
@@ -758,15 +733,15 @@ msgstr "Connesso"
 msgid "Connecting"
 msgstr "Connessione"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:211
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:316
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:225
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:218
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:330
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:225
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:211
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:218
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:316
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:330
 msgid "CONNECT REGISTRATION FAILED"
 msgstr "REGISTRAZIONE A CONNECT FALLITA"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:16
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:16
 msgid "Consider adjusting belt tension."
 msgstr "Valuta se è il caso di regolare la tensione della cinghia."
 
@@ -782,7 +757,7 @@ msgstr "Continua"
 msgid "CONTINUE"
 msgstr "CONTINUA"
 
-#: src/gui/screen_menu_selftest_snake.cpp:180
+#: src/gui/screen_menu_selftest_snake.cpp:174
 msgid "Continue running Calibrations & Tests?"
 msgstr "Continuare con le Calibrazioni e test?"
 
@@ -803,7 +778,7 @@ msgstr "Continua per eseguire il flash del firmware ESP."
 msgid "Control"
 msgstr "Controllo"
 
-#: src/gui/screen_menu_control.hpp:84
+#: src/gui/screen_menu_control.hpp:89
 msgid "CONTROL"
 msgstr "CONTROLLO"
 
@@ -832,7 +807,7 @@ msgstr "Carico CPU"
 msgid "CRASH DETECTED"
 msgstr "RILEVATA COLLISIONE"
 
-#: src/gui/screen_home.cpp:275
+#: src/gui/screen_home.cpp:268
 msgid ""
 "Crash detected. Save it to USB?\n"
 "\n"
@@ -1082,12 +1057,12 @@ msgstr "Calibrazione Dock"
 msgid "Dock %d calibration"
 msgstr "Calibrazione Dock %d"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:23
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:23
 #, c-format
 msgid "Dock %d position differs too much from expected values."
 msgstr "La posizione del Dock %d si discosta troppo dai valori previsti."
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:22
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:22
 msgid "DOCK POSITION OUT OF BOUNDS"
 msgstr "DOCK POSITION OUT OF BOUNDS"
 
@@ -1190,10 +1165,11 @@ msgstr ""
 "Vuoi ripetere l'ultimo passo e regolare ancora la distanza tra ugello e "
 "piano riscaldato?"
 
-#: src/gui/MItem_menus.cpp:672
-msgid "Do you want to reset the Nextruder maintenance reminder?"
+#: src/gui/MItem_mmu.cpp:327
+msgid "Do you want to reset the Nextruder main-plate maintenance reminder?"
 msgstr ""
-"Vuoi resettare il promemoria della manutenzione del Nextruder?"
+"Vuoi resettare il promemoria per la manutenzione della piastra principale "
+"del Nextruder?"
 
 #: src/gui/wizard/selftest_frame_firstlayer_questions.cpp:17
 #, c-format
@@ -1233,12 +1209,12 @@ msgstr ""
 "\n"
 "La stampante potrebbe vibrare e risultare più rumorosa durante l'homing."
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:352
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:352
 #, c-format
 msgid "Dwarf board %d fault: %s"
 msgstr "Guasto scheda Dwarf %d: %s"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:345
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:345
 #, c-format
 msgid ""
 "Dwarf board encountered the following problem: \n"
@@ -1251,8 +1227,8 @@ msgstr ""
 msgid "Dwarf Board Temp"
 msgstr "Temp scheda Dwarf"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:344
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:351
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:344
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:351
 msgid "DWARF ERROR"
 msgstr "DWARF ERROR"
 
@@ -1278,11 +1254,11 @@ msgstr "%d Test asse XY"
 msgid "%d Y Axis Test"
 msgstr "%d Test asse Y"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:240
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:352
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:254
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:247
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:380
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:254
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:240
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:247
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:352
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:380
 msgid "Dynamic allocation failed - out of memory. Reset the printer."
 msgstr ""
 "Allocazione dinamica fallita - memoria esaurita. Resettare la stampante."
@@ -1326,19 +1302,19 @@ msgstr "Espulsione"
 msgid "Ejecting filament"
 msgstr "Espellendo filamento"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:253
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:365
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:267
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:260
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:393
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:267
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:253
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:260
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:365
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:393
 msgid "EMERGENCY STOP"
 msgstr "EMERGENCY STOP"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:254
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:366
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:268
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:261
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:394
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:268
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:254
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:261
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:366
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:394
 msgid "Emergency stop invoked by G-code (M112)."
 msgstr "Arresto di emergenza richiesto da G-code (M112)."
 
@@ -1362,7 +1338,7 @@ msgstr "Abilita la memorizzazione all'avvio"
 msgid "Enclosure"
 msgstr "Enclosure"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:849
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:849
 msgid ""
 "Enclosure fan not spinning. Check it for possible debris, then inspect the "
 "wiring."
@@ -1437,11 +1413,11 @@ msgstr "Errore"
 msgid "ERROR"
 msgstr "ERRORE"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:317
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:562
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:380
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:338
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:590
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:380
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:317
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:338
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:562
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:590
 msgid ""
 "Error erasing\n"
 " flash! Restart\n"
@@ -1476,27 +1452,27 @@ msgstr "ERR TMC non riuscito"
 msgid "ERR Wait for User"
 msgstr "ERR Attendere utente"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:226
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:338
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:240
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:233
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:366
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:240
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:226
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:233
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:338
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:366
 msgid "ESP detected command error."
 msgstr "ESP ha rilevato un errore di comando."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:233
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:345
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:247
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:240
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:373
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:247
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:233
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:240
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:345
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:373
 msgid "ESP detected unknown error."
 msgstr "ESP ha rilevato un errore sconosciuto."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:282
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:527
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:345
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:303
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:555
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:345
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:282
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:303
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:527
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:555
 msgid "ESP doesn't seem to be connected."
 msgstr "L'ESP non sembra essere collegato."
 
@@ -1504,29 +1480,25 @@ msgstr "L'ESP non sembra essere collegato."
 msgid "ESP error"
 msgstr "Errore ESP"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:218
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:225
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:232
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:330
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:337
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:344
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:232
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:239
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:246
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:225
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:232
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:239
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:358
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:365
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:372
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:232
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:239
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:246
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:218
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:225
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:330
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:337
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:344
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:358
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:365
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:372
 msgid "ESP ERROR"
 msgstr "ERRORE ESP"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:281
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:526
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:344
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:302
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:554
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:344
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:281
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:302
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:526
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:554
 msgid "ESP NOT CONNECTED"
 msgstr "ESP NON CONNESSO"
 
@@ -1559,23 +1531,23 @@ msgstr "FINE"
 msgid "Extruder"
 msgstr "Estrusore"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:85
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:85
 msgid "EXTRUDER MAXTEMP ERROR"
 msgstr "EXTRUDER MAXTEMP ERROR"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:92
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:92
 msgid "EXTRUDER MINTEMP ERROR"
 msgstr "EXTRUDER MINTEMP ERROR"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:64
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:64
 msgid "EXTRUDER PREHEAT ERROR"
 msgstr "EXTRUDER PREHEAT ERROR"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:106
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:106
 msgid "EXTRUDER TEMP NOT MATCHING"
 msgstr "EXTRUDER TEMP NOT MATCHING"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:78
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:78
 msgid "EXTRUDER THERMAL RUNAWAY"
 msgstr "EXTRUDER THERMAL RUNAWAY"
 
@@ -1587,10 +1559,9 @@ msgstr "Ripristino impostazioni di fabbrica"
 msgid "FACTORY RESET"
 msgstr "RESET DI FABBRICA"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:107
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:191
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:114
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:107
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:114
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:107
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:191
 msgid ""
 "Failed to home the extruder in X-axis, make sure there is no obstacle on X-"
 "axis."
@@ -1598,7 +1569,7 @@ msgstr ""
 "Homing estrusore non riuscito sull'asse X. Assicurati che non ci siano "
 "ostacoli sull'asse X."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:198
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:198
 msgid ""
 "Failed to home the extruder in Y-axis, make sure there is no obstacle on Y-"
 "axis."
@@ -1606,19 +1577,19 @@ msgstr ""
 "L'estrusore non è riuscito a posizionarsi sull'asse Y, assicurati che non ci "
 "siano ostacoli sull'asse Y."
 
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:100
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:100
 msgid "Failed to home the extruder in Z-axis."
 msgstr "Homing estrusore su asse Z non riuscito."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:170
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:107
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:107
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:170
 msgid ""
 "Failed to home the extruder in Z-axis, make sure the loadcell is working."
 msgstr ""
 "Homing estrusore su asse Z non riuscito. Controlla il funzionamento della "
 "cella di carico."
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:212
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:212
 msgid ""
 "Failed to home the X-axis, make sure there is no obstacle on X-axis or Y-"
 "axis."
@@ -1626,7 +1597,7 @@ msgstr ""
 "Homing non riuscito sull'asse Y. Assicurati che non ci siano ostacoli "
 "sull'asse X o Y."
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:219
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:219
 msgid ""
 "Failed to home the Y-axis, make sure there is no obstacle on X-axis or Y-"
 "axis."
@@ -1634,15 +1605,14 @@ msgstr ""
 "Homing non riuscito sull'asse Y. Assicurati che non ci siano ostacoli "
 "sull'asse X o Y."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:114
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:121
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:114
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:121
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:114
 msgid "Failed to home the Y-axis, make sure there is no obstacle on Y-axis."
 msgstr ""
 "Homing non riuscito sull'asse Y. Assicurati che non ci siano ostacoli "
 "sull'asse Y."
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:191
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:191
 msgid "Failed to home the Z-axis, make sure the loadcell is working."
 msgstr ""
 "Homing asse Z non riuscito, assicurati che la cella di carico sia "
@@ -1734,11 +1704,7 @@ msgstr "Alim. in FSensor"
 msgid "Feeding to nozzle"
 msgstr "Alim. in ugello"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:269
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:269
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:269
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:269
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:269
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:269
 msgid "FIL. ALREADY LOADED"
 msgstr "FIL. GIÀ CARICATO"
 
@@ -1791,11 +1757,7 @@ msgstr "CAMBIO FILAMENTO"
 msgid "Filament check"
 msgstr "Controllo filamento"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:305
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:305
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:305
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:305
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:305
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:305
 msgid ""
 "Filament detected unexpectedly. Ensure no filament is loaded. Check the "
 "sensors and wiring."
@@ -1803,8 +1765,8 @@ msgstr ""
 "Filamento rilevato non previsto. Assicurati che non sia stato caricato alcun "
 "filamento. Controlla i sensori e il cablaggio."
 
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:499
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:450
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:499
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:450
 msgid ""
 "Filament detected. Unload filament now? Select NO to start the print with "
 "the currently loaded filament."
@@ -1812,11 +1774,7 @@ msgstr ""
 "Rilevato filamento. Scaricare subito il filamento? Seleziona NO per avviare "
 "la stampa con il filamento attualmente caricato."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:311
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:311
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:311
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:311
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:311
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:311
 msgid "FILAMENT EJECTED"
 msgstr "FILAMENTO ESPULSO"
 
@@ -1832,11 +1790,11 @@ msgstr "MAPPING FILAMENTO"
 msgid "FILAMENT MMU"
 msgstr "FILAMENTO MMU"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:408
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:653
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:485
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:436
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:681
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:485
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:408
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:436
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:653
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:681
 msgid ""
 "Filament not detected. Load filament now?\n"
 "Select NO to cancel the print.\n"
@@ -1851,19 +1809,19 @@ msgstr ""
 msgid "FILAMENT REMOVED"
 msgstr "FILAMENTO RIMOSSO"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:533
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:785
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:631
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:589
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:841
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:631
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:533
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:589
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:785
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:841
 msgid "Filament runout"
 msgstr "Filamento esaurito"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:534
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:786
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:632
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:590
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:842
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:632
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:534
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:590
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:786
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:842
 msgid "Filament runout during print, please insert new one."
 msgstr "Filamento esaurito durante la stampa, inserirne uno nuovo."
 
@@ -1897,11 +1855,7 @@ msgstr "Calibrazione sensore filamento"
 msgid "Filament sensor check"
 msgstr "Controllo sensore filamento"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:32
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:32
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:32
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:32
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:32
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:32
 msgid ""
 "Filament sensor didn't switch off while unloading filament. Ensure filament "
 "can move and the sensor works."
@@ -1909,11 +1863,7 @@ msgstr ""
 "Il sensore di filamento non si è spento durante lo scaricamento. Verifica "
 "che il filamento possa muoversi e che il sensore funzioni."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:25
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:25
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:25
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:25
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:25
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:25
 msgid ""
 "Filament sensor didn't trigger while loading the filament. Ensure the sensor "
 "is calibrated and the filament reached it."
@@ -1945,11 +1895,7 @@ msgstr "Sensori filamento calibrati."
 msgid "Filament sensors calibration"
 msgstr "Calibrazione sensori filamento"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:46
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:46
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:46
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:46
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:46
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:46
 msgid ""
 "Filament sensor triggered too early while loading to extruder. Check there "
 "isn't anything stuck in PTFE tube. Check that sensor reads properly."
@@ -1958,20 +1904,20 @@ msgstr ""
 "nell'estrusore. Controlla che non ci sia nulla di incastrato nel tubo PTFE. "
 "Controlla che il sensore legga correttamente."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:421
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:422
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:666
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:667
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:505
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:506
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:456
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:457
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:694
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:695
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:505
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:506
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:421
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:422
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:456
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:457
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:666
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:667
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:694
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:695
 msgid "File error"
 msgstr "Errore nel file"
 
-#: src/common/gcode/gcode_reader.cpp:158
+#: src/common/gcode/gcode_reader_interface.cpp:136
 msgid "File read error"
 msgstr "Errore di lettura del file"
 
@@ -1979,11 +1925,11 @@ msgstr "Errore di lettura del file"
 msgid "File removed or transfer aborted"
 msgstr "File rimosso o trasferimento interrotto"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:373
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:618
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:436
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:394
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:646
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:436
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:373
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:394
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:618
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:646
 msgid ""
 "File system error!\n"
 "Try a different USB\n"
@@ -2023,11 +1969,7 @@ msgstr "Finda"
 msgid "FINDA"
 msgstr "FINDA"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:18
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:18
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:18
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:18
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:18
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:18
 msgid ""
 "FINDA didn't switch off while unloading filament. Try unloading manually. "
 "Ensure filament can move and FINDA works."
@@ -2035,19 +1977,11 @@ msgstr ""
 "FINDA non disattivata durante scaric. filamento. Prova a scaricare "
 "manualmente. Verifica che il fil. possa muoversi e che FINDA funzioni."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:10
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:10
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:10
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:10
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:10
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:10
 msgid "FINDA DIDNT TRIGGER"
 msgstr "FINDA NON ATTIVATA"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:11
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:11
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:11
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:11
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:11
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:11
 msgid ""
 "FINDA didn't trigger while loading the filament. Ensure the filament can "
 "move and FINDA works."
@@ -2055,11 +1989,7 @@ msgstr ""
 "FINDA non attivata durante il caric. del filamento. Verif che il fil. possa "
 "muoversi e che FINDA funzioni."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:17
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:17
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:17
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:17
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:17
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:17
 msgid "FINDA FILAM. STUCK"
 msgstr "FINDA FILAM. BLOCC"
 
@@ -2067,7 +1997,7 @@ msgstr "FINDA FILAM. BLOCC"
 msgid "FINISH"
 msgstr "COMPLETA"
 
-#: src/gui/screen_printing.cpp:616
+#: src/gui/screen_printing.cpp:614
 msgid "FINISHED"
 msgstr "COMPLETATO"
 
@@ -2081,7 +2011,7 @@ msgstr "Completamento dei gcode in buffer"
 msgid "Finishing moves"
 msgstr "Finaliz. spostamenti"
 
-#: src/gui/screen_menu_selftest_snake.cpp:177
+#: src/gui/screen_menu_selftest_snake.cpp:171
 msgid ""
 "FINISH remaining calibrations without proceeding to other tests, or perform "
 "ALL Calibrations and Tests?\n"
@@ -2093,7 +2023,7 @@ msgstr ""
 "\n"
 "Se ESCI, tutti i dati fino a questo punto vengono salvati."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:345
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:345
 msgid ""
 "Firmware and hardware\n"
 "versions do not\n"
@@ -2109,10 +2039,10 @@ msgstr ""
 "giusto per la\n"
 "tua stampante."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:590
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:408
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:366
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:618
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:408
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:366
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:590
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:618
 msgid ""
 "Firmware and hardware versions do\n"
 "not match. Make sure you have\n"
@@ -2124,11 +2054,11 @@ msgstr ""
 "il file del firmware giusto per\n"
 "la tua stampante."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:303
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:548
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:366
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:324
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:576
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:366
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:303
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:324
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:548
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:576
 msgid ""
 "Firmware file has\n"
 "invalid size!\n"
@@ -2142,11 +2072,11 @@ msgstr ""
 "sulla memoria USB\n"
 "e riprova."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:310
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:555
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:373
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:331
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:583
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:373
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:310
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:331
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:555
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:583
 msgid ""
 "Firmware file\n"
 "missing in the USB\n"
@@ -2176,11 +2106,11 @@ msgstr "Flash del firmware riuscito!"
 msgid "Firmware flashing successful!"
 msgstr "Flash del firmware riuscito!"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:331
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:576
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:394
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:352
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:604
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:394
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:331
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:352
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:576
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:604
 msgid ""
 "Firmware hash\n"
 "verification failed!\n"
@@ -2198,11 +2128,11 @@ msgstr ""
 "copiarlo nuovamente\n"
 "sulla memoria USB."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:338
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:583
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:401
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:359
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:611
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:401
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:338
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:359
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:583
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:611
 msgid ""
 "Firmware in the\n"
 "internal flash\n"
@@ -2216,19 +2146,19 @@ msgstr ""
 "un nuovo flash \n"
 "del firmware."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:365
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:610
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:428
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:386
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:638
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:428
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:365
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:386
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:610
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:638
 msgid "FIRMWARE MISSING"
 msgstr "FIRMWARE MISSING"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:352
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:597
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:415
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:373
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:625
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:415
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:352
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:373
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:597
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:625
 msgid ""
 "Firmware/printer\n"
 "types do not match.\n"
@@ -2243,11 +2173,11 @@ msgstr ""
 "il fw corretto per\n"
 "la tua stampante."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:359
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:604
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:422
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:380
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:632
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:422
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:359
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:380
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:604
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:632
 msgid ""
 "Firmware/printer\n"
 "versions do not\n"
@@ -2264,11 +2194,11 @@ msgstr ""
 "diversa di\n"
 "scheda Buddy."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:324
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:569
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:387
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:345
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:597
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:387
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:324
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:345
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:569
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:597
 msgid ""
 "Firmware signature\n"
 "verification failed!\n"
@@ -2282,8 +2212,8 @@ msgstr ""
 "solo firmware con\n"
 "firma ufficiale."
 
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:449
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:407
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:449
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:407
 msgid "Firmware Update Required"
 msgstr "Aggiornamento del firmware richiesto"
 
@@ -2304,17 +2234,21 @@ msgstr "Calibrazione primo layer"
 msgid "FIRST LAYER CALIBRATION"
 msgstr "CALIBRAZIONE PRIMO LAYER"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:316
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:561
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:379
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:337
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:589
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:379
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:316
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:337
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:561
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:589
 msgid "FLASH ERASE ERROR"
 msgstr "ERRORE CANCELLAZIONE FLASH"
 
 #: src/gui/screen_menu_lan_settings.cpp:65
 msgid "Flash ESP"
 msgstr "Flash ESP"
+
+#: src/gui/MItem_mmu.cpp:309
+msgid "Flashing err"
+msgstr "Err. flashing"
 
 #: src/gui/MItem_print.hpp:93 src/gui/MItem_print.hpp:123
 msgid "Flow Factor"
@@ -2357,19 +2291,11 @@ msgstr "Lato Anteriore [um]"
 msgid "FSensor"
 msgstr "FSensor"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:24
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:24
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:24
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:24
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:24
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:24
 msgid "FSENSOR DIDNT TRIGG."
 msgstr "FSENSOR NON ATTIVATO"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:31
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:31
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:31
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:31
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:31
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:31
 msgid "FSENSOR FIL. STUCK"
 msgstr "FSENSOR FIL. BLOCC"
 
@@ -2377,11 +2303,7 @@ msgstr "FSENSOR FIL. BLOCC"
 msgid "FSensor side"
 msgstr "FSensor laterale"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:45
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:45
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:45
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:45
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:45
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:45
 msgid "FSENSOR TOO EARLY"
 msgstr "FSENSOR IN ANTICIPO"
 
@@ -2437,19 +2359,19 @@ msgstr "FS spazio 6"
 msgid "FS Value"
 msgstr "Valore FS"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:337
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:582
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:400
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:358
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:610
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:400
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:337
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:358
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:582
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:610
 msgid "FW IN INTERNAL FLASH CORRUPTED"
 msgstr "FW NELLA MEMORIA INTERNA CORROTTO"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:297
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:297
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:297
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:297
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:297
+#: src/gui/MItem_mmu.cpp:307
+msgid "FW ok"
+msgstr "FW ok"
+
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:297
 msgid "FW RUNTIME ERROR"
 msgstr "FW RUNTIME ERROR"
 
@@ -2465,6 +2387,10 @@ msgstr "Aggiornamento FW"
 msgid "FW UPDATE"
 msgstr "AGGIORNAMENTO FW"
 
+#: src/gui/MItem_mmu.cpp:308
+msgid "FW updated"
+msgstr "FW aggiornato"
+
 #: src/gui/MItem_hardware.hpp:95
 msgid "G-Code Checks"
 msgstr "Controlli G-code"
@@ -2477,11 +2403,11 @@ msgstr "Filamenti G-code"
 msgid "G-Code Level"
 msgstr "Livello G-code"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:513
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:758
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:611
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:569
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:807
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:611
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:513
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:569
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:758
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:807
 msgid ""
 "G-Code transfer running too slow. Check your network for issues or use "
 "different USB drive. Press Continue to resume printing."
@@ -2530,75 +2456,67 @@ msgstr "GW"
 msgid "H"
 msgstr "H"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:191
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:275
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:198
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:191
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:282
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:198
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:191
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:275
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:282
 msgid "HAL detected an I2C busy state when receiving data via I2C."
 msgstr ""
 "HAL ha rilevato uno stato I2C occupato durante la ricezione di dati via I2C."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:163
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:247
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:170
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:163
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:254
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:170
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:163
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:247
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:254
 msgid "HAL detected an I2C busy state when sending data via I2C."
 msgstr ""
 "HAL ha rilevato uno stato I2C occupato durante l'invio di dati via I2C."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:184
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:268
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:191
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:184
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:275
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:191
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:184
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:268
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:275
 msgid "HAL detected an I2C error when receiving data via I2C."
 msgstr "HAL ha rilevato un errore I2C durante la ricezione di dati via I2C."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:156
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:240
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:163
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:156
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:247
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:163
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:156
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:240
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:247
 msgid "HAL detected an I2C error when sending data via I2C."
 msgstr "HAL ha rilevato un errore I2C durante l'invio di dati via I2C."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:198
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:282
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:205
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:198
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:289
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:205
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:198
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:282
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:289
 msgid "HAL detected an I2C timeout when receiving data via I2C."
 msgstr "HAL ha rilevato un timeout I2C durante la ricezione di dati via I2C."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:170
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:254
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:177
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:170
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:261
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:177
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:170
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:254
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:261
 msgid "HAL detected an I2C timeout when sending data via I2C."
 msgstr "HAL ha rilevato un timeout I2C durante l'invio di dati via I2C."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:205
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:289
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:212
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:205
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:296
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:212
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:205
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:289
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:296
 msgid "HAL detected an I2C undefined error when receiving data via I2C."
 msgstr ""
 "HAL ha rilevato un I2C indefinito durante la ricezione di dati via I2C."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:177
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:261
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:184
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:177
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:268
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:184
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:177
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:261
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:268
 msgid "HAL detected an I2C undefined error when sending data via I2C."
 msgstr ""
 "HAL ha rilevato un errore I2C indefinito durante l'invio di dati via I2C."
 
-#: src/gui/screen_menu_selftest_snake.cpp:413
+#: src/gui/screen_menu_selftest_snake.cpp:405
 #: src/gui/wizard/selftest_frame_wizard_epilogue.cpp:55
 msgid "Happy printing!"
 msgstr "Buona stampa!"
@@ -2612,15 +2530,15 @@ msgid "Hardware"
 msgstr "Hardware"
 
 #: src/gui/screen_menu_hardware_tune.hpp:24
-#: src/gui/screen_menu_hardware.hpp:123
+#: src/gui/screen_menu_hardware.hpp:127
 msgid "HARDWARE"
 msgstr "HARDWARE"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:330
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:575
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:393
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:351
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:603
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:393
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:330
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:351
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:575
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:603
 msgid "HASH VERIFICATION FAILED"
 msgstr "HASH VERIFICATION FAILED"
 
@@ -2632,7 +2550,7 @@ msgstr "HB Fan RPM"
 msgid "Heatbed"
 msgstr "Piano riscaldato"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:163
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:163
 #, c-format
 msgid ""
 "Heatbed connector no. %d:\n"
@@ -2645,10 +2563,9 @@ msgstr ""
 msgid "Heatbed heater check"
 msgstr "Contr. risc. Piano"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:141
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:225
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:148
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:141
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:148
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:141
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:225
 msgid "HEATBED PORT OVERCURRENT"
 msgstr "SOVRACORRENTE PORTA PIANO RISCALDATO"
 
@@ -2656,10 +2573,10 @@ msgstr "SOVRACORRENTE PORTA PIANO RISCALDATO"
 msgid "Heatbed Temperature"
 msgstr "Temperatura piano riscaldato"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:107
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:114
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:135
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:142
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:107
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:114
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:135
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:142
 #, c-format
 msgid ""
 "Heatbed tile no. %d:\n"
@@ -2670,8 +2587,8 @@ msgstr ""
 "Piastrella o cablaggio danneggiati.\n"
 "Segui la guida online per la diagnosi."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:149
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:177
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:149
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:177
 #, c-format
 msgid ""
 "Heatbed tile no. %d:\n"
@@ -2680,10 +2597,10 @@ msgstr ""
 "Piastrella del piano riscaldato no. %d: \n"
 "Errore preheat."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:121
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:128
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:149
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:156
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:121
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:128
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:149
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:156
 #, c-format
 msgid ""
 "Heatbed tile no. %d: \n"
@@ -2693,8 +2610,8 @@ msgstr ""
 "Errore nella misurazione della temperatura; il termistore potrebbe essere "
 "guasto."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:156
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:184
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:156
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:184
 #, c-format
 msgid ""
 "Heatbed tile no. %d:\n"
@@ -2703,8 +2620,8 @@ msgstr ""
 "Piastrella del piano riscaldato no. %d: \n"
 "Errore nel test di riscaldamento."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:135
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:163
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:135
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:163
 #, c-format
 msgid ""
 "Heatbed tile no. %d: \n"
@@ -2713,8 +2630,8 @@ msgstr ""
 "Piastrella del piano riscaldato no. %d: \n"
 "Rilevato un calo di temperatura inaspettato."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:142
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:170
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:142
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:170
 #, c-format
 msgid ""
 "Heatbed tile no. %d:\n"
@@ -2723,8 +2640,8 @@ msgstr ""
 "Piastrella del piano riscaldato no. %d: \n"
 "Rilevato un picco di temperatura inaspettato."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:324
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:338
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:324
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:338
 #, c-format
 msgid ""
 "Heatbed tile no. %d:\n"
@@ -2761,19 +2678,15 @@ msgstr "Temperatura Heatbreak 5"
 msgid "Heatbreak Fan"
 msgstr "Ventola Heatbreak"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:85
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:92
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:92
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:85
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:120
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:92
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:85
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:120
 msgid "HEATBREAK MAXTEMP ERROR"
 msgstr "HEATBREAK MAXTEMP ERROR"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:78
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:85
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:85
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:78
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:113
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:85
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:78
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:113
 msgid "HEATBREAK MINTEMP ERROR"
 msgstr "HEATBREAK MINTEMP ERROR"
 
@@ -2785,11 +2698,11 @@ msgstr "Stato Heatbreak"
 msgid "Heatbreak Temp"
 msgstr "Temperatura Heatbreak"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:506
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:751
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:604
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:555
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:793
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:604
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:506
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:555
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:751
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:793
 msgid "Heatbreak thermistor is disconnected. Inspect the wiring."
 msgstr "Termistore Heatbreak disconnesso. Controllare il cablaggio."
 
@@ -2821,16 +2734,16 @@ msgstr "Riscaldamento"
 msgid "Heating..."
 msgstr "Riscaldamento..."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:471
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:485
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:716
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:730
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:569
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:583
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:520
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:534
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:758
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:772
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:569
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:583
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:471
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:485
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:520
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:534
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:716
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:730
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:758
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:772
 msgid "Heating disabled due to 30 minutes of inactivity."
 msgstr "Riscaldamento disattivato dopo 30 minuti di inattività."
 
@@ -2850,7 +2763,7 @@ msgstr "Controllo Filtro HEPA"
 msgid "High"
 msgstr "Alto"
 
-#: src/gui/screen_menu_selftest_snake.cpp:375
+#: src/gui/screen_menu_selftest_snake.cpp:370
 #: src/gui/wizard/selftest_frame_wizard_prologue.cpp:23
 msgid ""
 "Hi, this is your\n"
@@ -2863,7 +2776,7 @@ msgstr ""
 "Ti guiderò nel\n"
 "processo di configurazione."
 
-#: src/gui/screen_menu_selftest_snake.cpp:372
+#: src/gui/screen_menu_selftest_snake.cpp:367
 msgid ""
 "Hi, this is your\n"
 "Original Prusa MINI printer.\n"
@@ -2875,7 +2788,7 @@ msgstr ""
 "Ti guiderò nel processo\n"
 "di configurazione."
 
-#: src/gui/screen_menu_selftest_snake.cpp:369
+#: src/gui/screen_menu_selftest_snake.cpp:364
 #: src/gui/wizard/selftest_frame_wizard_prologue.cpp:28
 msgid ""
 "Hi, this is your\n"
@@ -2888,7 +2801,7 @@ msgstr ""
 "Ti guiderò nel processo\n"
 "di configurazione."
 
-#: src/gui/screen_menu_selftest_snake.cpp:366
+#: src/gui/screen_menu_selftest_snake.cpp:361
 #: src/gui/wizard/selftest_frame_wizard_prologue.cpp:18
 msgid ""
 "Hi, this is your\n"
@@ -2901,7 +2814,7 @@ msgstr ""
 "Ti guiderò nel processo\n"
 "di configurazione."
 
-#: src/gui/screen_menu_selftest_snake.cpp:363
+#: src/gui/screen_menu_selftest_snake.cpp:358
 #: src/gui/wizard/selftest_frame_wizard_prologue.cpp:33
 msgid ""
 "Hi, this is your\n"
@@ -2929,27 +2842,24 @@ msgstr "HOME"
 msgid "Homing"
 msgstr "Homing"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:106
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:190
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:113
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:106
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:211
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:113
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:106
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:190
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:211
 msgid "HOMING ERROR X"
 msgstr "ERRORE HOMING X"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:113
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:197
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:120
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:113
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:218
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:120
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:113
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:197
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:218
 msgid "HOMING ERROR Y"
 msgstr "ERRORE HOMING Y"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:99
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:169
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:106
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:99
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:190
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:106
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:99
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:169
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:190
 msgid "HOMING ERROR Z"
 msgstr "ERRORE HOMING Z"
 
@@ -2972,11 +2882,11 @@ msgstr "Ventola hotend"
 msgid "Hotend Fan"
 msgstr "Ventola hotend"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:527
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:779
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:625
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:583
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:835
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:625
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:527
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:583
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:779
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:835
 msgid ""
 "Hotend fan not spinning. Check it for possible debris, then inspect the "
 "wiring."
@@ -2988,7 +2898,7 @@ msgstr ""
 msgid "Hotend fan RPM test"
 msgstr "Test RPM ventola Hotend"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:323
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:323
 msgid "HOTEND HEATER OVERCURRENT"
 msgstr "SOVRACORRENTE RISCALDATORE HOTEND"
 
@@ -3040,83 +2950,67 @@ msgstr "HW test puleggia"
 msgid "HW test selector"
 msgstr "Test HW selettore"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:190
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:274
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:197
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:190
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:281
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:197
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:190
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:274
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:281
 msgid "I2C RECEIVE BUSY"
 msgstr "RICEZIONE I2C OCCUPATA"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:183
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:267
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:190
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:183
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:274
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:190
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:183
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:267
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:274
 msgid "I2C RECEIVE FAILED"
 msgstr "RICEZIONE I2C NON RIUSCITA"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:197
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:281
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:204
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:197
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:288
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:204
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:197
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:281
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:288
 msgid "I2C RECEIVE TIMEOUT"
 msgstr "TIMEOUT RICEZIONE I2C"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:204
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:288
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:211
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:204
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:295
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:211
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:204
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:288
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:295
 msgid "I2C RECEIVE UNDEFINED"
 msgstr "RICEZIONE I2C NON DEFINITO"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:162
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:246
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:169
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:162
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:253
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:169
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:162
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:246
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:253
 msgid "I2C SEND BUSY"
 msgstr "INVIO I2C OCCUPATO"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:155
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:239
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:162
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:155
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:246
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:162
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:155
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:239
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:246
 msgid "I2C SEND FAILED"
 msgstr "INVIO I2C NON RIUSCITO"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:169
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:253
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:176
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:169
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:260
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:176
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:169
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:253
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:260
 msgid "I2C SEND TIMEOUT"
 msgstr "TIMEOUT INVIO I2C"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:176
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:260
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:183
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:176
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:267
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:183
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:176
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:260
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:267
 msgid "I2C SEND UNDEFINED"
 msgstr "INVIO I2C NON DEFINITO"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:80
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:80
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:80
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:80
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:80
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:80
 msgid "IDLER CANNOT HOME"
 msgstr "HOME IDLER NON RIUSCITO"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:87
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:87
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:87
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:87
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:87
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:87
 msgid "IDLER CANNOT MOVE"
 msgstr "IDLER BLOCCATO"
 
@@ -3132,11 +3026,11 @@ msgstr ""
 msgid "IGNORE"
 msgstr "IGNORA"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:323
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:568
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:386
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:344
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:596
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:386
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:323
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:344
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:568
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:596
 msgid "IMPOSTER! FAKE SIGNATURE"
 msgstr "IMPOSTER! FAKE SIGNATURE"
 
@@ -3187,7 +3081,7 @@ msgstr "Voltaggio d'ingresso"
 
 #. TODO: change of visualization scheme is expected soon, some unification with fsensor visualization will happen as a result.
 #. For now, FINDA is visualized the same way like filament sensors' states
-#: src/gui/MItem_mmu.cpp:284
+#: src/gui/MItem_mmu.cpp:289
 msgid " INS / 1"
 msgstr "INS / 1"
 
@@ -3201,7 +3095,7 @@ msgstr "INS / %7ld"
 msgid "Inserting"
 msgstr "Inserimento"
 
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:450
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:450
 msgid ""
 "Insert the bundled USB drive, restart the printer and click the knob once "
 "during the boot. This will install the MK3.5 firmware."
@@ -3210,7 +3104,7 @@ msgstr ""
 "volta sulla manopola durante l'avvio. In questo modo verrà installato il "
 "firmware MK3.5."
 
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:408
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:408
 msgid ""
 "Insert the bundled USB drive, restart the printer and click the knob once "
 "during the boot. This will install the MK4/MK3.9 firmware."
@@ -3245,11 +3139,7 @@ msgstr ""
 msgid "Insert USB drive with valid INI file."
 msgstr "Inserire un drive USB con un file INI valido."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:52
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:52
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:52
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:52
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:52
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:52
 msgid "INSPECT FINDA"
 msgstr "CONTROLLA FINDA"
 
@@ -3271,11 +3161,7 @@ msgstr "Installa i perni"
 msgid "Install sheet on heatbed."
 msgstr "Installa la piastra sul piano riscaldato."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:298
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:298
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:298
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:298
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:298
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:298
 msgid "Internal runtime error. Try resetting the MMU or updating the firmware."
 msgstr ""
 "Errore interno di runtime. Prova a resettare la MMU o ad aggiornare il "
@@ -3289,23 +3175,19 @@ msgstr ""
 "Nel prossimo passo, usa la manopola per regolare l'altezza ugello. Controlla "
 "le immagini sul manuale per rifer."
 
-#: src/common/gcode/gcode_reader.cpp:441
+#: src/common/gcode/gcode_reader_binary.cpp:31
 msgid "Invalid BGCODE file header"
 msgstr "Intestazione del file BGCODE non valida"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:302
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:547
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:365
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:323
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:575
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:365
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:302
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:323
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:547
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:575
 msgid "INVALID FW SIZE ON USB FLASH DRIVE"
 msgstr "DIMENSIONE FW NON VALIDA SU DRIVE USB"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:276
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:276
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:276
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:276
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:276
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:276
 msgid "INVALID TOOL"
 msgstr "STRUMENTO NON VALIDO"
 
@@ -3398,10 +3280,10 @@ msgstr "Collisioni su asse Y ultima stampa"
 msgid "Leave"
 msgstr "Abbandona"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:498
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:316
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:274
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:526
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:316
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:274
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:498
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:526
 msgid "LED MEMORY ERROR"
 msgstr "ERRORE MEMORIA LED"
 
@@ -3417,11 +3299,11 @@ msgstr "Lato Sinistro"
 msgid "Left Side [um]"
 msgstr "Lato Sinistro [um]"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:436
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:681
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:520
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:471
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:709
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:520
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:436
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:471
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:681
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:709
 msgid ""
 "Length of an axis is too long.\n"
 "Motor current is too low, probably.\n"
@@ -3431,11 +3313,11 @@ msgstr ""
 "Probabilmente la corrente del motore è troppo bassa.\n"
 "Riprovare il controllo, mettere in pausa o riprendere la stampa?"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:443
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:688
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:527
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:478
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:716
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:527
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:443
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:478
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:688
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:716
 msgid ""
 "Length of an axis is too short.\n"
 "There's an obstacle or bearing issue.\n"
@@ -3471,16 +3353,16 @@ msgstr "CARICA"
 msgid "Loadcell"
 msgstr "Cella di carico"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:484
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:302
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:512
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:302
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:484
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:512
 msgid "LOADCELL BAD CONFIGURATION"
 msgstr "CONFIGURAZIONE ERRATA CELLA DI CARICO"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:457
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:275
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:268
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:485
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:275
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:268
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:457
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:485
 msgid ""
 "Loadcell calibration is incomplete. Restart the printer and callibrate "
 "loadcell."
@@ -3492,35 +3374,35 @@ msgstr ""
 msgid "Loadcell check"
 msgstr "Controllo Cella di carico"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:478
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:296
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:506
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:296
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:478
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:506
 msgid "Loadcell measured an inifinite or undefined load value."
 msgstr ""
 "La cella di carico ha misurato un valore di carico infinito o indefinito."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:477
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:295
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:505
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:295
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:477
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:505
 msgid "LOADCELL MEASURE FAILED"
 msgstr "MISURA CELLA DI CARICO FALLITA"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:456
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:274
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:267
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:484
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:274
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:267
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:456
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:484
 msgid "LOADCELL NOT CALIBRATED"
 msgstr "CELLA DI CARICO NON CALIBRATA"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:463
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:281
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:491
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:281
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:463
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:491
 msgid "LOADCELL TARE ERROR"
 msgstr "ERRORE TARA CELLA DI CARICO"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:470
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:288
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:498
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:288
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:470
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:498
 msgid "LOADCELL TARE FAILED"
 msgstr "TARA CELLA DI CARICO FALLITA"
 
@@ -3536,9 +3418,9 @@ msgstr "Test Cella di carico non riuscito."
 msgid "Loadcell test passed OK."
 msgstr "Test Cella di carico OK."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:491
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:309
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:519
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:309
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:491
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:519
 msgid "LOADCELL TIMEOUT"
 msgstr "TIMEOUT CELLA DI CARICO"
 
@@ -3589,11 +3471,7 @@ msgstr "Test caricamento"
 msgid "Loading the file failed! Check the USB drive!"
 msgstr "Caricamento del file non riuscito! Controllare l'unità USB!"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:60
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:60
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:60
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:60
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:60
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:60
 msgid ""
 "Loading to extruder failed. Inspect the filament tip shape. Refine the "
 "sensor calibration, if needed."
@@ -3613,11 +3491,7 @@ msgstr "Carica impostazioni"
 msgid "Load Settings from File"
 msgstr "Carica impostazioni da file"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:59
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:59
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:59
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:59
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:59
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:59
 msgid "LOAD TO EXTR. FAILED"
 msgstr "CARICAM. A ESTRUSORE FALLITO"
 
@@ -3683,11 +3557,13 @@ msgstr "Indirizzo MAC"
 
 #: src/gui/screen_printing.cpp:334
 msgid ""
-"Maintenance Reminder. "
-"Please inspect the Nextruder. Visit prusa.io/"
+"Maintenance Reminder. Filament changes have reached main-plate lifespan. "
+"Inspect the part and ensure you have a spare plate available. Visit prusa.io/"
 "mmu-care"
 msgstr ""
-"Promemoria per la manutenzione. Prego ispeziona il Nextruder. Visita prusa.io/mmu-care"
+"Promemoria Manutenzione. I cambi filamento hanno raggiunto il limite della "
+"piastra principale. Ispeziona il componente e assicurati di avere a "
+"disposizione una piastra di ricambio. Visita prusa.io/mmu-care"
 
 #: src/gui/dialogs/DialogLoadUnload.cpp:60
 msgid "Make sure the filament is inserted through the sensor."
@@ -3720,11 +3596,11 @@ msgstr "Configurazione Manuale"
 msgid "MANUAL CONFIGURATION"
 msgstr "CONFIGURAZIONE MANUALE"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:261
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:506
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:324
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:282
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:534
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:324
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:261
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:282
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:506
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:534
 msgid ""
 "Marlin client could not send message to Marlin server and timeout was "
 "reached."
@@ -3732,11 +3608,11 @@ msgstr ""
 "Il client Marlin non è riuscito a inviare il messaggio al server Marlin ed è "
 "stato raggiunto il timeout."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:260
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:505
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:323
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:281
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:533
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:323
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:260
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:281
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:505
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:533
 msgid "MARLIN REQUEST TIMEOUT"
 msgstr "TIMEOUT RICHIESTA MARLIN"
 
@@ -3749,14 +3625,9 @@ msgstr "Maschera"
 msgid "Material"
 msgstr "Materiale"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:36
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:43
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:43
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:50
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:43
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:50
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:36
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:43
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:43
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:50
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:36
 msgid "MAXTEMP ERROR"
 msgstr "MAXTEMP ERROR"
 
@@ -3764,44 +3635,40 @@ msgstr "MAXTEMP ERROR"
 msgid "MBed MCU Temp"
 msgstr "Temp MBed MCU"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:520
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:765
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:618
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:576
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:814
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:618
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:520
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:576
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:765
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:814
 msgid "MCU in Buddy is overheated. Any higher will result in fatal error."
 msgstr ""
 "La MCU nel Buddy è surriscaldata. Un valore superiore provocherà un errore "
 "fatale."
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:821
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:821
 msgid "MCU in Dwarf is overheated. Any higher will result in fatal error."
 msgstr ""
 "La MCU di Dwarf è surriscaldata. Un valore superiore provocherà un errore "
 "fatale."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:772
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:828
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:772
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:828
 msgid ""
 "MCU in Modular Bed is overheated. Any higher will result in fatal error."
 msgstr ""
 "La MCU del piano modulare è surriscaldata. Un valore superiore provocherà un "
 "errore fatale."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:93
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:100
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:100
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:93
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:128
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:100
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:93
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:128
 #, c-format
 msgid "MCU in %s is overheated."
 msgstr "MCU in %s è surriscaldata."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:92
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:99
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:99
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:92
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:127
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:99
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:92
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:127
 msgid "MCU MAXTEMP ERROR"
 msgstr "MCU MAXTEMP ERROR"
 
@@ -3809,7 +3676,7 @@ msgstr "MCU MAXTEMP ERROR"
 msgid "MCU Temperature"
 msgstr "Temperatura MCU"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:107
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:107
 msgid ""
 "Measured temperature is not matching expected value. Check if the thermistor "
 "is in contact with the heaterblock. In case of damage, replace it."
@@ -3818,11 +3685,9 @@ msgstr ""
 "il termistore sia a contatto con l'heaterblock. In caso di danni, "
 "sostituirlo."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:65
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:72
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:72
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:65
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:100
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:72
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:65
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:100
 msgid ""
 "Measured temperature is not matching expected value. Check the thermistor is "
 "in contact with heatbed. In case of damage, replace it."
@@ -3831,15 +3696,13 @@ msgstr ""
 "il termistore sia a contatto con il piano riscaldato. In caso di danni, "
 "sostituirlo."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:72
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:478
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:79
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:723
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:79
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:576
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:72
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:527
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:765
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:79
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:576
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:72
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:478
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:527
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:723
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:765
 msgid ""
 "Measured temperature is not matching expected value. Check the thermistor is "
 "in contact with hotend. In case of damage, replace it."
@@ -3851,10 +3714,10 @@ msgstr ""
 msgid "Medium"
 msgstr "Medio"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:499
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:317
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:275
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:527
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:317
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:275
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:499
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:527
 msgid "Memory allocation failed for scheduled LED animation"
 msgstr "Allocazione di memoria fallita per l'animazione LED programmata"
 
@@ -3903,14 +3766,9 @@ msgstr "Porta Statistiche"
 msgid "M.I.N.D.A."
 msgstr "M.I.N.D.A."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:50
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:57
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:57
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:64
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:57
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:64
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:50
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:57
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:57
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:64
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:50
 msgid "MINTEMP ERROR"
 msgstr "MINTEMP ERROR"
 
@@ -3930,15 +3788,15 @@ msgstr "Compatibilità MK3"
 msgid "MMU"
 msgstr "MMU"
 
+#: src/gui/MItem_mmu.hpp:291
+msgid "MMU BL Status"
+msgstr "Stato MMU BL"
+
 #: src/gui/MItem_tools.hpp:653
 msgid "MMU Current"
 msgstr "Corrente MMU"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:242
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:242
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:242
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:242
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:242
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:242
 msgid ""
 "MMU detected a power-related issue. Check the wiring and connectors. If the "
 "issue persists, contact support."
@@ -3958,27 +3816,15 @@ msgstr "Caricamenti filamento MMU"
 msgid "MMU filament sensor calibration"
 msgstr "Calibrazione del sensore del filamento MMU"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:284
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:284
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:284
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:284
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:284
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:284
 msgid "MMU Firmware internal error, please reset the MMU."
 msgstr "Errore interno firmware MMU, resettare la MMU."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:290
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:290
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:290
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:290
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:290
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:290
 msgid "MMU FW UPDATE NEEDED"
 msgstr "AGG FW MMU RICHIESTO"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:249
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:249
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:249
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:249
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:249
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:249
 msgid ""
 "MMU MCU detected a 5V undervoltage. There might be an issue with the "
 "electronics. Check the wiring and connectors"
@@ -3986,78 +3832,45 @@ msgstr ""
 "La MCU MMU ha rilevato una sottotensione di 5V. Potrebbe esserci un problema "
 "con l'elettronica. Controlla il cablaggio e i connettori"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:241
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:241
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:241
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:241
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:241
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:241
 msgid "MMU MCU ERROR"
 msgstr "ERRORE MCU MMU"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:248
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:248
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:248
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:248
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:248
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:248
 msgid "MMU MCU UNDERPOWER"
 msgstr "MMU MCU SOTTOTENSIONE"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:255
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:255
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:255
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:255
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:255
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:255
 msgid "MMU NOT RESPONDING"
 msgstr "MMU NON RISPONDE"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:256
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:256
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:256
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:256
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:256
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:256
 msgid "MMU not responding. Check the wiring and connectors."
 msgstr "La MMU non risponde. Controlla il cablaggio e i connettori."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:263
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:263
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:263
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:263
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:263
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:263
 msgid "MMU not responding correctly. Check the wiring and connectors."
 msgstr ""
 "La MMU non risponde correttamente. Controlla il cablaggio e i connettori."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:148
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:232
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:155
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:148
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:239
+#: src/gui/MItem_mmu.cpp:302
+msgid "MMU off"
+msgstr "MMU off"
+
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:155
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:148
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:232
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:239
 msgid "MMU OVERCURRENT"
 msgstr "SOVRACORRENTE MMU"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:220
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:227
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:234
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:220
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:227
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:234
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:220
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:227
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:234
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:220
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:227
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:234
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:220
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:227
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:234
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:220
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:227
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:234
 msgid "MMU SELFTEST FAILED"
 msgstr "AUTOTEST MMU FALLITO"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:235
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:235
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:235
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:235
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:235
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:235
 msgid ""
 "MMU selftest failed on the Idler TMC driver. Check the wiring and "
 "connectors. If the issue persists contact support."
@@ -4065,11 +3878,7 @@ msgstr ""
 "Autotest MMU non riuscito sul driver TMC dell'Idler. Controlla il cablaggio "
 "e i connettori. Se il problema persiste, contatta l'assistenza."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:221
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:221
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:221
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:221
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:221
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:221
 msgid ""
 "MMU selftest failed on the Pulley TMC driver. Check the wiring and "
 "connectors. If the issue persists contact support."
@@ -4077,11 +3886,7 @@ msgstr ""
 "Autotest MMU non riuscito sul driver TMC della Puleggia. Controlla il "
 "cablaggio e i connettori. Se il problema persiste, contatta l'assistenza."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:228
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:228
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:228
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:228
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:228
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:228
 msgid ""
 "MMU selftest failed on the Selector TMC driver. Check the wiring and "
 "connectors. If the issue persists contact support."
@@ -4097,33 +3902,25 @@ msgstr "Unità MMU"
 msgid "MMU Version"
 msgstr "Versione MMU"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:106
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:113
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:120
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:127
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:134
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:141
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:148
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:155
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:162
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:176
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:183
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:295
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:302
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:323
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:134
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:141
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:148
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:155
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:162
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:169
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:176
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:183
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:197
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:204
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:302
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:309
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:337
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:106
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:113
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:120
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:127
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:134
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:141
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:148
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:155
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:162
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:176
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:183
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:295
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:302
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:323
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:169
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:197
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:204
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:309
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:337
 msgid "MODULAR BED ERROR"
 msgstr "ERRORE PIANO MODULARE"
 
@@ -4134,7 +3931,7 @@ msgstr "Lu"
 
 #: src/common/client_response_texts.hpp:97
 msgid "MORE"
-msgstr "ALTRO"
+msgstr "NO"
 
 #: src/gui/screen_qr_error.cpp:29 src/gui/screen_fatal_warning.cpp:31
 #: src/gui/dialogs/DialogConnectReg.hpp:19
@@ -4248,14 +4045,14 @@ msgstr "è necessario un firmware più recente: %s"
 msgid "Newer FW req.: %s"
 msgstr "Necessario FW più recente: %s"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:639
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:471
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:422
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:667
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:471
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:422
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:639
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:667
 msgid "New firmware available"
 msgstr "Nuovo firmware disponibile"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:394
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:394
 msgid "New FW available"
 msgstr "Nuovo FW disponibile"
 
@@ -4263,7 +4060,7 @@ msgstr "Nuovo FW disponibile"
 msgid "NEXT"
 msgstr "SUCCESSIVO"
 
-#: src/gui/screen_printing.cpp:521
+#: src/gui/screen_printing.cpp:517
 msgid "Next change in"
 msgstr "Prossimo cambio tra"
 
@@ -4271,7 +4068,7 @@ msgstr "Prossimo cambio tra"
 msgid "Nextruder"
 msgstr "Nextruder"
 
-#: src/gui/MItem_menus.hpp:539
+#: src/gui/MItem_mmu.hpp:298
 msgid "Nextruder Maintenance"
 msgstr "Manutenzione Nextruder"
 
@@ -4283,7 +4080,7 @@ msgstr "Calzino in Silicone Nextruder"
 msgid "NINIT "
 msgstr "NINIT "
 
-#: src/gui/MItem_mmu.cpp:285
+#: src/gui/MItem_mmu.cpp:290
 msgid "NINS / 0"
 msgstr "NINS / 0"
 
@@ -4308,11 +4105,11 @@ msgstr "No Config"
 msgid "No crash dump to save."
 msgstr "Nessun crash dump da salvare."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:366
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:611
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:429
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:387
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:639
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:429
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:366
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:387
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:611
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:639
 msgid ""
 "No firmware found\n"
 "in the internal\n"
@@ -4326,11 +4123,11 @@ msgstr ""
 "un nuovo flash \n"
 "del firmware."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:309
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:554
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:372
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:330
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:582
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:372
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:309
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:330
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:554
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:582
 msgid "NO FW ON USB FLASH DRIVE"
 msgstr "NESSUN FW SULLA MEMORIA USB"
 
@@ -4343,11 +4140,11 @@ msgstr "Nessuno"
 msgid "Not Calib"
 msgstr "Non Calibrato"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:193
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:193
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:193
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:193
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:193
+#: src/gui/MItem_mmu.cpp:306
+msgid "Not detected"
+msgstr "Non rilevato"
+
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:193
 msgid ""
 "Not enough current for the Idler TMC driver. There is probably an issue with "
 "the electronics. Check the wiring and connectors."
@@ -4355,11 +4152,7 @@ msgstr ""
 "Corrente insufficiente per il driver TMC Idler. È probabile che ci sia un "
 "problema con l'elettronica. Controlla il cablaggio e i connettori."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:179
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:179
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:179
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:179
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:179
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:179
 msgid ""
 "Not enough current for the Pulley TMC driver. There is probably an issue "
 "with the electronics. Check the wiring and connectors."
@@ -4367,11 +4160,7 @@ msgstr ""
 "Corrente insufficiente per il driver TMC della Puleggia. È probabile che ci "
 "sia un problema con l'elettronica. Controlla il cablaggio e i connettori."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:186
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:186
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:186
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:186
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:186
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:186
 msgid ""
 "Not enough current for the Selector TMC driver. There is probably an issue "
 "with the electronics. Check the wiring and connectors."
@@ -4432,10 +4221,10 @@ msgstr "Temperatura Ugello 4"
 msgid "Nozzle 5 Temperature"
 msgstr "Temperatura Ugello 5"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:800
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:646
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:604
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:877
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:646
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:604
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:800
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:877
 msgid "Nozzle cleaning failed."
 msgstr "Pulizia ugello non riuscita."
 
@@ -4455,8 +4244,8 @@ msgstr "Conferma del diametro dell'ugello"
 msgid "nozzle diameter doesn't match"
 msgstr "Il diametro dell'ugello non corrisponde"
 
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:562
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:800
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:562
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:800
 msgid ""
 "Nozzle doesn't seem to have round cross section. Make sure it is clean and "
 "perpendicular to the bed."
@@ -4481,10 +4270,9 @@ msgstr ""
 msgid "Nozzle heater check"
 msgstr "Contr. risc. Ugello"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:134
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:218
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:141
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:134
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:141
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:134
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:218
 msgid "NOZZLE HEATER OVERCURRENT"
 msgstr "SOVRACORRENTE RISCALDATORE UGELLO"
 
@@ -4526,7 +4314,9 @@ msgstr "ODOMETRO"
 msgid "Off"
 msgstr "Off"
 
+#. filament present
 #: src/gui/footer/footer_item_fsensor.cpp:49
+#: src/gui/footer/footer_item_multitool.cpp:29
 msgid "OFF "
 msgstr "OFF "
 
@@ -4553,7 +4343,11 @@ msgstr "Offset Z"
 msgid "OK"
 msgstr "OK"
 
+#. @@TODO there is a strange comment in FooterItemFSensor::static_makeView about the last character not being rendered
+#. Not sure why but using the same workaround.
+#. Another funny thing is that the LED in FINDA shows the exact opposite - this needs to be discussed with Content ;)
 #: src/gui/footer/footer_item_fsensor.cpp:46
+#: src/gui/footer/footer_item_multitool.cpp:28
 msgid "ON "
 msgstr "ON "
 
@@ -4582,61 +4376,57 @@ msgstr "Solo memorizzati"
 msgid "On Restart"
 msgstr "In ripresa"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:239
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:351
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:253
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:246
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:379
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:253
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:239
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:246
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:351
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:379
 msgid "OUT OF MEMORY"
 msgstr "MEMORIA ESAURITA"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:177
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:198
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:177
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:198
 msgid "Overcurrent detected."
 msgstr "Rilevata sovracorrente."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:142
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:142
 msgid "Overcurrent detected on heatbed port, disconnect the device."
 msgstr ""
 "Rilevata sovracorrente sulla porta del piano riscaldato, scollega il "
 "dispositivo."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:135
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:219
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:142
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:135
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:142
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:135
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:219
 msgid "Overcurrent detected on nozzle heater."
 msgstr "Rilevata sovracorrente sul riscaldatore dell'ugello."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:128
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:212
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:135
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:128
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:233
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:135
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:128
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:212
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:233
 msgid "Overcurrent detected on the connected USB device, disconnect it."
 msgstr ""
 "È stata rilevata una sovracorrente sul dispositivo USB collegato, "
 "scollegarlo."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:149
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:233
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:156
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:149
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:240
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:156
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:149
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:233
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:240
 msgid "Overcurrent detected on the MMU port, disconnect the device."
 msgstr "Rilevata sovracorrente sulla porta MMU, scollega il dispositivo."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:121
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:205
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:128
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:121
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:226
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:128
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:121
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:205
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:226
 msgid "Overcurrent detected on USB port."
 msgstr "Rilevata sovracorrente sulla porta USB."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:226
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:149
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:142
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:149
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:142
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:226
 msgid "Overcurrent detected on xBuddy heatbed port, disconnect the device."
 msgstr ""
 "Rilevata sovracorrente sulla porta del piano riscaldato della xBuddy, "
@@ -4687,7 +4477,7 @@ msgstr "Pausa"
 msgid "PAUSE"
 msgstr "PAUSA"
 
-#: src/gui/screen_printing.cpp:607
+#: src/gui/screen_printing.cpp:605
 msgid "PAUSED"
 msgstr "IN PAUSA"
 
@@ -4695,7 +4485,7 @@ msgstr "IN PAUSA"
 msgid "Pausing..."
 msgstr "In pausa..."
 
-#: src/gui/screen_printing.cpp:603
+#: src/gui/screen_printing.cpp:601
 msgid "PAUSING ..."
 msgstr "IN PAUSA ..."
 
@@ -4782,7 +4572,7 @@ msgstr "Prendi Strumento"
 msgid "P.I.N.D.A."
 msgstr "P.I.N.D.A."
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:50
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:50
 msgid "PIN NOT REACHED"
 msgstr "PIN NOT REACHED"
 
@@ -4791,11 +4581,11 @@ msgid "Please assign a tool to the filament"
 msgstr "Assegna uno Strumento al filamento"
 
 #: src/gui/box_unfinished_selftest.cpp:86
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:387
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:632
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:464
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:415
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:660
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:464
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:387
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:415
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:632
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:660
 msgid "Please complete Calibrations & Tests before using the printer."
 msgstr "Completa le calibrazioni e i test prima di utilizzare la stampante."
 
@@ -4836,11 +4626,11 @@ msgstr "Attendere"
 msgid "Please wait until a tool is picked"
 msgstr "Attendi che venga scelto uno strumento"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:246
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:358
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:260
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:253
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:386
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:260
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:246
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:253
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:358
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:386
 msgid "PNG BUFFER FULL"
 msgstr "BUFFER PNG PIENO"
 
@@ -4852,8 +4642,8 @@ msgstr "Filtraggio Post Stampa"
 msgid "Power Cycle"
 msgstr "Power Cycle"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:296
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:303
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:296
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:303
 msgid "Power failure"
 msgstr "Interruzione di corrente"
 
@@ -4861,26 +4651,26 @@ msgstr "Interruzione di corrente"
 msgid "Power Failures"
 msgstr "Interruzioni di corrente"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:303
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:310
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:303
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:310
 msgid "Power panic"
 msgstr "Power panic"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:309
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:218
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:211
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:316
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:218
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:211
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:309
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:316
 msgid "POWER PANIC"
 msgstr "POWER PANIC"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:310
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:219
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:212
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:317
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:219
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:212
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:310
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:317
 msgid "Power panic detected on startup. Check power panic cable."
 msgstr "Rilevato power panic all'avvio. Controlla il cavo power panic."
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:15
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:15
 msgid "PRECISE REFINEMENT FAILED"
 msgstr "PRECISE REFINEMENT FAILED"
 
@@ -4892,14 +4682,9 @@ msgstr "Riscalda"
 msgid "Preheat Error"
 msgstr "Errore preheat"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:8
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:15
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:15
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:22
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:15
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:22
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:8
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:15
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:15
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:22
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:8
 msgid "PREHEAT ERROR"
 msgstr "ERRORE PREHEAT"
 
@@ -4954,7 +4739,7 @@ msgstr "Premi CONTINUA e spingi il filamento nella MMU."
 msgid "Press CONTINUE and push filament into the extruder."
 msgstr "Premi CONTINUA e spingi il filamento nell'estrusore."
 
-#: src/gui/screen_menu_selftest_snake.cpp:131
+#: src/gui/screen_menu_selftest_snake.cpp:128
 msgid "Previous Calibrations & Tests are not all done. Continue anyway?"
 msgstr ""
 "Le calibrazioni e i test precedenti non sono stati completati. Continuare "
@@ -4986,9 +4771,11 @@ msgstr "la stampante non ha abbastanza strumenti"
 #: src/gui/screen_printing.cpp:331
 msgid ""
 "Printer has detected multiple consecutive filament loading errors. We "
-"recommend checking the Nextruder. Visit prusa.io/mmu-care"
+"recommend checking Nextruder main-plate. Visit prusa.io/mmu-care"
 msgstr ""
-"La stampante ha rilevato multipli errori di caricamento del filamento consecutivi. Suggeriamo di ispezionare il Nextruder. Visita prusa.io/mmu-care"
+"La stampante ha rilevato numerosi errori di caricamento del filamento "
+"consecutivi. Ti consigliamo di controllare la piastra principale del "
+"Nextruder. Visita prusa.io/mmu-care"
 
 #: src/gui/MItem_tools.cpp:56
 msgid "Printer is busy. Please try repeating the action later."
@@ -5020,11 +4807,11 @@ msgstr "Ventola di stampa"
 msgid "Print Fan"
 msgstr "Ventola di stampa"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:464
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:709
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:562
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:513
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:751
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:562
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:464
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:513
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:709
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:751
 msgid ""
 "Print fan not spinning. Check it for possible debris, then inspect the "
 "wiring."
@@ -5095,7 +4882,7 @@ msgstr "Tempo di stampa"
 msgid "Print will end"
 msgstr "La stampa terminerà"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:44
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:44
 #, c-format
 msgid ""
 "Probed XY position is %.3f mm from expected. This is more than allowed "
@@ -5141,82 +4928,66 @@ msgstr ""
 msgid "PRUSALINK"
 msgstr "PRUSALINK"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:38
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:38
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:38
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:38
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:38
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:38
 msgid "PULLEY CANNOT MOVE"
 msgstr "PULEGGIA BLOCCATA"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:39
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:39
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:39
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:39
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:39
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:39
 msgid "Pulley motor stalled. Ensure the pulley can move and check the wiring."
 msgstr ""
 "Il motore della puleggia è bloccato. Verifica che la puleggia possa muoversi "
 "e controlla il cablaggio."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:387
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:415
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:387
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:415
 msgid "Puppy discovery error. No puppy found"
 msgstr "Errore di ricerca del puppy. Nessun puppy trovato"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:372
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:379
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:386
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:393
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:400
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:407
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:414
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:421
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:428
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:435
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:442
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:449
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:400
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:407
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:414
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:421
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:428
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:435
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:442
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:449
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:456
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:463
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:470
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:477
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:372
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:379
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:386
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:393
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:400
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:407
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:414
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:421
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:428
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:435
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:442
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:449
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:456
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:463
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:470
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:477
 msgid "PUPPY ERROR"
 msgstr "PUPPY ERROR"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:436
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:464
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:436
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:464
 #, c-format
 msgid "Puppy %s firmware fingerprint mismatch"
 msgstr "Mancata corrispondenza del fingerprint del firmware Puppy %s"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:422
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:450
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:422
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:450
 #, c-format
 msgid "Puppy %s firmware not found"
 msgstr "Firmware Puppy %s non trovato"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:429
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:457
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:429
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:457
 #, c-format
 msgid "Puppy %s flash writing failed"
 msgstr "Scrittura flash Puppy %s non riuscita"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:394
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:422
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:394
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:422
 #, c-format
 msgid "Puppy %s not responding"
 msgstr "Puppy %s non risponde"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:401
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:429
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:401
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:429
 #, c-format
 msgid ""
 "Puppy uses incompatible bootloader protocol %04x, Buddy FW requires %04x"
@@ -5254,11 +5025,7 @@ msgstr "Spingo il filamento"
 msgid "Question"
 msgstr "Domanda"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:283
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:283
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:283
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:283
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:283
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:283
 msgid "QUEUE FULL"
 msgstr "CODA PIENA"
 
@@ -5270,11 +5037,11 @@ msgstr "ESCI"
 msgid "Ramming"
 msgstr "Ramming"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:219
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:331
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:233
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:226
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:359
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:233
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:219
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:226
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:331
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:359
 msgid "Reading ESP firmware failed."
 msgstr "Lettura firmware ESP non riuscita."
 
@@ -5317,11 +5084,11 @@ msgstr "Registrazione"
 msgid "Registration successful, continue at connect.prusa3d.com"
 msgstr "Registrazione avvenuta correttamente, continua su connect.prusa3d.com"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:212
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:317
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:226
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:219
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:331
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:226
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:212
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:219
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:317
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:331
 msgid "Registration to Prusa Connect failed due to:"
 msgstr "La registrazione a Prusa Connect non è riuscita a causa di:"
 
@@ -5361,11 +5128,7 @@ msgstr ""
 "- Rimuovi la piastra di stampa.\n"
 "- Inserisci il perno di calibrazione."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:312
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:312
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:312
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:312
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:312
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:312
 msgid ""
 "Remove the ejected filament from the front of the MMU.\n"
 "\n"
@@ -5388,11 +5151,11 @@ msgstr "Rinomina"
 msgid "RENAME"
 msgstr "RINOMINA"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:450
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:695
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:534
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:485
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:723
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:534
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:450
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:485
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:695
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:723
 msgid ""
 "Repeated collision has been detected.\n"
 "Do you want to resume or pause the print?"
@@ -5408,11 +5171,7 @@ msgstr "SOSTITUISCI"
 msgid "Reprint"
 msgstr "Ristampa"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:277
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:277
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:277
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:277
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:277
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:277
 msgid ""
 "Requested filament tool is not available on this hardware. Check the G-code "
 "for tool index out of range (T0-T4)."
@@ -5547,7 +5306,7 @@ msgstr "Salvare Crash Dump"
 msgid "Saving selected value"
 msgstr "Salvataggio del valore selezionato"
 
-#: src/gui/screen_home.cpp:291
+#: src/gui/screen_home.cpp:284
 msgid "Saving to USB"
 msgstr "Salvataggio su USB"
 
@@ -5557,7 +5316,7 @@ msgstr ""
 "Scansiona il QR o visita prusa.io/add, accedi e aggiungi il codice della "
 "stampante:"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:324
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:324
 #, c-format
 msgid "%s Check hotend heater and control electronics for possible damage"
 msgstr ""
@@ -5585,27 +5344,15 @@ msgstr "Selezione strumento"
 msgid "SELECT LANGUAGE"
 msgstr "SELEZIONA LINGUA"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:66
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:66
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:66
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:66
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:66
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:66
 msgid "SELECTOR CANNOT HOME"
 msgstr "SELETTORE ERR MOVIM"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:73
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:73
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:73
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:73
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:73
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:73
 msgid "SELECTOR CANNOT MOVE"
 msgstr "SELETTORE BLOCCATO"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:53
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:53
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:53
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:53
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:53
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:53
 msgid ""
 "Selector can't move due to FINDA detecting a filament. Make sure no filament "
 "is in Selector and FINDA works properly."
@@ -5701,13 +5448,13 @@ msgstr "Imposta come Pronta"
 msgid "Settings"
 msgstr "Impost."
 
-#: src/gui/screen_menu_settings.hpp:68
+#: src/gui/screen_menu_settings.hpp:69
 msgid "SETTINGS"
 msgstr "IMPOSTAZIONI"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:471
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:289
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:499
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:289
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:471
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:499
 msgid "Setting the tare failed. Check the loadcell wiring and connection."
 msgstr ""
 "Impostazione tara non riuscita. Controlla il cablaggio e il collegamento "
@@ -5725,11 +5472,7 @@ msgstr "Profilo piastra"
 msgid "Sheets"
 msgstr "Piastre"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:214
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:214
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:214
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:214
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:214
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:214
 msgid ""
 "Short circuit on the Idler TMC driver. Check the wiring and connectors. If "
 "the issue persists contact support."
@@ -5737,11 +5480,7 @@ msgstr ""
 "Cortocircuito sul driver TMC Idler. Controlla il cablaggio e i connettori. "
 "Se il problema persiste, contatta l'assistenza."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:200
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:200
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:200
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:200
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:200
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:200
 msgid ""
 "Short circuit on the Pulley TMC driver. Check the wiring and connectors. If "
 "the issue persists contact support."
@@ -5749,11 +5488,7 @@ msgstr ""
 "Cortocircuito sul driver TMC della Puleggia. Controlla il cablaggio e i "
 "connettori. Se il problema persiste, contatta l'assistenza."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:207
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:207
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:207
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:207
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:207
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:207
 msgid ""
 "Short circuit on the Selector TMC driver. Check the wiring and connectors. "
 "If the issue persists contact support."
@@ -5883,11 +5618,11 @@ msgstr "Modo suono"
 msgid "Sound Volume"
 msgstr "Volume suono"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:268
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:513
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:331
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:289
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:541
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:331
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:268
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:289
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:513
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:541
 msgid ""
 "Space allocation for firmware BBF file failed. Repeat the action or try "
 "another USB drive."
@@ -5935,11 +5670,11 @@ msgstr "Modo Silenzioso"
 msgid "Steel Sheets"
 msgstr "Piastre d'acciaio"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:492
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:737
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:590
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:541
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:779
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:590
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:492
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:541
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:737
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:779
 msgid "Steppers disabled due to inactivity."
 msgstr "Motori disattivati per inattività."
 
@@ -5955,7 +5690,7 @@ msgstr "Stop"
 msgid "STOP"
 msgstr "STOP"
 
-#: src/gui/screen_printing.cpp:613
+#: src/gui/screen_printing.cpp:611
 msgid "STOPPED"
 msgstr "INTERROTTO"
 
@@ -5983,9 +5718,8 @@ msgstr "Memorizzarla come Porta Statische?"
 msgid "Strict"
 msgstr "Esatto"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:8
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:8
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:57
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:8
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:57
 msgid "STUCK FILAMENT DETECTED"
 msgstr "RILEVATO FILAMENTO BLOCCATO"
 
@@ -6008,7 +5742,7 @@ msgstr ""
 msgid "Sun"
 msgstr "Do"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:100
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:100
 msgid ""
 "SuperPINDA sensor is probably broken or disconnected, could not home Z-axis "
 "properly."
@@ -6084,15 +5818,10 @@ msgstr "Temperatura"
 msgid "TEMPERATURE"
 msgstr "TEMPERATURA"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:64
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:71
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:71
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:78
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:71
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:78
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:64
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:71
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:99
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:71
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:78
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:64
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:99
 msgid "TEMP NOT MATCHING"
 msgstr "TEMP NON CORRISPONDE"
 
@@ -6188,9 +5917,8 @@ msgstr "La calibrazione dovrebbe durare poco più di 14 minuti."
 msgid "The calibration should take a little over 7 minutes."
 msgstr "La calibrazione dovrebbe durare poco più di 7 minuti."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:9
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:9
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:58
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:9
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:58
 msgid ""
 "The filament seems to be stuck, please unload it from nextruder and load it "
 "again."
@@ -6206,11 +5934,12 @@ msgstr "Il filamento verrà scaricato automaticamente."
 msgid "The file disappeared"
 msgstr "Il file è scomparso"
 
-#: src/common/gcode/gcode_reader.cpp:912 src/common/gcode/gcode_reader.cpp:925
+#: src/common/gcode/gcode_reader_binary.cpp:525
+#: src/common/gcode/gcode_reader_binary.cpp:538
 msgid "The file is not a valid bgcode file."
 msgstr "Il file non è un file bgcode valido."
 
-#: src/common/gcode/gcode_reader.cpp:409
+#: src/common/gcode/gcode_reader_plaintext.cpp:235
 msgid "The file seems to be a binary gcode with a wrong suffix."
 msgstr "Il file sembra essere un gcode binario con un suffisso errato."
 
@@ -6222,11 +5951,11 @@ msgstr ""
 "Calib. primo layer non riuscita. Ricontrolla il cablaggio, assi e ugello, "
 "quindi ripeti la calibrazione."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:401
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:646
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:478
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:429
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:674
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:478
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:401
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:429
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:646
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:674
 msgid "The G-code isn't fully compatible"
 msgstr "Il G-code non è pienamente compatibile"
 
@@ -6239,11 +5968,11 @@ msgstr ""
 "ingranaggi montate dall'utente o sottoposte a manutenzione. In tutti gli "
 "altri casi, puoi saltare questo passaggio."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:429
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:674
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:513
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:464
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:702
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:513
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:429
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:464
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:674
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:702
 msgid ""
 "The heatbed cooled down during the power outage, printed object might have "
 "detached. Inspect it before continuing."
@@ -6262,7 +5991,7 @@ msgstr ""
 "ventola dell'hotend. Puoi continuare, ma ti consigliamo di risolvere questo "
 "problema prima di iniziare a stampare."
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:863
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:863
 msgid ""
 "The HEPA filter has expired. Change the HEPA filter before your next print. "
 "Visit prusa.io/xl-filter for more information."
@@ -6270,7 +5999,7 @@ msgstr ""
 "Il filtro HEPA è esaurito. Cambiare il filtro HEPA prima della prossima "
 "stampa. Per ulteriori informazioni, visitare prusa.io/xl-filter."
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:856
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:856
 msgid ""
 "The HEPA filter is nearing the end of its life span (100 hours of printing "
 "time remaining). We recommend purchasing a new one. Visit prusa.io/xl-filter "
@@ -6280,22 +6009,14 @@ msgstr ""
 "Si consiglia di acquistarne uno nuovo. Per ulteriori informazioni, visitare "
 "prusa.io/xl-filter."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:81
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:81
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:81
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:81
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:81
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:81
 msgid ""
 "The Idler cannot home properly. Check for anything blocking its movement."
 msgstr ""
 "Idler non riesce a tornare in home correttamente. Verifica che non vi sia "
 "nulla che ne blocchi il movimento."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:88
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:88
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:88
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:88
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:88
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:88
 msgid ""
 "The Idler cannot move properly. Check for anything blocking its movement. "
 "Check if the wiring is correct."
@@ -6303,17 +6024,13 @@ msgstr ""
 "L'idler non riesce a muoversi correttamente. Controlla che non ci sia nulla "
 "che ne blocchi il movimento. Controlla che cablaggio sia corretto."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:485
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:303
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:513
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:303
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:485
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:513
 msgid "The loadcell configuration is incorrect."
 msgstr "La configurazione della cella di carico non è corretta."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:291
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:291
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:291
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:291
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:291
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:291
 msgid ""
 "The MMU firmware version is incompatible with the printer's FW. Update to "
 "compatible version."
@@ -6343,16 +6060,16 @@ msgstr ""
 "Devi avvertire una leggera resistenza.\n"
 "Se il filamento è bloccato, apri la leva dell'idler."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:464
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:282
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:492
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:282
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:464
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:492
 msgid "There was an error requesting the tare for loadcell."
 msgstr ""
 "Si è verificato un errore nella richiesta della tara per la cella di carico."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:492
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:310
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:520
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:310
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:492
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:520
 msgid ""
 "There was a timeout while waiting for measurement sample, please repeat the "
 "action."
@@ -6360,15 +6077,10 @@ msgstr ""
 "Si è verificato un timeout durante l'attesa del campione di misurazione, "
 "ripeti l'azione."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:22
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:29
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:29
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:36
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:29
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:36
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:22
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:29
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:71
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:29
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:36
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:22
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:71
 msgid "THERMAL RUNAWAY"
 msgstr "THERMAL RUNAWAY"
 
@@ -6380,22 +6092,14 @@ msgstr ""
 "Il test RPM non è riuscito, controlla che entrambe le ventole possano girare "
 "e che siano collegate correttamente."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:67
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:67
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:67
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:67
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:67
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:67
 msgid ""
 "The Selector cannot home properly. Check for anything blocking its movement."
 msgstr ""
 "Il selettore non riesce a tornare in home correttamente. Verifica che non vi "
 "sia nulla che ne blocchi il movimento."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:74
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:74
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:74
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:74
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:74
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:74
 msgid ""
 "The Selector cannot move. Check for anything blocking its movement. Check if "
 "the wiring is correct."
@@ -6422,11 +6126,11 @@ msgstr ""
 "(seguirà la calibrazione)\n"
 "Rimappare?"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:289
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:534
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:352
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:310
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:562
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:352
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:289
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:310
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:534
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:562
 msgid ""
 "This error code is not found\n"
 "in our database.\n"
@@ -6464,7 +6168,7 @@ msgstr ""
 "Vuoi sostituire lo strumento assegnato con lo strumento selezionato o "
 "aggiungere lo strumento selezionato per la funzionalità SPOOL JOIN?"
 
-#: src/gui/screen_home.cpp:330
+#: src/gui/screen_home.cpp:323
 msgid ""
 "This firmware is still\n"
 "in development.\n"
@@ -6488,7 +6192,7 @@ msgstr ""
 "\n"
 "Maggiori informazioni su prusa.io/input shaper"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:415
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:415
 msgid "This G-code was set up for another filament type."
 msgstr "Questo G-code è impostato per un altro tipo di filamento."
 
@@ -6619,29 +6323,13 @@ msgstr "Orario estivo"
 msgid "TLS error"
 msgstr "Errore TLS"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:136
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:143
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:150
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:136
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:143
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:150
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:136
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:143
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:150
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:136
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:143
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:150
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:136
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:143
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:150
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:136
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:143
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:150
 msgid "TMC DRIVER ERROR"
 msgstr "ERRORE DRIVER TMC"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:109
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:109
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:109
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:109
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:109
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:109
 msgid ""
 "TMC driver for the Idler motor is almost overheating. Make sure there is "
 "sufficient airflow near the MMU board."
@@ -6649,11 +6337,7 @@ msgstr ""
 "Il driver TMC per il motore Idler si sta surriscaldando. Assicurati che ci "
 "sia un flusso d'aria sufficiente vicino alla scheda MMU."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:151
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:151
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:151
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:151
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:151
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:151
 msgid ""
 "TMC driver for the Idler motor is not responding. Try resetting the MMU. If "
 "the issue persists contact support."
@@ -6661,11 +6345,7 @@ msgstr ""
 "Il driver TMC per il motore Idler non risponde. Prova a resettare la MMU. Se "
 "il problema persiste, contatta l'assistenza."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:130
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:130
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:130
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:130
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:130
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:130
 msgid ""
 "TMC driver for the Idler motor is overheated. Cool down the MMU board and "
 "reset MMU."
@@ -6673,11 +6353,7 @@ msgstr ""
 "Il driver TMC per il motore Idler è surriscaldato. Raffredda la scheda MMU e "
 "resetta la MMU."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:172
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:172
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:172
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:172
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:172
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:172
 msgid ""
 "TMC driver for the Idler motor was restarted. There is probably an issue "
 "with the electronics. Check the wiring and connectors."
@@ -6685,11 +6361,7 @@ msgstr ""
 "Il driver TMC per il motore Idler è stato riavviato. Probabilmente c'è un "
 "problema con l'elettronica. Controlla il cablaggio e i connettori."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:95
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:95
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:95
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:95
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:95
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:95
 msgid ""
 "TMC driver for the Pulley motor is almost overheating. Make sure there is "
 "sufficient airflow near the MMU board."
@@ -6697,11 +6369,7 @@ msgstr ""
 "Il driver TMC per il motore della puleggia si sta surriscaldando. Assicurati "
 "che ci sia un flusso d'aria sufficiente vicino alla scheda MMU."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:137
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:137
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:137
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:137
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:137
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:137
 msgid ""
 "TMC driver for the Pulley motor is not responding. Try resetting the MMU. If "
 "the issue persists contact support."
@@ -6709,11 +6377,7 @@ msgstr ""
 "Il driver TMC per il motore della puleggia non risponde. Prova a resettare "
 "la MMU. Se il problema persiste, contatta l'assistenza."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:116
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:116
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:116
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:116
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:116
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:116
 msgid ""
 "TMC driver for the Pulley motor is overheated. Cool down the MMU board and "
 "reset MMU."
@@ -6721,11 +6385,7 @@ msgstr ""
 "Il driver TMC per il motore della puleggia è surriscaldato. Raffredda la "
 "scheda MMU e resetta la MMU."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:158
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:158
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:158
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:158
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:158
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:158
 msgid ""
 "TMC driver for the Pulley motor was restarted. There is probably an issue "
 "with the electronics. Check the wiring and connectors."
@@ -6733,11 +6393,7 @@ msgstr ""
 "Il driver TMC per il motore Puleggia è stato riavviato. Probabilmente c'è un "
 "problema con l'elettronica. Controlla il cablaggio e i connettori."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:102
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:102
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:102
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:102
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:102
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:102
 msgid ""
 "TMC driver for the Selector motor is almost overheating. Make sure there is "
 "sufficient airflow near the MMU board."
@@ -6745,11 +6401,7 @@ msgstr ""
 "Il driver TMC per il motore del Selettore si sta surriscaldando. Assicurati "
 "che ci sia un flusso d'aria sufficiente vicino alla scheda MMU."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:144
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:144
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:144
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:144
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:144
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:144
 msgid ""
 "TMC driver for the Selector motor is not responding. Try resetting the MMU. "
 "If the issue persists contact support."
@@ -6757,11 +6409,7 @@ msgstr ""
 "Il driver TMC per il motore del selettore non risponde. Prova a resettare la "
 "MMU. Se il problema persiste, contatta l'assistenza."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:123
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:123
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:123
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:123
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:123
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:123
 msgid ""
 "TMC driver for the Selector motor is overheated. Cool down the MMU board and "
 "reset MMU."
@@ -6769,11 +6417,7 @@ msgstr ""
 "Il driver TMC per il motore Selettore è surriscaldato. Raffredda la scheda "
 "MMU e resetta la MMU."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:165
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:165
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:165
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:165
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:165
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:165
 msgid ""
 "TMC driver for the Selector motor was restarted. There is probably an issue "
 "with the electronics. Check the wiring and connectors."
@@ -6781,75 +6425,27 @@ msgstr ""
 "Il driver TMC per il motore Selettore è stato riavviato. Probabilmente c'è "
 "un problema con l'elettronica. Controlla il cablaggio e i connettori."
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:157
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:164
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:171
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:157
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:164
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:171
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:157
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:164
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:171
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:157
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:164
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:171
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:157
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:164
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:171
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:157
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:164
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:171
 msgid "TMC DRIVER RESET"
 msgstr "RESET DRIVER TMC"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:199
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:206
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:213
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:199
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:206
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:213
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:199
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:206
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:213
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:199
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:206
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:213
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:199
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:206
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:213
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:199
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:206
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:213
 msgid "TMC DRIVER SHORTED"
 msgstr "TMC DRIVER SHORTED"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:115
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:122
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:129
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:115
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:122
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:129
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:115
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:122
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:129
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:115
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:122
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:129
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:115
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:122
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:129
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:115
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:122
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:129
 msgid "TMC OVERHEAT ERROR"
 msgstr "TMC OVERHEAT ERROR"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:178
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:185
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:192
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:178
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:185
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:192
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:178
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:185
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:192
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:178
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:185
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:192
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:178
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:185
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:192
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:178
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:185
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:192
 msgid "TMC UNDERVOLTAGE ERR"
 msgstr "TMC UNDERVOLTAGE ERR"
 
@@ -7069,11 +6665,11 @@ msgstr "Fattore di flusso Strumento 5"
 msgid "Tool 5 Loadcell Test"
 msgstr "Test Cella di carico Strumento 5"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:8
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:8
 msgid "TOOLCHANGER ERROR"
 msgstr "TOOLCHANGER ERROR"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:737
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:737
 msgid ""
 "Toolchanger problem has been detected.\n"
 "Park all tools to docks\n"
@@ -7083,7 +6679,7 @@ msgstr ""
 "Parcheggia tutti gli strumenti nei dock\n"
 "e lascia libero il carrello."
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:30
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:30
 #, c-format
 msgid "Tool %d offset %c: %.3f is out of bounds [%.3f, %.3f]."
 msgstr "Offset strumento %d %c: %.3f è fuori dai limiti [%.3f, %.3f]."
@@ -7100,13 +6696,13 @@ msgstr "Sensore Filamento Testina"
 msgid "Tool Light"
 msgstr "Luce Strumento"
 
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:547
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:498
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:743
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:547
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:498
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:743
 msgid "Tool mapping"
 msgstr "Tool mapping"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:29
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:29
 msgid "TOOL OFFSET OUT OF BOUNDS"
 msgstr "TOOL OFFSET OUT OF BOUNDS"
 
@@ -7146,7 +6742,7 @@ msgstr "Totale caricamenti non riusciti"
 msgid "Touch"
 msgstr "Tocco"
 
-#: src/gui/screen_home.cpp:320
+#: src/gui/screen_home.cpp:313
 msgid ""
 "Touch disabled. This feature is work-in-progress and is going to be fully "
 "available in a future update."
@@ -7224,11 +6820,11 @@ msgstr "Ruota la manopola per spostare l'asse Z"
 msgid "%u %% / %li RPM"
 msgstr "%u %% / %li RPM"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:457
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:702
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:541
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:492
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:730
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:541
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:457
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:492
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:702
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:730
 msgid ""
 "Unable to home the printer.\n"
 "Do you want to try again?"
@@ -7236,8 +6832,8 @@ msgstr ""
 "Homing non riuscito. \n"
 "Vuoi riprovare?"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:415
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:443
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:415
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:443
 msgid "Unable to start puppy application"
 msgstr "Impossibile avviare applicazione puppy"
 
@@ -7245,8 +6841,8 @@ msgstr "Impossibile avviare applicazione puppy"
 msgid "Unassigned G-Code filament(s)"
 msgstr "Filamento(i) G-code non assegnato(i)"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:380
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:408
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:380
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:408
 msgid "Unassigned puppy found"
 msgstr "Rilevato puppy non assegnato"
 
@@ -7259,16 +6855,12 @@ msgstr "Non autorizzato"
 msgid "uncalibrated / %ld"
 msgstr "non calibr. / %ld"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:319
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:319
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:319
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:319
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:319
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:319
 msgid "Unexpected error occurred."
 msgstr "Si è verificato un errore imprevisto."
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:184
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:205
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:184
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:205
 msgid "Unexpected invalid current."
 msgstr "Corrente non valida imprevista."
 
@@ -7285,16 +6877,12 @@ msgstr "Sconosciuto"
 msgid "Unknown Error"
 msgstr "Errore sconosciuto"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:318
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:318
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:318
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:318
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:318
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:318
 msgid "UNKNOWN ERROR"
 msgstr "Errore sconosciuto"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:408
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:436
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:408
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:436
 msgid "Unknown puppy type"
 msgstr "Tipo di puppy sconosciuto"
 
@@ -7337,11 +6925,7 @@ msgstr "Scarico in FINDA"
 msgid "Unloading to pulley"
 msgstr "Scarico su puleggia"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:304
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:304
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:304
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:304
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:304
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:304
 msgid "UNLOAD MANUALLY"
 msgstr "SCARICA MANUALMENTE"
 
@@ -7349,27 +6933,27 @@ msgstr "SCARICA MANUALMENTE"
 msgid "Unparking"
 msgstr "Unparking"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:358
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:603
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:421
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:379
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:631
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:421
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:358
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:379
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:603
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:631
 msgid "UNSUPPORTED BUDDY FW"
 msgstr "FW BUDDY NON SUPPORTATO"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:379
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:624
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:442
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:400
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:652
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:442
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:379
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:400
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:624
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:652
 msgid "UNSUPPORTED FIRMWARE BBF FILE"
 msgstr "FILE FIRMWARE BBF NON SUPPORTATO"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:351
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:596
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:414
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:372
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:624
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:414
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:351
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:372
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:596
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:624
 msgid "UNSUPPORTED PRINTER MODEL"
 msgstr "MODELLO DI STAMPANTE NON SUPPORTATO"
 
@@ -7392,19 +6976,18 @@ msgstr ""
 "\n"
 "Attendere."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:127
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:211
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:134
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:127
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:232
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:134
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:127
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:211
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:232
 msgid "USB DEVICE OVERCURRENT"
 msgstr "SOVRACORRENTE DISP. USB"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:296
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:541
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:359
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:317
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:569
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:359
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:296
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:317
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:541
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:569
 msgid ""
 "USB drive not\n"
 "connected! Please\n"
@@ -7422,20 +7005,20 @@ msgstr ""
 msgid "USB drive not detected! Insert USB drive first!"
 msgstr "Unità USB non rilevata! Inserire prima l'unità USB!"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:499
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:744
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:597
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:548
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:786
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:597
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:499
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:548
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:744
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:786
 msgid "USB drive or file error, the print is now paused. Reconnect the drive."
 msgstr ""
 "Errore nell'unità USB o nel file, la stampa è in pausa. Ricollega l'unità."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:380
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:625
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:443
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:401
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:653
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:443
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:380
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:401
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:625
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:653
 msgid ""
 "USB flash drive contains\n"
 "unsupported firmware BBF file."
@@ -7443,27 +7026,26 @@ msgstr ""
 "L'unità USB contiene un\n"
 "file BBF del firmware non supportato."
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:295
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:540
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:358
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:316
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:568
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:358
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:295
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:316
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:540
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:568
 msgid "USB FLASH DRIVE NOT CONNECTED"
 msgstr "FLASH DRIVE USB NON CONNESSO"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:372
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:617
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:435
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:393
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:645
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:435
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:372
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:393
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:617
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:645
 msgid "USB FLASH ERROR"
 msgstr "USB FLASH ERROR"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:120
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:204
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:127
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:120
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:225
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:127
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:120
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:204
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:225
 msgid "USB PORT OVERCURRENT"
 msgstr "SOVRACORRENTE PORTA USB"
 
@@ -7515,8 +7097,8 @@ msgstr "Info versione"
 msgid "VERSION INFO"
 msgstr "INFO VERSIONE"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:443
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:471
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:443
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:471
 msgid "Waiting for fingerprint timed out"
 msgstr "Timeout attesa fingerprint"
 
@@ -7526,8 +7108,8 @@ msgstr ""
 "In attesa che la temperatura degli hotend si stabilizzi a quella di "
 "calibrazione:"
 
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:450
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:478
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:450
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:478
 msgid "Waiting for puppies to start timed out"
 msgstr "Timeout attesa avvio dei puppy"
 
@@ -7535,17 +7117,17 @@ msgstr "Timeout attesa avvio dei puppy"
 msgid "Waiting for temperature"
 msgstr "In attesa della temperatura"
 
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:548
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:807
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:653
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:611
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:884
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:653
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:548
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:611
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:807
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:884
 msgid "Waiting for the user. Press \"Resume\" once the printer is ready."
 msgstr ""
 "In attesa dell'utente. Premi \"Riprendi\" quando la stampante è pronta."
 
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:555
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:506
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:555
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:506
 msgid "Waiting for user input"
 msgstr "Attesa azione utente"
 
@@ -7554,51 +7136,37 @@ msgid "Warn"
 msgstr "Avvisa"
 
 #: src/guiapi/src/window_msgbox.cpp:332
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:386
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:393
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:400
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:407
-#: build/mini_release_boot/lib/error_codes/error_list.hpp:414
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:631
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:638
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:645
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:652
-#: build/ix_release_boot/lib/error_codes/error_list.hpp:659
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:463
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:470
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:477
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:484
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:491
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:498
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:414
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:421
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:428
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:435
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:442
-#: build/mk3.5_release_boot/lib/error_codes/error_list.hpp:449
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:659
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:666
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:673
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:680
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:687
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:463
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:470
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:477
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:484
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:491
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:498
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:386
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:393
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:400
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:407
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:414
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:421
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:428
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:435
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:442
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:449
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:631
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:638
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:645
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:652
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:659
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:666
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:673
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:680
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:687
 msgid "Warning"
 msgstr "Attenzione"
 
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:94
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:101
-#: build/mini_release_boot/lib/error_codes/error_list_mmu.hpp:108
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:94
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:101
-#: build/ix_release_boot/lib/error_codes/error_list_mmu.hpp:108
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:94
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:101
-#: build/mk4_release_boot/lib/error_codes/error_list_mmu.hpp:108
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:94
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:101
-#: build/mk3.5_release_boot/lib/error_codes/error_list_mmu.hpp:108
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:94
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:101
-#: build/xl_release_boot/lib/error_codes/error_list_mmu.hpp:108
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:94
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:101
+#: build-vscode-buddy/lib/error_codes/error_list_mmu.hpp:108
 msgid "WARNING TMC TOO HOT"
 msgstr "ATTENZIONE TMC CALDO"
 
@@ -7611,7 +7179,7 @@ msgstr "Filamento scaricato correttamente?"
 msgid "Wed"
 msgstr "Me"
 
-#: build/mk4_release_boot/lib/error_codes/error_list.hpp:457
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:457
 msgid ""
 "Welcome to the Cold Pull wizard. Prepare a 30cm piece of PLA filament and "
 "follow the instructions. For more details, visit:"
@@ -7682,7 +7250,7 @@ msgstr "Wi-Fi"
 msgid "WiFi connection"
 msgstr "Connessione WiFi"
 
-#: src/gui/screen_home.cpp:408
+#: src/gui/screen_home.cpp:401
 msgid ""
 "Wi-Fi credentials (SSID and password) discovered on the USB flash drive. "
 "Would you like to connect your printer to Wi-Fi now?"
@@ -7718,10 +7286,6 @@ msgstr "IMPOSTAZIONI WI-FI"
 #, c-format
 msgid "Wipe tower %dg"
 msgstr "Torre di pulitura %dg"
-
-#: include/common/hotend_type.hpp
-msgid "With sock"
-msgstr "Con calzino"
 
 #: src/gui/MItem_basic_selftest.hpp:19
 msgid "Wizard"
@@ -7771,15 +7335,15 @@ msgstr "XL Buddy Corrente 5V"
 msgid "xLCD"
 msgstr "xLCD"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:43
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:43
 msgid "XY POSITION INVALID"
 msgstr "XY POSITION INVALID"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:36
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:36
 msgid "XY PROBE UNSTABLE"
 msgstr "XY PROBE UNSTABLE"
 
-#: build/xl_release_boot/lib/error_codes/error_list.hpp:37
+#: build-vscode-buddy/lib/error_codes/error_list.hpp:37
 msgid "XY probing failed due to the low measurement stability."
 msgstr ""
 "Rilevamento XY non riuscito a causa di una bassa stabilità di misurazione."

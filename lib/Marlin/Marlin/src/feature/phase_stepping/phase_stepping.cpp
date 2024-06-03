@@ -43,38 +43,54 @@ static uint_fast8_t axis_num_to_refresh = 0;
 #endif
 static uint32_t last_timer_tick = 0;
 
-MoveTarget::MoveTarget(float position)
-    : initial_pos(position)
+MoveTarget::MoveTarget(float initial_pos)
+    : initial_pos(initial_pos)
     , half_accel(0)
     , start_v(0)
     , duration(0)
-    , target(position) {}
+    , target_pos(initial_pos)
+    , end_time(0) {}
 
-MoveTarget::MoveTarget(const move_t &move, int axis, const uint64_t move_duration_ticks) {
+MoveTarget::MoveTarget(float initial_pos, const move_t &move, int axis, const uint64_t move_duration_ticks)
+    : initial_pos(initial_pos)
+    , duration(uint32_t(move_duration_ticks)) {
     assert(move_duration_ticks <= std::numeric_limits<uint32_t>::max());
     float r = get_move_axis_r(move, axis);
-    initial_pos = extract_physical_position(AxisEnum(axis), move.start_pos);
     half_accel = r * float(move.half_accel);
     start_v = r * float(move.start_v);
-    duration = uint32_t(move_duration_ticks);
-    target = target_position();
+    target_pos = target_position();
+    end_time = move_end_time(move.print_time + move.move_time);
 }
 
-MoveTarget::MoveTarget(const input_shaper_state_t &is_state, const uint64_t move_duration_ticks)
-    : initial_pos(is_state.start_pos)
+MoveTarget::MoveTarget(float initial_pos, const input_shaper_state_t &is_state, const uint64_t move_duration_ticks)
+    : initial_pos(initial_pos)
     , half_accel(is_state.half_accel)
     , start_v(is_state.start_v)
     , duration(uint32_t(move_duration_ticks)) {
-    target = target_position();
     assert(move_duration_ticks <= std::numeric_limits<uint32_t>::max());
+    target_pos = target_position();
+    end_time = move_end_time(is_state.nearest_next_change);
+}
+
+float MoveTarget::move_end_time(double end_time) const {
+    // To ensure the lock-free behavior of current_target_end_time (and conserve space) we reduce
+    // the precision of end_time to float. Since end_time is only used for flushing, the precision
+    // is not crucial (no steps are produced) as long as we *guarantee* proper ordering.
+    // The value needs to be strictly <= when compared and we do so here.
+    float f_end_time = end_time;
+    if (f_end_time > end_time) {
+        f_end_time = std::nextafterf(f_end_time, 0.f);
+    }
+    return f_end_time;
 }
 
 float MoveTarget::target_position() const {
-    float epoch = duration / 1000000.f;
+    float epoch = duration / static_cast<float>(TICK_FREQ);
     return initial_pos + start_v * epoch + half_accel * epoch * epoch;
 }
 
 void phase_stepping::init() {
+    phase_stepping::initialize_axis_motor_params();
     phase_stepping::axis_states[0].reset(new AxisState(AxisEnum::X_AXIS));
     phase_stepping::axis_states[1].reset(new AxisState(AxisEnum::Y_AXIS));
 }
@@ -85,7 +101,7 @@ void phase_stepping::load() {
 }
 
 FORCE_INLINE uint64_t convert_absolute_time_to_ticks(const double time) {
-    return uint64_t(time * 1'000'000.);
+    return uint64_t(time * TICK_FREQ);
 }
 
 FORCE_INLINE uint64_t calc_move_segment_end_time_in_ticks(const move_t &move) {
@@ -112,20 +128,20 @@ FORCE_INLINE CorrectedCurrentLut &resolve_current_lut(AxisState &axis_state) {
 }
 
 static void init_step_generator_internal(
-    const move_t &move,
     move_segment_step_generator_t &step_generator,
-    step_generator_state_t & /*step_generator_state*/) {
+    step_generator_state_t &step_generator_state) {
     auto &axis_state = *step_generator.phase_step_state;
     const uint8_t axis = step_generator.axis;
 
     assert(axis_state.pending_targets.isEmpty());
 
-    axis_state.initial_time = ticks_us();
+    axis_state.initial_time = step_generator_state.initial_time;
 
-    axis_state.last_position = axis_state.target->initial_pos;
-    axis_state.last_processed_move = &move;
+    axis_state.last_position = axis_state.next_target.initial_pos;
+    axis_state.current_target = MoveTarget(axis_state.last_position);
+    axis_state.current_target_end_time = MAX_PRINT_TIME;
 
-    int32_t initial_steps_made = pos_to_steps(AxisEnum(axis), axis_state.target->initial_pos);
+    int32_t initial_steps_made = pos_to_steps(AxisEnum(axis), axis_state.next_target.initial_pos);
     axis_state.initial_count_position = Stepper::get_axis_steps(AxisEnum(axis)) - initial_steps_made;
     axis_state.initial_count_position_from_startup = Stepper::get_axis_steps_from_startup(AxisEnum(axis)) - initial_steps_made;
 
@@ -146,7 +162,8 @@ void phase_stepping::init_step_generator_classic(
 
     const uint64_t next_print_time_ticks = calc_move_segment_end_time_in_ticks(move);
     const uint64_t move_duration_ticks = next_print_time_ticks - axis_state.current_print_time_ticks;
-    axis_state.target = MoveTarget(move, axis, move_duration_ticks);
+    const float move_start_pos = extract_physical_position(AxisEnum(axis), move.start_pos);
+    axis_state.next_target = MoveTarget(move_start_pos, move, axis, move_duration_ticks);
     axis_state.current_print_time_ticks = next_print_time_ticks;
 
     step_generator_state.step_generator[axis] = &step_generator;
@@ -155,8 +172,9 @@ void phase_stepping::init_step_generator_classic(
     // We are keeping a reference to a move segment in last_processed_move.
     // Otherwise, a move segment can be discarded while we are using it.
     move.reference_cnt += 1;
+    axis_state.last_processed_move = &move;
 
-    init_step_generator_internal(move, step_generator, step_generator_state);
+    init_step_generator_internal(step_generator, step_generator_state);
 }
 
 void phase_stepping::init_step_generator_input_shaping(
@@ -175,7 +193,7 @@ void phase_stepping::init_step_generator_input_shaping(
 
     const uint64_t next_print_time_ticks = calc_move_segment_end_time_in_ticks(*step_generator.is_state);
     const uint64_t move_duration_ticks = next_print_time_ticks - axis_state.current_print_time_ticks;
-    axis_state.target = MoveTarget(*step_generator.is_state, move_duration_ticks);
+    axis_state.next_target = MoveTarget(step_generator.is_state->start_pos, *step_generator.is_state, move_duration_ticks);
     axis_state.current_print_time_ticks = next_print_time_ticks;
 
     // ...and then override next_step_func with phase stepping one
@@ -183,7 +201,10 @@ void phase_stepping::init_step_generator_input_shaping(
     step_generator_state.step_generator[axis] = &step_generator;
     step_generator_state.next_step_func[axis] = (generator_next_step_f)next_step_event_input_shaping;
 
-    init_step_generator_internal(move, step_generator, step_generator_state);
+    // we don't keep a reference to the last move with IS, reset it
+    axis_state.last_processed_move = nullptr;
+
+    init_step_generator_internal(step_generator, step_generator_state);
 }
 
 step_event_info_t phase_stepping::next_step_event_classic(
@@ -196,26 +217,29 @@ step_event_info_t phase_stepping::next_step_event_classic(
 
     step_event_info_t next_step_event = { std::numeric_limits<double>::max(), 0, STEP_EVENT_INFO_STATUS_GENERATED_INVALID };
     if (axis_state.pending_targets.isFull()) {
-        next_step_event.time = axis_state.last_processed_move->print_time + axis_state.last_processed_move->move_time;
+        next_step_event.time = axis_state.current_target_end_time;
         next_step_event.status = StepEventInfoStatus::STEP_EVENT_INFO_STATUS_GENERATED_PENDING;
     } else if (const move_t *next_move = PreciseStepping::move_segment_queue_next_move(*axis_state.last_processed_move); next_move != nullptr) {
         next_step_event.time = next_move->print_time;
 
-        if (!is_ending_empty_move(*next_move)) {
-            uint8_t axis = axis_state.axis_index;
+        const uint8_t axis = axis_state.axis_index;
+        const float move_start_pos = extract_physical_position(AxisEnum(axis), next_move->start_pos);
 
+        // push the buffered target
+        axis_state.next_target.target_pos = move_start_pos;
+        axis_state.active = false;
+        axis_state.pending_targets.enqueue(axis_state.next_target);
+        axis_state.active = true;
+
+        // buffer the next
+        if (!is_ending_empty_move(*next_move)) {
             const uint64_t next_print_time_ticks = calc_move_segment_end_time_in_ticks(*next_move);
             const uint64_t move_duration_ticks = next_print_time_ticks - axis_state.current_print_time_ticks;
-            auto new_target = MoveTarget(*next_move, axis, move_duration_ticks);
+            axis_state.next_target = MoveTarget(move_start_pos, *next_move, axis, move_duration_ticks);
             axis_state.current_print_time_ticks = next_print_time_ticks;
 
-            float target_pos = new_target.target;
-            int32_t target_steps = pos_to_steps(AxisEnum(axis), target_pos);
+            const int32_t target_steps = pos_to_steps(AxisEnum(axis), axis_state.next_target.target_pos);
             PreciseStepping::step_generator_state.current_distance[axis] = target_steps;
-
-            axis_state.active = false;
-            axis_state.pending_targets.enqueue(new_target);
-            axis_state.active = true;
 
             next_step_event.flags |= STEP_EVENT_FLAG_KEEP_ALIVE;
             next_step_event.status = STEP_EVENT_INFO_STATUS_GENERATED_KEEP_ALIVE;
@@ -244,31 +268,34 @@ step_event_info_t phase_stepping::next_step_event_input_shaping(
 
     step_event_info_t next_step_event = { std::numeric_limits<double>::max(), 0, STEP_EVENT_INFO_STATUS_GENERATED_INVALID };
     if (axis_state.pending_targets.isFull()) {
-        next_step_event.time = step_generator.is_state->nearest_next_change;
+        next_step_event.time = axis_state.current_target_end_time;
         next_step_event.status = StepEventInfoStatus::STEP_EVENT_INFO_STATUS_GENERATED_PENDING;
     } else {
         next_step_event.time = step_generator.is_state->nearest_next_change;
 
-        if (const bool is_updated = input_shaper_state_update(*step_generator.is_state, step_generator.axis);
-            is_updated && step_generator.is_state->nearest_next_change < MAX_PRINT_TIME) {
-
+        if (input_shaper_state_update(*step_generator.is_state, step_generator.axis)) {
             uint8_t axis = axis_state.axis_index;
+            const float move_start_pos = step_generator.is_state->start_pos;
 
-            const uint64_t next_print_time_ticks = calc_move_segment_end_time_in_ticks(*step_generator.is_state);
-            const uint64_t move_duration_ticks = next_print_time_ticks - axis_state.current_print_time_ticks;
-            auto new_target = MoveTarget(*step_generator.is_state, move_duration_ticks);
-            axis_state.current_print_time_ticks = next_print_time_ticks;
-
-            float target_pos = new_target.target;
-            int32_t target_steps = pos_to_steps(AxisEnum(axis), target_pos);
-            PreciseStepping::step_generator_state.current_distance[axis] = target_steps;
-
+            // push the buffered target
+            axis_state.next_target.target_pos = move_start_pos;
             axis_state.active = false;
-            axis_state.pending_targets.enqueue(new_target);
+            axis_state.pending_targets.enqueue(axis_state.next_target);
             axis_state.active = true;
 
-            next_step_event.flags |= STEP_EVENT_FLAG_KEEP_ALIVE;
-            next_step_event.status = STEP_EVENT_INFO_STATUS_GENERATED_KEEP_ALIVE;
+            // buffer the next
+            if (step_generator.is_state->nearest_next_change < MAX_PRINT_TIME) {
+                const uint64_t next_print_time_ticks = calc_move_segment_end_time_in_ticks(*step_generator.is_state);
+                const uint64_t move_duration_ticks = next_print_time_ticks - axis_state.current_print_time_ticks;
+                axis_state.next_target = MoveTarget(move_start_pos, *step_generator.is_state, move_duration_ticks);
+                axis_state.current_print_time_ticks = next_print_time_ticks;
+
+                const int32_t target_steps = pos_to_steps(AxisEnum(axis), axis_state.next_target.target_pos);
+                PreciseStepping::step_generator_state.current_distance[axis] = target_steps;
+
+                next_step_event.flags |= STEP_EVENT_FLAG_KEEP_ALIVE;
+                next_step_event.status = STEP_EVENT_INFO_STATUS_GENERATED_KEEP_ALIVE;
+            }
         }
 
         PreciseStepping::move_segment_processed_handler();
@@ -291,7 +318,7 @@ void phase_stepping::synchronize() {
 bool phase_stepping::processing() {
     // check for pending targets
     for (auto &state : axis_states) {
-        if (state && (!state->pending_targets.isEmpty() || state->target.has_value())) {
+        if (state && (!state->pending_targets.isEmpty() || state->current_target.has_value())) {
             return true;
         }
     }
@@ -315,6 +342,8 @@ void phase_stepping::set_phase_origin(AxisEnum axis, float pos) {
     assert_initialized();
 
     auto &axis_state = *axis_states[axis];
+    assert(axis_state.pending_targets.isEmpty() && !axis_state.current_target.has_value());
+
     bool was_active = axis_state.active;
     axis_state.active = false;
 
@@ -332,24 +361,32 @@ void phase_stepping::enable_phase_stepping(AxisEnum axis_num) {
     // We know that PHASE_STEPPING is enabled only on TMC2130 boards
     auto &stepper = static_cast<TMC2130Stepper &>(stepper_axis(axis_num));
     auto &axis_state = *axis_states[axis_num];
-    assert(!axis_state.active && !axis_state.target.has_value() && axis_state.pending_targets.isEmpty());
+    assert(!axis_state.active && !axis_state.current_target.has_value() && axis_state.pending_targets.isEmpty());
 
     axis_state.last_position = 0;
-    axis_state.direction = true; // TODO: should use last_direction_bits
+    axis_state.direction = Stepper::last_axis_direction(axis_num);
 
-#if HAS_BURST_STEPPING()
-    axis_state.original_microsteps = stepper.microsteps();
-    axis_state.last_phase = axis_state.zero_rotor_phase = axis_state.driver_phase = stepper.MSCNT();
-    axis_state.phase_correction = 0;
+    // switch off interpolation first to ensure position is settled
     axis_state.had_interpolation = stepper.intpol();
     stepper.intpol(false);
+
+    // switch microsteps and fetch MSCNT at full resolution
+    axis_state.original_microsteps = stepper.microsteps();
     stepper.microsteps(256);
+    int current_phase = stepper.MSCNT();
+
+    // We initialize the zero rotor phase to current phase. The real initialization is done by
+    // set_phase_origin() when the local coordinate system is effectively initialized.
+    axis_state.zero_rotor_phase = current_phase;
+    axis_state.last_phase = current_phase;
+
+#if HAS_BURST_STEPPING()
+    axis_state.driver_phase = current_phase;
+    burst_stepping::init();
 #else
     // In order to start phase stepping, we have to set phase currents that are
     // in sync with current position, and then switch the driver to current
     // mode.
-    int current_phase = stepper.MSCNT();
-
     axis_state.last_currents = resolve_current_lut(axis_state).get_current(current_phase);
 
     // Set IHOLD to be the same as IRUN (as IHOLD is always used in XDIRECT)
@@ -360,20 +397,10 @@ void phase_stepping::enable_phase_stepping(AxisEnum axis_num) {
     stepper.coil_A(axis_state.last_currents.b);
     stepper.coil_B(axis_state.last_currents.a);
     stepper.direct_mode(true);
-
-    // We initialize the zero rotor phase to current phase. The real initialization is done by
-    // set_phase_origin() when the local coordinate system is effectively initialized.
-    axis_state.zero_rotor_phase = current_phase;
-    axis_state.last_phase = current_phase;
 #endif
+
     // Read axis configuration and cache it so we can access it fast
-    if (axis_num == AxisEnum::X_AXIS) {
-        axis_state.inverted = INVERT_X_DIR;
-    } else if (axis_num == AxisEnum::Y_AXIS) {
-        axis_state.inverted = INVERT_Y_DIR;
-    } else if (axis_num == AxisEnum::Z_AXIS) {
-        axis_state.inverted = INVERT_Z_DIR;
-    }
+    axis_state.inverted = Stepper::is_axis_inverted(axis_num);
 
     // Sync the counters just before enabling the axis
     int32_t initial_steps_made = pos_to_steps(axis_num, axis_state.last_position);
@@ -401,14 +428,9 @@ void phase_stepping::disable_phase_stepping(AxisEnum axis_num) {
     auto enable_mask = PHASE_STEPPING_GENERATOR_X << axis_num;
     PreciseStepping::physical_axis_step_generator_types &= ~enable_mask;
 
-#if HAS_BURST_STEPPING()
-    stepper.microsteps(axis_state.original_microsteps);
-    stepper.intpol(axis_state.had_interpolation);
-#else
+#if !HAS_BURST_STEPPING()
     // In order to avoid glitch in motor motion, we have to first, make steps to
     // get MSCNT into sync and then we disable XDirect mode
-    int original_microsteps = stepper.microsteps();
-    stepper.microsteps(256);
     int current_phase = normalize_motor_phase(axis_state.last_phase);
     while (current_phase != stepper.MSCNT()) {
         switch (axis_num) {
@@ -427,10 +449,11 @@ void phase_stepping::disable_phase_stepping(AxisEnum axis_num) {
         delay_us_precise(20);
     }
     stepper.direct_mode(false);
-    stepper.microsteps(original_microsteps);
 #endif
 
-    // Reset IHOLD to the original state
+    // Reset driver params to original state
+    stepper.microsteps(axis_state.original_microsteps);
+    stepper.intpol(axis_state.had_interpolation);
     stepper.rms_current(stepper.rms_current(), axis_state.initial_hold_multiplier);
 
     if (!any_axis_active()) {
@@ -455,12 +478,12 @@ void phase_stepping::enable(AxisEnum axis_num, bool enable) {
     }
 }
 
-void phase_stepping::stop_immediately() {
+void phase_stepping::clear_targets() {
     for (auto &axis_state : axis_states) {
         bool was_active = axis_state->active;
         axis_state->active = false;
 
-        axis_state->target.reset();
+        axis_state->current_target.reset();
         while (!axis_state->pending_targets.isEmpty()) {
             axis_state->pending_targets.dequeue();
         }
@@ -511,8 +534,6 @@ static bool is_refresh_period_sane(uint32_t now, uint32_t last_timer_tick) {
     // the case when there was too long delay between refreshes as it marks that
     // the interrupt was delayed and the next update might be sooner than we
     // anticipate.
-
-    static constexpr uint REFRESH_PERIOD_US = 1'000'000 / REFRESH_FREQ;
     static constexpr uint UPDATE_DURATION_US = 20; // Rather pesimistic update
 
     uint32_t refresh_period = ticks_diff(now, last_timer_tick);
@@ -545,25 +566,25 @@ static FORCE_INLINE FORCE_OFAST void refresh_axis(
     uint32_t move_epoch = ticks_diff(now, axis_state.initial_time);
     float move_position = axis_state.last_position;
 
-    while (!axis_state.target.has_value() || move_epoch > axis_state.target->duration) {
-        uint32_t time_overshoot = 0;
-        if (axis_state.target.has_value()) {
-            time_overshoot = ticks_diff(move_epoch, axis_state.target->duration);
-            move_position = axis_state.target->target;
-            axis_state.target.reset();
+    while (!axis_state.current_target.has_value() || move_epoch > axis_state.current_target->duration) {
+        if (axis_state.current_target.has_value()) {
+            axis_state.initial_time += axis_state.current_target->duration;
+            move_position = axis_state.current_target->target_pos;
+            axis_state.current_target.reset();
         }
 
         if (!axis_state.pending_targets.isEmpty()) {
             // Pull new movement
-            axis_state.target = axis_state.pending_targets.dequeue();
+            const auto current_target = axis_state.pending_targets.dequeue();
+            axis_state.current_target = current_target;
 
-            axis_state.is_cruising = axis_state.target->half_accel == 0 && axis_state.target->duration > 10'000;
+            axis_state.current_target_end_time = current_target.end_time;
+
+            axis_state.is_cruising = (current_target.half_accel == 0) && (current_target.duration > 10'000);
             axis_state.is_moving = true;
 
-            // Time overshoots accounts for the lost time in the previous state
-            axis_state.initial_time = now - time_overshoot;
-            move_position = axis_state.target->initial_pos;
-            move_epoch = time_overshoot;
+            move_position = current_target.initial_pos;
+            move_epoch = ticks_diff(now, axis_state.initial_time);
         } else {
             // No new movement
             axis_state.is_cruising = false;
@@ -572,7 +593,7 @@ static FORCE_INLINE FORCE_OFAST void refresh_axis(
         }
     }
 
-    auto [speed, position] = axis_state.target.has_value()
+    auto [speed, position] = axis_state.current_target.has_value()
         ? axis_position(axis_state, move_epoch)
         : std::make_tuple(0.f, move_position);
 
@@ -585,12 +606,12 @@ static FORCE_INLINE FORCE_OFAST void refresh_axis(
     }
     const auto &current_lut = resolve_current_lut(axis_state);
 
-    int new_phase = normalize_motor_phase(pos_to_phase(axis_index, physical_position) + axis_state.zero_rotor_phase);
+    int new_phase = normalize_motor_phase(pos_to_phase(axis_enum, physical_position) + axis_state.zero_rotor_phase);
     assert(phase_difference(axis_state.last_phase, new_phase) < 256);
 
 #if HAS_BURST_STEPPING()
-    axis_state.phase_correction = current_lut.get_phase_shift(new_phase);
-    int shifted_phase = normalize_motor_phase(new_phase + axis_state.phase_correction);
+    int phase_correction = current_lut.get_phase_shift(new_phase);
+    int shifted_phase = normalize_motor_phase(new_phase + phase_correction);
     int steps_diff = phase_difference(shifted_phase, axis_state.driver_phase);
     burst_stepping::set_phase_diff(axis_enum, steps_diff);
     axis_state.driver_phase = shifted_phase;
@@ -610,7 +631,7 @@ static FORCE_INLINE FORCE_OFAST void refresh_axis(
     // called and will refresh the new starting values.
     if (position != axis_state.last_position) {
         // update counters to the new position
-        int32_t steps_made = pos_to_steps(axis_index, position);
+        int32_t steps_made = pos_to_steps(axis_enum, position);
         Stepper::set_axis_steps(axis_enum, axis_state.initial_count_position + steps_made);
         Stepper::set_axis_steps_from_startup(axis_enum, axis_state.initial_count_position_from_startup + steps_made);
 
@@ -639,8 +660,6 @@ FORCE_OFAST void phase_stepping::handle_periodic_refresh() {
     // - post to phase: 1.3 µs
     // - current lookup: 800 ns
     // - Quick transmission: 900ns (time from call to first bit) + 1µs transaction termination
-
-    static constexpr uint REFRESH_PERIOD_US = 1'000'000 / REFRESH_FREQ;
     uint32_t now = ticks_us() + REFRESH_PERIOD_US;
 
     // always refresh the last_timer_tick
@@ -649,20 +668,24 @@ FORCE_OFAST void phase_stepping::handle_periodic_refresh() {
 
 #if HAS_BURST_STEPPING()
     // Fire the previously setup steps...
-    burst_stepping::fire();
-
-    // ...and refresh all axes
-    for (std::size_t i = 0; i != SUPPORTED_AXIS_COUNT; i++) {
-        refresh_axis(*axis_states[i], now, old_tick);
+    if (burst_stepping::fire()) {
+        if (!PreciseStepping::stopping()) {
+            // ...and refresh all axes
+            for (std::size_t i = 0; i != SUPPORTED_AXIS_COUNT; i++) {
+                refresh_axis(*axis_states[i], now, old_tick);
+            }
+        }
     }
 #else
     phase_stepping::spi::finish_transmission();
 
-    ++axis_num_to_refresh;
-    if (axis_num_to_refresh == axis_states.size()) {
-        axis_num_to_refresh = 0;
+    if (!PreciseStepping::stopping()) {
+        ++axis_num_to_refresh;
+        if (axis_num_to_refresh == axis_states.size()) {
+            axis_num_to_refresh = 0;
+        }
+        refresh_axis(*axis_states[axis_num_to_refresh], now, old_tick);
     }
-    refresh_axis(*axis_states[axis_num_to_refresh], now, old_tick);
 #endif
 }
 
@@ -672,84 +695,6 @@ bool phase_stepping::any_axis_active() {
     });
 }
 
-int32_t phase_stepping::pos_to_phase(int axis, float position) {
-    static constinit std::array<float, SUPPORTED_AXIS_COUNT> FACTORS = []() consteval {
-        static_assert(SUPPORTED_AXIS_COUNT <= 3);
-
-        int STEPS_PER_UNIT[] = DEFAULT_AXIS_STEPS_PER_UNIT;
-        int MICROSTEPS[] = { X_MICROSTEPS, Y_MICROSTEPS, Z_MICROSTEPS };
-
-        std::array<float, SUPPORTED_AXIS_COUNT> ret;
-        for (int i = 0; i != SUPPORTED_AXIS_COUNT; i++) {
-            ret[i] = 256.f * STEPS_PER_UNIT[i] / MICROSTEPS[i];
-        }
-        return ret;
-    }();
-    return normalize_motor_phase(position * FACTORS[axis]);
-}
-
-int32_t phase_stepping::pos_to_steps(int axis, float position) {
-    static constinit std::array<float, SUPPORTED_AXIS_COUNT> FACTORS = []() consteval {
-        static_assert(SUPPORTED_AXIS_COUNT <= 3);
-
-        int STEPS_PER_UNIT[] = DEFAULT_AXIS_STEPS_PER_UNIT;
-
-        std::array<float, SUPPORTED_AXIS_COUNT> ret;
-        for (int i = 0; i != SUPPORTED_AXIS_COUNT; i++) {
-            ret[i] = float(STEPS_PER_UNIT[i]);
-        }
-        return ret;
-    }();
-    return position * FACTORS[axis];
-}
-
-int32_t pos_to_msteps(int axis, float position) {
-    static constinit std::array<float, SUPPORTED_AXIS_COUNT> FACTORS = []() consteval {
-        static_assert(SUPPORTED_AXIS_COUNT <= 3);
-
-        int STEPS_PER_UNIT[] = DEFAULT_AXIS_STEPS_PER_UNIT;
-
-        std::array<float, SUPPORTED_AXIS_COUNT> ret;
-        for (int i = 0; i != SUPPORTED_AXIS_COUNT; i++) {
-            ret[i] = float(STEPS_PER_UNIT[i]) / PLANNER_STEPS_MULTIPLIER;
-        }
-        return ret;
-    }();
-    return position * FACTORS[axis];
-}
-
-float phase_stepping::mm_to_rev(int motor, float mm) {
-    static constinit std::array<float, SUPPORTED_AXIS_COUNT> FACTORS = []() consteval {
-        static_assert(SUPPORTED_AXIS_COUNT <= 3);
-
-        int STEPS_PER_UNIT[] = DEFAULT_AXIS_STEPS_PER_UNIT;
-        int MICROSTEPS[] = { X_MICROSTEPS, Y_MICROSTEPS, Z_MICROSTEPS };
-
-        std::array<float, SUPPORTED_AXIS_COUNT> ret;
-        for (int i = 0; i != SUPPORTED_AXIS_COUNT; i++) {
-            ret[i] = 1.f / (get_motor_steps(AxisEnum(i)) * float(MICROSTEPS[i]) / float(STEPS_PER_UNIT[i]));
-        }
-        return ret;
-    }();
-    return mm * FACTORS[motor];
-}
-
-int phase_stepping::phase_per_ustep(int axis) {
-    static constinit std::array<int, SUPPORTED_AXIS_COUNT> FACTORS = []() consteval {
-        static_assert(SUPPORTED_AXIS_COUNT <= 3);
-
-        int MICROSTEPS[] = { X_MICROSTEPS, Y_MICROSTEPS, Z_MICROSTEPS };
-
-        std::array<int, SUPPORTED_AXIS_COUNT> ret;
-        for (int i = 0; i != SUPPORTED_AXIS_COUNT; i++) {
-            ret[i] = 256 / MICROSTEPS[i];
-        }
-        return ret;
-    }();
-    return FACTORS[axis];
-}
-
-#if HAS_BURST_STEPPING()
 int phase_stepping::logical_ustep(AxisEnum axis) {
     int mscnt = stepper_axis(axis).MSCNT();
     if (axis >= opts::SUPPORTED_AXIS_COUNT) {
@@ -761,16 +706,18 @@ int phase_stepping::logical_ustep(AxisEnum axis) {
     }
 
     // ensure we're not being called while still moving
-    assert(!axis_state.target.has_value());
+    assert(!axis_state.current_target.has_value());
+#if HAS_BURST_STEPPING()
     assert(!burst_stepping::busy());
-
-    return normalize_motor_phase(mscnt - axis_state.phase_correction);
-}
+    assert(mscnt == axis_state.driver_phase);
 #endif
 
+    return axis_state.last_phase;
+}
+
 FORCE_OFAST std::tuple<float, float> phase_stepping::axis_position(const AxisState &axis_state, uint32_t move_epoch) {
-    float epoch = move_epoch / 1000000.f;
-    const MoveTarget &trg = *axis_state.target;
+    float epoch = move_epoch / static_cast<float>(TICK_FREQ);
+    const MoveTarget &trg = *axis_state.current_target;
     return {
         trg.start_v + 2.f * trg.half_accel * epoch,
         trg.initial_pos + trg.start_v * epoch + trg.half_accel * epoch * epoch
@@ -833,10 +780,10 @@ void save_to_persistent_storage_without_enabling(AxisEnum axis) {
 
 void load_from_persistent_storage(AxisEnum axis) {
     assert(axis < SUPPORTED_AXIS_COUNT);
-    phase_stepping::enable(axis, config_store().get_phase_stepping_enabled(axis));
-
     load_correction_from_file(axis_states[axis]->forward_current, get_correction_file_path(axis, CorrectionType::forward));
     load_correction_from_file(axis_states[axis]->backward_current, get_correction_file_path(axis, CorrectionType::backward));
+
+    phase_stepping::enable(axis, config_store().get_phase_stepping_enabled(axis));
 }
 
 } // namespace phase_stepping
@@ -856,11 +803,12 @@ extern "C" void PHSTEP_TIMER_ISR_HANDLER(void) {
 }
 
 // For the same reason as the ISR handler above, we include the
-// quick_tmc_spi.cpp, burst_stepper.cpp and lut.cpp instead of compiling them
-// separately:
+// quick_tmc_spi.cpp, burst_stepper.cpp, axes.cpp and lut.cpp instead of
+// compiling them separately:
 #if HAS_BURST_STEPPING()
     #include "burst_stepper.cpp"
 #else
     #include "quick_tmc_spi.cpp"
 #endif
 #include "lut.cpp"
+#include "axes.cpp"
