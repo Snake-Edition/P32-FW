@@ -30,7 +30,10 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 15. **Cold mode (min.temp.)**: If you enable Cold Mode, temperatures (once set) won't drop below 30°C. For safety reasons cold mode must be enabled after every start of the printer.
 16. ~~**Show MBL and tilt**: After mesh bed leveling (G29) you can go to `Snake Settings` and see the MBL Z levels at the measured points and check the tilt of the axes. Levels are shifted to avoid negative numbers.~~
 17. **Speed up (un)parking**: Parking and unparking is done at the highest speed to shorten maintenance (change filament) time during printing.
-18. **Different printers**: Next to a standard version, a coreXY and a long bed version is released. The latter is suited for beds of length 250 mm ([long bed HW](https://www.aliexpress.com/item/1005001632020501.html)).
+18. **Different printers**: Next to a standard version, other version are released:
+  1. coreXY
+  1. long bed - bed length of 250 mm ([long bed HW](https://www.aliexpress.com/item/1005001632020501.html))
+  1. i3 MK3.3 (i3 MK3 with MINI board, MINI display, Z motor split, and mosfet on heating)
 19. ~~**Different languages**~~
 20. **Avoid display flashing**: Some displays flash with original FW.
 
