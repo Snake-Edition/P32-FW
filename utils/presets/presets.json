@@ -287,30 +287,277 @@
             }
         },
         {
-            "name": "minixy",
+            "name": "minixy-en-cs",
             "description": "MINI",
             "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
                 "PRINTER": "MINI",
+                "BOARD": "<default>",
                 "BOARD_VERSION": "<default>",
-                "PRESET_COMPILE_OPTIONS": "-DMINI_COREXY"
+                "PRESET_COMPILE_OPTIONS": "-DMINI_COREXY",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "cs"
             }
         },
         {
-            "name": "miniLG",
+            "name": "minixy-en-de",
             "description": "MINI",
             "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
                 "PRINTER": "MINI",
+                "BOARD": "<default>",
                 "BOARD_VERSION": "<default>",
-                "PRESET_COMPILE_OPTIONS": "-DMINI_LONG_BED"
+                "PRESET_COMPILE_OPTIONS": "-DMINI_COREXY",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "de"
             }
         },
         {
-            "name": "mini_i3_mk33",
+            "name": "minixy-en-es",
             "description": "MINI",
             "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
                 "PRINTER": "MINI",
+                "BOARD": "<default>",
                 "BOARD_VERSION": "<default>",
-                "PRESET_COMPILE_OPTIONS": "-DMINI_I3_MK33"
+                "PRESET_COMPILE_OPTIONS": "-DMINI_COREXY",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "es"
+            }
+        },
+        {
+            "name": "minixy-en-fr",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_COREXY",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "fr"
+            }
+        },
+        {
+            "name": "minixy-en-it",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_COREXY",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "it"
+            }
+        },
+        {
+            "name": "minixy-en-pl",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_COREXY",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "pl"
+            }
+        },
+        {
+            "name": "minixy-en-jp",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_COREXY",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "jp"
+            }
+        },
+
+        {
+            "name": "miniLG-en-cs",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_LONG_BED",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "cs"
+            }
+        },
+        {
+            "name": "miniLG-en-de",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_LONG_BED",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "de"
+            }
+        },
+        {
+            "name": "miniLG-en-es",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_LONG_BED",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "es"
+            }
+        },
+        {
+            "name": "miniLG-en-fr",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_LONG_BED",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "fr"
+            }
+        },
+        {
+            "name": "miniLG-en-it",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_LONG_BED",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "it"
+            }
+        },
+        {
+            "name": "miniLG-en-pl",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_LONG_BED",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "pl"
+            }
+        },
+        {
+            "name": "miniLG-en-jp",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_LONG_BED",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "jp"
+            }
+        },
+        {
+            "name": "mini_i3_mk33-en-cs",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_I3_MK33",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "cs"
+            }
+        },
+        {
+            "name": "mini_i3_mk33-en-de",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_I3_MK33",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "de"
+            }
+        },
+        {
+            "name": "mini_i3_mk33-en-es",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_I3_MK33",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "es"
+            }
+        },
+        {
+            "name": "mini_i3_mk33-en-fr",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_I3_MK33",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "fr"
+            }
+        },
+        {
+            "name": "mini_i3_mk33-en-it",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_I3_MK33",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "it"
+            }
+        },
+        {
+            "name": "mini_i3_mk33-en-pl",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_I3_MK33",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "pl"
+            }
+        },
+        {
+            "name": "mini_i3_mk33-en-jp",
+            "description": "MINI",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "PRINTER": "MINI",
+                "BOARD": "<default>",
+                "BOARD_VERSION": "<default>",
+                "PRESET_COMPILE_OPTIONS": "-DMINI_I3_MK33",
+                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "TRANSLATIONS_LIST": "jp"
             }
         }
     ]

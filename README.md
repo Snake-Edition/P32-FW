@@ -34,7 +34,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
   1. coreXY
   1. long bed - bed length of 250 mm ([long bed HW](https://www.aliexpress.com/item/1005001632020501.html))
   1. i3 MK3.3 (i3 MK3 with MINI board, MINI display, Z motor split, and mosfet on heating)
-19. ~~**Different languages**~~
+19. **Different languages**
 20. **Avoid display flashing**: Some displays flash with original FW.
 
 All settings are automatically saved to EEPROM and loaded on boot.
