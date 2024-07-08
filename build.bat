@@ -65,25 +65,25 @@ rem long bed EN-JP (250 mm) FW (Experimental)
 python utils/build.py --generate-bbf --bootloader empty --preset miniLG-en-pl --final
 
 rem i3 MK3.3 EN-CS
-python utils/build.py --generate-bbf --bootloader empty --mini_i3_mk33_en-cs --final
+python utils/build.py --generate-bbf --bootloader empty --mini_i3_mk33-en-cs --final
 
 rem i3 MK3.3 EN-DE
-python utils/build.py --generate-bbf --bootloader empty --mini_i3_mk33_en-de --final
+python utils/build.py --generate-bbf --bootloader empty --mini_i3_mk33-en-de --final
 
 rem i3 MK3.3 EN-ES
-python utils/build.py --generate-bbf --bootloader empty --mini_i3_mk33_en-es --final
+python utils/build.py --generate-bbf --bootloader empty --mini_i3_mk33-en-es --final
 
 rem i3 MK3.3 EN-FR
-python utils/build.py --generate-bbf --bootloader empty --mini_i3_mk33_en-fr --final
+python utils/build.py --generate-bbf --bootloader empty --mini_i3_mk33-en-fr --final
 
 rem i3 MK3.3 EN-IT
-python utils/build.py --generate-bbf --bootloader empty --mini_i3_mk33_en-it --final
+python utils/build.py --generate-bbf --bootloader empty --mini_i3_mk33-en-it --final
 
 rem i3 MK3.3 EN-PL
-python utils/build.py --generate-bbf --bootloader empty --mini_i3_mk33_en-pl --final
+python utils/build.py --generate-bbf --bootloader empty --mini_i3_mk33-en-pl --final
 
 rem i3 MK3.3 EN-JP (Experimental)
-python utils/build.py --generate-bbf --bootloader empty --mini_i3_mk33_en-jp --final
+python utils/build.py --generate-bbf --bootloader empty --mini_i3_mk33-en-jp --final
 
 
 rem python utils/build.py -h

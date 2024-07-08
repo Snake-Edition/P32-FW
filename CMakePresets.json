@@ -6938,7 +6938,7 @@
             }
         },
         {
-            "name": "mini_i3_mk33_en-cs",
+            "name": "mini_i3_mk33-en-cs",
             "generator": "Ninja",
             "binaryDir": "build-vscode-buddy",
             "cacheVariables": {
@@ -7052,7 +7052,7 @@
             }
         },
         {
-            "name": "mini_i3_mk33_en-de",
+            "name": "mini_i3_mk33-en-de",
             "generator": "Ninja",
             "binaryDir": "build-vscode-buddy",
             "cacheVariables": {
@@ -7111,7 +7111,7 @@
             }
         },
         {
-            "name": "mini_i3_mk33_en-es",
+            "name": "mini_i3_mk33-en-es",
             "generator": "Ninja",
             "binaryDir": "build-vscode-buddy",
             "cacheVariables": {
@@ -7170,7 +7170,7 @@
             }
         },
         {
-            "name": "mini_i3_mk33_en-fr",
+            "name": "mini_i3_mk33-en-fr",
             "generator": "Ninja",
             "binaryDir": "build-vscode-buddy",
             "cacheVariables": {
@@ -7229,7 +7229,7 @@
             }
         },
         {
-            "name": "mini_i3_mk33_en-it",
+            "name": "mini_i3_mk33-en-it",
             "generator": "Ninja",
             "binaryDir": "build-vscode-buddy",
             "cacheVariables": {
@@ -7288,7 +7288,7 @@
             }
         },
         {
-            "name": "mini_i3_mk33_en-pl",
+            "name": "mini_i3_mk33-en-pl",
             "generator": "Ninja",
             "binaryDir": "build-vscode-buddy",
             "cacheVariables": {
@@ -7347,7 +7347,7 @@
             }
         },
         {
-            "name": "mini_i3_mk33_en-jp",
+            "name": "mini_i3_mk33-en-jp",
             "generator": "Ninja",
             "binaryDir": "build-vscode-buddy",
             "cacheVariables": {
