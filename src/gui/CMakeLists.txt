@@ -48,6 +48,7 @@ target_sources(
           screen_filebrowser.cpp
           screen_hardfault.cpp
           screen_home.cpp
+          screen_mbl_values.cpp
           screen_menu.cpp
           screen_menu_cancel_object.cpp
           screen_menu_change_filament.cpp
