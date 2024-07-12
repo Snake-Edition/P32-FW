@@ -22,6 +22,8 @@
 #include <wui.h>
 #include "translator.hpp"
 #include "SteelSheets.hpp"
+#include "screen_mbl_values.hpp"
+
 #include <option/has_leds.h>
 #if HAS_LEDS()
     #include "led_animations/animator.hpp"
@@ -501,6 +503,15 @@ MI_SNAKE::MI_SNAKE()
 void MI_SNAKE::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<screen_snake_data_t>);
 }
+
+MI_MBL_VALUES::MI_MBL_VALUES()
+    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_MBL_VALUES::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<screen_mbl_values_t>);
+}
+
 /* -===============================================(:>- */
 
 /**********************************************************************************************/

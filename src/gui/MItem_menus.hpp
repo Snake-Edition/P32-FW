@@ -290,6 +290,7 @@ protected:
 };
 
 /* -===============================================(:>- */
+
 class MI_SNAKE_SETTINGS : public IWindowMenuItem {
     static constexpr const char *const label = N_("Snake Settings");
 
@@ -330,9 +331,18 @@ public:
 protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
-/* -===============================================(:>- */
 
-/**********************************************************************************************/
+class MI_MBL_VALUES : public IWindowMenuItem {
+    static constexpr const char *const label = "MBL values";
+
+public:
+    MI_MBL_VALUES();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+/* -===============================================(:>- */
 
 class MI_EEPROM_DIAGNOSTICS : public IWindowMenuItem {
     static constexpr const char *const label = N_("Eeprom Diagnostics");
