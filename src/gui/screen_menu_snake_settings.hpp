@@ -4,7 +4,7 @@
 #include "MItem_menus.hpp"
 #include "MItem_tools.hpp"
 
-using ScreenMenuSnakeSettings__ = ScreenMenu<EFooter::On, MI_RETURN, MI_BRIGHTNESS, MI_SKEW_XY, MI_SKEW_XZ, MI_SKEW_YZ, MI_COLD_MODE>;
+using ScreenMenuSnakeSettings__ = ScreenMenu<EFooter::On, MI_RETURN, MI_BRIGHTNESS, MI_MBL_VALUES, MI_SKEW_XY, MI_SKEW_XZ, MI_SKEW_YZ>;
 
 class ScreenMenuSnakeSettings : public ScreenMenuSnakeSettings__ {
 public:
@@ -14,7 +14,7 @@ public:
 
 /*********************************************************************************/
 
-using ScreenMenuSnakeTuneSettings__ = ScreenMenu<EFooter::On, MI_RETURN, MI_BRIGHTNESS, MI_SKEW_XY, MI_SKEW_XZ, MI_SKEW_YZ, MI_COLD_MODE>;
+using ScreenMenuSnakeTuneSettings__ = ScreenMenu<EFooter::On, MI_RETURN, MI_BRIGHTNESS, MI_MBL_VALUES, MI_SKEW_XY, MI_SKEW_XZ, MI_SKEW_YZ>;
 
 class ScreenMenuSnakeTuneSettings : public ScreenMenuSnakeTuneSettings__ {
 public:
