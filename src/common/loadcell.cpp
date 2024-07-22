@@ -269,8 +269,10 @@ void Loadcell::ProcessSample(int32_t loadcellRaw, uint32_t time_us) {
 }
 
 void Loadcell::HomingSafetyCheck() const {
-    static constexpr uint32_t MAX_LOADCELL_DATA_AGE_WHEN_HOMING_US = 100000;
-    if (ticks_us() - last_sample_time_us > MAX_LOADCELL_DATA_AGE_WHEN_HOMING_US) {
+    // We need signed int because the last sample can be slightly in the future, caused by time sync with dwarves.
+    static constexpr int32_t MAX_LOADCELL_DATA_AGE_WHEN_HOMING_US = 100000;
+    int32_t since_last = ticks_diff(ticks_us(), last_sample_time_us.load());
+    if (since_last > MAX_LOADCELL_DATA_AGE_WHEN_HOMING_US) {
         fatal_error(ErrCode::ERR_ELECTRO_HOMING_ERROR_Z);
     }
 }
