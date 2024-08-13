@@ -76,6 +76,16 @@ void CurrentStore::perform_config_check() {
 #endif
     }
 
+    // BFW-5486
+    // Older versions of the firmware had the ability to manually change this
+    // byte. Newer versions of the firmware removed that ability. This leads
+    // to a situation when, after manually changing the value and upgrading,
+    // the only way to revert the change is to downgrade the firmware.
+    // Therefore, we always set it to FwAutoUpdate::off on newer versions.
+    // We should update the bootloader to stop reading this byte altogether,
+    // then we can finally stop writing this and rely entirely on dataexchange.
+    EEPROMInstance().write_byte(0x040B, 0x00);
+
     // First run -> the config store is empty -> we don't need to do any migrations from older versions
     if (!is_first_run && config_version.get() != newest_config_version) {
         perform_config_migrations();
