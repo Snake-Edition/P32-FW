@@ -238,4 +238,10 @@ class AtomicCircularQueue {
      * @return number of items in the queue
      */
     index_t count() { return buffer.tail - buffer.head; }
+
+
+    /**
+     * @brief Clear the contents of the queue
+     */
+    void clear() { buffer.head.store(buffer.tail); }
 };
