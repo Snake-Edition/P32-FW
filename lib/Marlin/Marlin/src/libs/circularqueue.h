@@ -65,7 +65,7 @@ class CircularQueue {
      * @return  type T item
      */
     T dequeue() {
-      if (isEmpty()) return T();
+      assert(!isEmpty());
 
       uint8_t index = buffer.head;
 
@@ -179,7 +179,7 @@ class AtomicCircularQueue {
      * @return  type T item
      */
     T dequeue() {
-      if (isEmpty()) return T();
+      assert(!isEmpty());
 
       index_t index = buffer.head;
       T ret = buffer.queue[mask(index++)];
