@@ -68,6 +68,28 @@ static_assert(MoveFlag::MOVE_FLAG_Y_ACTIVE == (MoveFlag)PreciseSteppingFlag::PRE
 static_assert(MoveFlag::MOVE_FLAG_Z_ACTIVE == (MoveFlag)PreciseSteppingFlag::PRECISE_STEPPING_FLAG_Z_USED);
 static_assert(MoveFlag::MOVE_FLAG_E_ACTIVE == (MoveFlag)PreciseSteppingFlag::PRECISE_STEPPING_FLAG_E_USED);
 
+// Helper class to disable the MOVE ISR
+class [[nodiscard]] MoveIsrDisabler {
+    bool old_move_isr_state;
+
+public:
+    MoveIsrDisabler()
+        : old_move_isr_state { MOVE_ISR_ENABLED() } {
+        if (old_move_isr_state) {
+            DISABLE_MOVE_INTERRUPT();
+        }
+    }
+
+    ~MoveIsrDisabler() {
+        if (old_move_isr_state) {
+            ENABLE_MOVE_INTERRUPT();
+        }
+    }
+
+    MoveIsrDisabler(const MoveIsrDisabler &) = delete;
+    MoveIsrDisabler &operator=(const MoveIsrDisabler &) = delete;
+};
+
 class PreciseStepping {
 
 public:
