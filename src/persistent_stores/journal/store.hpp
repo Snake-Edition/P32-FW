@@ -66,12 +66,6 @@ bool consteval has_unique_items() {
 template <class Config, class DeprecatedItems, const std::span<const journal::Backend::MigrationFunction> &MigrationFunctions>
 class Store : public Config {
 
-    void dump_items() {
-        visit_all_struct_fields(static_cast<Config &>(*this), [](auto &item) {
-            item.ram_dump();
-        });
-    }
-
 public:
     /**
      * @brief Loads data from a byte array with a hashed_id.
@@ -92,6 +86,13 @@ public:
                 }
             }
         });
+    }
+
+    void dump_items(ItemFlags exclude_flags = {}) {
+        static constexpr auto callback = [](auto &item, auto exclude_flags) {
+            item.ram_dump(exclude_flags);
+        };
+        visit_all_struct_fields(static_cast<Config &>(*this), callback, exclude_flags);
     }
 
     void save_all() {

@@ -178,8 +178,10 @@ public:
         Base::set(hashed_id, in_buff, max_length);
     }
 
-    inline void ram_dump() {
-        Base::ram_dump(hashed_id, default_val);
+    inline void ram_dump(ItemFlags exclude_flags) {
+        if (!(flags & exclude_flags)) {
+            Base::ram_dump(hashed_id, default_val);
+        }
     }
 };
 
@@ -331,7 +333,11 @@ public:
         memcpy(&(data_array[index]), raw_data.data(), sizeof(value_type));
     }
 
-    void ram_dump() {
+    void ram_dump(ItemFlags exclude_flags) {
+        if (flags & exclude_flags) {
+            return;
+        }
+
         for (uint8_t i = 0; i < item_count; i++) {
             if (data_array[i] != get_default_val(i)) {
                 do_save(i);
