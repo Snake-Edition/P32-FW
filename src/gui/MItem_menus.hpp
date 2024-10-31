@@ -136,7 +136,7 @@ using MI_INFO
     = MI_SCREEN<N_("Info"), class ScreenMenuInfo>;
 
 using MI_OPEN_FACTORY_RESET
-    = MI_SCREEN<N_("Factory Reset"), class ScreenMenuFactoryReset>;
+    = MI_SCREEN<N_("Factory Reset"), class ScreenFactoryReset>;
 
 using MI_INPUT_SHAPER
     = MI_SCREEN<N_("Input Shaper"), class ScreenMenuInputShaper>;

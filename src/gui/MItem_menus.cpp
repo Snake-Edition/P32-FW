@@ -28,7 +28,6 @@
 #include "screen_menu_hardware_tune.hpp"
 #include "screen_menu_system.hpp"
 #include "screen_menu_statistics.hpp"
-#include "screen_menu_factory_reset.hpp"
 #include "screen_menu_error_test.hpp"
 #include "screen_menu_input_shaper.hpp"
 #include <screen_menu_languages.hpp>
@@ -44,6 +43,7 @@
 #include <screen/filament/screen_filaments_reorder.hpp>
 #include <screen/filament/screen_filaments_visibility.hpp>
 #include <screen/toolhead/screen_toolhead_settings.hpp>
+#include <gui/screen/screen_factory_reset.hpp>
 
 #if PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_MINI()
     #include <screen_menu_bed_level_correction.hpp>
@@ -110,7 +110,7 @@ template struct MI_SCREEN_CTOR<ScreenMenuHardwareTune>;
 template struct MI_SCREEN_CTOR<ScreenMenuSystem>;
 template struct MI_SCREEN_CTOR<ScreenMenuStatistics>;
 template struct MI_SCREEN_CTOR<ScreenMenuInfo>;
-template struct MI_SCREEN_CTOR<ScreenMenuFactoryReset>;
+template struct MI_SCREEN_CTOR<ScreenFactoryReset>;
 template struct MI_SCREEN_CTOR<ScreenMenuInputShaper>;
 template struct MI_SCREEN_CTOR<ScreenPrinterSetup>;
 
