@@ -56,7 +56,6 @@ target_sources(
           screen_menu_eeprom.cpp
           screen_menu_enclosure.cpp
           screen_menu_error_test.cpp
-          screen_menu_factory_reset.cpp
           screen_menu_fail_stat.cpp
           screen_menu_filament.cpp
           screen_menu_footer_settings.cpp
