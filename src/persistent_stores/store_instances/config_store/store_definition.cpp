@@ -43,7 +43,9 @@ void CurrentStore::perform_config_check() {
 
     // We cannot change a default value of config store items for backwards compatibility reasons.
     // So this is a place to instead set them to something for new installations
-    if (is_first_run) {
+    if (is_first_run || force_default_hw_config.get()) {
+        force_default_hw_config.set(false);
+
 #if HAS_TOUCH()
         touch_enabled.set(true);
 #endif

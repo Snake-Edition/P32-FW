@@ -95,6 +95,11 @@ extern osThreadId displayTaskHandle;
             }
         }
         config_store().dump_items(exclude_flags);
+
+        // If we're resetting hw config, make sure that we perform first run config setup
+        if (exclude_flags & config_store_ns::ItemFlag::hw_config) {
+            config_store().force_default_hw_config.set(true);
+        }
     }
 
     // We cannot display msg box here - it would be trying to load an icon from xFlash that we've probably wiped.

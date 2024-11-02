@@ -540,6 +540,9 @@ struct CurrentStore
 
     input_shaper::AxisConfig get_input_shaper_axis_config(AxisEnum axis);
     void set_input_shaper_axis_config(AxisEnum axis, const input_shaper::AxisConfig &);
+    
+    /// If set to true, will run the set HW defaults section in perform_config_check (and set itself to false) on next boot
+    StoreItem<bool, false, ItemFlag::hw_config, journal::hash("Force Default HW Config")> force_default_hw_config;
 
 #if PRINTER_IS_PRUSA_MK3_5()
     StoreItem<bool, false, ItemFlag::hw_config, journal::hash("Has Alt Fans")> has_alt_fans;
