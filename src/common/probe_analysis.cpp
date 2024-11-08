@@ -1,5 +1,6 @@
 #include "probe_analysis.hpp"
 #include <scope_guard.hpp>
+#include "metric.h"
 
 using namespace buddy;
 
@@ -12,6 +13,13 @@ void ProbeAnalysisBase::StoreSample(float currentZ, float currentLoad) {
         return;
     }
     window.push_back({ currentZ, currentLoad });
+
+#if !defined(UNITTESTS)
+    lastSampleTimestamp = ticks_us();
+
+    METRIC_DEF(mbl, "mbl", METRIC_VALUE_CUSTOM, 0, METRIC_DISABLED);
+    metric_record_custom(&mbl, " z=%0.3f,l=%0.3f", double(currentZ), double(currentLoad));
+#endif
 }
 
 ProbeAnalysisBase::Result ProbeAnalysisBase::Analyse() {
@@ -73,8 +81,10 @@ ProbeAnalysisBase::Result ProbeAnalysisBase::Analyse() {
     bool isGood = Classify(features);
     if (isGood) {
         float zCoordinate = InterpolateFinalZCoordinate(features);
+        log_features_metrics(features, zCoordinate);
         return Result::Good(zCoordinate);
     } else {
+        log_features_metrics(features, std::nullopt);
         return Result::Bad("low-precision");
     }
 }
@@ -510,4 +520,57 @@ bool ProbeAnalysisBase::HasOutOfRangeFeature(Features &features, const char **fe
         return true;
     }
     return false;
+}
+
+void ProbeAnalysisBase::log_features_metrics(const Features &features, std::optional<float> detected_z) const {
+#if !defined(UNITTESTS)
+    // There are fall-, halt- and rise line in Z and before compression-,
+    // compression-, compressed-, decompression- and afterdecompression lines in
+    // load.
+
+    uint32_t window_start_ts = lastSampleTimestamp - window.size() * samplingInterval * 1e6f;
+
+    float analysis_start = samplingInterval * std::distance(window.begin(), features.analysisStart);
+    float fall_end = samplingInterval * std::distance(window.begin(), features.fallEnd);
+    float rise_start = samplingInterval * std::distance(window.begin(), features.riseStart);
+    float analysis_end = samplingInterval * std::distance(window.begin(), features.analysisEnd);
+
+    auto record_line = [&](metric_t &metric, const Line &line, float start_t, float end_t) {
+        metric_record_float_at_time(&metric,
+            window_start_ts + uint32_t(start_t * 1e6f),
+            line.a * start_t + line.b);
+        metric_record_float_at_time(&metric,
+            window_start_ts + uint32_t(end_t * 1e6f),
+            line.a * end_t + line.b);
+    };
+
+    METRIC_DEF(mbl_fall_line_m, "mbl_fl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    record_line(mbl_fall_line_m, features.fallLine, analysis_start, fall_end);
+
+    METRIC_DEF(mbl_halt_line_m, "mbl_hl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    record_line(mbl_halt_line_m, features.haltLine, fall_end, rise_start);
+
+    METRIC_DEF(mbl_rise_line_m, "mbl_rl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    record_line(mbl_rise_line_m, features.riseLine, rise_start, analysis_end);
+
+    METRIC_DEF(mbl_detected_z_m, "mbl_dz", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    if (detected_z.has_value()) {
+        record_line(mbl_detected_z_m, Line(0, *detected_z), analysis_start, analysis_end);
+    }
+
+    METRIC_DEF(mbl_before_compr_line_m, "mbl_bcl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    record_line(mbl_before_compr_line_m, features.beforeCompressionLine, analysis_start, features.compressionStartTime);
+
+    METRIC_DEF(mbl_compressing_line_m, "mbl_cl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    record_line(mbl_compressing_line_m, features.compressionLine, features.compressionStartTime, features.compressionEndTime);
+
+    METRIC_DEF(mbl_compressed_line_m, "mbl_cpl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    record_line(mbl_compressed_line_m, features.compressedLine, features.compressionEndTime, features.decompressionStartTime);
+
+    METRIC_DEF(mbl_decompression_line_m, "mbl_dcl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    record_line(mbl_decompression_line_m, features.decompressionLine, features.decompressionStartTime, features.decompressionEndTime);
+
+    METRIC_DEF(mbl_after_decompr_line_m, "mbl_adl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    record_line(mbl_after_decompr_line_m, features.afterDecompressionLine, features.decompressionEndTime, analysis_end);
+#endif
 }

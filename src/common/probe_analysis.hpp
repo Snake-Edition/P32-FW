@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <tuple>
 #include <functional>
+#include <optional>
 #include <numeric>
 #include <limits>
 #include <cassert>
@@ -211,6 +212,9 @@ public:
     /// Currently recorded samples (moving window).
     CircleBufferBaseT<Record> &window;
 
+    /// Last sample's timestamp to be used for metrics
+    uint32_t lastSampleTimestamp;
+
 public:
     /// Return time of the given sample
     float TimeOfSample(Sample sample) const {
@@ -345,6 +349,9 @@ protected:
 
     /// True if Analyse() is being process (and no samples should be processed)
     std::atomic<bool> analysisInProgress = false;
+
+    /// Log features into metrics
+    void log_features_metrics(const Features &features, std::optional<float> detected_z) const;
 };
 
 /**
