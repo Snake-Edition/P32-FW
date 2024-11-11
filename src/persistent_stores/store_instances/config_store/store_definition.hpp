@@ -540,9 +540,14 @@ struct CurrentStore
 
     input_shaper::AxisConfig get_input_shaper_axis_config(AxisEnum axis);
     void set_input_shaper_axis_config(AxisEnum axis, const input_shaper::AxisConfig &);
-    
+
     /// If set to true, will run the set HW defaults section in perform_config_check (and set itself to false) on next boot
     StoreItem<bool, false, ItemFlag::hw_config, journal::hash("Force Default HW Config")> force_default_hw_config;
+
+    /// FW base printer model from the last boot of the printer.
+    /// Used for detecting when the printer has been upgraded to a different base model with the same board (for example MK3.5 -> MK3.9)
+    /// We want to detect those cases and force a factory reset, because some config store might not be compatible between different firmwares.
+    StoreItem<PrinterModel, static_cast<PrinterModel>(-1), ItemFlag::hw_config, journal::hash("Last Boot Base Printer Model")> last_boot_base_printer_model;
 
 #if PRINTER_IS_PRUSA_MK3_5()
     StoreItem<bool, false, ItemFlag::hw_config, journal::hash("Has Alt Fans")> has_alt_fans;

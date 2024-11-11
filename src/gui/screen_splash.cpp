@@ -15,6 +15,7 @@
 #include <pseudo_screen_callback.hpp>
 #include "bsod.h"
 #include <guiconfig/guiconfig.h>
+#include <feature/factory_reset/factory_reset.hpp>
 
 #include <option/bootloader.h>
 #include <option/developer_mode.h>
@@ -181,6 +182,30 @@ screen_splash_data_t::screen_splash_data_t()
         Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<ScreenPrinterSetup>);
         Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<PseudoScreenCallback, pepa_callback>);
     }
+
+    // Check for FW type change
+    {
+        auto &model_var = config_store().last_boot_base_printer_model;
+        const auto model = model_var.get();
+        const auto current_base_model = PrinterModelInfo::firmware_base().model;
+        if (model == model_var.default_val) {
+            // Not initialized - assume correct printer
+            model_var.set(current_base_model);
+
+        } else if (model != current_base_model) {
+            constexpr auto callback = +[] {
+                StringViewUtf8Parameters<16> params;
+                MsgBoxError(
+                    _("Printer type changed from %s to %s.\nFactory reset will be performed.\nSome configuration (network, filament profiles, ...) will be preserved.")
+                        .formatted(params, PrinterModelInfo::get(config_store().last_boot_base_printer_model.get()).id_str, PrinterModelInfo::firmware_base().id_str),
+                    { Response::Continue });
+
+                FactoryReset::perform(false, FactoryReset::item_bitset({ FactoryReset::Item::network, FactoryReset::Item::stats, FactoryReset::Item::user_interface, FactoryReset::Item::user_profiles }));
+            };
+            Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<PseudoScreenCallback, callback>);
+        }
+    }
+
 #if HAS_TOUCH()
     if (touchscreen.is_enabled() && !touchscreen.is_hw_ok()) {
         Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<PseudoScreenCallback, touch_error_callback>);
