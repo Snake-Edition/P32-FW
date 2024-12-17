@@ -13,4 +13,3 @@ RUN git clone --recursive https://github.com/espressif/ESP8266_RTOS_SDK.git
 RUN cd /ESP8266_RTOS_SDK && git checkout a192988b7906680440213eefc730d99dec0ce237
 RUN cd /ESP8266_RTOS_SDK && PYTHONPATH=/usr/lib/python3.9/site-packages ./install.sh
 RUN echo "source /ESP8266_RTOS_SDK/export.sh" >> ~/.bashrc
-
