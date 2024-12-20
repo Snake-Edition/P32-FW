@@ -13,3 +13,5 @@ endif()
 if(HAS_EMERGENCY_STOP)
   add_subdirectory(emergency_stop)
 endif()
+
+add_subdirectory(print_status_message)
