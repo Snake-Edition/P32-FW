@@ -267,143 +267,161 @@ screen_printing_data_t::screen_printing_data_t()
 
 void screen_printing_data_t::windowEvent(window_t *sender, GUI_event_t event, void *param) {
     /// check stop clicked when MBL is running
-    printing_state_t p_state = GetState();
-    if (
-        stop_pressed
-        && waiting_for_abort
-        && marlin_client::get_command() != Cmd::G29
-        && (p_state == printing_state_t::ABORTING || p_state == printing_state_t::PAUSED)) {
-        marlin_client::print_abort();
-        waiting_for_abort = false;
-        return;
+    const printing_state_t p_state = GetState();
+
+    switch (event) {
+
+    case GUI_event_t::LOOP: {
+        if (
+            stop_pressed
+            && waiting_for_abort
+            && marlin_client::get_command() != Cmd::G29
+            && (p_state == printing_state_t::ABORTING || p_state == printing_state_t::PAUSED)) {
+            marlin_client::print_abort();
+            waiting_for_abort = false;
+            break;
+        }
+
+        change_print_state();
+
+        /// -- Print time update loop
+        updateTimes();
+
+        /// -- close screen when print is done / stopped and USB media is removed
+        if (!marlin_vars().media_inserted && (p_state == printing_state_t::PRINTED || p_state == printing_state_t::STOPPED)) {
+            marlin_client::print_exit();
+            break;
+        }
+
+#if HAS_LARGE_DISPLAY()
+        if (p_state == printing_state_t::PRINTING) {
+            const auto &vars = marlin_vars();
+            const bool midprint = vars.logical_curr_pos[MARLIN_VAR_INDEX_Z] >= 1.0f;
+            const bool extruder_moved = (vars.logical_curr_pos[MARLIN_VAR_INDEX_E] - last_e_axis_position) > 0
+                && vars.logical_curr_pos[MARLIN_VAR_INDEX_E] > 0
+                && last_e_axis_position > 0; // Ignore negative movements and reset of E position (e.g. retraction)
+            if (print_progress.isPaused() && midprint && extruder_moved) {
+                print_progress.Resume();
+            } else if (print_progress.isPaused()) {
+                last_e_axis_position = vars.logical_curr_pos[MARLIN_VAR_INDEX_E];
+            }
+
+        } else if (p_state == printing_state_t::PRINTED && !shown_end_result) {
+            start_showing_end_result();
+        }
+#endif
+
+        if (message_popup.IsVisible() && ticks_diff(ticks_ms(), message_popup_close_time) > 0) {
+            message_popup.Hide();
+        }
+
+        if (p_state == printing_state_t::PRINTED || p_state == printing_state_t::STOPPED) {
+#if HAS_LARGE_DISPLAY()
+            if (p_state == printing_state_t::PRINTED) {
+                print_progress.Pause();
+            } else {
+                print_progress.StoppedMode();
+            }
+#endif
+            hide_time_information();
+        } else {
+#if HAS_LARGE_DISPLAY()
+            print_progress.PrintingMode();
+#endif
+            show_time_information();
+        }
+
+#if HAS_MMU2()
+        // FIXME: This is, technically, a wrong place to do it. The marlin server
+        // would be better, as it would also allow Connect to see the dialog. But
+        // that was problematic and it got postponed.
+        //
+        // See BFW-5221.
+        if (!mmu_maintenance_checked && (p_state == printing_state_t::PRINTED || p_state == printing_state_t::STOPPED)) {
+            mmu_maintenance_checked = true;
+            if (auto reason = MMU2::check_maintenance(); reason.has_value()) {
+                string_view_utf8 txt;
+                switch (*reason) {
+                case MMU2::MaintenanceReason::Failures:
+    #if HAS_LOADCELL()
+                    txt = _("Printer has detected multiple consecutive filament loading errors. We recommend checking Nextruder main-plate. Visit prusa.io/mmu-care");
+    #else
+                    txt = _("Printer has detected multiple consecutive filament loading errors. We recommend checking the extruder. Visit prusa.io/mmu-care");
+    #endif
+                    break;
+                case MMU2::MaintenanceReason::Changes:
+    #if HAS_LOADCELL()
+                    txt = _("Maintenance Reminder. Filament changes have reached main-plate lifespan. Inspect the part and ensure you have a spare plate available. Visit prusa.io/mmu-care");
+    #else
+                    txt = _("Maintenance Reminder. Filament changes have reached 30k. Inspect and clean the extruder. Visit prusa.io/mmu-care");
+    #endif
+                    break;
+                }
+
+                MsgBoxWarning(txt, Responses_Ok);
+            }
+        }
+#endif
+        break;
     }
 
-    change_print_state();
-
-    /// -- Print time update loop
-    updateTimes();
-
-    /// -- close screen when print is done / stopped and USB media is removed
-    if (!marlin_vars().media_inserted && (p_state == printing_state_t::PRINTED || p_state == printing_state_t::STOPPED)) {
-        marlin_client::print_exit();
-        return;
-    }
-
-    /// -- check when media is or isn't inserted
-    if (event == GUI_event_t::MEDIA) {
+    case GUI_event_t::MEDIA: {
         /// -- check for enable/disable resume button
         set_pause_icon_and_label();
+
+        break;
     }
-    if (event == GUI_event_t::HELD_RELEASED) {
+
+    case GUI_event_t::HELD_RELEASED:
         if (marlin_vars().logical_curr_pos[2 /* Z Axis */] <= 1.0f && p_state == printing_state_t::PRINTING) {
             open_live_adjust_z_screen();
         } else if (p_state == printing_state_t::PRINTED || p_state == printing_state_t::STOPPED) {
             open_move_z_screen();
         }
-        return;
-    }
-#if HAS_LARGE_DISPLAY()
-    if (event == GUI_event_t::LOOP && p_state == printing_state_t::PRINTING) {
-        const auto &vars = marlin_vars();
-        const bool midprint = vars.logical_curr_pos[MARLIN_VAR_INDEX_Z] >= 1.0f;
-        const bool extruder_moved = (vars.logical_curr_pos[MARLIN_VAR_INDEX_E] - last_e_axis_position) > 0
-            && vars.logical_curr_pos[MARLIN_VAR_INDEX_E] > 0
-            && last_e_axis_position > 0; // Ignore negative movements and reset of E position (e.g. retraction)
-        if (print_progress.isPaused() && midprint && extruder_moved) {
-            print_progress.Resume();
-        } else if (print_progress.isPaused()) {
-            last_e_axis_position = vars.logical_curr_pos[MARLIN_VAR_INDEX_E];
-        }
-    }
-#endif
-
-    if (event == GUI_event_t::LOOP) {
-        if (message_popup.IsVisible() && ticks_diff(ticks_ms(), message_popup_close_time) > 0) {
-            message_popup.Hide();
-        }
-    }
-
-    if (p_state == printing_state_t::PRINTED || p_state == printing_state_t::STOPPED) {
-#if HAS_LARGE_DISPLAY()
-        if (p_state == printing_state_t::PRINTED) {
-            print_progress.Pause();
-        } else {
-            print_progress.StoppedMode();
-        }
-#endif
-        hide_time_information();
-    } else {
-#if HAS_LARGE_DISPLAY()
-        print_progress.PrintingMode();
-#endif
-        show_time_information();
-    }
-
-#if HAS_MMU2()
-    // FIXME: This is, technically, a wrong place to do it. The marlin server
-    // would be better, as it would also allow Connect to see the dialog. But
-    // that was problematic and it got postponed.
-    //
-    // See BFW-5221.
-    if (!mmu_maintenance_checked && (p_state == printing_state_t::PRINTED || p_state == printing_state_t::STOPPED)) {
-        mmu_maintenance_checked = true;
-        if (auto reason = MMU2::check_maintenance(); reason.has_value()) {
-            string_view_utf8 txt;
-            switch (*reason) {
-            case MMU2::MaintenanceReason::Failures:
-    #if HAS_LOADCELL()
-                txt = _("Printer has detected multiple consecutive filament loading errors. We recommend checking Nextruder main-plate. Visit prusa.io/mmu-care");
-    #else
-                txt = _("Printer has detected multiple consecutive filament loading errors. We recommend checking the extruder. Visit prusa.io/mmu-care");
-    #endif
-                break;
-            case MMU2::MaintenanceReason::Changes:
-    #if HAS_LOADCELL()
-                txt = _("Maintenance Reminder. Filament changes have reached main-plate lifespan. Inspect the part and ensure you have a spare plate available. Visit prusa.io/mmu-care");
-    #else
-                txt = _("Maintenance Reminder. Filament changes have reached 30k. Inspect and clean the extruder. Visit prusa.io/mmu-care");
-    #endif
-                break;
-            }
-
-            MsgBoxWarning(txt, Responses_Ok);
-        }
-    }
-#endif
+        break;
 
 #if HAS_LARGE_DISPLAY()
-    if (shown_end_result && event == GUI_event_t::ENC_DN
-        && ((buttons[0].IsEnabled() && buttons[0].IsFocused()) || (!buttons[0].IsEnabled() && buttons[1].IsFocused()))) {
-        start_showing_end_result();
-        return;
-    }
+    case GUI_event_t::ENC_DN:
+        if (shown_end_result
+            && ((buttons[0].IsEnabled() && buttons[0].IsFocused()) || (!buttons[0].IsEnabled() && buttons[1].IsFocused()))) {
+            start_showing_end_result();
+            break;
+        }
+        break;
+#endif
 
-    if (p_state == printing_state_t::PRINTED && !shown_end_result) {
-        start_showing_end_result();
-        return;
-    }
-
-    // Touch swipe left/right toggles showing end result
-    if (event == GUI_event_t::TOUCH_SWIPE_LEFT || event == GUI_event_t::TOUCH_SWIPE_RIGHT) {
+#if HAS_TOUCH()
+    case GUI_event_t::TOUCH_SWIPE_LEFT:
+    case GUI_event_t::TOUCH_SWIPE_RIGHT:
+        // Touch swipe left/right toggles showing end result
         if (showing_end_result) {
             stop_showing_end_result();
         } else {
             start_showing_end_result();
         }
-        return;
+        break;
+
+    case GUI_event_t::TOUCH_CLICK:
+        // Clicking on the left arrow also shows end result
+        if (!showing_end_result && arrow_left_touch_rect.Contain(event_conversion_union { .pvoid = param }.point)) {
+            start_showing_end_result();
+        }
+        break;
+#endif
+
+#if HAS_LARGE_DISPLAY()
+    case GUI_event_t::CHILD_CHANGED:
+        if (showing_end_result) {
+            stop_showing_end_result();
+        }
+        break;
+#endif
+
+    default:
+        break;
     }
 
-    // Clicking on the left arrow also shows end result
-    if (!showing_end_result && event == GUI_event_t::TOUCH_CLICK && arrow_left_touch_rect.Contain(event_conversion_union { .pvoid = param }.point)) {
-        start_showing_end_result();
-        return;
-    }
-
-    if (showing_end_result && (event == GUI_event_t::CHILD_CHANGED)) {
-        stop_showing_end_result();
-        return;
-    }
-
+#if HAS_LARGE_DISPLAY()
     if (!showing_end_result) {
         ScreenPrintingModel::windowEvent(sender, event, param);
     }
