@@ -25,6 +25,9 @@
     #include <mmu2/maintenance.hpp>
 #endif
 
+#include <feature/print_status_message/print_status_message_mgr.hpp>
+#include <feature/print_status_message/print_status_message_formatter_buddy.hpp>
+
 #include "Marlin/src/module/motion.h"
 
 #if ENABLED(CRASH_RECOVERY)
@@ -311,8 +314,22 @@ void screen_printing_data_t::windowEvent(window_t *sender, GUI_event_t event, vo
         }
 #endif
 
-        if (message_popup.IsVisible() && ticks_diff(ticks_ms(), message_popup_close_time) > 0) {
-            message_popup.Hide();
+        // Update status message
+        {
+            const auto new_msg = print_status_message().current_message();
+            if (new_msg.message != current_message) {
+                decltype(message_text) new_text;
+                StringBuilder sb(new_text);
+                PrintStatusMessageFormatterBuddy::format(sb, new_msg.message);
+                if (strcmp(message_text.data(), new_text.data())) {
+                    strlcpy(message_text.data(), new_text.data(), message_text.size());
+                    message_popup.SetText(string_view_utf8::MakeRAM(message_text.data()));
+                    message_popup.Invalidate();
+                }
+
+                current_message = new_msg.message;
+                message_popup.set_visible(bool(new_msg));
+            }
         }
 
         if (p_state == printing_state_t::PRINTED || p_state == printing_state_t::STOPPED) {
@@ -826,15 +843,4 @@ void screen_printing_data_t::change_print_state() {
     if (st == printing_state_t::PRINTED || st == printing_state_t::STOPPED || st == printing_state_t::PAUSED) {
         Odometer_s::instance().force_to_eeprom();
     }
-}
-
-void screen_printing_data_t::on_message(const char *msg) {
-    if (strcmp(msg, message_buffer.data()) != 0) {
-        strlcpy(message_buffer.data(), msg, message_buffer.size());
-        message_popup.SetText(string_view_utf8::MakeRAM(message_buffer.data()));
-        message_popup.Invalidate();
-    }
-
-    message_popup.set_visible(true);
-    message_popup_close_time = ticks_ms() + POPUP_MSG_DUR_MS;
 }

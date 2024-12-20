@@ -157,6 +157,7 @@
 #endif
 
 #include <wui.h>
+#include <feature/print_status_message/print_status_message_mgr.hpp>
 
 using namespace ExtUI;
 
@@ -3408,11 +3409,8 @@ void onStatusChanged(const char *const msg) {
     }
 
     log_info(MarlinServer, "ExtUI: onStatusChanged: %s", msg);
-    _send_notify_event(Event::StatusChanged, 0, 0); // this includes MMU:P progress messages - just plain textual information
-
     if (msg[0] != '\0') {
-        _add_status_msg(msg);
-        _send_notify_event(Event::Message, 0, 0);
+        print_status_message().show_temporary<PrintStatusMessage::custom>({ std::shared_ptr<const char[]>(strdup(msg), [](char *str) { free(str); }) });
     }
 }
 

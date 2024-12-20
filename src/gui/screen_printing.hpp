@@ -14,6 +14,7 @@
 #include <array>
 #include <window_progress.hpp>
 #include "screen_printing_end_result.hpp"
+#include <feature/print_status_message/print_status_message_guard.hpp>
 
 enum class printing_state_t : uint8_t {
     INITIAL,
@@ -116,8 +117,8 @@ class screen_printing_data_t : public ScreenPrintingModel {
 #endif
 
     window_text_t message_popup;
-    uint32_t message_popup_close_time = 0;
-    std::array<char, 64> message_buffer;
+    PrintStatusMessage current_message;
+    std::array<char, 256> message_text;
 
 public:
     screen_printing_data_t();
@@ -144,6 +145,4 @@ private:
 
 public:
     printing_state_t GetState() const;
-
-    virtual void on_message(const char *msg) override;
 };

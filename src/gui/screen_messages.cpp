@@ -1,20 +1,10 @@
-/*
- * screen_messages.cpp
- *
- *  Created on: Nov 13, 2019
- *      Author: Migi
- */
-
+#include <feature/print_status_message/print_status_message_mgr.hpp>
+#include <feature/print_status_message/print_status_message_formatter_buddy.hpp>
 #include "screen_messages.hpp"
-#include "marlin_server.hpp"
 #include "ScreenHandler.hpp"
 #include <stdlib.h>
-#include <stdint.h>
 #include "i18n.h"
-#include "gui.hpp"
 #include <sound.hpp>
-
-MessageBuffer screen_messages_data_t::message_buffer;
 
 screen_messages_data_t::screen_messages_data_t()
     : screen_t()
@@ -36,15 +26,23 @@ void screen_messages_data_t::windowEvent(window_t *sender, GUI_event_t event, vo
         Screens::Access()->Close();
         return;
 
+    case GUI_event_t::LOOP:
+        print_status_message().walk_history([this](const PrintStatusMessageManager::Record &msg) {
+            if (msg.id <= last_message_id) {
+                return true;
+            }
+
+            ArrayStringBuilder<256> buf;
+            PrintStatusMessageFormatterBuddy::format(buf, msg.message);
+            term.Printf("%s\n", buf.str());
+            last_message_id = msg.id;
+            return true;
+        });
+        break;
+
     default:
-        screen_t::windowEvent(sender, event, param);
         break;
     }
 
-    // must be last window_frame_t could validate term
-    char *txt = nullptr;
-    while (message_buffer.try_get(txt)) {
-        term.Printf("%s\n", txt);
-        free(txt);
-    }
+    screen_t::windowEvent(sender, event, param);
 }

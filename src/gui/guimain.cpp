@@ -62,13 +62,6 @@ Jogwheel jogwheel;
 
 inline constexpr size_t MSG_MAX_LENGTH = 63; // status message max length
 
-void MsgCircleBuffer_cb(char *txt) {
-    if (auto screen = IScreenPrinting::GetInstance()) {
-        screen->on_message(txt);
-    }
-    screen_messages_data_t::message_buffer.put(txt);
-}
-
 namespace {
 void led_animation_step() {
 #if HAS_LEDS()
@@ -230,7 +223,6 @@ void gui_run(void) {
     marlin_client::init();
 
     DialogHandler::Access(); // to create class NOW, not at first call of one of callback
-    marlin_client::set_message_cb(MsgCircleBuffer_cb);
 
     marlin_client::set_event_notify(marlin_server::EVENT_MSK_DEF);
 
