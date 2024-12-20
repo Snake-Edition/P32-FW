@@ -40,7 +40,6 @@ typedef struct _marlin_client_t {
 
     uint32_t ack; // cached ack value from last Acknowledge event
     uint32_t command; // processed command (G28,G29,M701,M702,M600)
-    message_cb_t message_cb; // to register callback message
     uint8_t id; // client id (0..MARLIN_MAX_CLIENTS-1)
 } marlin_client_t;
 
@@ -91,7 +90,6 @@ void init() {
         client->events = 0;
         marlin_clients++;
         client->command = ftrstd::to_underlying(Cmd::NONE);
-        client->message_cb = NULL;
         marlin_client_task[client_id] = osThreadGetId();
     }
 }
@@ -109,17 +107,6 @@ int get_id() {
         return client->id;
     }
     return 0;
-}
-
-// register callback to message
-// return success
-bool set_message_cb(message_cb_t cb) {
-    marlin_client_t *client = _client_ptr();
-    if (client && cb) {
-        client->message_cb = cb;
-        return true;
-    }
-    return false;
 }
 
 static bool try_send(Request &request) {
@@ -473,20 +460,11 @@ static bool receive_and_process_client_message(marlin_client_t *client, size_t m
     case Event::Acknowledge:
         client->ack = client_event.usr32;
         break;
-    case Event::Message: {
-        if (client->message_cb) {
-            client->message_cb(client_event.message); // callback takes ownership
-        } else {
-            free(client_event.message);
-        }
-        break;
-    }
         // not handled events
         // do not use default, i want all events listed here, so new event will generate warning, when not added
     case Event::MediaInserted:
     case Event::MediaError:
     case Event::MediaRemoved:
-    case Event::StatusChanged:
     case Event::RequestCalibrationsScreen:
         break;
     case Event::_count:

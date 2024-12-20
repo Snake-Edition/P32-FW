@@ -92,9 +92,6 @@ enum class RetAndCool_t : uint8_t {
     last_ = Both
 };
 
-using message_cb_t = void (*)(char *);
 #else // !__cplusplus
 // C
-typedef void (*message_cb_t)(const char *);
-typedef void (*warning_cb_t)(uint32_t);
 #endif //__cplusplus

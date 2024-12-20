@@ -183,7 +183,6 @@ namespace {
         EventMask notify_events[MARLIN_MAX_CLIENTS]; // event notification mask - message filter
         EventMask notify_changes[MARLIN_MAX_CLIENTS]; // variable change notification mask - message filter
         EventMask client_events[MARLIN_MAX_CLIENTS]; // client event mask - unsent messages
-        char *event_messages[MARLIN_MAX_CLIENTS]; // last Event::Message for clients
         State print_state; // printing state (printing, paused, ...)
         bool print_is_serial = false; //< When true, current print is not from USB, but sent via gcode commands.
 #if ENABLED(CRASH_RECOVERY) //
@@ -496,21 +495,6 @@ constexpr EncodedFSMResponse empty_encoded_fsm_response = {
 };
 static EncodedFSMResponse server_side_encoded_fsm_response = empty_encoded_fsm_response;
 
-void _add_status_msg(const char *const popup_msg) {
-    // I could check client mask here
-    for (size_t i = 0; i < MARLIN_MAX_CLIENTS; ++i) {
-        if (server.event_messages[i]) {
-            // FIXME: It would be great if we didn't lose messages there.
-            //        For now, let's keep the original implementation.
-            free(server.event_messages[i]);
-        }
-        // FIXME: It would be really great if we didn't allocate here.
-        //        Maybe we could instead setup some state in marlin_vars_t
-        //        For now, let's keep the original implementation.
-        server.event_messages[i] = strdup(popup_msg);
-    }
-}
-
 //-----------------------------------------------------------------------------
 // forward declarations of private functions
 
@@ -533,7 +517,6 @@ void init(void) {
     for (i = 0; i < MARLIN_MAX_CLIENTS; i++) {
         server.notify_events[i] = make_mask(Event::Acknowledge); // by default only ack
         server.notify_changes[i] = 0; // by default nothing
-        server.event_messages[i] = nullptr;
     }
     server_task = osThreadGetId();
     server.enable_nozzle_temp_timeout = true;
@@ -2788,40 +2771,15 @@ extern uint32_t get_user_move_count(void) {
 //-----------------------------------------------------------------------------
 // private functions
 
-static bool _send_message_event_to_client(int client_id, ClientQueue &queue) {
-    char *message = std::exchange(server.event_messages[client_id], nullptr);
-
-    const marlin_client::ClientEvent client_event {
-        .event = Event::Message,
-        .unused = 0,
-        .usr16 = 0,
-        .message = message,
-    };
-    if (queue.try_send(client_event, 0)) {
-        // message was sent, client will free it
-        return true;
-    } else {
-        // message was not sent, we have to free it
-        free(message);
-        return false;
-    }
-}
-
 // send event notification to client (called from server thread)
-static bool _send_notify_event_to_client(int client_id, ClientQueue &queue, Event evt_id, uint32_t usr32, uint16_t usr16) {
-    switch (evt_id) {
-    case Event::Message:
-        return _send_message_event_to_client(client_id, queue);
-    default: {
-        const marlin_client::ClientEvent client_message {
-            .event = evt_id,
-            .unused = 0,
-            .usr16 = usr16,
-            .usr32 = usr32,
-        };
-        return queue.try_send(client_message, 0);
-    }
-    }
+static bool _send_notify_event_to_client([[maybe_unused]] int client_id, ClientQueue &queue, Event evt_id, uint32_t usr32, uint16_t usr16) {
+    const marlin_client::ClientEvent client_message {
+        .event = evt_id,
+        .unused = 0,
+        .usr16 = usr16,
+        .usr32 = usr32,
+    };
+    return queue.try_send(client_message, 0);
 }
 
 // send event notification to client - multiple events (called from server thread)
@@ -2842,8 +2800,6 @@ static uint64_t _send_notify_events_to_client(int client_id, ClientQueue &queue,
             case Event::MediaError:
             case Event::MediaRemoved:
             case Event::RequestCalibrationsScreen:
-            // StatusChanged event - one string argument
-            case Event::StatusChanged:
                 if (_send_notify_event_to_client(client_id, queue, evt_id, 0, 0)) {
                     sent |= msk; // event sent, set bit
                 }
@@ -2866,9 +2822,6 @@ static uint64_t _send_notify_events_to_client(int client_id, ClientQueue &queue,
                 }
                 break;
             // unused events
-            case Event::Message:
-                sent |= msk; // fake event sent for unused and forced events
-                break;
             case Event::_count:
                 assert(false);
                 break;

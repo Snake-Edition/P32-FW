@@ -29,9 +29,6 @@ void loop();
 // returns client_id for calling thread (-1 for unattached thread)
 int get_id();
 
-// sets dialog message, returns true on success
-bool set_message_cb(message_cb_t cb);
-
 // sets event notification mask
 void set_event_notify(uint64_t notify_events);
 
