@@ -43,6 +43,8 @@
 #include "printers.h"
 #include "MarlinPin.h"
 #include "../../../../src/common/adc.hpp"
+#include <feature/print_status_message/print_status_message_guard.hpp>
+#include <i18n.h>
 
 #define MAX6675_SEPARATE_SPI (EITHER(HEATER_0_USES_MAX6675, HEATER_1_USES_MAX6675) && PINS_EXIST(MAX6675_SCK, MAX6675_DO))
 
@@ -3888,20 +3890,6 @@ void Temperature::isr() {
 
   #endif // AUTO_REPORT_TEMPERATURES
 
-  #if HOTENDS && HAS_DISPLAY
-    void Temperature::set_heating_message(const uint8_t e) {
-      const bool heating = isHeatingHotend(e);
-      ui.status_printf_P(0,
-        #if HOTENDS > 1
-          PSTR("E%c " S_FMT), '1' + e
-        #else
-          PSTR("E " S_FMT)
-        #endif
-        , heating ? GET_TEXT(MSG_HEATING) : GET_TEXT(MSG_COOLING)
-      );
-    }
-  #endif
-
   #if HAS_TEMP_HOTEND
 
     #ifndef MIN_COOLING_SLOPE_DEG
@@ -3945,6 +3933,8 @@ void Temperature::isr() {
         thermalManager.set_fan_speed(target_extruder, 255);
       }
 
+      PrintStatusMessageGuard statusGuard;
+
       do {
         // Check if we're aborting
         if (planner.draining()) break;
@@ -3982,6 +3972,7 @@ void Temperature::isr() {
         gcode.reset_stepper_timeout(); // Keep steppers powered
 
         const float temp = degHotend(target_extruder);
+        statusGuard.update<PrintStatusMessage::waiting_for_hotend_temp>({.current = temp, .target = target_temp});
 
         #if ENABLED(PRINTER_EVENT_LEDS)
           // Gradually change LED strip from violet to red as nozzle heats up
@@ -4013,7 +4004,6 @@ void Temperature::isr() {
         thermalManager.set_fan_speed(target_extruder, fan_speed_at_start);
 
       if (wait_for_heatup) {
-        ui.reset_status();
         #if ENABLED(PRINTER_EVENT_LEDS)
           printerEventLEDs.onHeatingDone();
         #endif
@@ -4062,6 +4052,8 @@ void Temperature::isr() {
         printerEventLEDs.onBedHeatingStart();
       #endif
 
+      PrintStatusMessageGuard statusGuard;
+
       do {
         // Check if we're aborting
         if (planner.draining()) break;
@@ -4093,6 +4085,7 @@ void Temperature::isr() {
         gcode.reset_stepper_timeout(); // Keep steppers powered
 
         const float temp = degBed();
+        statusGuard.update<PrintStatusMessage::waiting_for_bed_temp>({.current = temp, .target = target_temp});
 
         #if ENABLED(PRINTER_EVENT_LEDS)
           // Gradually change LED strip from blue to violet as bed heats up
@@ -4140,8 +4133,6 @@ void Temperature::isr() {
         #endif
 
       } while (wait_for_heatup && TEMP_BED_CONDITIONS);
-
-      if (wait_for_heatup) ui.reset_status();
 
       return wait_for_heatup;
     }

@@ -1001,10 +1001,6 @@ public:
       #endif
     #endif
 
-    #if HAS_DISPLAY
-      static void set_heating_message(const uint8_t e);
-    #endif
-
     #if ENABLED(MODEL_DETECT_STUCK_THERMISTOR)
       static bool saneTempReadingHotend(const uint8_t E_NAME) {
           if (failed_cycles[HOTEND_INDEX] > THERMAL_PROTECTION_MODEL_PERIOD) return false;

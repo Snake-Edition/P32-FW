@@ -9,6 +9,7 @@
 #include <lcd/ultralcd.h> // Some marlin garbage dunno
 #include <marlin_server.hpp>
 #include <gcode/gcode.h>
+#include <feature/print_status_message/print_status_message_guard.hpp>
 
 using namespace buddy;
 
@@ -86,10 +87,10 @@ static void set_chamber_temperature(buddy::Temperature target, bool wait_for_hea
     /// How long we should wait until displaying a warning that we're failing to reach the temperature
     static constexpr int32_t warning_timeout_ms = 10 * 60 * 1000;
 
-    uint32_t last_report_time = 0;
     uint32_t warning_timeout_start = ticks_ms();
     SkippableGCode::Guard skippable_operation;
 
+    PrintStatusMessageGuard statusGuard;
     while (true) {
         if (planner.draining()) {
             // We're aborting -> stop waiting
@@ -99,14 +100,9 @@ static void set_chamber_temperature(buddy::Temperature target, bool wait_for_hea
         const auto current = chamber().current_temperature();
         static const Temperature tolerance = 3;
 
+        statusGuard.update<PrintStatusMessage::waiting_for_chamber_temp>({ .current = current.value_or(0), .target = target });
+
         const auto now = ticks_ms();
-        if (ticks_diff(now, last_report_time) > 1000) {
-            ArrayStringBuilder<64> sb;
-            sb.append_string_view(_("Waiting for chamber temperature"));
-            sb.append_printf(" %i/%i °C", int(current.value_or(0)), int(target));
-            ui.set_status(sb.str());
-            last_report_time = now;
-        }
 
         // Show a heat failure warning if we're waiting for too long
         if (ticks_diff(now, warning_timeout_start) >= warning_timeout_ms && !marlin_server::is_warning_active(WarningType::FailedToReachChamberTemperature)) {
@@ -152,6 +148,5 @@ static void set_chamber_temperature(buddy::Temperature target, bool wait_for_hea
         gcode.reset_stepper_timeout();
     }
 
-    MarlinUI::reset_status();
     marlin_server::clear_warning(WarningType::FailedToReachChamberTemperature);
 }

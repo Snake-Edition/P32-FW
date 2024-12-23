@@ -93,7 +93,6 @@ void GcodeSuite::M104() {
        */
       if (temp <= (EXTRUDE_MINTEMP) / 2) {
         print_job_timer.pause();
-        ui.reset_status();
       }
     #endif
   }
@@ -157,15 +156,9 @@ void GcodeSuite::M109() {
        */
       if (temp <= (EXTRUDE_MINTEMP) / 2) {
         print_job_timer.pause();
-        ui.reset_status();
       }
       else
         print_job_timer.start();
-    #endif
-
-    #if HAS_DISPLAY
-      if (thermalManager.isHeatingHotend(target_extruder) || !no_wait_for_cooling)
-        thermalManager.set_heating_message(target_extruder);
     #endif
   }
 

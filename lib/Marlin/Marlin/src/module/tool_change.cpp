@@ -985,9 +985,6 @@ void tool_change(const uint8_t new_tool,
           singlenozzle_temp[old_tool] = thermalManager.temp_hotend[0].target;
           if (singlenozzle_temp[new_tool] && singlenozzle_temp[new_tool] != singlenozzle_temp[old_tool]) {
             thermalManager.setTargetHotend(singlenozzle_temp[new_tool], 0);
-            #if HAS_DISPLAY
-              thermalManager.set_heating_message(0);
-            #endif
             (void)thermalManager.wait_for_hotend(0, false);  // Wait for heating or cooling
           }
         #endif

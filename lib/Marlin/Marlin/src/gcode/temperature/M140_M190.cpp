@@ -84,8 +84,6 @@ void GcodeSuite::M190() {
   }
   else return;
 
-  ui.set_status_P(thermalManager.isHeatingBed() ? GET_TEXT(MSG_BED_HEATING) : GET_TEXT(MSG_BED_COOLING));
-
   thermalManager.wait_for_bed(no_wait_for_cooling);
 }
 
