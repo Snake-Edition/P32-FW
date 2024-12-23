@@ -98,6 +98,7 @@
 
 #include <scope_guard.hpp>
 #include <marlin_server.hpp>
+#include <feature/print_status_message/print_status_message_guard.hpp>
 
 #if ENABLED(QUICK_HOME)
 
@@ -321,6 +322,7 @@ void GcodeSuite::G28() {
 #endif
 
   marlin_server::FSM_Holder fsm_holder(PhaseWait::homing);
+  PrintStatusMessageGuard statusGuard(PrintStatusMessage::make<PrintStatusMessage::homing>({}));
 
   bool X = parser.seen('X');
   bool Y = parser.seen('Y');

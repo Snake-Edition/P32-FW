@@ -1385,8 +1385,6 @@
     #define UBL_SAVE_ACTIVE_ON_M500 // Save the currently active mesh in the current slot on M500
 
     #define UBL_TRAVEL_ACCELERATION 800
-
-    #define UBL_DONT_REPORT_POINT_COUNT // Don't report total count of probed points
 //#define UBL_Z_RAISE_WHEN_OFF_MESH 2.5 // When the nozzle is off the mesh, this value is used
 // as the Z-Height correction value.
 

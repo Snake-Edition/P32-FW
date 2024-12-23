@@ -48,6 +48,9 @@
     #include <hw_configuration.hpp>
   #endif
 
+  #include <feature/print_status_message/print_status_message_guard.hpp>
+  #include <i18n.h>
+
   #if ENABLED(NOZZLE_LOAD_CELL)
     #include "loadcell.hpp"
   #endif
@@ -965,11 +968,10 @@
       #endif
 
       PrintArea::rect_t probe_area(area_a, area_b);
+      PrintStatusMessageGuard statusGuard;
 
       bool is_initial_probe = true;
-      #if DISABLED(UBL_DONT_REPORT_POINT_COUNT)
       const int  num_of_points_to_probe = count_points_to_probe();
-      #endif /*DISABLED(UBL_DONT_REPORT_POINT_COUNT)*/
       int num_of_probed_points = 0;
        // enumerate over all major points
       for (int y = GRID_MAX_POINTS_Y - GRID_BORDER - 1; y >= GRID_BORDER; y -= GRID_MAJOR_STEP) {
@@ -1014,12 +1016,9 @@
           }
 
           num_of_probed_points ++;
+          statusGuard.update<PrintStatusMessage::probing_bed>({.current = (float) num_of_probed_points, .target = (float) num_of_points_to_probe});
+
           // and finally, probe
-          #if ENABLED(UBL_DONT_REPORT_POINT_COUNT)
-            ui.status_printf_P(0, PSTR(S_FMT " %i"), GET_TEXT(MSG_PROBING_MESH), num_of_probed_points);
-          #else
-            ui.status_printf_P(0, PSTR(S_FMT " %i/%i"), GET_TEXT(MSG_PROBING_MESH), num_of_probed_points, num_of_points_to_probe);
-          #endif /*ENABLED(UBL_DONT_REPORT_POINT_COUNT)*/
           const float measured_z = probe_at_point(
                         pos,
                         stow_probe ? PROBE_PT_STOW : PROBE_PT_RAISE, g29_verbose_level
