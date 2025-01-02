@@ -40,6 +40,9 @@ struct EnumArray final : public std::array<Value, static_cast<size_t>(cnt)> {
     inline constexpr Value get_fallback(Enum v, Enum fallback_value) const {
         return get_fallback(static_cast<size_t>(v), static_cast<size_t>(fallback_value));
     }
+    inline constexpr Value get_or(Enum v, Value fallback_value) const {
+        return (static_cast<size_t>(v) < this->size()) ? Array::operator[](static_cast<size_t>(v)) : fallback_value;
+    }
 
     inline constexpr const Value &operator[](size_t i) const {
         return Array::operator[](i);
