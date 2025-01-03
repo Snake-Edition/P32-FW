@@ -250,6 +250,8 @@ optional<Error> HttpClient::send_request(const char *host, Connection *conn, Req
                     size_t written = get<size_t>(result);
                     if (written == 0) {
                         has_more = false;
+                    } else {
+                        log_debug(httpc, "out: %*s", written, reinterpret_cast<char *>(buffer));
                     }
                     return written;
                 } else {
