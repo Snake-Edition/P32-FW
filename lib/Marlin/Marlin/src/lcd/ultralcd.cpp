@@ -1428,7 +1428,6 @@ void MarlinUI::update() {
    */
   void MarlinUI::reset_status() {
     PGM_P printing = GET_TEXT(MSG_PRINTING);
-    PGM_P welcome  = GET_TEXT(WELCOME_MSG);
     #if SERVICE_INTERVAL_1 > 0
       static const char service1[] PROGMEM = { "> " SERVICE_NAME_1 "!" };
     #endif
@@ -1438,7 +1437,7 @@ void MarlinUI::update() {
     #if SERVICE_INTERVAL_3 > 0
       static const char service3[] PROGMEM = { "> " SERVICE_NAME_3 "!" };
     #endif
-    PGM_P msg;
+    PGM_P msg = nullptr;
     if (printingIsPaused())
       msg = print_paused;
     #if ENABLED(SDSUPPORT)
@@ -1458,10 +1457,9 @@ void MarlinUI::update() {
       else if (print_job_timer.needsService(3)) msg = service3;
     #endif
 
-    else
-      msg = welcome;
-
-    set_status_P(msg, -1);
+    if(msg) {
+      set_status_P(msg, -1);
+    }
   }
 
   #if ENABLED(SDSUPPORT)
