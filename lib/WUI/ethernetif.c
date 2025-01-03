@@ -16,6 +16,9 @@
 #include <stdbool.h>
 #include "buddy/priorities_config.h"
 
+// Needs to live in a cpp file :-(
+void log_dropped_packet_rx(size_t len);
+
 /* The time to block waiting for input. */
 #define TIME_WAITING_FOR_INPUT (portMAX_DELAY)
 /* Stack size of the interface thread */
@@ -341,6 +344,9 @@ static struct pbuf *low_level_input(struct netif *netif) {
     if (len > 0) {
         /* We allocate a pbuf chain of pbufs from the Lwip buffer pool */
         p = pbuf_alloc_rx(len);
+        if (p == NULL) {
+            log_dropped_packet_rx(len);
+        }
     }
 
     if (p != NULL) {
