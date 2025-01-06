@@ -70,9 +70,8 @@ public:
      * @param MCU_modular_bed_temp [in] - MCU Temperature for handling fan cooling/filtration
      * @param active_dwarf_board_temp [in] - Current or first dwarf board temperature
      * @param print_state [in]
-     * @return WarningType for GUI
      */
-    std::optional<WarningType> loop(int32_t MCU_modular_bed_temp, int16_t active_dwarf_board_temp, marlin_server::State print_state);
+    void loop(int32_t MCU_modular_bed_temp, int16_t active_dwarf_board_temp, marlin_server::State print_state);
 
     /**
      *  Set up reminder for expired filter change
@@ -155,9 +154,8 @@ private:
 
     /**
      *  Test enclosure fan presence
-     *  @return WarningType - returns WarningType::EnclosureFanError if test did not pass. Otherwise returns std::optional without value
      */
-    std::optional<WarningType> testFanPresence(uint32_t curr_sec);
+    void testFanPresence(uint32_t curr_sec);
 
     /**
      *  Looks which filament are required for this print and set up post-print filtration period for the smelly ones
@@ -168,7 +166,7 @@ private:
     /**
      *  Update and check filter expiration timer. On 500. & 600. hour of printing notification to GUI is sent
      */
-    std::optional<WarningType> updateFilterExpirationTimer(uint32_t delta_sec);
+    void updateFilterExpirationTimer(uint32_t delta_sec);
 
     /**
      *  Timing validation period of recorded temperature: 5 minutes
@@ -183,9 +181,8 @@ private:
 
     /**
      *  Handles fan activation during printing state
-     *  @return optional with no value or WarningType::EnclosureFilterExpiration
      */
-    std::optional<WarningType> checkPrintState(marlin_server::State print_state, uint32_t curr_sec);
+    void checkPrintState(marlin_server::State print_state, uint32_t curr_sec);
 
     std::atomic<uint8_t> persistent_flags;
     std::atomic<uint8_t> runtime_flags;

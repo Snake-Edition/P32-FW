@@ -11,6 +11,7 @@
 #include <ctime>
 #include <tools_mapping.hpp>
 #include <option/xl_enclosure_support.h>
+#include <marlin_server.hpp>
 
 static_assert(XL_ENCLOSURE_SUPPORT());
 
@@ -46,8 +47,7 @@ Enclosure::Enclosure()
     last_timer_update_sec = last_sec = ticks_s();
 }
 
-std::optional<WarningType> Enclosure::testFanPresence(uint32_t curr_tick) {
-    std::optional<WarningType> ret = std::nullopt;
+void Enclosure::testFanPresence(uint32_t curr_tick) {
     if (curr_tick - fan_presence_test_sec >= fan_presence_test_period_sec) {
         if (Fans::enclosure().getRPMIsOk()) {
             setPersistentFlg(PERSISTENT::ENABLED);
@@ -55,11 +55,10 @@ std::optional<WarningType> Enclosure::testFanPresence(uint32_t curr_tick) {
         } else {
             clrPersistentFlg(PERSISTENT::ENABLED);
             active_mode = EnclosureMode::Idle;
-            ret = { WarningType::EnclosureFanError };
+            marlin_server::set_warning(WarningType::EnclosureFanError);
         }
         fan_presence_test_sec = 0;
     }
-    return ret;
 }
 
 bool Enclosure::testFanTacho() {
@@ -147,30 +146,29 @@ bool Enclosure::updatePostPrintFiltrationTimer(uint32_t curr_sec) {
 
 // Expiration timer + Expiration warning timer
 // expiration_shown flag and xl_enclosure_filter_timer EEPROM value are reused for 5 day reminder
-std::optional<WarningType> Enclosure::updateFilterExpirationTimer(uint32_t delta_sec) {
-    std::optional<WarningType> ret = std::nullopt;
+void Enclosure::updateFilterExpirationTimer(uint32_t delta_sec) {
     int64_t expiration_timer = config_store().xl_enclosure_filter_timer.get();
 
     if (isExpirationShown()) {
         // 5 day reminder after filter already expired (RTC time)
         if (isReminderSet() && time(nullptr) - expiration_timer >= expiration_5day_reminder_period_sec) {
-            ret = { WarningType::EnclosureFilterExpiration };
+            marlin_server::set_warning(WarningType::EnclosureFilterExpiration);
         }
-        return ret;
+        return;
     }
 
     // check filter expiration
     if (!isWarningShown() && expiration_timer + delta_sec >= expiration_warning_sec) {
         setPersistentFlg(PERSISTENT::WARNING_SHOWN);
-        ret = { WarningType::EnclosureFilterExpirWarning };
+        marlin_server::set_warning(WarningType::EnclosureFilterExpirWarning);
+
     } else if (!isExpirationShown() && expiration_timer + delta_sec >= expiration_deadline_sec) {
         setPersistentFlg(PERSISTENT::EXPIRATION_SHOWN);
-        return { WarningType::EnclosureFilterExpiration };
+        marlin_server::set_warning(WarningType::EnclosureFilterExpiration);
     }
 
     expiration_timer += delta_sec;
     config_store().xl_enclosure_filter_timer.set(expiration_timer);
-    return ret;
 }
 
 bool Enclosure::isPostPrintFiltrationNeeded() {
@@ -248,9 +246,7 @@ static bool isResuming(marlin_server::State state) {
     return false;
 }
 
-std::optional<WarningType> Enclosure::checkPrintState(marlin_server::State print_state, uint32_t curr_sec) {
-
-    std::optional<WarningType> ret = std::nullopt;
+void Enclosure::checkPrintState(marlin_server::State print_state, uint32_t curr_sec) {
     if (print_state == marlin_server::State::Printing) {
         if (!isPrinting()) {
             // PRINT STARTED - can be Start / Resume / Recovery
@@ -265,7 +261,7 @@ std::optional<WarningType> Enclosure::checkPrintState(marlin_server::State print
             // Pop up expiration dialog
             if (isExpirationShown() && !isReminderSet() && isBasicStartPrint(previous_print_state)) {
                 // Print start (except for resuming)
-                ret = { WarningType::EnclosureFilterExpiration };
+                marlin_server::set_warning(WarningType::EnclosureFilterExpiration);
             }
         }
     } else {
@@ -285,7 +281,6 @@ std::optional<WarningType> Enclosure::checkPrintState(marlin_server::State print
             clrRuntimeFlg(RUNTIME::TEMP_VALID);
         }
     }
-    return ret;
 }
 
 uint8_t Enclosure::getPwmFromMode() const {
@@ -313,18 +308,18 @@ uint8_t Enclosure::getPwmFromMode() const {
     return 0;
 }
 
-std::optional<WarningType> Enclosure::loop(int32_t MCU_modular_bed_temp, int16_t dwarf_board_temp, marlin_server::State print_state) {
+void Enclosure::loop(int32_t MCU_modular_bed_temp, int16_t dwarf_board_temp, marlin_server::State print_state) {
 
     // 1s loop delay
-    uint32_t curr_sec = ticks_s();
+    const uint32_t curr_sec = ticks_s();
     if (curr_sec - last_sec < tick_delay_sec) {
-        return std::nullopt;
+        return;
     }
 
     last_sec = curr_sec;
     active_dwarf_board_temp = dwarf_board_temp; // update actual temp of active dwarf board
 
-    std::optional<WarningType> warning_opt = checkPrintState(print_state, curr_sec);
+    checkPrintState(print_state, curr_sec);
     previous_print_state = print_state;
 
     // Deactivated enclosure
@@ -343,8 +338,7 @@ std::optional<WarningType> Enclosure::loop(int32_t MCU_modular_bed_temp, int16_t
         break;
 
     case EnclosureMode::Test:
-
-        warning_opt = testFanPresence(curr_sec);
+        testFanPresence(curr_sec);
         break;
 
     case EnclosureMode::Active: {
@@ -352,7 +346,7 @@ std::optional<WarningType> Enclosure::loop(int32_t MCU_modular_bed_temp, int16_t
         if (testFanTacho()) {
             clrPersistentFlg(PERSISTENT::ENABLED);
             clrRuntimeFlg(RUNTIME::ACTIVE_COOLING | RUNTIME::ACTIVE_POST_PRINT_FILTRATION | RUNTIME::TEMP_VALID);
-            warning_opt = { WarningType::EnclosureFanError };
+            marlin_server::set_warning(WarningType::EnclosureFanError);
             break;
         }
 
@@ -387,17 +381,13 @@ std::optional<WarningType> Enclosure::loop(int32_t MCU_modular_bed_temp, int16_t
 
     if (!isActive() || fan_pwm == 0) {
         last_timer_update_sec = curr_sec;
-        return warning_opt;
+        return;
     }
 
     // Check timer every minute of active fan - longer period because it writes to EEPROM
     if (curr_sec - last_timer_update_sec >= timers_update_period_sec) {
         // Filter expiration notification
-        std::optional<WarningType> expir_warning = updateFilterExpirationTimer(curr_sec - last_timer_update_sec);
-        if (expir_warning.has_value()) {
-            warning_opt = expir_warning;
-        }
+        updateFilterExpirationTimer(curr_sec - last_timer_update_sec);
         last_timer_update_sec = curr_sec;
     }
-    return warning_opt;
 }

@@ -739,12 +739,8 @@ static void cycle() {
     #if HAS_TOOLCHANGER()
     dwarf_temp = prusa_toolchanger.getActiveToolOrFirst().get_board_temperature();
     #endif
-    std::optional<WarningType> notif = xl_enclosure.loop(buddy::puppies::modular_bed.get_mcu_temperature(), dwarf_temp, server.print_state);
 
-    // Filter expiration, expiration warning, 5 day postponed reminder
-    if (notif.has_value()) {
-        set_warning(*notif); // Notify the GUI about the warning
-    }
+    xl_enclosure.loop(buddy::puppies::modular_bed.get_mcu_temperature(), dwarf_temp, server.print_state);
 
 #endif
 
