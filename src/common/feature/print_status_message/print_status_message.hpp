@@ -13,6 +13,7 @@ struct PrintStatusMessage {
 
         homing,
         probing_bed,
+        absorbing_heat,
 
         waiting_for_hotend_temp,
         waiting_for_bed_temp,

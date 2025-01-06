@@ -9,6 +9,7 @@ static constexpr EnumArray<Message::Type, const char *, Message::Type::_cnt> mes
         { Message::Type::custom, nullptr },
         { Message::Type::homing, N_("Homing") },
         { Message::Type::probing_bed, N_("Probing bed") },
+        { Message::Type::absorbing_heat, N_("Absorbing heat") },
         { Message::Type::waiting_for_hotend_temp, N_("Waiting for hotend") },
         { Message::Type::waiting_for_bed_temp, N_("Waiting for bed") },
 #if HAS_CHAMBER_API()

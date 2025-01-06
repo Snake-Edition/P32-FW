@@ -6,6 +6,8 @@
 #include "../../lcd/ultralcd.h"
 #include "../../../marlin_stubs/skippable_gcode.hpp"
 
+#include <feature/print_status_message/print_status_message_guard.hpp>
+
 #if HAS_HEATED_BED
 
 static constexpr int16_t minimal_preheat_temp = 60;
@@ -58,9 +60,7 @@ uint32_t BedPreheat::remaining_preheat_time() {
 
 void BedPreheat::wait_for_preheat() {
     SkippableGCode::Guard skippable_operation;
-
-    static constexpr uint32_t message_interval = 1000;
-    uint32_t last_message_timestamp = millis() - message_interval;
+    PrintStatusMessageGuard status_guard;
 
     while (can_preheat && !preheated && !skippable_operation.is_skip_requested()) {
         idle(true);
@@ -68,16 +68,8 @@ void BedPreheat::wait_for_preheat() {
         // make sure we don't turn off the motors
         gcode.reset_stepper_timeout();
 
-        if (millis() - last_message_timestamp > message_interval) {
-            const uint32_t remaining_s = remaining_preheat_time() / 1000;
-            const uint32_t minutes = remaining_s / 60;
-            const uint32_t seconds = remaining_s % 60;
-            MarlinUI::status_printf_P(0, "Absorbing heat (%i:%02i)", minutes, seconds);
-            last_message_timestamp = millis();
-        }
+        status_guard.update<PrintStatusMessage::absorbing_heat>({ .current = (float)remaining_preheat_time(), .target = 0 });
     }
-
-    MarlinUI::reset_status();
 }
 
 BedPreheat bed_preheat;
