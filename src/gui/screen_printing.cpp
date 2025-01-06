@@ -613,7 +613,6 @@ void screen_printing_data_t::set_pause_icon_and_label() {
     case printing_state_t::COUNT:
     case printing_state_t::INITIAL:
     case printing_state_t::PRINTING:
-    case printing_state_t::MBL_FAILED:
         EnableButton(BtnSocket::Middle);
         SetButtonIconAndLabel(BtnSocket::Middle, BtnRes::Pause, LabelRes::Pause);
         break;
@@ -637,7 +636,6 @@ void screen_printing_data_t::set_pause_icon_and_label() {
         SetButtonIconAndLabel(BtnSocket::Middle, BtnRes::Resume, LabelRes::Resuming);
         break;
     case printing_state_t::REHEATING:
-    case printing_state_t::REHEATING_DONE:
         DisableButton(BtnSocket::Middle);
         SetButtonIconAndLabel(BtnSocket::Middle, BtnRes::Resume, LabelRes::Reheating);
         break;
@@ -655,7 +653,6 @@ void screen_printing_data_t::set_pause_icon_and_label() {
     case printing_state_t::PAUSING:
         header.SetText(_("PAUSING ..."));
         break;
-    case printing_state_t::MBL_FAILED:
     case printing_state_t::PAUSED:
         header.SetText(_("PAUSED"));
         break;

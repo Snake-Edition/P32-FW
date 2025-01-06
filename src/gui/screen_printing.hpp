@@ -24,8 +24,6 @@ enum class printing_state_t : uint8_t {
     RESUMING,
     ABORTING,
     REHEATING,
-    REHEATING_DONE,
-    MBL_FAILED,
     STOPPED,
     PRINTED,
     COUNT // setting this state == forced update
