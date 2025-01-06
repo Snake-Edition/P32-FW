@@ -91,7 +91,7 @@ void EmergencyStop::maybe_block() {
         return;
     }
 
-    marlin_server::set_warning(WarningType::DoorOpen, PhasesWarning::DoorOpen);
+    marlin_server::set_warning(WarningType::DoorOpen);
     maybe_block_running = true;
     allow_planning_movements = false;
 

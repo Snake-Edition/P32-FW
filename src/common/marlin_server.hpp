@@ -297,7 +297,7 @@ public:
     }
 };
 
-void set_warning(WarningType type, PhasesWarning phase = PhasesWarning::Warning);
+void set_warning(WarningType type);
 void clear_warning(WarningType type);
 bool is_warning_active(WarningType type);
 
