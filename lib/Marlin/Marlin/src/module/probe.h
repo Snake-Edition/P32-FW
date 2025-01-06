@@ -50,7 +50,7 @@
     return probe_at_point(pos.x, pos.y, raise_after, verbose_level, probe_relative);
   }
   #if ENABLED(NOZZLE_LOAD_CELL) && ENABLED(PROBE_CLEANUP_SUPPORT)
-    void cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max);
+    bool cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max);
   #endif
   #define DEPLOY_PROBE() set_probe_deployed(true)
   #define STOW_PROBE() set_probe_deployed(false)

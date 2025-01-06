@@ -259,7 +259,36 @@ void GcodeSuite::G29() {
 
     while (true) {
         ubl.g29_min_max_measured_z = std::nullopt;
+        ubl.g29_nozzle_cleaning_failed = false;
+        ubl.g29_probing_failed = false;
         ubl.G29();
+
+    #if HAS_BED_PROBE
+        if (ubl.g29_probing_failed) {
+            plan_park_move_to_xyz({ { XYZ_NOZZLE_PARK_POINT } }, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE);
+
+            if (marlin_server::prompt_warning(WarningType::ProbingFailed) != Response::Yes) {
+                marlin_server::print_abort();
+                return;
+            }
+
+            G28_no_parser(true, true, true);
+            continue;
+        }
+    #endif
+
+    #if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
+        if (ubl.g29_nozzle_cleaning_failed) {
+            plan_park_move_to_xyz({ { XYZ_NOZZLE_PARK_POINT } }, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE);
+
+            if (marlin_server::prompt_warning(WarningType::NozzleCleaningFailed) != Response::Retry) {
+                marlin_server::print_abort();
+                return;
+            }
+
+            continue;
+        }
+    #endif
 
     #if HAS_UNEVEN_BED_PROMPT()
         // If we've done some measuring in this phase and it is too uneven, offer running Z calib
@@ -270,7 +299,7 @@ void GcodeSuite::G29() {
             // Hack for the supplemenary "probe near purge place" - that is done after print area MBL and we don't want to offer Z align after that
             && !parser.seenval('C') //
         ) {
-            log_warning(Marlin, "Uneven bed detected: %f - %f", (double) ubl.g29_min_max_measured_z->first, (double)ubl.g29_min_max_measured_z->second);
+            log_warning(Marlin, "Uneven bed detected: %f - %f", (double)ubl.g29_min_max_measured_z->first, (double)ubl.g29_min_max_measured_z->second);
 
             if (marlin_server::prompt_warning(WarningType::BedUnevenAlignmentPrompt) == Response::Yes) {
                 // calib_Z does not have its own holder - we have to handle that

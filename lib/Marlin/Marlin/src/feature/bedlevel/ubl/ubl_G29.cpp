@@ -667,7 +667,7 @@
                 // we're going to move to an absolute position: inhibit XYZ repositioning
                 crash_s.set_gcode_replay_flags(Crash_s::RECOVER_AXIS_STATE);
               #endif
-              cleanup_probe(g29_pos, g29_pos + g29_size);
+              ubl.g29_nozzle_cleaning_failed |= !cleanup_probe(g29_pos, g29_pos + g29_size);
             } else {
               SERIAL_ECHOLNPGM("G29 P9 requires X, Y, W and H arguments");
               return;
@@ -1025,7 +1025,7 @@
                         stow_probe ? PROBE_PT_STOW : PROBE_PT_RAISE, g29_verbose_level
                       );
           if(std::isnan(measured_z)){
-            LCD_MESSAGEPGM(MSG_LCD_PROBING_FAILED);
+            ubl.g29_probing_failed = true;
             STOW_PROBE();
             return;
           }

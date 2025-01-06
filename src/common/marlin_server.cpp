@@ -207,9 +207,6 @@ namespace {
         Measure_axis *measure_axis = nullptr;
 #endif // ENABLED(AXIS_MEASURE)
 
-#if HAS_BED_PROBE || HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-        bool mbl_failed;
-#endif
         bool was_print_time_saved = false;
     };
 
@@ -449,36 +446,6 @@ namespace {
             break;
 #endif
 
-        case PhasesWarning::ProbingFailed:
-            switch (consume_response()) {
-            case Response::Yes:
-                print_resume();
-                break;
-
-            case Response::No:
-                print_abort();
-                break;
-
-            default:
-                break;
-            }
-            break;
-
-        case PhasesWarning::NozzleCleaningFailed:
-            switch (consume_response()) {
-            case Response::Retry:
-                print_resume();
-                break;
-
-            case Response::No:
-                print_abort();
-                break;
-
-            default:
-                break;
-            }
-            break;
-
         default:
             // Most warnings are handled somewhere else and we shouldn't consume and process the responses
             break;
@@ -571,9 +538,7 @@ void init(void) {
     }
     server_task = osThreadGetId();
     server.enable_nozzle_temp_timeout = true;
-#if HAS_BED_PROBE || HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-    server.mbl_failed = false;
-#endif
+
     // Random at boot, to avoid chance of reusing the same (0/1) dialog ID
     // after a reboot.
     fsm_states.generation = rand_u();
@@ -1771,14 +1736,6 @@ static void resuming_reheating() {
         return;
     }
 
-#if HAS_BED_PROBE || HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-    // There's homing after MBL fail so no need to unpark at all
-    if (server.mbl_failed) {
-        server.print_state = State::Resuming_UnparkHead_ZE;
-        return;
-    }
-#endif
-
 #if ENABLED(CRASH_RECOVERY)
     if (crash_s.get_state() == Crash_s::REPEAT_WAIT) {
         server.print_state = State::Resuming_UnparkHead_ZE; // Skip unpark when recovering from toolcrash or homing fail
@@ -1973,9 +1930,6 @@ static void _server_print_loop(void) {
             // NOTE this works surely thanks to State::WaitGui being in between the DESTROY and CREATE
             fsm_create(PhasesPrinting::active);
         }
-#if HAS_BED_PROBE || HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-        server.mbl_failed = false;
-#endif
         break;
     case State::SerialPrintInit:
         server.print_is_serial = true;
@@ -2095,12 +2049,6 @@ static void _server_print_loop(void) {
 
             // Crash Detection is disabled during serial printing, because it does not work
             assert(server.print_is_serial || crash_s.get_state() == Crash_s::PRINTING);
-        }
-#endif
-#if HAS_BED_PROBE || HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-        if (server.mbl_failed) {
-            gcode.process_subcommands_now_P("G28");
-            server.mbl_failed = false;
         }
 #endif
         if (abort_resuming) {
@@ -2654,14 +2602,8 @@ void resuming_begin(void) {
     nozzle_timeout_on(); // could be turned off after pause by changing temperature.
     if (print_reheat_ready()) {
 
-#if HAS_BED_PROBE || HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-        if (server.mbl_failed) {
-            // There's homing after MBL fail so no need to unpark at all
-            server.print_state = State::Resuming_UnparkHead_ZE;
-        } else
-#endif /*HAS_BED_PROBE || HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)*/
 #if ENABLED(CRASH_RECOVERY)
-            if (crash_s.get_state() == Crash_s::REPEAT_WAIT) {
+        if (crash_s.get_state() == Crash_s::REPEAT_WAIT) {
             // Skip unpark when recovering from toolcrash or homing fail
             server.print_state = State::Resuming_UnparkHead_ZE;
         } else
@@ -2752,12 +2694,6 @@ void park_head() {
     #endif /*HAS_TOOLCHANGER()*/
 
     xyz_pos_t park = XYZ_NOZZLE_PARK_POINT;
-    #ifdef XYZ_NOZZLE_PARK_POINT_M600
-    const xyz_pos_t park_clean = XYZ_NOZZLE_PARK_POINT_M600;
-    if (server.mbl_failed) {
-        park = park_clean;
-    }
-    #endif // XYZ_NOZZLE_PARK_POINT_M600
     park.z = current_position.z;
     plan_park_move_to_xyz(park, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE);
 #endif // NOZZLE_PARK_FEATURE
@@ -3465,26 +3401,10 @@ void onUserConfirmRequired(const char *const msg) {
     log_info(MarlinServer, "ExtUI: onUserConfirmRequired: %s", msg);
 }
 
-#if HAS_BED_PROBE || HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-static void mbl_error(WarningType warning) {
-    if (server.print_state != State::Printing && server.print_state != State::Pausing_Begin) {
-        return;
-    }
-
-    server.print_state = State::Pausing_Failed_Code;
-    /// pause immediatelly to save current file position
-    pause_print(Pause_Type::Repeat_Last_Code);
-    server.mbl_failed = true;
-    set_warning(warning);
-}
-#endif
-
 void onStatusChanged(const char *const msg) {
     if (!msg) {
         return; // ignore errorneous nullptr messages
     }
-
-    static bool pending_err_msg = false;
 
     log_info(MarlinServer, "ExtUI: onStatusChanged: %s", msg);
     _send_notify_event(Event::StatusChanged, 0, 0); // this includes MMU:P progress messages - just plain textual information
@@ -3493,29 +3413,10 @@ void onStatusChanged(const char *const msg) {
     else if (strcmp(msg, "TMC CONNECTION ERROR") == 0) {
         // FIXME: Nobody was consuming this at all, so disabled.
         //_send_notify_event(Event::Error, MARLIN_ERR_TMCDriverError, 0);
-    } else {
-        if (!is_abort_state(server.print_state)) {
-            pending_err_msg = false;
-        }
-        if (!pending_err_msg) {
-/// FIXME: Message through Marlin's UI could be delayed and we won't pause print at the MBL command
-#if HAS_BED_PROBE
-            if (strcmp(msg, MSG_ERR_PROBING_FAILED) == 0) {
-                mbl_error(WarningType::ProbingFailed);
-                pending_err_msg = true;
-            }
-#endif
-#if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-            if (strcmp(msg, MSG_ERR_NOZZLE_CLEANING_FAILED) == 0) {
-                mbl_error(WarningType::NozzleCleaningFailed);
-                pending_err_msg = true;
-            }
-#endif
-            if (msg[0] != 0) { // empty message filter
-                _add_status_msg(msg);
-                _send_notify_event(Event::Message, 0, 0);
-            }
-        }
+
+    } else if (msg[0] != '\0') {
+        _add_status_msg(msg);
+        _send_notify_event(Event::Message, 0, 0);
     }
 }
 

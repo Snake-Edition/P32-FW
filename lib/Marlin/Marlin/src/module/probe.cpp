@@ -849,7 +849,7 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
 /**
  * @brief Probe within a given rectangle in order to cleanup loadcell-based probe.
  */
-void cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max) {
+bool cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max) {
   float radius = 1.0f;
   bool probe_deployed = false;
   const int required_clean_cnt = 3;
@@ -917,9 +917,8 @@ void cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max) {
   if (probe_deployed) {
     STOW_PROBE();
   }
-  if (consecutive_clean_cnt < required_clean_cnt) {
-    LCD_MESSAGEPGM_P(MSG_ERR_NOZZLE_CLEANING_FAILED);
-  }
+
+  return consecutive_clean_cnt >= required_clean_cnt;
 }
 #endif
 

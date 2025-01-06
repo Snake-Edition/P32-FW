@@ -604,7 +604,6 @@ namespace Language_en {
   PROGMEM Language_Str MSG_RUNOUT_SENSOR                   = _UxGT("Runout Sensor");
   PROGMEM Language_Str MSG_RUNOUT_DISTANCE_MM              = _UxGT("Runout Dist mm");
   PROGMEM Language_Str MSG_LCD_HOMING_FAILED               = _UxGT("Homing Failed");
-  PROGMEM Language_Str MSG_LCD_PROBING_FAILED              = _UxGT("Probing Failed");
   PROGMEM Language_Str MSG_LCD_MISSING_SHEET               = _UxGT("Print sheet missing");
   PROGMEM Language_Str MSG_M600_TOO_COLD                   = _UxGT("M600: Too Cold");
 

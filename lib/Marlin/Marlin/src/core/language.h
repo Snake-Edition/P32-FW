@@ -244,7 +244,6 @@
 #define MSG_ERR_HOTEND_TOO_COLD             "Hotend too cold"
 #define MSG_ERR_Z_HOMING_SER                "Home XY first"
 #define MSG_ERR_EEPROM_WRITE                "Error writing to EEPROM!"
-#define MSG_ERR_NOZZLE_CLEANING_FAILED      "Nozzle Cleaning Failed"
 
 #define MSG_FILAMENT_CHANGE_HEAT_LCD        "Press button to heat nozzle"
 #define MSG_FILAMENT_CHANGE_INSERT_LCD      "Insert filament and press button"
@@ -295,7 +294,6 @@
 #define MSG_T_THERMAL_RUNAWAY               "Thermal Runaway"
 #define MSG_T_MAXTEMP                       "MAXTEMP triggered"
 #define MSG_T_MINTEMP                       "MINTEMP triggered"
-#define MSG_ERR_PROBING_FAILED              "Probing Failed"
 #define STR_ZPROBE_OUT_SER                  "Z Probe Past Bed"
 
 // Debug
