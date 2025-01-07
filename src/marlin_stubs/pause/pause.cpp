@@ -339,7 +339,7 @@ bool Pause::ensureSafeTemperatureNotifyProgress(uint8_t progress_min, uint8_t pr
         return true;
     }
 
-    setPhase(settings.can_stop ? PhasesLoadUnload::WaitingTemp_stoppable : PhasesLoadUnload::WaitingTemp_unstoppable, progress_min);
+    setPhase(is_unstoppable() ? PhasesLoadUnload::WaitingTemp_unstoppable : PhasesLoadUnload::WaitingTemp_stoppable, progress_min);
 
     PauseFsmNotifier N(*this, Temperature::degHotend(active_extruder),
         Temperature::degTargetHotend(active_extruder) - heating_phase_min_hotend_diff, progress_min, progress_max, marlin_vars().hotend(active_extruder).temp_nozzle);
@@ -1103,7 +1103,7 @@ bool Pause::wait_for_motion_finish_or_user_stop() {
 }
 
 void Pause::park_nozzle_and_notify() {
-    setPhase(settings.can_stop ? PhasesLoadUnload::Parking_stoppable : PhasesLoadUnload::Parking_unstoppable);
+    setPhase(is_unstoppable() ? PhasesLoadUnload::Parking_unstoppable : PhasesLoadUnload::Parking_stoppable);
     // Initial retract before move to filament change position
     if (settings.retract && thermalManager.hotEnoughToExtrude(active_extruder)) {
         do_pause_e_move(settings.retract, PAUSE_PARK_RETRACT_FEEDRATE);
@@ -1283,7 +1283,6 @@ void Pause::unpark_nozzle_and_notify() {
  */
 void Pause::filament_change(const pause::Settings &settings_, bool is_filament_stuck) {
     settings = settings_;
-    settings.can_stop = false;
 
     load_type = is_filament_stuck ? LoadType::filament_stuck : LoadType::filament_change;
 

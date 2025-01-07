@@ -56,7 +56,6 @@ private:
 
     uint8_t mmu_filament_to_load = 0;
     uint8_t target_extruder;
-    bool can_stop : 1; // true by default, only runout cannot stop, set by Pause
     bool do_stop : 1; // part of settings just o be resetted
 
     // Preloaded from the config_store to prevent querying it each loop
