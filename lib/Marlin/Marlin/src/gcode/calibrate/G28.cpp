@@ -341,7 +341,7 @@ void GcodeSuite::G28() {
     flags.check_sheet = !parser.boolval('P');
   #endif
   #if ENABLED(PRECISE_HOMING_COREXY)
-    flags.precise = !parser.seen('I'); // imprecise: do not perform precise refinement
+    flags.no_refine = parser.seen('I'); // do not perform precise refinement
   #endif
 
   #if ENABLED(CRASH_RECOVERY)
@@ -685,54 +685,57 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
   #if ENABLED(PRECISE_HOMING_COREXY)
     // absolute refinement requires both axes to be already probed
-    if (!failed && ( doX || ENABLED(CODEPENDENT_XY_HOMING)) && doY && flags.precise) {
-      // Do not handle feedrate defaults again within precise homing: do it here
-      const float xy_mm_s = fr_mm_s ? fr_mm_s : homing_feedrate(A_AXIS);
+    if (!failed && ( doX || ENABLED(CODEPENDENT_XY_HOMING)) && doY && !flags.no_refine) {
+      // skip refinement without data if we're not allowed to calibrate
+      if (corexy_home_is_calibrated() || flags.can_calibrate || flags.force_calibrate) {
+        // Do not handle feedrate defaults again within precise homing: do it here
+        const float xy_mm_s = fr_mm_s ? fr_mm_s : homing_feedrate(A_AXIS);
 
-      for (size_t retry = 0; !planner.draining(); ++retry) {
-        #if HAS_TRINAMIC && defined(XY_HOMING_MEASURE_SENS_MIN)
-        // re/calibrate optimal measurement sensitivity first
-        if (flags.force_calibrate || !corexy_sens_is_calibrated()
-          || (retry && (retry % PRECISE_HOMING_SENS_TRY_RECAL) == 0)) {
-          if (!corexy_sens_calibrate(xy_mm_s)) {
-            failed = true;
+        for (size_t retry = 0; !planner.draining(); ++retry) {
+          #if HAS_TRINAMIC && defined(XY_HOMING_MEASURE_SENS_MIN)
+          // re/calibrate optimal measurement sensitivity first
+          if (flags.force_calibrate || !corexy_sens_is_calibrated()
+            || (retry && (retry % PRECISE_HOMING_SENS_TRY_RECAL) == 0)) {
+            if (!corexy_sens_calibrate(xy_mm_s)) {
+              failed = true;
+              break;
+            }
+            if (!corexy_rehome_xy(xy_mm_s)) {
+              failed = true;
+              break;
+            }
+          }
+          #endif
+
+          CoreXYCalibrationMode mode =
+            ( flags.force_calibrate ? CoreXYCalibrationMode::force
+              : flags.can_calibrate ? CoreXYCalibrationMode::on_demand
+              : CoreXYCalibrationMode::disallow );
+
+          if (mode == CoreXYCalibrationMode::on_demand && corexy_home_is_unstable()) {
+            // automatically recalibrate when allowed and unstable
+            mode = CoreXYCalibrationMode::force;
+          }
+
+          failed = !corexy_home_refine(xy_mm_s, mode);
+          if (!failed && (!corexy_home_is_unstable() || !corexy_home_is_calibrated())) {
+            // successfully homed
             break;
           }
+          if (retry >= PRECISE_HOMING_COREXY_RETRIES) {
+            // allow homing to continue after enough retries even if the home is unstable
+            break;
+          }
+
+          // instead of blindly retrying internally on the same location, move the gantry
           if (!corexy_rehome_xy(xy_mm_s)) {
             failed = true;
             break;
           }
         }
-        #endif
-
-        CoreXYCalibrationMode mode =
-          ( flags.force_calibrate ? CoreXYCalibrationMode::force
-            : flags.can_calibrate ? CoreXYCalibrationMode::on_demand
-            : CoreXYCalibrationMode::disallow );
-
-        if (mode == CoreXYCalibrationMode::on_demand && corexy_home_is_unstable()) {
-          // automatically recalibrate when allowed and unstable
-          mode = CoreXYCalibrationMode::force;
+        if (failed && !planner.draining()) {
+          homing_failed([]() { fatal_error(ErrCode::ERR_MECHANICAL_PRECISE_REFINEMENT_FAILED); });
         }
-
-        failed = !corexy_home_refine(xy_mm_s, mode);
-        if (!failed && (!corexy_home_is_unstable() || !corexy_home_is_calibrated())) {
-          // successfully homed
-          break;
-        }
-        if (retry >= PRECISE_HOMING_COREXY_RETRIES) {
-          // allow homing to continue after enough retries even if the home is unstable
-          break;
-        }
-
-        // instead of blindly retrying internally on the same location, move the gantry
-        if (!corexy_rehome_xy(xy_mm_s)) {
-          failed = true;
-          break;
-        }
-      }
-      if (failed && !planner.draining()) {
-        homing_failed([]() { fatal_error(ErrCode::ERR_MECHANICAL_PRECISE_REFINEMENT_FAILED); });
       }
     }
   #endif

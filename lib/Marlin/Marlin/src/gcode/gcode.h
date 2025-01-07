@@ -318,7 +318,7 @@ struct G28Flags {
     bool simulate = false;
   #endif
   #if ENABLED(PRECISE_HOMING_COREXY)
-    bool precise = true;
+    bool no_refine = false;
   #endif
   #if ENABLED(DETECT_PRINT_SHEET)
     bool check_sheet = false;
