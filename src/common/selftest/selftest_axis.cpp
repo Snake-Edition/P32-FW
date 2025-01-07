@@ -142,17 +142,13 @@ void CSelftestPart_Axis::sg_sampling_enable() {
     tmc_set_sg_axis(config.axis);
     m_pSGOrig_cb = (void *)tmc_get_sg_sample_cb();
     tmc_set_sg_sample_cb(sg_sample_cb);
-    m_pSGAxis = this;
 }
 
 void CSelftestPart_Axis::sg_sampling_disable() {
     tmc_set_sg_mask(m_SGOrig_mask);
     tmc_set_sg_axis(0);
     tmc_set_sg_sample_cb((tmc_sg_sample_cb_t *)m_pSGOrig_cb);
-    m_pSGAxis = nullptr;
 }
-
-CSelftestPart_Axis *CSelftestPart_Axis::m_pSGAxis = nullptr;
 
 LoopResult CSelftestPart_Axis::stateActivateHomingReporter() {
     HomingReporter::enable();

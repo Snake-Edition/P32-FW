@@ -24,7 +24,6 @@ class CSelftestPart_Axis {
     float unmeasured_distance = 0; // Distance traveled before axis measuring is started
 #endif
     bool coils_ok = false; // Initially false, set to true when any coil check passes
-    static CSelftestPart_Axis *m_pSGAxis;
 
     void sg_sampling_enable();
     void sg_sampling_disable();
