@@ -1210,7 +1210,6 @@ void test_tmc_connection(const bool test_x, const bool test_y, const bool test_z
   }
 
   if (axis_connection) {
-	  ui.set_status_P(GET_TEXT(MSG_ERROR_TMC));
 	  bsod(GET_TEXT(MSG_ERROR_TMC));
   }
 }

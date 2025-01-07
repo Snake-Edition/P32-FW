@@ -3409,11 +3409,7 @@ void onStatusChanged(const char *const msg) {
     log_info(MarlinServer, "ExtUI: onStatusChanged: %s", msg);
     _send_notify_event(Event::StatusChanged, 0, 0); // this includes MMU:P progress messages - just plain textual information
 
-    if (strcmp(msg, "TMC CONNECTION ERROR") == 0) {
-        // FIXME: Nobody was consuming this at all, so disabled.
-        //_send_notify_event(Event::Error, MARLIN_ERR_TMCDriverError, 0);
-
-    } else if (msg[0] != '\0') {
+    if (msg[0] != '\0') {
         _add_status_msg(msg);
         _send_notify_event(Event::Message, 0, 0);
     }
