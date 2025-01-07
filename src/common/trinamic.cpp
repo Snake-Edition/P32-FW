@@ -21,7 +21,6 @@ static TMC2209Stepper *pStep[4] = { nullptr, nullptr, nullptr, nullptr };
 #endif
 
 static uint16_t tmc_sg[4]; // stallguard result for each axis
-static uint8_t tmc_sg_mask = 7; // stallguard result sampling mask (bit0-x, bit1-y, ...), xyz by default
 static uint8_t tmc_sg_axis = 0; // current axis for stallguard result sampling (0-x, 1-y, ...)
 
 tmc_reg_t tmc_reg_map[] = {
@@ -110,10 +109,6 @@ std::atomic<BusOwner> tmc_bus_owner = BusOwner::NOBODY;
 std::atomic<bool> tmc_bus_requested = false;
 
 extern "C" {
-
-uint8_t tmc_get_sg_mask() { return tmc_sg_mask; }
-
-void tmc_set_sg_mask(uint8_t mask) { tmc_sg_mask = mask; }
 
 void tmc_delay(uint16_t time) // delay for switching tmc step pin level
 {
@@ -355,7 +350,7 @@ void tmc_register_read_hook(uint8_t slave_addr, uint8_t reg_addr, uint32_t val) 
 //  right way is reading tstep and comparing it to TCOOLTHRS, but it takes time (read register).
 //  Using stepper.axis_is_moving is simple but in some cases we get bad samples (tstep > TCOOLTHRS).
 //  Maybe we can improve this by calculating tstep from stepper variables.
-uint8_t tmc_sample(void) {
+uint8_t tmc_sample(uint8_t tmc_sg_mask) {
     uint8_t mask = 0;
     if (tmc_sg_mask) {
         while ((tmc_sg_mask & (1 << tmc_sg_axis)) == 0) {

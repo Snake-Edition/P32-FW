@@ -48,13 +48,13 @@ void StartMeasurementTask([[maybe_unused]] void const *argument) {
     uint32_t next_fs_cycle = ticks_ms();
     uint32_t next_sg_cycle = ticks_ms();
 
-    tmc_set_sg_mask(
+    constexpr const uint8_t sg_mask {
 #if PRINTER_IS_PRUSA_MINI()
         0 // disable sampling on mini
 #else
         0x07 // XYZ
 #endif
-    );
+    };
 
     for (;;) {
         uint32_t now = ticks_ms();
@@ -71,7 +71,7 @@ void StartMeasurementTask([[maybe_unused]] void const *argument) {
 #if HAS_PHASE_STEPPING() && !HAS_BURST_STEPPING()
             if (!phase_stepping::any_axis_enabled()) {
 #endif
-                uint8_t updated_axes = tmc_sample();
+                uint8_t updated_axes = tmc_sample(sg_mask);
                 record_trinamic_metrics(updated_axes);
 #if HAS_PHASE_STEPPING() && !HAS_BURST_STEPPING()
             }
@@ -80,7 +80,6 @@ void StartMeasurementTask([[maybe_unused]] void const *argument) {
             // This represents the lowest samplerate per axis
             uint32_t next_delay = 40;
 
-            auto sg_mask = tmc_get_sg_mask();
             int num_of_enabled_axes = 0;
 
             for (unsigned axis = 0; axis < sizeof(metrics_tmc_sg) / sizeof(metrics_tmc_sg[0]); axis++) {

@@ -20,12 +20,8 @@ extern void init_tmc(void);
 extern void tmc_get_sgt();
 extern void tmc_get_TPWMTHRS();
 extern void tmc_get_tstep();
-extern uint8_t tmc_sample();
+extern uint8_t tmc_sample(uint8_t mask);
 extern uint16_t tmc_get_last_sg_sample(uint8_t axis);
-
-extern uint8_t tmc_get_sg_mask();
-
-extern void tmc_set_sg_mask(uint8_t mask);
 
 extern void tmc_enable_wavetable(bool X, bool Y, bool Z);
 extern void tmc_disable_wavetable(bool X, bool Y, bool Z);
