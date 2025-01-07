@@ -20,9 +20,6 @@ static TMC2130Stepper *pStep[4] = { nullptr, nullptr, nullptr, nullptr };
 static TMC2209Stepper *pStep[4] = { nullptr, nullptr, nullptr, nullptr };
 #endif
 
-static uint16_t tmc_sg[4]; // stallguard result for each axis
-static uint8_t tmc_sg_axis = 0; // current axis for stallguard result sampling (0-x, 1-y, ...)
-
 tmc_reg_t tmc_reg_map[] = {
     /*  { cmd_name, reg_adr, write, read }, */
     { "gconf", 0x00, true, true },
@@ -343,29 +340,16 @@ void tmc_register_read_hook(uint8_t slave_addr, uint8_t reg_addr, uint32_t val) 
 //  right way is reading tstep and comparing it to TCOOLTHRS, but it takes time (read register).
 //  Using stepper.axis_is_moving is simple but in some cases we get bad samples (tstep > TCOOLTHRS).
 //  Maybe we can improve this by calculating tstep from stepper variables.
-uint8_t tmc_sample(uint8_t tmc_sg_mask) {
-    uint8_t mask = 0;
-    if (tmc_sg_mask) {
-        while ((tmc_sg_mask & (1 << tmc_sg_axis)) == 0) {
-            tmc_sg_axis = (tmc_sg_axis + 1) & 0x03;
-        }
-        if (stepper.axis_is_moving((AxisEnum)tmc_sg_axis)) {
-            mask = (1 << tmc_sg_axis);
+extern uint16_t tmc_sg_result(uint8_t axis) {
+    if (stepper.axis_is_moving((AxisEnum)axis)) {
 #if HAS_DRIVER(TMC2130)
-            tmc_sg[tmc_sg_axis] = pStep[tmc_sg_axis]->sg_result();
+        return pStep[axis]->sg_result();
 #elif HAS_DRIVER(TMC2209)
-            tmc_sg[tmc_sg_axis] = pStep[tmc_sg_axis]->SG_RESULT();
+        return pStep[axis]->SG_RESULT();
 #endif
-        } else {
-            tmc_sg[tmc_sg_axis] = 0;
-        }
-        tmc_sg_axis = (tmc_sg_axis + 1) & 0x03;
+    } else {
+        return 0;
     }
-    return mask;
-}
-
-extern uint16_t tmc_get_last_sg_sample(uint8_t axis) {
-    return tmc_sg[axis];
 }
 
 bool tmc_check_coils(uint8_t axis) {
