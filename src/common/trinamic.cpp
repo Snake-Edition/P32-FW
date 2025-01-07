@@ -112,10 +112,8 @@ std::atomic<bool> tmc_bus_requested = false;
 extern "C" {
 
 uint8_t tmc_get_sg_mask() { return tmc_sg_mask; }
-uint8_t tmc_get_sg_axis() { return tmc_sg_axis; }
 
 void tmc_set_sg_mask(uint8_t mask) { tmc_sg_mask = mask; }
-void tmc_set_sg_axis(uint8_t axis) { tmc_sg_axis = axis; }
 
 void tmc_delay(uint16_t time) // delay for switching tmc step pin level
 {
