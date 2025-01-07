@@ -1,5 +1,4 @@
-add_library(LwIP INTERFACE)
-target_sources(LwIP INTERFACE
+add_library(LwIP OBJECT
   src/api/api_lib.c
   src/api/api_msg.c
   src/api/err.c
@@ -77,7 +76,7 @@ target_sources(LwIP INTERFACE
 
 target_include_directories(
   LwIP
-  INTERFACE system
+  PUBLIC system
          src/include
          src/include/netif/ppp
          src/include/lwip
@@ -86,3 +85,5 @@ target_include_directories(
          src/include/netif
          src/include/posix
   )
+
+target_link_libraries(LwIP PUBLIC LwIP_Config)

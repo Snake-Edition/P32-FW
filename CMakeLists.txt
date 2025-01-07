@@ -207,7 +207,7 @@ target_link_libraries(Segger_Config INTERFACE BuddyHeaders)
 #
 
 add_library(LwIP_Config INTERFACE)
-target_link_libraries(LwIP_Config INTERFACE BuddyHeaders logging)
+target_link_libraries(LwIP_Config INTERFACE BuddyHeaders log_interface)
 
 #
 # Configure FatFs
