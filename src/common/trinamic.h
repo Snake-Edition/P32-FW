@@ -2,10 +2,6 @@
 #pragma once
 #include <stdint.h>
 
-#include <inttypes.h>
-
-typedef void(tmc_sg_sample_cb_t)(uint8_t axis, uint16_t sg);
-
 #ifdef __cplusplus
 extern "C" {
 #endif //__cplusplus

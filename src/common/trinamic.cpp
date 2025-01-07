@@ -24,8 +24,6 @@ static uint16_t tmc_sg[4]; // stallguard result for each axis
 static uint8_t tmc_sg_mask = 7; // stallguard result sampling mask (bit0-x, bit1-y, ...), xyz by default
 static uint8_t tmc_sg_axis = 0; // current axis for stallguard result sampling (0-x, 1-y, ...)
 
-static tmc_sg_sample_cb_t *tmc_sg_sample_cb = NULL; // sg sample callback
-
 tmc_reg_t tmc_reg_map[] = {
     /*  { cmd_name, reg_adr, write, read }, */
     { "gconf", 0x00, true, true },
@@ -374,9 +372,6 @@ uint8_t tmc_sample(void) {
 #endif
         } else {
             tmc_sg[tmc_sg_axis] = 0;
-        }
-        if (tmc_sg_sample_cb) {
-            tmc_sg_sample_cb(tmc_sg_axis, tmc_sg[tmc_sg_axis]);
         }
         tmc_sg_axis = (tmc_sg_axis + 1) & 0x03;
     }
