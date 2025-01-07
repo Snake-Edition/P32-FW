@@ -214,6 +214,7 @@ def install_dependency(dependency):
         os.mkdir(installation_directory)
         for file in files:
             basename = file.split('/')[-1]
+            print('Downloading ' + file)
             urlretrieve(file, installation_directory / basename)
     else:
         raise ('dependency is missing payload')
