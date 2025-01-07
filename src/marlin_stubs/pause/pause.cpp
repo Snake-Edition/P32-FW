@@ -263,10 +263,6 @@ Pause &Pause::Instance() {
 }
 
 bool Pause::is_unstoppable() const {
-    if constexpr (!option::has_human_interactions) {
-        return true;
-    }
-
     switch (load_type) {
     case LoadType::load:
         return FSensors_instance().HasMMU();
@@ -491,7 +487,7 @@ void Pause::load_start_process([[maybe_unused]] Response response) {
 
 void Pause::filament_push_ask_process(Response response) {
     if constexpr (!option::has_human_interactions) {
-        setPhase(PhasesLoadUnload::Inserting_unstoppable);
+        setPhase(is_unstoppable() ? PhasesLoadUnload::Inserting_unstoppable : PhasesLoadUnload::Inserting_stoppable);
 
         if (FSensors_instance().has_filament_surely(LogicalFilamentSensor::extruder)) {
             set(LoadState::move_to_purge);
