@@ -31,7 +31,6 @@ class CSelftestPart_Axis {
     LoopResult wait(int8_t dir);
     static uint32_t estimate(const AxisConfig_t &config);
     static uint32_t estimate_move(float len_mm, float fr_mms);
-    static void sg_sample_cb(uint8_t axis, uint16_t sg);
     void actualizeProgress() const;
     LogTimer log;
     int getDir() { return (m_Step % 2) ? -config.movement_dir : config.movement_dir; }

@@ -133,15 +133,11 @@ uint32_t CSelftestPart_Axis::estimate_move(float len_mm, float fr_mms) {
     return move_time;
 }
 
-void CSelftestPart_Axis::sg_sample_cb(uint8_t, uint16_t) {
-}
-
 void CSelftestPart_Axis::sg_sampling_enable() {
     m_SGOrig_mask = tmc_get_sg_mask();
     tmc_set_sg_mask(1 << config.axis);
     tmc_set_sg_axis(config.axis);
     m_pSGOrig_cb = (void *)tmc_get_sg_sample_cb();
-    tmc_set_sg_sample_cb(sg_sample_cb);
 }
 
 void CSelftestPart_Axis::sg_sampling_disable() {
