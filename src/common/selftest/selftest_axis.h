@@ -18,14 +18,11 @@ class CSelftestPart_Axis {
     uint32_t time_progress_estimated_end = 0;
     uint32_t m_StartPos_usteps = 0;
     uint8_t m_Step = 0;
-    uint8_t m_SGOrig_mask;
 #if !PRINTER_IS_PRUSA_XL()
     float unmeasured_distance = 0; // Distance traveled before axis measuring is started
 #endif
     bool coils_ok = false; // Initially false, set to true when any coil check passes
 
-    void sg_sampling_enable();
-    void sg_sampling_disable();
     void phaseMove(int8_t dir);
     LoopResult wait(int8_t dir);
     static uint32_t estimate(const AxisConfig_t &config);

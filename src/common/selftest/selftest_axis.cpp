@@ -45,7 +45,6 @@ void CSelftestPart_Axis::phaseMove(int8_t dir) {
     log_info(Selftest, "%s %s @%d mm/s", ((dir * config.movement_dir) > 0) ? "fwd" : "rew", config.partname, int(feedrate));
     planner.synchronize();
     endstops.validate_homing_move();
-    sg_sampling_enable();
 
     set_current_from_steppers();
     sync_plan_position();
@@ -85,7 +84,6 @@ LoopResult CSelftestPart_Axis::wait(int8_t dir) {
     if (planner.processing()) {
         return LoopResult::RunCurrent;
     }
-    sg_sampling_disable();
 
     set_current_from_steppers();
     sync_plan_position();
@@ -131,17 +129,6 @@ uint32_t CSelftestPart_Axis::estimate(const AxisConfig_t &config) {
 uint32_t CSelftestPart_Axis::estimate_move(float len_mm, float fr_mms) {
     uint32_t move_time = 1000 * len_mm / fr_mms;
     return move_time;
-}
-
-void CSelftestPart_Axis::sg_sampling_enable() {
-    m_SGOrig_mask = tmc_get_sg_mask();
-    tmc_set_sg_mask(1 << config.axis);
-    tmc_set_sg_axis(config.axis);
-}
-
-void CSelftestPart_Axis::sg_sampling_disable() {
-    tmc_set_sg_mask(m_SGOrig_mask);
-    tmc_set_sg_axis(0);
 }
 
 LoopResult CSelftestPart_Axis::stateActivateHomingReporter() {
