@@ -137,13 +137,11 @@ void CSelftestPart_Axis::sg_sampling_enable() {
     m_SGOrig_mask = tmc_get_sg_mask();
     tmc_set_sg_mask(1 << config.axis);
     tmc_set_sg_axis(config.axis);
-    m_pSGOrig_cb = (void *)tmc_get_sg_sample_cb();
 }
 
 void CSelftestPart_Axis::sg_sampling_disable() {
     tmc_set_sg_mask(m_SGOrig_mask);
     tmc_set_sg_axis(0);
-    tmc_set_sg_sample_cb((tmc_sg_sample_cb_t *)m_pSGOrig_cb);
 }
 
 LoopResult CSelftestPart_Axis::stateActivateHomingReporter() {

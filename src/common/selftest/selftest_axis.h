@@ -14,7 +14,6 @@ class CSelftestPart_Axis {
     IPartHandler &state_machine;
     const AxisConfig_t &config;
     SelftestSingleAxis_t &rResult;
-    void *m_pSGOrig_cb = nullptr;
     uint32_t time_progress_start = 0;
     uint32_t time_progress_estimated_end = 0;
     uint32_t m_StartPos_usteps = 0;
