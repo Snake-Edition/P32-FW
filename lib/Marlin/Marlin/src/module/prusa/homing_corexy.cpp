@@ -864,7 +864,14 @@ bool corexy_home_refine(float fr_mm_s, CoreXYCalibrationMode mode) {
         config_store().corexy_grid_origin.set(calibrated_origin);
     } else if (calibrated_origin.uninitialized()) {
         // we have no origin, but calibration was explicitly disabled
+#if DISABLED(PRUSA_TOOLCHANGER)
         bsod("homing precisely without calibrated origin");
+#else
+        // TODO[BFW-6527]: this is a temporary workaround until home calibration is enforced
+        SERIAL_ECHOLN("warning: homing without calibrated origin");
+        calibrated_origin.origin[A_AXIS] = 0.f;
+        calibrated_origin.origin[B_AXIS] = 0.f;
+#endif
     }
     xy_pos_t calibrated_origin_xy = { calibrated_origin.origin[A_AXIS], calibrated_origin.origin[B_AXIS] };
 

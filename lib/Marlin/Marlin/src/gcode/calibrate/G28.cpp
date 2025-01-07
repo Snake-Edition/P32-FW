@@ -686,8 +686,15 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   #if ENABLED(PRECISE_HOMING_COREXY)
     // absolute refinement requires both axes to be already probed
     if (!failed && ( doX || ENABLED(CODEPENDENT_XY_HOMING)) && doY && !flags.no_refine) {
-      // skip refinement without data if we're not allowed to calibrate
-      if (corexy_home_is_calibrated() || flags.can_calibrate || flags.force_calibrate) {
+      #if DISABLED(PRUSA_TOOLCHANGER)
+        // skip refinement without data if we're not allowed to calibrate
+        const bool do_refine = (corexy_home_is_calibrated() || flags.can_calibrate || flags.force_calibrate);
+      #else
+        // TODO[BFW-6527]: this is a temporary workaround until home calibration is enforced
+        const bool do_refine = true;
+      #endif
+
+      if (do_refine) {
         // Do not handle feedrate defaults again within precise homing: do it here
         const float xy_mm_s = fr_mm_s ? fr_mm_s : homing_feedrate(A_AXIS);
 
