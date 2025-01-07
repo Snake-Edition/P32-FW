@@ -143,8 +143,6 @@ void CSelftestPart_Axis::sg_sample(uint16_t sg) {
     [[maybe_unused]] int32_t pos = stepper.position((AxisEnum)config.axis);
     LogDebugTimed(log, "%s time %" PRIu32 "ms pos: %" PRId32 " sg: %" PRIu16,
         config.partname, static_cast<uint32_t>(SelftestInstance().GetTime() - time_progress_start), pos, sg);
-    m_SGCount++;
-    m_SGSum += sg;
 }
 
 void CSelftestPart_Axis::sg_sampling_enable() {
@@ -154,8 +152,6 @@ void CSelftestPart_Axis::sg_sampling_enable() {
     m_pSGOrig_cb = (void *)tmc_get_sg_sample_cb();
     tmc_set_sg_sample_cb(sg_sample_cb);
     m_pSGAxis = this;
-    m_SGCount = 0;
-    m_SGSum = 0;
 }
 
 void CSelftestPart_Axis::sg_sampling_disable() {

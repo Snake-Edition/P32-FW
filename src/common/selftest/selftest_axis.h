@@ -18,8 +18,6 @@ class CSelftestPart_Axis {
     uint32_t time_progress_start = 0;
     uint32_t time_progress_estimated_end = 0;
     uint32_t m_StartPos_usteps = 0;
-    uint32_t m_SGSum = 0;
-    uint16_t m_SGCount = 0;
     uint8_t m_Step = 0;
     uint8_t m_SGOrig_mask;
 #if !PRINTER_IS_PRUSA_XL()
