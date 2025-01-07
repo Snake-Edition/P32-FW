@@ -110,13 +110,6 @@ std::atomic<bool> tmc_bus_requested = false;
 
 extern "C" {
 
-void tmc_delay(uint16_t time) // delay for switching tmc step pin level
-{
-    volatile uint16_t tmc_delay;
-    for (tmc_delay = 0; tmc_delay < time; time--) {
-    }
-}
-
 void tmc_enable_wavetable([[maybe_unused]] bool X, [[maybe_unused]] bool Y, [[maybe_unused]] bool Z) {
 #ifdef HAS_TMC_WAVETABLE
     if (Y) {
