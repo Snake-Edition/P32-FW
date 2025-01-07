@@ -754,66 +754,61 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
       if (!failed) {
       #if ENABLED(Z_SAFE_HOMING)
-        if (TERN1(POWER_LOSS_RECOVERY, !parser.seen_test('H'))) {
-          failed = !home_z_safely();
+        failed = !home_z_safely();
 
-          #if ENABLED(DETECT_PRINT_SHEET)
-          if (!failed && flags.check_sheet) {
-            failed = [&] {
-              // Do multiple attempts of detect print sheet
-              // The point is that we want to prevent false failures caused by a dirty nozzle (cold filament left hanging out)
-              // BFW-5028
-              uint8_t attempt = 0;
-              while(true) {
-                // If detect_print_sheet, return success (failed -> false)
-                if(detect_print_sheet(z_homing_height)) {
-                  return false;
-                }
-
-                bool ignore_fail = false;
-
-                // Ran out of attempts -> report detect fail
-                if(++attempt == 3) {
-                  // Report missing bed sheet
-                  static constexpr auto warning_type = WarningType::SteelSheetNotDetected;
-                  marlin_server::set_warning(warning_type);
-
-                  // Move the bed to the bottom to give space for the user to insert the sheet
-                  // Do this asynchronously so that we can process the response while moving
-                  current_position.z = DETECT_PRINT_SHEET_Z_AFTER_FAILURE;
-                  line_to_current_position(homing_feedrate(Z_AXIS));
-
-                  // Continue after the user puts the print sheet on
-                  const Response response = marlin_server::wait_for_response(warning_type_phase(warning_type));
-
-                  marlin_server::clear_warning(warning_type);
-
-                  // Wait for the movement to finish
-                  planner.synchronize();
-                  ignore_fail = (response == Response::Ignore);
-                  attempt = 0;
-                }
-
-                // Raise the Z again to prevent crashing into the sheet
-                do_z_clearance(z_homing_height);
-
-                // Return to the XY homing position over the printbed and try rehoming z
-                if(!home_z_safely()) {
-                  // Fail straight away if z homing fails, only repeat if detect_print_sheet fails
-                  return true;
-                }
-
-                if(ignore_fail) {
-                  return false;
-                }
+        #if ENABLED(DETECT_PRINT_SHEET)
+        if (!failed && flags.check_sheet) {
+          failed = [&] {
+            // Do multiple attempts of detect print sheet
+            // The point is that we want to prevent false failures caused by a dirty nozzle (cold filament left hanging out)
+            // BFW-5028
+            uint8_t attempt = 0;
+            while(true) {
+              // If detect_print_sheet, return success (failed -> false)
+              if(detect_print_sheet(z_homing_height)) {
+                return false;
               }
-            }();
-          }
-          #endif
 
-        } else {
-          failed = !homeaxis(Z_AXIS);
+              bool ignore_fail = false;
+
+              // Ran out of attempts -> report detect fail
+              if(++attempt == 3) {
+                // Report missing bed sheet
+                static constexpr auto warning_type = WarningType::SteelSheetNotDetected;
+                marlin_server::set_warning(warning_type);
+
+                // Move the bed to the bottom to give space for the user to insert the sheet
+                // Do this asynchronously so that we can process the response while moving
+                current_position.z = DETECT_PRINT_SHEET_Z_AFTER_FAILURE;
+                line_to_current_position(homing_feedrate(Z_AXIS));
+
+                // Continue after the user puts the print sheet on
+                const Response response = marlin_server::wait_for_response(warning_type_phase(warning_type));
+
+                marlin_server::clear_warning(warning_type);
+
+                // Wait for the movement to finish
+                planner.synchronize();
+                ignore_fail = (response == Response::Ignore);
+                attempt = 0;
+              }
+
+              // Raise the Z again to prevent crashing into the sheet
+              do_z_clearance(z_homing_height);
+
+              // Return to the XY homing position over the printbed and try rehoming z
+              if(!home_z_safely()) {
+                // Fail straight away if z homing fails, only repeat if detect_print_sheet fails
+                return true;
+              }
+
+              if(ignore_fail) {
+                return false;
+              }
+            }
+          }();
         }
+        #endif
       #else
         failed = !homeaxis(Z_AXIS);
       #endif

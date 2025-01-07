@@ -134,12 +134,6 @@ public:
     FORCE_INLINE static void getfilename_sorted(const uint16_t nr) { selectFileByIndex(nr); }
   #endif
 
-  #if ENABLED(POWER_LOSS_RECOVERY)
-    static bool jobRecoverFileExists();
-    static void openJobRecoveryFile(const bool read);
-    static void removeJobRecoveryFile();
-  #endif
-
   static inline bool isFileOpen() { return isMounted() && file.isOpen(); }
   static inline uint32_t getIndex() { return sdpos; }
   static inline bool eof() { return sdpos >= filesize; }

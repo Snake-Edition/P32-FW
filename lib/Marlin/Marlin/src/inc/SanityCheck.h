@@ -2330,14 +2330,6 @@ static_assert(   _ARR_TEST(3,0) && _ARR_TEST(3,1) && _ARR_TEST(3,2)
   #endif
 #endif
 
-#if ENABLED(POWER_LOSS_RECOVERY) && DISABLED(ULTIPANEL)
-  #error "POWER_LOSS_RECOVERY currently requires an LCD Controller."
-#endif
-
-#if ALL(POWER_LOSS_RECOVERY, POWER_PANIC)
-  #error "POWER_LOSS_RECOVERY and POWER_PANIC are mutually exclusive."
-#endif
-
 #if ENABLED(POWER_PANIC) && DISABLED(CRASH_RECOVERY)
   #error "POWER_PANIC requires CRASH_RECOVERY."
 #endif

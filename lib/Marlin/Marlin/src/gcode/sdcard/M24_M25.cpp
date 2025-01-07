@@ -38,19 +38,10 @@
   #include "../../feature/host_actions.h"
 #endif
 
-#if ENABLED(POWER_LOSS_RECOVERY)
-  #include "../../feature/power_loss_recovery.h"
-#endif
-
 /*
  * M24: Start or Resume SD Print
  */
 void GcodeSuite::M24() {
-
-  #if ENABLED(POWER_LOSS_RECOVERY)
-    if (parser.seenval('S')) card.setIndex(parser.value_long());
-    if (parser.seenval('T')) print_job_timer.resume(parser.value_long());
-  #endif
 
   #if ENABLED(PARK_HEAD_ON_PAUSE)
     if (did_pause_print) {
@@ -62,9 +53,6 @@ void GcodeSuite::M24() {
   if (card.isFileOpen()) {
     card.startFileprint();
     print_job_timer.start();
-    #if ENABLED(POWER_LOSS_RECOVERY)
-      recovery.prepare();
-    #endif
     #if ENABLED(POWER_PANIC)
       power_panic::reset();
     #endif

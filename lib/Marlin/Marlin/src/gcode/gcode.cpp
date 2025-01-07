@@ -41,11 +41,6 @@ GcodeSuite gcode;
   #include "../feature/host_actions.h"
 #endif
 
-#if ENABLED(POWER_LOSS_RECOVERY)
-  #include "../sd/cardreader.h"
-  #include "../feature/power_loss_recovery.h"
-#endif
-
 #if ENABLED(CANCEL_OBJECTS)
   #include "../feature/cancel_object.h"
 #endif
@@ -192,12 +187,6 @@ void GcodeSuite::get_destination_from_command() {
       Odometer_s::instance().add_extruded(active_extruder, destination[i] - current_position[i]);
     }
   }
-
-  #if ENABLED(POWER_LOSS_RECOVERY) && !PIN_EXISTS(POWER_LOSS)
-    // Only update power loss recovery on moves with E
-    if (recovery.enabled && IS_SD_PRINTING() && seen.e && (seen.x || seen.y))
-      recovery.save();
-  #endif
 
   if (parser.linearval('F') > 0)
     feedrate_mm_s = parser.value_feedrate();
@@ -937,11 +926,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
       case 999: M999(); break;                                    // M999: Restart after being Stopped
 
-      #if ENABLED(POWER_LOSS_RECOVERY)
-        case 413: M413(); break;                                  // M413: Enable/disable/query Power-Loss Recovery
-        case 1000: M1000(); break;                                // M1000: Resume from power-loss
-      #endif
-
       default: parser.unknown_command_error(); break;
     }
     break;
@@ -965,10 +949,6 @@ void GcodeSuite::process_next_command() {
   char * const current_command = queue.command_buffer[queue.index_r];
 
   PORT_REDIRECT(queue.port[queue.index_r]);
-
-  #if ENABLED(POWER_LOSS_RECOVERY)
-    recovery.queue_index_r = queue.index_r;
-  #endif
 
   if (DEBUGGING(ECHO)) {
     SERIAL_ECHO_START();

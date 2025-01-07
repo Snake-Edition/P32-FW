@@ -98,20 +98,6 @@ void GcodeSuite::G92() {
         #endif // Not SCARA
       } return;
     #endif
-    #if ENABLED(POWER_LOSS_RECOVERY)
-      case 9: {
-        LOOP_XYZE(i) {
-          if (parser.seenval(axis_codes[i])) {
-            current_position[i] = parser.value_axis_units((AxisEnum)i);
-            #if IS_SCARA || !HAS_POSITION_SHIFT
-              if (i == E_AXIS) didE = true; else didXYZ = true;
-            #elif HAS_POSITION_SHIFT
-              if (i == E_AXIS) didE = true;
-            #endif
-          }
-        }
-      } break;
-    #endif
     case 0: {
       LOOP_XYZE(i) {
         if (parser.seenval(axis_codes[i])) {

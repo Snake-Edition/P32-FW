@@ -156,10 +156,6 @@
   #include "feature/pause.h"
 #endif
 
-#if ENABLED(POWER_LOSS_RECOVERY)
-  #include "feature/power_loss_recovery.h"
-#endif
-
 #if HAS_FILAMENT_SENSOR
   #include "feature/runout.h"
 #endif
@@ -650,10 +646,6 @@ void idle(
     , bool no_stepper_sleep/*=false*/
   #endif
 ) {
-  #if ENABLED(POWER_LOSS_RECOVERY) && PIN_EXISTS(POWER_LOSS)
-    recovery.outage();
-  #endif
-
   #if ENABLED(SPI_ENDSTOPS)
     if (endstops.tmc_spi_homing.any
       #if ENABLED(IMPROVE_HOMING_RELIABILITY)
@@ -900,10 +892,6 @@ void setup() {
     runout.setup();
   #endif
 
-  #if ENABLED(POWER_LOSS_RECOVERY)
-    recovery.setup();
-  #endif
-
   setup_killpin();
 
   #if HAS_TMC220x
@@ -1144,10 +1132,6 @@ void setup() {
     est_init();
   #endif
 
-  #if ENABLED(POWER_LOSS_RECOVERY)
-    recovery.check();
-  #endif
-
   #if ENABLED(USE_WATCHDOG)
     watchdog_init();          // Reinit watchdog after HAL_get_reset_source call
   #endif
@@ -1220,9 +1204,6 @@ void loop() {
         #endif
         thermalManager.zero_fan_speeds();
         wait_for_heatup = false;
-        #if ENABLED(POWER_LOSS_RECOVERY)
-          card.removeJobRecoveryFile();
-        #endif
         #ifdef EVENT_GCODE_SD_STOP
           queue.inject_P(PSTR(EVENT_GCODE_SD_STOP));
         #endif

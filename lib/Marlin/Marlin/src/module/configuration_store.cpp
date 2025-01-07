@@ -88,10 +88,6 @@
 
 #include "../feature/fwretract.h"
 
-#if ENABLED(POWER_LOSS_RECOVERY)
-  #include "../feature/power_loss_recovery.h"
-#endif
-
 #include "../feature/pause.h"
 
 #if ENABLED(BACKLASH_COMPENSATION)
@@ -292,11 +288,6 @@ typedef struct SettingsDataStruct {
   // HAS_LCD_CONTRAST
   //
   int16_t lcd_contrast;                                 // M250 C
-
-  //
-  // POWER_LOSS_RECOVERY
-  //
-  bool recovery_enabled;                                // M413 S
 
   //
   // FWRETRACT
@@ -861,22 +852,6 @@ void MarlinSettings::postprocess() {
         #endif
       ;
       EEPROM_WRITE(lcd_contrast);
-    }
-
-    //
-    // Power-Loss Recovery
-    //
-    {
-      _FIELD_TEST(recovery_enabled);
-
-      const bool recovery_enabled =
-        #if ENABLED(POWER_LOSS_RECOVERY)
-          recovery.enabled
-        #else
-          true
-        #endif
-      ;
-      EEPROM_WRITE(recovery_enabled);
     }
 
     //
@@ -1658,20 +1633,6 @@ void MarlinSettings::postprocess() {
         EEPROM_READ(lcd_contrast);
         #if HAS_LCD_CONTRAST
           ui.set_contrast(lcd_contrast);
-        #endif
-      }
-
-      //
-      // Power-Loss Recovery
-      //
-      {
-        _FIELD_TEST(recovery_enabled);
-
-        #if ENABLED(POWER_LOSS_RECOVERY)
-          EEPROM_READ(recovery.enabled);
-        #else
-          bool recovery_enabled;
-          EEPROM_READ(recovery_enabled);
         #endif
       }
 
@@ -2499,14 +2460,6 @@ void MarlinSettings::reset() {
   #endif
 
   //
-  // Power-Loss Recovery
-  //
-
-  #if ENABLED(POWER_LOSS_RECOVERY)
-    recovery.enable(true);
-  #endif
-
-  //
   // Firmware Retraction
   //
 
@@ -3045,12 +2998,6 @@ void MarlinSettings::reset() {
       CONFIG_ECHO_HEADING("LCD Contrast:");
       CONFIG_ECHO_START();
       SERIAL_ECHOLNPAIR("  M250 C", ui.contrast);
-    #endif
-
-    #if ENABLED(POWER_LOSS_RECOVERY)
-      CONFIG_ECHO_HEADING("Power-Loss Recovery:");
-      CONFIG_ECHO_START();
-      SERIAL_ECHOLNPAIR("  M413 S", int(recovery.enabled));
     #endif
 
     #if ENABLED(FWRETRACT)

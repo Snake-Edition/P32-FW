@@ -38,10 +38,6 @@
   #include "../feature/emergency_parser.h"
 #endif
 
-#if ENABLED(POWER_LOSS_RECOVERY)
-  #include "../feature/power_loss_recovery.h"
-#endif
-
 #if ENABLED(ADVANCED_PAUSE_FEATURE)
   #include "../feature/pause.h"
 #endif
@@ -589,11 +585,7 @@ void CardReader::checkautostart() {
     else settings.first_load();
   #endif
 
-  if (isMounted()
-    #if ENABLED(POWER_LOSS_RECOVERY)
-      && !recovery.valid() // Don't run auto#.g when a resume file exists
-    #endif
-  ) {
+  if (isMounted()) {
     char autoname[8];
     sprintf_P(autoname, PSTR("auto%c.g"), autostart_index + '0');
     dir_t p;
@@ -1043,10 +1035,6 @@ void CardReader::printingHasFinished() {
   else {
     stopSDPrint();
 
-    #if ENABLED(POWER_LOSS_RECOVERY)
-      removeJobRecoveryFile();
-    #endif
-
     #if ENABLED(SD_FINISHED_STEPPERRELEASE) && defined(SD_FINISHED_RELEASECOMMAND)
       planner.finish_and_disable();
     #endif
@@ -1084,38 +1072,5 @@ void CardReader::printingHasFinished() {
     }
   }
 #endif // AUTO_REPORT_SD_STATUS
-
-#if ENABLED(POWER_LOSS_RECOVERY)
-
-  bool CardReader::jobRecoverFileExists() {
-    const bool exists = recovery.file.open(&root, recovery.filename, O_READ);
-    if (exists) recovery.file.close();
-    return exists;
-  }
-
-  void CardReader::openJobRecoveryFile(const bool read) {
-    if (!isMounted()) return;
-    if (recovery.file.isOpen()) return;
-    if (!recovery.file.open(&root, recovery.filename, read ? O_READ : O_CREAT | O_WRITE | O_TRUNC | O_SYNC))
-      SERIAL_ECHOLNPAIR(MSG_SD_OPEN_FILE_FAIL, recovery.filename, ".");
-    else if (!read)
-      SERIAL_ECHOLNPAIR(MSG_SD_WRITE_TO_FILE, recovery.filename);
-  }
-
-  // Removing the job recovery file currently requires closing
-  // the file being printed, so during SD printing the file should
-  // be zeroed and written instead of deleted.
-  void CardReader::removeJobRecoveryFile() {
-    if (jobRecoverFileExists()) {
-      recovery.init();
-      removeFile(recovery.filename);
-      #if ENABLED(DEBUG_POWER_LOSS_RECOVERY)
-        SERIAL_ECHOPGM("Power-loss file delete");
-        serialprintPGM(jobRecoverFileExists() ? PSTR(" failed.\n") : PSTR("d.\n"));
-      #endif
-    }
-  }
-
-#endif // POWER_LOSS_RECOVERY
 
 #endif // SDSUPPORT
