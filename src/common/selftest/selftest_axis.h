@@ -26,7 +26,6 @@ class CSelftestPart_Axis {
     bool coils_ok = false; // Initially false, set to true when any coil check passes
     static CSelftestPart_Axis *m_pSGAxis;
 
-    void sg_sample(uint16_t sg);
     void sg_sampling_enable();
     void sg_sampling_disable();
     void phaseMove(int8_t dir);

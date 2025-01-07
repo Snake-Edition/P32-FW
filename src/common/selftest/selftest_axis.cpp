@@ -133,13 +133,7 @@ uint32_t CSelftestPart_Axis::estimate_move(float len_mm, float fr_mms) {
     return move_time;
 }
 
-void CSelftestPart_Axis::sg_sample_cb(uint8_t axis, uint16_t sg) {
-    if (m_pSGAxis && (m_pSGAxis->config.axis == axis)) {
-        m_pSGAxis->sg_sample(sg);
-    }
-}
-
-void CSelftestPart_Axis::sg_sample(uint16_t) {
+void CSelftestPart_Axis::sg_sample_cb(uint8_t, uint16_t) {
 }
 
 void CSelftestPart_Axis::sg_sampling_enable() {
