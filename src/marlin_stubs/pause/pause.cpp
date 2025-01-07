@@ -346,7 +346,7 @@ bool Pause::ensureSafeTemperatureNotifyProgress(uint8_t progress_min, uint8_t pr
 
     // Wait until temperature is close
     while (Temperature::degHotend(active_extruder) < (Temperature::degTargetHotend(active_extruder) - heating_phase_min_hotend_diff)) {
-        if (check_user_stop()) {
+        if (check_user_stop(getResponse())) {
             return false;
         }
         idle(true, true);
@@ -397,20 +397,6 @@ void Pause::plan_e_move(const float &length, const feedRate_t &fr_mm_s) {
     }
 }
 
-bool Pause::process_stop() {
-    if (planner.draining()) { // Planner is draining, someone stopped, stop load/unload as well
-        settings.do_stop = false;
-        return true;
-    }
-
-    if (!settings.do_stop) {
-        return false;
-    }
-
-    settings.do_stop = false;
-    return true;
-}
-
 void Pause::start_process([[maybe_unused]] Response response) {
     switch (load_type) {
     case LoadType::load:
@@ -433,7 +419,7 @@ void Pause::load_start_process([[maybe_unused]] Response response) {
     // TODO: this shouldn't be needed here
     // actual temperature does not matter, only target
     if (!is_target_temperature_safe() && load_type != LoadType::load_to_gears && (option::has_human_interactions || !HasTempToRestore())) {
-        settings.do_stop = true;
+        set(LoadState::stop);
         return;
     }
 
@@ -538,10 +524,6 @@ void Pause::filament_push_ask_process(Response response) {
             set(LoadState::load_to_gears);
         }
     }
-
-    if (response == Response::Stop) {
-        settings.do_stop = true;
-    }
 }
 
 void Pause::await_filament_process([[maybe_unused]] Response response) {
@@ -580,7 +562,7 @@ void Pause::assist_insertion_process([[maybe_unused]] Response response) {
     // Load for at least 40 seconds before giving up. Alternatively, if filament is removed altogether, stop too.
     if (ticks_diff(ticks_ms(), start_time_ms) > 40000 /*Move for at least 40 seconds before giving up*/
         || FSensors_instance().no_filament_surely(LogicalFilamentSensor::side)) {
-        settings.do_stop = true;
+        set(LoadState::stop);
         return;
     }
 
@@ -610,7 +592,7 @@ void Pause::move_to_purge_process([[maybe_unused]] Response response) {
 }
 
 void Pause::wait_temp_process([[maybe_unused]] Response response) {
-    if (ensureSafeTemperatureNotifyProgress(30, 50)) {
+    if (ensureSafeTemperatureNotifyProgress(30, 50)) { // blocking -> checks for user stop
         if (load_type == LoadType::load_purge) {
             set(LoadState::purge);
         } else {
@@ -803,10 +785,39 @@ void Pause::load_nozzle_clean_process([[maybe_unused]] Response response) {
 }
 #endif
 
+void Pause::stop_process([[maybe_unused]] Response response) {
+    if (!planner.draining()) {
+        planner.quick_stop();
+    }
+
+    if (planner.processing()) {
+        return; // wait in invoke_loop() until is printer done moving, then finalize stopping
+    }
+
+    planner.resume_queuing();
+    set_all_unhomed();
+    set_all_unknown();
+    xyze_pos_t real_current_position;
+    planner.get_axis_position_mm(static_cast<xyz_pos_t &>(real_current_position));
+    real_current_position[E_AXIS] = 0;
+#if HAS_POSITION_MODIFIERS
+    planner.unapply_modifiers(real_current_position
+    #if HAS_LEVELING
+        ,
+        true
+    #endif
+    );
+#endif
+    current_position = real_current_position;
+    planner.set_position_mm(current_position);
+
+    set(LoadState::_stopped);
+}
+
 void Pause::unload_start_process([[maybe_unused]] Response response) {
     // loop_unload_mmu has it's own preheating sequence, use that one for better progress reporting
     if (!(load_type == LoadType::unload && FSensors_instance().HasMMU()) && !is_target_temperature_safe() && load_type != LoadType::unload_from_gears) {
-        settings.do_stop = true;
+        set(LoadState::stop);
         return;
     }
 
@@ -863,7 +874,7 @@ void Pause::filament_stuck_ask_process(Response response) {
 
 void Pause::ram_sequence_process([[maybe_unused]] Response response) {
     if (!ensureSafeTemperatureNotifyProgress(0, 50)) {
-        settings.do_stop = true;
+        set(LoadState::stop);
         return;
     }
 
@@ -875,9 +886,6 @@ void Pause::ram_sequence_process([[maybe_unused]] Response response) {
 void Pause::unload_process([[maybe_unused]] Response response) {
     setPhase(is_unstoppable() ? PhasesLoadUnload::Unloading_unstoppable : PhasesLoadUnload::Unloading_stoppable, 51);
     unload_filament();
-    if (settings.do_stop) {
-        return;
-    }
 
     config_store().set_filament_type(settings.GetExtruder(), FilamentType::none);
 
@@ -1028,29 +1036,20 @@ bool Pause::invoke_loop() {
 
     set(LoadState::start);
 
-    bool ret = true;
     while (!finished()) {
-        ret = !process_stop();
-        if (ret) {
-            (this->*(state_handlers[state]))(getResponse());
-        } else {
-            set(LoadState::_finish);
-            continue;
+        auto response { getResponse() };
+        if (planner.draining() || check_user_stop(response)) {
+            set(LoadState::stop);
         }
-        ret = !process_stop(); // why is this 2nd call here ???, some workaround ???
-        if (ret) {
-            idle(true, true); // idle loop to prevent wdt and manage heaters etc, true == do not shutdown steppers
-        } else {
-            set(LoadState::_finish);
-            continue;
-        }
+        (this->*(state_handlers[state]))(response);
+        idle(true, true); // idle loop to prevent wdt and manage heaters etc, true == do not shutdown steppers
     };
 
 #if ENABLED(PID_EXTRUSION_SCALING)
     thermalManager.setExtrusionScalingEnabled(extrusionScalingEnabled);
 #endif // ENABLED(PID_EXTRUSION_SCALING)
 
-    return ret;
+    return finished_ok();
 }
 
 /*****************************************************************************/
@@ -1094,7 +1093,7 @@ bool Pause::parkMoveXGreaterThanY(const xyz_pos_t &pos0, const xyz_pos_t &pos1) 
 
 bool Pause::wait_for_motion_finish_or_user_stop() {
     while (planner.processing()) {
-        if (check_user_stop()) {
+        if (check_user_stop(getResponse())) {
             return true;
         }
         idle(true, true);
@@ -1177,7 +1176,7 @@ void Pause::park_nozzle_and_notify() {
             if (!isnan(settings.park_pos.pos[axis]) && axes_need_homing(_BV(axis))) {
                 GcodeSuite::G28_no_parser(axis == X_AXIS, axis == Y_AXIS, false, { .z_raise = 0 });
             }
-            if (check_user_stop()) {
+            if (check_user_stop(getResponse())) {
                 return;
             }
             if (isnan(settings.park_pos.pos[axis])) {
@@ -1350,7 +1349,7 @@ void Pause::ram_filament() {
     // ram filament
     for (auto &elem : sequence) {
         plan_e_move(elem.e, elem.feedrate * mm_per_minute);
-        if (check_user_stop()) {
+        if (check_user_stop(getResponse())) {
             return;
         }
     }
@@ -1390,54 +1389,15 @@ const RammingSequence &Pause::get_ramming_sequence() const {
     }
 }
 
-bool Pause::check_user_stop() {
-    if (user_stop_pending) {
-        return true;
-    }
-
-    const Response response = getResponse();
+bool Pause::check_user_stop(Response response) {
     if (response != Response::Stop) {
         return false;
     }
 
-    settings.do_stop = true;
-    planner.quick_stop();
-
-    // unwind to main marlin loop and let it call finalize_user_stop()
-    user_stop_pending = true;
+    set(LoadState::stop);
     return true;
 }
 
-void Pause::finalize_user_stop() {
-    if (!user_stop_pending) {
-        // nothing to do (at all)
-        return;
-    }
-
-    if (planner.processing()) {
-        // nothing to do (yet)
-        return;
-    }
-
-    user_stop_pending = false;
-
-    planner.resume_queuing();
-    set_all_unhomed();
-    set_all_unknown();
-    xyze_pos_t real_current_position;
-    planner.get_axis_position_mm(static_cast<xyz_pos_t &>(real_current_position));
-    real_current_position[E_AXIS] = 0;
-#if HAS_POSITION_MODIFIERS
-    planner.unapply_modifiers(real_current_position
-    #if HAS_LEVELING
-        ,
-        true
-    #endif
-    );
-#endif
-    current_position = real_current_position;
-    planner.set_position_mm(current_position);
-}
 void Pause::handle_filament_removal(LoadState state_to_set) {
     // only if there is no filament present and we are sure (FS on and sees no filament)
     if (FSensors_instance().no_filament_surely(LogicalFilamentSensor::extruder)) {

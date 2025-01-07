@@ -1172,9 +1172,6 @@ void loop() {
   #if !ENABLED(MARLIN_DISABLE_INFINITE_LOOP)
   for (;;) {
   #endif
-  #if !BOARD_IS_DWARF()
-    Pause::Instance().finalize_user_stop();
-  #endif
 
     idle(false); // Do an idle first so boot is slightly faster
 

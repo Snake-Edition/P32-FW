@@ -24,7 +24,6 @@ Settings::Settings()
     , park_pos { NAN, NAN, NAN }
     , resume_pos { NAN, NAN, NAN, NAN }
     , target_extruder(0)
-    , do_stop(false)
 #if HAS_MMU2()
     , extruder_mmu_rework(config_store().is_mmu_rework.get())
 #endif

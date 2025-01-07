@@ -28,6 +28,7 @@ class PausePrivatePhase : public IPause {
 protected:
     enum class LoadState {
         _finish = INT_MAX,
+        _stopped = _finish - 1,
         start = 0,
         unload_start,
         filament_stuck_ask,
@@ -60,7 +61,8 @@ protected:
         load_nozzle_clean,
 #endif
         load_prime,
-        _last = load_prime,
+        stop,
+        _last = stop,
     };
 
 private:
@@ -91,7 +93,8 @@ protected:
     }
 
     // use only when necessary
-    bool finished() { return state == LoadState::_finish; }
+    bool finished() { return state == LoadState::_finish || state == LoadState::_stopped; }
+    bool finished_ok() { return state == LoadState::_finish; }
 
     void clrRestoreTemp();
 
@@ -156,8 +159,6 @@ public:
 
     void filament_change(const pause::Settings &settings_, bool is_filament_stuck);
 
-    void finalize_user_stop();
-
     template <class ENUM>
     void set_timed(ENUM en) {
         start_time_ms = ticks_ms();
@@ -203,6 +204,7 @@ private:
     void load_nozzle_clean_process(Response response);
 #endif
     void load_prime_process(Response response);
+    void stop_process(Response response);
 
     using StateHandler = void (Pause::*)(Response response);
     static constexpr EnumArray<LoadState, StateHandler, static_cast<int>(LoadState::_last) + 1> state_handlers {
@@ -238,6 +240,7 @@ private:
             { LoadState::load_nozzle_clean, &Pause::load_nozzle_clean_process },
 #endif
             { LoadState::load_prime, &Pause::load_prime_process },
+            { LoadState::stop, &Pause::stop_process },
     };
 
     // does not create FSM_HolderLoadUnload
@@ -266,7 +269,7 @@ private:
     /// Moves the extruder by \p length . Heats up for the move if necessary. Notifies the FSM about progress.
     void do_e_move_notify_progress_hotextrude(const float &length, const feedRate_t &fr_mm_s, uint8_t progress_min, uint8_t progress_max);
 
-    bool check_user_stop(); //< stops motion and fsm and returns true it user triggered stop
+    bool check_user_stop(Response response); //< stops motion and fsm and returns true it user triggered stop
     bool wait_for_motion_finish_or_user_stop(); //< waits until motion is finished; if stop is triggered then returns true
     bool process_stop();
     void handle_filament_removal(LoadState state_to_set); //<checks if filament is present if not it sets a different state
