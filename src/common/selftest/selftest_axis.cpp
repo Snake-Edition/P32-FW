@@ -89,12 +89,9 @@ LoopResult CSelftestPart_Axis::wait(int8_t dir) {
     sync_plan_position();
     report_current_position();
 
-#if HAS_HOTEND_OFFSET
-    // Tool offset was just trashed, moreover this home was not precise
-    // Force home on next toolchange
+    // Tool offset was just trashed, moreover this home was not intended to be precise
     CBI(axis_known_position, X_AXIS);
     CBI(axis_known_position, Y_AXIS);
-#endif
 
     int32_t endPos_usteps = stepper.position((AxisEnum)config.axis);
     int32_t length_usteps = dir * (endPos_usteps - m_StartPos_usteps);
@@ -141,8 +138,8 @@ LoopResult CSelftestPart_Axis::stateHomeXY() {
     set_axis_is_not_at_home(AxisEnum(config.axis));
 
     // Trigger home on axis
-    ArrayStringBuilder<10> sb;
-    sb.append_printf("G28 %c D P", iaxis_codes[config.axis]);
+    ArrayStringBuilder<12> sb;
+    sb.append_printf("G28 %c I D P", iaxis_codes[config.axis]);
     queue.enqueue_one_now(sb.str());
 
     log_info(Selftest, "%s home single axis", config.partname);
@@ -176,21 +173,16 @@ LoopResult CSelftestPart_Axis::stateEvaluateHomingXY() {
 }
 
 LoopResult CSelftestPart_Axis::stateHomeZ() {
-    // we have Z safe homing enabled, so Z might need to home all axis
-    if (!TEST(axis_known_position, X_AXIS) || !TEST(axis_known_position, Y_AXIS)) {
-        log_info(Selftest, "%s home all axis", config.partname);
-        queue.enqueue_one_now("G28 D P");
-    } else {
-        log_info(Selftest, "%s home single axis", config.partname);
-        queue.enqueue_one_now("G28 Z P");
-    }
-
 #if HAS_TOOLCHANGER()
-    // Z axis check needs to be done with a tool
+    // The next Z axis check needs to be done with a tool. This will re-home XY on-demand
     if (prusa_toolchanger.is_toolchanger_enabled() && (prusa_toolchanger.has_tool() == false)) {
         queue.enqueue_one_now("T0 S1");
     }
-#endif /*HAS_TOOLCHANGER()*/
+#endif
+
+    // We have Z safe homing enabled, so trash Z position and re-home without calibrations
+    CBI(axis_known_position, Z_AXIS);
+    queue.enqueue_one_now("G28 I O D P");
 
     return LoopResult::RunNext;
 }
