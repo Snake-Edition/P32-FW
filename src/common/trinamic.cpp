@@ -115,11 +115,9 @@ extern "C" {
 
 uint8_t tmc_get_sg_mask() { return tmc_sg_mask; }
 uint8_t tmc_get_sg_axis() { return tmc_sg_axis; }
-tmc_sg_sample_cb_t *tmc_get_sg_sample_cb() { return tmc_sg_sample_cb; }
 
 void tmc_set_sg_mask(uint8_t mask) { tmc_sg_mask = mask; }
 void tmc_set_sg_axis(uint8_t axis) { tmc_sg_axis = axis; }
-void tmc_set_sg_sample_cb(tmc_sg_sample_cb_t *cb) { tmc_sg_sample_cb = cb; }
 
 void tmc_delay(uint16_t time) // delay for switching tmc step pin level
 {

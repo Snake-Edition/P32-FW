@@ -29,11 +29,9 @@ extern uint16_t tmc_get_last_sg_sample(uint8_t axis);
 
 extern uint8_t tmc_get_sg_mask();
 extern uint8_t tmc_get_sg_axis();
-extern tmc_sg_sample_cb_t *tmc_get_sg_sample_cb();
 
 extern void tmc_set_sg_mask(uint8_t mask);
 extern void tmc_set_sg_axis(uint8_t axis);
-extern void tmc_set_sg_sample_cb(tmc_sg_sample_cb_t *cb);
 
 extern void tmc_enable_wavetable(bool X, bool Y, bool Z);
 extern void tmc_disable_wavetable(bool X, bool Y, bool Z);
