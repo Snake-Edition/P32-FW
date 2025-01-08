@@ -12,12 +12,13 @@
 #include <limits>
 
 struct SelftestLoadcell_t {
-    static constexpr uint8_t countdown_undef = 0x7f; // 7 bits for countdown
+    static constexpr uint8_t countdown_undef = 0b111111;
+
     uint8_t progress = 0;
-    uint8_t countdown = countdown_undef;
+    uint8_t countdown : 6 = countdown_undef;
+    bool pressed_too_soon : 1 = false;
+    bool failed : 1 = false; // workaround just to pass it to main selftest
     int16_t temperature = std::numeric_limits<int16_t>::min();
-    bool pressed_too_soon = false;
-    bool failed = false; // workaround just to pass it to main selftest
 
     static SelftestLoadcell_t from_phaseData(fsm::PhaseData new_data) {
         SelftestLoadcell_t r;
@@ -27,19 +28,12 @@ struct SelftestLoadcell_t {
 
     constexpr fsm::PhaseData Serialize() const {
         fsm::PhaseData ret;
-        ret[0] = progress;
-        ret[1] = countdown & 0x7f; // 7 bits for countdown
-        ret[1] |= pressed_too_soon ? 0x80 : 0x00; // 8th bit for pressed_too_soon
-        ret[2] = temperature & 0xff;
-        ret[3] = temperature >> 8;
+        memcpy(ret.data(), this, sizeof(SelftestLoadcell_t));
         return ret;
     }
 
     constexpr void Deserialize(fsm::PhaseData new_data) {
-        progress = new_data[0];
-        countdown = new_data[1] & 0x7f; // 7 bits for countdown
-        pressed_too_soon = (new_data[1] & 0x80) == 0x80; // 8th bit for pressed_too_soon
-        temperature = new_data[2] | (new_data[3] << 8);
+        memcpy(this, new_data.data(), sizeof(SelftestLoadcell_t));
     }
 
     constexpr bool operator==(const SelftestLoadcell_t &other) const = default;
@@ -56,3 +50,5 @@ struct SelftestLoadcell_t {
     } // don't touch countdown and pressed_too_soon
     void Abort() {} // currently not needed
 };
+
+static_assert(sizeof(SelftestLoadcell_t) <= std::tuple_size<fsm::PhaseData>());
