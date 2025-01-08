@@ -129,13 +129,6 @@ public:
         ~FailureOnLoadAboveEnforcer();
     };
 
-    class FailureOnLoadBelowEnforcer : public IFailureEnforcer {
-    public:
-        FailureOnLoadBelowEnforcer(Loadcell &lcell, float grams);
-        FailureOnLoadBelowEnforcer(FailureOnLoadBelowEnforcer &&) = default;
-        ~FailureOnLoadBelowEnforcer();
-    };
-
     class HighPrecisionEnabler {
     public:
         HighPrecisionEnabler(Loadcell &lcell, bool enable = true);
