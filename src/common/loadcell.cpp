@@ -33,11 +33,7 @@ METRIC_DEF(metric_loadcell_age, "loadcell_age", METRIC_VALUE_INTEGER, 0, METRIC_
 METRIC_DEF(metric_loadcell_value, "loadcell_value", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
 
 Loadcell::Loadcell()
-    : scale(1)
-    , thresholdStatic(NAN)
-    , thresholdContinuous(NAN)
-    , hysteresis(0)
-    , failsOnLoadAbove(INFINITY)
+    : failsOnLoadAbove(INFINITY)
     , failsOnLoadBelow(-INFINITY)
     , highPrecision(false)
     , tareMode(TareMode::Static)
@@ -124,14 +120,6 @@ bool Loadcell::GetMinZEndstop() const {
 
 bool Loadcell::GetXYEndstop() const {
     return xy_endstop;
-}
-
-void Loadcell::SetScale(float scale) {
-    this->scale = scale;
-}
-
-void Loadcell::SetHysteresis(float hysteresis) {
-    this->hysteresis = hysteresis;
 }
 
 float Loadcell::GetScale() const {

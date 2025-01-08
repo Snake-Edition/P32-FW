@@ -63,21 +63,9 @@ public:
      */
     void reset_filters();
 
-    void SetScale(float scale);
     float GetScale() const;
 
     void set_xy_endstop(const bool enabled);
-
-    inline void SetThreshold(float threshold, TareMode tareMode) {
-        switch (tareMode) {
-        case TareMode::Static:
-            thresholdStatic = threshold;
-            break;
-        case TareMode::Continuous:
-            thresholdContinuous = threshold;
-            break;
-        }
-    }
 
     inline float GetThreshold(TareMode tareMode = TareMode::Static) const {
         switch (tareMode) {
@@ -89,7 +77,6 @@ public:
         return 0;
     }
 
-    void SetHysteresis(float hysteresis);
     float GetHysteresis() const;
 
     void ProcessSample(int32_t loadcellRaw, uint32_t time_us);
@@ -264,10 +251,10 @@ private:
         unsigned int samples; ///< Samples fed until SETTLING_TIME is reached
     };
 
-    float scale;
-    float thresholdStatic;
-    float thresholdContinuous;
-    float hysteresis;
+    static constexpr float scale = 0.0192f;
+    static constexpr float thresholdStatic = -125.f;
+    static constexpr float thresholdContinuous = -40.f;
+    static constexpr float hysteresis = 80.f;
     float failsOnLoadAbove;
     float failsOnLoadBelow;
 

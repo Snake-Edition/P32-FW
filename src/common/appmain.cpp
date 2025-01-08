@@ -171,12 +171,6 @@ static void app_setup(void) {
     }
 
 #if HAS_LOADCELL()
-    // loadcell configuration
-    loadcell.SetScale(0.0192f);
-    loadcell.SetThreshold(-125.f, Loadcell::TareMode::Static);
-    loadcell.SetThreshold(-40.f, Loadcell::TareMode::Continuous);
-    loadcell.SetHysteresis(80.f);
-
     if (config_store().stuck_filament_detection.get()) {
         EMotorStallDetector::Instance().SetEnabled();
     } // else keep it disabled (which is the default)
