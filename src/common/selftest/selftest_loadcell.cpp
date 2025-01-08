@@ -27,6 +27,8 @@
 LOG_COMPONENT_REF(Selftest);
 using namespace selftest;
 
+static constexpr int32_t acceptable_noise_range_g = 20;
+
 CSelftestPart_Loadcell::CSelftestPart_Loadcell(IPartHandler &state_machine, const LoadcellConfig_t &config,
     SelftestLoadcell_t &result)
     : rStateMachine(state_machine)
@@ -216,6 +218,8 @@ LoopResult CSelftestPart_Loadcell::stateTapCheckCountDownInit() {
     loadcell.WaitBarrier();
     loadcell.Tare(Loadcell::TareMode::Static);
 
+    loadcell_value_range = {};
+
     time_start_countdown = SelftestInstance().GetTime();
     rResult.countdown = SelftestLoadcell_t::countdown_undef;
     rResult.pressed_too_soon = true;
@@ -224,7 +228,10 @@ LoopResult CSelftestPart_Loadcell::stateTapCheckCountDownInit() {
 }
 
 LoopResult CSelftestPart_Loadcell::stateTapCheckCountDown() {
-    int32_t load = -1 * loadcell.get_tared_z_load(); // Positive when pushing the nozzle up
+    const int32_t load = -1 * loadcell.get_tared_z_load(); // Positive when pushing the nozzle up
+    loadcell_value_range.min = std::min(loadcell_value_range.min, load);
+    loadcell_value_range.max = std::max(loadcell_value_range.max, load);
+
     // Show tared value at 1/10 of the range, threshold tap_min_load_ok is needed to pass the test
     rResult.progress = scale_percent_avoid_overflow(load, rConfig.tap_min_load_ok / -9, rConfig.tap_min_load_ok);
     if (std::abs(load) >= rConfig.countdown_load_error_value) {
@@ -249,6 +256,12 @@ LoopResult CSelftestPart_Loadcell::stateTapCheckCountDown() {
 }
 
 LoopResult CSelftestPart_Loadcell::stateTapCheckInit() {
+    if (loadcell_value_range.max - loadcell_value_range.min > acceptable_noise_range_g) {
+        log_info(Selftest, "%s range: %" PRIi32 "-%" PRIi32 " outside of %" PRIi32, rConfig.partname, loadcell_value_range.min, loadcell_value_range.max, acceptable_noise_range_g);
+        rResult.loadcell_noisy = true;
+        return LoopResult::GoToMark0;
+    }
+
     rResult.countdown = SelftestLoadcell_t::countdown_undef;
     time_start_tap = SelftestInstance().GetTime();
     IPartHandler::SetFsmPhase(PhasesSelftest::Loadcell_user_tap_check);

@@ -88,8 +88,18 @@ void SelftestFrameLoadcell::change() {
         break;
     }
     case PhasesSelftest::Loadcell_user_tap_ask_abort:
-        txt_phase = dt.pressed_too_soon ? N_("You did not tap the nozzle or you tapped it too soon. Retry?\n\n ") : N_("We will need your help with this test. You will be asked to tap the nozzle. Don't worry; it is going to be cold.\n ");
-        icon_id = dt.pressed_too_soon ? &img::hand_with_nozzle2_154x100 : &img::hand_with_nozzle3_154x100;
+        if (dt.pressed_too_soon) {
+            txt_phase = N_("You did not tap the nozzle or you tapped it too soon. Retry?\n\n ");
+            icon_id = &img::hand_with_nozzle2_154x100;
+
+        } else if (dt.loadcell_noisy) {
+            txt_phase = N_("Loadcell data are noisy. Make sure the printer is on a stable surface. Retry?");
+            icon_id = &img::warning_48x48;
+
+        } else {
+            txt_phase = N_("We will need your help with this test. You will be asked to tap the nozzle. Don't worry; it is going to be cold.\n ");
+            icon_id = &img::hand_with_nozzle3_154x100;
+        }
         break;
     case PhasesSelftest::Loadcell_user_tap_countdown:
         icon_id = &img::hand_with_nozzle1_154x100;
