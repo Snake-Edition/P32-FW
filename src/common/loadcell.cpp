@@ -287,13 +287,6 @@ Loadcell::FailureOnLoadAboveEnforcer Loadcell::CreateLoadAboveErrEnforcer(bool e
     return Loadcell::FailureOnLoadAboveEnforcer(*this, enable, grams);
 }
 
-/*****************************************************************************/
-// IFailureEnforcer
-Loadcell::IFailureEnforcer::IFailureEnforcer(Loadcell &lcell, float oldErrThreshold)
-    : lcell(lcell)
-    , oldErrThreshold(oldErrThreshold) {
-}
-
 /**
  *
  * @param lcell
@@ -301,7 +294,8 @@ Loadcell::IFailureEnforcer::IFailureEnforcer(Loadcell &lcell, float oldErrThresh
  * @param enable
  */
 Loadcell::FailureOnLoadAboveEnforcer::FailureOnLoadAboveEnforcer(Loadcell &lcell, bool enable, float grams)
-    : IFailureEnforcer(lcell, lcell.GetFailsOnLoadAbove()) {
+    : lcell(lcell)
+    , oldErrThreshold(lcell.GetFailsOnLoadAbove()) {
     if (enable) {
         lcell.SetFailsOnLoadAbove(grams);
     }

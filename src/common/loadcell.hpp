@@ -113,20 +113,15 @@ public:
     /// @brief To be called during homing, will raise redsceen when samples stop comming during homing
     void HomingSafetyCheck() const;
 
-    class IFailureEnforcer {
-    protected:
-        Loadcell &lcell;
-        float oldErrThreshold;
-        IFailureEnforcer(Loadcell &lcell, float oldErrThreshold);
-        IFailureEnforcer(const IFailureEnforcer &) = delete;
-        IFailureEnforcer(IFailureEnforcer &&) = default;
-    };
-
-    class FailureOnLoadAboveEnforcer : public IFailureEnforcer {
+    class FailureOnLoadAboveEnforcer {
     public:
         FailureOnLoadAboveEnforcer(Loadcell &lcell, bool enable, float grams);
         FailureOnLoadAboveEnforcer(FailureOnLoadAboveEnforcer &&) = default;
         ~FailureOnLoadAboveEnforcer();
+
+    private:
+        Loadcell &lcell;
+        float oldErrThreshold;
     };
 
     class HighPrecisionEnabler {
