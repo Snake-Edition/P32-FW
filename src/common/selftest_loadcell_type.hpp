@@ -13,22 +13,16 @@
 
 struct SelftestLoadcell_t {
     static constexpr uint8_t countdown_undef = 0x7f; // 7 bits for countdown
-    uint8_t progress;
-    uint8_t countdown;
-    int16_t temperature;
-    bool pressed_too_soon;
-    bool failed; // workaround just to pass it to main selftest
+    uint8_t progress = 0;
+    uint8_t countdown = countdown_undef;
+    int16_t temperature = std::numeric_limits<int16_t>::min();
+    bool pressed_too_soon = false;
+    bool failed = false; // workaround just to pass it to main selftest
 
-    constexpr SelftestLoadcell_t(uint8_t prog = 0)
-        : progress(prog)
-        , countdown(countdown_undef)
-        , temperature(std::numeric_limits<int16_t>::min())
-        , pressed_too_soon(false)
-        , failed(false) {}
-
-    constexpr SelftestLoadcell_t(fsm::PhaseData new_data)
-        : SelftestLoadcell_t() {
-        Deserialize(new_data);
+    static SelftestLoadcell_t from_phaseData(fsm::PhaseData new_data) {
+        SelftestLoadcell_t r;
+        r.Deserialize(new_data);
+        return r;
     }
 
     constexpr fsm::PhaseData Serialize() const {

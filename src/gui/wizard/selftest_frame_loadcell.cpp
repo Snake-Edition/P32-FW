@@ -55,7 +55,7 @@ SelftestFrameLoadcell::SelftestFrameLoadcell(window_t *parent, PhasesSelftest ph
 }
 
 void SelftestFrameLoadcell::change() {
-    SelftestLoadcell_t dt(data_current);
+    SelftestLoadcell_t dt = SelftestLoadcell_t::from_phaseData(data_current);
 
     const char *txt_phase = nullptr; // text_phase
     const char *txt_result = nullptr; // text_result
