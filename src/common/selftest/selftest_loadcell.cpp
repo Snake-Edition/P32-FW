@@ -219,10 +219,9 @@ LoopResult CSelftestPart_Loadcell::stateTapCheckCountDownInit() {
     loadcell.Tare(Loadcell::TareMode::Static);
 
     loadcell_value_range = {};
-
     time_start_countdown = SelftestInstance().GetTime();
-    rResult.countdown = SelftestLoadcell_t::countdown_undef;
-    rResult.pressed_too_soon = true;
+    rResult = {};
+
     IPartHandler::SetFsmPhase(PhasesSelftest::Loadcell_user_tap_countdown);
     return LoopResult::RunNext;
 }
@@ -237,7 +236,7 @@ LoopResult CSelftestPart_Loadcell::stateTapCheckCountDown() {
     if (std::abs(load) >= rConfig.countdown_load_error_value) {
         log_info(Selftest, "%s load during countdown %dg exceeded error value %dg", rConfig.partname,
             static_cast<int>(load), static_cast<int>(rConfig.countdown_load_error_value));
-        rResult.pressed_too_soon = true;
+        rResult.wrong_tap = true;
         return LoopResult::GoToMark0;
     }
     LogDebugTimed(log, "%s load during countdown %dg", rConfig.partname, static_cast<int>(load));
@@ -272,6 +271,7 @@ LoopResult CSelftestPart_Loadcell::stateTapCheckInit() {
 LoopResult CSelftestPart_Loadcell::stateTapCheck() {
     if ((SelftestInstance().GetTime() - time_start_tap) >= rConfig.tap_timeout_ms) {
         log_info(Selftest, "%s user did not tap", rConfig.partname);
+        rResult.wrong_tap = true;
         return LoopResult::GoToMark0; // timeout, retry entire touch sequence
     }
 

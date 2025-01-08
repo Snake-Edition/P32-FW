@@ -17,7 +17,7 @@ struct SelftestLoadcell_t {
     uint8_t progress = 0;
     uint8_t countdown : 5 = countdown_undef;
     bool loadcell_noisy : 1 = false;
-    bool pressed_too_soon : 1 = false;
+    bool wrong_tap : 1 = false;
     bool failed : 1 = false; // workaround just to pass it to main selftest
     int16_t temperature = std::numeric_limits<int16_t>::min();
 
@@ -43,13 +43,13 @@ struct SelftestLoadcell_t {
     void Pass() {
         progress = 100;
         countdown = countdown_undef;
-        pressed_too_soon = false;
+        wrong_tap = false;
         loadcell_noisy = false;
     }
     void Fail() {
         progress = 100;
         failed = true;
-    } // don't touch countdown and pressed_too_soon
+    } // don't touch countdown and wrong_tap
     void Abort() {} // currently not needed
 };
 

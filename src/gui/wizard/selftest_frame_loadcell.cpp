@@ -88,7 +88,7 @@ void SelftestFrameLoadcell::change() {
         break;
     }
     case PhasesSelftest::Loadcell_user_tap_ask_abort:
-        if (dt.pressed_too_soon) {
+        if (dt.wrong_tap) {
             txt_phase = N_("You did not tap the nozzle or you tapped it too soon. Retry?\n\n ");
             icon_id = &img::hand_with_nozzle2_154x100;
 
