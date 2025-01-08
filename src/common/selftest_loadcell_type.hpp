@@ -42,13 +42,8 @@ struct SelftestLoadcell_t {
         temperature = new_data[2] | (new_data[3] << 8);
     }
 
-    constexpr bool operator==(const SelftestLoadcell_t &other) const {
-        return ((progress == other.progress) && (countdown == other.countdown) && (pressed_too_soon == other.pressed_too_soon) && (temperature == other.temperature));
-    }
-
-    constexpr bool operator!=(const SelftestLoadcell_t &other) const {
-        return !((*this) == other);
-    }
+    constexpr bool operator==(const SelftestLoadcell_t &other) const = default;
+    constexpr bool operator!=(const SelftestLoadcell_t &other) const = default;
 
     void Pass() {
         progress = 100;
