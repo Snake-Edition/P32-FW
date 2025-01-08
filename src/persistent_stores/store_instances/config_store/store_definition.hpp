@@ -188,13 +188,6 @@ struct CurrentStore
 
     StoreItem<time_tools::TimeFormat, defaults::time_format, journal::hash("Time Format")> time_format;
 
-#if HAS_LOADCELL()
-    StoreItem<float, defaults::loadcell_scale, journal::hash("Loadcell Scale")> loadcell_scale;
-    StoreItem<float, defaults::loadcell_threshold_static, journal::hash("Loadcell Threshold Static")> loadcell_threshold_static;
-    StoreItem<float, defaults::loadcell_hysteresis, journal::hash("Loadcell Hysteresis")> loadcell_hysteresis;
-    StoreItem<float, defaults::loadcell_threshold_continuous, journal::hash("Loadcell Threshold Continuous")> loadcell_threshold_continuous;
-#endif
-
     // filament sensor values:
     // ref value: value of filament sensor in moment of calibration (w/o filament present)
     // value span: minimal difference of raw values between the two states of the filament sensor
@@ -569,6 +562,11 @@ struct CurrentStore
 #if ENABLED(PRECISE_HOMING_COREXY) && HAS_TRINAMIC && defined(XY_HOMING_MEASURE_SENS_MIN)
     StoreItem<CoreXYHomeTMCSens, COREXY_NO_HOME_TMC_SENS, journal::hash("CoreXY home TMC calibration")> corexy_home_tmc_sens;
 #endif
+
+    StoreItem<float, 0, journal::hash("Loadcell Scale")> loadcell_scale;
+    StoreItem<float, 0, journal::hash("Loadcell Threshold Static")> loadcell_threshold_static;
+    StoreItem<float, 0, journal::hash("Loadcell Hysteresis")> loadcell_hysteresis;
+    StoreItem<float, 0, journal::hash("Loadcell Threshold Continuous")> loadcell_threshold_continuous;
 };
 
 /**

@@ -176,11 +176,6 @@ namespace defaults {
 
     inline constexpr time_tools::TimeFormat time_format { time_tools::TimeFormat::_24h };
 
-    inline constexpr float loadcell_scale { 0.0192f };
-    inline constexpr float loadcell_threshold_static { -125.f };
-    inline constexpr float loadcell_hysteresis { 80.f };
-    inline constexpr float loadcell_threshold_continuous { -40.f };
-
     // Filament sensor reference NOT INSERTED value
     inline constexpr int32_t extruder_fs_ref_nins_value { std::numeric_limits<int32_t>::min() }; // min == will require calibration
     // Filament sensor reference INSERTED value
