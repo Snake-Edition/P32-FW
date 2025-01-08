@@ -21,9 +21,6 @@
 #include "MItem_basic_selftest.hpp"
 #include "printers.h"
 
-#if HAS_LOADCELL()
-    #include "MItem_loadcell.hpp"
-#endif
 #if HAS_TOOLCHANGER()
     #include "screen_menu_tools.hpp"
 #endif
@@ -92,10 +89,6 @@ using ScreenMenuHardware__ = ScreenMenu<GuiDefaults::MenuFooter,
 #ifdef HAS_TMC_WAVETABLE
     ,
     MI_WAVETABLE_XYZ
-#endif
-#if HAS_LOADCELL()
-    ,
-    MI_LOADCELL_SCALE
 #endif
 #if (BOARD_IS_XLBUDDY())
     ,
