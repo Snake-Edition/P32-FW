@@ -171,13 +171,13 @@ static std::vector<std::pair<float, float>> parse_pairs(std::string_view str) {
 }
 
 /**
- *### M973: Set single entry for the current correction table <a href=" "> </a>
+ *### M973: Set/reset correction table for the specified axis and direction <a href=" "> </a>
  *
  * Only XL and iX
  *
  *#### Usage
  *
- *    M973 [ X | Y | F | B ]
+ *    M973 [ XF | XB | YF | YB ] <mag,phase mag,phase ...>
  *
  *#### Parameters
  *
@@ -185,19 +185,25 @@ static std::vector<std::pair<float, float>> parse_pairs(std::string_view str) {
  * - `Y` - Y axis
  * - `F` - Forward direction
  * - `B` - Backward direction
- * - `<mag,phase>` - mag and phase
  *
- * String argument in format: <X/Y><F/B><list of mag,phase pairs separated by space>
+ * The number of entries in the mag,phase list must match the count returned by M972.
+ * With zero entries, clear the table instead.
  **/
 void GcodeSuite::M973() {
     std::string_view str_arg { parser.string_arg };
-    if (str_arg.size() < 3 || !is_one_of(str_arg[0], "XY") || !is_one_of(str_arg[1], "FB")) {
-        print_error("Invalid format; should be <X/Y><F/B><list of mag,phase pairs separated by space");
+    if (str_arg.size() < 2 || !is_one_of(str_arg[0], "XY") || !is_one_of(str_arg[1], "FB")) {
+        print_error("Invalid correction table; should be one of [ XF | XB | YF | YB ]");
+        return;
     }
 
-    AxisEnum axis = str_arg[0] == 'X' ? AxisEnum::X_AXIS : AxisEnum::Y_AXIS;
+    const char axis_char = str_arg[0];
+    const char axis_dir = str_arg[1];
+    AxisEnum axis = axis_char == 'X' ? AxisEnum::X_AXIS : AxisEnum::Y_AXIS;
     phase_stepping::AxisState &axis_state = phase_stepping::axis_states[axis];
-    const bool forward_correction { str_arg[1] == 'F' };
+    const bool forward_correction { axis_dir == 'F' };
+    const phase_stepping::CorrectionType lut_type = forward_correction
+        ? phase_stepping::CorrectionType::forward
+        : phase_stepping::CorrectionType::backward;
     auto &lut = forward_correction
         ? axis_state.forward_current
         : axis_state.backward_current;
@@ -205,33 +211,51 @@ void GcodeSuite::M973() {
     str_arg.remove_prefix(2);
     auto data = parse_pairs(str_arg);
 
-    if (data.empty()) {
+    if (data.size() && data.size() != lut.get_correction().size()) {
+        print_error("Invalid count of <mag,phase> entries");
         return;
+    }
+
+    bool was_enabled = phase_stepping::is_enabled(axis);
+    if (was_enabled) {
+        Planner::synchronize();
+        phase_stepping::enable(axis, false);
     }
 
     lut.modify_correction([&](auto &table) {
         for (size_t n = 0; n != table.size(); n++) {
+            float mag, pha;
             if (n < data.size()) {
-                SERIAL_ECHO("Setting ");
-                SERIAL_ECHO(n);
-                SERIAL_ECHO(": ");
-                SERIAL_ECHO(data[n].first);
-                SERIAL_ECHO(", ");
-                SERIAL_ECHOLN(data[n].second);
-                table[n] = phase_stepping::SpectralItem {
-                    .mag = data[n].first,
-                    .pha = data[n].second
-                };
+                mag = data[n].first;
+                pha = data[n].second;
             } else {
-                table[n] = phase_stepping::SpectralItem {
-                    .mag = 0,
-                    .pha = 0
-                };
+                mag = 0.f;
+                pha = 0.f;
             }
+
+            SERIAL_ECHO("Setting ");
+            SERIAL_ECHO(axis_char);
+            SERIAL_ECHO(axis_dir);
+            SERIAL_ECHO("[");
+            SERIAL_ECHO(n);
+            SERIAL_ECHO("] = ");
+            SERIAL_ECHO(mag);
+            SERIAL_ECHO(",");
+            SERIAL_ECHOLN(pha);
+
+            table[n] = phase_stepping::SpectralItem { .mag = mag, .pha = pha };
         }
     });
 
-    phase_stepping::save_correction_to_file(lut, phase_stepping::get_correction_file_path(axis, forward_correction ? phase_stepping::CorrectionType::forward : phase_stepping::CorrectionType::backward));
+    if (data.size() == 0) {
+        phase_stepping::remove_from_persistent_storage(axis, lut_type);
+    } else {
+        phase_stepping::save_correction_to_file(lut, phase_stepping::get_correction_file_path(axis, lut_type));
+    }
+
+    if (was_enabled) {
+        phase_stepping::enable(axis, true);
+    }
 }
 
 /**
