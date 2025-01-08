@@ -42,6 +42,7 @@ PrinterState leds::mpsToAnimationState(marlin_server::State state) {
     case State::Printing:
     case State::PrintInit:
     case State::SerialPrintInit:
+    case State::Finishing_WaitIdle:
         return PrinterState::Printing;
 
     case State::Pausing_Begin:
@@ -65,7 +66,6 @@ PrinterState leds::mpsToAnimationState(marlin_server::State state) {
     case State::Aborted:
         return PrinterState::Aborting;
 
-    case State::Finishing_WaitIdle:
     case State::Finishing_ParkHead:
     case State::Finishing_UnloadFilament:
     case State::Finished:
