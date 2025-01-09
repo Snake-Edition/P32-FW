@@ -1856,24 +1856,31 @@ static void _server_print_loop(void) {
 
         break;
     }
-    case State::PrintInit:
-        server.print_is_serial = false;
-        server.was_print_time_saved = false;
-        feedrate_percentage = 100;
 
-        // Reset flow factor for all extruders
-        HOTEND_LOOP() {
-            planner.flow_percentage[e] = 100;
-            planner.refresh_e_factor(e);
+    case State::PrintInit:
+    case State::SerialPrintInit:
+        server.print_is_serial = (server.print_state == State::SerialPrintInit);
+        server.was_print_time_saved = false;
+
+        if (!server.print_is_serial) {
+            feedrate_percentage = 100;
+
+            // Reset flow factor for all extruders
+            HOTEND_LOOP() {
+                planner.flow_percentage[e] = 100;
+                planner.refresh_e_factor(e);
+            }
         }
 
 #if ENABLED(PRUSA_TOOL_MAPPING) && (HOTENDS > 1)
-        // Cooldown unused tools
-        // Ignore spool join - spool joined tools will get heated as spool join is activated
-        // BFW-5996
-        for (uint8_t physical_tool = 0; physical_tool < HOTENDS; physical_tool++) {
-            if (tool_mapper.to_gcode(physical_tool) == tools_mapping::no_tool) {
-                thermalManager.setTargetHotend(0, physical_tool);
+        if (!server.print_is_serial) {
+            // Cooldown unused tools
+            // Ignore spool join - spool joined tools will get heated as spool join is activated
+            // BFW-5996
+            for (uint8_t physical_tool = 0; physical_tool < HOTENDS; physical_tool++) {
+                if (tool_mapper.to_gcode(physical_tool) == tools_mapping::no_tool) {
+                    thermalManager.setTargetHotend(0, physical_tool);
+                }
             }
         }
 #endif
@@ -1882,7 +1889,11 @@ static void _server_print_loop(void) {
         crash_s.reset();
         crash_s.counters.reset();
         endstops.enable_globally(true);
-        crash_s.set_state(Crash_s::PRINTING);
+
+        // Crash Detection is disabled during serial printing, because it does not work
+        if (!server.print_is_serial) {
+            crash_s.set_state(Crash_s::PRINTING);
+        }
 #endif // ENABLED(CRASH_RECOVERY)
 
 #if ENABLED(CANCEL_OBJECTS)
@@ -1893,46 +1904,37 @@ static void _server_print_loop(void) {
 #endif
 
 #if HAS_LOADCELL()
-        // Reset Live-Adjust-Z value before every print
-        probe_offset.z = 0;
-        marlin_vars().z_offset = 0;
+        if (!server.print_is_serial) {
+            // Reset Live-Adjust-Z value before every print
+            probe_offset.z = 0;
+            marlin_vars().z_offset = 0;
+        }
 #endif // HAS_LOADCELL()
 
         print_job_timer.start();
-        marlin_vars().time_to_end = TIME_TO_END_INVALID;
-        marlin_vars().time_to_pause = TIME_TO_END_INVALID;
         marlin_vars().print_start_time = time(nullptr);
+
+        if (!server.print_is_serial) {
+            marlin_vars().time_to_end = TIME_TO_END_INVALID;
+            marlin_vars().time_to_pause = TIME_TO_END_INVALID;
+        }
+
         server.print_state = State::Printing;
-        if (fsm_states.is_active(ClientFSM::PrintPreview)) {
-            fsm_destroy_and_create(ClientFSM::PrintPreview, ClientFSM::Printing, fsm::BaseData());
+
+        if (server.print_is_serial) {
+            fsm_create(PhasesSerialPrinting::active);
+        } else {
+
+            if (fsm_states.is_active(ClientFSM::PrintPreview)) {
+                fsm_destroy_and_create(ClientFSM::PrintPreview, ClientFSM::Printing, fsm::BaseData());
+            }
+            if (!fsm_states.is_active(ClientFSM::Printing)) {
+                // FIXME make this atomic change. It would require improvements in PrintScreen so that it can re-initialize upon phase change.
+                // FYI the DESTROY invoke is in print_start()
+                // NOTE this works surely thanks to State::WaitGui being in between the DESTROY and CREATE
+                fsm_create(PhasesPrinting::active);
+            }
         }
-        if (!fsm_states.is_active(ClientFSM::Printing)) {
-            // FIXME make this atomic change. It would require improvements in PrintScreen so that it can re-initialize upon phase change.
-            // FYI the DESTROY invoke is in print_start()
-            // NOTE this works surely thanks to State::WaitGui being in between the DESTROY and CREATE
-            fsm_create(PhasesPrinting::active);
-        }
-        break;
-    case State::SerialPrintInit:
-        server.print_is_serial = true;
-        server.was_print_time_saved = false;
-#if ENABLED(CRASH_RECOVERY)
-        crash_s.reset();
-        crash_s.counters.reset();
-        endstops.enable_globally(true);
-        // Crash Detection is disabled during serial printing, because it does not work
-        // crash_s.set_state(Crash_s::PRINTING);
-#endif // ENABLED(CRASH_RECOVERY)
-#if ENABLED(CANCEL_OBJECTS)
-        cancelable.reset();
-        for (auto &cancel_object_name : marlin_vars().cancel_object_names) {
-            cancel_object_name.set(""); // Erase object names
-        }
-#endif
-        print_job_timer.start();
-        marlin_vars().print_start_time = time(nullptr);
-        fsm_create(PhasesSerialPrinting::active);
-        server.print_state = State::Printing;
         break;
 
     case State::Printing:
