@@ -38,6 +38,7 @@
 #include <option/has_xbuddy_extension.h>
 #include <option/has_emergency_stop.h>
 #include <option/xl_enclosure_support.h>
+#include <option/developer_mode.h>
 #include <common/extended_printer_type.hpp>
 #include <common/hw_check.hpp>
 #include <feature/xbuddy_extension/xbuddy_extension_fan_results.hpp>
@@ -549,7 +550,7 @@ struct CurrentStore
 #endif
 
 #if HAS_EMERGENCY_STOP()
-    StoreItem<bool, true, journal::hash("Emergency stop enable")> emergency_stop_enable;
+    StoreItem<bool, (DEVELOPER_MODE() ? false : true), journal::hash("Emergency stop enable")> emergency_stop_enable;
 #endif
 
 #if HAS_ILI9488_DISPLAY()
