@@ -65,7 +65,7 @@ static void report_state() {
 /**
  *### M970: Enable/Disable Phase Stepping <a href="https://reprap.org/wiki/G-code#M970:_Enable.2FDisable_Phase_Stepping">M970: Enable/Disable Phase Stepping</a>
  *
- * Only XL and iX
+ * Only XL/iX/COREONE
  *
  *#### Usage
  *
@@ -94,7 +94,7 @@ void GcodeSuite::M970() {
 /**
  *### M972: Retrieve current correction <a href="https://reprap.org/wiki/G-code#M972:_Retrieve_Current_Correction">M972: Retrieve Current Correction</a>
  *
- * Only XL and iX
+ * Only XL/iX/COREONE
  *
  *#### Usage
  *
@@ -173,7 +173,7 @@ static std::vector<std::pair<float, float>> parse_pairs(std::string_view str) {
 /**
  *### M973: Set/reset correction table for the specified axis and direction <a href=" "> </a>
  *
- * Only XL and iX
+ * Only XL/iX/COREONE
  *
  *#### Usage
  *
@@ -261,7 +261,7 @@ void GcodeSuite::M973() {
 /**
  *### M974: Measure print head resonance <a href="https://reprap.org/wiki/G-code#M974:_Measure_Print_Head_Resonance">M974: Measure Print Head Resonance</a>
  *
- * Only XL and iX
+ * Only XL/iX/COREONE
  *
  *#### Usage
  *
@@ -340,7 +340,7 @@ void GcodeSuite::M974() {
 /**
  *### M975: Measure dwarf accelerometer sampling frequency <a href="https://reprap.org/wiki/G-code#M975:_Measure_Dwarf_Accelerometer_Sampling_Frequency">M975: Measure Dwarf Accelerometer Sampling Frequency</a>
  *
- * Only XL and iX
+ * Only XL/iX/COREONE
  *
  *#### Usage
  *
@@ -398,7 +398,7 @@ void GcodeSuite::M975() {
 /**
  *### M976: Measure print head resonance <a href="https://reprap.org/wiki/G-code#M976:_Measure_Print_Head_Resonance">M976: Measure Print Head Resonance</a>
  *
- * Only XL and iX
+ * Only XL/iX/COREONE
  *
  *#### Usage
  *
@@ -540,7 +540,7 @@ public:
 /**
  *### M977: Calibrate motor <a href="https://reprap.org/wiki/G-code#M977:_Calibrate_Motor">M977: Calibrate Motor</a>
  *
- * Only XL and iX
+ * Only XL/iX/COREONE
  *
  *#### Usage
  *
