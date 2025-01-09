@@ -211,6 +211,7 @@ target_include_directories(
           ${CMAKE_SOURCE_DIR}/src/common
           ${CMAKE_SOURCE_DIR}/src/common/http
           ${CMAKE_SOURCE_DIR}/src/common/marlin_server_types
+          ${CMAKE_SOURCE_DIR}/src/common/utils
           ${CMAKE_SOURCE_DIR}/src/gui
           ${CMAKE_SOURCE_DIR}/src
           ${CMAKE_SOURCE_DIR}/src/puppy/xbuddy_extension_shared
@@ -304,6 +305,7 @@ target_include_directories(
           ${CMAKE_SOURCE_DIR}/src/common
           ${CMAKE_SOURCE_DIR}/src/common/http
           ${CMAKE_SOURCE_DIR}/src/common/marlin_server_types
+          ${CMAKE_SOURCE_DIR}/src/common/utils
           ${CMAKE_SOURCE_DIR}/src/gui
           ${CMAKE_SOURCE_DIR}/src/puppy/xbuddy_extension_shared
           ${CMAKE_SOURCE_DIR}/lib/Middlewares/Third_Party/mbedtls/include

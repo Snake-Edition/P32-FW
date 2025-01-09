@@ -274,12 +274,15 @@ TEST_CASE("Transport ended") {
     REQUIRE(event != nullptr);
     REQUIRE(event->type == EventType::TransferFinished);
     REQUIRE(event->transfer_id == id);
+
+    // Check the id is never using 32nd bit - should be always 0
+    REQUIRE(((*event->transfer_id).to_uint32_t() & ~0x7FFFFFFF) == 0);
 }
 
 TEST_CASE("Transport ended and started") {
     Test test;
 
-    auto slot = Monitor::instance.allocate(Monitor::Type::Connect, "/usb/stuff.gcode", 1024);
+    auto slot = Monitor::instance.allocate(Monitor::Type::Connect, "/usb/stuff.gcode", false, 1024);
     REQUIRE(slot.has_value());
     auto id = Monitor::instance.id();
     REQUIRE(id.has_value());
@@ -295,7 +298,7 @@ TEST_CASE("Transport ended and started") {
     slot.reset();
 
     // Start a new one.
-    slot = Monitor::instance.allocate(Monitor::Type::Link, "/usb/stuff.gcode", 1024);
+    slot = Monitor::instance.allocate(Monitor::Type::Link, "/usb/stuff.gcode", false, 1024);
 
     // The info/notification that the previous one ended is still available.
     auto action2 = test.planner.next_action(buffer, nullptr);
@@ -303,13 +306,16 @@ TEST_CASE("Transport ended and started") {
     REQUIRE(event != nullptr);
     REQUIRE(event->type == EventType::TransferFinished);
     REQUIRE(event->transfer_id == id);
+
+    // Check the id is never using 32nd bit - should be always 0
+    REQUIRE(((*event->transfer_id).to_uint32_t() & ~0x7FFFFFFF) == 0);
 }
 
 // When lost in history, we lose the notification, but doesn't crash or do anything extra weird.
 TEST_CASE("Transport ended, lost in history") {
     Test test;
 
-    auto slot = Monitor::instance.allocate(Monitor::Type::Connect, "/usb/stuff.gcode", 1024);
+    auto slot = Monitor::instance.allocate(Monitor::Type::Connect, "/usb/stuff.gcode", false, 1024);
     REQUIRE(slot.has_value());
 
     test.consume_telemetry();
@@ -324,7 +330,7 @@ TEST_CASE("Transport ended, lost in history") {
 
     // Start many new ones, to push the old one from the history.
     for (size_t i = 0; i < 5; i++) {
-        slot = Monitor::instance.allocate(Monitor::Type::Link, "/usb/stuff.gcode", 1024);
+        slot = Monitor::instance.allocate(Monitor::Type::Link, "/usb/stuff.gcode", false, 1024);
         slot.reset();
     }
 
@@ -440,6 +446,34 @@ TEST_CASE("Command Set value - chamber.target_temp set/unset logic") {
         test.planner.command(command);
         REQUIRE(buddy::chamber().target_temperature().has_value());
         REQUIRE(buddy::chamber().target_temperature().value() == 55);
+    }
+}
+
+TEST_CASE("Test ID limited to 31bits only") {
+    Test test;
+
+    // Create ID at the end of 31bit range and increment
+    auto slot1 = Monitor::instance.allocate(Monitor::Type::Connect, "/usb/stuff.gcode", false, 0x7FFFFFFF);
+    REQUIRE(slot1.has_value());
+    auto id1 = Monitor::instance.id();
+    REQUIRE(id1.has_value());
+    if (id1.has_value()) {
+        REQUIRE(((*id1).to_uint32_t() & ~0x7FFFFFFF) == 0);
+    }
+
+    auto slot2 = Monitor::instance.allocate(Monitor::Type::Link, "/usb/stuff.gcode", false);
+    auto id2 = Monitor::instance.id();
+    REQUIRE(id2.has_value());
+    if (id2.has_value()) {
+        REQUIRE(((*id2).to_uint32_t() & ~0x7FFFFFFF) == 0);
+    }
+
+    // Create ID with 32bit set
+    auto slot3 = Monitor::instance.allocate(Monitor::Type::Connect, "/usb/stuff.gcode", false, 0x80000001);
+    auto id3 = Monitor::instance.id();
+    REQUIRE(id3.has_value());
+    if (id3.has_value()) {
+        REQUIRE(((*id3).to_uint32_t() & ~0x7FFFFFFF) == 0);
     }
 }
 

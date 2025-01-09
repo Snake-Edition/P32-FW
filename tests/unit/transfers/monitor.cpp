@@ -139,6 +139,46 @@ TEST_CASE("Transfer history") {
 
     // Already out of history (yes, we abuse the knowledge of the history size in this test).
     REQUIRE_FALSE(monitor.outcome(id1).has_value());
+
+    // Trying to reach future. Test of history overflow
+    auto future_id = *id4;
+    future_id++;
+    REQUIRE_FALSE(monitor.outcome(future_id).has_value());
+}
+
+TEST_CASE("Transfer history 31bit ID overflow") {
+    Monitor monitor;
+
+    // Test possible overflow at 31bit range
+    REQUIRE_FALSE(monitor.outcome(42).has_value());
+
+    auto o = [&](Monitor::Outcome o, std::optional<TransferId> id = std::nullopt) -> TransferId {
+        auto slot = monitor.allocate(Monitor::Type::Connect, "/usb/path.gcode", 1024, false, id);
+        REQUIRE(slot.has_value());
+
+        auto status = monitor.status();
+        REQUIRE(status.has_value());
+
+        slot->done(o);
+        return status->id;
+    };
+
+    auto id1 = o(Monitor::Outcome::Finished, std::optional<TransferId>(0x7FFFFFFF));
+    REQUIRE(monitor.outcome(id1) == Monitor::Outcome::Finished);
+
+    auto id2 = o(Monitor::Outcome::ErrorNetwork);
+    REQUIRE(monitor.outcome(id2) == Monitor::Outcome::ErrorNetwork);
+    // The id1 is still reachable
+    REQUIRE(monitor.outcome(id1) == Monitor::Outcome::Finished);
+
+    auto id3 = o(Monitor::Outcome::Stopped);
+    REQUIRE(monitor.outcome(id3) == Monitor::Outcome::Stopped);
+    // The id1 is still reachable
+
+    // Trying to reach future. Test of history overflow
+    auto future_id = id3;
+    future_id++;
+    REQUIRE_FALSE(monitor.outcome(future_id).has_value());
 }
 
 TEST_CASE("Transfer Estimates") {
