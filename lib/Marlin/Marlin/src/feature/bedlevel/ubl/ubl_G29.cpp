@@ -42,7 +42,7 @@
   #include "../../../feature/bed_preheat.hpp"
   #include <fanctl.hpp>
   #include <option/has_love_board.h>
-  #include <RAII.hpp>
+  #include <scope_guard.hpp>
 
   #if BOARD_IS_XBUDDY()
     #include <hw_configuration.hpp>
@@ -354,7 +354,7 @@
     } else {
         buddy::hw::fanHeatBreakPwm.write(buddy::hw::Pin::State::high);
     }
-    Defer restore_fan_autocontrol([&]() {
+    ScopeGuard restore_fan_autocontrol([&]() {
         fan.enable_autocontrol();
     });
     #endif
