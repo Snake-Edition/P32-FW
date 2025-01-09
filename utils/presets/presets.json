@@ -3,7 +3,7 @@
     "presets": [
         {
             "name": "mini",
-            "description": "Original Prusa MINI",
+            "description": "MINI",
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
