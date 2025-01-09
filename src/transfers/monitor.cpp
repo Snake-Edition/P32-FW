@@ -34,7 +34,7 @@ Monitor::Slot::~Slot() {
         bool destruction_handled;
         {
             Lock lock2(owner.history_mutex);
-            destruction_handled = (owner.current_id == owner.history_latest);
+            destruction_handled = (static_cast<transfers::TransferId>(owner.current_id) == owner.history_latest);
         }
 
         if (!destruction_handled) {
@@ -137,7 +137,7 @@ optional<Monitor::Outcome> Monitor::outcome(TransferId id) const {
     Lock lock(history_mutex);
 
     // How much to the past into the history do we go?
-    uint32_t offset = history_latest - id;
+    uint32_t offset = (history_latest - id).to_uint32_t();
     if (offset > history_len) {
         // The history is continuous segment back. We may be asked for outdated
         // ID (in which case it'll be slightly larger than the length of the
@@ -174,7 +174,7 @@ optional<Monitor::Slot> Monitor::allocate(Type type, const char *dest, size_t ex
         return nullopt;
     }
 
-    if (current_id == 0) {
+    if (static_cast<transfers::TransferId>(current_id) == static_cast<transfers::TransferId>(0)) {
         // Special-case: lazy initialize by a random number. Initialization in
         // the construction was too early and the HW generator wasn't ready.
         // Using the usual `random` call also produced predictable, always the
@@ -194,7 +194,9 @@ optional<Monitor::Slot> Monitor::allocate(Type type, const char *dest, size_t ex
         history_len = 0;
         current_id = *override_id;
     } else {
-        current_id++;
+        transfers::TransferId desired = static_cast<transfers::TransferId>(current_id);
+        desired++;
+        current_id.store(desired);
     }
     transfer_active = true;
     used = true;

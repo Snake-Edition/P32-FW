@@ -138,7 +138,7 @@ namespace {
                 //
                 // And yes, we need the guard on each one, because we can
                 // resume at each and every of these fields.
-                JSON_FIELD_INT_G(transfer_status.has_value(), "transfer_id", transfer_status->id) JSON_COMMA;
+                JSON_FIELD_INT_G(transfer_status.has_value(), "transfer_id", transfer_status->id.to_uint32_t()) JSON_COMMA;
                 JSON_FIELD_INT_G(transfer_status.has_value(), "transfer_transferred", transfer_status->download_progress.get_valid_size()) JSON_COMMA;
                 JSON_FIELD_INT_G(transfer_status.has_value(), "transfer_time_remaining", transfer_status->time_remaining_estimate()) JSON_COMMA;
                 JSON_FIELD_FFIXED_G(transfer_status.has_value(), "transfer_progress", transfer_status->progress_estimate() * 100.0, 1) JSON_COMMA;
@@ -677,7 +677,7 @@ namespace {
                 JSON_FIELD_INT("command_id", *event.command_id) JSON_COMMA;
             }
             if (state.transfer_id.has_value()) {
-                JSON_FIELD_INT("transfer_id", *state.transfer_id) JSON_COMMA;
+                JSON_FIELD_INT("transfer_id", (*state.transfer_id).to_uint32_t()) JSON_COMMA;
             }
             JSON_FIELD_STR("event", to_str(event.type));
         JSON_OBJ_END;

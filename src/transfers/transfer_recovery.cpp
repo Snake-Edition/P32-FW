@@ -59,7 +59,7 @@ struct SerializedTransfer {
     uint64_t team_id = 0;
     uint32_t orig_size = 0;
 
-    uint32_t transfer_id;
+    TransferId transfer_id;
 
     // encryption info
     std::optional<Download::EncryptionInfo> encryption_info;
