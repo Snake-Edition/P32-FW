@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/littlefs-project/littlefs
+	branch = v2.8.0
+	commit = f77214d1f0a8ccd7ddc7e1204fedd25ee5a41534
+	parent = 1acc364b96797fbbbc6215f34e15696f6355a7f0
+	method = merge
+	cmdver = 0.4.6

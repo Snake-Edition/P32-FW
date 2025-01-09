@@ -1,0 +1,94 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+- repo: https://github.com/cheshirekow/cmake-format-precommit
+  rev: v0.6.13
+  hooks:
+    - id: cmake-format
+- repo: https://github.com/google/yapf
+  rev: v0.40.2
+  hooks:
+    - id: yapf
+- repo: local
+  hooks:
+    - id: clang-format
+      name: clang-format
+      description: This hook automatically checks and reformats changed files using clang-format formatter.
+      entry: './.dependencies/clang-format-16-83817c2f/clang-format'
+      language: script
+      files: \.(h\+\+|h|hh|hxx|hpp|cuh|c|cc|cpp|cu|c\+\+|cxx|tpp|txx)$
+      args: ['-i', '-style=file']
+    - id: generate-log-components-overview
+      name: log-components-doc-generate
+      description: This hook generate an overview of currently defined Log Components.
+      entry: python utils/logging/generate_overview.py
+      language: python
+      language_version: python3
+    - id: generate-cmake-presets
+      name: generate-cmake-presets
+      description: This hook generates CMakePresets.json file based on utils/presets/presets.json
+      entry: python utils/build.py --generate-cmake-presets
+      files: (^|/)(.*.json)$
+      pass_filenames: false
+      language: python
+      language_version: python3
+    - id: generate-log-components-overview
+      name: log-components-doc-generate
+      description: This hook generate an overview of currently defined Log Components.
+      entry: python utils/logging/generate_overview.py
+      language: python
+      language_version: python3
+    - id: python3-requirements
+      name: python3-requirements
+      description: Check if requirements.txt matches the buildsystem.
+      entry: 'utils/check-requirements.py'
+      language: script
+      files: requirements\.txt$
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: 'v2.4.0'
+  hooks:
+    - id: trailing-whitespace
+      args: [--markdown-linebreak-ext=md]
+    - id: end-of-file-fixer
+    - id: mixed-line-ending
+exclude: |
+  (?x)(
+    ^lib/Catch2/|
+    ^lib/CrashCatcher/|
+    ^lib/Drivers/|
+    ^lib/Marlin/(?!
+        Marlin/src(/gcode)?/feature/prusa/|
+        Marlin/src(/gcode)?/feature/input_shaper/|
+        Marlin/src(/gcode)?/feature/pressure_advance/|
+        Marlin/src(/gcode)?/feature/precise_stepping/|
+        Marlin/src(/gcode)?/feature/phase_stepping/|
+        Marlin/src/module/prusa/|
+        Marlin/src/gcode/calibrate/M958.cpp
+        Marlin/src/gcode/calibrate/M958.hpp
+      )|
+    ^lib/Middlewares/Third_Party/FatFs/|
+    ^lib/Middlewares/Third_Party/FreeRTOS/|
+    ^lib/Middlewares/Third_Party/LwIP/|
+    ^lib/Middlewares/Third_Party/littlefs/|
+    ^lib/Middlewares/Third_Party/mbedtls/|
+    ^lib/Prusa-Error-Codes/|
+    ^lib/Prusa-Firmware-MMU/|
+    ^lib/QR/|
+    ^lib/Segger|
+    ^lib/TMCStepper/|
+    ^lib/cpp-std-extensions/|
+    ^lib/esp-serial-flasher/|
+    ^lib/heatshrink/|
+    ^lib/inih/|
+    ^lib/jsmn/|
+    ^lib/libbgcode/|
+    ^lib/liblightmodbus/|
+    ^lib/libsysbase/|
+    ^lib/printf|
+    ^lib/tinyusb/|
+    ^lib/magic_enum/|
+    ^lib/SG14/|
+    ^tests/stubs/FreeRTOS|
+    ^tests/unit/common/gcode/.*\.gcode$|
+    ^tests/unit/lang/translator/(keys|cs|es|fr|de|pl|it)\.txt$
+  )

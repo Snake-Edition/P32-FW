@@ -1,0 +1,5 @@
+aioserial
+click
+aioinflux
+git+https://github.com/dragomirecky/line-protocol-parser.git@master#egg=line-protocol-parser
+pyyaml

@@ -1,0 +1,5 @@
+add_subdirectory(FreeRTOS)
+add_subdirectory(FatFs)
+add_subdirectory(LwIP)
+add_subdirectory(littlefs)
+include(addMBEDTLS.cmake)
