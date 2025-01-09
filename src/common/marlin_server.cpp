@@ -238,7 +238,6 @@ namespace {
 
     enum class Pause_Type {
         Pause,
-        Repeat_Last_Code,
         Crash
     };
 
@@ -382,7 +381,6 @@ namespace {
             switch (type) {
 
             case Pause_Type::Crash:
-            case Pause_Type::Repeat_Last_Code:
                 print_state.skip_gcode = false;
                 break;
 
