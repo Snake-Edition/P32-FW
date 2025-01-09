@@ -7180,7 +7180,7 @@ msgstr ""
 
 #: src/gui/wizard/selftest_frame_wizard_prologue.cpp:14
 msgid ""
-"Welcome to the Original Prusa MINI setup wizard. Would you like to continue?"
+"Welcome to the MINI setup wizard. Would you like to continue?"
 msgstr ""
 
 #: src/gui/screen_menu_metrics.cpp:53
