@@ -107,7 +107,29 @@ using MI_FOOTER_SETTINGS_ADV
     = MI_SCREEN<N_("Advanced"), class ScreenMenuFooterSettingsAdv, nullptr, is_hidden_t::dev>;
 
 using MI_EXPERIMENTAL_SETTINGS
-    = MI_SCREEN<N_("Experimental Settings"), class ScreenMenuExperimentalSettings, nullptr, is_hidden_t::dev>;
+    = MI_SCREEN<N_("Experimental Settings"), class ScreenMenuExperimentalSettings, nullptr, is_hidden_t::no>;
+
+/* -===============================================(:>- */
+class MI_SNAKE_SETTINGS : public IWindowMenuItem {
+    static constexpr const char *const label = N_("Snake Settings");
+
+public:
+    MI_SNAKE_SETTINGS();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_SNAKE_TUNE_SETTINGS : public IWindowMenuItem {
+    static constexpr const char *const label = N_("Snake Settings");
+
+public:
+    MI_SNAKE_TUNE_SETTINGS();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+/* -===============================================(:>- */
 
 using MI_USER_INTERFACE
     = MI_SCREEN<N_("User Interface"), class ScreenMenuUserInterface>;
