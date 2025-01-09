@@ -1865,6 +1865,7 @@ static void _server_print_loop(void) {
     case State::SerialPrintInit:
         server.print_is_serial = (server.print_state == State::SerialPrintInit);
         server.was_print_time_saved = false;
+        planner.max_printed_z = 0;
 
         if (!server.print_is_serial) {
             feedrate_percentage = 100;
