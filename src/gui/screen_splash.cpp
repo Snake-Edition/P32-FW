@@ -80,13 +80,12 @@ screen_splash_data_t::screen_splash_data_t()
     text_progress.SetText(string_view_utf8::MakeRAM((uint8_t *)text_progress_buffer));
     progress.SetProgressPercent(0);
 
-#if !HAS_SELFTEST()
-    // Nothing
+#if DEVELOPER_MODE()
+    // don't present any screen or wizard
+    return;
+#endif
 
-#elif DEVELOPER_MODE()
-    const bool run_wizard = false;
-
-#elif !PRINTER_IS_PRUSA_iX()
+#if HAS_SELFTEST() && !PRINTER_IS_PRUSA_iX()
     const bool run_wizard =
         []() {
             SelftestResult sr = config_store().selftest_result.get();
