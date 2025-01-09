@@ -154,21 +154,11 @@ PhasesPhaseStepping evaluate_result(Context &context) {
     return PhasesPhaseStepping::calib_nok;
 }
 
-void unlink_or_else(const char *path) {
-    if (unlink(path) != 0) {
-        if (errno == ENOENT) {
-            return; // file may not exist and that's ok
-        }
-        bsod("unlink");
-    }
-}
-
 void restore_axis_defaults(AxisEnum axis) {
-    phase_stepping::disable_phase_stepping(axis);
-    unlink_or_else(phase_stepping::get_correction_file_path(axis, phase_stepping::CorrectionType::backward));
-    unlink_or_else(phase_stepping::get_correction_file_path(axis, phase_stepping::CorrectionType::forward));
+    phase_stepping::EnsureDisabled _;
     phase_stepping::reset_compensation(axis);
-    phase_stepping::enable_phase_stepping(axis);
+    phase_stepping::remove_from_persistent_storage(axis, phase_stepping::CorrectionType::forward);
+    phase_stepping::remove_from_persistent_storage(axis, phase_stepping::CorrectionType::backward);
 }
 
 namespace state {
