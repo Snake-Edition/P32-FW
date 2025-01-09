@@ -26,6 +26,7 @@
 #include "screen_menu_lang_and_time.hpp"
 #include "screen_menu_hardware.hpp"
 #include "screen_menu_hardware_tune.hpp"
+#include "screen_menu_snake_settings.hpp"
 #include "screen_menu_system.hpp"
 #include "screen_menu_statistics.hpp"
 #include "screen_menu_factory_reset.hpp"
@@ -134,39 +135,55 @@ template struct MI_SCREEN_CTOR<ScreenMenuFilamentSensors>;
 template struct MI_SCREEN_CTOR<ScreenMenuSTSCalibrations>;
 #endif
 
-#if PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_MINI()
-template struct MI_SCREEN_CTOR<ScreenMenuBedLevelCorrection>;
-#endif
+/**********************************************************************************************/
+MI_SNAKE_SETTINGS::MI_SNAKE_SETTINGS()
+    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+}
+
+void MI_SNAKE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuSnakeSettings>);
+}
 
 /**********************************************************************************************/
-// MI_SERIAL_PRINTING_SCREEN_ENABLE
-MI_SERIAL_PRINTING_SCREEN_ENABLE::MI_SERIAL_PRINTING_SCREEN_ENABLE()
-    : WI_ICON_SWITCH_OFF_ON_t(config_store().serial_print_screen_enabled.get(), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
-}
-void MI_SERIAL_PRINTING_SCREEN_ENABLE::OnChange(size_t old_index) {
-    config_store().serial_print_screen_enabled.set(!old_index);
+MI_SNAKE_TUNE_SETTINGS::MI_SNAKE_TUNE_SETTINGS()
+    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
 
-// * MI_TOOLHEAD_SETTINGS
-MI_TOOLHEAD_SETTINGS::MI_TOOLHEAD_SETTINGS()
-    : IWindowMenuItem(
-#if HAS_TOOLCHANGER()
-        prusa_toolchanger.is_toolchanger_enabled() ? _("Tools") : _("Toolhead"),
-#else
-        _("Printhead"),
+void MI_SNAKE_TUNE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuSnakeTuneSettings>);
+#if PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_MINI()
+    template struct MI_SCREEN_CTOR<ScreenMenuBedLevelCorrection>;
 #endif
-        nullptr,
-        is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
-}
 
-void MI_TOOLHEAD_SETTINGS::click(IWindowMenu &) {
-    ScreenFactory::Creator screen = ScreenFactory::Screen<ScreenToolheadDetail>;
-
-#if HAS_TOOLCHANGER()
-    if (prusa_toolchanger.is_toolchanger_enabled() && prusa_toolchanger.get_num_enabled_tools() > 1) {
-        screen = ScreenFactory::Screen<ScreenToolheadSettingsList>;
+    /**********************************************************************************************/
+    // MI_SERIAL_PRINTING_SCREEN_ENABLE
+    MI_SERIAL_PRINTING_SCREEN_ENABLE::MI_SERIAL_PRINTING_SCREEN_ENABLE()
+        : WI_ICON_SWITCH_OFF_ON_t(config_store().serial_print_screen_enabled.get(), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
     }
+    void MI_SERIAL_PRINTING_SCREEN_ENABLE::OnChange(size_t old_index) {
+        config_store().serial_print_screen_enabled.set(!old_index);
+    }
+
+    // * MI_TOOLHEAD_SETTINGS
+    MI_TOOLHEAD_SETTINGS::MI_TOOLHEAD_SETTINGS()
+        : IWindowMenuItem(
+#if HAS_TOOLCHANGER()
+            prusa_toolchanger.is_toolchanger_enabled() ? _("Tools") : _("Toolhead"),
+#else
+            _("Printhead"),
+#endif
+            nullptr,
+            is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+    }
+
+    void MI_TOOLHEAD_SETTINGS::click(IWindowMenu &) {
+        ScreenFactory::Creator screen = ScreenFactory::Screen<ScreenToolheadDetail>;
+
+#if HAS_TOOLCHANGER()
+        if (prusa_toolchanger.is_toolchanger_enabled() && prusa_toolchanger.get_num_enabled_tools() > 1) {
+            screen = ScreenFactory::Screen<ScreenToolheadSettingsList>;
+        }
 #endif
 
-    Screens::Access()->Open(screen);
-}
+        Screens::Access()->Open(screen);
+    }
