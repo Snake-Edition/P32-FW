@@ -284,13 +284,21 @@ bool PrusaToolChanger::tool_change(const uint8_t new_tool, tool_return_t return_
         // Raise Z before move
         float z_raise = 0; ///< Raise Z before toolchange by this amount
         if (z_lift > tool_change_lift_t::no_lift) {
+            if (return_type > tool_return_t::no_return) {
+                float min_z = current_position.z;
+
+                // also immediately account for clearance in the return move
+                min_z = std::max(min_z, return_position.z);
+
+                // Always raise above the printed model
+                min_z = std::max(min_z, planner.max_printed_z);
+
+                z_raise += (min_z - current_position.z);
+            }
+
             if (z_lift >= tool_change_lift_t::full_lift) {
                 // Do a small lift to avoid the workpiece for parking
-                z_raise = toolchange_settings.z_raise;
-            }
-            if (return_type > tool_return_t::no_return && (return_position.z - current_position.z) > 0) {
-                // also immediately account for clearance in the return move
-                z_raise += (return_position.z - current_position.z);
+                z_raise += toolchange_settings.z_raise;
             }
             if (levelling_active) {
                 z_raise += get_mbl_z_lift_height();
