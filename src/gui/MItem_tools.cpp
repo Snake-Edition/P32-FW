@@ -430,6 +430,19 @@ MI_TIME_NOW::MI_TIME_NOW()
     ChangeInformation(time_tools::get_time());
 }
 
+/* -===============================================(:>- */
+static const NumericInputConfig bright_spin_config = {
+    .min_value = 30,
+    .max_value = 150,
+};
+
+MI_BRIGHTNESS::MI_BRIGHTNESS()
+    : WiSpin(config_store().brightness.get(), bright_spin_config, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
+void MI_BRIGHTNESS::OnClick() {
+    config_store().brightness.set(GetVal());
+}
+/* -===============================================(:>- */
+
 /*****************************************************************************/
 static const NumericInputConfig skew_spin_config = {
     .min_value = -1,

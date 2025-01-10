@@ -554,6 +554,8 @@ struct CurrentStore
     StoreItem<int16_t, defaults::homing_sens_x, ItemFlag::calibrations | ItemFlag::common_misconfigurations, journal::hash("Homing Sens X")> homing_sens_x; // X axis homing sensitivity
     StoreItem<int16_t, defaults::homing_sens_y, ItemFlag::calibrations | ItemFlag::common_misconfigurations, journal::hash("Homing Sens Y")> homing_sens_y; // Y axis homing sensitivity
 
+    StoreItem<uint8_t, 100, ItemFlag::features, journal::hash("Display Brightness")> brightness;
+
     StoreItem<bool, true, ItemFlag::features, journal::hash("Stuck filament detection V2")> stuck_filament_detection;
 
     StoreItem<bool, false, ItemFlag::features, journal::hash("Stealth mode")> stealth_mode;
