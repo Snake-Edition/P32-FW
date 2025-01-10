@@ -37,8 +37,6 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 19. **Different languages**
 20. **Avoid display flashing**: Some displays flash with original FW.
 
-All settings are automatically saved to EEPROM and loaded on boot.
-
 ## Feed the Snake
 
 This FW is developed in spare time. If you like it, please
