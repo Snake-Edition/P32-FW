@@ -139,6 +139,7 @@ struct flash_planner_t {
     user_planner_settings_t settings;
 
     float z_position;
+    float max_printed_z;
 #if DISABLED(CLASSIC_JERK)
     float junction_deviation_mm;
 #endif
@@ -591,6 +592,8 @@ void resume_loop() {
             SBI(axis_homed, Z_AXIS);
         }
 
+        planner.max_printed_z = state_buf.planner.max_printed_z;
+
         // canceled objects
 #if ENABLED(CANCEL_OBJECTS)
         cancelable.canceled = state_buf.canceled_objects;
@@ -935,6 +938,7 @@ void panic_loop() {
         stepperZ.rms_current(POWER_PANIC_Z_CURRENT, 1);
         log_debug(PowerPanic, "Z MSCNT end: %d", stepperZ.MSCNT());
         state_buf.planner.z_position = current_position[Z_AXIS];
+        state_buf.planner.max_printed_z = planner.max_printed_z;
 
         // timer & progress state
         state_buf.progress.print_duration = print_job_timer.duration();
