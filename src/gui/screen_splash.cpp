@@ -171,26 +171,26 @@ screen_splash_data_t::screen_splash_data_t()
         // Calls network_initial_setup_wizard
         marlin_client::gcode("M1703 A");
     };
-
-    const screen_node screens[] {
-#if HAS_TRANSLATIONS()
-        { !LangEEPROM::getInstance().IsValid() ? ScreenFactory::Screen<ScreenMenuLanguages, ScreenMenuLanguages::Context::initial_language_selection> : nullptr },
-#endif
-#if HAS_TOUCH()
-            { touchscreen.is_enabled() && !touchscreen.is_hw_ok() ? ScreenFactory::Screen<PseudoScreenCallback, touch_error_callback> : nullptr },
-#endif // HAS_TOUCH
-
-            { !config_store().printer_setup_done.get() ? ScreenFactory::Screen<PseudoScreenCallback, pepa_callback> : nullptr },
-            { !config_store().printer_setup_done.get() ? ScreenFactory::Screen<ScreenPrinterSetup> : nullptr },
-            { !config_store().printer_setup_done.get() ? ScreenFactory::Screen<PseudoScreenCallback, network_callback> : nullptr },
-
 #if HAS_SELFTEST()
-        {
-            run_wizard ? ScreenFactory::Screen<ScreenMenuSTSWizard> : nullptr
-        }
+    if (run_wizard) {
+        Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<ScreenMenuSTSWizard>);
+    }
 #endif
-    };
-    Screens::Access()->PushBeforeCurrent(screens, screens + std::size(screens));
+    if (!config_store().printer_setup_done.get()) {
+        Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<PseudoScreenCallback, network_callback>);
+        Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<ScreenPrinterSetup>);
+        Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<PseudoScreenCallback, pepa_callback>);
+    }
+#if HAS_TOUCH()
+    if (touchscreen.is_enabled() && !touchscreen.is_hw_ok()) {
+        Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<PseudoScreenCallback, touch_error_callback>);
+    }
+#endif // HAS_TOUCH
+#if HAS_TRANSLATIONS()
+    if (!LangEEPROM::getInstance().IsValid()) {
+        Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<ScreenMenuLanguages, ScreenMenuLanguages::Context::initial_language_selection>);
+    }
+#endif
 }
 
 screen_splash_data_t::~screen_splash_data_t() {
