@@ -32,6 +32,7 @@
 #include "screen_menu_factory_reset.hpp"
 #include "screen_menu_error_test.hpp"
 #include "screen_menu_input_shaper.hpp"
+#include "screen_snake.hpp"
 #include <screen_menu_languages.hpp>
 #include <screen_menu_info.hpp>
 #include <screen_menu_control.hpp>
@@ -151,6 +152,14 @@ MI_SNAKE_TUNE_SETTINGS::MI_SNAKE_TUNE_SETTINGS()
 
 void MI_SNAKE_TUNE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuSnakeTuneSettings>);
+}
+
+MI_SNAKE::MI_SNAKE()
+    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_SNAKE::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<screen_snake_data_t>);
 }
 #if PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_MINI()
 template struct MI_SCREEN_CTOR<ScreenMenuBedLevelCorrection>;
