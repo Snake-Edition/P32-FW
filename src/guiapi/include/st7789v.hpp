@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <algorithm>
 
 enum {
     ST7789V_COLS = 240,
@@ -13,7 +14,19 @@ enum {
     ST7789V_BUFFER_SIZE = ST7789V_COLS * ST7789V_BUFF_ROWS * 2
 };
 
+extern uint8_t brightness; //< in percents
+
 inline uint16_t color_to_565(Color clr) {
+
+    /* -===============================================(:>- */
+    // dim the screen
+    const float dim = std::clamp(brightness, uint8_t(30), uint8_t(150)) / 100.f;
+    const uint8_t b = std::min(0xff, int(dim * (clr.raw & 0xff)));
+    const uint8_t g = std::min(0xff, int(dim * ((clr.raw & 0xff00) >> 8)));
+    const uint8_t r = std::min(0xff, int(dim * ((clr.raw & 0xff0000) >> 16)));
+    clr.raw = b | (g << 8) | (r << 16);
+    /* -===============================================(:>- */
+
     static constexpr uint8_t r_shift = (8 - 5);
     static constexpr uint8_t g_shift = (8 - 6) + r_shift;
     static constexpr uint8_t b_shift = (8 - 5) + g_shift;
