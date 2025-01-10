@@ -105,7 +105,7 @@ using MI_FOOTER_SETTINGS_ADV
     = MI_SCREEN<N_("Advanced"), class ScreenMenuFooterSettingsAdv, nullptr, is_hidden_t::dev>;
 
 using MI_EXPERIMENTAL_SETTINGS
-    = MI_SCREEN<N_("Experimental Settings"), class ScreenMenuExperimentalSettings, nullptr, is_hidden_t::dev>;
+    = MI_SCREEN<N_("Experimental Settings"), class ScreenMenuExperimentalSettings, nullptr, is_hidden_t::no>;
 
 /* -===============================================(:>- */
 
