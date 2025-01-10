@@ -80,6 +80,13 @@ screen_splash_data_t::screen_splash_data_t()
     text_progress.SetText(string_view_utf8::MakeRAM((uint8_t *)text_progress_buffer));
     progress.SetProgressPercent(0);
 
+#if ENABLED(POWER_PANIC)
+    // don't present any screen or wizard if there is a powerpanic pending
+    if (power_panic::state_stored()) {
+        return;
+    }
+#endif
+
 #if DEVELOPER_MODE()
     // don't present any screen or wizard
     return;
@@ -183,15 +190,7 @@ screen_splash_data_t::screen_splash_data_t()
         }
 #endif
     };
-
-#if ENABLED(POWER_PANIC)
-    // present none of the screens above if there is a powerpanic pending
-    if (!power_panic::state_stored()) {
-#endif
-        Screens::Access()->PushBeforeCurrent(screens, screens + std::size(screens));
-#if ENABLED(POWER_PANIC)
-    }
-#endif
+    Screens::Access()->PushBeforeCurrent(screens, screens + std::size(screens));
 }
 
 screen_splash_data_t::~screen_splash_data_t() {
