@@ -1,6 +1,8 @@
 #include "warning_type.hpp"
 
-PhasesWarning warning_type_phase(WarningType warning) {
+#include <bitset>
+
+constexpr PhasesWarning warning_type_phase_constexpr(WarningType warning) {
     switch (warning) {
 
     default:
@@ -43,3 +45,35 @@ PhasesWarning warning_type_phase(WarningType warning) {
         //
     }
 }
+
+PhasesWarning warning_type_phase(WarningType warning) {
+    return warning_type_phase_constexpr(warning);
+}
+
+static_assert([] {
+    std::bitset<CountPhases<PhasesWarning>()> used_phases;
+
+    // Check that each phase (except for Warning, which is handled separately) has a separate phase
+    // If this does not apply and we use
+    // In the future, we could possibly unify WarningType and PhasesWarning
+    for (size_t i = 0; i <= static_cast<size_t>(WarningType::_last); i++) {
+        const WarningType wt = static_cast<WarningType>(i);
+        const PhasesWarning ph = warning_type_phase_constexpr(wt);
+        const auto phi = std::to_underlying(ph);
+
+        if (ph != PhasesWarning::Warning && used_phases.test(phi)) {
+            std::abort();
+        }
+
+        used_phases.set(phi);
+    }
+
+    // Check that every phase is used by some warning - otherwise it's pointless
+    for (size_t i = 0; i < CountPhases<PhasesWarning>(); i++) {
+        if (!used_phases.test(i)) {
+            std::abort();
+        }
+    }
+
+    return true;
+}());
