@@ -42,6 +42,11 @@ constexpr PhasesWarning warning_type_phase_constexpr(WarningType warning) {
         return PhasesWarning::FailedToReachChamberTemperature;
 #endif
 
+#if ENABLED(DETECT_PRINT_SHEET)
+    case WarningType::SteelSheetNotDetected:
+        return PhasesWarning::SteelSheetNotDetected;
+#endif
+
         //
     }
 }
