@@ -34,6 +34,9 @@
   #include "../feature/power.h"
 #endif
 
+extern uint8_t cold_mode;
+const constexpr uint8_t cold_mode_temp = 30;
+
 
 #if ENABLED(MODULAR_HEATBED)
   #include "modular_heatbed.h"
@@ -709,7 +712,8 @@ class Temperature {
 
     #if HOTENDS
 
-      static void setTargetHotend(const int16_t celsius, const uint8_t E_NAME) {
+      static void setTargetHotend(int16_t celsius, const uint8_t E_NAME) {
+        if (cold_mode && celsius < cold_mode_temp) celsius = cold_mode_temp;
         const uint8_t ee = HOTEND_INDEX;
         const int16_t new_temp = _MIN(celsius, temp_range[ee].maxtemp - HEATER_MAXTEMP_SAFETY_MARGIN);
 
@@ -803,7 +807,8 @@ class Temperature {
         static inline void start_watching_bed() {}
       #endif
 
-      static void setTargetBed(const int16_t celsius) {
+      static void setTargetBed(int16_t celsius) {
+        if (cold_mode && celsius < cold_mode_temp) celsius = cold_mode_temp;
         #if ENABLED(AUTO_POWER_CONTROL)
           if (celsius) {
             powerManager.power_on();
