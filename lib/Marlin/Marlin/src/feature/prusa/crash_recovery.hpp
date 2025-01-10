@@ -298,7 +298,7 @@ public:
         orig_state = crash_s.is_active();
         if (orig_state) {
             // Crash state shouldn't be changed while moving.
-            assert(!planner.processing());
+            assert(!planner.processing() || planner.draining());
             crash_s.deactivate();
         }
     }
