@@ -1,7 +1,11 @@
 #include "probe_analysis.hpp"
-#include <scope_guard.hpp>
+#include "scope_guard.hpp"
 #include "metric.h"
+#include "timing.h"
 #include <printers.h>
+#ifdef PROBE_ANALYSIS_WITH_METRICS
+    #include <Marlin.h>
+#endif
 
 using namespace buddy;
 
@@ -13,7 +17,7 @@ void ProbeAnalysisBase::StoreSample(float currentZ, float currentLoad) {
     if (analysisInProgress) {
         return;
     }
-    window.push_back({ currentZ, currentLoad });
+    window.push_back({ ticks_us(), currentZ, currentLoad });
 
 #if !defined(UNITTESTS)
     lastSampleTimestamp = ticks_us();
@@ -68,6 +72,67 @@ ProbeAnalysisBase::Result ProbeAnalysisBase::Analyse() {
     features.r2_30ms = CalculateSegmentedR2s(features, 0.030);
     features.r2_50ms = CalculateSegmentedR2s(features, 0.050);
     features.r2_60ms = CalculateSegmentedR2s(features, 0.060);
+
+#ifdef PROBE_ANALYSIS_WITH_METRICS
+    {
+        // log the load line to metrics
+        METRIC_DEF(probe_ll_metric, "probe_load_line", METRIC_VALUE_CUSTOM, 0, METRIC_ENABLED);
+
+        std::array<std::tuple<uint32_t, float>, 6> load_line_points;
+
+        auto timestamp_for_time = [this](Time time) -> uint32_t {
+            return ClosestSample(time, SearchDirection::Both)->timestamp;
+        };
+
+        // analysis start
+        {
+            idle(true);
+            auto time = TimeOfSample(features.analysisStart);
+            auto load = features.beforeCompressionLine.GetY(time);
+            load_line_points.at(0) = { timestamp_for_time(time), load };
+        }
+
+        // compression start
+        {
+            auto time = features.compressionStartTime;
+            auto load = features.compressionLine.GetY(time);
+            load_line_points.at(1) = { timestamp_for_time(time), load };
+        }
+
+        // compression end
+        {
+            auto time = features.compressionEndTime;
+            auto load = features.compressedLine.GetY(time);
+            load_line_points.at(2) = { timestamp_for_time(time), load };
+        }
+
+        // decompression start
+        {
+            auto time = features.decompressionStartTime;
+            auto load = features.compressedLine.GetY(time);
+            load_line_points.at(3) = { timestamp_for_time(time), load };
+        }
+
+        // decompression end
+        {
+            auto time = features.decompressionEndTime;
+            auto load = features.decompressionLine.GetY(time);
+            load_line_points.at(4) = { timestamp_for_time(time), load };
+        }
+
+        // analysis end
+        {
+            auto time = TimeOfSample(features.analysisEnd);
+            auto load = features.afterDecompressionLine.GetY(time);
+            load_line_points.at(5) = { timestamp_for_time(time), load };
+        }
+
+        for (auto [timestamp, load] : load_line_points) {
+            idle(true);
+            metric_record_custom_at_time(&probe_ll_metric, timestamp, " v=%0.3f", (double)load);
+        }
+    }
+#endif
 
     // Check all features are within expected range
     {
@@ -125,6 +190,10 @@ ProbeAnalysisBase::Sample ProbeAnalysisBase::ClosestSample(Time time, SearchDire
 
     case SearchDirection::Forward:
         index = static_cast<size_t>(std::ceil(static_cast<float>(time) / samplingInterval));
+        break;
+
+    case SearchDirection::Both:
+        index = static_cast<size_t>(std::round(static_cast<float>(time) / samplingInterval));
         break;
 
     default:

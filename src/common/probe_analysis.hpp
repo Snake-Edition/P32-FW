@@ -55,6 +55,8 @@ public:
 
     /// Entry of the moving window used for analysis.
     struct Record {
+        uint32_t timestamp;
+
         /// Extruder's Z coordinate [mm]
         float z;
 
@@ -224,6 +226,7 @@ public:
     enum class SearchDirection {
         Backward,
         Forward,
+        Both,
     };
 
     /// Find the closest sample for given time
