@@ -57,6 +57,9 @@ enum class WarningType : uint32_t {
     ChamberOverheatingTemperature,
     ChamberCriticalTemperature,
 #endif
+#if HAS_CEILING_CLEARANCE()
+    CeilingClearanceViolation,
+#endif
     AccelerometerCommunicationFailed,
     _last = AccelerometerCommunicationFailed,
 };

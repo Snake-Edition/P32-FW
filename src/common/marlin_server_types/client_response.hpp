@@ -33,6 +33,7 @@
 #include <option/xl_enclosure_support.h>
 #include <option/has_chamber_api.h>
 #include <option/has_uneven_bed_prompt.h>
+#include <option/has_ceiling_clearance.h>
 #include <common/hotend_type.hpp>
 #include <device/board.h>
 
@@ -420,6 +421,10 @@ enum class PhasesWarning : PhaseUnderlyingType {
 
 #if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
     NozzleCleaningFailed,
+#endif
+
+#if HAS_CEILING_CLEARANCE()
+    CeilingClearanceViolation,
 #endif
 
     /// Shown when the M334 is attempting to change metrics configuration, prompting the user to confirm the change (security reasons)
@@ -868,6 +873,9 @@ class ClientResponses {
 #endif
 #if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
             { PhasesWarning::NozzleCleaningFailed, { Response::Retry, Response::Abort } },
+#endif
+#if HAS_CEILING_CLEARANCE()
+            { PhasesWarning::CeilingClearanceViolation, { Response::Continue, Response::Abort } },
 #endif
             { PhasesWarning::MetricsConfigChangePrompt, { Response::Yes, Response::No } },
     };

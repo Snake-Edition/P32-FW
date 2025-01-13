@@ -558,6 +558,11 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
     case WarningType::ChamberCriticalTemperature:
         return ErrCode::ERR_TEMPERATURE_CHAMBER_CRITICAL_TEMP;
 #endif
+
+#if HAS_CEILING_CLEARANCE()
+    case WarningType::CeilingClearanceViolation:
+        return ErrCode::ERR_MECHANICAL_CEILING_CLEARANCE_VIOLATION;
+#endif
     }
 
     assert(false);

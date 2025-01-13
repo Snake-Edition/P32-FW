@@ -45,6 +45,11 @@ constexpr PhasesWarning warning_type_phase_constexpr(WarningType warning) {
         return PhasesWarning::SteelSheetNotDetected;
 #endif
 
+#if HAS_CEILING_CLEARANCE()
+    case WarningType::CeilingClearanceViolation:
+        return PhasesWarning::CeilingClearanceViolation;
+#endif
+
         //
     }
 }
