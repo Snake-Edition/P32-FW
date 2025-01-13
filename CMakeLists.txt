@@ -119,7 +119,7 @@ endif()
 
 target_include_directories(BuddyHeaders INTERFACE include)
 
-target_link_libraries(BuddyHeaders INTERFACE FreeRTOS::FreeRTOS)
+target_link_libraries(BuddyHeaders INTERFACE FreeRTOS::FreeRTOS FreeRTOS::CMSIS)
 
 # Define printer type and version
 set(PRINTER_VERSION "1") # default version
