@@ -412,6 +412,11 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
   planner.synchronize();          // Wait for planner moves to finish!
 
+  // If we are homing Z, assume that max_printed_z is zero (the Z homing couldn't be safe otherwise)
+  if(Z && Z_HOME_DIR < 0) {
+    planner.max_printed_z = 0;
+  }
+
   /**
    * @brief Set to true when homing fails.
    * It is used to skip all motion until stepper currents
