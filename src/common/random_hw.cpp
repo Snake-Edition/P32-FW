@@ -44,6 +44,6 @@ RAND_DECL bool rand_u_secure(uint32_t *result) {
 }
 
 /// Replacement of the original std::rand that was using a software RNG and dynamic allocation
-RAND_DECL int __wrap_rand() {
+RAND_DECL __attribute__((used)) int __wrap_rand() {
     return int(rand_u() & INT_MAX);
 }
