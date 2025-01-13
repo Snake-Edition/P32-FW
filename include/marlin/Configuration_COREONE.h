@@ -1153,6 +1153,13 @@
     #define Z_MAX_POS Z_SIZE
 #endif
 
+/// How much space there is between the bed and the ceiling for Z = 0 on CoreXY printers
+/// If defined, the printer will check max_printed_z and if a move would result in the model getting above this clearance,
+/// it will prompt the user
+/// Requires HAS_CEILING_CLEARANCE()
+// Note: There is actually a more space to the ceiling on C1, but there is also the toolhead cable swinging around, so let's be a bit conservative
+#define Z_CEILING_CLEARANCE 100
+
 /// Distance between start of the axis to the position where ordinary movement is allowed
 #define X_HOME_GAP 0
 #define Y_HOME_GAP 0
