@@ -22,10 +22,10 @@ _ssize_t _write_r(struct _reent *, int, const void *, size_t) {
     hal_panic();
 }
 
-int _kill_r(struct _reent *, int, int) {
+int __attribute__((used)) _kill_r(struct _reent *, int, int) {
     hal_panic();
 }
 
-int _getpid_r(struct _reent *) {
+int __attribute__((used)) _getpid_r(struct _reent *) {
     hal_panic();
 }
