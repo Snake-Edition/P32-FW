@@ -400,9 +400,6 @@ enum class PhasesWarning : PhaseUnderlyingType {
 
     ProbingFailed,
 
-    /// Shown when the M334 is attempting to change metrics configuration, prompting the user to confirm the change (security reasons)
-    MetricsConfigChangePrompt,
-
 #if ENABLED(DETECT_PRINT_SHEET)
     /// Shown on failed print sheet detection. Custom handling.
     SteelSheetNotDetected,
@@ -421,8 +418,14 @@ enum class PhasesWarning : PhaseUnderlyingType {
     BedUnevenAlignmentPrompt,
 #endif
 
+#if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
     NozzleCleaningFailed,
-    _last = NozzleCleaningFailed,
+#endif
+
+    /// Shown when the M334 is attempting to change metrics configuration, prompting the user to confirm the change (security reasons)
+    MetricsConfigChangePrompt,
+
+    _last = MetricsConfigChangePrompt,
 };
 constexpr inline ClientFSM client_fsm_from_phase(PhasesWarning) { return ClientFSM::Warning; }
 
@@ -851,7 +854,6 @@ class ClientResponses {
             { PhasesWarning::EnclosureFilterExpiration, { Response::Ignore, Response::Postpone5Days, Response::Done } },
 #endif
             { PhasesWarning::ProbingFailed, { Response::Yes, Response::No } },
-            { PhasesWarning::MetricsConfigChangePrompt, { Response::Yes, Response::No } },
 #if ENABLED(DETECT_PRINT_SHEET)
             { PhasesWarning::SteelSheetNotDetected, { Response::Retry, Response::Ignore } },
 #endif
@@ -864,7 +866,10 @@ class ClientResponses {
 #if HAS_UNEVEN_BED_PROMPT()
             { PhasesWarning::BedUnevenAlignmentPrompt, { Response::Yes, Response::No } },
 #endif
+#if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
             { PhasesWarning::NozzleCleaningFailed, { Response::Retry, Response::Abort } },
+#endif
+            { PhasesWarning::MetricsConfigChangePrompt, { Response::Yes, Response::No } },
     };
 
 #if HAS_COLDPULL()
