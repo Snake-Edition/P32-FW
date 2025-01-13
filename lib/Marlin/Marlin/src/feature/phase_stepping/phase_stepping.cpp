@@ -391,7 +391,7 @@ void phase_stepping::enable_phase_stepping(AxisEnum axis_num) {
         return;
     }
 
-    assert(!planner.has_blocks_queued() && !PreciseStepping::processing());
+    assert(planner.draining() || (!planner.has_blocks_queued() && !PreciseStepping::processing()));
 
     // We know that PHASE_STEPPING is enabled only on TMC2130 boards
     TMCStepperType &stepper = stepper_axis(axis_num);
