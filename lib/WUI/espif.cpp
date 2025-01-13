@@ -740,7 +740,7 @@ static void uart_input(uint8_t *data, size_t size, struct netif *netif) {
                     rx_read = 0;
                     state = PacketData;
                 } else {
-                    log_warning(ESPIF, "pbuf_alloc_rx() failed, dropping packet");
+                    log_warning(ESPIF, "pbuf_alloc_rx(%zu) failed, dropping packet", static_cast<size_t>(rx_len));
                     rx_read = 0;
                     state = PacketDataThrowaway;
                 }
