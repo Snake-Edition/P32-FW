@@ -109,6 +109,11 @@
   #include <feature/emergency_stop/emergency_stop.hpp>
 #endif
 
+#include <option/has_ceiling_clearance.h>
+#if HAS_CEILING_CLEARANCE()
+  #include <feature/ceiling_clearance/ceiling_clearance.hpp>
+#endif
+
 #include "configuration_store.h"
 
 constexpr const int32_t MIN_MSTEPS_PER_SEGMENT = MIN_STEPS_PER_SEGMENT * PLANNER_STEPS_MULTIPLIER;
@@ -2106,6 +2111,15 @@ bool Planner::buffer_segment(const abce_pos_t &abce
   , const uint8_t extruder/*=active_extruder*/
   , const PlannerHints &hints/*=PlannerHints()*/
 ) {
+
+#if defined(Z_CEILING_CLEARANCE) != HAS_CEILING_CLEARANCE()
+  #error Z_CEILING_CLEARANCE must be defined only if HAS_CEILING_CLEARANCE()
+#endif
+
+#if HAS_CEILING_CLEARANCE()
+  // ! Important: call before checking for draining_buffer
+  buddy::check_ceiling_clearance(abce);
+#endif
 
   // If we are aborting, do not accept queuing of movements
   if (draining_buffer || PreciseStepping::stopping()) return false;

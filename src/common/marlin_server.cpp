@@ -156,6 +156,11 @@
     #include <feature/emergency_stop/emergency_stop.hpp>
 #endif
 
+#include <option/has_ceiling_clearance.h>
+#if HAS_CEILING_CLEARANCE()
+    #include <feature/ceiling_clearance/ceiling_clearance.hpp>
+#endif
+
 #include <wui.h>
 #include <feature/print_status_message/print_status_message_mgr.hpp>
 
@@ -1900,6 +1905,10 @@ static void _server_print_loop(void) {
             crash_s.set_state(Crash_s::PRINTING);
         }
 #endif // ENABLED(CRASH_RECOVERY)
+
+#if HAS_CEILING_CLEARANCE()
+        buddy::reenable_ceiling_clearance_warning();
+#endif
 
 #if ENABLED(CANCEL_OBJECTS)
         cancelable.reset();

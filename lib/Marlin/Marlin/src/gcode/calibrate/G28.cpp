@@ -100,6 +100,11 @@
 #include <marlin_server.hpp>
 #include <feature/print_status_message/print_status_message_guard.hpp>
 
+#include <option/has_ceiling_clearance.h>
+#if HAS_CEILING_CLEARANCE()
+  #include <feature/ceiling_clearance/ceiling_clearance.hpp>
+#endif
+
 #if ENABLED(QUICK_HOME)
 
   static void quick_home_xy() {
@@ -363,6 +368,10 @@ void GcodeSuite::G28() {
 bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   PrintStatusMessageGuard statusGuard(PrintStatusMessage::make<PrintStatusMessage::homing>({}));
   HomingReporter reporter;
+
+  #if HAS_CEILING_CLEARANCE()
+  buddy::CeilingClearanceCheckDisabler ccd;
+  #endif
 
   DEBUG_SECTION(log_G28, "G28", DEBUGGING(LEVELING));
   if (DEBUGGING(LEVELING)) log_machine_info();
