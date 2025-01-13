@@ -503,10 +503,8 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
     case WarningType::ModBedMCUMaxTemp:
         return ErrCode::CONNECT_MOD_BED_MCU_MAX_TEMP;
 #endif
-#if HAS_BED_PROBE
     case WarningType::ProbingFailed:
         return ErrCode::CONNECT_PROBING_FAILED;
-#endif
 #if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
     case WarningType::NozzleCleaningFailed:
         return ErrCode::CONNECT_NOZZLE_CLEANING_FAILED;

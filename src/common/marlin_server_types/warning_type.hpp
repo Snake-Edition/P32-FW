@@ -28,9 +28,7 @@ enum class WarningType : uint32_t {
 #if HAS_MODULARBED()
     ModBedMCUMaxTemp,
 #endif
-#if HAS_BED_PROBE
     ProbingFailed,
-#endif
 #if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
     NozzleCleaningFailed,
 #endif

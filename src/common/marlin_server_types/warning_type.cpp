@@ -12,10 +12,8 @@ constexpr PhasesWarning warning_type_phase_constexpr(WarningType warning) {
     case WarningType::MetricsConfigChangePrompt:
         return PhasesWarning::MetricsConfigChangePrompt;
 
-#if HAS_BED_PROBE
     case WarningType::ProbingFailed:
         return PhasesWarning::ProbingFailed;
-#endif
 
 #if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
     case WarningType::NozzleCleaningFailed:
