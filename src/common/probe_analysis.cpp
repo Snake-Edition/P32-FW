@@ -1,6 +1,7 @@
 #include "probe_analysis.hpp"
 #include <scope_guard.hpp>
 #include "metric.h"
+#include <printers.h>
 
 using namespace buddy;
 
@@ -361,7 +362,11 @@ float ProbeAnalysisBase::InterpolateFinalZCoordinate(Features &features) {
     float loadAtDecompressionEnd = features.decompressionLine.GetY(features.decompressionEndTime);
     float middleTimestamp = features.decompressionLine.GetTime(loadAtDecompressionEnd - 120 + 70);
     float zDecompressionMiddle = features.riseLine.GetY(middleTimestamp);
-    return (zDecompressionEnd + zDecompressionMiddle) / 2 + 0.01f;
+    return (zDecompressionEnd + zDecompressionMiddle) / 2
+#if PRINTER_IS_PRUSA_COREONE()
+        + 0.01f
+#endif
+        ;
 }
 
 int ProbeAnalysisBase::Classify(Features &features) {
