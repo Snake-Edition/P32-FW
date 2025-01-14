@@ -59,7 +59,6 @@ public:
 
     bool IsOpenPending() const { return creator_node.creator.func != nullptr; }
 
-    void PushBeforeCurrent(const ScreenFactory::Creator screen_creator);
     void PushBeforeCurrent(screen_node screen_creator);
     void PushBeforeCurrent(const screen_node *begin, const screen_node *end); // push in normal order, skips nullptr
 
