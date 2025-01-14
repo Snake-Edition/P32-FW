@@ -15,11 +15,13 @@
 namespace leds {
 
 // names D1 D21 and D10 are from eletric schema
-enum class index { backlight,
-    l0_D2,
+enum class index {
+    l0_D10,
     l1_D21,
-    l2_D10,
-    count_ };
+    l2_D2,
+    backlight,
+    count_
+};
 
 /**
  * @brief count of LEDs
@@ -58,9 +60,9 @@ void SetBrightness(unsigned percent);
 void ForceRefresh(size_t cnt);
 
 // TODO rename afte LED have a meaning (represent a function like print status)
-inline void Set0th(ColorRGBW clr) { SetNth(clr, index::l0_D2); }
+inline void Set0th(ColorRGBW clr) { SetNth(clr, index::l0_D10); }
 inline void Set1st(ColorRGBW clr) { SetNth(clr, index::l1_D21); }
-inline void Set2nd(ColorRGBW clr) { SetNth(clr, index::l2_D10); }
+inline void Set2nd(ColorRGBW clr) { SetNth(clr, index::l2_D2); }
 
 /**
  * @brief Called from power panic module to quickly turn off leds from AC fault task

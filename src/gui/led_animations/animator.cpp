@@ -60,7 +60,7 @@ void AnimatorBase::pause_animator() {
     save_run_state(run);
 }
 AnimatorLCD &Animator_LCD_leds() {
-    static AnimatorLCD animator({ 1, 3 });
+    static AnimatorLCD animator({ 0, 2 });
     return animator;
 }
 bool AnimatorBase::animator_state() {

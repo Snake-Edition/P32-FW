@@ -230,7 +230,7 @@ TEST_CASE("LEDS") {
 
         // after neopixel receives 24 bits, they are stored, than rest is shifted out
         // this behavior mirrors order of LEDs
-        static constexpr const char *input_data = "00000000 00000000 00000000  11111111 00000000 00000000  00000000 11111111 00000000  00000000 00000000 11111111";
+        static constexpr const char *input_data = "00000000 00000000 11111111  00000000 11111111 00000000  11111111 00000000 00000000  00000000 00000000 00000000";
         std::string result_string = string_extend(input_data, T1H, T1L, T0H, T0L);
         led_test<T1H, T1L, T0H, T0L, END_PULSE, 4>(colors, result_string);
     }

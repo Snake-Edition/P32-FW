@@ -178,19 +178,19 @@ protected:
     std::bitset<bitfield_size> led_bitset;
 
     void setHi(size_t &rBitfieldPos) {
-        rBitfieldPos += T1L; // no need to set false
-
         for (size_t i = 0; i < T1H; ++i) {
             led_bitset[rBitfieldPos++] = true;
         }
+
+        rBitfieldPos += T1L; // no need to set false
     }
 
     void setLo(size_t &rBitfieldPos) {
-        rBitfieldPos += T0L; // no need to set false
-
         for (size_t i = 0; i < T0H; ++i) {
             led_bitset[rBitfieldPos++] = true;
         }
+
+        rBitfieldPos += T0L; // no need to set false
     }
 
     /**
@@ -208,19 +208,13 @@ size_t LedsSPI_base<COUNT, T1H, T1L, T0H, T0L>::setBitset() {
         return 0; // nothing to set
     }
 
-    // Optimization via leds_to_rewrite does not work correctly
-    // thanks to LedsSPI_MSB inverting the indexing and breaking the daisy-chaining.
-    // As a quick fix, we always update everything
-    // BFW-5067 - Someone please fix this :(
-    this->leds_to_rewrite = COUNT;
-
     led_bitset.reset(); // clear bit array
 
     size_t bitfield_position = 0;
 
     for (size_t i = 0; i < this->leds_to_rewrite; ++i) {
         std::bitset<24> bits_of_color = this->leds[i];
-        for (size_t bit = 0; bit < 24; ++bit) {
+        for (int8_t bit = 23; bit >= 0; --bit) {
             bits_of_color[bit] ? setHi(bitfield_position) : setLo(bitfield_position); // bitfield_position passed by reference
         }
     }
@@ -228,51 +222,6 @@ size_t LedsSPI_base<COUNT, T1H, T1L, T0H, T0L>::setBitset() {
     this->leds_to_rewrite = 0;
     return bitfield_position;
 }
-
-/**
- * @brief child of LedsSPI_base handling LSB data conversion
- *
- * @tparam COUNT count of leds
- * @tparam T1H   lenght of high bus status of converted logical "1" bit value
- * @tparam T1L   lenght of low  bus status of converted logical "1" bit value
- * @tparam T0H   lenght of high bus status of converted logical "0" bit value
- * @tparam T0L   lenght of low  bus status of converted logical "0" bit value
- * @tparam RESET_PULSE number of pulses needed to be in low state to write signals on LEDs
- */
-// This class is not used at all and should probably be thrown out of the codee -> BFW-5067
-template <size_t COUNT, size_t T1H, size_t T1L, size_t T0H, size_t T0L, size_t RESET_PULSE>
-class LedsSPI_LSB : public LedsSPI_base<COUNT, T1H, T1L, T0H, T0L> {
-protected:
-    uint8_t send_buff[(LedsSPI_base<COUNT, T1H, T1L, T0H, T0L>::bitfield_size + RESET_PULSE + 7) / 8];
-
-    /**
-     * @brief ready data to send
-     *        call exactly once before sending data to LEDs via SPI
-     *
-     * @return size_t number of bytes to be send
-     */
-    size_t bitfieldToSendBuff() {
-        size_t bit_count = this->setBitset();
-        size_t bit_read_index = 0; // from bitset
-
-        // write reset pulse
-        for (size_t i = 0; i < (RESET_PULSE + 7) / 8; ++i) {
-            send_buff[i] = 0;
-        }
-
-        // clear last byte
-        send_buff[((bit_count + RESET_PULSE + 7) / 8) - 1] = 0;
-
-        for (; bit_read_index < bit_count; ++bit_read_index) {
-            size_t bit_write_index = bit_read_index + RESET_PULSE;
-            uint8_t &r_target_byte = send_buff[bit_write_index / 8];
-            uint8_t target_bit = 1 << (bit_write_index % 8);
-            r_target_byte = this->led_bitset[bit_read_index] ? r_target_byte | target_bit : r_target_byte & (~target_bit);
-        }
-
-        return (bit_count + RESET_PULSE + 7) / 8;
-    };
-};
 
 /**
  * @brief child of LedsSPI_base handling MSB data conversion
@@ -306,17 +255,10 @@ protected:
             send_buff[i] = 0;
         }
 
-        size_t bit_read_index = bit_count - 1;
-        size_t bit_write_index = 0;
-
-        // This function reverses completely everything,
-        // which screws up neopixel driver indexing (doesn't correspond with the daisy-chain order)
-        // BFW-5067
-
-        for (; bit_write_index < bit_count; ++bit_write_index, --bit_read_index) {
-            uint8_t &r_target_byte = send_buff[bit_write_index / 8];
-            uint8_t target_bit = 1 << (7 - (bit_write_index % 8));
-            r_target_byte = this->led_bitset[bit_read_index] ? r_target_byte | target_bit : r_target_byte & (~target_bit);
+        for (size_t bit_index = 0; bit_index < bit_count; ++bit_index) {
+            const uint8_t target_bit = 1 << (7 - (bit_index % 8));
+            uint8_t &r_target_byte = send_buff[bit_index / 8];
+            r_target_byte = this->led_bitset[bit_index] ? r_target_byte | target_bit : r_target_byte & (~target_bit);
         }
 
         return (bit_count + RESET_PULSE + 7) / 8;
