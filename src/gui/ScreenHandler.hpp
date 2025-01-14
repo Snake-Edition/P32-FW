@@ -108,7 +108,6 @@ public:
     bool GetFanChceck();
 
     static void Init(screen_node screen_creator);
-    static void Init(const screen_node *begin, const screen_node *end); // init in normal order, skips nullptr
 
     static Screens *Access();
 

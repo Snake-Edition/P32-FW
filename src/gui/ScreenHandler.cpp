@@ -30,27 +30,6 @@ Screens::r_iter Screens::rfind_enabled_node(r_iter begin, r_iter end) {
     return std::find_if(r_iter(end), r_iter(begin), [](const screen_node &node) { return node.creator != nullptr; });
 }
 
-void Screens::Init(const screen_node *begin, const screen_node *end) {
-    if (size_t(end - begin) > MAX_SCREENS) {
-        return;
-    }
-    if (begin == end) {
-        return;
-    }
-
-    // find last enabled creator
-    iter node = find_enabled_node(begin, end);
-    if (node == end) {
-        return;
-    }
-
-    // have creator
-    Init(*node);
-
-    // Must push rest of enabled creators on stack
-    Access()->PushBeforeCurrent(node + 1, end); // node + 1 excludes node
-}
-
 void Screens::EnableMenuTimeout() {
     ResetTimeout();
     menu_timeout_enabled = true;
