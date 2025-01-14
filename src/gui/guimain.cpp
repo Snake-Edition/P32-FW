@@ -210,11 +210,8 @@ void gui_run(void) {
     gui::knob::RegisterHeldLeftAction(TakeAScreenshot);
     gui::knob::RegisterLongPressScreenAction([]() { Screens::Access()->Open(ScreenFactory::Screen<ScreenMoveZ>); });
 
-    screen_node screen_initializer[] {
-        ScreenFactory::Screen<screen_splash_data_t>, // splash
-        ScreenFactory::Screen<screen_home_data_t> // home
-    };
-    Screens::Init(screen_initializer, screen_initializer + (sizeof(screen_initializer) / sizeof(screen_initializer[0])));
+    Screens::Init(ScreenFactory::Screen<screen_splash_data_t>);
+    Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<screen_home_data_t>);
 
     // TIMEOUT variable getting value from EEPROM when EEPROM interface is initialized
     if (config_store().menu_timeout.get()) {
