@@ -161,8 +161,4 @@ private:
     void InnerLoop(); // call inside Loop of this class
 
     bool menu_timeout_enabled = true;
-    using r_iter = std::reverse_iterator<const screen_node *>;
-    static r_iter rfind_enabled_node(r_iter begin, r_iter end); // reverse find method
-    using iter = const screen_node *;
-    static iter find_enabled_node(iter begin, iter end); // normal find method
 };

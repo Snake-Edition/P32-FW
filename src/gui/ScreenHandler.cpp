@@ -22,14 +22,6 @@ void Screens::Init(screen_node screen_creator) {
     instance = &s;
 }
 
-Screens::iter Screens::find_enabled_node(iter begin, iter end) {
-    return std::find_if(begin, end, [](const screen_node &node) { return node.creator != nullptr; });
-}
-
-Screens::r_iter Screens::rfind_enabled_node(r_iter begin, r_iter end) {
-    return std::find_if(r_iter(end), r_iter(begin), [](const screen_node &node) { return node.creator != nullptr; });
-}
-
 void Screens::EnableMenuTimeout() {
     ResetTimeout();
     menu_timeout_enabled = true;
