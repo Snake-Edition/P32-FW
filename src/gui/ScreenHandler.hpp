@@ -60,7 +60,6 @@ public:
     bool IsOpenPending() const { return creator_node.creator.func != nullptr; }
 
     void PushBeforeCurrent(screen_node screen_creator);
-    void PushBeforeCurrent(const screen_node *begin, const screen_node *end); // push in normal order, skips nullptr
 
     /// Closes currently open screen on the stack
     void Close();

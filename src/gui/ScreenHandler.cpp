@@ -39,29 +39,6 @@ void Screens::DisableMenuTimeout() {
 }
 bool Screens::GetMenuTimeout() { return menu_timeout_enabled; }
 
-// Push enabled creators on stack - in reverted order
-// not a bug non reverting method must use reverse iterators
-void Screens::PushBeforeCurrent(const screen_node *begin, const screen_node *end) {
-    if (size_t(end - begin) > MAX_SCREENS) {
-        return;
-    }
-    if (begin == end) {
-        return;
-    }
-
-    // initialize reverse iterators
-    r_iter r_begin(begin);
-    r_iter r_node(end + 1); // point behind end, first call of "r_node + 1" will revert this
-
-    do {
-        r_node = rfind_enabled_node(r_begin, r_node + 1);
-        if (r_node != r_begin) {
-            (*stack_iterator) = *r_node;
-            ++stack_iterator;
-        }
-    } while (r_node != r_begin);
-}
-
 Screens *Screens::Access() {
     if (!instance) {
         bsod("Accessing uninitialized screen");
