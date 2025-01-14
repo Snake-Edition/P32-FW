@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:STMicroelectronics/stm32f4xx-hal-driver.git
+	branch = v1.8.3
+	commit = c2e1406d7ea4b73aa42b98ddeb75a8670b1a5a16
+	parent = 31908d481f90befddf1fbde92c972883ff80cf10
+	method = merge
+	cmdver = 0.4.9
