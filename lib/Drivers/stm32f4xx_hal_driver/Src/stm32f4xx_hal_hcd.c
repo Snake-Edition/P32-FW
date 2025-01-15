@@ -1611,7 +1611,7 @@ static void HCD_HC_OUT_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
     hhcd->hc[chnum].state = HC_XACTERR;
     (void)USB_HC_Halt(hhcd->Instance, chnum);
   }
-  else if (__HAL_HCD_GET_CH_FLAG(hhcd, chnum, USB_OTG_HCINT_ACK))
+  else if (__HAL_HCD_GET_CH_FLAG(hhcd, chnum, USB_OTG_HCINT_ACK) && (USBx_HC(chnum)->HCINTMSK & USB_OTG_HCINTMSK_ACKM))
   {
     __HAL_HCD_CLEAR_HC_INT(chnum, USB_OTG_HCINT_ACK);
 

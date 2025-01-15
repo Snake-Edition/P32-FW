@@ -1724,8 +1724,16 @@ HAL_StatusTypeDef USB_HC_Init(USB_OTG_GlobalTypeDef *USBx, uint8_t ch_num,
 #if defined (USB_OTG_HS)
         if (USBx == USB_OTG_HS)
         {
-          USBx_HC((uint32_t)ch_num)->HCINTMSK |= USB_OTG_HCINTMSK_NYET |
-                                                 USB_OTG_HCINTMSK_ACKM;
+          if (speed == USB_OTG_SPEED_HIGH)
+          {
+            USBx_HC((uint32_t)ch_num)->HCINTMSK |= USB_OTG_HCINTMSK_NYET |
+                                                   USB_OTG_HCINTMSK_ACKM;
+          }
+          else
+          {
+            // Avoid overload of ACK interrupts when in Full Speed mode on HS peripheral
+            USBx_HC((uint32_t)ch_num)->HCINTMSK |= USB_OTG_HCINTMSK_NYET;
+          }
         }
 #endif /* defined (USB_OTG_HS) */
       }
