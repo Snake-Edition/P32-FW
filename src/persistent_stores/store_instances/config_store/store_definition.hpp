@@ -563,11 +563,6 @@ struct CurrentStore
 #if ENABLED(PRECISE_HOMING_COREXY) && HAS_TRINAMIC && defined(XY_HOMING_MEASURE_SENS_MIN)
     StoreItem<CoreXYHomeTMCSens, COREXY_NO_HOME_TMC_SENS, journal::hash("CoreXY home TMC calibration")> corexy_home_tmc_sens;
 #endif
-
-    StoreItem<float, 0, journal::hash("Loadcell Scale")> loadcell_scale;
-    StoreItem<float, 0, journal::hash("Loadcell Threshold Static")> loadcell_threshold_static;
-    StoreItem<float, 0, journal::hash("Loadcell Hysteresis")> loadcell_hysteresis;
-    StoreItem<float, 0, journal::hash("Loadcell Threshold Continuous")> loadcell_threshold_continuous;
 };
 
 /**
@@ -647,6 +642,11 @@ struct DeprecatedStore
     StoreItem<uint8_t, 0, journal::hash("Nozzle Type")> nozzle_type;
 
     StoreItem<bool, true, journal::hash("Enable Side LEDs")> side_leds_enabled;
+
+    StoreItem<float, 0, journal::hash("Loadcell Scale")> loadcell_scale;
+    StoreItem<float, 0, journal::hash("Loadcell Threshold Static")> loadcell_threshold_static;
+    StoreItem<float, 0, journal::hash("Loadcell Hysteresis")> loadcell_hysteresis;
+    StoreItem<float, 0, journal::hash("Loadcell Threshold Continuous")> loadcell_threshold_continuous;
 };
 
 } // namespace config_store_ns
