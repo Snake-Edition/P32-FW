@@ -503,7 +503,9 @@ bool input_shaper_state_update(input_shaper_state_t &is_state, const int axis) {
         if (std::signbit(is_state.start_v) != std::signbit(end_v)) {
             const double zero_velocity_crossing_time_absolute = is_state.start_v / (-2. * is_state.half_accel) + is_state.print_time;
 
-            if (zero_velocity_crossing_time_absolute < (is_state.nearest_next_change - EPSILON)) {
+            // We need to ensure that we set is_crossing_zero_velocity to true only when zero_velocity_crossing_time_absolute
+            // is bigger than is_state.print_time, otherwise, we can get stuck in the infinite loop because of that.
+            if (is_state.print_time < zero_velocity_crossing_time_absolute && zero_velocity_crossing_time_absolute < is_state.nearest_next_change) {
                 for (size_t axis_shaper_idx = 0; axis_shaper_idx < is_state.m_num_axis_shapers; ++axis_shaper_idx) {
                     is_state.m_axis_shapers[axis_shaper_idx].set_nearest_next_change(zero_velocity_crossing_time_absolute);
                 }
