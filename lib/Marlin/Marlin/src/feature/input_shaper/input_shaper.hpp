@@ -85,8 +85,6 @@ typedef struct logical_axis_input_shaper_t {
 
     uint8_t calc_nearest_next_change_idx() const;
 
-    double calc_half_accel() const;
-
     double get_nearest_next_change() const {
         return m_next_change[m_nearest_next_change_idx];
     }

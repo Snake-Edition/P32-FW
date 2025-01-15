@@ -321,74 +321,61 @@ static bool input_shaper_state_step_dir(input_shaper_state_t &is_state) {
 }
 
 bool logical_axis_input_shaper_t::update(const input_shaper_state_t &axis_is) {
-    const uint8_t curr_idx = m_nearest_next_change_idx;
-    const double nearest_next_change = m_next_change[curr_idx];
+    const uint8_t current_move_idx = m_nearest_next_change_idx;
 
-    // Weighted (by input shaper coefficient) discontinuity in ending and starting velocity between two succeeding move segments.
-    double weighted_velocity_discontinuity = 0.;
     if (!axis_is.is_crossing_zero_velocity) {
-        const move_t *curr_move = m_move[curr_idx];
-        const move_t *next_move = this->load_next_move_segment(curr_idx);
-        if (next_move == nullptr) {
+        if (const move_t *next_move = this->load_next_move_segment(current_move_idx); next_move == nullptr) {
             return false;
         }
-
-        weighted_velocity_discontinuity += (get_move_start_v(*next_move, m_axis) - get_move_end_v(*curr_move, m_axis)) * m_pulses->pulses[curr_idx].a;
     }
 
-    const move_t *curr_move = m_move[curr_idx];
-    m_next_change[curr_idx] = curr_move->print_time + curr_move->move_time - m_pulses->pulses[curr_idx].t;
+    const move_t &current_move = *m_move[current_move_idx];
+    const double nearest_next_change = m_next_change[current_move_idx];
 
-    const double move_elapsed_time = (nearest_next_change - m_print_time);
-    if (const move_t *first_move = m_move[0], *last_move = m_move[m_pulses->num_pulses - 1]; first_move == last_move) {
-        // When all pointers point on the same move segment (iff the first and the last pointers point on the same move segment),
-        // then we can compute start_v, start_pos, and half_accel without accumulation, so we can suppress accumulated errors.
-        const double move_time = (nearest_next_change - first_move->print_time); // Mapped nearest_next_change into current move segment.
-        const double start_v = get_move_start_v(*first_move, m_axis);
-        const double half_accel = get_move_half_accel(*first_move, m_axis);
-        assert(move_time >= 0. && move_time < first_move->move_time);
+    m_next_change[current_move_idx] = current_move.print_time + current_move.move_time - m_pulses->pulses[current_move_idx].t;
 
-        // After applying the input shape filter, the velocity during the acceleration or deceleration phase doesn't equal the velocity of the input move segment at the same time.
-        // Because of that also, the position will not equal, so during the acceleration or deceleration phase, we cannot compute start_pos just from the input move segment.
-        // We can compute start_pos from the input move segment (without accumulated error) just for the cruise phase where velocity is constant.
-        if (std::abs(half_accel) <= EPSILON) {
-            m_start_pos = get_move_start_pos(*first_move, m_axis) + start_v * move_time;
-        } else {
-            m_start_pos += (m_start_v + m_half_accel * move_elapsed_time) * move_elapsed_time;
-        }
+    m_half_accel = 0., m_start_v = 0., m_start_pos = 0.;
+    for (uint8_t pulse_idx = 0; pulse_idx < m_pulses->num_pulses; ++pulse_idx) {
+        if (const pulse_t &pulse = m_pulses->pulses[pulse_idx]; pulse.a != 0.) {
+            const move_t &move = *m_move[pulse_idx];
+            const double start_v = get_move_start_v(move, m_axis);
+            const double start_pos = get_move_start_pos(move, m_axis);
+            const double half_accel = get_move_half_accel(move, m_axis);
 
-        m_start_v = start_v + 2. * half_accel * move_time;
-        m_half_accel = half_accel;
-    } else {
-        const double half_velocity_diff = m_half_accel * move_elapsed_time; // (1/2) * a * t
-        m_start_pos += (m_start_v + half_velocity_diff) * move_elapsed_time; // (v0 + (1/2) * a * t) * t
-        m_start_v += 2. * half_velocity_diff + weighted_velocity_discontinuity; // a * t
-        m_half_accel = this->calc_half_accel();
+            // Elapsed time within the current move segment.
+            const double move_elapsed_time = nearest_next_change - (move.print_time - pulse.t);
 
-        // Change small accelerations to zero as prevention for numeric issues.
-        if (std::abs(m_half_accel) <= INPUT_SHAPER_ACCELERATION_EPSILON) {
-            const bool start_v_prev_sign = std::signbit(m_start_v);
-
-            // Adjust start_v to compensate for zeroed acceleration.
-            m_start_v += m_half_accel * move_elapsed_time;
-            if (std::signbit(m_start_v) != start_v_prev_sign) {
-                // When we cross zero velocity, set the start velocity to zero.
-                // Typically, when zero velocity is crossed, it will be a very small value.
-                // So setting the start velocity to zero should be ok.
-                m_start_v = 0.f;
-            }
-
-            m_half_accel = 0.;
-        }
-
-        // Change small velocities to zero as prevention for numeric issues.
-        if (std::abs(m_start_v) <= INPUT_SHAPER_VELOCITY_EPSILON) {
-            m_start_v = 0.;
+            const double half_velocity_diff = half_accel * move_elapsed_time; // (1/2) * a * t
+            m_start_v += (2. * half_velocity_diff + start_v) * pulse.a; // v0 + a * t
+            m_start_pos += ((start_v + half_velocity_diff) * move_elapsed_time + start_pos) * pulse.a; // s0 + (v0 + (1/2) * a * t) * t
+            m_half_accel += half_accel * pulse.a;
         }
     }
 
     m_print_time = nearest_next_change;
     m_nearest_next_change_idx = this->calc_nearest_next_change_idx();
+
+    // Change small accelerations to zero as prevention for numeric issues.
+    if (std::abs(m_half_accel) <= INPUT_SHAPER_ACCELERATION_EPSILON) {
+        const bool start_v_prev_sign = std::signbit(m_start_v);
+
+        // Adjust start_v to compensate for zeroed acceleration.
+        m_start_v += m_half_accel * (this->get_nearest_next_change() - m_print_time);
+        if (std::signbit(m_start_v) != start_v_prev_sign) {
+            // When we cross zero velocity, set the start velocity to zero.
+            // Typically, when zero velocity is crossed, it will be a very small value.
+            // So setting the start velocity to zero should be ok.
+            m_start_v = 0.;
+        }
+
+        m_half_accel = 0.;
+    }
+
+    // Change small velocities to zero as prevention for numeric issues.
+    if (std::abs(m_start_v) <= INPUT_SHAPER_VELOCITY_EPSILON) {
+        m_start_v = 0.;
+    }
+
     return true;
 }
 
@@ -596,14 +583,6 @@ uint8_t logical_axis_input_shaper_t::calc_nearest_next_change_idx() const {
     }
 
     return min_next_change_idx;
-}
-
-double logical_axis_input_shaper_t::calc_half_accel() const {
-    double half_accel = 0.;
-    for (uint8_t idx = 0; idx < m_pulses->num_pulses; ++idx) {
-        half_accel += m_pulses->pulses[idx].a * get_move_half_accel(*m_move[idx], m_axis);
-    }
-    return half_accel;
 }
 
 void logical_axis_input_shaper_t::set_nearest_next_change(const double new_nearest_next_change) {
