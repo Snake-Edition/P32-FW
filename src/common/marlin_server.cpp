@@ -760,6 +760,10 @@ void static finalize_print(bool finished) {
     marlin_vars().print_end_time = time(nullptr);
     marlin_vars().add_job_result(job_id, finished ? marlin_vars_t::JobInfo::JobResult::finished : marlin_vars_t::JobInfo::JobResult::aborted);
 
+#if XL_ENCLOSURE_SUPPORT()
+    xl_enclosure.checkFilterExpiration();
+#endif
+
     // Do not remove, needed for 3rd party tools such as octoprint to get status that the gcode file printing has finished
     SERIAL_ECHOLNPGM(MSG_FILE_PRINTED);
 }
@@ -1935,6 +1939,9 @@ static void _server_print_loop(void) {
                 fsm_create(PhasesPrinting::active);
             }
         }
+#if XL_ENCLOSURE_SUPPORT()
+        xl_enclosure.checkFilterExpiration();
+#endif
         break;
 
     case State::Printing:

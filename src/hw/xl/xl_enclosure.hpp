@@ -84,6 +84,11 @@ public:
      */
     void resetFilterTimer();
 
+    /**
+     *  Checks filter expiration timer. On 500th & 600th hour of printing notification to GUI is sent
+     */
+    void checkFilterExpiration();
+
     // FLAG GETTER FUNCTION
     inline bool isEnabled() const { return persistent_flags & PERSISTENT::ENABLED; }
     inline bool isPrintFiltrationEnabled() const { return persistent_flags & PERSISTENT::PRINT_FILTRATION; }
@@ -162,11 +167,6 @@ private:
      *  @return True if there is at least one filament used, which is aligable for post print filtration
      */
     bool isPostPrintFiltrationNeeded();
-
-    /**
-     *  Update and check filter expiration timer. On 500. & 600. hour of printing notification to GUI is sent
-     */
-    void updateFilterExpirationTimer(uint32_t delta_sec);
 
     /**
      *  Timing validation period of recorded temperature: 5 minutes

@@ -146,7 +146,10 @@ bool Enclosure::updatePostPrintFiltrationTimer(uint32_t curr_sec) {
 
 // Expiration timer + Expiration warning timer
 // expiration_shown flag and xl_enclosure_filter_timer EEPROM value are reused for 5 day reminder
-void Enclosure::updateFilterExpirationTimer(uint32_t delta_sec) {
+void Enclosure::checkFilterExpiration() {
+    if (!isEnabled()) {
+        return;
+    }
     int64_t expiration_timer = config_store().xl_enclosure_filter_timer.get();
 
     if (isExpirationShown()) {
@@ -158,17 +161,14 @@ void Enclosure::updateFilterExpirationTimer(uint32_t delta_sec) {
     }
 
     // check filter expiration
-    if (!isWarningShown() && expiration_timer + delta_sec >= expiration_warning_sec) {
+    if (!isWarningShown() && expiration_timer >= expiration_warning_sec) {
         setPersistentFlg(PERSISTENT::WARNING_SHOWN);
         marlin_server::set_warning(WarningType::EnclosureFilterExpirWarning);
-
-    } else if (!isExpirationShown() && expiration_timer + delta_sec >= expiration_deadline_sec) {
+    }
+    if (!isExpirationShown() && expiration_timer >= expiration_deadline_sec) {
         setPersistentFlg(PERSISTENT::EXPIRATION_SHOWN);
         marlin_server::set_warning(WarningType::EnclosureFilterExpiration);
     }
-
-    expiration_timer += delta_sec;
-    config_store().xl_enclosure_filter_timer.set(expiration_timer);
 }
 
 bool Enclosure::isPostPrintFiltrationNeeded() {
@@ -387,7 +387,9 @@ void Enclosure::loop(int32_t MCU_modular_bed_temp, int16_t dwarf_board_temp, mar
     // Check timer every minute of active fan - longer period because it writes to EEPROM
     if (curr_sec - last_timer_update_sec >= timers_update_period_sec) {
         // Filter expiration notification
-        updateFilterExpirationTimer(curr_sec - last_timer_update_sec);
+        if (!isReminderSet()) {
+            config_store().xl_enclosure_filter_timer.set(config_store().xl_enclosure_filter_timer.get() + (curr_sec - last_timer_update_sec));
+        }
         last_timer_update_sec = curr_sec;
     }
 }
