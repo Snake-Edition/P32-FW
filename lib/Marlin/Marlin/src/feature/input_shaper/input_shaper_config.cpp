@@ -71,10 +71,57 @@ static input_shaper_pulses_t get_input_shaper(const AxisConfig &c) {
 }
 
 #ifdef COREXY
+// Create two new input_shaper_pulses_t that both have the same number of pulses and also,
+// they both have pulses at the same time (some of them could have zero amplitude).
+// When there is some pulse in a specific time that is present in just one input input_shaper_pulses_t,
+// then we use zero as amplitude for the second in that specific time.
+// This preprocessing doesn't affect the produced micro move segment by the input shaper implementation
+// but simplifies the implementation by a lot for CoreXY. Because we can assume that both logical axes
+// are always updated at the same time.
+static std::pair<input_shaper_pulses_t, input_shaper_pulses_t> adjust_input_shaper_pulses_to_match_time_pulses(const input_shaper_pulses_t &first_pulses, const input_shaper_pulses_t &second_pulses) {
+    input_shaper_pulses_t first_pulses_adjust;
+    input_shaper_pulses_t second_pulses_adjust;
+
+    if (first_pulses.num_pulses + second_pulses.num_pulses > INPUT_SHAPER_MAX_PULSES) {
+        bsod("Number of input shaper pulses exceeds the capacity of pulses buffer.");
+    }
+
+    first_pulses_adjust.num_pulses = 0;
+    second_pulses_adjust.num_pulses = 0;
+    double prev_pulse_t = std::numeric_limits<double>::lowest();
+    for (int common_idx = 0, first_idx = 0, second_idx = 0; common_idx < (first_pulses.num_pulses + second_pulses.num_pulses); ++common_idx) {
+        const bool is_nearest_pulse_from_first = (first_idx != first_pulses.num_pulses) && (second_idx == second_pulses.num_pulses || first_pulses.pulses[first_idx].t <= second_pulses.pulses[second_idx].t);
+        const pulse_t &nearest_pulse = is_nearest_pulse_from_first ? first_pulses.pulses[first_idx++] : second_pulses.pulses[second_idx++];
+
+        if (std::abs(nearest_pulse.t - prev_pulse_t) <= INPUT_SHAPER_PULSES_MIN_TIME_DIFF) {
+            if (is_nearest_pulse_from_first) {
+                assert(first_pulses_adjust.pulses[first_pulses_adjust.num_pulses - 1].a == 0.);
+                first_pulses_adjust.pulses[first_pulses_adjust.num_pulses - 1].a += nearest_pulse.a;
+            } else {
+                assert(second_pulses_adjust.pulses[second_pulses_adjust.num_pulses - 1].a == 0.);
+                second_pulses_adjust.pulses[second_pulses_adjust.num_pulses - 1].a += nearest_pulse.a;
+            }
+        } else {
+            first_pulses_adjust.pulses[first_pulses_adjust.num_pulses++] = nearest_pulse;
+            second_pulses_adjust.pulses[second_pulses_adjust.num_pulses++] = nearest_pulse;
+
+            if (is_nearest_pulse_from_first) {
+                second_pulses_adjust.pulses[second_pulses_adjust.num_pulses - 1].a = 0.;
+            } else {
+                first_pulses_adjust.pulses[first_pulses_adjust.num_pulses - 1].a = 0.;
+            }
+
+            prev_pulse_t = nearest_pulse.t;
+        }
+    }
+
+    return { first_pulses_adjust, second_pulses_adjust };
+}
+
 static std::pair<input_shaper_pulses_t, input_shaper_pulses_t> get_input_shaper(const AxisConfig &first_axis_config, const std::optional<AxisConfig> &second_axis_config) {
     const input_shaper_pulses_t first_axis_pulses = get_input_shaper(first_axis_config);
     const input_shaper_pulses_t second_axis_pulses = second_axis_config ? get_input_shaper(*second_axis_config) : create_null_input_shaper_pulses();
-    return { first_axis_pulses, second_axis_pulses };
+    return adjust_input_shaper_pulses_to_match_time_pulses(first_axis_pulses, second_axis_pulses);
 }
 #endif
 
