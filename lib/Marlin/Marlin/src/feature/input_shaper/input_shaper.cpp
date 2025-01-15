@@ -474,7 +474,7 @@ bool input_shaper_state_update(input_shaper_state_t &is_state, const int axis) {
 
         is_state.step_dir = input_shaper_state_step_dir(is_state);
         is_state.print_time = is_state.nearest_next_change;
-        is_state.nearest_next_change = std::min(is_state.m_axis_shapers[0].m_next_change[is_state.m_axis_shapers[0].m_nearest_next_change_idx], is_state.m_axis_shapers[1].m_next_change[is_state.m_axis_shapers[1].m_nearest_next_change_idx]);
+        is_state.nearest_next_change = std::min(is_state.m_axis_shapers[0].get_nearest_next_change(), is_state.m_axis_shapers[1].get_nearest_next_change());
     } else {
         assert(is_state.m_num_axis_shapers == 1);
         if (!is_state.m_axis_shapers[0].update(is_state)) {
@@ -486,7 +486,7 @@ bool input_shaper_state_update(input_shaper_state_t &is_state, const int axis) {
         is_state.start_pos = is_state.m_axis_shapers[0].m_start_pos;
         is_state.step_dir = input_shaper_state_step_dir(is_state);
         is_state.print_time = is_state.m_axis_shapers[0].m_print_time;
-        is_state.nearest_next_change = is_state.m_axis_shapers[0].m_next_change[is_state.m_axis_shapers[0].m_nearest_next_change_idx];
+        is_state.nearest_next_change = is_state.m_axis_shapers[0].get_nearest_next_change();
     }
 
     if (is_state.is_crossing_zero_velocity) {
