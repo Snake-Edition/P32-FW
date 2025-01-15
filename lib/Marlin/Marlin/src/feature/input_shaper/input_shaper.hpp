@@ -89,10 +89,12 @@ typedef struct logical_axis_input_shaper_t {
 
 typedef struct input_shaper_state_t {
 #ifdef COREXY
-    std::array<logical_axis_input_shaper_t, 2> m_axis_shaper;
+    std::array<logical_axis_input_shaper_t, 2> m_axis_shapers;
 #else
-    std::array<logical_axis_input_shaper_t, 1> m_axis_shaper;
+    std::array<logical_axis_input_shaper_t, 1> m_axis_shapers;
 #endif
+
+    size_t m_num_axis_shapers = 0;
 
     double start_pos;
     double start_v;

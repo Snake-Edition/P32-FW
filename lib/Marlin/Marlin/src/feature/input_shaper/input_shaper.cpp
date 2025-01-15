@@ -234,21 +234,26 @@ void input_shaper_step_generator_init(const move_t &move, input_shaper_step_gene
 
 #ifdef COREXY
     if (axis == X_AXIS || axis == Y_AXIS) {
-        is_state->m_axis_shaper[0].m_pulses = &InputShaper::logical_axis_pulses[X_AXIS];
-        is_state->m_axis_shaper[1].m_pulses = &InputShaper::logical_axis_pulses[Y_AXIS];
+        is_state->m_num_axis_shapers = 2;
+        is_state->m_axis_shapers[0].m_pulses = &InputShaper::logical_axis_pulses[X_AXIS];
+        is_state->m_axis_shapers[1].m_pulses = &InputShaper::logical_axis_pulses[Y_AXIS];
+    } else if (axis == Z_AXIS) {
+        is_state->m_num_axis_shapers = 1;
+        is_state->m_axis_shapers[0].m_pulses = &InputShaper::logical_axis_pulses[axis];
     } else {
-        bsod("Unsupported axis");
+        bsod("Input shaper isn't supported on this axis for CoreXY kinematics.");
     }
 #else
     if (axis == X_AXIS || axis == Y_AXIS || axis == Z_AXIS) {
-        is_state->m_axis_shaper[0].m_pulses = &InputShaper::logical_axis_pulses[axis];
+        is_state->m_num_axis_shapers = 1;
+        is_state->m_axis_shapers[0].m_pulses = &InputShaper::logical_axis_pulses[axis];
     } else {
-        bsod("Unsupported axis");
+        bsod("Input shaper isn't supported on this axis for Cartesian kinematics.");
     }
 #endif
 
-    for (const logical_axis_input_shaper_t &axis_shaper : is_state->m_axis_shaper) {
-        move.reference_cnt += axis_shaper.m_pulses->num_pulses;
+    for (size_t axis_shaper_idx = 0; axis_shaper_idx < is_state->m_num_axis_shapers; ++axis_shaper_idx) {
+        move.reference_cnt += is_state->m_axis_shapers[axis_shaper_idx].m_pulses->num_pulses;
     }
 
     input_shaper_state_init(*is_state, move, axis);
@@ -261,35 +266,37 @@ void input_shaper_state_init(input_shaper_state_t &is_state, const move_t &move,
 
     is_state.print_time = move.print_time;
 
-#ifdef COREXY
-    for (uint8_t logical_axis = X_AXIS; logical_axis <= Y_AXIS; ++logical_axis) {
-        is_state.m_axis_shaper[logical_axis].init(move, logical_axis);
-    }
-#else
-    is_state.m_axis_shaper[0].init(move, axis);
-#endif
+    if (is_state.m_num_axis_shapers == 1) {
+        is_state.m_axis_shapers[0].init(move, axis);
+        is_state.nearest_next_change = is_state.m_axis_shapers[0].get_nearest_next_change();
 
+        is_state.start_pos = get_move_start_pos(move, axis);
+    } else if (is_state.m_num_axis_shapers == 2) {
 #ifdef COREXY
-    is_state.nearest_next_change = std::min(is_state.m_axis_shaper[0].get_nearest_next_change(), is_state.m_axis_shaper[1].get_nearest_next_change());
+        if (axis == X_AXIS || axis == Y_AXIS) {
+            is_state.m_axis_shapers[0].init(move, X_AXIS);
+            is_state.m_axis_shapers[1].init(move, Y_AXIS);
+        } else {
+            bsod("Invalid combination of axis and number of logical input shapers for CoreXY kinematics.");
+        }
+
+        if (axis == A_AXIS) {
+            is_state.start_pos = move.start_pos.x + move.start_pos.y;
+        } else if (axis == B_AXIS) {
+            is_state.start_pos = move.start_pos.x - move.start_pos.y;
+        } else {
+            bsod("Invalid combination of axis and number of logical input shapers for CoreXY kinematics.");
+        }
 #else
-    is_state.nearest_next_change = is_state.m_axis_shaper[0].get_nearest_next_change();
+        bsod("Unsupported number of logical axes for used kinematics.");
 #endif
+        is_state.nearest_next_change = std::min(is_state.m_axis_shapers[0].get_nearest_next_change(), is_state.m_axis_shapers[1].get_nearest_next_change());
+    } else {
+        bsod("Unsupported number of logical input shapers.");
+    }
 
     is_state.half_accel = get_move_half_accel(move, axis);
     is_state.start_v = get_move_start_v(move, axis);
-
-#ifdef COREXY
-    if (axis == A_AXIS) {
-        is_state.start_pos = move.start_pos.x + move.start_pos.y;
-    } else if (axis == B_AXIS) {
-        is_state.start_pos = move.start_pos.x - move.start_pos.y;
-    } else {
-        fatal_error("Invalid axis", "input_shaper_state_init");
-    }
-#else
-    is_state.start_pos = get_move_start_pos(move, axis);
-#endif
-
     is_state.step_dir = get_move_step_dir(move, axis);
 
     is_state.is_crossing_zero_velocity = false;
@@ -392,97 +399,99 @@ bool logical_axis_input_shaper_t::update(const input_shaper_state_t &axis_is) {
 // could lead to incorrect step timing.
 // Returns true if input_shaper_state was updated and false otherwise.
 bool input_shaper_state_update(input_shaper_state_t &is_state, const int axis) {
+    if (is_state.m_num_axis_shapers == 2) {
+        bool x_updated = false;
+        bool y_updated = false;
+        if (is_state.is_crossing_zero_velocity || is_state.nearest_next_change == is_state.m_axis_shapers[0].get_nearest_next_change()) {
+            if (!is_state.m_axis_shapers[0].update(is_state)) {
+                return false;
+            } else {
+                x_updated = true;
+            }
+        }
+
+        if (is_state.is_crossing_zero_velocity || is_state.nearest_next_change == is_state.m_axis_shapers[1].get_nearest_next_change()) {
+            if (!is_state.m_axis_shapers[1].update(is_state)) {
+                return false;
+            } else {
+                y_updated = true;
+            }
+        }
+
+        double x_start_v = is_state.m_axis_shapers[0].m_start_v;
+        double y_start_v = is_state.m_axis_shapers[1].m_start_v;
+        double x_start_pos = is_state.m_axis_shapers[0].m_start_pos;
+        double y_start_pos = is_state.m_axis_shapers[1].m_start_pos;
+
+        const double x_move_time = is_state.nearest_next_change - is_state.m_axis_shapers[0].m_print_time;
+        const double y_move_time = is_state.nearest_next_change - is_state.m_axis_shapers[1].m_print_time;
+
+        // If just one logical axis input shaper was updated, then we need to calculate new start_pos and start_v for the other logical axis input shaper.
+        if (x_updated && !y_updated) {
+            y_start_pos = y_start_pos + (y_start_v + is_state.m_axis_shapers[1].m_half_accel * y_move_time) * y_move_time;
+            y_start_v = y_start_v + 2. * is_state.m_axis_shapers[1].m_half_accel * y_move_time;
+        } else if (y_updated && !x_updated) {
+            x_start_pos = x_start_pos + (x_start_v + is_state.m_axis_shapers[0].m_half_accel * x_move_time) * x_move_time;
+            x_start_v = x_start_v + 2. * is_state.m_axis_shapers[0].m_half_accel * x_move_time;
+        }
+
 #ifdef COREXY
-    bool x_updated = false;
-    bool y_updated = false;
-    if (is_state.is_crossing_zero_velocity || is_state.nearest_next_change == is_state.m_axis_shaper[0].get_nearest_next_change()) {
-        if (!is_state.m_axis_shaper[0].update(is_state)) {
-            return false;
+        if (axis == X_AXIS) {
+            is_state.start_v = x_start_v + y_start_v;
+            is_state.start_pos = x_start_pos + y_start_pos;
+            is_state.half_accel = is_state.m_axis_shapers[0].m_half_accel + is_state.m_axis_shapers[1].m_half_accel;
+        } else if (axis == Y_AXIS) {
+            is_state.start_v = x_start_v - y_start_v;
+            is_state.start_pos = x_start_pos - y_start_pos;
+            is_state.half_accel = is_state.m_axis_shapers[0].m_half_accel - is_state.m_axis_shapers[1].m_half_accel;
         } else {
-            x_updated = true;
+            bsod("Invalid combination of axis and number of logical input shapers for CoreXY kinematics.");
         }
-    }
-
-    if (is_state.is_crossing_zero_velocity || is_state.nearest_next_change == is_state.m_axis_shaper[1].get_nearest_next_change()) {
-        if (!is_state.m_axis_shaper[1].update(is_state)) {
-            return false;
-        } else {
-            y_updated = true;
-        }
-    }
-
 #else
-    if (!is_state.m_axis_shaper[0].update(is_state)) {
-        return false;
-    }
+        bsod("Unsupported number of logical axes for used kinematics.");
 #endif
+
+        // Change small accelerations to zero as prevention for numeric issues.
+        if (std::abs(is_state.half_accel) <= INPUT_SHAPER_ACCELERATION_EPSILON) {
+            const bool start_v_prev_sign = std::signbit(is_state.start_v);
+
+            // Adjust start_v to compensate for zeroed acceleration.
+            is_state.start_v += is_state.half_accel * (is_state.nearest_next_change - is_state.print_time);
+            if (std::signbit(is_state.start_v) != start_v_prev_sign) {
+                // When we cross zero velocity, set the start velocity to zero.
+                // Typically, when zero velocity is crossed, it will be a very small value.
+                // So setting the start velocity to zero should be ok.
+                is_state.start_v = 0.f;
+            }
+
+            is_state.half_accel = 0.;
+        }
+
+        // Change small velocities to zero as prevention for numeric issues.
+        if (std::abs(is_state.start_v) <= INPUT_SHAPER_VELOCITY_EPSILON) {
+            is_state.start_v = 0.;
+        }
+
+        is_state.step_dir = input_shaper_state_step_dir(is_state);
+        is_state.print_time = is_state.nearest_next_change;
+        is_state.nearest_next_change = std::min(is_state.m_axis_shapers[0].m_next_change[is_state.m_axis_shapers[0].m_nearest_next_change_idx], is_state.m_axis_shapers[1].m_next_change[is_state.m_axis_shapers[1].m_nearest_next_change_idx]);
+    } else {
+        assert(is_state.m_num_axis_shapers == 1);
+        if (!is_state.m_axis_shapers[0].update(is_state)) {
+            return false;
+        }
+
+        is_state.start_v = is_state.m_axis_shapers[0].m_start_v;
+        is_state.half_accel = is_state.m_axis_shapers[0].m_half_accel;
+        is_state.start_pos = is_state.m_axis_shapers[0].m_start_pos;
+        is_state.step_dir = input_shaper_state_step_dir(is_state);
+        is_state.print_time = is_state.m_axis_shapers[0].m_print_time;
+        is_state.nearest_next_change = is_state.m_axis_shapers[0].m_next_change[is_state.m_axis_shapers[0].m_nearest_next_change_idx];
+    }
 
     if (is_state.is_crossing_zero_velocity) {
         is_state.is_crossing_zero_velocity = false;
     }
-
-#ifdef COREXY
-    double x_start_v = is_state.m_axis_shaper[0].m_start_v;
-    double y_start_v = is_state.m_axis_shaper[1].m_start_v;
-    double x_start_pos = is_state.m_axis_shaper[0].m_start_pos;
-    double y_start_pos = is_state.m_axis_shaper[1].m_start_pos;
-
-    const double x_move_time = is_state.nearest_next_change - is_state.m_axis_shaper[0].m_print_time;
-    const double y_move_time = is_state.nearest_next_change - is_state.m_axis_shaper[1].m_print_time;
-
-    // If just one logical axis input shaper was updated, then we need to calculate new start_pos and start_v for the other logical axis input shaper.
-    if (x_updated && !y_updated) {
-        y_start_pos = y_start_pos + (y_start_v + is_state.m_axis_shaper[1].m_half_accel * y_move_time) * y_move_time;
-        y_start_v = y_start_v + 2. * is_state.m_axis_shaper[1].m_half_accel * y_move_time;
-    } else if (y_updated && !x_updated) {
-        x_start_pos = x_start_pos + (x_start_v + is_state.m_axis_shaper[0].m_half_accel * x_move_time) * x_move_time;
-        x_start_v = x_start_v + 2. * is_state.m_axis_shaper[0].m_half_accel * x_move_time;
-    }
-
-    if (axis == A_AXIS) {
-        is_state.start_v = x_start_v + y_start_v;
-        is_state.start_pos = x_start_pos + y_start_pos;
-        is_state.half_accel = is_state.m_axis_shaper[0].m_half_accel + is_state.m_axis_shaper[1].m_half_accel;
-    } else if (axis == B_AXIS) {
-        is_state.start_v = x_start_v - y_start_v;
-        is_state.start_pos = x_start_pos - y_start_pos;
-        is_state.half_accel = is_state.m_axis_shaper[0].m_half_accel - is_state.m_axis_shaper[1].m_half_accel;
-    } else {
-        fatal_error("Invalid axis", "input_shaper_state_update");
-    }
-
-    // Change small accelerations to zero as prevention for numeric issues.
-    if (std::abs(is_state.half_accel) <= INPUT_SHAPER_ACCELERATION_EPSILON) {
-        const bool start_v_prev_sign = std::signbit(is_state.start_v);
-
-        // Adjust start_v to compensate for zeroed acceleration.
-        is_state.start_v += is_state.half_accel * (is_state.nearest_next_change - is_state.print_time);
-        if (std::signbit(is_state.start_v) != start_v_prev_sign) {
-            // When we cross zero velocity, set the start velocity to zero.
-            // Typically, when zero velocity is crossed, it will be a very small value.
-            // So setting the start velocity to zero should be ok.
-            is_state.start_v = 0.f;
-        }
-
-        is_state.half_accel = 0.;
-    }
-
-    // Change small velocities to zero as prevention for numeric issues.
-    if (std::abs(is_state.start_v) <= INPUT_SHAPER_VELOCITY_EPSILON) {
-        is_state.start_v = 0.;
-    }
-
-    is_state.step_dir = input_shaper_state_step_dir(is_state);
-    is_state.print_time = is_state.nearest_next_change;
-    is_state.nearest_next_change = std::min(is_state.m_axis_shaper[0].m_next_change[is_state.m_axis_shaper[0].m_nearest_next_change_idx], is_state.m_axis_shaper[1].m_next_change[is_state.m_axis_shaper[1].m_nearest_next_change_idx]);
-#else
-    is_state.start_v = is_state.m_axis_shaper[0].m_start_v;
-    is_state.half_accel = is_state.m_axis_shaper[0].m_half_accel;
-    is_state.start_pos = is_state.m_axis_shaper[0].m_start_pos;
-    is_state.step_dir = input_shaper_state_step_dir(is_state);
-    is_state.print_time = is_state.m_axis_shaper[0].m_print_time;
-    is_state.nearest_next_change = is_state.m_axis_shaper[0].m_next_change[is_state.m_axis_shaper[0].m_nearest_next_change_idx];
-#endif
 
     // Determine if the current micro move segment is crossing zero velocity because when zero velocity is crossed, we need to flip the step direction.
     // Zero velocity could be crossed only when start_v and half_accel have different signs and start_v isn't zero.
@@ -495,8 +504,8 @@ bool input_shaper_state_update(input_shaper_state_t &is_state, const int axis) {
             const double zero_velocity_crossing_time_absolute = is_state.start_v / (-2. * is_state.half_accel) + is_state.print_time;
 
             if (zero_velocity_crossing_time_absolute < (is_state.nearest_next_change - EPSILON)) {
-                for (logical_axis_input_shaper_t &axis_shaper : is_state.m_axis_shaper) {
-                    axis_shaper.set_nearest_next_change(zero_velocity_crossing_time_absolute);
+                for (size_t axis_shaper_idx = 0; axis_shaper_idx < is_state.m_num_axis_shapers; ++axis_shaper_idx) {
+                    is_state.m_axis_shapers[axis_shaper_idx].set_nearest_next_change(zero_velocity_crossing_time_absolute);
                 }
 
                 is_state.nearest_next_change = zero_velocity_crossing_time_absolute;
