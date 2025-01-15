@@ -95,10 +95,10 @@ static std::pair<input_shaper_pulses_t, input_shaper_pulses_t> adjust_input_shap
 
         if (std::abs(nearest_pulse.t - prev_pulse_t) <= INPUT_SHAPER_PULSES_MIN_TIME_DIFF) {
             if (is_nearest_pulse_from_first) {
-                assert(first_pulses_adjust.pulses[first_pulses_adjust.num_pulses - 1].a == 0.);
+                assert(first_pulses_adjust.pulses[first_pulses_adjust.num_pulses - 1].a == 0.f);
                 first_pulses_adjust.pulses[first_pulses_adjust.num_pulses - 1].a += nearest_pulse.a;
             } else {
-                assert(second_pulses_adjust.pulses[second_pulses_adjust.num_pulses - 1].a == 0.);
+                assert(second_pulses_adjust.pulses[second_pulses_adjust.num_pulses - 1].a == 0.f);
                 second_pulses_adjust.pulses[second_pulses_adjust.num_pulses - 1].a += nearest_pulse.a;
             }
         } else {
@@ -106,9 +106,9 @@ static std::pair<input_shaper_pulses_t, input_shaper_pulses_t> adjust_input_shap
             second_pulses_adjust.pulses[second_pulses_adjust.num_pulses++] = nearest_pulse;
 
             if (is_nearest_pulse_from_first) {
-                second_pulses_adjust.pulses[second_pulses_adjust.num_pulses - 1].a = 0.;
+                second_pulses_adjust.pulses[second_pulses_adjust.num_pulses - 1].a = 0.f;
             } else {
-                first_pulses_adjust.pulses[first_pulses_adjust.num_pulses - 1].a = 0.;
+                first_pulses_adjust.pulses[first_pulses_adjust.num_pulses - 1].a = 0.f;
             }
 
             prev_pulse_t = nearest_pulse.t;

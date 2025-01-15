@@ -28,13 +28,13 @@ input_shaper_state_t InputShaper::is_state[3];
 input_shaper_pulses_t InputShaper::logical_axis_pulses[3];
 
 static void init_input_shaper_pulses(const float a[], const float t[], const int num_pulses, input_shaper_pulses_t *is_pulses) {
-    double sum_a = 0.;
+    float sum_a = 0.f;
     for (int i = 0; i < num_pulses; ++i) {
         sum_a += a[i];
     }
 
     // Reverse pulses vs their traditional definition
-    const double inv_sum_a = 1. / sum_a;
+    const float inv_sum_a = 1.f / sum_a;
     for (int i = 0; i < num_pulses; ++i) {
         is_pulses->pulses[num_pulses - i - 1].a = a[i] * inv_sum_a;
         is_pulses->pulses[num_pulses - i - 1].t = -t[i];
@@ -42,7 +42,7 @@ static void init_input_shaper_pulses(const float a[], const float t[], const int
 
     double time_shift = 0.;
     for (int i = 0; i < num_pulses; ++i) {
-        time_shift += is_pulses->pulses[i].a * is_pulses->pulses[i].t;
+        time_shift += double(is_pulses->pulses[i].a) * is_pulses->pulses[i].t;
     }
 
     // Shift pulses around mid-point.
@@ -230,7 +230,7 @@ void input_shaper_step_generator_init(const move_t &move, input_shaper_step_gene
     // Set the initial direction and activity flags for the entire next move
     step_generator.move_step_flags = 0;
     step_generator.move_step_flags |= (!is_state->step_dir) * (STEP_EVENT_FLAG_X_DIR << axis);
-    step_generator.move_step_flags |= (is_state->start_v != 0. || is_state->half_accel != 0.) * (STEP_EVENT_FLAG_X_ACTIVE << axis);
+    step_generator.move_step_flags |= (is_state->start_v != 0.f || is_state->half_accel != 0.f) * (STEP_EVENT_FLAG_X_ACTIVE << axis);
 
 #ifdef COREXY
     if (axis == X_AXIS || axis == Y_AXIS) {
@@ -270,7 +270,7 @@ void input_shaper_state_init(input_shaper_state_t &is_state, const move_t &move,
         is_state.m_axis_shapers[0].init(move, axis);
         is_state.nearest_next_change = is_state.m_axis_shapers[0].get_nearest_next_change();
 
-        is_state.start_pos = get_move_start_pos(move, axis);
+        is_state.start_pos = float(get_move_start_pos(move, axis));
     } else if (is_state.m_num_axis_shapers == 2) {
 #ifdef COREXY
         if (axis == X_AXIS || axis == Y_AXIS) {
@@ -281,9 +281,9 @@ void input_shaper_state_init(input_shaper_state_t &is_state, const move_t &move,
         }
 
         if (axis == A_AXIS) {
-            is_state.start_pos = move.start_pos.x + move.start_pos.y;
+            is_state.start_pos = float(move.start_pos.x + move.start_pos.y);
         } else if (axis == B_AXIS) {
-            is_state.start_pos = move.start_pos.x - move.start_pos.y;
+            is_state.start_pos = float(move.start_pos.x - move.start_pos.y);
         } else {
             bsod("Invalid combination of axis and number of logical input shapers for CoreXY kinematics.");
         }
@@ -295,27 +295,26 @@ void input_shaper_state_init(input_shaper_state_t &is_state, const move_t &move,
         bsod("Unsupported number of logical input shapers.");
     }
 
-    is_state.half_accel = get_move_half_accel(move, axis);
-    is_state.start_v = get_move_start_v(move, axis);
+    is_state.half_accel = float(get_move_half_accel(move, axis));
+    is_state.start_v = float(get_move_start_v(move, axis));
     is_state.step_dir = get_move_step_dir(move, axis);
 
-    is_state.is_crossing_zero_velocity = false;
+    is_state.m_is_crossing_zero_velocity = false;
 }
 
 static bool input_shaper_state_step_dir(input_shaper_state_t &is_state) {
     // Previously we ensured that none of micro move segments would cross zero velocity.
     // So this function can correctly determine step_dir only when this assumption is met.
 
-    // Convert doubles to floats to perform comparisons in float instead doubles.
-    float start_v = float(is_state.start_v);
-    float half_accel = float(is_state.half_accel);
+    float start_v = is_state.start_v;
+    float half_accel = is_state.half_accel;
 
     if (start_v < 0.f || (start_v == 0.f && half_accel < 0.f)) {
         return false;
     } else if (start_v > 0.f || (start_v == 0.f && half_accel > 0.f)) {
         return true;
     } else {
-        assert(start_v == 0.f && is_state.half_accel == 0.f);
+        assert(start_v == 0.f && half_accel == 0.f);
         return is_state.step_dir;
     }
 }
@@ -323,7 +322,7 @@ static bool input_shaper_state_step_dir(input_shaper_state_t &is_state) {
 bool logical_axis_input_shaper_t::update(const input_shaper_state_t &axis_is) {
     const uint8_t current_move_idx = m_nearest_next_change_idx;
 
-    if (!axis_is.is_crossing_zero_velocity) {
+    if (!axis_is.m_is_crossing_zero_velocity) {
         if (const move_t *next_move = this->load_next_move_segment(current_move_idx); next_move == nullptr) {
             return false;
         }
@@ -334,19 +333,19 @@ bool logical_axis_input_shaper_t::update(const input_shaper_state_t &axis_is) {
 
     m_next_change[current_move_idx] = current_move.print_time + current_move.move_time - m_pulses->pulses[current_move_idx].t;
 
-    m_half_accel = 0., m_start_v = 0., m_start_pos = 0.;
+    m_half_accel = 0.f, m_start_v = 0.f, m_start_pos = 0.f;
     for (uint8_t pulse_idx = 0; pulse_idx < m_pulses->num_pulses; ++pulse_idx) {
-        if (const pulse_t &pulse = m_pulses->pulses[pulse_idx]; pulse.a != 0.) {
+        if (const pulse_t &pulse = m_pulses->pulses[pulse_idx]; pulse.a != 0.f) {
             const move_t &move = *m_move[pulse_idx];
-            const double start_v = get_move_start_v(move, m_axis);
-            const double start_pos = get_move_start_pos(move, m_axis);
-            const double half_accel = get_move_half_accel(move, m_axis);
+            const float start_v = float(get_move_start_v(move, m_axis));
+            const float start_pos = float(get_move_start_pos(move, m_axis));
+            const float half_accel = float(get_move_half_accel(move, m_axis));
 
-            // Elapsed time within the current move segment.
-            const double move_elapsed_time = nearest_next_change - (move.print_time - pulse.t);
+            // Elapsed time is relative time within the current move segment, so its values are relatively small.
+            const float move_elapsed_time = float(nearest_next_change - (move.print_time - pulse.t));
 
-            const double half_velocity_diff = half_accel * move_elapsed_time; // (1/2) * a * t
-            m_start_v += (2. * half_velocity_diff + start_v) * pulse.a; // v0 + a * t
+            const float half_velocity_diff = half_accel * move_elapsed_time; // (1/2) * a * t
+            m_start_v += (2.f * half_velocity_diff + start_v) * pulse.a; // v0 + a * t
             m_start_pos += ((start_v + half_velocity_diff) * move_elapsed_time + start_pos) * pulse.a; // s0 + (v0 + (1/2) * a * t) * t
             m_half_accel += half_accel * pulse.a;
         }
@@ -419,9 +418,10 @@ bool input_shaper_state_update(input_shaper_state_t &is_state, const uint8_t phy
     // Change small accelerations to zero as prevention for numeric issues.
     if (std::abs(is_state.half_accel) <= INPUT_SHAPER_ACCELERATION_EPSILON) {
         const bool start_v_prev_sign = std::signbit(is_state.start_v);
+        const float move_time = float(is_state.nearest_next_change - is_state.print_time);
 
         // Adjust start_v to compensate for zeroed acceleration.
-        is_state.start_v += is_state.half_accel * (is_state.nearest_next_change - is_state.print_time);
+        is_state.start_v += is_state.half_accel * move_time;
         if (std::signbit(is_state.start_v) != start_v_prev_sign) {
             // When we cross zero velocity, set the start velocity to zero.
             // Typically, when zero velocity is crossed, it will be a very small value.
@@ -429,26 +429,26 @@ bool input_shaper_state_update(input_shaper_state_t &is_state, const uint8_t phy
             is_state.start_v = 0.f;
         }
 
-        is_state.half_accel = 0.;
+        is_state.half_accel = 0.f;
     }
 
     // Change small velocities to zero as prevention for numeric issues.
     if (std::abs(is_state.start_v) <= INPUT_SHAPER_VELOCITY_EPSILON) {
-        is_state.start_v = 0.;
+        is_state.start_v = 0.f;
     }
 
     is_state.step_dir = input_shaper_state_step_dir(is_state);
-    is_state.is_crossing_zero_velocity = false;
+    is_state.m_is_crossing_zero_velocity = false;
 
     // Determine if the current micro move segment is crossing zero velocity because when zero velocity is crossed, we need to flip the step direction.
     // Zero velocity could be crossed only when start_v and half_accel have different signs and start_v isn't zero.
-    if (std::signbit(is_state.start_v) != std::signbit(is_state.half_accel) && is_state.start_v != 0.) {
+    if (std::signbit(is_state.start_v) != std::signbit(is_state.half_accel) && is_state.start_v != 0.f) {
         // Micro move segment is crossing zero velocity only when start_v and end_v are different.
-        // Division in doubles is quite an expensive operation, so it is much cheaper to make these pre-checks instead of checks based on the computed time of crossing the zero velocity.
-        const double move_time = is_state.nearest_next_change - is_state.print_time;
-        const double end_v = is_state.start_v + 2. * is_state.half_accel * move_time;
+        // Elapsed time is relative time within the current move segment, so its values are relatively small.
+        const float move_time = float(is_state.nearest_next_change - is_state.print_time);
+        const float end_v = is_state.start_v + 2.f * is_state.half_accel * move_time;
         if (std::signbit(is_state.start_v) != std::signbit(end_v)) {
-            const double zero_velocity_crossing_time_absolute = is_state.start_v / (-2. * is_state.half_accel) + is_state.print_time;
+            const double zero_velocity_crossing_time_absolute = double(is_state.start_v / (-2.f * is_state.half_accel)) + is_state.print_time;
 
             // We need to ensure that we set is_crossing_zero_velocity to true only when zero_velocity_crossing_time_absolute
             // is bigger than is_state.print_time, otherwise, we can get stuck in the infinite loop because of that.
@@ -458,7 +458,7 @@ bool input_shaper_state_update(input_shaper_state_t &is_state, const uint8_t phy
                 }
 
                 is_state.nearest_next_change = zero_velocity_crossing_time_absolute;
-                is_state.is_crossing_zero_velocity = true;
+                is_state.m_is_crossing_zero_velocity = true;
             }
         }
     }
@@ -467,9 +467,9 @@ bool input_shaper_state_update(input_shaper_state_t &is_state, const uint8_t phy
 }
 
 FORCE_INLINE void input_shaper_step_generator_update(input_shaper_step_generator_t &step_generator) {
-    step_generator.start_v = float(step_generator.is_state->start_v);
-    step_generator.accel = 2.f * float(step_generator.is_state->half_accel);
-    step_generator.start_pos = float(step_generator.is_state->start_pos);
+    step_generator.start_v = step_generator.is_state->start_v;
+    step_generator.accel = 2.f * step_generator.is_state->half_accel;
+    step_generator.start_pos = step_generator.is_state->start_pos;
     step_generator.step_dir = step_generator.is_state->step_dir;
 }
 
@@ -524,9 +524,9 @@ void logical_axis_input_shaper_t::init(const move_t &move, uint8_t axis) {
         m_next_change[pulse_idx] = move.print_time + move.move_time - m_pulses->pulses[pulse_idx].t;
     }
 
-    m_half_accel = get_move_half_accel(move, axis);
-    m_start_v = get_move_start_v(move, axis);
-    m_start_pos = get_move_start_pos(move, axis);
+    m_half_accel = float(get_move_half_accel(move, axis));
+    m_start_v = float(get_move_start_v(move, axis));
+    m_start_pos = float(get_move_start_pos(move, axis));
     m_axis = axis;
     m_print_time = move.print_time;
     m_nearest_next_change_idx = this->calc_nearest_next_change_idx();

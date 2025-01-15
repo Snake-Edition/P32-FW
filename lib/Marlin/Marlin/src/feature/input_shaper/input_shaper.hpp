@@ -55,7 +55,7 @@ Shaper get(float damping_ratio, float shaper_freq, float vibration_reduction, in
 
 typedef struct pulse_t {
     double t;
-    double a;
+    float a;
 } pulse_t;
 
 typedef struct input_shaper_pulses_t {
@@ -71,9 +71,9 @@ typedef struct logical_axis_input_shaper_t {
 
     // The largest index corresponds to the pointer to the rightmost time point (on the time axis).
     // And index zero corresponds to the pointer to the leftmost time point (on the time axis).
-    double m_start_pos;
-    double m_start_v;
-    double m_half_accel;
+    float m_start_pos;
+    float m_start_v;
+    float m_half_accel;
     double m_print_time;
     uint8_t m_axis;
     uint8_t m_nearest_next_change_idx;
@@ -94,21 +94,21 @@ typedef struct logical_axis_input_shaper_t {
 } logical_axis_input_shaper_t;
 
 typedef struct input_shaper_state_t {
-    std::array<logical_axis_input_shaper_t, INPUT_SHAPER_MAX_LOGICAL_AXES> m_axis_shapers;
+    std::array<logical_axis_input_shaper_t, INPUT_SHAPER_MAX_LOGICAL_AXES> m_axis_shapers = {};
 
     size_t m_num_axis_shapers = 0;
 
-    double start_pos;
-    double start_v;
-    double half_accel;
+    float start_pos = 0.f;
+    float start_v = 0.f;
+    float half_accel = 0.f;
 
-    double nearest_next_change;
-    double print_time;
+    double nearest_next_change = 0.;
+    double print_time = 0.;
 
-    bool step_dir;
+    bool step_dir = false;
 
     // Indicates if the current micro move segment is crossing zero velocity (needed change of stepper motor direction).
-    bool is_crossing_zero_velocity;
+    bool m_is_crossing_zero_velocity = false;
 } input_shaper_state_t;
 
 input_shaper_pulses_t create_null_input_shaper_pulses();
