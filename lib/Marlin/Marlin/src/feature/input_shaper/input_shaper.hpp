@@ -16,7 +16,14 @@
 #include "../precise_stepping/fwdecl.hpp"
 #include "../../core/types.h"
 
-constexpr const uint8_t MAX_INPUT_SHAPER_PULSES = 5;
+#ifdef COREXY
+constexpr const uint8_t INPUT_SHAPER_MAX_LOGICAL_AXES = 2;
+#else
+constexpr const uint8_t INPUT_SHAPER_MAX_LOGICAL_AXES = 1;
+#endif
+
+constexpr const uint8_t INPUT_SHAPER_MAX_LENGTH = 5;
+constexpr const uint8_t INPUT_SHAPER_MAX_PULSES = INPUT_SHAPER_MAX_LENGTH * INPUT_SHAPER_MAX_LOGICAL_AXES;
 
 constexpr const double INPUT_SHAPER_VELOCITY_EPSILON = 0.0001;
 constexpr const double INPUT_SHAPER_ACCELERATION_EPSILON = 0.1;
@@ -26,7 +33,7 @@ namespace input_shaper {
 struct Shaper {
     Shaper(const float par_a[], const float par_t[], int par_num_pulses)
         : num_pulses(par_num_pulses) {
-        for (int i = 0; i < MAX_INPUT_SHAPER_PULSES; ++i) {
+        for (int i = 0; i < INPUT_SHAPER_MAX_PULSES; ++i) {
             if (i < num_pulses) {
                 a[i] = par_a[i];
                 t[i] = par_t[i];
@@ -37,8 +44,8 @@ struct Shaper {
         }
     }
 
-    float a[MAX_INPUT_SHAPER_PULSES] = {};
-    float t[MAX_INPUT_SHAPER_PULSES] = {};
+    float a[INPUT_SHAPER_MAX_PULSES] = {};
+    float t[INPUT_SHAPER_MAX_PULSES] = {};
     int num_pulses;
 };
 
@@ -52,12 +59,12 @@ typedef struct pulse_t {
 
 typedef struct input_shaper_pulses_t {
     uint8_t num_pulses;
-    std::array<pulse_t, MAX_INPUT_SHAPER_PULSES> pulses;
+    std::array<pulse_t, INPUT_SHAPER_MAX_PULSES> pulses;
 } input_shaper_pulses_t;
 
 typedef struct logical_axis_input_shaper_t {
-    std::array<const move_t *, MAX_INPUT_SHAPER_PULSES> m_move;
-    std::array<double, MAX_INPUT_SHAPER_PULSES> m_next_change;
+    std::array<const move_t *, INPUT_SHAPER_MAX_PULSES> m_move;
+    std::array<double, INPUT_SHAPER_MAX_PULSES> m_next_change;
 
     const input_shaper_pulses_t *m_pulses;
 
@@ -88,11 +95,7 @@ typedef struct logical_axis_input_shaper_t {
 } logical_axis_input_shaper_t;
 
 typedef struct input_shaper_state_t {
-#ifdef COREXY
-    std::array<logical_axis_input_shaper_t, 2> m_axis_shapers;
-#else
-    std::array<logical_axis_input_shaper_t, 1> m_axis_shapers;
-#endif
+    std::array<logical_axis_input_shaper_t, INPUT_SHAPER_MAX_LOGICAL_AXES> m_axis_shapers;
 
     size_t m_num_axis_shapers = 0;
 
