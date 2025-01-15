@@ -102,6 +102,8 @@ static void HCD_Port_IRQHandler(HCD_HandleTypeDef *hhcd);
   * @{
   */
 
+#define HCD_MAX_TXERR 80U
+
 /**
   * @brief  Initialize the host driver.
   * @param  hhcd HCD handle
@@ -1706,7 +1708,7 @@ static void HCD_HC_OUT_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
     else
     {
       hhcd->hc[chnum].ErrCnt++;
-      if (hhcd->hc[chnum].ErrCnt > 2U)
+      if (hhcd->hc[chnum].ErrCnt > HCD_MAX_TXERR)
       {
         hhcd->hc[chnum].ErrCnt = 0U;
         hhcd->hc[chnum].urb_state = URB_ERROR;
@@ -1799,7 +1801,7 @@ static void HCD_HC_OUT_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
     {
       hhcd->hc[chnum].state = HC_HALTED;
       hhcd->hc[chnum].ErrCnt++;
-      if (hhcd->hc[chnum].ErrCnt > 2U)
+      if (hhcd->hc[chnum].ErrCnt > HCD_MAX_TXERR)
       {
         hhcd->hc[chnum].ErrCnt = 0U;
         hhcd->hc[chnum].urb_state = URB_ERROR;
