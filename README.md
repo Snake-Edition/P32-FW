@@ -112,7 +112,7 @@ See /ProjectOptions.cmake for more information about those cache variables.
 ```bash
 mkdir build-tests
 cd build-tests
-cmake ..
+cmake .. -DBOARD=BUDDY
 make tests
 ctest .
 ```
