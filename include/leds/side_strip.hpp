@@ -13,17 +13,19 @@ namespace leds {
 
 class SideStrip : public LedStrip {
 public:
-    static constexpr bool HasWhiteLed() {
+    static constexpr bool has_white_led_and_enclosure_on_second_driver() {
 #if PRINTER_IS_PRUSA_XL()
         return true;
-#elif PRINTER_IS_PRUSA_iX()
+#else
         return false;
-#elif PRINTER_IS_PRUSA_COREONE()
-        return true;
-#elif defined(UNITTESTS)
+#endif
+    }
+
+    static constexpr bool has_white_led() {
+#if PRINTER_IS_PRUSA_COREONE()
         return true;
 #else
-    #error "Not defined for this printer."
+        return has_white_led_and_enclosure_on_second_driver();
 #endif
     }
 

@@ -37,7 +37,7 @@ void SideStripControl::Tick() {
     }
 
     auto set_idle = [&](int transition_ms = 5000) {
-        if (SideStrip::HasWhiteLed()) {
+        if (SideStrip::has_white_led()) {
             TransitionToColor(ColorRGBW(0, 0, 0, 40), transition_ms);
         } else {
             TransitionToColor(ColorRGBW(40, 40, 40, 40), transition_ms);
@@ -46,7 +46,7 @@ void SideStripControl::Tick() {
     };
 
     auto set_active = [&](int transition_ms = 500) {
-        if (SideStrip::HasWhiteLed()) {
+        if (SideStrip::has_white_led()) {
             TransitionToColor(ColorRGBW(0, 0, 0, 255), transition_ms);
         } else {
             TransitionToColor(ColorRGBW(255, 255, 255, 255), transition_ms);
