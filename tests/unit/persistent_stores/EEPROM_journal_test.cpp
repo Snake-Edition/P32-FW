@@ -333,9 +333,9 @@ inline constexpr TestStruct default_test_struct {};
 inline constexpr NestedStruct default_nested_struct {};
 
 struct TestEEPROMJournalConfigV0 : public CurrentStoreConfig<Backend, Test_EEPROM_journal> {
-    StoreItem<int32_t, default_int32_t, 0xAA> int_item;
-    StoreItem<TestStruct, default_test_struct, 0x1000> struct_item;
-    StoreItem<NestedStruct, default_nested_struct, 0x2000> nested_struct_item;
+    StoreItem<int32_t, default_int32_t, ItemFlags {}, 0xAA> int_item;
+    StoreItem<TestStruct, default_test_struct, ItemFlags {}, 0x1000> struct_item;
+    StoreItem<NestedStruct, default_nested_struct, ItemFlags {}, 0x2000> nested_struct_item;
 };
 struct TestDeprecatedEEPROMJournalItemsV0 : public DeprecatedStoreConfig<Backend> {
 };
@@ -559,7 +559,7 @@ inline journal::Backend &Small_Test_EEPROM_journal() {
     return journal::backend_instance<100, 768, EEPROMInstance>();
 }
 struct TestEEPROMJournalConfigBigItem : public CurrentStoreConfig<Backend, Small_Test_EEPROM_journal> {
-    StoreItem<std::array<int32_t, 64>, default_array, 1> random_data;
+    StoreItem<std::array<int32_t, 64>, default_array, ItemFlags {}, 1> random_data;
 };
 
 TEST_CASE("journal::EEPROM::Bank migration during transaction") {
@@ -591,9 +591,9 @@ TEST_CASE("journal::EEPROM::Bank migration during transaction") {
 }
 
 struct TestEEPROMJournalConfigV1 : public CurrentStoreConfig<Backend, Test_EEPROM_journal> {
-    StoreItem<int32_t, default_int32_t, 0x11> int_item;
-    StoreItem<TestStruct, default_test_struct, 0x1000> struct_item;
-    StoreItem<NestedStruct, default_nested_struct, 0x2000> nested_struct_item;
+    StoreItem<int32_t, default_int32_t, ItemFlags {}, 0x11> int_item;
+    StoreItem<TestStruct, default_test_struct, ItemFlags {}, 0x1000> struct_item;
+    StoreItem<NestedStruct, default_nested_struct, ItemFlags {}, 0x2000> nested_struct_item;
 };
 
 struct TestDeprecatedEEPROMJournalItemsV1 : public DeprecatedStoreConfig<Backend> {
@@ -601,9 +601,9 @@ struct TestDeprecatedEEPROMJournalItemsV1 : public DeprecatedStoreConfig<Backend
 };
 
 struct TestEEPROMJournalConfigV2 : public CurrentStoreConfig<Backend, Test_EEPROM_journal> {
-    StoreItem<int32_t, default_int32_t, 0x22> int_item;
-    StoreItem<TestStruct, default_test_struct, 0x1000> struct_item;
-    StoreItem<NestedStruct, default_nested_struct, 0x2000> nested_struct_item;
+    StoreItem<int32_t, default_int32_t, ItemFlags {}, 0x22> int_item;
+    StoreItem<TestStruct, default_test_struct, ItemFlags {}, 0x1000> struct_item;
+    StoreItem<NestedStruct, default_nested_struct, ItemFlags {}, 0x2000> nested_struct_item;
 };
 
 struct TestDeprecatedEEPROMJournalItemsV2 : public DeprecatedStoreConfig<Backend> {
@@ -612,9 +612,9 @@ struct TestDeprecatedEEPROMJournalItemsV2 : public DeprecatedStoreConfig<Backend
 };
 
 struct TestEEPROMJournalConfigV3 : public CurrentStoreConfig<Backend, Test_EEPROM_journal> {
-    StoreItem<int32_t, default_int32_t, 0x33> int_item;
-    StoreItem<TestStruct, default_test_struct, 0x1000> struct_item;
-    StoreItem<NestedStruct, default_nested_struct, 0x2000> nested_struct_item;
+    StoreItem<int32_t, default_int32_t, ItemFlags {}, 0x33> int_item;
+    StoreItem<TestStruct, default_test_struct, ItemFlags {}, 0x1000> struct_item;
+    StoreItem<NestedStruct, default_nested_struct, ItemFlags {}, 0x2000> nested_struct_item;
 };
 
 struct TestDeprecatedEEPROMJournalItemsV3 : public DeprecatedStoreConfig<Backend> {
@@ -785,7 +785,7 @@ TEST_CASE("journal::EEPROM::Item migration") {
 }
 
 struct StoreConfig_BFW3553 : public CurrentStoreConfig<Backend, Test_EEPROM_journal> {
-    StoreItem<int32_t, default_int32_t, 0> int_item;
+    StoreItem<int32_t, default_int32_t, ItemFlags {}, 0> int_item;
 };
 
 TEST_CASE("journal::EEPROM::Regression BFW-3553") {

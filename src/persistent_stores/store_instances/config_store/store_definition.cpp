@@ -14,6 +14,21 @@ namespace config_store_ns {
 #if not HAS_CONFIG_STORE_WO_BACKEND()
 static_assert((sizeof(CurrentStore) + aggregate_arity<CurrentStore>() * sizeof(journal::Backend::ItemHeader)) < (BANK_SIZE / 100) * 75, "EEPROM bank is almost full");
 static_assert(journal::has_unique_items<config_store_ns::CurrentStore>(), "Just added items are causing collisions with reserved backend IDs");
+static_assert([] {
+    uint16_t problematic_item = 0;
+    CurrentStore s;
+    visit_all_struct_fields(s, [&problematic_item]<typename T>(T &) {
+        if constexpr ((T::flags & ~(ItemFlag::dev_items | ItemFlag::common_misconfigurations)) == 0) {
+            if constexpr (std::is_base_of_v<journal::JournalItemArrayBase, T>) {
+                problematic_item = T::hashed_id_first;
+            } else {
+                problematic_item = T::hashed_id;
+            }
+        }
+    });
+    return problematic_item;
+}() == 0,
+    "All items must have a flag set (not counting dev_items/common_misconfigurations)");
 #endif
 
 void CurrentStore::perform_config_check() {

@@ -34,7 +34,7 @@ struct NBJournalCurrentStoreConfig {
 
 // shorthand to allow easier change of journal-based store into no_backend-based store
 struct NBJournalDeprecatedStoreConfig {
-    template <typename DataT, DataT DefaultVal, uint16_t hash>
+    template <typename DataT, DataT DefaultVal, uint16_t hash, auto...>
     using StoreItem = DeprecatedItem<DataT, DefaultVal>;
 };
 
