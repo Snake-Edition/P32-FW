@@ -355,27 +355,6 @@ bool logical_axis_input_shaper_t::update(const input_shaper_state_t &axis_is) {
     m_print_time = nearest_next_change;
     m_nearest_next_change_idx = this->calc_nearest_next_change_idx();
 
-    // Change small accelerations to zero as prevention for numeric issues.
-    if (std::abs(m_half_accel) <= INPUT_SHAPER_ACCELERATION_EPSILON) {
-        const bool start_v_prev_sign = std::signbit(m_start_v);
-
-        // Adjust start_v to compensate for zeroed acceleration.
-        m_start_v += m_half_accel * (this->get_nearest_next_change() - m_print_time);
-        if (std::signbit(m_start_v) != start_v_prev_sign) {
-            // When we cross zero velocity, set the start velocity to zero.
-            // Typically, when zero velocity is crossed, it will be a very small value.
-            // So setting the start velocity to zero should be ok.
-            m_start_v = 0.;
-        }
-
-        m_half_accel = 0.;
-    }
-
-    // Change small velocities to zero as prevention for numeric issues.
-    if (std::abs(m_start_v) <= INPUT_SHAPER_VELOCITY_EPSILON) {
-        m_start_v = 0.;
-    }
-
     return true;
 }
 
@@ -432,6 +411,11 @@ bool input_shaper_state_update(input_shaper_state_t &is_state, const uint8_t phy
         is_state.half_accel = first.m_half_accel;
     }
 
+    // Because all logical axis input shapers have the same time coefficients, we just need to get m_print_time and the value
+    // of get_nearest_next_change() from any arbitrary logical input shaper.
+    is_state.print_time = first.m_print_time;
+    is_state.nearest_next_change = first.get_nearest_next_change();
+
     // Change small accelerations to zero as prevention for numeric issues.
     if (std::abs(is_state.half_accel) <= INPUT_SHAPER_ACCELERATION_EPSILON) {
         const bool start_v_prev_sign = std::signbit(is_state.start_v);
@@ -453,15 +437,8 @@ bool input_shaper_state_update(input_shaper_state_t &is_state, const uint8_t phy
         is_state.start_v = 0.;
     }
 
-    // Because all logical axis input shapers have the same time coefficients, we just need to get m_print_time and the value
-    // of get_nearest_next_change() from any arbitrary logical input shaper.
     is_state.step_dir = input_shaper_state_step_dir(is_state);
-    is_state.print_time = first.m_print_time;
-    is_state.nearest_next_change = first.get_nearest_next_change();
-
-    if (is_state.is_crossing_zero_velocity) {
-        is_state.is_crossing_zero_velocity = false;
-    }
+    is_state.is_crossing_zero_velocity = false;
 
     // Determine if the current micro move segment is crossing zero velocity because when zero velocity is crossed, we need to flip the step direction.
     // Zero velocity could be crossed only when start_v and half_accel have different signs and start_v isn't zero.
