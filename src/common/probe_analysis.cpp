@@ -605,6 +605,12 @@ bool ProbeAnalysisBase::HasOutOfRangeFeature(Features &features, const char **fe
         *value = features.r2_60ms.decompressionEnd;
         return true;
     }
+    auto compressedvsDecompressedAngleAfter = features.compressedLine.CalculateAngle(features.afterDecompressionLine, false);
+    if (std::abs(compressedvsDecompressedAngleAfter) > 40) {
+        *feature = "angle_after";
+        *value = compressedvsDecompressedAngleAfter;
+        return true;
+    }
     return false;
 }
 
