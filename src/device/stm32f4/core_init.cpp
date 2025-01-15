@@ -1,7 +1,7 @@
 #include <device/hal.h>
 #include <device/cmsis.h>
 
-inline RCC_OscInitTypeDef RCC_OscInitStruct = [] {
+inline constexpr RCC_OscInitTypeDef RCC_OscInitStruct = [] {
     RCC_OscInitTypeDef rcc_OscInit {};
 #if (BOARD_IS_BUDDY())
     rcc_OscInit.OscillatorType = RCC_OSCILLATORTYPE_LSI | RCC_OSCILLATORTYPE_HSE;
@@ -25,7 +25,7 @@ inline RCC_OscInitTypeDef RCC_OscInitStruct = [] {
     return rcc_OscInit;
 }();
 
-inline RCC_ClkInitTypeDef RCC_ClkInitStruct = {
+inline constexpr RCC_ClkInitTypeDef RCC_ClkInitStruct = {
     .ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
         | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2,
     .SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK,
