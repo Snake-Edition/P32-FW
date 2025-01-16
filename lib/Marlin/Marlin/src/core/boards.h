@@ -257,7 +257,6 @@
 // SAM3X8C ARM Cortex M3
 //
 
-#define BOARD_PRINTRBOARD_G2          3100  // PRINTRBOARD G2
 #define BOARD_ADSK                    3101  // Arduino DUE Shield Kit (ADSK)
 
 //

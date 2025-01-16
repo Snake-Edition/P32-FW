@@ -306,11 +306,6 @@ typedef struct SettingsDataStruct {
   tmc_stealth_enabled_t tmc_stealth_enabled;            // M569 X Y Z X2 Y2 Z2 Z3 E0 E1 E2 E3 E4 E5
 
   //
-  // HAS_MOTOR_CURRENT_PWM
-  //
-  uint32_t motor_current_setting[3];                    // M907 X Z E
-
-  //
   // CNC_COORDINATE_SYSTEMS
   //
   xyz_pos_t coordinate_system[MAX_COORDINATE_SYSTEMS];  // G54-G59.3
@@ -400,10 +395,6 @@ void MarlinSettings::postprocess() {
 
   #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
     refresh_bed_level();
-  #endif
-
-  #if HAS_MOTOR_CURRENT_PWM
-    stepper.refresh_motor_power();
   #endif
 
   #if ENABLED(FWRETRACT)
@@ -1104,20 +1095,6 @@ void MarlinSettings::postprocess() {
         #endif // MAX_EXTRUDERS
       #endif
       EEPROM_WRITE(tmc_stealth_enabled);
-    }
-
-    //
-    // Motor Current PWM
-    //
-    {
-      _FIELD_TEST(motor_current_setting);
-
-      #if HAS_MOTOR_CURRENT_PWM
-        EEPROM_WRITE(stepper.motor_current_setting);
-      #else
-        const xyz_ulong_t no_current{0};
-        EEPROM_WRITE(no_current);
-      #endif
     }
 
     //
@@ -1865,19 +1842,6 @@ void MarlinSettings::postprocess() {
       }
 
       //
-      // Motor Current PWM
-      //
-      {
-        uint32_t motor_current_setting[3];
-        _FIELD_TEST(motor_current_setting);
-        EEPROM_READ(motor_current_setting);
-        #if HAS_MOTOR_CURRENT_PWM
-          if (!validating)
-            COPY(stepper.motor_current_setting, motor_current_setting);
-        #endif
-      }
-
-      //
       // CNC Coordinate System
       //
       {
@@ -2458,16 +2422,6 @@ void MarlinSettings::reset() {
   );
 
   reset_stepper_drivers();
-
-  //
-  // Motor Current PWM
-  //
-
-  #if HAS_MOTOR_CURRENT_PWM
-    constexpr uint32_t tmp_motor_current_setting[3] = PWM_MOTOR_CURRENT;
-    for (uint8_t q = 3; q--;)
-      stepper.digipot_current(q, (stepper.motor_current_setting[q] = tmp_motor_current_setting[q]));
-  #endif
 
   //
   // CNC Coordinate System
@@ -3272,16 +3226,6 @@ void MarlinSettings::reset() {
       #endif // HAS_STEALTHCHOP
 
     #endif // HAS_TRINAMIC
-
-    #if HAS_MOTOR_CURRENT_PWM
-      CONFIG_ECHO_HEADING("Stepper motor currents:");
-      CONFIG_ECHO_START();
-      SERIAL_ECHOLNPAIR(
-          "  M907 X", stepper.motor_current_setting[0]
-        , " Z", stepper.motor_current_setting[1]
-        , " E", stepper.motor_current_setting[2]
-      );
-    #endif
 
     /**
      * Advanced Pause filament load & unload lengths

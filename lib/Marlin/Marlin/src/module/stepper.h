@@ -259,11 +259,6 @@ class Stepper {
     // Triggered position of an axis in steps
     static int32_t triggered_position(const AxisEnum axis);
 
-    #if HAS_DIGIPOTSS || HAS_MOTOR_CURRENT_PWM
-      static void digitalPotWrite(const int16_t address, const int16_t value);
-      static void digipot_current(const uint8_t driver, const int16_t current);
-    #endif
-
     #if HAS_MICROSTEPS || HAS_DRIVER(TMC2130) || HAS_DRIVER(TMC2209)
       static void microstep_ms(const uint8_t driver, const int8_t ms1, const int8_t ms2, const int8_t ms3);
       static void microstep_mode(const uint8_t driver, const uint8_t stepping);
@@ -291,10 +286,6 @@ class Stepper {
 
     #if ENABLED(BABYSTEPPING)
       static void babystep(const AxisEnum axis, const bool direction); // perform a short step with a single stepper motor, outside of any convention
-    #endif
-
-    #if HAS_MOTOR_CURRENT_PWM
-      static void refresh_motor_power();
     #endif
 
     // Set the current position in steps

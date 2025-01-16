@@ -245,10 +245,6 @@
  * M876 - Handle Prompt Response. (Requires HOST_PROMPT_SUPPORT and not EMERGENCY_PARSER)
  * M900 - Get or Set Linear Advance K-factor. (PA Compatibility with old LIN_ADVANCE)
  * M906 - Set or get motor current in milliamps using axis codes X, Y, Z, E. Report values if no axis codes given. (Requires at least one _DRIVER_TYPE defined as TMC2130/2160/5130/5160/2208/2209/2660 or L6470)
- * M907 - Set digital trimpot motor current using axis codes. (Requires a board with digital trimpots)
- * M908 - Control digital trimpot directly. (Requires DAC_STEPPER_CURRENT or DIGIPOTSS_PIN)
- * M909 - Print digipot/DAC current value. (Requires DAC_STEPPER_CURRENT)
- * M910 - Commit digipot/DAC value to external EEPROM via I2C. (Requires DAC_STEPPER_CURRENT)
  * M911 - Report stepper driver overtemperature pre-warn condition. (Requires at least one _DRIVER_TYPE defined as TMC2130/2160/5130/5160/2208/2209/2660)
  * M912 - Clear stepper driver overtemperature pre-warn condition flag. (Requires at least one _DRIVER_TYPE defined as TMC2130/2160/5130/5160/2208/2209/2660)
  * M913 - Set HYBRID_THRESHOLD speed. (Requires HYBRID_THRESHOLD)
@@ -1003,17 +999,6 @@ private:
     static void M916();
     static void M917();
     static void M918();
-  #endif
-
-  #if HAS_DIGIPOTSS || HAS_MOTOR_CURRENT_PWM || EITHER(DIGIPOT_I2C, DAC_STEPPER_CURRENT)
-    static void M907();
-    #if HAS_DIGIPOTSS || ENABLED(DAC_STEPPER_CURRENT)
-      static void M908();
-      #if ENABLED(DAC_STEPPER_CURRENT)
-        static void M909();
-        static void M910();
-      #endif
-    #endif
   #endif
 
   #if ENABLED(SDSUPPORT)

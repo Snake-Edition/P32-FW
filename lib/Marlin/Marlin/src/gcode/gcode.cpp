@@ -812,17 +812,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       // Linear Advance / Pressure Advance compatibility
       case 900: M900(); break;                                    // M900: Set advance K factor.
 
-      #if HAS_DIGIPOTSS || HAS_MOTOR_CURRENT_PWM || EITHER(DIGIPOT_I2C, DAC_STEPPER_CURRENT)
-        case 907: M907(); break;                                  // M907: Set digital trimpot motor current using axis codes.
-        #if HAS_DIGIPOTSS || ENABLED(DAC_STEPPER_CURRENT)
-          case 908: M908(); break;                                // M908: Control digital trimpot directly.
-          #if ENABLED(DAC_STEPPER_CURRENT)
-            case 909: M909(); break;                              // M909: Print digipot/DAC current value
-            case 910: M910(); break;                              // M910: Commit digipot/DAC value to external EEPROM
-          #endif
-        #endif
-      #endif
-
       #if HAS_TRINAMIC
         case 122: M122(); break;                                  // M122: Report driver configuration and status
         case 906: M906(); break;                                  // M906: Set motor current in milliamps using axis codes X, Y, Z, E

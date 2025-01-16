@@ -2190,16 +2190,6 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
 #endif
 
 /**
- * Digipot requirement
- */
-#if ENABLED(DIGIPOT_MCP4018)
-  #if !defined(DIGIPOTS_I2C_SDA_X) || !defined(DIGIPOTS_I2C_SDA_Y) || !defined(DIGIPOTS_I2C_SDA_Z) \
-    || !defined(DIGIPOTS_I2C_SDA_E0) || !defined(DIGIPOTS_I2C_SDA_E1)
-      #error "DIGIPOT_MCP4018 requires DIGIPOTS_I2C_SDA_* pins to be defined."
-  #endif
-#endif
-
-/**
  * Check per-axis initializers for errors
  */
 constexpr float sanity_arr_1[] = DEFAULT_AXIS_STEPS_PER_UNIT,
@@ -2491,12 +2481,6 @@ static_assert(   _ARR_TEST(3,0) && _ARR_TEST(3,1) && _ARR_TEST(3,2)
       #error "SPINDLE_LASER_PWM_PIN conflicts with FAN2_PIN."
     #elif _PIN_CONFLICT(CONTROLLERFAN)
       #error "SPINDLE_LASER_PWM_PIN conflicts with CONTROLLERFAN_PIN."
-    #elif _PIN_CONFLICT(MOTOR_CURRENT_PWM_XY)
-      #error "SPINDLE_LASER_PWM_PIN conflicts with MOTOR_CURRENT_PWM_XY."
-    #elif _PIN_CONFLICT(MOTOR_CURRENT_PWM_Z)
-      #error "SPINDLE_LASER_PWM_PIN conflicts with MOTOR_CURRENT_PWM_Z."
-    #elif _PIN_CONFLICT(MOTOR_CURRENT_PWM_E)
-      #error "SPINDLE_LASER_PWM_PIN conflicts with MOTOR_CURRENT_PWM_E."
     #endif
   #endif
   #undef _PIN_CONFLICT
