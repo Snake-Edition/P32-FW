@@ -696,62 +696,62 @@ void Stepper::microstep_readings(){
       SERIAL_ECHOPGM("X2:");
       snprintf(msg,7,"%u\n",stepperX2.microsteps());
       stepperX2.microsteps();
-SERIAL_ECHOPGM(msg);
-#endif
+      SERIAL_ECHOPGM(msg);
+    #endif
     #if AXIS_IS_TMC(Y)
       SERIAL_ECHOPGM("Y:");
       snprintf(msg,7,"%u\n",stepperY.microsteps());
-  SERIAL_ECHOPGM(msg);
-#endif
+      SERIAL_ECHOPGM(msg);
+    #endif
     #if AXIS_IS_TMC(Y2)
       SERIAL_ECHOPGM("Y2:");
       snprintf(msg,7,"%u\n",stepperY2.microsteps());
-SERIAL_ECHOPGM(msg);
-#endif
+      SERIAL_ECHOPGM(msg);
+    #endif
     #if AXIS_IS_TMC(Z)
       SERIAL_ECHOPGM("Z:");
       snprintf(msg,7,"%u\n",stepperZ.microsteps());
-  SERIAL_ECHOPGM(msg);
-#endif
+      SERIAL_ECHOPGM(msg);
+    #endif
     #if AXIS_IS_TMC(Z2)
       SERIAL_ECHOPGM("Z2:");
       snprintf(msg,7,"%u\n",stepperZ2.microsteps());
-SERIAL_ECHOPGM(msg);
-#endif
+      SERIAL_ECHOPGM(msg);
+    #endif
     #if AXIS_IS_TMC(Z3)
       SERIAL_ECHOPGM("Z3:");
       snprintf(msg,7,"%u\n",stepperZ3.microsteps());
-SERIAL_ECHOPGM(msg);
-#endif
+      SERIAL_ECHOPGM(msg);
+    #endif
     #if AXIS_IS_TMC(E0)
       SERIAL_ECHOPGM("E0:");
       snprintf(msg,7,"%u\n",stepperE0.microsteps());
-  SERIAL_ECHOPGM(msg);
-#endif
+      SERIAL_ECHOPGM(msg);
+    #endif
     #if AXIS_IS_TMC(E1)
       SERIAL_ECHOPGM("E1:");
       snprintf(msg,7,"%u\n",stepperE1.microsteps());
-SERIAL_ECHOPGM(msg);
-#endif
+      SERIAL_ECHOPGM(msg);
+    #endif
     #if AXIS_IS_TMC(E2)
       SERIAL_ECHOPGM("E2:");
       snprintf(msg,7,"%u\n",stepperE2.microsteps());
-SERIAL_ECHOPGM(msg);
-#endif
+      SERIAL_ECHOPGM(msg);
+    #endif
     #if AXIS_IS_TMC(E3)
       SERIAL_ECHOPGM("E3:");
       snprintf(msg,7,"%u\n",stepperE2.microsteps());
-SERIAL_ECHOPGM(msg);
-#endif
+      SERIAL_ECHOPGM(msg);
+    #endif
     #if AXIS_IS_TMC(E4)
       SERIAL_ECHOPGM("E4:");
       snprintf(msg,7,"%u\n",stepperE3.microsteps());
-SERIAL_ECHOPGM(msg);
-#endif
+      SERIAL_ECHOPGM(msg);
+    #endif
     #if AXIS_IS_TMC(E5)
       SERIAL_ECHOPGM("E5:");
       snprintf(msg,7,"%u\n",stepperE5.microsteps());
-SERIAL_ECHOPGM(msg);
-#endif
+      SERIAL_ECHOPGM(msg);
+    #endif
 }
 #endif // HAS_DRIVER(TMC2130) || HAS_DRIVER(TMC2209)
