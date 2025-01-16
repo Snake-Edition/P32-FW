@@ -825,11 +825,8 @@ private:
     static void M305();
   #endif
 
-  #if HAS_DRIVER(TMC2130) ||HAS_MICROSTEPS
+  #if HAS_DRIVER(TMC2130)
     static void M350();
-  #endif
-  #if HAS_MICROSTEPS
-    static void M351();
   #endif
 
   #if HAS_CASE_LIGHT

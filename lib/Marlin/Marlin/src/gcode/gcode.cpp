@@ -838,11 +838,8 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 918: M918(); break;                                   // M918: L6470 tuning: Increase speed until max or error
       #endif
 
-      #if HAS_DRIVER(TMC2130) || HAS_MICROSTEPS
+      #if HAS_DRIVER(TMC2130)
         case 350: M350(); break;                                  // M350: Set microstepping mode. Warning: Steps per unit remains unchanged. S code sets stepping mode for all drivers.
-      #endif
-      #if HAS_MICROSTEPS
-        case 351: M351(); break;                                  // M351: Toggle MS1 MS2 pins directly, S# determines MS1 or MS2, X# sets the pin high/low.
       #endif
       #if HAS_CASE_LIGHT
         case 355: M355(); break;                                  // M355: Set case light brightness

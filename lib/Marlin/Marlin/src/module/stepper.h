@@ -259,7 +259,7 @@ class Stepper {
     // Triggered position of an axis in steps
     static int32_t triggered_position(const AxisEnum axis);
 
-    #if HAS_MICROSTEPS || HAS_DRIVER(TMC2130) || HAS_DRIVER(TMC2209)
+    #if HAS_DRIVER(TMC2130) || HAS_DRIVER(TMC2209)
       static void microstep_ms(const uint8_t driver, const int8_t ms1, const int8_t ms2, const int8_t ms3);
       static void microstep_mode(const uint8_t driver, const uint8_t stepping);
       static void microstep_readings();
