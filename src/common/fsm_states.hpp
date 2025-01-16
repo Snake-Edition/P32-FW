@@ -4,6 +4,7 @@
 #include <array>
 #include <common/fsm_base_types.hpp>
 #include <optional>
+#include <random.h>
 
 namespace fsm {
 
@@ -16,8 +17,21 @@ public:
 private:
     std::array<State, static_cast<size_t>(ClientFSM::_count)> states;
 
+protected:
+    uint32_t state_id = 0; // unique ID of the state instance
+
 public:
-    uint32_t generation = 0;
+    inline void init_state_id() {
+        state_id = rand_u();
+    }
+
+    constexpr void increment_state_id() {
+        state_id++;
+    }
+
+    constexpr uint32_t get_state_id() const {
+        return state_id;
+    }
 
     constexpr bool is_active(ClientFSM client_fsm) const {
         return (*this)[client_fsm].has_value();

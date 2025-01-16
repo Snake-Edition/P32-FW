@@ -326,7 +326,7 @@ StateWithDialog get_state_with_dialog(bool ready) {
     // Get the state and slap top FSM dialog on top of it, if any
     DeviceState state = get_state(ready);
     const auto &fsm_states = marlin_vars().get_fsm_states();
-    const auto &fsm_gen = fsm_states.generation;
+    const auto &fsm_gen = fsm_states.get_state_id();
     const auto &top = fsm_states.get_top();
     if (!top) {
         return state;

@@ -609,7 +609,7 @@ const char *MarlinPrinter::dialog_action(uint32_t dialog_id, Response response) 
         return "No buttons";
     }
 
-    if (fsm_states.generation != dialog_id) {
+    if (fsm_states.get_state_id() != dialog_id) {
         return "Invalid dialog id";
     }
 

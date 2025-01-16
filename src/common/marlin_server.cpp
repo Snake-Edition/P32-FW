@@ -454,7 +454,7 @@ namespace {
 } // end anonymous namespace
 
 static void commit_fsm_states() {
-    ++fsm_states.generation;
+    fsm_states.increment_state_id();
     marlin_vars().set_fsm_states(fsm_states);
     fsm_states.log();
 }
@@ -525,7 +525,7 @@ void init(void) {
 
     // Random at boot, to avoid chance of reusing the same (0/1) dialog ID
     // after a reboot.
-    fsm_states.generation = rand_u();
+    fsm_states.init_state_id();
 
     marlin_vars().init();
 #if HAS_SHEET_PROFILES()

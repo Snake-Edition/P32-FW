@@ -76,7 +76,7 @@ std::optional<States::Top> States::get_top() const {
 
 void States::log() const {
 #if _DEBUG
-    log_debug(Fsm, "New generation %" PRIu32, generation);
+    log_debug(Fsm, "New generation %" PRIu32, state_id);
     for (size_t i = 0; i < states.size(); i++) {
         if (states[i].has_value()) {
             log_debug(Fsm, "%zu: %hhu", i, states[i]->GetPhase());
