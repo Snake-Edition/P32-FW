@@ -4,7 +4,7 @@
 #include <array>
 #include <common/fsm_base_types.hpp>
 #include <optional>
-#include <random.h>
+#include <utils/custom_uint31_t.hpp>
 
 namespace fsm {
 
@@ -18,18 +18,18 @@ private:
     std::array<State, static_cast<size_t>(ClientFSM::_count)> states;
 
 protected:
-    uint32_t state_id = 0; // unique ID of the state instance
+    StateId state_id = 0; // unique ID of the state instance
 
 public:
     inline void init_state_id() {
-        state_id = rand_u();
+        state_id = StateId::generate_random_uint31();
     }
 
     constexpr void increment_state_id() {
         state_id++;
     }
 
-    constexpr uint32_t get_state_id() const {
+    inline StateId get_state_id() const {
         return state_id;
     }
 

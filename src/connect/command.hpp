@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <string_view>
 #include <variant>
+#include <custom_uint31_t.hpp>
 
 namespace connect_client {
 
@@ -87,7 +88,7 @@ struct SetToken {
 struct ResetPrinter {};
 struct SendStateInfo {};
 struct DialogAction {
-    uint32_t dialog_id;
+    printer_state::DialogId dialog_id;
     Response response;
 };
 

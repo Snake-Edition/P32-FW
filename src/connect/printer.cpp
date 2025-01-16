@@ -167,7 +167,10 @@ uint32_t Printer::info_fingerprint() const {
 uint32_t Printer::Params::state_fingerprint() const {
     Crc crc;
 
-    const uint32_t dialog_id = state.dialog.has_value() ? state.dialog->dialog_id : 0xFFFFFFFF;
+    // internal variable used to calculate fingerprint and may exceed 31bits reserved for DialogId's
+    // value 0xFFFFFFFF reserved for missing Id
+    const uint32_t dialog_id = state.dialog.has_value() ? state.dialog->dialog_id.to_uint32_t() : 0xFFFFFFFF;
+
     return crc
         .add(state.device_state)
         .add(dialog_id)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <random.h>
 class Custom_uint31_t {
 public:
     // Constructor with optional initialization
@@ -44,6 +45,10 @@ public:
     // Overload subtraction arithmetic operators, to cover properlyb 31bit overflow
     Custom_uint31_t operator-(const Custom_uint31_t &other) const {
         return Custom_uint31_t(get_value() - other.get_value());
+    }
+
+    static inline Custom_uint31_t generate_random_uint31() {
+        return static_cast<Custom_uint31_t>(rand_u() & mask_);
     }
 
 private:

@@ -252,7 +252,7 @@ namespace {
             }
 
             if (params.state.dialog.has_value()) {
-                JSON_FIELD_INT_G(params.state.dialog.has_value(), "dialog_id", params.state.dialog->dialog_id) JSON_COMMA;
+                JSON_FIELD_INT_G(params.state.dialog.has_value(), "dialog_id", params.state.dialog->dialog_id.to_uint32_t()) JSON_COMMA;
             }
             // State is sent always, first because it seems important, but
             // also, we want something that doesn't have the final comma on
@@ -670,7 +670,7 @@ namespace {
             }
 
             if (params.state.dialog.has_value()) {
-                JSON_FIELD_INT_G(params.state.dialog.has_value(), "dialog_id", params.state.dialog->dialog_id) JSON_COMMA;
+                JSON_FIELD_INT_G(params.state.dialog.has_value(), "dialog_id", params.state.dialog->dialog_id.to_uint32_t()) JSON_COMMA;
             }
             JSON_FIELD_STR("state", to_str(params.state.device_state)) JSON_COMMA;
             if (event.command_id.has_value()) {

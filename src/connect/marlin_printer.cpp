@@ -598,7 +598,7 @@ void MarlinPrinter::reset_printer() {
     NVIC_SystemReset();
 }
 
-const char *MarlinPrinter::dialog_action(uint32_t dialog_id, Response response) {
+const char *MarlinPrinter::dialog_action(printer_state::DialogId dialog_id, Response response) {
     const fsm::States fsm_states = marlin_vars().get_fsm_states();
     const std::optional<fsm::States::Top> top = fsm_states.get_top();
 

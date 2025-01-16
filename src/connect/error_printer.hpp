@@ -17,7 +17,7 @@ private:
     char title[crash_dump::MSG_TITLE_MAX_LEN + 1];
     char text[crash_dump::MSG_MAX_LEN + 1];
     uint16_t error_code;
-    uint32_t dialog_id;
+    printer_state::DialogId dialog_id;
     virtual void renew(std::optional<SharedBuffer::Borrow> paths) override;
     virtual void drop_paths() override;
     virtual Params params() const override;
@@ -43,7 +43,7 @@ private:
     virtual const char *get_cancel_object_name(char *buffer, size_t size, size_t index) const override;
 #endif
     virtual void reset_printer() override;
-    virtual const char *dialog_action(uint32_t dialog_id, Response response) override;
+    virtual const char *dialog_action(printer_state::DialogId dialog_id, Response response) override;
     virtual std::optional<FinishedJobResult> get_prior_job_result(uint16_t job_id) const override;
     virtual void set_slot_info(size_t, const SlotInfo &);
 

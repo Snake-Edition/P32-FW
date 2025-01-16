@@ -295,7 +295,7 @@ public:
     // Does not return if successful
     virtual void reset_printer() = 0;
 
-    virtual const char *dialog_action(uint32_t dialog_id, Response response) = 0;
+    virtual const char *dialog_action(printer_state::DialogId dialog_id, Response response) = 0;
     virtual std::optional<FinishedJobResult> get_prior_job_result(uint16_t job_id) const = 0;
 
     // Returns a newly reloaded config and a flag if it changed since last load
