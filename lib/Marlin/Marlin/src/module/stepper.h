@@ -227,103 +227,10 @@ class Stepper {
 
   public:
 
-#if 0
-    #if HAS_EXTRA_ENDSTOPS || ENABLED(Z_STEPPER_AUTO_ALIGN)
-      static bool separate_multi_axis;
-    #endif
-
-    #if HAS_MOTOR_CURRENT_PWM
-      #ifndef PWM_MOTOR_CURRENT
-        #define PWM_MOTOR_CURRENT DEFAULT_PWM_MOTOR_CURRENT
-      #endif
-      static uint32_t motor_current_setting[3];
-      static bool initialized;
-    #endif
-
-    static bool independent_XY_stepping_enabled;
-#endif
   private:
 
     static uint8_t last_direction_bits,     // The next stepping-bits to be output
                    axis_did_move;           // Last Movement in the given direction is not null, as computed when the last movement was fetched from planner
-
-#if 0
-    // Last-moved extruder, as set when the last movement was fetched from planner
-    #if EXTRUDERS < 2
-      static constexpr uint8_t last_moved_extruder = 0;
-    #elif DISABLED(MIXING_EXTRUDER)
-      static uint8_t last_moved_extruder;
-    #endif
-
-    #if ENABLED(X_DUAL_ENDSTOPS)
-      static bool locked_X_motor, locked_X2_motor;
-    #endif
-    #if ENABLED(Y_DUAL_ENDSTOPS)
-      static bool locked_Y_motor, locked_Y2_motor;
-    #endif
-    #if Z_MULTI_ENDSTOPS || ENABLED(Z_STEPPER_AUTO_ALIGN)
-      static bool locked_Z_motor, locked_Z2_motor;
-    #endif
-    #if ENABLED(Z_TRIPLE_ENDSTOPS) || BOTH(Z_STEPPER_AUTO_ALIGN, Z_TRIPLE_STEPPER_DRIVERS)
-      static bool locked_Z3_motor;
-    #endif
-
-    static uint32_t acceleration_time, deceleration_time; // time measured in Stepper Timer ticks
-    static uint8_t steps_per_isr;         // Count of steps to perform per Stepper ISR call
-
-    #if ENABLED(ADAPTIVE_STEP_SMOOTHING)
-      static uint8_t oversampling_factor; // Oversampling factor (log2(multiplier)) to increase temporal resolution of axis
-    #else
-      static constexpr uint8_t oversampling_factor = 0;
-    #endif
-
-    // Delta error variables for the Bresenham line tracer
-    static xyze_long_t delta_error;
-    static xyze_ulong_t advance_dividend;
-    static uint32_t advance_divisor,
-                    step_events_completed,  // The number of step events executed in the current block
-                    accelerate_until,       // The point from where we need to stop acceleration
-                    decelerate_after,       // The point from where we need to start decelerating
-                    step_event_count;       // The total event count for the current block
-
-    #if EXTRUDERS > 1 || ENABLED(MIXING_EXTRUDER)
-      static uint8_t stepper_extruder;
-    #else
-      static constexpr uint8_t stepper_extruder = 0;
-    #endif
-
-    #if ENABLED(S_CURVE_ACCELERATION)
-      static int32_t bezier_A,     // A coefficient in Bézier speed curve
-                     bezier_B,     // B coefficient in Bézier speed curve
-                     bezier_C;     // C coefficient in Bézier speed curve
-      static uint32_t bezier_F,    // F coefficient in Bézier speed curve
-                      bezier_AV;   // AV coefficient in Bézier speed curve
-      #ifdef __AVR__
-        static bool A_negative;    // If A coefficient was negative
-      #endif
-      static bool bezier_2nd_half; // If Bézier curve has been initialized or not
-    #endif
-
-    static uint32_t nextMainISR;   // time remaining for the next Step ISR
-    static inline constexpr uint32_t SLOW_AXIS_NEVER = 0xFFFFFFFF;
-    static uint32_t nextSlowAxisISR; // time remaining for the next slow axis Step ISR
-    static bool speedUpSlowAxisISR;
-    static uint32_t s_slow_axis_interval;
-    static bool s_slow_axis_can_speedup;
-    static int32_t slow_axis_steps_to_do;
-    #if ENABLED(LIN_ADVANCE)
-      static uint32_t nextAdvanceISR, LA_isr_rate;
-      static uint16_t LA_current_adv_steps, LA_final_adv_steps, LA_max_adv_steps; // Copy from current executed block. Needed because current_block is set to NULL "too early".
-      static int8_t LA_steps;
-      static bool LA_use_advance_lead;
-    #endif // LIN_ADVANCE
-
-    static uint32_t ticks_nominal_slow_axis;
-    static int32_t ticks_nominal;
-    #if DISABLED(S_CURVE_ACCELERATION)
-      static uint32_t acc_step_rate; // needed for deceleration start point
-    #endif
-#endif
 
     //
     // Exact steps at which an endstop was triggered
@@ -367,45 +274,6 @@ class Stepper {
       return awake;
     }
 
-#if 0
-    // The ISR scheduler
-    static void isr();
-
-    // The stepper pulse phase ISR
-    static void stepper_pulse_phase_isr();
-
-    // X is slower than Y
-    static bool X_is_slow_axis() {
-      return (advance_dividend[_AXIS(X)] < advance_dividend[_AXIS(Y)]);
-    }
-    // Y is slower or equal to X
-    static bool Y_is_slow_axis() {
-      return !X_is_slow_axis();
-    }
-    // Z is slower than X or Y
-    static bool Z_is_slow_axis() {
-      return ((advance_dividend[_AXIS(Z)] < advance_dividend[_AXIS(X)])
-           || (advance_dividend[_AXIS(Z)] < advance_dividend[_AXIS(Y)]));
-    }
-    // E is slower than X or Y
-    static bool E_is_slow_axis() {
-      return ((advance_dividend[_AXIS(E)] < advance_dividend[_AXIS(X)])
-           || (advance_dividend[_AXIS(E)] < advance_dividend[_AXIS(Y)]));
-    }
-    static bool slow_axis_ISR_active() {
-      return (SLOW_AXIS_NEVER != nextSlowAxisISR);
-    }
-    static void slow_axis_pulse_phase_isr();
-
-    // The stepper block processing phase ISR
-    static uint32_t stepper_block_phase_isr(uint32_t &slow_axis_interval, bool &slow_axis_can_speedup);
-
-    #if ENABLED(LIN_ADVANCE)
-      // The Linear advance stepper ISR
-      static uint32_t advance_isr();
-    #endif
-#endif
-
     // Get the position of a stepper, in steps
     static int32_t position(const AxisEnum axis);
     static int32_t position_from_startup(const AxisEnum axis);
@@ -429,17 +297,6 @@ class Stepper {
 
     // The last movement direction was not null on the specified axis. Note that motor direction is not necessarily the same.
     FORCE_INLINE static bool axis_is_moving(const AxisEnum axis) { return TEST(axis_did_move, axis); }
-
-#if 0
-    // The extruder associated to the last movement
-    FORCE_INLINE static uint8_t movement_extruder() {
-      return (0
-        #if EXTRUDERS > 1 && DISABLED(MIXING_EXTRUDER)
-          + last_moved_extruder
-        #endif
-      );
-    }
-#endif
 
     // Handle a triggered endstop
     static void endstop_triggered(const AxisEnum axis);
@@ -556,101 +413,6 @@ private:
     // Set the current position in steps
     static void _set_position(const int32_t &a, const int32_t &b, const int32_t &c, const int32_t &e);
     FORCE_INLINE static void _set_position(const abce_long_t &spos) { _set_position(spos.a, spos.b, spos.c, spos.e); }
-
-#if 0
-    FORCE_INLINE static uint32_t calc_timer_interval(uint32_t step_rate, uint8_t scale, uint8_t* loops) {
-      uint32_t timer;
-
-      // Scale the frequency, as requested by the caller
-      step_rate <<= scale;
-
-      uint8_t multistep = 1;
-      #if DISABLED(DISABLE_MULTI_STEPPING)
-
-        // The stepping frequency limits for each multistepping rate
-        static const uint32_t limit[] PROGMEM = {
-          (  MAX_STEP_ISR_FREQUENCY_1X     ),
-          (  MAX_STEP_ISR_FREQUENCY_2X >> 1),
-          (  MAX_STEP_ISR_FREQUENCY_4X >> 2),
-          (  MAX_STEP_ISR_FREQUENCY_8X >> 3),
-          ( MAX_STEP_ISR_FREQUENCY_16X >> 4),
-          ( MAX_STEP_ISR_FREQUENCY_32X >> 5),
-          ( MAX_STEP_ISR_FREQUENCY_64X >> 6),
-          (MAX_STEP_ISR_FREQUENCY_128X >> 7)
-        };
-
-        // Select the proper multistepping
-        uint8_t idx = 0;
-        while (idx < 7 && step_rate > (uint32_t)pgm_read_dword(&limit[idx])) {
-          step_rate >>= 1;
-          multistep <<= 1;
-          ++idx;
-        };
-      #else
-        NOMORE(step_rate, uint32_t(MAX_STEP_ISR_FREQUENCY_1X));
-      #endif
-      *loops = multistep;
-
-      #ifdef CPU_32_BIT
-        // In case of high-performance processor, it is able to calculate in real-time
-        timer = uint32_t(STEPPER_TIMER_RATE) / step_rate;
-      #else
-        constexpr uint32_t min_step_rate = F_CPU / 500000U;
-        NOLESS(step_rate, min_step_rate);
-        step_rate -= min_step_rate; // Correct for minimal speed
-        if (step_rate >= (8 * 256)) { // higher step rate
-          const uint8_t tmp_step_rate = (step_rate & 0x00FF);
-          const uint16_t table_address = (uint16_t)&speed_lookuptable_fast[(uint8_t)(step_rate >> 8)][0],
-                         gain = (uint16_t)pgm_read_word(table_address + 2);
-          timer = MultiU16X8toH16(tmp_step_rate, gain);
-          timer = (uint16_t)pgm_read_word(table_address) - timer;
-        }
-        else { // lower step rates
-          uint16_t table_address = (uint16_t)&speed_lookuptable_slow[0][0];
-          table_address += ((step_rate) >> 1) & 0xFFFC;
-          timer = (uint16_t)pgm_read_word(table_address)
-                - (((uint16_t)pgm_read_word(table_address + 2) * (uint8_t)(step_rate & 0x0007)) >> 3);
-        }
-        // (there is no need to limit the timer value here. All limits have been
-        // applied above, and AVR is able to keep up at 30khz Stepping ISR rate)
-      #endif
-
-      return timer;
-    }
-    FORCE_INLINE static uint32_t calc_slow_timer_interval(uint32_t fast_timer_interval, bool &slow_timer_can_speedup) {
-      slow_timer_can_speedup = false;
-      if ((0 == advance_dividend[_AXIS(X)]) || (0 == advance_dividend[_AXIS(Y)])) {
-        return 0;
-      }
-      if (advance_dividend[_AXIS(X)] == advance_dividend[_AXIS(Y)]) {
-        return 0;
-      }
-      const uint32_t slow_dividend = _MIN(advance_dividend[_AXIS(X)], advance_dividend[_AXIS(Y)]);
-      const uint32_t fast_dividend = _MAX(advance_dividend[_AXIS(X)], advance_dividend[_AXIS(Y)]);
-      uint64_t slow_timer_interval = static_cast<uint64_t>(fast_timer_interval) * static_cast<uint64_t>(fast_dividend) / static_cast<uint64_t>(slow_dividend);
-      if (static_cast<uint64_t>(fast_timer_interval) * static_cast<uint64_t>(fast_dividend) % static_cast<uint64_t>(slow_dividend)) {
-        ++slow_timer_interval;
-        slow_timer_can_speedup = true;
-      }
-
-      if (slow_timer_interval <= fast_timer_interval) return 0;
-      if (slow_timer_interval >= SLOW_AXIS_NEVER) return 0;
-      return slow_timer_interval;
-    }
-
-    #if ENABLED(S_CURVE_ACCELERATION)
-      static void _calc_bezier_curve_coeffs(const int32_t v0, const int32_t v1, const uint32_t av);
-      static int32_t _eval_bezier_curve(const uint32_t curr_step);
-    #endif
-
-    #if HAS_DIGIPOTSS || HAS_MOTOR_CURRENT_PWM
-      static void digipot_init();
-    #endif
-
-    #if HAS_MICROSTEPS
-      static void microstep_init();
-    #endif
-#endif
 
     friend class PreciseStepping;
 };
