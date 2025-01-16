@@ -1198,23 +1198,8 @@
   #ifndef MICROSTEP8
     #define MICROSTEP8 HIGH,HIGH,LOW
   #endif
-  #ifdef __SAM3X8E__
-    #if MB(ALLIGATOR)
-      #ifndef MICROSTEP16
-        #define MICROSTEP16 LOW,LOW,LOW
-      #endif
-      #ifndef MICROSTEP32
-        #define MICROSTEP32 HIGH,HIGH,LOW
-      #endif
-    #else
-      #ifndef MICROSTEP16
-        #define MICROSTEP16 HIGH,HIGH,LOW
-      #endif
-    #endif
-  #else
-    #ifndef MICROSTEP16
-      #define MICROSTEP16 HIGH,HIGH,LOW
-    #endif
+  #ifndef MICROSTEP16
+    #define MICROSTEP16 HIGH,HIGH,LOW
   #endif
 
   #define HAS_MICROSTEP1 defined(MICROSTEP1)

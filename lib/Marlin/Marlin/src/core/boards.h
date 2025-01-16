@@ -252,7 +252,6 @@
 #define BOARD_ULTRATRONICS_PRO        3022  // ReprapWorld Ultratronics Pro V1.0
 #define BOARD_ARCHIM1                 3023  // UltiMachine Archim1 (with DRV8825 drivers)
 #define BOARD_ARCHIM2                 3024  // UltiMachine Archim2 (with TMC2130 drivers)
-#define BOARD_ALLIGATOR               3025  // Alligator Board R2
 
 //
 // SAM3X8C ARM Cortex M3

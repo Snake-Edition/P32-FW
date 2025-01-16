@@ -101,10 +101,6 @@ Stepper stepper; // Singleton
 #include "../Marlin.h"
 #include "../HAL/shared/Delay.h"
 
-#if MB(ALLIGATOR)
-  #include "../feature/dac/dac_dac084s085.h"
-#endif
-
 #if HAS_DIGIPOTSS
   #include <SPI.h>
 #endif
@@ -249,15 +245,6 @@ bool Stepper::is_axis_inverted(AxisEnum axis) {
 #define _INVERT_STEP_PIN(AXIS) INVERT_## AXIS ##_STEP_PIN
 
 void Stepper::init() {
-
-  #if MB(ALLIGATOR)
-    const float motor_current[] = MOTOR_CURRENT;
-    unsigned int digipot_motor = 0;
-    for (uint8_t i = 0; i < 3 + EXTRUDERS; i++) {
-      digipot_motor = 255 * (motor_current[i] / 2.5);
-      dac084s085::setValue(i, digipot_motor);
-    }
-  #endif//MB(ALLIGATOR)
 
   // Init Microstepping Pins
   #if HAS_MICROSTEPS
