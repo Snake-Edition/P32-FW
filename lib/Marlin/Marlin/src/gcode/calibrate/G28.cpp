@@ -322,7 +322,6 @@ void GcodeSuite::G28() {
 #endif
 
   marlin_server::FSM_Holder fsm_holder(PhaseWait::homing);
-  PrintStatusMessageGuard statusGuard(PrintStatusMessage::make<PrintStatusMessage::homing>({}));
 
   bool X = parser.seen('X');
   bool Y = parser.seen('Y');
@@ -362,6 +361,7 @@ void GcodeSuite::G28() {
 /** @}*/
 
 bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
+  PrintStatusMessageGuard statusGuard(PrintStatusMessage::make<PrintStatusMessage::homing>({}));
   HomingReporter reporter;
 
   DEBUG_SECTION(log_G28, "G28", DEBUGGING(LEVELING));
@@ -705,6 +705,8 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
           // re/calibrate optimal measurement sensitivity first
           if (flags.force_calibrate || !corexy_sens_is_calibrated()
             || (retry && (retry % PRECISE_HOMING_SENS_TRY_RECAL) == 0)) {
+            statusGuard.update<PrintStatusMessage::recalibrating_home>({});
+
             if (!corexy_sens_calibrate(xy_mm_s)) {
               failed = true;
               break;

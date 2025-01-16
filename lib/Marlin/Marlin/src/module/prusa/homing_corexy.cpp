@@ -848,7 +848,6 @@ bool corexy_sens_calibrate(const float fr_mm_s) {
     endstops.not_homing();
 
     SERIAL_ECHOLN("recalibrating homing sensitivity");
-    ui.status_printf_P(0, "Recalibrating home. Printer may vibrate and be noisier.");
 
     CoreXYHomeTMCSens calibrated_sens;
     if (!measure_calibrate_sens(calibrated_sens, measured_axis, fr_mm_s)) {

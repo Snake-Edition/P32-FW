@@ -12,6 +12,7 @@ struct PrintStatusMessage {
         custom,
 
         homing,
+        recalibrating_home,
         probing_bed,
         absorbing_heat,
 
@@ -59,7 +60,8 @@ struct PrintStatusMessage {
 
     using type_record_list = TypeRecordList<
         TypeRecord<Type::custom, PrintStatusMessageDataCustom>,
-        TypeRecord<Type::homing, PrintStatusMessageDataProgress>,
+        TypeRecord<Type::homing, std::monostate>,
+        TypeRecord<Type::recalibrating_home, std::monostate>,
         TypeRecord<Type::probing_bed, PrintStatusMessageDataProgress>,
         TypeRecord<Type::absorbing_heat, PrintStatusMessageDataProgress>,
         TypeRecord<Type::waiting_for_hotend_temp, PrintStatusMessageDataProgress>,

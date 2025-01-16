@@ -8,6 +8,7 @@ static constexpr EnumArray<Message::Type, const char *, Message::Type::_cnt> mes
     { Message::Type::none, nullptr },
         { Message::Type::custom, nullptr },
         { Message::Type::homing, N_("Homing") },
+        { Message::Type::recalibrating_home, N_("Recalibrating home. Printer may vibrate and be noisier.") },
         { Message::Type::probing_bed, N_("Probing bed") },
         { Message::Type::absorbing_heat, N_("Absorbing heat") },
         { Message::Type::waiting_for_hotend_temp, N_("Waiting for hotend") },
