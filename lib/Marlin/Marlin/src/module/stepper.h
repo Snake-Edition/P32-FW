@@ -45,9 +45,6 @@
 
 #include "planner.h"
 #include "stepper/indirection.h"
-#ifdef __AVR__
-  #include "speed_lookuptable.h"
-#endif
 
 //
 // Stepper class definition
@@ -104,8 +101,12 @@ class Stepper {
     }
 
     // Get the position of a stepper, in steps
-    static int32_t position(const AxisEnum axis);
-    static int32_t position_from_startup(const AxisEnum axis);
+    static int32_t position(const AxisEnum axis) {
+      return count_position[axis];
+    }
+    static int32_t position_from_startup(const AxisEnum axis) {
+      return count_position_from_startup[axis];
+    }
 
     // Report the positions of the steppers, in steps
     static void report_positions();
@@ -131,7 +132,9 @@ class Stepper {
     static void endstop_triggered(const AxisEnum axis);
 
     // Triggered position of an axis in steps
-    static int32_t triggered_position(const AxisEnum axis);
+    static int32_t triggered_position(const AxisEnum axis) {
+      return endstops_trigsteps[axis];
+    }
 
     #if HAS_DRIVER(TMC2130) || HAS_DRIVER(TMC2209)
       static void microstep_ms(const uint8_t driver, const int8_t ms1, const int8_t ms2, const int8_t ms3);
@@ -173,19 +176,7 @@ class Stepper {
 
     static inline void set_axis_position(const AxisEnum a, const int32_t &v) {
       planner.synchronize();
-
-      #ifdef __AVR__
-        // Protect the access to the position. Only required for AVR, as
-        //  any 32bit CPU offers atomic access to 32bit variables
-        const bool was_enabled = suspend();
-      #endif
-
       count_position[a] = v;
-
-      #ifdef __AVR__
-        // Reenable Stepper ISR
-        if (was_enabled) wake_up();
-      #endif
     }
 
     // Set direction bits for all steppers

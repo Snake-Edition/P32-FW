@@ -81,10 +81,6 @@
 
 Stepper stepper; // Singleton
 
-#ifdef __AVR__
-  #include "speed_lookuptable.h"
-#endif
-
 #include "endstops.h"
 #include "planner.h"
 #include "motion.h"
@@ -440,29 +436,6 @@ void Stepper::_set_position(const int32_t &a, const int32_t &b, const int32_t &c
   count_position.e = e;
 }
 
-/**
- * Get a stepper's position in steps.
- */
-int32_t Stepper::position(const AxisEnum axis) {
-  #ifdef __AVR__
-    // Protect the access to the position. Only required for AVR, as
-    //  any 32bit CPU offers atomic access to 32bit variables
-    const bool was_enabled = suspend();
-  #endif
-
-  const int32_t v = count_position[axis];
-
-  #ifdef __AVR__
-    // Reenable Stepper ISR
-    if (was_enabled) wake_up();
-  #endif
-  return v;
-}
-
-int32_t Stepper::position_from_startup(const AxisEnum axis) {
-    return count_position_from_startup[axis];
-}
-
 // Signal endstops were triggered - This function can be called from
 // an ISR context  (Temperature, Stepper or limits ISR), so we must
 // be very careful here. If the interrupt being preempted was the
@@ -489,35 +462,10 @@ void Stepper::endstop_triggered(const AxisEnum axis) {
   if (was_enabled) wake_up();
 }
 
-int32_t Stepper::triggered_position(const AxisEnum axis) {
-  #ifdef __AVR__
-    // Protect the access to the position. Only required for AVR, as
-    //  any 32bit CPU offers atomic access to 32bit variables
-    const bool was_enabled = suspend();
-  #endif
-
-  const int32_t v = endstops_trigsteps[axis];
-
-  #ifdef __AVR__
-    // Reenable Stepper ISR
-    if (was_enabled) wake_up();
-  #endif
-
-  return v;
-}
-
 void Stepper::report_positions() {
-
-  #ifdef __AVR__
-    // Protect the access to the position.
-    const bool was_enabled = suspend();
-  #endif
-
+  // Note that the reported position is not atomic/synchronous for all axes
+  // to avoid locking the step ISR
   const xyz_long_t pos = count_position;
-
-  #ifdef __AVR__
-    if (was_enabled) wake_up();
-  #endif
 
   #if CORE_IS_XY || CORE_IS_XZ || ENABLED(DELTA) || IS_SCARA
     SERIAL_ECHOPAIR(MSG_COUNT_A, pos.x, " B:", pos.y);
