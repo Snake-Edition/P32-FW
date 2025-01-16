@@ -61,13 +61,6 @@
   // The base ISR takes 792 cycles
   #define ISR_BASE_CYCLES  792UL
 
-  // Linear advance base time is 64 cycles
-  #if ENABLED(LIN_ADVANCE)
-    #define ISR_LA_BASE_CYCLES 64UL
-  #else
-    #define ISR_LA_BASE_CYCLES 0UL
-  #endif
-
   // S curve interpolation adds 40 cycles
   #if ENABLED(S_CURVE_ACCELERATION)
     #define ISR_S_CURVE_CYCLES 40UL
@@ -88,13 +81,6 @@
 
   // The base ISR takes 752 cycles
   #define ISR_BASE_CYCLES  752UL
-
-  // Linear advance base time is 32 cycles
-  #if ENABLED(LIN_ADVANCE)
-    #define ISR_LA_BASE_CYCLES 32UL
-  #else
-    #define ISR_LA_BASE_CYCLES 0UL
-  #endif
 
   // S curve interpolation adds 160 cycles
   #if ENABLED(S_CURVE_ACCELERATION)
@@ -142,12 +128,9 @@
 #define ISR_E_STEPPER_CYCLES         ISR_STEPPER_CYCLES
 
 // If linear advance is disabled, the loop also handles them
-#if DISABLED(LIN_ADVANCE) && ENABLED(MIXING_EXTRUDER)
+#if ENABLED(MIXING_EXTRUDER)
   #define ISR_START_MIXING_STEPPER_CYCLES ((MIXING_STEPPERS) * (ISR_START_STEPPER_CYCLES))
   #define ISR_MIXING_STEPPER_CYCLES ((MIXING_STEPPERS) * (ISR_STEPPER_CYCLES))
-#else
-  #define ISR_START_MIXING_STEPPER_CYCLES 0UL
-  #define ISR_MIXING_STEPPER_CYCLES  0UL
 #endif
 
 // Calculate the minimum time to start all stepper pulses in the ISR loop
@@ -181,28 +164,6 @@
 
 // But the user could be enforcing a minimum time, so the loop time is
 #define ISR_LOOP_CYCLES (ISR_LOOP_BASE_CYCLES + _MAX(MIN_STEPPER_PULSE_CYCLES, MIN_ISR_LOOP_CYCLES))
-
-// If linear advance is enabled, then it is handled separately
-#if ENABLED(LIN_ADVANCE)
-
-  // Estimate the minimum LA loop time
-  #if ENABLED(MIXING_EXTRUDER) // ToDo: ???
-    // HELP ME: What is what?
-    // Directions are set up for MIXING_STEPPERS - like before.
-    // Finding the right stepper may last up to MIXING_STEPPERS loops in get_next_stepper().
-    //   These loops are a bit faster than advancing a bresenham counter.
-    // Always only one e-stepper is stepped.
-    #define MIN_ISR_LA_LOOP_CYCLES ((MIXING_STEPPERS) * (ISR_STEPPER_CYCLES))
-  #else
-    #define MIN_ISR_LA_LOOP_CYCLES ISR_STEPPER_CYCLES
-  #endif
-
-  // And the real loop time
-  #define ISR_LA_LOOP_CYCLES _MAX(MIN_STEPPER_PULSE_CYCLES, MIN_ISR_LA_LOOP_CYCLES)
-
-#else
-  #define ISR_LA_LOOP_CYCLES 0UL
-#endif
 
 // Now estimate the total ISR execution time in cycles given a step per ISR multiplier
 #define ISR_EXECUTION_CYCLES(R) (((ISR_BASE_CYCLES + ISR_S_CURVE_CYCLES + (ISR_LOOP_CYCLES) * (R) + ISR_LA_BASE_CYCLES + ISR_LA_LOOP_CYCLES)) / (R))
@@ -373,11 +334,6 @@ class Stepper {
 
     // Return ratio of completed steps of current block (call within ISR context)
     static float segment_progress();
-
-    #if ENABLED(LIN_ADVANCE)
-      // Return accumulated LA steps
-      static uint16_t get_LA_steps() { return LA_current_adv_steps; }
-    #endif
 
     static long get_axis_steps(const AxisEnum a) {
       return count_position[a];

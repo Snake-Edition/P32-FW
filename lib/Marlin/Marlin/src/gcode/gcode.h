@@ -247,7 +247,7 @@
  * M868 - Report or set position encoder module error correction threshold.
  * M869 - Report position encoder module error.
  * M876 - Handle Prompt Response. (Requires HOST_PROMPT_SUPPORT and not EMERGENCY_PARSER)
- * M900 - Get or Set Linear Advance K-factor. (Requires LIN_ADVANCE)
+ * M900 - Get or Set Linear Advance K-factor. (PA Compatibility with old LIN_ADVANCE)
  * M906 - Set or get motor current in milliamps using axis codes X, Y, Z, E. Report values if no axis codes given. (Requires at least one _DRIVER_TYPE defined as TMC2130/2160/5130/5160/2208/2209/2660 or L6470)
  * M907 - Set digital trimpot motor current using axis codes. (Requires a board with digital trimpots)
  * M908 - Control digital trimpot directly. (Requires DAC_STEPPER_CURRENT or DIGIPOTSS_PIN)
@@ -991,9 +991,8 @@ private:
     FORCE_INLINE static void M869() { I2CPEM.M869(); }
   #endif
 
-//  #if ENABLED(LIN_ADVANCE)
-    static void M900();
-//  #endif
+  // Linear Advance / Pressure Advance compatibility
+  static void M900();
 
   #if HAS_TRINAMIC
     static void M122();

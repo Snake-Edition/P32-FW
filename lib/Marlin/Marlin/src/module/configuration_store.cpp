@@ -98,10 +98,6 @@
   #include "../feature/runout.h"
 #endif
 
-#if ENABLED(EXTRA_LIN_ADVANCE_K)
-  extern float saved_extruder_advance_K[EXTRUDERS];
-#endif
-
 #if EXTRUDERS > 1
   #include "tool_change.h"
   void M217_report(const bool eeprom);
@@ -308,11 +304,6 @@ typedef struct SettingsDataStruct {
   tmc_hybrid_threshold_t tmc_hybrid_threshold;          // M913 X Y Z X2 Y2 Z2 Z3 E0 E1 E2 E3 E4 E5
   tmc_sgt_t tmc_sgt;                                    // M914 X Y Z X2
   tmc_stealth_enabled_t tmc_stealth_enabled;            // M569 X Y Z X2 Y2 Z2 Z3 E0 E1 E2 E3 E4 E5
-
-  //
-  // LIN_ADVANCE
-  //
-  float planner_extruder_advance_K[EXTRUDERS];          // M900 K  planner.extruder_advance_K
 
   //
   // HAS_MOTOR_CURRENT_PWM
@@ -1116,20 +1107,6 @@ void MarlinSettings::postprocess() {
     }
 
     //
-    // Linear Advance
-    //
-    {
-      _FIELD_TEST(planner_extruder_advance_K);
-
-      #if ENABLED(LIN_ADVANCE)
-        EEPROM_WRITE(planner.extruder_advance_K);
-      #else
-        dummy = 0;
-        for (uint8_t q = EXTRUDERS; q--;) EEPROM_WRITE(dummy);
-      #endif
-    }
-
-    //
     // Motor Current PWM
     //
     {
@@ -1888,19 +1865,6 @@ void MarlinSettings::postprocess() {
       }
 
       //
-      // Linear Advance
-      //
-      {
-        float extruder_advance_K[EXTRUDERS];
-        _FIELD_TEST(planner_extruder_advance_K);
-        EEPROM_READ(extruder_advance_K);
-        #if ENABLED(LIN_ADVANCE)
-          if (!validating)
-            COPY(planner.extruder_advance_K, extruder_advance_K);
-        #endif
-      }
-
-      //
       // Motor Current PWM
       //
       {
@@ -2494,19 +2458,6 @@ void MarlinSettings::reset() {
   );
 
   reset_stepper_drivers();
-
-  //
-  // Linear Advance
-  //
-
-  #if ENABLED(LIN_ADVANCE)
-    LOOP_L_N(i, EXTRUDERS) {
-      planner.extruder_advance_K[i] = LIN_ADVANCE_K;
-    #if ENABLED(EXTRA_LIN_ADVANCE_K)
-      saved_extruder_advance_K[i] = LIN_ADVANCE_K;
-    #endif
-    }
-  #endif
 
   //
   // Motor Current PWM
@@ -3321,20 +3272,6 @@ void MarlinSettings::reset() {
       #endif // HAS_STEALTHCHOP
 
     #endif // HAS_TRINAMIC
-
-    /**
-     * Linear Advance
-     */
-    #if ENABLED(LIN_ADVANCE)
-      CONFIG_ECHO_HEADING("Linear Advance:");
-      CONFIG_ECHO_START();
-      #if EXTRUDERS < 2
-        SERIAL_ECHOLNPAIR("  M900 K", planner.extruder_advance_K[0]);
-      #else
-        LOOP_L_N(i, EXTRUDERS)
-          SERIAL_ECHOLNPAIR("  M900 T", int(i), " K", planner.extruder_advance_K[i]);
-      #endif
-    #endif
 
     #if HAS_MOTOR_CURRENT_PWM
       CONFIG_ECHO_HEADING("Stepper motor currents:");

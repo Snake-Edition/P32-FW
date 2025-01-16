@@ -825,9 +825,8 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         M810_819(); break;                                        // M810-M819: Define/execute G-code macro
       #endif
 
-//      #if ENABLED(LIN_ADVANCE)
-        case 900: M900(); break;                                  // M900: Set advance K factor.
-//      #endif
+      // Linear Advance / Pressure Advance compatibility
+      case 900: M900(); break;                                    // M900: Set advance K factor.
 
       #if HAS_DIGIPOTSS || HAS_MOTOR_CURRENT_PWM || EITHER(DIGIPOT_I2C, DAC_STEPPER_CURRENT)
         case 907: M907(); break;                                  // M907: Set digital trimpot motor current using axis codes.

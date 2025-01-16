@@ -2639,11 +2639,6 @@ void retract() {
     // server.motion_param.save_reset();  // TODO: currently disabled (see Crash_s::save_parameters())
 #if ENABLED(ADVANCED_PAUSE_FEATURE)
     float mm = PAUSE_PARK_RETRACT_LENGTH / planner.e_factor[active_extruder];
-    #if BOTH(CRASH_RECOVERY, LIN_ADVANCE)
-    if (crash_s.did_trigger()) {
-        mm += crash_s.advance_mm;
-    }
-    #endif
     plan_move_by(PAUSE_PARK_RETRACT_FEEDRATE, 0, 0, 0, -mm);
 #endif // ENABLED(ADVANCED_PAUSE_FEATURE)
 }

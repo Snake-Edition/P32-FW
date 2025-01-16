@@ -632,17 +632,6 @@ namespace ExtUI {
     #endif
   #endif
 
-  #if ENABLED(LIN_ADVANCE)
-    float getLinearAdvance_mm_mm_s(const extruder_t extruder) {
-      return (extruder < EXTRUDERS) ? planner.extruder_advance_K[extruder - E0] : 0;
-    }
-
-    void setLinearAdvance_mm_mm_s(const float value, const extruder_t extruder) {
-      if (extruder < EXTRUDERS)
-        planner.extruder_advance_K[extruder - E0] = constrain(value, 0, 999);
-    }
-  #endif
-
   #if DISABLED(CLASSIC_JERK)
 
     float getJunctionDeviation_mm() {
@@ -651,9 +640,6 @@ namespace ExtUI {
 
     void setJunctionDeviation_mm(const float value) {
       planner.junction_deviation_mm = constrain(value, 0.01, 0.3);
-      #if ENABLED(LIN_ADVANCE)
-        planner.recalculate_max_e_jerk();
-      #endif
     }
 
   #else

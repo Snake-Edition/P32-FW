@@ -176,11 +176,6 @@ namespace ExtUI {
   void setFeedrate_percent(const float);
   void setUserConfirmed();
 
-  #if ENABLED(LIN_ADVANCE)
-    float getLinearAdvance_mm_mm_s(const extruder_t);
-    void setLinearAdvance_mm_mm_s(const float, const extruder_t);
-  #endif
-
   #if DISABLED(CLASSIC_JERK)
     float getJunctionDeviation_mm();
     void setJunctionDeviation_mm(const float);

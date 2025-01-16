@@ -209,9 +209,6 @@ void GcodeSuite::M205() {
       const float junc_dev = parser.value_linear_units();
       if (WITHIN(junc_dev, 0.01f, 0.3f)) {
         planner.junction_deviation_mm = junc_dev;
-        #if ENABLED(LIN_ADVANCE)
-          planner.recalculate_max_e_jerk();
-        #endif
       }
       else
         SERIAL_ERROR_MSG("?J out of range (0.01 to 0.3)");

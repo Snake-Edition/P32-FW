@@ -1065,30 +1065,6 @@
     #endif
 #endif
 
-// @section extruder
-
-/**
- * Linear Pressure Control v1.5
- *
- * Assumption: advance [steps] = k * (delta velocity [steps/s])
- * K=0 means advance disabled.
- *
- * NOTE: K values for LIN_ADVANCE 1.5 differ from earlier versions!
- *
- * Set K around 0.22 for 3mm PLA Direct Drive with ~6.5cm between the drive gear and heatbreak.
- * Larger K values will be needed for flexible filament and greater distances.
- * If this algorithm produces a higher speed offset than the extruder can handle (compared to E jerk)
- * print acceleration will be reduced during the affected moves to keep within the limit.
- *
- * See http://marlinfw.org/docs/features/lin_advance.html for full instructions.
- * Mention @Sebastianv650 on GitHub to alert the author of any issues.
- */
-//#define LIN_ADVANCE
-#if ENABLED(LIN_ADVANCE)
-    #define LIN_ADVANCE_K 0 // Unit: mm compression per 1mm/s extruder speed
-//#define LA_DEBUG          // If enabled, this will generate debug information output over USB.
-#endif
-
 // @section leveling
 
 #if EITHER(MESH_BED_LEVELING, AUTO_BED_LEVELING_UBL)

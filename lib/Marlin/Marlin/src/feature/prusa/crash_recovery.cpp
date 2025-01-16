@@ -57,9 +57,6 @@ void Crash_s::stop_and_save() {
         segments_finished = crash_block.segment_idx;
         recover_flags = crash_block.recover_flags;
         fr_mm_s = crash_block.fr_mm_s;
-    #if ENABLED(LIN_ADVANCE)
-        advance_mm = stepper.get_LA_steps() * Planner::mm_per_step[E_AXIS];
-    #endif
         start_current_position = crash_block.start_current_position;
 
         // recover delta E position
@@ -72,9 +69,6 @@ void Crash_s::stop_and_save() {
         segments_finished = 0;
         recover_flags = gcode_state.recover_flags;
         fr_mm_s = feedrate_mm_s;
-    #if ENABLED(LIN_ADVANCE)
-        advance_mm = 0;
-    #endif
         start_current_position = current_position;
         e_position = current_position[E_AXIS];
     }
