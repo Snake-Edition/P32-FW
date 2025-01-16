@@ -133,9 +133,8 @@
 //
 
 // Mixing stepper, Switching stepper, or regular stepper
-#define E_NEEDED(N) (ENABLED(MIXING_EXTRUDER) && MIXING_STEPPERS > N) \
-                 || (ENABLED(SWITCHING_EXTRUDER) && E_STEPPERS > N) \
-                 || (NONE(SWITCHING_EXTRUDER, MIXING_EXTRUDER) && EXTRUDERS > N)
+#define E_NEEDED(N) (ENABLED(SWITCHING_EXTRUDER) && E_STEPPERS > N) \
+                 || (NONE(SWITCHING_EXTRUDER) && EXTRUDERS > N)
 
 #define _E0_CS
 #define _E0_MS1
@@ -297,36 +296,26 @@
   #define _E0_PINS E0_STEP_PIN, E0_DIR_PIN, E0_ENABLE_PIN, _E0_CS _E0_MS1 _E0_MS2 _E0_MS3
 #endif
 
-#if ENABLED(SWITCHING_EXTRUDER)
-                      // Tools 0 and 1 use E0
-  #if EXTRUDERS > 2   // Tools 2 and 3 use E1
-    #undef _E1_PINS
-    #define _E1_PINS E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN, _E1_CS _E1_MS1 _E1_MS2 _E1_MS3
-    #if EXTRUDERS > 4 // Tools 4 and 5 use E2
-      #undef _E2_PINS
-      #define _E2_PINS E2_STEP_PIN, E2_DIR_PIN, E2_ENABLE_PIN, _E2_CS _E2_MS1 _E2_MS2 _E2_MS3
-    #endif
-  #endif
-#elif EXTRUDERS > 1 || ENABLED(MIXING_EXTRUDER)
+#if EXTRUDERS > 1
   #undef _E1_PINS
   #define _E1_PINS E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN, _E1_CS _E1_MS1 _E1_MS2 _E1_MS3
-  #if EXTRUDERS > 2 || (ENABLED(MIXING_EXTRUDER) && MIXING_STEPPERS > 2)
+  #if EXTRUDERS > 2
     #undef _E2_PINS
     #define _E2_PINS E2_STEP_PIN, E2_DIR_PIN, E2_ENABLE_PIN, _E2_CS _E2_MS1 _E2_MS2 _E2_MS3
-    #if EXTRUDERS > 3 || (ENABLED(MIXING_EXTRUDER) && MIXING_STEPPERS > 3)
+    #if EXTRUDERS > 3
       #undef _E3_PINS
       #define _E3_PINS E3_STEP_PIN, E3_DIR_PIN, E3_ENABLE_PIN, _E3_CS _E3_MS1 _E3_MS2 _E3_MS3
-      #if EXTRUDERS > 4 || (ENABLED(MIXING_EXTRUDER) && MIXING_STEPPERS > 4)
+      #if EXTRUDERS > 4
         #undef _E4_PINS
         #define _E4_PINS E4_STEP_PIN, E4_DIR_PIN, E4_ENABLE_PIN, _E4_CS _E4_MS1 _E4_MS2 _E4_MS3
-        #if EXTRUDERS > 5 || (ENABLED(MIXING_EXTRUDER) && MIXING_STEPPERS > 5)
+        #if EXTRUDERS > 5
           #undef _E5_PINS
           #define _E5_PINS E5_STEP_PIN, E5_DIR_PIN, E5_ENABLE_PIN, _E5_CS _E5_MS1 _E5_MS2 _E5_MS3
-        #endif // EXTRUDERS > 5 || MIXING_EXTRUDER > 5
-      #endif // EXTRUDERS > 4 || MIXING_EXTRUDER > 4
-    #endif // EXTRUDERS > 3 || MIXING_EXTRUDER > 3
-  #endif // EXTRUDERS > 2 || MIXING_EXTRUDER > 2
-#endif // EXTRUDERS > 1 || MIXING_EXTRUDER
+        #endif // EXTRUDERS > 5
+      #endif // EXTRUDERS > 4
+    #endif // EXTRUDERS > 3
+  #endif // EXTRUDERS > 2
+#endif // EXTRUDERS > 1
 
 //
 // Heaters, Fans, Temp Sensors

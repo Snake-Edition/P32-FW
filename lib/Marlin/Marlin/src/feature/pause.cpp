@@ -320,18 +320,12 @@ bool load_filament(const float &slow_load_length/*=0*/, const float &fast_load_l
  * Returns 'true' if unload was completed, 'false' for abort
  */
 bool unload_filament(const float &unload_length, const bool show_lcd/*=false*/,
-                     const PauseMode mode/*=PAUSE_MODE_PAUSE_PRINT*/
-                     #if BOTH(FILAMENT_UNLOAD_ALL_EXTRUDERS, MIXING_EXTRUDER)
-                       , const float &mix_multiplier/*=1.0*/
-                     #endif
-) {
+                     const PauseMode mode/*=PAUSE_MODE_PAUSE_PRINT*/) {
   #if !HAS_LCD_MENU
     UNUSED(show_lcd);
   #endif
 
-  #if !BOTH(FILAMENT_UNLOAD_ALL_EXTRUDERS, MIXING_EXTRUDER)
-    constexpr float mix_multiplier = 1.0;
-  #endif
+  constexpr float mix_multiplier = 1.0;
 
   if (!ensure_safe_temperature(mode)) {
     #if HAS_LCD_MENU

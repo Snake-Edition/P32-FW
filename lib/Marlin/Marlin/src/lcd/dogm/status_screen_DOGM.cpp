@@ -52,10 +52,6 @@
   #include "../../module/printcounter.h"
 #endif
 
-#if DUAL_MIXING_EXTRUDER
-  #include "../../feature/mixing.h"
-#endif
-
 #define X_LABEL_POS      3
 #define X_VALUE_POS     11
 #define XYZ_SPACING     37
@@ -620,33 +616,8 @@ void MarlinUI::draw_status_screen() {
         u8g.setColorIndex(0); // white on black
       #endif
 
-      #if DUAL_MIXING_EXTRUDER
-
-        // Two-component mix / gradient instead of XY
-
-        char mixer_messages[12];
-        const char *mix_label;
-        #if ENABLED(GRADIENT_MIX)
-          if (mixer.gradient.enabled) {
-            mixer.update_mix_from_gradient();
-            mix_label = "Gr";
-          }
-          else
-        #endif
-          {
-            mixer.update_mix_from_vtool();
-            mix_label = "Mx";
-          }
-        sprintf_P(mixer_messages, PSTR("%s %d;%d%% "), mix_label, int(mixer.mix[0]), int(mixer.mix[1]));
-        lcd_put_u8str(X_LABEL_POS, XYZ_BASELINE, mixer_messages);
-
-      #else
-
-        _draw_axis_value(X_AXIS, xstring, blink);
-        _draw_axis_value(Y_AXIS, ystring, blink);
-
-      #endif
-
+      _draw_axis_value(X_AXIS, xstring, blink);
+      _draw_axis_value(Y_AXIS, ystring, blink);
       _draw_axis_value(Z_AXIS, zstring, blink);
 
       #if DISABLED(XYZ_HOLLOW_FRAME)

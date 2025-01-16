@@ -42,10 +42,6 @@
   #include "../../../feature/prusa/MMU2/mmu2_mk4.h"
 #endif
 
-#if ENABLED(MIXING_EXTRUDER)
-  #include "../../../feature/mixing.h"
-#endif
-
 /*
 Replaced by PRUSA specific gcodes in /src/marlin_stubs/
 */
@@ -72,21 +68,8 @@ void GcodeSuite::M701() {
     if (axes_need_homing()) park_point.z = 0;
   #endif
 
-  #if ENABLED(MIXING_EXTRUDER)
-    const int8_t target_e_stepper = get_target_e_stepper_from_command();
-    if (target_e_stepper < 0) return;
-
-    const uint8_t old_mixing_tool = mixer.get_current_vtool();
-    mixer.T(MIXER_DIRECT_SET_TOOL);
-
-    MIXER_STEPPER_LOOP(i) mixer.set_collector(i, (i == (uint8_t)target_e_stepper) ? 1.0 : 0.0);
-    mixer.normalize();
-
-    const int8_t target_extruder = active_extruder;
-  #else
-    const int8_t target_extruder = get_target_extruder_from_command();
-    if (target_extruder < 0) return;
-  #endif
+  const int8_t target_extruder = get_target_extruder_from_command();
+  if (target_extruder < 0) return;
 
   // Z axis lift
   if (parser.seenval('Z')) park_point.z = parser.linearval('Z');
@@ -137,10 +120,6 @@ void GcodeSuite::M701() {
       tool_change(active_extruder_before_filament_change, false);
   #endif
 
-  #if ENABLED(MIXING_EXTRUDER)
-    mixer.T(old_mixing_tool); // Restore original mixing tool
-  #endif
-
   // Show status screen
   #if HAS_LCD_MENU
     lcd_pause_show_message(PAUSE_MESSAGE_STATUS);
@@ -173,31 +152,8 @@ void GcodeSuite::M702() {
     if (axes_need_homing()) park_point.z = 0;
   #endif
 
-  #if ENABLED(MIXING_EXTRUDER)
-    const uint8_t old_mixing_tool = mixer.get_current_vtool();
-
-    #if ENABLED(FILAMENT_UNLOAD_ALL_EXTRUDERS)
-      float mix_multiplier = 1.0;
-      if (!parser.seenval('T')) {
-        mixer.T(MIXER_AUTORETRACT_TOOL);
-        mix_multiplier = MIXING_STEPPERS;
-      }
-      else
-    #endif
-    {
-      const int8_t target_e_stepper = get_target_e_stepper_from_command();
-      if (target_e_stepper < 0) return;
-
-      mixer.T(MIXER_DIRECT_SET_TOOL);
-      MIXER_STEPPER_LOOP(i) mixer.set_collector(i, (i == (uint8_t)target_e_stepper) ? 1.0 : 0.0);
-      mixer.normalize();
-    }
-
-    const int8_t target_extruder = active_extruder;
-  #else
-    const int8_t target_extruder = get_target_extruder_from_command();
-    if (target_extruder < 0) return;
-  #endif
+  const int8_t target_extruder = get_target_extruder_from_command();
+  if (target_extruder < 0) return;
 
   // Z axis lift
   if (parser.seenval('Z')) park_point.z = parser.linearval('Z');
@@ -236,11 +192,7 @@ void GcodeSuite::M702() {
       const float unload_length = -ABS(parser.seen('U') ? parser.value_axis_units(E_AXIS)
                                                         : fc_settings[target_extruder].unload_length);
 
-      unload_filament(unload_length, true, PAUSE_MODE_UNLOAD_FILAMENT
-        #if ALL(FILAMENT_UNLOAD_ALL_EXTRUDERS, MIXING_EXTRUDER)
-          , mix_multiplier
-        #endif
-      );
+      unload_filament(unload_length, true, PAUSE_MODE_UNLOAD_FILAMENT);
     }
   #endif
 
@@ -252,10 +204,6 @@ void GcodeSuite::M702() {
     // Restore toolhead if it was changed
     if (active_extruder_before_filament_change != active_extruder)
       tool_change(active_extruder_before_filament_change, false);
-  #endif
-
-  #if ENABLED(MIXING_EXTRUDER)
-    mixer.T(old_mixing_tool); // Restore original mixing tool
   #endif
 
   // Show status screen

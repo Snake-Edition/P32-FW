@@ -61,10 +61,6 @@
   #include "../feature/snmm.h"
 #endif
 
-#if ENABLED(MIXING_EXTRUDER)
-  #include "../feature/mixing.h"
-#endif
-
 #if HAS_LEVELING
   #include "../feature/bedlevel/bedlevel.h"
 #endif
@@ -777,19 +773,7 @@ void tool_change(const uint8_t new_tool,
     if (new_tool == active_extruder) return;
   #endif
 
-  #if ENABLED(MIXING_EXTRUDER)
-
-    UNUSED(return_type);
-
-    if (new_tool >= MIXING_VIRTUAL_TOOLS)
-      return invalid_extruder_error(new_tool);
-
-    #if MIXING_VIRTUAL_TOOLS > 1
-      // T0-Tnnn: Switch virtual tool by changing the index to the mix
-      mixer.T(new_tool);
-    #endif
-
-  #elif ENABLED(PRUSA_MMU2)
+  #if ENABLED(PRUSA_MMU2)
 
     UNUSED(return_type);
 

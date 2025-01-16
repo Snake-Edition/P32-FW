@@ -406,7 +406,6 @@
   #undef SINGLENOZZLE
   #undef SWITCHING_EXTRUDER
   #undef SWITCHING_NOZZLE
-  #undef MIXING_EXTRUDER
   #undef HOTEND_IDLE_TIMEOUT
   #undef DISABLE_E
 #endif
@@ -433,14 +432,6 @@
     #define HOTENDS       E_STEPPERS
   #endif
 
-#elif ENABLED(MIXING_EXTRUDER)      // Multiple feeds are mixed proportionally
-
-  #define E_STEPPERS      MIXING_STEPPERS
-  #define E_MANUAL        1
-  #if MIXING_STEPPERS == 2
-    #define HAS_DUAL_MIXING 1
-  #endif
-
 #elif ENABLED(SWITCHING_TOOLHEAD)   // Toolchanger
 
   #define E_STEPPERS      EXTRUDERS
@@ -465,7 +456,7 @@
   #define SINGLENOZZLE
 #endif
 
-#if EITHER(SINGLENOZZLE, MIXING_EXTRUDER)         // One hotend, one thermistor, no XY offset
+#if ENABLED(SINGLENOZZLE)           // One hotend, one thermistor, no XY offset
   #undef HOTENDS
   #define HOTENDS       1
   #undef HOTEND_OFFSET_X

@@ -195,11 +195,6 @@ void GcodeSuite::get_destination_from_command() {
     if (!DEBUGGING(DRYRUN) && !skip_move)
       print_job_timer.incFilamentUsed(destination.e - current_position.e);
   #endif
-
-  // Get ABCDHI mixing factors
-  #if BOTH(MIXING_EXTRUDER, DIRECT_MIXING_IN_G1)
-    M165();
-  #endif
 }
 
 /**
@@ -588,17 +583,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
       #if HAS_COLOR_LEDS
         case 150: M150(); break;                                  // M150: Set Status LED Color
-      #endif
-
-      #if ENABLED(MIXING_EXTRUDER)
-        case 163: M163(); break;                                  // M163: Set a component weight for mixing extruder
-        case 164: M164(); break;                                  // M164: Save current mix as a virtual extruder
-        #if ENABLED(DIRECT_MIXING_IN_G1)
-          case 165: M165(); break;                                // M165: Set multiple mix weights
-        #endif
-        #if ENABLED(GRADIENT_MIX)
-          case 166: M166(); break;                                // M166: Set Gradient Mix
-        #endif
       #endif
 
       #if DISABLED(NO_VOLUMETRICS)

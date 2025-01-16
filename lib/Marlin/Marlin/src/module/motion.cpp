@@ -1089,19 +1089,8 @@ void prepare_move_to_destination(const MoveHints &hints) {
         #if ENABLED(PREVENT_LENGTHY_EXTRUDE)
           const float e_delta = ABS(destination.e - current_position.e) * planner.e_factor[active_extruder];
           if (e_delta > (EXTRUDE_MAXLENGTH)) {
-            #if ENABLED(MIXING_EXTRUDER)
-              bool ignore_e = false;
-              float collector[MIXING_STEPPERS];
-              mixer.refresh_collector(1.0, mixer.get_current_vtool(), collector);
-              MIXER_STEPPER_LOOP(e)
-                if (e_delta * collector[e] > (EXTRUDE_MAXLENGTH)) { ignore_e = true; break; }
-            #else
-              constexpr bool ignore_e = true;
-            #endif
-            if (ignore_e) {
-              current_position.e = destination.e; // Behave as if the move really took place, but ignore E part
-              SERIAL_ECHO_MSG(MSG_ERR_LONG_EXTRUDE_STOP);
-            }
+            current_position.e = destination.e; // Behave as if the move really took place, but ignore E part
+            SERIAL_ECHO_MSG(MSG_ERR_LONG_EXTRUDE_STOP);
           }
         #endif // PREVENT_LENGTHY_EXTRUDE
       }

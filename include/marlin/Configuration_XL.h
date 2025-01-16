@@ -272,25 +272,6 @@
 #endif
 
 /**
- * "Mixing Extruder"
- *   - Adds G-codes M163 and M164 to set and "commit" the current mix factors.
- *   - Extends the stepping routines to move multiple steppers in proportion to the mix.
- *   - Optional support for Repetier Firmware's 'M164 S<index>' supporting virtual tools.
- *   - This implementation supports up to two mixing extruders.
- *   - Enable DIRECT_MIXING_IN_G1 for M165 and mixing in G1 (from Pia Taubert's reference implementation).
- */
-//#define MIXING_EXTRUDER
-#if ENABLED(MIXING_EXTRUDER)
-    #define MIXING_STEPPERS 2 // Number of steppers in your mixing extruder
-    #define MIXING_VIRTUAL_TOOLS 16 // Use the Virtual Tool method with M163 and M164
-    //#define DIRECT_MIXING_IN_G1    // Allow ABCDHI mix factors in G1 movement commands
-    //#define GRADIENT_MIX           // Support for gradient mixing with M166 and LCD
-    #if ENABLED(GRADIENT_MIX)
-    //#define GRADIENT_VTOOL       // Add M166 T to use a V-tool index as a Gradient alias
-    #endif
-#endif
-
-/**
  * Modular heatbed(MHB)
  *
  *  Heatbed composed of multiple smaller heatbedlets.

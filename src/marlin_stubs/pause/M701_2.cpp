@@ -3,7 +3,6 @@
 // clang-format off
 #if (!ENABLED(FILAMENT_LOAD_UNLOAD_GCODES)) || \
     HAS_LCD_MENU || \
-    ENABLED(MIXING_EXTRUDER) || \
     ENABLED(NO_MOTION_BEFORE_HOMING)
     #error unsupported
 #endif

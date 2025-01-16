@@ -79,7 +79,6 @@ GCodeLoader nozzle_cleaner_gcode_loader;
     NUM_RUNOUT_SENSORS > 1 || \
     ENABLED(DUAL_X_CARRIAGE) || \
     ENABLED(ADVANCED_PAUSE_CONTINUOUS_PURGE) || \
-    BOTH(FILAMENT_UNLOAD_ALL_EXTRUDERS, MIXING_EXTRUDER) || \
     ENABLED(SDSUPPORT)
 #error unsupported
 #endif

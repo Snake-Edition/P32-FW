@@ -88,10 +88,6 @@
   #include "feature/digipot/digipot.h"
 #endif
 
-#if ENABLED(MIXING_EXTRUDER)
-  #include "feature/mixing.h"
-#endif
-
 #if ENABLED(MAX7219_DEBUG)
   #include "feature/Max7219_Debug_LEDs.h"
 #endif
@@ -1092,10 +1088,6 @@ void setup() {
 
   #if HAS_FANMUX
     fanmux_init();
-  #endif
-
-  #if ENABLED(MIXING_EXTRUDER)
-    mixer.init();
   #endif
 
   #if ENABLED(BLTOUCH)

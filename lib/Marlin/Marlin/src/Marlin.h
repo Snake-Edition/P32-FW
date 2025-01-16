@@ -231,89 +231,53 @@ void manage_inactivity(const bool ignore_stepper_queue=false);
   #define E5_disable NOOP
 #endif
 
-#if ENABLED(MIXING_EXTRUDER)
+#if HAS_E0_ENABLE
+  #define  enable_E0() E0_enable
+  #define disable_E0() E0_disable
+#else
+  #define  enable_E0() NOOP
+  #define disable_E0() NOOP
+#endif
 
-  /**
-   * Mixing steppers synchronize their enable (and direction) together
-   */
-  #if MIXING_STEPPERS > 5
-    #define  enable_E0() { E0_enable;  E1_enable;  E2_enable;  E3_enable;  E4_enable;  E5_enable; }
-    #define disable_E0() { E0_disable; E1_disable; E2_disable; E3_disable; E4_disable; E5_disable; }
-  #elif MIXING_STEPPERS > 4
-    #define  enable_E0() { E0_enable;  E1_enable;  E2_enable;  E3_enable;  E4_enable; }
-    #define disable_E0() { E0_disable; E1_disable; E2_disable; E3_disable; E4_disable; }
-  #elif MIXING_STEPPERS > 3
-    #define  enable_E0() { E0_enable;  E1_enable;  E2_enable;  E3_enable; }
-    #define disable_E0() { E0_disable; E1_disable; E2_disable; E3_disable; }
-  #elif MIXING_STEPPERS > 2
-    #define  enable_E0() { E0_enable;  E1_enable;  E2_enable; }
-    #define disable_E0() { E0_disable; E1_disable; E2_disable; }
-  #else
-    #define  enable_E0() { E0_enable;  E1_enable; }
-    #define disable_E0() { E0_disable; E1_disable; }
-  #endif
+#if (E_STEPPERS > 1 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E1_ENABLE
+  #define  enable_E1() E1_enable
+  #define disable_E1() E1_disable
+#else
   #define  enable_E1() NOOP
   #define disable_E1() NOOP
+#endif
+
+#if (E_STEPPERS > 2 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E2_ENABLE
+  #define  enable_E2() E2_enable
+  #define disable_E2() E2_disable
+#else
   #define  enable_E2() NOOP
   #define disable_E2() NOOP
+#endif
+
+#if (E_STEPPERS > 3 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E3_ENABLE
+  #define  enable_E3() E3_enable
+  #define disable_E3() E3_disable
+#else
   #define  enable_E3() NOOP
   #define disable_E3() NOOP
+#endif
+
+#if (E_STEPPERS > 4 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E4_ENABLE
+  #define  enable_E4() E4_enable
+  #define disable_E4() E4_disable
+#else
   #define  enable_E4() NOOP
   #define disable_E4() NOOP
+#endif
+
+#if (E_STEPPERS > 5 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E5_ENABLE
+  #define  enable_E5() E5_enable
+  #define disable_E5() E5_disable
+#else
   #define  enable_E5() NOOP
   #define disable_E5() NOOP
-
-#else // !MIXING_EXTRUDER
-
-  #if HAS_E0_ENABLE
-    #define  enable_E0() E0_enable
-    #define disable_E0() E0_disable
-  #else
-    #define  enable_E0() NOOP
-    #define disable_E0() NOOP
-  #endif
-
-  #if (E_STEPPERS > 1 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E1_ENABLE
-    #define  enable_E1() E1_enable
-    #define disable_E1() E1_disable
-  #else
-    #define  enable_E1() NOOP
-    #define disable_E1() NOOP
-  #endif
-
-  #if (E_STEPPERS > 2 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E2_ENABLE
-    #define  enable_E2() E2_enable
-    #define disable_E2() E2_disable
-  #else
-    #define  enable_E2() NOOP
-    #define disable_E2() NOOP
-  #endif
-
-  #if (E_STEPPERS > 3 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E3_ENABLE
-    #define  enable_E3() E3_enable
-    #define disable_E3() E3_disable
-  #else
-    #define  enable_E3() NOOP
-    #define disable_E3() NOOP
-  #endif
-
-  #if (E_STEPPERS > 4 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E4_ENABLE
-    #define  enable_E4() E4_enable
-    #define disable_E4() E4_disable
-  #else
-    #define  enable_E4() NOOP
-    #define disable_E4() NOOP
-  #endif
-
-  #if (E_STEPPERS > 5 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E5_ENABLE
-    #define  enable_E5() E5_enable
-    #define disable_E5() E5_disable
-  #else
-    #define  enable_E5() NOOP
-    #define disable_E5() NOOP
-  #endif
-
-#endif // !MIXING_EXTRUDER
+#endif
 
 #if ENABLED(G38_PROBE_TARGET)
   extern uint8_t G38_move;          // Flag to tell the ISR that G38 is in progress, and the type
