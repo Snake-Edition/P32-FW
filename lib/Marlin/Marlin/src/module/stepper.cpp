@@ -97,10 +97,6 @@ Stepper stepper; // Singleton
   #include "../feature/runout.h"
 #endif
 
-#if HAS_DRIVER(L6470)
-  #include "../libs/L6470/L6470_Marlin.h"
-#endif
-
 // public:
 
 #if HAS_EXTRA_ENDSTOPS || ENABLED(Z_STEPPER_AUTO_ALIGN)
@@ -126,10 +122,6 @@ xyze_int8_t Stepper::count_direction{0};
  *   COREYZ: Y_AXIS=B_AXIS and Z_AXIS=C_AXIS
  */
 void Stepper::set_directions() {
-
-  #if HAS_DRIVER(L6470)
-    uint8_t L6470_buf[MAX_L6470 + 1];   // chip command sequence - element 0 not used
-  #endif
 
   #if MINIMUM_STEPPER_PRE_DIR_DELAY > 0
     DELAY_NS(MINIMUM_STEPPER_PRE_DIR_DELAY);
@@ -165,27 +157,6 @@ void Stepper::set_directions() {
     NORM_E_DIR(stepper_extruder);
     count_direction.e = 1;
   }
-
-  #if HAS_DRIVER(L6470)
-
-    if (L6470.spi_active) {
-      L6470.spi_abort = true;                     // interrupted a SPI transfer - need to shut it down gracefully
-      for (uint8_t j = 1; j <= L6470::chain[0]; j++)
-        L6470_buf[j] = dSPIN_NOP;                 // fill buffer with NOOP commands
-      L6470.transfer(L6470_buf, L6470::chain[0]);  // send enough NOOPs to complete any command
-      L6470.transfer(L6470_buf, L6470::chain[0]);
-      L6470.transfer(L6470_buf, L6470::chain[0]);
-    }
-
-    // The L6470.dir_commands[] array holds the direction command for each stepper
-
-    //scan command array and copy matches into L6470.transfer
-    for (uint8_t j = 1; j <= L6470::chain[0]; j++)
-      L6470_buf[j] = L6470.dir_commands[L6470::chain[j]];
-
-    L6470.transfer(L6470_buf, L6470::chain[0]);  // send the command stream to the drivers
-
-  #endif
 
   // A small delay may be needed after changing direction
   #if MINIMUM_STEPPER_POST_DIR_DELAY > 0
