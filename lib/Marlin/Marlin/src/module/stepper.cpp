@@ -82,7 +82,7 @@
 Stepper stepper; // Singleton
 
 #include "planner.h"
-#include "../HAL/shared/Delay.h"
+#include <timing_precise.hpp>
 
 // public:
 
@@ -111,7 +111,7 @@ xyze_int8_t Stepper::count_direction{0};
 void Stepper::set_directions() {
 
   #if MINIMUM_STEPPER_PRE_DIR_DELAY > 0
-    DELAY_NS(MINIMUM_STEPPER_PRE_DIR_DELAY);
+    delay_ns_precise<MINIMUM_STEPPER_PRE_DIR_DELAY>();
   #endif
 
   #define SET_STEP_DIR(A)                       \
@@ -147,7 +147,7 @@ void Stepper::set_directions() {
 
   // A small delay may be needed after changing direction
   #if MINIMUM_STEPPER_POST_DIR_DELAY > 0
-    DELAY_NS(MINIMUM_STEPPER_POST_DIR_DELAY);
+    delay_ns_precise<MINIMUM_STEPPER_POST_DIR_DELAY>();
   #endif
 }
 
@@ -463,27 +463,27 @@ void Stepper::report_positions() {
   #else
     #define _SAVE_START NOOP
     #if EXTRA_CYCLES_BABYSTEP > 0
-      #define _PULSE_WAIT DELAY_NS(EXTRA_CYCLES_BABYSTEP * NANOSECONDS_PER_CYCLE)
+      #define _PULSE_WAIT delay_ns_precise<EXTRA_CYCLES_BABYSTEP * NANOSECONDS_PER_CYCLE>()
     #elif ENABLED(DELTA)
-      #define _PULSE_WAIT DELAY_US(2);
+      #define _PULSE_WAIT delay_us_precise<2>()
     #elif STEP_PULSE_CYCLES > 0
       #define _PULSE_WAIT NOOP
     #else
-      #define _PULSE_WAIT DELAY_US(4);
+      #define _PULSE_WAIT delay_us_precise<4>()
     #endif
   #endif
 
-  #define BABYSTEP_AXIS(AXIS, INVERT, DIR) {            \
-      const uint8_t old_dir = _READ_DIR(AXIS);          \
-      _ENABLE(AXIS);                                    \
-      DELAY_NS(MINIMUM_STEPPER_PRE_DIR_DELAY);          \
-      _APPLY_DIR(AXIS, _INVERT_DIR(AXIS)^DIR^INVERT);   \
-      DELAY_NS(MINIMUM_STEPPER_POST_DIR_DELAY);         \
-      _SAVE_START;                                      \
-      _APPLY_STEP(AXIS)(!_INVERT_STEP_PIN(AXIS));       \
-      _PULSE_WAIT;                                      \
-      _APPLY_STEP(AXIS)(_INVERT_STEP_PIN(AXIS));        \
-      _APPLY_DIR(AXIS, old_dir);                        \
+  #define BABYSTEP_AXIS(AXIS, INVERT, DIR) {             \
+      const uint8_t old_dir = _READ_DIR(AXIS);           \
+      _ENABLE(AXIS);                                     \
+      delay_ns_precise<MINIMUM_STEPPER_PRE_DIR_DELAY>(); \
+      _APPLY_DIR(AXIS, _INVERT_DIR(AXIS)^DIR^INVERT);    \
+      delay_ns_precise<MINIMUM_STEPPER_POST_DIR_DELAY>();\
+      _SAVE_START;                                       \
+      _APPLY_STEP(AXIS)(!_INVERT_STEP_PIN(AXIS));        \
+      _PULSE_WAIT;                                       \
+      _APPLY_STEP(AXIS)(_INVERT_STEP_PIN(AXIS));         \
+      _APPLY_DIR(AXIS, old_dir);                         \
     }
 
   // MUST ONLY BE CALLED BY AN ISR,
@@ -542,7 +542,7 @@ void Stepper::report_positions() {
           enable_Z();
 
           #if MINIMUM_STEPPER_PRE_DIR_DELAY > 0
-            DELAY_NS(MINIMUM_STEPPER_PRE_DIR_DELAY);
+            delay_ns_precise<MINIMUM_STEPPER_PRE_DIR_DELAY>();
           #endif
 
           const uint8_t old_x_dir_pin = X_DIR_READ(),
@@ -554,7 +554,7 @@ void Stepper::report_positions() {
           Z_DIR_WRITE(INVERT_Z_DIR ^ z_direction);
 
           #if MINIMUM_STEPPER_POST_DIR_DELAY > 0
-            DELAY_NS(MINIMUM_STEPPER_POST_DIR_DELAY);
+            delay_ns_precise<MINIMUM_STEPPER_POST_DIR_DELAY>();
           #endif
 
           _SAVE_START;
