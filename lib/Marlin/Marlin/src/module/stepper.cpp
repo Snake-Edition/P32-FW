@@ -81,21 +81,8 @@
 
 Stepper stepper; // Singleton
 
-#include "endstops.h"
 #include "planner.h"
-#include "motion.h"
-
-#include "temperature.h"
-#include "../lcd/ultralcd.h"
-#include "../core/language.h"
-#include "../gcode/queue.h"
-#include "../sd/cardreader.h"
-#include "../Marlin.h"
 #include "../HAL/shared/Delay.h"
-
-#ifdef FILAMENT_RUNOUT_DISTANCE_MM
-  #include "../feature/runout.h"
-#endif
 
 // public:
 
