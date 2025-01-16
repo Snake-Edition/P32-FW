@@ -53,6 +53,9 @@ struct window_header_t : public window_frame_t {
     void updateIcons();
     void updateTime();
     void update_bed_info();
+#if BUDDY_ENABLE_CONNECT()
+    void updateConnect(bool iface_up);
+#endif
 
 public:
     window_header_t(window_t *parent, const string_view_utf8 &txt = string_view_utf8::MakeNULLSTR());

@@ -62,9 +62,53 @@ void window_header_t::updateNetwork() {
 #endif
 
 #if BUDDY_ENABLE_CONNECT()
-    icon_connect.set_shadow(interface_status != NETDEV_NETIF_UP || get<0>(connect_client::last_status()) != connect_client::ConnectionStatus::Ok);
-#endif // BUDDY_ENABLE_CONNECT()
+    updateConnect(interface_status == NETDEV_NETIF_UP);
+#endif
 }
+
+#if BUDDY_ENABLE_CONNECT()
+void window_header_t::updateConnect(bool iface_up) {
+    /*
+     * Racionale behind the order and logic.
+     *
+     * The off state (not registered or turned off) and "permanent" errors have
+     * precedence over read/not ready indication. That's because the ready
+     * state has no application except for Connect.
+     *
+     * However, transient errors are combined with ready/not ready indication.
+     * Transient errors are likely going to get resolved on their own (eg.
+     * reconnection), so the fact a printer is ready and may start printing
+     * just after the reconnection is done is interesting info to the user. In
+     * a similar sense, the fact the printer drops connection for a short while
+     * is not uncommon and "hiding" the ready (and reappearing it) would
+     * confuse the user.
+     */
+    if (!connect_client::is_connect_registered()) {
+        // If not registered, we don't care about anything from the rest, just don't show.
+        icon_connect.set_visible(false);
+        return;
+    }
+
+    const auto status = connect_client::last_status();
+    const auto connection_status = get<0>(status);
+    const bool online = (connection_status == connect_client::ConnectionStatus::Ok);
+    bool shadow = !iface_up || !online;
+    if (!online && get<1>(status) == connect_client::OnlineError::Auth) {
+        // Auth errors are "permanent", this likely means the account was
+        // removed on the server. User interaction needed to resolve.
+        icon_connect.SetRes(&img::connect_orange_16x16);
+        // We "orangize" instead of shadow here.
+        shadow = false;
+    } else if (connect_client::MarlinPrinter::is_printer_ready()) {
+        icon_connect.SetRes(&img::set_ready_16x16);
+    } else {
+        icon_connect.SetRes(&img::connect_16x16);
+    }
+
+    icon_connect.set_shadow(shadow);
+    icon_connect.set_visible(true);
+}
+#endif
 
 void window_header_t::updateTransfer() {
     auto status = transfers::Monitor::instance.status();
@@ -207,11 +251,6 @@ void window_header_t::updateIcons() {
     updateTransfer();
     updateTime();
     update_bed_info();
-
-#if BUDDY_ENABLE_CONNECT()
-    icon_connect.SetRes(connect_client::MarlinPrinter::is_printer_ready() ? &img::set_ready_16x16 : &img::connect_16x16);
-    icon_connect.set_visible(connect_client::is_connect_registered());
-#endif // BUDDY_ENABLE_CONNECT()
 
 #if !HAS_MINI_DISPLAY()
     icon_metrics.set_visible(config_store().enable_metrics.get());
