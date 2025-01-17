@@ -150,7 +150,7 @@ const user_planner_settings_t &Planner::user_settings = user_settings_;
 
 bool Planner::stealth_mode_ = false;
 
-void Planner::apply_settings(const user_planner_settings_t &settings) {
+void Planner::apply_settings(const user_planner_settings_t &settings, const bool no_limits) {
   static constexpr planner_settings_t standard_limits = {
     .max_acceleration_mm_per_s2 = HWLIMIT_NORMAL_MAX_ACCELERATION,
     .max_feedrate_mm_s = HWLIMIT_NORMAL_MAX_FEEDRATE,
@@ -183,9 +183,11 @@ void Planner::apply_settings(const user_planner_settings_t &settings) {
     }
   };
 
-  apply_limit(&planner_settings_t::max_feedrate_mm_s);
-  apply_limit(&planner_settings_t::max_acceleration_mm_per_s2);
-  apply_limit(&planner_settings_t::max_jerk);
+  if (!no_limits) {
+    apply_limit(&planner_settings_t::max_feedrate_mm_s);
+    apply_limit(&planner_settings_t::max_acceleration_mm_per_s2);
+    apply_limit(&planner_settings_t::max_jerk);
+  }
 
   refresh_acceleration_rates();
 }

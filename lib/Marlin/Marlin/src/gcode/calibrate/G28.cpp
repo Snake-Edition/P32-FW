@@ -561,7 +561,9 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
       #if HAS_CLASSIC_JERK
         s.max_jerk.set(XY_HOMING_JERK, XY_HOMING_JERK);
       #endif
-      planner.apply_settings(s);
+
+      // use feedrates as given! These shouldn't be alterated by any other policy!
+      planner.apply_settings(s, true);
     }
   #endif
 

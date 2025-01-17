@@ -299,11 +299,19 @@ class Planner {
     /// Reference to user_settings - settings before limits are applied
     static const user_planner_settings_t &user_settings;
 
-    /// Sets new settings for the planner.
-    /// Writes the settings raw to user_settings, and with limits applied to settings/working_settings
-    /// !!! Always base your settings on user_settings, not on settings
-    static void apply_settings(const user_planner_settings_t &settings);
-    
+    /**
+     * @brief Sets new settings for the planner, possibly applying current mode limits.
+     * @param settings Settings to apply
+     * @param no_limits When true, do not apply any limits
+     *
+     * Writes the settings raw to user_settings, and with limits applied to
+     * settings/working_settings according to the current stealth mode. Always base your settings on
+     * user_settings, not on settings.
+     *
+     * When no_limits is true, the settings are applied directly.
+     */
+    static void apply_settings(const user_planner_settings_t &settings, const bool no_limits=false);
+
     static void set_stealth_mode(bool set);
 
     static uint32_t max_acceleration_msteps_per_s2[XYZE_N]; // (mini-steps/s^2) Derived from mm_per_s2
