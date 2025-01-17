@@ -51,13 +51,6 @@
 
 LOG_COMPONENT_REF(Metrics);
 
-/// This metric is defined in Marlin/src/module/probe.cpp, thus no interface
-#if HAS_BED_PROBE
-extern metric_t metric_probe_z;
-extern metric_t metric_probe_z_diff;
-extern metric_t metric_home_diff;
-#endif
-
 void buddy::metrics::RecordRuntimeStats() {
     METRIC_DEF(fw_version, "fw_version", METRIC_VALUE_STRING, 65535, METRIC_ENABLED);
     metric_record_string(&fw_version, "%s", version::project_version_full);
