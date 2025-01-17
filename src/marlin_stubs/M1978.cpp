@@ -90,7 +90,7 @@ public:
     }
 
     void update_progress() {
-        float new_progress;
+        float new_progress = 0;
         // Manual check pauses the progress, so we cannot calculate just (now - start)
         switch (phase) {
 #if PRINTER_IS_PRUSA_MK3_5() && HAS_SWITCHED_FAN_TEST()
