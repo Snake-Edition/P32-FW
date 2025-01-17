@@ -3304,13 +3304,9 @@ void onStartup() {
 
 void onIdle() {
     idle();
-    buddy::metrics::RecordMarlinVariables();
-    buddy::metrics::RecordRuntimeStats();
-    buddy::metrics::RecordPrintFilename();
-    buddy::metrics::RecordPowerStats();
-#if (BOARD_IS_XLBUDDY())
-    buddy::metrics::record_dwarf_internal_temperatures();
-#endif
+
+    buddy::metrics::record();
+
     print_utils_loop();
 }
 

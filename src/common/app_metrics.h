@@ -3,11 +3,7 @@
 
 namespace buddy {
 namespace metrics {
-    void RecordMarlinVariables();
-    void RecordRuntimeStats();
-    void RecordPowerStats();
-    void RecordPrintFilename();
-    void record_dwarf_internal_temperatures();
+    void record();
 
     struct RunApproxEvery {
         uint32_t interval_ms;

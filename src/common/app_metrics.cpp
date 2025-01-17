@@ -25,6 +25,7 @@
 #include "marlin_vars.hpp"
 #include "config_features.h"
 #include <option/has_mmu2.h>
+#include <metric_handlers.h>
 
 #include "../Marlin/src/module/temperature.h"
 #include "../Marlin/src/module/planner.h"
@@ -49,9 +50,13 @@
     #define active_extruder_or_first 0
 #endif
 
+using namespace buddy::metrics;
+
 LOG_COMPONENT_REF(Metrics);
 
-void buddy::metrics::RecordRuntimeStats() {
+namespace {
+
+void RecordRuntimeStats() {
     METRIC_DEF(fw_version, "fw_version", METRIC_VALUE_STRING, 65535, METRIC_ENABLED);
     metric_record_string(&fw_version, "%s", version::project_version_full);
 
@@ -129,7 +134,7 @@ void buddy::metrics::RecordRuntimeStats() {
     metric_record_custom(&heap, " free=%zui,total=%zui", xPortGetFreeHeapSize(), static_cast<size_t>(heap_total_size));
 }
 
-void buddy::metrics::RecordMarlinVariables() {
+void RecordMarlinVariables() {
     METRIC_DEF(is_printing, "is_printing", METRIC_VALUE_INTEGER, 5000, METRIC_ENABLED);
     metric_record_integer(&is_printing, printingIsActive() ? 1 : 0);
 
@@ -303,7 +308,7 @@ void buddy::metrics::RecordMarlinVariables() {
 
 #if HAS_ADVANCED_POWER()
     #if BOARD_IS_XBUDDY()
-void buddy::metrics::RecordPowerStats() {
+void RecordPowerStats() {
     METRIC_DEF(metric_bed_v_raw, "volt_bed_raw", METRIC_VALUE_INTEGER, 1000, METRIC_DISABLED);
     metric_record_integer(&metric_bed_v_raw, advancedpower.GetBedVoltageRaw());
     {
@@ -350,7 +355,7 @@ void buddy::metrics::RecordPowerStats() {
     metric_record_integer(&metric_oc_input_fault, advancedpower.OvercurrentFaultDetected());
 }
     #elif BOARD_IS_XLBUDDY()
-void buddy::metrics::RecordPowerStats() {
+void RecordPowerStats() {
     METRIC_DEF(metric_splitter_5V_current, "splitter_5V_current", METRIC_VALUE_FLOAT, 1000, METRIC_ENABLED);
     metric_record_float(&metric_splitter_5V_current, advancedpower.GetDwarfSplitter5VCurrent());
 
@@ -385,7 +390,7 @@ void buddy::metrics::RecordPowerStats() {
 
 #endif // HAS_ADVANCED_POWER()
 
-void buddy::metrics::RecordPrintFilename() {
+void RecordPrintFilename() {
     METRIC_DEF(file_name, "print_filename", METRIC_VALUE_STRING, 5000, METRIC_ENABLED);
     if (marlin_vars().print_state != marlin_server::State::Idle) {
         // The docstring for media_print_filename() advises against using this function; however, there is currently no replacement for it.
@@ -396,7 +401,7 @@ void buddy::metrics::RecordPrintFilename() {
 }
 
 #if BOARD_IS_XLBUDDY()
-void buddy::metrics::record_dwarf_internal_temperatures() {
+void record_dwarf_internal_temperatures() {
     // Dwarf board and MCU temperature for sensor screen
     buddy::puppies::Dwarf &dwarf = prusa_toolchanger.getActiveToolOrFirst();
 
@@ -433,3 +438,21 @@ void buddy::metrics::record_dwarf_internal_temperatures() {
     }
 }
 #endif
+
+} // namespace
+
+void buddy::metrics::record() {
+    if (!are_metrics_enabled()) {
+        return;
+    }
+
+    RecordMarlinVariables();
+    RecordRuntimeStats();
+    RecordPrintFilename();
+#if HAS_ADVANCED_POWER()
+    RecordPowerStats();
+#endif
+#if BOARD_IS_XLBUDDY()
+    record_dwarf_internal_temperatures();
+#endif
+}
