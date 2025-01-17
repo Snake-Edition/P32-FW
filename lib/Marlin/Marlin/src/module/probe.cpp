@@ -736,6 +736,11 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
       }
 
       #if ENABLED(NOZZLE_LOAD_CELL)
+        // The analysis profile *expects* a delay after touchdown. This was previously provided by
+        // the implicit 1st move delay, which is automatically elided now. Re-introduce it here
+        // until we can handle it at the model level.
+        safe_delay(Loadcell::TOUCHDOWN_DELAY_MS);
+
         // Return slowly back
         float move_back = 0.09f;
         do_blocking_move_to_z(current_position.z + move_back, MMM_TO_MMS(Z_PROBE_SPEED_BACK_MOVE));
