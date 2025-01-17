@@ -2066,16 +2066,6 @@ void Planner::buffer_sync_block() {
   // Convert current mini-steps to absolute step count
   block->sync_step_position = position / PLANNER_STEPS_MULTIPLIER;
 
-  // If this is the first added movement, reload the delay, otherwise, cancel it.
-  if (block_buffer_head == block_buffer_tail) {
-    // If it was the first queued block, restart the 1st block delivery delay, to
-    // give the planner an opportunity to queue more movements and plan them
-    // As there are no queued movements, the Stepper ISR will not touch this
-    // variable, so there is no risk setting this here (but it MUST be done
-    // before the following line!!)
-    delay_before_delivering = BLOCK_DELAY_FOR_1ST_MOVE;
-  }
-
   block_buffer_head = next_buffer_head;
 
   stepper.wake_up();
