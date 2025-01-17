@@ -890,6 +890,9 @@ bool PreciseStepping::is_waiting_before_delivering() {
         } else {
             return true;
         }
+    } else {
+        // clear any previous timer
+        waiting_before_delivering_start_time = 0;
     }
 
     if (const uint8_t waiting_for_discard = Planner::movesplanned_processed(); waiting_for_discard >= (BLOCK_BUFFER_SIZE / 2)) {

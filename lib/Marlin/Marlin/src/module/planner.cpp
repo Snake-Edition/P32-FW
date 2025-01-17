@@ -1030,9 +1030,8 @@ void Planner::quick_stop() {
 
   quick_stop_count ++;
 
-  // Restart the block delay for the first movement - As the queue was
-  // forced to empty, there's no risk the ISR will touch this.
-  delay_before_delivering = BLOCK_DELAY_FOR_1ST_MOVE;
+  // Reset the block delay for the first movement
+  delay_before_delivering = 0;
 }
 
 void Planner::resume_queuing() {
@@ -1197,6 +1196,7 @@ bool Planner::busy() {
 void Planner::synchronize() {
   bool emptying_buffer_orig = emptying();
   emptying_buffer = true;
+  delay_before_delivering = 0;
   while (busy()) idle(true);
   emptying_buffer = emptying_buffer_orig;
 #if HAS_PHASE_STEPPING()
@@ -1274,13 +1274,9 @@ bool Planner::_buffer_msteps(const xyze_long_t &target, const xyze_pos_t &target
     return true;
   }
 
-  // If this is the first added movement, reload the delay, otherwise, cancel it.
   if (block_buffer_head == block_buffer_tail) {
-    // If it was the first queued block, restart the 1st block delivery delay, to
+    // If it was the first queued block, set the 1st block delivery delay to
     // give the planner an opportunity to queue more movements and plan them
-    // As there are no queued movements, the Stepper ISR will not touch this
-    // variable, so there is no risk setting this here (but it MUST be done
-    // before the following line!!)
     delay_before_delivering = BLOCK_DELAY_FOR_1ST_MOVE;
   }
 
