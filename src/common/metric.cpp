@@ -87,7 +87,7 @@ static bool check_min_interval(metric_t *metric, uint32_t timestamp) {
 }
 
 static metric_point_t *point_check_and_prepare(metric_t *metric, uint32_t timestamp, metric_value_type_t type) {
-    if (!are_metrics_enabled()) {
+    if (!are_metrics_enabled() || !metric->enabled) {
         return NULL;
     }
 
@@ -99,10 +99,6 @@ static metric_point_t *point_check_and_prepare(metric_t *metric, uint32_t timest
         log_error(Metrics, "Attempt to record an invalid value type for metric %s", metric->name);
         metric_record_error(metric, "invalid type");
         return NULL;
-    }
-
-    if (!metric->enabled) {
-        return NULL; // don't try to enqueue if nobody is listening
     }
 
     metric_point_t *point = (metric_point_t *)osMailAlloc(metric_system_queue, 0);
