@@ -666,6 +666,7 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
       if (!do_probe_move(z, MMM_TO_MMS(Z_PROBE_SPEED_FAST))) {
         do_blocking_move_to_z(current_position.z + Z_CLEARANCE_BETWEEN_PROBES, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
         #if ENABLED(NOZZLE_LOAD_CELL)
+          safe_delay(Z_FIRST_PROBE_DELAY);
           reference_tare = loadcell_retare_for_analysis();
         #endif
       }
@@ -696,6 +697,7 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
 
         if (p) {
           // sync and re-tare the loadcell
+          safe_delay(Z_FIRST_PROBE_DELAY);
           auto offset = loadcell_retare_for_analysis() - reference_tare;
 
           SERIAL_ECHO_START();
@@ -704,6 +706,7 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
           // If tare value is suspicious, lift very high and try tare again
           if (std::abs(offset) > max_tare_offset) {
             do_blocking_move_to_z(current_position.z + Z_AFTER_PROBING, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+            safe_delay(PROBE_DELAY_AFTER_Z);
             reference_tare = loadcell_retare_for_analysis();
 
             SERIAL_ECHO_START();
