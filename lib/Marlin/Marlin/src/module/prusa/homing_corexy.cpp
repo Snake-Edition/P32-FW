@@ -213,10 +213,12 @@ struct measure_axis_params {
  * @param dist Maximum distance/direction to travel to hit an endstop
  * @param m_steps Measured steps
  * @param m_dist Measured distance
+ * @param fr_mm_s Service move feedrate
  * @param params Measured axis/stepper parameters
  * @return True on success
  */
-static bool measure_axis_distance(AxisEnum axis, xy_long_t origin_steps, int32_t dist, int32_t &m_steps, float &m_dist, const measure_axis_params &params) {
+static bool measure_axis_distance(AxisEnum axis, xy_long_t origin_steps, int32_t dist, int32_t &m_steps, float &m_dist,
+    const float fr_mm_s, const measure_axis_params &params) {
     // full initial position
     const xyze_long_t initial_steps = { origin_steps.a, origin_steps.b, stepper.position(C_AXIS), stepper.position(E_AXIS) };
     xyze_pos_t initial_mm;
@@ -276,7 +278,7 @@ static bool measure_axis_distance(AxisEnum axis, xy_long_t origin_steps, int32_t
     end_sensorless_homing_per_axis(axis, stealth_states);
 
     // move back to starting point
-    plan_raw_move(initial_mm, initial_pos_msteps, homing_feedrate(axis));
+    plan_raw_move(initial_mm, initial_pos_msteps, fr_mm_s);
     if (planner.draining()) {
         return false;
     }
@@ -327,7 +329,8 @@ static measure_axis_params measure_axis_defaults(const AxisEnum axis) {
 
 // Call measure_axis_distance() with calibrated parameters
 // (or defaults in printers without measurement calibration)
-static bool measure_axis_distance(AxisEnum axis, xy_long_t origin_steps, int32_t dist, int32_t &m_steps, float &m_dist) {
+static bool measure_axis_distance(AxisEnum axis, xy_long_t origin_steps, int32_t dist,
+    int32_t &m_steps, float &m_dist, const float fr_mm_s) {
     measure_axis_params params;
 
 #if HAS_TRINAMIC && defined(XY_HOMING_MEASURE_SENS_MIN)
@@ -345,7 +348,7 @@ static bool measure_axis_distance(AxisEnum axis, xy_long_t origin_steps, int32_t
     params = measure_axis_defaults(axis);
 #endif
 
-    return measure_axis_distance(axis, origin_steps, dist, m_steps, m_dist, params);
+    return measure_axis_distance(axis, origin_steps, dist, m_steps, m_dist, fr_mm_s, params);
 }
 
 /**
@@ -371,9 +374,10 @@ S sum_along(const T *seq, const size_t size, const size_t axis) {
  * @param axis Physical axis to measure
  * @param c_dist AB cycle distance from the endstop
  * @param m_dist 1/2 distance from the endstop (mm)
+ * @param fr_mm_s Service move feedrate
  * @return True on success
  */
-static bool measure_phase_cycles(AxisEnum axis, xy_pos_t &c_dist, xy_pos_t &m_dist) {
+static bool measure_phase_cycles(AxisEnum axis, xy_pos_t &c_dist, xy_pos_t &m_dist, const float fr_mm_s) {
     // prepare for repeated measurements
     const AxisEnum other_axis = (axis == B_AXIS ? A_AXIS : B_AXIS);
     SetupForMeasurement setup_guard(other_axis);
@@ -392,8 +396,8 @@ static bool measure_phase_cycles(AxisEnum axis, xy_pos_t &c_dist, xy_pos_t &m_di
         const uint8_t slot1 = (retry + 1) % probe_n;
 
         // measure distance B+/B-
-        if (!measure_axis_distance(axis, origin_steps, measure_max_dist * measure_dir, p_steps[slot1][1], p_dist[slot1][1])
-            || !measure_axis_distance(axis, origin_steps, measure_max_dist * -measure_dir, p_steps[slot1][0], p_dist[slot1][0])) {
+        if (!measure_axis_distance(axis, origin_steps, measure_max_dist * measure_dir, p_steps[slot1][1], p_dist[slot1][1], fr_mm_s)
+            || !measure_axis_distance(axis, origin_steps, measure_max_dist * -measure_dir, p_steps[slot1][0], p_dist[slot1][0], fr_mm_s)) {
             if (!planner.draining()) {
                 ui.status_printf_P(0, "Endstop not reached");
             }
@@ -533,7 +537,7 @@ static bool measure_origin_multipoint(AxisEnum axis, const xy_long_t &origin_ste
                     return false;
                 }
 
-                if (!measure_phase_cycles(axis, data.c_dist, data.m_dist)) {
+                if (!measure_phase_cycles(axis, data.c_dist, data.m_dist, fr_mm_s)) {
                     return false;
                 }
             }
@@ -736,7 +740,7 @@ static bool measure_calibrate_walk(float &score, AxisEnum measured_axis,
             }
 
             const bool valid = measure_axis_distance(measured_axis, temp_origin,
-                measure_max_dist * measure_dir * a_dir, p_steps, p_dist, params);
+                measure_max_dist * measure_dir * a_dir, p_steps, p_dist, fr_mm_s, params);
             if (!valid) {
                 if (planner.draining()) {
                     return false;
@@ -933,7 +937,7 @@ bool corexy_home_refine(float fr_mm_s, CoreXYCalibrationMode mode) {
 
     // measure from current origin
     xy_pos_t c_dist, _;
-    if (!measure_phase_cycles(measured_axis, c_dist, _)) {
+    if (!measure_phase_cycles(measured_axis, c_dist, _, fr_mm_s)) {
         return false;
     }
 
@@ -954,7 +958,7 @@ bool corexy_home_refine(float fr_mm_s, CoreXYCalibrationMode mode) {
         return false;
     }
     xy_pos_t v_c_dist;
-    if (!measure_phase_cycles(measured_axis, v_c_dist, _)) {
+    if (!measure_phase_cycles(measured_axis, v_c_dist, _, fr_mm_s)) {
         return false;
     }
 
