@@ -796,8 +796,9 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
 
       #if TOTAL_PROBING > 2
         // Small Z raise after all but the last probe
-        if (p < TOTAL_PROBING - 1)
+        if (p < TOTAL_PROBING - 1) {
           do_blocking_move_to_z(current_position.z + Z_CLEARANCE_MULTI_PROBE, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+        }
       #endif
     }
 
