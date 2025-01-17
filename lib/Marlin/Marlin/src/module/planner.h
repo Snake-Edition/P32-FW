@@ -274,7 +274,7 @@ class Planner {
                             block_buffer_nonbusy,     // Index of the first non busy block
                             block_buffer_planned,     // Index of the optimally planned block
                             block_buffer_tail;        // Index of the busy block, if any
-    static uint8_t delay_before_delivering;           // This counter delays delivery of blocks when queue becomes empty to allow the opportunity of merging blocks
+    static uint32_t delay_before_delivering;          // Initial milliseconds of delay for planner optimization
 
 
     #if ENABLED(DISTINCT_E_FACTORS)

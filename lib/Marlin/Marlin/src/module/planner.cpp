@@ -118,9 +118,9 @@
 
 constexpr const int32_t MIN_MSTEPS_PER_SEGMENT = MIN_STEPS_PER_SEGMENT * PLANNER_STEPS_MULTIPLIER;
 
-// Delay for delivery of first block to the stepper ISR, if the queue contains 2 or
-// fewer movements. The delay is measured in milliseconds, and must be less than 250ms
-#define BLOCK_DELAY_FOR_1ST_MOVE 100
+// Delay for delivery of first block to the stepper ISR to allow planner optimization.
+// The delay is measured in milliseconds.
+#define BLOCK_DELAY_FOR_1ST_MOVE 200
 
 Planner planner;
 
@@ -134,7 +134,7 @@ volatile uint8_t Planner::block_buffer_head,    // Index of the next block to be
                  Planner::block_buffer_nonbusy, // Index of the first non-busy block
                  Planner::block_buffer_planned, // Index of the optimally planned block
                  Planner::block_buffer_tail;    // Index of the busy block, if any
-uint8_t Planner::delay_before_delivering;       // This counter delays delivery of blocks when queue becomes empty to allow the opportunity of merging blocks
+uint32_t Planner::delay_before_delivering;      // Initial milliseconds of delay for planner optimization
 
 // A flag to drop queuing of blocks and abort any pending move
 bool Planner::draining_buffer;

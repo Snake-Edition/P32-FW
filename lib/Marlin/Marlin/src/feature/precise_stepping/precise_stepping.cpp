@@ -884,7 +884,7 @@ bool PreciseStepping::is_waiting_before_delivering() {
         if (waiting_before_delivering_start_time == 0) {
             waiting_before_delivering_start_time = ticks_ms();
             return true;
-        } else if (Planner::nonbusy_movesplanned() >= 3 || (ticks_ms() - waiting_before_delivering_start_time) >= Planner::delay_before_delivering) {
+        } else if (Planner::is_full() || (ticks_diff(ticks_ms(), waiting_before_delivering_start_time) >= int32_t(Planner::delay_before_delivering))) {
             Planner::delay_before_delivering = 0;
             waiting_before_delivering_start_time = 0;
         } else {
