@@ -847,14 +847,7 @@ inline void loud_kill(PGM_P const lcd_msg, const heater_ind_t heater) {
 }
 
 void Temperature::_temp_error(const heater_ind_t heater, PGM_P const serial_msg, PGM_P const lcd_msg) {
-
-  static uint8_t killed = 0;
-
-  if (IsRunning()
-    #if BOGUS_TEMPERATURE_GRACE_PERIOD
-      && killed == 2
-    #endif
-  ) {
+  if (IsRunning()) {
     SERIAL_ERROR_START();
     serialprintPGM(serial_msg);
     SERIAL_ECHOPGM(MSG_STOPPED_HEATER);
@@ -868,27 +861,7 @@ void Temperature::_temp_error(const heater_ind_t heater, PGM_P const serial_msg,
 
   disable_all_heaters(); // always disable (even for bogus temp)
 
-  #if BOGUS_TEMPERATURE_GRACE_PERIOD
-    const millis_t ms = millis();
-    static millis_t expire_ms;
-    switch (killed) {
-      case 0:
-        expire_ms = ms + BOGUS_TEMPERATURE_GRACE_PERIOD;
-        ++killed;
-        break;
-      case 1:
-        if (ELAPSED(ms, expire_ms)) ++killed;
-        break;
-      case 2:
-        loud_kill(lcd_msg1, heater);
-        ++killed;
-        break;
-    }
-  #elif defined(BOGUS_TEMPERATURE_GRACE_PERIOD)
-    UNUSED(killed);
-  #else
-    if (!killed) { killed = 1; loud_kill(lcd_msg, heater); }
-  #endif
+  loud_kill(lcd_msg, heater);
 }
 
 void Temperature::max_temp_error(const heater_ind_t heater) {
