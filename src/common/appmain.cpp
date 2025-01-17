@@ -224,7 +224,6 @@ static uint8_t cnt_advanced_power_update = 0;
 void advanced_power_irq() {
     if (++cnt_advanced_power_update >= 40) { // update Advanced power variables = 25Hz
         advancedpower.Update();
-        buddy::metrics::RecordPowerStats();
     #ifdef ADC_MULTIPLEXER
         PowerHWIDAndTempMux.switch_channel();
     #endif
