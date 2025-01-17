@@ -665,10 +665,6 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
       // Probe down fast. If the probe never triggered, raise for probe clearance
       if (!do_probe_move(z, MMM_TO_MMS(Z_PROBE_SPEED_FAST))) {
         do_blocking_move_to_z(current_position.z + Z_CLEARANCE_BETWEEN_PROBES, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
-        #if ENABLED(NOZZLE_LOAD_CELL)
-          safe_delay(Z_FIRST_PROBE_DELAY);
-          reference_tare = loadcell_retare_for_analysis();
-        #endif
       }
     }
   #endif
@@ -695,23 +691,21 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
         auto center_offset = offset_for_probe_try(probe_idx++);
         do_blocking_move_to_xy(center_pos + center_offset, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
 
-        if (p) {
-          // sync and re-tare the loadcell
+        // re-tare the loadcell
+        safe_delay(Z_FIRST_PROBE_DELAY);
+        auto offset = loadcell_retare_for_analysis() - reference_tare;
+
+        SERIAL_ECHO_START();
+        SERIAL_ECHOLNPAIR_F("Re-tared with offset ", offset);
+
+        // If tare value is suspicious, lift very high and try tare again
+        if (std::abs(offset) > max_tare_offset) {
+          do_blocking_move_to_z(current_position.z + Z_AFTER_PROBING, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
           safe_delay(Z_FIRST_PROBE_DELAY);
-          auto offset = loadcell_retare_for_analysis() - reference_tare;
+          reference_tare = loadcell_retare_for_analysis();
 
           SERIAL_ECHO_START();
-          SERIAL_ECHOLNPAIR_F("Re-tared with offset ", offset);
-
-          // If tare value is suspicious, lift very high and try tare again
-          if (std::abs(offset) > max_tare_offset) {
-            do_blocking_move_to_z(current_position.z + Z_AFTER_PROBING, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
-            safe_delay(PROBE_DELAY_AFTER_Z);
-            reference_tare = loadcell_retare_for_analysis();
-
-            SERIAL_ECHO_START();
-            SERIAL_ECHOLNPAIR_F("Lifted and took new reference tare ", reference_tare);
-          }
+          SERIAL_ECHOLNPAIR_F("Lifted and took new reference tare ", reference_tare);
         }
 
         SERIAL_ECHO_START();
