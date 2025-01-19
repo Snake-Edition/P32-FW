@@ -1713,7 +1713,7 @@
 	#ifdef MINI_I3_MK33
 	    #define X_AXIS_LOAD_POS  (std::numeric_limits<float>::quiet_NaN())
 	    #define X_AXIS_UNLOAD_POS  (std::numeric_limits<float>::quiet_NaN())
-	#elseif MINI_COREXY
+	#elif MINI_COREXY
 	    #define X_AXIS_LOAD_POS  ((X_MAX_POS) / 2)
 	    #define X_AXIS_UNLOAD_POS  ((X_MAX_POS) / 2)
 	#else
