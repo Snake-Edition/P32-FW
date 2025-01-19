@@ -27,10 +27,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "BOOTLOADER": {
                     "type": "STRING",
                     "value": "YES"
@@ -81,10 +77,6 @@
                 "BOARD_VERSION": {
                     "type": "STRING",
                     "value": "1.0.0"
-                },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
                 },
                 "BOOTLOADER": {
                     "type": "STRING",
@@ -137,10 +129,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "BOOTLOADER": {
                     "type": "STRING",
                     "value": "YES"
@@ -192,10 +180,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "BOOTLOADER": {
                     "type": "STRING",
                     "value": "NO"
@@ -246,10 +230,6 @@
                 "BOARD_VERSION": {
                     "type": "STRING",
                     "value": "1.0.0"
-                },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -306,10 +286,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
                     "value": "cs"
@@ -364,10 +340,6 @@
                 "BOARD_VERSION": {
                     "type": "STRING",
                     "value": "1.0.0"
-                },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -424,10 +396,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
                     "value": "cs"
@@ -482,10 +450,6 @@
                 "BOARD_VERSION": {
                     "type": "STRING",
                     "value": "1.0.0"
-                },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -542,10 +506,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
                     "value": "de"
@@ -600,10 +560,6 @@
                 "BOARD_VERSION": {
                     "type": "STRING",
                     "value": "1.0.0"
-                },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -660,10 +616,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
                     "value": "de"
@@ -718,10 +670,6 @@
                 "BOARD_VERSION": {
                     "type": "STRING",
                     "value": "1.0.0"
-                },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -778,10 +726,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
                     "value": "es"
@@ -836,10 +780,6 @@
                 "BOARD_VERSION": {
                     "type": "STRING",
                     "value": "1.0.0"
-                },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -896,10 +836,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
                     "value": "es"
@@ -954,10 +890,6 @@
                 "BOARD_VERSION": {
                     "type": "STRING",
                     "value": "1.0.0"
-                },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -1014,10 +946,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
                     "value": "fr"
@@ -1072,10 +1000,6 @@
                 "BOARD_VERSION": {
                     "type": "STRING",
                     "value": "1.0.0"
-                },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -1132,10 +1056,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
                     "value": "fr"
@@ -1190,10 +1110,6 @@
                 "BOARD_VERSION": {
                     "type": "STRING",
                     "value": "1.0.0"
-                },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -1250,10 +1166,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
                     "value": "it"
@@ -1308,10 +1220,6 @@
                 "BOARD_VERSION": {
                     "type": "STRING",
                     "value": "1.0.0"
-                },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -1368,10 +1276,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
                     "value": "it"
@@ -1426,10 +1330,6 @@
                 "BOARD_VERSION": {
                     "type": "STRING",
                     "value": "1.0.0"
-                },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -1486,10 +1386,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
                     "value": "pl"
@@ -1545,10 +1441,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
                     "value": "pl"
@@ -1603,10 +1495,6 @@
                 "BOARD_VERSION": {
                     "type": "STRING",
                     "value": "1.0.0"
-                },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -1667,10 +1555,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
                     "value": "ja"
@@ -1729,10 +1613,6 @@
                 "BOARD_VERSION": {
                     "type": "STRING",
                     "value": "1.0.0"
-                },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -1793,10 +1673,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
                     "value": "ja"
@@ -1856,10 +1732,6 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
-                },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
                     "value": "ja"
@@ -1915,9 +1787,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -1974,9 +1846,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -2033,9 +1905,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -2092,9 +1964,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -2151,9 +2023,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -2210,9 +2082,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -2269,9 +2141,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -2328,9 +2200,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -2387,9 +2259,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -2446,9 +2318,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -2505,9 +2377,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -2564,9 +2436,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -2623,9 +2495,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -2682,9 +2554,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -2741,9 +2613,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -2800,9 +2672,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -2859,9 +2731,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -2918,9 +2790,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -2977,9 +2849,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -3036,9 +2908,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -3095,9 +2967,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -3154,9 +3026,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -3213,9 +3085,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -3272,9 +3144,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -3335,9 +3207,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -3398,9 +3270,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -3461,9 +3333,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -3524,9 +3396,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_COREXY"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -3583,9 +3455,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -3642,9 +3514,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -3701,9 +3573,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -3760,9 +3632,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -3819,9 +3691,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -3878,9 +3750,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -3937,9 +3809,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -3996,9 +3868,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -4055,9 +3927,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -4114,9 +3986,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -4173,9 +4045,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -4232,9 +4104,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -4291,9 +4163,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -4350,9 +4222,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -4409,9 +4281,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -4468,9 +4340,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -4527,9 +4399,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -4586,9 +4458,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -4645,9 +4517,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -4704,9 +4576,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -4763,9 +4635,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -4822,9 +4694,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -4881,9 +4753,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -4940,9 +4812,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -5003,9 +4875,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -5066,9 +4938,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -5129,9 +5001,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -5192,9 +5064,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_LONG_BED"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -5251,9 +5123,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -5310,9 +5182,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -5369,9 +5241,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -5428,9 +5300,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -5487,9 +5359,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -5546,9 +5418,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -5605,9 +5477,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -5664,9 +5536,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -5723,9 +5595,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -5782,9 +5654,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -5841,9 +5713,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -5900,9 +5772,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -5959,9 +5831,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -6018,9 +5890,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -6077,9 +5949,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -6136,9 +6008,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -6195,9 +6067,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -6254,9 +6126,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -6313,9 +6185,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -6372,9 +6244,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -6431,9 +6303,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -6490,9 +6362,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -6549,9 +6421,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -6608,9 +6480,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -6671,9 +6543,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -6734,9 +6606,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -6797,9 +6669,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",
@@ -6860,9 +6732,9 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "DEVELOPMENT_ITEMS_ENABLED": {
-                    "type": "BOOL",
-                    "value": "YES"
+                "PRESET_COMPILE_OPTIONS": {
+                    "type": "STRING",
+                    "value": "-DMINI_I3_MK33"
                 },
                 "TRANSLATIONS_LIST": {
                     "type": "STRING",

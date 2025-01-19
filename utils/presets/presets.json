@@ -7,8 +7,7 @@
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
-                "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true
+                "BOARD_VERSION": "1.0.0"
             }
         },
         {
@@ -18,7 +17,6 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
                 "TRANSLATIONS_LIST": "cs"
             }
         },
@@ -29,7 +27,6 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
                 "TRANSLATIONS_LIST": "de"
             }
         },
@@ -40,7 +37,6 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
                 "TRANSLATIONS_LIST": "es"
             }
         },
@@ -51,7 +47,6 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
                 "TRANSLATIONS_LIST": "fr"
             }
         },
@@ -62,7 +57,6 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
                 "TRANSLATIONS_LIST": "it"
             }
         },
@@ -73,7 +67,6 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
                 "TRANSLATIONS_LIST": "pl"
             }
         },
@@ -85,7 +78,6 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
                 "TRANSLATIONS_LIST": "ja"
             }
         },
@@ -99,7 +91,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_COREXY",
                 "TRANSLATIONS_LIST": "cs"
             }
         },
@@ -110,7 +102,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_COREXY",
                 "TRANSLATIONS_LIST": "de"
             }
         },
@@ -121,7 +113,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_COREXY",
                 "TRANSLATIONS_LIST": "es"
             }
         },
@@ -132,7 +124,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_COREXY",
                 "TRANSLATIONS_LIST": "fr"
             }
         },
@@ -143,7 +135,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                 "PRESET_COMPILE_OPTIONS": "-DMINI_COREXY",
                 "TRANSLATIONS_LIST": "it"
             }
         },
@@ -154,7 +146,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_COREXY",
                 "TRANSLATIONS_LIST": "pl"
             }
         },
@@ -166,7 +158,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                 "PRESET_COMPILE_OPTIONS": "-DMINI_COREXY",
                 "TRANSLATIONS_LIST": "ja"
             }
         },
@@ -180,7 +172,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_LONG_BED",
                 "TRANSLATIONS_LIST": "cs"
             }
         },
@@ -191,7 +183,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_LONG_BED",
                 "TRANSLATIONS_LIST": "de"
             }
         },
@@ -202,7 +194,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_LONG_BED",
                 "TRANSLATIONS_LIST": "es"
             }
         },
@@ -213,7 +205,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_LONG_BED",
                 "TRANSLATIONS_LIST": "fr"
             }
         },
@@ -224,7 +216,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_LONG_BED",
                 "TRANSLATIONS_LIST": "it"
             }
         },
@@ -235,7 +227,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_LONG_BED",
                 "TRANSLATIONS_LIST": "pl"
             }
         },
@@ -247,7 +239,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_LONG_BED",
                 "TRANSLATIONS_LIST": "ja"
             }
         },
@@ -261,7 +253,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_I3_MK33",
                 "TRANSLATIONS_LIST": "cs"
             }
         },
@@ -272,7 +264,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_I3_MK33",
                 "TRANSLATIONS_LIST": "de"
             }
         },
@@ -283,7 +275,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_I3_MK33",
                 "TRANSLATIONS_LIST": "es"
             }
         },
@@ -294,7 +286,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_I3_MK33",
                 "TRANSLATIONS_LIST": "fr"
             }
         },
@@ -305,7 +297,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_I3_MK33",
                 "TRANSLATIONS_LIST": "it"
             }
         },
@@ -316,7 +308,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_I3_MK33",
                 "TRANSLATIONS_LIST": "pl"
             }
         },
@@ -328,7 +320,7 @@
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "BOARD_VERSION": "1.0.0",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
+                "PRESET_COMPILE_OPTIONS": "-DMINI_I3_MK33",
                 "TRANSLATIONS_LIST": "ja"
             }
         },
