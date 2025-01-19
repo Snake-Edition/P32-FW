@@ -1787,7 +1787,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -1846,7 +1846,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -1905,7 +1905,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -1964,7 +1964,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -2023,7 +2023,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -2082,7 +2082,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -2141,7 +2141,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -2200,7 +2200,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -2259,7 +2259,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -2318,7 +2318,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -2377,7 +2377,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -2436,7 +2436,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -2495,7 +2495,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -2554,7 +2554,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -2613,7 +2613,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -2672,7 +2672,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -2731,7 +2731,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -2790,7 +2790,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -2849,7 +2849,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -2908,7 +2908,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -2967,7 +2967,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -3026,7 +3026,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -3085,7 +3085,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -3144,7 +3144,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -3207,7 +3207,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -3270,7 +3270,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -3333,7 +3333,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -3396,7 +3396,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_COREXY"
                 },
@@ -3455,7 +3455,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -3514,7 +3514,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -3573,7 +3573,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -3632,7 +3632,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -3691,7 +3691,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -3750,7 +3750,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -3809,7 +3809,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -3868,7 +3868,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -3927,7 +3927,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -3986,7 +3986,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -4045,7 +4045,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -4104,7 +4104,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -4163,7 +4163,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -4222,7 +4222,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -4281,7 +4281,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -4340,7 +4340,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -4399,7 +4399,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -4458,7 +4458,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -4517,7 +4517,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -4576,7 +4576,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -4635,7 +4635,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -4694,7 +4694,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -4753,7 +4753,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -4812,7 +4812,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -4875,7 +4875,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -4938,7 +4938,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -5001,7 +5001,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -5064,7 +5064,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_LONG_BED"
                 },
@@ -5123,7 +5123,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -5182,7 +5182,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -5241,7 +5241,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -5300,7 +5300,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -5359,7 +5359,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -5418,7 +5418,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -5477,7 +5477,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -5536,7 +5536,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -5595,7 +5595,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -5654,7 +5654,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -5713,7 +5713,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -5772,7 +5772,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -5831,7 +5831,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -5890,7 +5890,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -5949,7 +5949,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -6008,7 +6008,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -6067,7 +6067,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -6126,7 +6126,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -6185,7 +6185,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -6244,7 +6244,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -6303,7 +6303,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -6362,7 +6362,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -6421,7 +6421,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -6480,7 +6480,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -6543,7 +6543,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -6606,7 +6606,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -6669,7 +6669,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
@@ -6732,7 +6732,7 @@
                     "type": "STRING",
                     "value": "1.0.0"
                 },
-                "PRESET_COMPILE_OPTIONS": {
+                "CUSTOM_COMPILE_OPTIONS": {
                     "type": "STRING",
                     "value": "-DMINI_I3_MK33"
                 },
