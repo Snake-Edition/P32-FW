@@ -41,12 +41,7 @@ void screen_mbl_values_t::draw() {
             snprintf(text, sizeof(text), "%1.3f", static_cast<double>(num));
             const int16_t x = ix * block_size;
             const int16_t y = (GRID_MAJOR_POINTS_Y - 1 - iy) * block_size;
-
-            // TODO use hsl_to_rgb()
-            const float extreme = std::clamp(1.f - std::min(num, max_z - z_values[ix][iy]) / (max_z - min_z) * 2.f, 0.f, 1.f);
-            Color color;
-            color.from_rgb(uint8_t(extreme * 0xff), uint8_t((1 - extreme) * 0xff), 0);
-            display::draw_text(Rect16(x, y, block_size, block_size), string_view_utf8::MakeRAM((const uint8_t *)text), resource_font(Font::normal), COLOR_BLACK, color);
+            display::draw_text(Rect16(x, y, block_size, block_size), string_view_utf8::MakeRAM((const uint8_t *)text), resource_font(Font::normal), COLOR_BLACK, COLOR_WHITE);
         }
     }
 
