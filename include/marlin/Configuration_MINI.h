@@ -1721,6 +1721,9 @@
 	#ifdef MINI_I3_MK33
 	    #define X_AXIS_LOAD_POS  (std::numeric_limits<float>::quiet_NaN())
 	    #define X_AXIS_UNLOAD_POS  (std::numeric_limits<float>::quiet_NaN())
+	#elseif MINI_COREXY
+	    #define X_AXIS_LOAD_POS  ((X_MAX_POS) / 2)
+	    #define X_AXIS_UNLOAD_POS  ((X_MAX_POS) / 2)
 	#else
 	    #define X_AXIS_LOAD_POS  ((X_MAX_POS) / 4)
 	    #define X_AXIS_UNLOAD_POS  ((X_MAX_POS) / 4)
@@ -1740,6 +1743,7 @@
         {X_NOZZLE_PARK_POINT_M600, Y_NOZZLE_PARK_POINT_M600, Z_NOZZLE_PARK_POINT_M600}
 	#ifdef MINI_I3_MK33
 	    #define NOZZLE_PARK_XY_FEEDRATE 100 // (mm/s) X and Y axes feedrate (also used for delta Z axis)
+	    #define NOZZLE_UNPARK_XY_FEEDRATE 100 // (mm/s) X and Y axes feedrate for unparking after m600
 	    #define NOZZLE_PARK_Z_FEEDRATE 5 // (mm/s) Z axis feedrate (not used for delta printers)
 	#else
 	    #define NOZZLE_PARK_XY_FEEDRATE 999 // (mm/s) X and Y axes feedrate (also used for delta Z axis)
