@@ -1189,7 +1189,7 @@
 #endif
 
 #ifdef MINI_COREXY
-    #define Y_MIN_POS -2
+    #define Y_MIN_POS -1
 #elif MINI_I3_MK33
     #define Y_MIN_POS -4
 #else
