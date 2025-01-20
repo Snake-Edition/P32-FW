@@ -66,12 +66,7 @@
       if (!WITHIN(iend.x, 0, GRID_MAX_POINTS_X - 1) || !WITHIN(iend.y, 0, GRID_MAX_POINTS_Y - 1)) {
 
         // Note: There is no Z Correction in this case. We are off the grid and don't know what
-        // a reasonable correction would be.  If the user has specified a UBL_Z_RAISE_WHEN_OFF_MESH
-        // value, that will be used instead of a calculated (Bi-Linear interpolation) correction.
-
-        #ifdef UBL_Z_RAISE_WHEN_OFF_MESH
-          end.z += UBL_Z_RAISE_WHEN_OFF_MESH;
-        #endif
+        // a reasonable correction would be.
         planner.buffer_segment(end, scaled_fr_mm_s, extruder);
         current_position = destination;
         return;

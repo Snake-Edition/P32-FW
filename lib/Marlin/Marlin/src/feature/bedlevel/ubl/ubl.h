@@ -210,14 +210,8 @@ class unified_bed_leveling {
           DEBUG_ECHOLNPAIR(" out of bounds in z_correction_for_x_on_horizontal_mesh_line(rx0=", rx0, ",x1_i=", x1_i, ",yi=", yi, ")");
         }
 
-        // The requested location is off the mesh. Return UBL_Z_RAISE_WHEN_OFF_MESH or NAN.
-        return (
-          #ifdef UBL_Z_RAISE_WHEN_OFF_MESH
-            UBL_Z_RAISE_WHEN_OFF_MESH
-          #else
-            NAN
-          #endif
-        );
+        // The requested location is off the mesh.
+        return NAN;
       }
 
       const float xratio = (rx0 - mesh_index_to_xpos(x1_i)) * RECIPROCAL(MESH_X_DIST),
@@ -240,14 +234,8 @@ class unified_bed_leveling {
           DEBUG_ECHOLNPAIR(" out of bounds in z_correction_for_y_on_vertical_mesh_line(ry0=", ry0, ", xi=", xi, ", y1_i=", y1_i, ")");
         }
 
-        // The requested location is off the mesh. Return UBL_Z_RAISE_WHEN_OFF_MESH or NAN.
-        return (
-          #ifdef UBL_Z_RAISE_WHEN_OFF_MESH
-            UBL_Z_RAISE_WHEN_OFF_MESH
-          #else
-            NAN
-          #endif
-        );
+        // The requested location is off the mesh.
+        return NAN;
       }
 
       const float yratio = (ry0 - mesh_index_to_ypos(y1_i)) * RECIPROCAL(MESH_Y_DIST),
@@ -271,15 +259,6 @@ class unified_bed_leveling {
       float iry0 = constrain(ry0, MESH_MIN_Y, MESH_MAX_Y);
 
       const int8_t cx = cell_index_x(irx0), cy = cell_index_y(iry0); // return values are clamped
-
-      /**
-       * Check if the requested location is off the mesh.  If so, and
-       * UBL_Z_RAISE_WHEN_OFF_MESH is specified, that value is returned.
-       */
-      #ifdef UBL_Z_RAISE_WHEN_OFF_MESH
-        if (!WITHIN(rx0, MESH_MIN_X, MESH_MAX_X) || !WITHIN(ry0, MESH_MIN_Y, MESH_MAX_Y))
-          return UBL_Z_RAISE_WHEN_OFF_MESH;
-      #endif
 
       const float z1 = calc_z0(irx0,
                                mesh_index_to_xpos(cx), z_values[cx][cy],
