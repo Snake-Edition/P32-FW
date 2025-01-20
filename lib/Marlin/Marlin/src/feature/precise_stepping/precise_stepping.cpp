@@ -911,6 +911,13 @@ bool PreciseStepping::is_waiting_before_delivering() {
     return false;
 }
 
+void PreciseStepping::wake_up() {
+    if (Planner::nonbusy_movesplanned()) {
+        MoveIsrDisabler move_guard;
+        __HAL_TIM_SET_COUNTER(&TimerHandle[MOVE_TIMER_NUM].handle, 0);
+    }
+}
+
 void PreciseStepping::process_queue_of_blocks() {
     if (is_waiting_before_delivering()) {
         return;

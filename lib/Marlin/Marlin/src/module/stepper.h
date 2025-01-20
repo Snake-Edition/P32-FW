@@ -106,11 +106,6 @@ public:
     static void init();
 
     // Interrupt Service Routine and phases
-
-    // The stepper subsystem goes to sleep when it runs out of things to execute.
-    // Call this to notify the subsystem that it is time to go to work.
-    static inline void wake_up() { ENABLE_STEPPER_DRIVER_INTERRUPT(); }
-
     static inline bool is_awake() { return STEPPER_ISR_ENABLED(); }
 
     static inline bool suspend() {
@@ -131,17 +126,6 @@ public:
 
     // Report the positions of the steppers, in steps
     static void report_positions();
-
-    // Force any planned move to start immediately
-    static inline void start_moving() {
-        if (planner.movesplanned()) {
-            suspend();
-            planner.delay_before_delivering = 0;
-            // TODO: implement this for PreciseStepping
-            // if (!current_block) isr(); // zero-wait
-            wake_up();
-        }
-    }
 
     // The direction of a single motor
     FORCE_INLINE static bool motor_direction(const AxisEnum axis) { return TEST(last_direction_bits, axis); }

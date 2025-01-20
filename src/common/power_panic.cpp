@@ -888,7 +888,7 @@ void panic_loop() {
 #if !HAS_DWARF()
             // retract if we were printing
             plan_move_by(PAUSE_PARK_RETRACT_FEEDRATE, 0, 0, 0, -PAUSE_PARK_RETRACT_LENGTH / planner.e_factor[active_extruder]);
-            stepper.start_moving();
+            planner.start_moving();
 #endif
 
             // start powering off complex devices
@@ -919,7 +919,7 @@ void panic_loop() {
                 uint8_t cycles = (already_lifted ? 1 : POWER_PANIC_Z_LIFT_CYCLES);
                 float z_shift = distance_to_reset_point(Z_AXIS, cycles);
                 plan_move_by(POWER_PANIC_Z_FEEDRATE, 0, 0, z_shift);
-                stepper.start_moving();
+                planner.start_moving();
 
                 // continue powering off devices
                 shutdown_loop_checked();
@@ -1021,7 +1021,7 @@ void panic_loop() {
                     current_position.x = current_position.x - (X_MAX_POS - X_MIN_POS);
                 }
                 line_to_current_position(POWER_PANIC_X_FEEDRATE);
-                stepper.start_moving();
+                planner.start_moving();
             }
         }
 

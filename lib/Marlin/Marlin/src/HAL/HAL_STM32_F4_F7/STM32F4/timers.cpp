@@ -77,7 +77,7 @@ void HAL_timer_start(const uint8_t timer_num, const uint32_t frequency) {
         __HAL_DBGMCU_FREEZE_TIM6();
         TimerHandle[timer_num].handle.Instance            = TIM6;
         TimerHandle[timer_num].handle.Init.Prescaler      = move_prescaler;
-        TimerHandle[timer_num].handle.Init.CounterMode    = TIM_COUNTERMODE_UP;
+        TimerHandle[timer_num].handle.Init.CounterMode    = TIM_COUNTERMODE_DOWN;
         TimerHandle[timer_num].handle.Init.ClockDivision  = TIM_CLOCKDIVISION_DIV1;
         TimerHandle[timer_num].callback = (uint32_t)TC6_Handler;
         HAL_NVIC_SetPriority(MOVE_TIMER_IRQ_ID, ISR_PRIORITY_MOVE_TIMER, 0);

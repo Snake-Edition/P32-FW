@@ -2063,8 +2063,6 @@ void Planner::buffer_sync_block() {
   block->sync_step_position = position / PLANNER_STEPS_MULTIPLIER;
 
   block_buffer_head = next_buffer_head;
-
-  stepper.wake_up();
 } // buffer_sync_block()
 
 /**
@@ -2201,7 +2199,6 @@ bool Planner::buffer_segment(const abce_pos_t &abce
 #endif
   )) return false;
 
-  stepper.wake_up();
   return true;
 } // buffer_segment()
 

@@ -798,6 +798,12 @@ class Planner {
     // Resume queuing after being held by drain()
     static void resume_queuing();
 
+    // Force any planned move to start immediately
+    static inline void start_moving() {
+      delay_before_delivering = 0;
+      PreciseStepping::wake_up();
+    }
+
     // Called when an endstop is triggered. Causes the machine to stop immediately
     static void endstop_triggered(const AxisEnum axis);
 

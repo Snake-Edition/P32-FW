@@ -154,6 +154,9 @@ public:
     // Process one planner block into move segments
     static void process_queue_of_blocks();
 
+    // Trigger immediate processing of the move queue
+    static void wake_up();
+
     // Process the move segment queue
     static void process_queue_of_move_segments();
 
