@@ -534,6 +534,9 @@ void PreciseStepping::init() {
     PreciseStepping::reset_from_halt(false);
     PreciseStepping::update_maximum_lookback_time();
 
+    HAL_timer_start(STEP_TIMER_NUM, STEPPER_TIMER_RATE);
+    ENABLE_STEPPER_DRIVER_INTERRUPT();
+
     HAL_timer_start(MOVE_TIMER_NUM, MOVE_TIMER_FREQUENCY);
     ENABLE_MOVE_INTERRUPT();
 }

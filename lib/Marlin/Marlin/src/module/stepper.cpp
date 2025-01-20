@@ -382,12 +382,6 @@ void Stepper::init() {
     E_AXIS_INIT(5);
 #endif
 
-#if DISABLED(I2S_STEPPER_STREAM)
-    HAL_timer_start(STEP_TIMER_NUM, 122); // Init Stepper ISR to 122 Hz for quick starting
-    wake_up();
-    sei();
-#endif
-
     // Init direction bits for first moves
     last_direction_bits = 0
         | (INVERT_X_DIR ? _BV(X_AXIS) : 0)
