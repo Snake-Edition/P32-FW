@@ -1566,10 +1566,6 @@
 
 #endif // AUTO_BED_LEVELING_UBL
 
-#if ALL(PROBE_PT_1_X, PROBE_PT_2_X, PROBE_PT_3_X, PROBE_PT_1_Y, PROBE_PT_2_Y, PROBE_PT_3_Y)
-  #define HAS_FIXED_3POINT;
-#endif
-
 #if ENABLED(AUTO_BED_LEVELING_UBL) && IS_KINEMATIC
     #define HAS_FIXED_3POINT
     #define SIN0    0.0
@@ -1578,24 +1574,12 @@
     #define COS0    1.0
     #define COS120 -0.5
     #define COS240 -0.5
-    #ifndef PROBE_PT_1_X
-      #define PROBE_PT_1_X (X_CENTER + (_PROBE_RADIUS) * COS0)
-    #endif
-    #ifndef PROBE_PT_1_Y
-      #define PROBE_PT_1_Y (Y_CENTER + (_PROBE_RADIUS) * SIN0)
-    #endif
-    #ifndef PROBE_PT_2_X
-      #define PROBE_PT_2_X (X_CENTER + (_PROBE_RADIUS) * COS120)
-    #endif
-    #ifndef PROBE_PT_2_Y
-      #define PROBE_PT_2_Y (Y_CENTER + (_PROBE_RADIUS) * SIN120)
-    #endif
-    #ifndef PROBE_PT_3_X
-      #define PROBE_PT_3_X (X_CENTER + (_PROBE_RADIUS) * COS240)
-    #endif
-    #ifndef PROBE_PT_3_Y
-      #define PROBE_PT_3_Y (Y_CENTER + (_PROBE_RADIUS) * SIN240)
-    #endif
+    #define PROBE_PT_1_X (X_CENTER + (_PROBE_RADIUS) * COS0)
+    #define PROBE_PT_1_Y (Y_CENTER + (_PROBE_RADIUS) * SIN0)
+    #define PROBE_PT_2_X (X_CENTER + (_PROBE_RADIUS) * COS120)
+    #define PROBE_PT_2_Y (Y_CENTER + (_PROBE_RADIUS) * SIN120)
+    #define PROBE_PT_3_X (X_CENTER + (_PROBE_RADIUS) * COS240)
+    #define PROBE_PT_3_Y (Y_CENTER + (_PROBE_RADIUS) * SIN240)
 #endif
 
 /**
