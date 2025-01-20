@@ -227,5 +227,5 @@ void metric_record_error(metric_t *metric, const char *fmt, ...) {
 }
 
 bool metric_record_is_due(metric_t *metric) {
-    return check_min_interval(metric, ticks_us());
+    return metric->enabled && check_min_interval(metric, ticks_us());
 }
