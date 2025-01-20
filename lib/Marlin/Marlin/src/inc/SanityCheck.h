@@ -197,9 +197,9 @@
 #elif defined(SCARA)
   #error "SCARA is now MORGAN_SCARA. Please update your configuration."
 #elif defined(ENABLE_AUTO_BED_LEVELING)
-  #error "ENABLE_AUTO_BED_LEVELING is deprecated. Specify AUTO_BED_LEVELING_LINEAR or AUTO_BED_LEVELING_3POINT."
+  #error "ENABLE_AUTO_BED_LEVELING is deprecated. Specify AUTO_BED_LEVELING_3POINT."
 #elif defined(AUTO_BED_LEVELING_FEATURE)
-  #error "AUTO_BED_LEVELING_FEATURE is deprecated. Specify AUTO_BED_LEVELING_LINEAR or AUTO_BED_LEVELING_3POINT."
+  #error "AUTO_BED_LEVELING_FEATURE is deprecated. Specify AUTO_BED_LEVELING_3POINT."
 #elif defined(ABL_GRID_POINTS)
   #error "ABL_GRID_POINTS is now GRID_MAX_POINTS_X and GRID_MAX_POINTS_Y. Please update your configuration."
 #elif defined(ABL_GRID_POINTS_X) || defined(ABL_GRID_POINTS_Y)
@@ -1190,10 +1190,9 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
  * Allow only one bed leveling option to be defined
  */
 #if 1 < 0 \
-  + ENABLED(AUTO_BED_LEVELING_LINEAR) \
   + ENABLED(AUTO_BED_LEVELING_3POINT) \
   + ENABLED(AUTO_BED_LEVELING_UBL)
-  #error "Select only one of: AUTO_BED_LEVELING_LINEAR, AUTO_BED_LEVELING_3POINT or AUTO_BED_LEVELING_UBL."
+  #error "Select only one of: AUTO_BED_LEVELING_3POINT or AUTO_BED_LEVELING_UBL."
 #endif
 
 /**

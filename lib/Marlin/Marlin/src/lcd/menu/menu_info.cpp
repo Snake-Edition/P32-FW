@@ -272,8 +272,6 @@ void menu_info_board() {
     VALUE_ITEM_P(MSG_INFO_EXTRUDERS, STRINGIFY(EXTRUDERS), SS_CENTER); // Extruders: 2
     #if ENABLED(AUTO_BED_LEVELING_3POINT)
       STATIC_ITEM(MSG_3POINT_LEVELING);                         // 3-Point Leveling
-    #elif ENABLED(AUTO_BED_LEVELING_LINEAR)
-      STATIC_ITEM(MSG_LINEAR_LEVELING);                         // Linear Leveling
     #elif ENABLED(AUTO_BED_LEVELING_UBL)
       STATIC_ITEM(MSG_UBL_LEVELING);                            // Unified Bed Leveling
     #endif

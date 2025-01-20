@@ -1245,18 +1245,12 @@
  *   You specify the XY coordinates of all 3 points.
  *   The result is a single tilted plane. Best for a flat bed.
  *
- * - AUTO_BED_LEVELING_LINEAR
- *   Probe several points in a grid.
- *   You specify the rectangle and the density of sample points.
- *   The result is a single tilted plane. Best for a flat bed.
- *
  * - AUTO_BED_LEVELING_UBL (Unified Bed Leveling)
  *   A comprehensive bed leveling system combining the features and benefits
  *   of other systems. UBL also includes integrated Mesh Generation, Mesh
  *   Validation and Mesh Editing systems.
  */
 //#define AUTO_BED_LEVELING_3POINT
-//#define AUTO_BED_LEVELING_LINEAR
 #define AUTO_BED_LEVELING_UBL
 
 /**
@@ -1301,22 +1295,7 @@
 
 #endif
 
-#if ENABLED(AUTO_BED_LEVELING_LINEAR)
-
-    // Set the number of grid points per dimension.
-    #define GRID_MAX_POINTS_X 5
-    #define GRID_MAX_POINTS_Y GRID_MAX_POINTS_X
-
-// Set the boundaries for probing (where the probe can reach).
-//#define LEFT_PROBE_BED_POSITION MIN_PROBE_EDGE
-//#define RIGHT_PROBE_BED_POSITION (X_BED_SIZE - (MIN_PROBE_EDGE))
-//#define FRONT_PROBE_BED_POSITION MIN_PROBE_EDGE
-//#define BACK_PROBE_BED_POSITION (Y_BED_SIZE - (MIN_PROBE_EDGE))
-
-// Probe along the Y axis, advancing X after each column
-//#define PROBE_Y_FIRST
-
-#elif ENABLED(AUTO_BED_LEVELING_UBL)
+#if ENABLED(AUTO_BED_LEVELING_UBL)
 
 //===========================================================================
 //========================= Unified Bed Leveling ============================

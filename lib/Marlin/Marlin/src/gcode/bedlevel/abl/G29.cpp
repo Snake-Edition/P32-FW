@@ -40,10 +40,6 @@
   #include "../../../lcd/ultralcd.h"
 #endif
 
-#if ENABLED(AUTO_BED_LEVELING_LINEAR)
-  #include "../../../libs/least_squares_fit.h"
-#endif
-
 #if ABL_PLANAR
   #include "../../../libs/vector_3.h"
 #endif
@@ -213,7 +209,7 @@ G29_TYPE GcodeSuite::G29() {
   ABL_VAR float measured_z;
   ABL_VAR bool dryrun, abl_should_enable;
 
-  #if EITHER(PROBE_MANUALLY, AUTO_BED_LEVELING_LINEAR)
+  #if ENABLED(PROBE_MANUALLY)
     ABL_VAR int abl_probe_index;
   #endif
 
@@ -230,27 +226,9 @@ G29_TYPE GcodeSuite::G29() {
     ABL_VAR xy_int_t probe_position_lf, probe_position_rb;
     ABL_VAR xy_float_t gridSpacing = { 0, 0 };
 
-    #if ENABLED(AUTO_BED_LEVELING_LINEAR)
-      ABL_VAR bool do_topography_map;
-      ABL_VAR xy_uint8_t abl_grid_points;
-    #else // Bilinear
-      constexpr xy_uint8_t abl_grid_points = { GRID_MAX_POINTS_X, GRID_MAX_POINTS_Y };
-    #endif
+    constexpr xy_uint8_t abl_grid_points = { GRID_MAX_POINTS_X, GRID_MAX_POINTS_Y };
 
-    #if ENABLED(AUTO_BED_LEVELING_LINEAR)
-      ABL_VAR int abl_points;
-    #elif ENABLED(PROBE_MANUALLY) // Bilinear
-      int constexpr abl_points = GRID_MAX_POINTS;
-    #endif
-
-    #if ENABLED(AUTO_BED_LEVELING_LINEAR)
-
-      ABL_VAR int indexIntoAB[GRID_MAX_POINTS_X][GRID_MAX_POINTS_Y];
-
-      ABL_VAR float eqnAMatrix[(GRID_MAX_POINTS) * 3], // "A" matrix of the linear system of equations
-                    eqnBVector[GRID_MAX_POINTS],       // "B" vector of Z points
-                    mean;
-    #endif
+    int constexpr abl_points = GRID_MAX_POINTS;
 
   #elif ENABLED(AUTO_BED_LEVELING_3POINT)
 
@@ -275,11 +253,6 @@ G29_TYPE GcodeSuite::G29() {
 
   #endif // AUTO_BED_LEVELING_3POINT
 
-  #if ENABLED(AUTO_BED_LEVELING_LINEAR)
-    struct linear_fit_data lsf_results;
-    incremental_LSF_reset(&lsf_results);
-  #endif
-
   /**
    * On the initial G29 fetch command parameters.
    */
@@ -289,7 +262,7 @@ G29_TYPE GcodeSuite::G29() {
       if (active_extruder != 0) tool_change(0);
     #endif
 
-    #if EITHER(PROBE_MANUALLY, AUTO_BED_LEVELING_LINEAR)
+    #if ENABLED(PROBE_MANUALLY)
       abl_probe_index = -1;
     #endif
 
@@ -314,32 +287,6 @@ G29_TYPE GcodeSuite::G29() {
         || no_action
       #endif
     ;
-
-    #if ENABLED(AUTO_BED_LEVELING_LINEAR)
-
-      do_topography_map = verbose_level > 2 || parser.boolval('T');
-
-      // X and Y specify points in each direction, overriding the default
-      // These values may be saved with the completed mesh
-      abl_grid_points.set(
-        parser.byteval('X', GRID_MAX_POINTS_X),
-        parser.byteval('Y', GRID_MAX_POINTS_Y)
-      );
-      if (parser.seenval('P')) abl_grid_points.x = abl_grid_points.y = parser.value_int();
-
-      if (!WITHIN(abl_grid_points.x, 2, GRID_MAX_POINTS_X)) {
-        SERIAL_ECHOLNPGM("?Probe points (X) implausible (2-" STRINGIFY(GRID_MAX_POINTS_X) ").");
-        G29_RETURN(false);
-      }
-      if (!WITHIN(abl_grid_points.y, 2, GRID_MAX_POINTS_Y)) {
-        SERIAL_ECHOLNPGM("?Probe points (Y) implausible (2-" STRINGIFY(GRID_MAX_POINTS_Y) ").");
-        G29_RETURN(false);
-      }
-
-      abl_points = abl_grid_points.x * abl_grid_points.y;
-      mean = 0;
-
-    #endif
 
     #if ABL_GRID
 
@@ -469,7 +416,7 @@ G29_TYPE GcodeSuite::G29() {
     }
     else {
 
-      #if EITHER(AUTO_BED_LEVELING_LINEAR, AUTO_BED_LEVELING_3POINT)
+      #if ENABLED(AUTO_BED_LEVELING_3POINT)
         const uint16_t index = abl_probe_index - 1;
       #endif
 
@@ -477,17 +424,7 @@ G29_TYPE GcodeSuite::G29() {
       // Save the previous Z before going to the next point
       measured_z = current_position.z;
 
-      #if ENABLED(AUTO_BED_LEVELING_LINEAR)
-
-        mean += measured_z;
-        eqnBVector[index] = measured_z;
-        eqnAMatrix[index + 0 * abl_points] = probePos.x;
-        eqnAMatrix[index + 1 * abl_points] = probePos.y;
-        eqnAMatrix[index + 2 * abl_points] = 1;
-
-        incremental_LSF(&lsf_results, probePos, measured_z);
-
-      #elif ENABLED(AUTO_BED_LEVELING_3POINT)
+      #if ENABLED(AUTO_BED_LEVELING_3POINT)
 
         points[index].z = measured_z;
 
@@ -516,10 +453,6 @@ G29_TYPE GcodeSuite::G29() {
 
         probePos.set(FLOOR(base.x + (base.x < 0 ? 0 : 0.5)),
                      FLOOR(base.y + (base.y < 0 ? 0 : 0.5)));
-
-        #if ENABLED(AUTO_BED_LEVELING_LINEAR)
-          indexIntoAB[meshCount.x][meshCount.y] = abl_probe_index;
-        #endif
 
         // Keep looping till a reachable point is found
         if (position_is_reachable(probePos)) break;
@@ -628,10 +561,6 @@ G29_TYPE GcodeSuite::G29() {
           probePos.set(FLOOR(base.x + (base.x < 0 ? 0 : 0.5)),
                        FLOOR(base.y + (base.y < 0 ? 0 : 0.5)));
 
-          #if ENABLED(AUTO_BED_LEVELING_LINEAR)
-            indexIntoAB[meshCount.x][meshCount.y] = ++abl_probe_index; // 0...
-          #endif
-
           #if IS_KINEMATIC
             // Avoid probing outside the round or hexagonal area
             if (!position_is_reachable_by_probe(probePos)) continue;
@@ -648,18 +577,6 @@ G29_TYPE GcodeSuite::G29() {
             set_bed_leveling_enabled(abl_should_enable);
             break; // Breaks out of both loops
           }
-
-          #if ENABLED(AUTO_BED_LEVELING_LINEAR)
-
-            mean += measured_z;
-            eqnBVector[abl_probe_index] = measured_z;
-            eqnAMatrix[abl_probe_index + 0 * abl_points] = probePos.x;
-            eqnAMatrix[abl_probe_index + 1 * abl_points] = probePos.y;
-            eqnAMatrix[abl_probe_index + 2 * abl_points] = 1;
-
-            incremental_LSF(&lsf_results, probePos, measured_z);
-
-          #endif
 
           abl_should_enable = false;
           idle(false);
@@ -731,83 +648,6 @@ G29_TYPE GcodeSuite::G29() {
 
   // Calculate leveling, print reports, correct the position
   if (!isnan(measured_z)) {
-    #if ENABLED(AUTO_BED_LEVELING_LINEAR)
-
-      // For LINEAR leveling calculate matrix, print reports, correct the position
-
-      /**
-       * solve the plane equation ax + by + d = z
-       * A is the matrix with rows [x y 1] for all the probed points
-       * B is the vector of the Z positions
-       * the normal vector to the plane is formed by the coefficients of the
-       * plane equation in the standard form, which is Vx*x+Vy*y+Vz*z+d = 0
-       * so Vx = -a Vy = -b Vz = 1 (we want the vector facing towards positive Z
-       */
-      struct { float a, b, d; } plane_equation_coefficients;
-
-      finish_incremental_LSF(&lsf_results);
-      plane_equation_coefficients.a = -lsf_results.A;  // We should be able to eliminate the '-' on these three lines and down below
-      plane_equation_coefficients.b = -lsf_results.B;  // but that is not yet tested.
-      plane_equation_coefficients.d = -lsf_results.D;
-
-      mean /= abl_points;
-
-      if (verbose_level) {
-        SERIAL_ECHOPAIR_F("Eqn coefficients: a: ", plane_equation_coefficients.a, 8);
-        SERIAL_ECHOPAIR_F(" b: ", plane_equation_coefficients.b, 8);
-        SERIAL_ECHOPAIR_F(" d: ", plane_equation_coefficients.d, 8);
-        if (verbose_level > 2)
-          SERIAL_ECHOPAIR_F("\nMean of sampled points: ", mean, 8);
-        SERIAL_EOL();
-      }
-
-      // Create the matrix but don't correct the position yet
-      if (!dryrun)
-        planner.bed_level_matrix = matrix_3x3::create_look_at(
-          vector_3(-plane_equation_coefficients.a, -plane_equation_coefficients.b, 1)    // We can eliminate the '-' here and up above
-        );
-
-      // Show the Topography map if enabled
-      if (do_topography_map) {
-
-        float min_diff = 999;
-
-        auto print_topo_map = [&](PGM_P const title, const bool get_min) {
-          serialprintPGM(title);
-          for (int8_t yy = abl_grid_points.y - 1; yy >= 0; yy--) {
-            for (uint8_t xx = 0; xx < abl_grid_points.x; xx++) {
-              const int ind = indexIntoAB[xx][yy];
-              xyz_float_t tmp = { eqnAMatrix[ind + 0 * abl_points],
-                                  eqnAMatrix[ind + 1 * abl_points], 0 };
-              apply_rotation_xyz(planner.bed_level_matrix, tmp);
-              if (get_min) NOMORE(min_diff, eqnBVector[ind] - tmp.z);
-              const float subval = get_min ? mean : tmp.z + min_diff,
-                            diff = eqnBVector[ind] - subval;
-              SERIAL_CHAR(' '); if (diff >= 0.0) SERIAL_CHAR('+');   // Include + for column alignment
-              SERIAL_ECHO_F(diff, 5);
-            } // xx
-            SERIAL_EOL();
-          } // yy
-          SERIAL_EOL();
-        };
-
-        print_topo_map(PSTR("\nBed Height Topography:\n"
-                               "   +--- BACK --+\n"
-                               "   |           |\n"
-                               " L |    (+)    | R\n"
-                               " E |           | I\n"
-                               " F | (-) N (+) | G\n"
-                               " T |           | H\n"
-                               "   |    (-)    | T\n"
-                               "   |           |\n"
-                               "   O-- FRONT --+\n"
-                               " (0,0)\n"), true);
-        if (verbose_level > 3)
-          print_topo_map(PSTR("\nCorrected Bed Height vs. Bed Topology:\n"), false);
-
-      } //do_topography_map
-
-    #endif // AUTO_BED_LEVELING_LINEAR
 
     #if ABL_PLANAR
 

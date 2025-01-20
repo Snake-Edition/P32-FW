@@ -116,7 +116,6 @@ void safe_delay(millis_t ms) {
 
     #if HAS_ABL_OR_UBL
       SERIAL_ECHOPGM("Auto Bed Leveling: "
-        TERN_(AUTO_BED_LEVELING_LINEAR, "LINEAR")
         TERN_(AUTO_BED_LEVELING_3POINT, "3POINT")
         TERN_(AUTO_BED_LEVELING_UBL, "UBL")
       );
