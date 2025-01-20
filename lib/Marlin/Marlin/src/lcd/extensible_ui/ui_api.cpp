@@ -841,9 +841,6 @@ namespace ExtUI {
       void setMeshPoint(const xy_uint8_t &pos, const float zoff) {
         if (WITHIN(pos.x, 0, GRID_MAX_POINTS_X) && WITHIN(pos.y, 0, GRID_MAX_POINTS_Y)) {
           Z_VALUES(pos.x, pos.y) = zoff;
-          #if ENABLED(ABL_BILINEAR_SUBDIVISION)
-            bed_level_virt_interpolate();
-          #endif
         }
       }
     #endif

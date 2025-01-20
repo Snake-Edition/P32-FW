@@ -604,12 +604,8 @@ void MarlinSettings::postprocess() {
     // Planar Bed Leveling matrix
     //
     {
-      #if ABL_PLANAR
-        EEPROM_WRITE(planner.bed_level_matrix);
-      #else
-        dummy = 0;
-        for (uint8_t q = 9; q--;) EEPROM_WRITE(dummy);
-      #endif
+      dummy = 0;
+      for (uint8_t q = 9; q--;) EEPROM_WRITE(dummy);
     }
 
     //
@@ -1335,11 +1331,7 @@ void MarlinSettings::postprocess() {
       // Planar Bed Leveling matrix
       //
       {
-        #if ABL_PLANAR
-          EEPROM_READ(planner.bed_level_matrix);
-        #else
-          for (uint8_t q = 9; q--;) EEPROM_READ(dummy);
-        #endif
+        for (uint8_t q = 9; q--;) EEPROM_READ(dummy);
       }
 
       //
@@ -2646,10 +2638,6 @@ void MarlinSettings::reset() {
           ubl.echo_name();
           SERIAL_ECHOLNPGM(":");
         }
-
-      #elif HAS_ABL_OR_UBL
-
-        CONFIG_ECHO_HEADING("Auto Bed Leveling:");
 
       #endif
 

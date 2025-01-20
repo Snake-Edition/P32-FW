@@ -49,9 +49,6 @@
 
   // LCD probed points are from defaults
   constexpr uint8_t total_probe_points = (
-    #if ABL_GRID
-      GRID_MAX_POINTS
-    #endif
   );
 
   bool MarlinUI::wait_for_bl_move; // = false

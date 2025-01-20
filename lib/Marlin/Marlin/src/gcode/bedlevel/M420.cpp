@@ -191,9 +191,6 @@ void GcodeSuite::M420() {
                   ExtUI::onMeshUpdate(x, y, Z_VALUES(x, y));
                 #endif
               }
-            #if ENABLED(ABL_BILINEAR_SUBDIVISION)
-              bed_level_virt_interpolate();
-            #endif
           }
 
         #endif
@@ -206,16 +203,6 @@ void GcodeSuite::M420() {
     }
 
   #endif // HAS_MESH
-
-  // V to print the matrix or mesh
-  if (seenV) {
-    #if ABL_PLANAR
-      planner.bed_level_matrix.debug(PSTR("Bed Level Correction Matrix:"));
-    #else
-      if (leveling_is_valid()) {
-      }
-    #endif
-  }
 
   #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
     if (parser.seen('Z')) set_z_fade_height(parser.value_linear_units(), false);

@@ -230,10 +230,6 @@ xyz_pos_t cartes;
   xyz_pos_t workspace_offset{0};
 #endif
 
-#if HAS_ABL_NOT_UBL
-  float xy_probe_feedrate_mm_s = MMM_TO_MMS(XY_PROBE_SPEED);
-#endif
-
 /**
  * Output the current position to serial
  */

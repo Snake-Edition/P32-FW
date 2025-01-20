@@ -120,9 +120,6 @@ void reset_bed_level() {
     ubl.reset();
   #else
     set_bed_leveling_enabled(false);
-    #if ABL_PLANAR
-      planner.bed_level_matrix.set_to_identity();
-    #endif
   #endif
 }
 
