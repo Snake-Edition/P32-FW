@@ -45,6 +45,8 @@ struct RecordHeader {
 #ifndef UNITTESTS
 /// Duration (in ms) of the just executed prefetch
 METRIC_DEF(metric_fetch_duration, "ftch_dur", METRIC_VALUE_INTEGER, 0, METRIC_ENABLED);
+
+METRIC_DEF(metric_fetch_sdpos, "ftch_sdpos", METRIC_VALUE_INTEGER, 0, METRIC_ENABLED);
 #endif
 
 } // namespace media_prefetch
@@ -387,6 +389,10 @@ void MediaPrefetchManager::fetch_routine(AsyncJobExecutionControl &control) {
             break;
         }
     }
+
+#ifndef UNITTESTS
+    metric_record_integer(&metric_fetch_sdpos, s.gcode_reader_pos);
+#endif
 
     log_debug(MediaPrefetch, "Fetch stop at %" PRIu32 ", fetched %" PRIu32, s.gcode_reader_pos, s.gcode_reader_pos - initial_gcode_pos);
 }
