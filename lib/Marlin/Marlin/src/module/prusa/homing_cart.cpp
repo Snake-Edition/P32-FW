@@ -8,6 +8,7 @@
 #include "../stepper.h"
 #include "feature/prusa/crash_recovery.hpp"
 #include "configuration.hpp"
+#include <feature/print_status_message/print_status_message_guard.hpp>
 
 inline constexpr float HOMING_BUMP_DIVISOR_STEP = 1.03f;
 inline constexpr float homing_bump_divisor_dflt[] = HOMING_BUMP_DIVISOR;
@@ -82,6 +83,8 @@ static int32_t home_and_get_calibration_offset(AxisEnum axis, int axis_home_dir,
     bool break_loop = false;
     fr_mm_s = fr_mm_s != 0.0f ? fr_mm_s : homing_feedrate_mm_s[axis];
 
+    PrintStatusMessageGuard status_guard;
+
     do {
         const int32_t mscnt = home_and_get_mscnt(axis, axis_home_dir, fr_mm_s / homing_bump_divisor[axis], probe_offset);
 
@@ -105,7 +108,7 @@ static int32_t home_and_get_calibration_offset(AxisEnum axis, int axis_home_dir,
         if (calibrated) {
             SERIAL_ECHOLNPAIR(" calibration offset: ", calibration_offset);
         } else {
-            ui.status_printf_P(0, "Calibrating %c axis", axis_codes[axis]);
+            status_guard.update<PrintStatusMessage::calibrating_axis>({ .axis = axis });
             // I _could_ use SERIAL_ECHOLN(), but that somehow cuts off the end
             // of the printed string. Very nice.
             SERIAL_ECHOLNPAIR(" Not yet", " calibrated.");

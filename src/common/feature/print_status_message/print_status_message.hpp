@@ -13,6 +13,7 @@ struct PrintStatusMessage {
 
         homing,
         recalibrating_home,
+        calibrating_axis,
         probing_bed,
         absorbing_heat,
 
@@ -62,6 +63,7 @@ struct PrintStatusMessage {
         TypeRecord<Type::custom, PrintStatusMessageDataCustom>,
         TypeRecord<Type::homing, std::monostate>,
         TypeRecord<Type::recalibrating_home, std::monostate>,
+        TypeRecord<Type::calibrating_axis, PrintStatusMessageDataAxisProgress>,
         TypeRecord<Type::probing_bed, PrintStatusMessageDataProgress>,
         TypeRecord<Type::absorbing_heat, PrintStatusMessageDataProgress>,
         TypeRecord<Type::waiting_for_hotend_temp, PrintStatusMessageDataProgress>,

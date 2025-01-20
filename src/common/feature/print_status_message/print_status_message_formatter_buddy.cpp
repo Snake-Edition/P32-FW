@@ -9,6 +9,7 @@ static constexpr EnumArray<Message::Type, const char *, Message::Type::_cnt> mes
         { Message::Type::custom, nullptr },
         { Message::Type::homing, N_("Homing") },
         { Message::Type::recalibrating_home, N_("Recalibrating home. Printer may vibrate and be noisier.") },
+        { Message::Type::calibrating_axis, N_("Calibrating axis") },
         { Message::Type::probing_bed, N_("Probing bed") },
         { Message::Type::absorbing_heat, N_("Absorbing heat") },
         { Message::Type::waiting_for_hotend_temp, N_("Waiting for hotend") },
@@ -28,6 +29,12 @@ void PrintStatusMessageFormatterBuddy::format(StringBuilder &target, const Messa
     case Message::Type::custom: {
         const auto d = std::get<PrintStatusMessageDataCustom>(msg.data);
         target.append_string(d.message.get());
+        break;
+    }
+
+    case Message::Type::calibrating_axis: {
+        const auto d = std::get<PrintStatusMessageDataAxisProgress>(msg.data);
+        target.append_printf(" (%c)", axis_codes[d.axis]);
         break;
     }
 

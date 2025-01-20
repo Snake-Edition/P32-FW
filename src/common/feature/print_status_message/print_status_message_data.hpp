@@ -22,7 +22,16 @@ struct PrintStatusMessageDataProgress {
     /// Target value we are aiming for
     float target = 0;
 
+    /// If the
+    AxisEnum axis = X_AXIS;
+
     bool operator==(const PrintStatusMessageDataProgress &) const = default;
 };
 
-using PrintStatusMessageData = std::variant<std::monostate, PrintStatusMessageDataCustom, PrintStatusMessageDataProgress>;
+struct PrintStatusMessageDataAxisProgress : public PrintStatusMessageDataProgress {
+    AxisEnum axis;
+
+    bool operator==(const PrintStatusMessageDataAxisProgress &) const = default;
+};
+
+using PrintStatusMessageData = std::variant<std::monostate, PrintStatusMessageDataCustom, PrintStatusMessageDataProgress, PrintStatusMessageDataAxisProgress>;
