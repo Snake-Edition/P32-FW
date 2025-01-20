@@ -1240,17 +1240,11 @@
  *
  *  If using a Probe for Z Homing, enable Z_SAFE_HOMING also!
  *
- * - AUTO_BED_LEVELING_3POINT
- *   Probe 3 arbitrary points on the bed (that aren't collinear)
- *   You specify the XY coordinates of all 3 points.
- *   The result is a single tilted plane. Best for a flat bed.
- *
  * - AUTO_BED_LEVELING_UBL (Unified Bed Leveling)
  *   A comprehensive bed leveling system combining the features and benefits
  *   of other systems. UBL also includes integrated Mesh Generation, Mesh
  *   Validation and Mesh Editing systems.
  */
-//#define AUTO_BED_LEVELING_3POINT
 #define AUTO_BED_LEVELING_UBL
 
 /**
@@ -1324,7 +1318,7 @@
  * Points to probe for all 3-point Leveling procedures.
  * Override if the automatically selected points are inadequate.
  */
-#if EITHER(AUTO_BED_LEVELING_3POINT, AUTO_BED_LEVELING_UBL)
+#if ENABLED(AUTO_BED_LEVELING_UBL)
 //#define PROBE_PT_1_X 15
 //#define PROBE_PT_1_Y 180
 //#define PROBE_PT_2_X 15

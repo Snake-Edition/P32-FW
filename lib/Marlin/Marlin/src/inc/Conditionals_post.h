@@ -1406,7 +1406,7 @@
  * Set granular options based on the specific type of leveling
  */
 #define UBL_SEGMENTED   (ENABLED(AUTO_BED_LEVELING_UBL) && ANY(SEGMENT_LEVELED_MOVES, DELTA))
-#define ABL_PLANAR      ENABLED(AUTO_BED_LEVELING_3POINT)
+#define ABL_PLANAR      false
 #define ABL_GRID        false
 #define HAS_ABL_NOT_UBL (ABL_PLANAR || ABL_GRID)
 #define HAS_ABL_OR_UBL  (HAS_ABL_NOT_UBL || ENABLED(AUTO_BED_LEVELING_UBL))
@@ -1574,7 +1574,7 @@
   #define HAS_FIXED_3POINT;
 #endif
 
-#if EITHER(AUTO_BED_LEVELING_UBL, AUTO_BED_LEVELING_3POINT) && IS_KINEMATIC
+#if ENABLED(AUTO_BED_LEVELING_UBL) && IS_KINEMATIC
     #define HAS_FIXED_3POINT
     #define SIN0    0.0
     #define SIN120  0.866025

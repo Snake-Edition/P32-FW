@@ -49,9 +49,7 @@
 
   // LCD probed points are from defaults
   constexpr uint8_t total_probe_points = (
-    #if ENABLED(AUTO_BED_LEVELING_3POINT)
-      3
-    #elif ABL_GRID
+    #if ABL_GRID
       GRID_MAX_POINTS
     #endif
   );

@@ -230,28 +230,7 @@ G29_TYPE GcodeSuite::G29() {
 
     int constexpr abl_points = GRID_MAX_POINTS;
 
-  #elif ENABLED(AUTO_BED_LEVELING_3POINT)
-
-    #if ENABLED(PROBE_MANUALLY)
-      int constexpr abl_points = 3; // used to show total points
-    #endif
-
-    // Probe at 3 arbitrary points
-    const float x_min = probe_min_x(), x_max = probe_max_x(), y_min = probe_min_y(), y_max = probe_max_y();
-
-    ABL_VAR vector_3 points[3] = {
-      #if ENABLED(HAS_FIXED_3POINT)
-        { PROBE_PT_1_X, PROBE_PT_1_Y, 0 },
-        { PROBE_PT_2_X, PROBE_PT_2_Y, 0 },
-        { PROBE_PT_3_X, PROBE_PT_3_Y, 0 }
-      #else
-        { x_min, y_min, 0 },
-        { x_max, y_min, 0 },
-        { (x_max - x_min) / 2, y_max, 0 }
-      #endif
-    };
-
-  #endif // AUTO_BED_LEVELING_3POINT
+  #endif
 
   /**
    * On the initial G29 fetch command parameters.
@@ -360,15 +339,6 @@ G29_TYPE GcodeSuite::G29() {
 
     if (!faux) remember_feedrate_scaling_off();
 
-    #if ENABLED(AUTO_BED_LEVELING_3POINT)
-
-      if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("> 3-point Leveling");
-
-      // Probe at 3 arbitrary points
-      points[0].z = points[1].z = points[2].z = 0;
-
-    #endif // AUTO_BED_LEVELING_3POINT
-
   } // !g29_in_progress
 
   #if ENABLED(PROBE_MANUALLY)
@@ -415,20 +385,9 @@ G29_TYPE GcodeSuite::G29() {
       do_blocking_move_to_z(0);
     }
     else {
-
-      #if ENABLED(AUTO_BED_LEVELING_3POINT)
-        const uint16_t index = abl_probe_index - 1;
-      #endif
-
       // For G29 after adjusting Z.
       // Save the previous Z before going to the next point
       measured_z = current_position.z;
-
-      #if ENABLED(AUTO_BED_LEVELING_3POINT)
-
-        points[index].z = measured_z;
-
-      #endif
     }
 
     //
@@ -481,40 +440,7 @@ G29_TYPE GcodeSuite::G29() {
         #endif
       }
 
-    #elif ENABLED(AUTO_BED_LEVELING_3POINT)
-
-      // Probe at 3 arbitrary points
-      if (abl_probe_index < abl_points) {
-        probePos = points[abl_probe_index];
-        _manual_goto_xy(probePos);
-        #if HAS_SOFTWARE_ENDSTOPS
-          // Disable software endstops to allow manual adjustment
-          // If G29 is not completed, they will not be re-enabled
-          soft_endstops_enabled = false;
-        #endif
-        G29_RETURN(false);
-      }
-      else {
-
-        SERIAL_ECHOLNPGM("3-point probing done.");
-
-        // Re-enable software endstops, if needed
-        #if HAS_SOFTWARE_ENDSTOPS
-          soft_endstops_enabled = saved_soft_endstops_state;
-        #endif
-
-        if (!dryrun) {
-          vector_3 planeNormal = vector_3::cross(points[0] - points[1], points[2] - points[1]).get_normal();
-          if (planeNormal.z < 0) planeNormal *= -1;
-          planner.bed_level_matrix = matrix_3x3::create_look_at(planeNormal);
-
-          // Can't re-enable (on error) until the new grid is written
-          abl_should_enable = false;
-        }
-
-      }
-
-    #endif // AUTO_BED_LEVELING_3POINT
+    #endif
 
   #else // !PROBE_MANUALLY
   {
@@ -584,36 +510,7 @@ G29_TYPE GcodeSuite::G29() {
         } // inner
       } // outer
 
-    #elif ENABLED(AUTO_BED_LEVELING_3POINT)
-
-      // Probe at 3 arbitrary points
-
-      for (uint8_t i = 0; i < 3; ++i) {
-        if (verbose_level) SERIAL_ECHOLNPAIR("Probing point ", int(i), "/3.");
-        #if HAS_DISPLAY
-          ui.status_printf_P(0, PSTR(S_FMT" %i/3"), GET_TEXT(MSG_PROBING_MESH)), int(i);
-        #endif
-
-        // Retain the last probe position
-        probePos = points[i];
-        measured_z = faux ? 0.001 * random(-100, 101) : probe_at_point(probePos, raise_after, verbose_level);
-        if (isnan(measured_z)) {
-          set_bed_leveling_enabled(abl_should_enable);
-          break;
-        }
-        points[i].z = measured_z;
-      }
-
-      if (!dryrun && !isnan(measured_z)) {
-        vector_3 planeNormal = vector_3::cross(points[0] - points[1], points[2] - points[1]).get_normal();
-        if (planeNormal.z < 0) planeNormal *= -1;
-        planner.bed_level_matrix = matrix_3x3::create_look_at(planeNormal);
-
-        // Can't re-enable (on error) until the new grid is written
-        abl_should_enable = false;
-      }
-
-    #endif // AUTO_BED_LEVELING_3POINT
+    #endif
 
     #if HAS_DISPLAY
       ui.reset_status();
