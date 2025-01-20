@@ -1096,6 +1096,8 @@ FORCE_INLINE void trigger_first_step_event_after_specified_ticks(const uint32_t 
     assert(ticks <= STEP_TIMER_MAX_TICKS_LIMIT);
 
     StepIsrDisabler step_guard;
+    PreciseStepping::left_ticks_to_next_step_event = 0;
+    PreciseStepping::last_step_isr_delay = 0;
     const uint16_t counter = __HAL_TIM_GET_COUNTER(&TimerHandle[STEP_TIMER_NUM].handle);
     const uint16_t deadline = counter + ticks;
     __HAL_TIM_SET_COMPARE(&TimerHandle[STEP_TIMER_NUM].handle, TIM_CHANNEL_1, deadline);
@@ -1421,6 +1423,7 @@ void PreciseStepping::reset_queues() {
     step_dl_miss = 0;
     step_ev_miss = 0;
     left_ticks_to_next_step_event = 0;
+    last_step_isr_delay = 0;
     Stepper::axis_did_move = 0;
     stop_pending = false;
     busy = false;

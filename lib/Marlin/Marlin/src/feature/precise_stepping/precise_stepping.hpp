@@ -106,6 +106,9 @@ public:
     // Or number of ticks to next call of stepper ISR when step event queue is empty.
     static uint16_t left_ticks_to_next_step_event;
 
+    // Accumulated delay in the last ISR call
+    static uint32_t last_step_isr_delay;
+
     // Indicate which direction bits are inverted.
     static uint16_t inverted_dirs;
 
@@ -348,7 +351,6 @@ public:
 
 private:
     static uint32_t waiting_before_delivering_start_time;
-    static uint32_t last_step_isr_delay;
 
     static void step_generator_state_init(const move_t &move);
 
