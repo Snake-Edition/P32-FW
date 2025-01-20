@@ -263,6 +263,11 @@ void GcodeSuite::G29() {
         ubl.g29_probing_failed = false;
         ubl.G29();
 
+        // Planner is draining -> there is some emergency or quickstop, abort abort uíí uíí uíí
+        if (planner.draining()) {
+            break;
+        }
+
     #if HAS_BED_PROBE
         if (ubl.g29_probing_failed) {
             plan_park_move_to_xyz({ { XYZ_NOZZLE_PARK_POINT } }, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE);
