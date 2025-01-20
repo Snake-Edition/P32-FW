@@ -1406,7 +1406,7 @@ void PreciseStepping::reset_queues() {
 #endif
 
     const bool was_enabled = stepper.suspend();
-    DISABLE_MOVE_INTERRUPT();
+    MoveIsrDisabler move_guard;
 
     // reset internal state and queues
     step_event_queue_clear();
@@ -1422,8 +1422,6 @@ void PreciseStepping::reset_queues() {
     Stepper::axis_did_move = 0;
     stop_pending = false;
     busy = false;
-
-    ENABLE_MOVE_INTERRUPT();
     if (was_enabled) {
         stepper.wake_up();
     }

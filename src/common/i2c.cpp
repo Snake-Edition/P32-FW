@@ -1,9 +1,7 @@
 #include "i2c.hpp"
-#include "stm32f4xx_hal.h"
 #include "bsod.h"
 #include "cmsis_os.h"
 #include "bsod.h"
-#include <type_traits>
 #include <array>
 #include "HAL/HAL.h"
 #include <feature/precise_stepping/precise_stepping.hpp>
