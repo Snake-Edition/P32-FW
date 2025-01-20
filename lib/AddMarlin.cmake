@@ -39,7 +39,6 @@ if(BOARD_IS_MASTER_BOARD)
             Marlin/Marlin/src/feature/babystep.cpp
             Marlin/Marlin/src/feature/backlash.cpp
             Marlin/Marlin/src/feature/bed_preheat.cpp
-            Marlin/Marlin/src/feature/bedlevel/abl/abl.cpp
             Marlin/Marlin/src/feature/bedlevel/bedlevel.cpp
             Marlin/Marlin/src/feature/bedlevel/ubl/ubl.cpp
             Marlin/Marlin/src/feature/bedlevel/ubl/ubl_G29.cpp
@@ -62,7 +61,6 @@ if(BOARD_IS_MASTER_BOARD)
             Marlin/Marlin/src/feature/touch/xpt2046.cpp
             Marlin/Marlin/src/feature/twibus.cpp
             Marlin/Marlin/src/gcode/bedlevel/abl/G29.cpp
-            Marlin/Marlin/src/gcode/bedlevel/abl/M421.cpp
             Marlin/Marlin/src/gcode/bedlevel/G26.cpp
             Marlin/Marlin/src/gcode/bedlevel/G42.cpp
             Marlin/Marlin/src/gcode/bedlevel/M420.cpp

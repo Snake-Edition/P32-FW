@@ -197,9 +197,9 @@
 #elif defined(SCARA)
   #error "SCARA is now MORGAN_SCARA. Please update your configuration."
 #elif defined(ENABLE_AUTO_BED_LEVELING)
-  #error "ENABLE_AUTO_BED_LEVELING is deprecated. Specify AUTO_BED_LEVELING_LINEAR, AUTO_BED_LEVELING_BILINEAR, or AUTO_BED_LEVELING_3POINT."
+  #error "ENABLE_AUTO_BED_LEVELING is deprecated. Specify AUTO_BED_LEVELING_LINEAR or AUTO_BED_LEVELING_3POINT."
 #elif defined(AUTO_BED_LEVELING_FEATURE)
-  #error "AUTO_BED_LEVELING_FEATURE is deprecated. Specify AUTO_BED_LEVELING_LINEAR, AUTO_BED_LEVELING_BILINEAR, or AUTO_BED_LEVELING_3POINT."
+  #error "AUTO_BED_LEVELING_FEATURE is deprecated. Specify AUTO_BED_LEVELING_LINEAR or AUTO_BED_LEVELING_3POINT."
 #elif defined(ABL_GRID_POINTS)
   #error "ABL_GRID_POINTS is now GRID_MAX_POINTS_X and GRID_MAX_POINTS_Y. Please update your configuration."
 #elif defined(ABL_GRID_POINTS_X) || defined(ABL_GRID_POINTS_Y)
@@ -1010,8 +1010,8 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
 #if ENABLED(DELTA)
   #if NONE(USE_XMAX_PLUG, USE_YMAX_PLUG, USE_ZMAX_PLUG)
     #error "You probably want to use Max Endstops for DELTA!"
-  #elif ENABLED(ENABLE_LEVELING_FADE_HEIGHT) && DISABLED(AUTO_BED_LEVELING_BILINEAR) && !UBL_SEGMENTED
-    #error "ENABLE_LEVELING_FADE_HEIGHT on DELTA requires AUTO_BED_LEVELING_BILINEAR or AUTO_BED_LEVELING_UBL."
+  #elif ENABLED(ENABLE_LEVELING_FADE_HEIGHT) && !UBL_SEGMENTED
+    #error "ENABLE_LEVELING_FADE_HEIGHT on DELTA requires AUTO_BED_LEVELING_UBL."
   #elif ENABLED(DELTA_AUTO_CALIBRATION) && !(HAS_BED_PROBE || HAS_LCD_MENU)
     #error "DELTA_AUTO_CALIBRATION requires a probe or LCD Controller."
   #elif ABL_GRID
@@ -1192,9 +1192,8 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
 #if 1 < 0 \
   + ENABLED(AUTO_BED_LEVELING_LINEAR) \
   + ENABLED(AUTO_BED_LEVELING_3POINT) \
-  + ENABLED(AUTO_BED_LEVELING_BILINEAR) \
   + ENABLED(AUTO_BED_LEVELING_UBL)
-  #error "Select only one of: AUTO_BED_LEVELING_LINEAR, AUTO_BED_LEVELING_3POINT, AUTO_BED_LEVELING_BILINEAR or AUTO_BED_LEVELING_UBL."
+  #error "Select only one of: AUTO_BED_LEVELING_LINEAR, AUTO_BED_LEVELING_3POINT or AUTO_BED_LEVELING_UBL."
 #endif
 
 /**
@@ -1224,13 +1223,6 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
    * Auto Bed Leveling
    */
 
-  /**
-   * Delta and SCARA have limited bed leveling options
-   */
-  #if IS_SCARA && DISABLED(AUTO_BED_LEVELING_BILINEAR)
-    #error "SCARA machines can only use the AUTO_BED_LEVELING_BILINEAR leveling option."
-  #endif
-
 #endif
 
 #if HAS_MESH
@@ -1238,7 +1230,7 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
     static_assert(DEFAULT_ZJERK > 0.1, "Low DEFAULT_ZJERK values are incompatible with mesh-based leveling.");
   #endif
 #elif ENABLED(G26_MESH_VALIDATION)
-  #error "G26_MESH_VALIDATION requires AUTO_BED_LEVELING_BILINEAR, or AUTO_BED_LEVELING_UBL."
+  #error "G26_MESH_VALIDATION requires AUTO_BED_LEVELING_UBL."
 #endif
 
 #if ENABLED(MESH_EDIT_GFX_OVERLAY) && !(ENABLED(AUTO_BED_LEVELING_UBL) && HAS_GRAPHICAL_LCD)

@@ -274,8 +274,6 @@ void menu_info_board() {
       STATIC_ITEM(MSG_3POINT_LEVELING);                         // 3-Point Leveling
     #elif ENABLED(AUTO_BED_LEVELING_LINEAR)
       STATIC_ITEM(MSG_LINEAR_LEVELING);                         // Linear Leveling
-    #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
-      STATIC_ITEM(MSG_BILINEAR_LEVELING);                       // Bi-linear Leveling
     #elif ENABLED(AUTO_BED_LEVELING_UBL)
       STATIC_ITEM(MSG_UBL_LEVELING);                            // Unified Bed Leveling
     #endif

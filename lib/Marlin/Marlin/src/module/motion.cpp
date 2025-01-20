@@ -939,9 +939,6 @@ void restore_feedrate_and_scaling() {
            * Otherwise fall through to do a direct single move.
            */
           if (xy_pos_t(current_position) != xy_pos_t(destination)) {
-            #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-              bilinear_line_to_destination(scaled_fr_mm_s);
-            #endif
             return true;
           }
         #endif

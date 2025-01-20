@@ -57,27 +57,12 @@ class TemporaryBedLevelingState {
 
   typedef float bed_mesh_t[GRID_MAX_POINTS_X][GRID_MAX_POINTS_Y];
 
-  #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-    #include "abl/abl.h"
-  #elif ENABLED(AUTO_BED_LEVELING_UBL)
+  #if ENABLED(AUTO_BED_LEVELING_UBL)
     #include "ubl/ubl.h"
   #endif
 
   #define Z_VALUES(X,Y) Z_VALUES_ARR[X][Y]
   #define _GET_MESH_POS(M) { _GET_MESH_X(M.a), _GET_MESH_Y(M.b) }
-
-  #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-
-    #include <stdint.h>
-
-    typedef float (*element_2d_fn)(const uint8_t, const uint8_t);
-
-    /**
-     * Print calibration results for plotting or manual frame adjustment.
-     */
-    void print_2d_array(const uint8_t sx, const uint8_t sy, const uint8_t precision, element_2d_fn fn);
-
-  #endif
 
   struct mesh_index_pair {
     xy_int8_t pos;

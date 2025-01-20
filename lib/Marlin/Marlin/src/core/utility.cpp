@@ -117,7 +117,6 @@ void safe_delay(millis_t ms) {
     #if HAS_ABL_OR_UBL
       SERIAL_ECHOPGM("Auto Bed Leveling: "
         TERN_(AUTO_BED_LEVELING_LINEAR, "LINEAR")
-        TERN_(AUTO_BED_LEVELING_BILINEAR, "BILINEAR")
         TERN_(AUTO_BED_LEVELING_3POINT, "3POINT")
         TERN_(AUTO_BED_LEVELING_UBL, "UBL")
       );
@@ -137,8 +136,6 @@ void safe_delay(millis_t ms) {
         #else
           #if ENABLED(AUTO_BED_LEVELING_UBL)
             SERIAL_ECHOPGM("UBL Adjustment Z");
-          #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
-            SERIAL_ECHOPGM("ABL Adjustment Z");
           #endif
           const float rz = bedlevel.get_z_correction(current_position);
           SERIAL_ECHO(ftostr43sign(rz, '+'));

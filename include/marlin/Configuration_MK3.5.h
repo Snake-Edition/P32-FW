@@ -1210,11 +1210,6 @@
  *   You specify the rectangle and the density of sample points.
  *   The result is a single tilted plane. Best for a flat bed.
  *
- * - AUTO_BED_LEVELING_BILINEAR
- *   Probe several points in a grid.
- *   You specify the rectangle and the density of sample points.
- *   The result is a mesh, best for large or uneven beds.
- *
  * - AUTO_BED_LEVELING_UBL (Unified Bed Leveling)
  *   A comprehensive bed leveling system combining the features and benefits
  *   of other systems. UBL also includes integrated Mesh Generation, Mesh
@@ -1222,7 +1217,6 @@
  */
 //#define AUTO_BED_LEVELING_3POINT
 //#define AUTO_BED_LEVELING_LINEAR
-//#define AUTO_BED_LEVELING_BILINEAR
 #define AUTO_BED_LEVELING_UBL
 
 /**
@@ -1238,7 +1232,7 @@
  */
 //#define DEBUG_LEVELING_FEATURE
 
-#if ANY(AUTO_BED_LEVELING_BILINEAR, AUTO_BED_LEVELING_UBL)
+#if ENABLED(AUTO_BED_LEVELING_UBL)
     // Gradually reduce leveling correction until a set height is reached,
     // at which point movement will be level to the machine's XY plane.
     // The height can be set with M420 Z<height>
@@ -1264,7 +1258,7 @@
 
 #endif
 
-#if EITHER(AUTO_BED_LEVELING_LINEAR, AUTO_BED_LEVELING_BILINEAR)
+#if ENABLED(AUTO_BED_LEVELING_LINEAR)
 
     // Set the number of grid points per dimension.
     #define GRID_MAX_POINTS_X 4
@@ -1278,24 +1272,6 @@
 
 // Probe along the Y axis, advancing X after each column
 //#define PROBE_Y_FIRST
-
-    #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-
-        // Beyond the probed grid, continue the implied tilt?
-        // Default is to maintain the height of the nearest edge.
-        #define EXTRAPOLATE_BEYOND_GRID
-
-        //
-        // Experimental Subdivision of the grid by Catmull-Rom method.
-        // Synthesizes intermediate points to produce a more detailed mesh.
-        //
-        //#define ABL_BILINEAR_SUBDIVISION
-        #if ENABLED(ABL_BILINEAR_SUBDIVISION)
-            // Number of subdivisions between probe points
-            #define BILINEAR_SUBDIVISIONS 3
-        #endif
-
-    #endif
 
 #elif ENABLED(AUTO_BED_LEVELING_UBL)
 

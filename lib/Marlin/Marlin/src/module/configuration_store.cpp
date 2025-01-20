@@ -211,11 +211,7 @@ typedef struct SettingsDataStruct {
   //
   uint8_t grid_max_x, grid_max_y;                       // GRID_MAX_POINTS_X, GRID_MAX_POINTS_Y
   xy_int_t bilinear_grid_spacing, bilinear_start;       // G29 L F
-  #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-    bed_mesh_t z_values;                                // G29
-  #else
-    float z_values[3][3];
-  #endif
+  float z_values[3][3];
 
   //
   // AUTO_BED_LEVELING_UBL
@@ -387,10 +383,6 @@ void MarlinSettings::postprocess() {
 
   #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
     set_z_fade_height(new_z_fade_height, false); // false = no report
-  #endif
-
-  #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-    refresh_bed_level();
   #endif
 
   #if ENABLED(FWRETRACT)
@@ -624,29 +616,15 @@ void MarlinSettings::postprocess() {
     // Bilinear Auto Bed Leveling
     //
     {
-      #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-        // Compile time test that sizeof(z_values) is as expected
-        static_assert(
-          sizeof(z_values) == (GRID_MAX_POINTS) * sizeof(z_values[0][0]),
-          "Bilinear Z array is the wrong size."
-        );
-        const uint8_t grid_max_x = GRID_MAX_POINTS_X, grid_max_y = GRID_MAX_POINTS_Y;
-        EEPROM_WRITE(grid_max_x);            // 1 byte
-        EEPROM_WRITE(grid_max_y);            // 1 byte
-        EEPROM_WRITE(bilinear_grid_spacing); // 2 ints
-        EEPROM_WRITE(bilinear_start);        // 2 ints
-        EEPROM_WRITE(z_values);              // 9-256 floats
-      #else
-        // For disabled Bilinear Grid write an empty 3x3 grid
-        const uint8_t grid_max_x = 3, grid_max_y = 3;
-        const xy_int_t bilinear_start{0}, bilinear_grid_spacing{0};
-        dummy = 0;
-        EEPROM_WRITE(grid_max_x);
-        EEPROM_WRITE(grid_max_y);
-        EEPROM_WRITE(bilinear_grid_spacing);
-        EEPROM_WRITE(bilinear_start);
-        for (uint16_t q = grid_max_x * grid_max_y; q--;) EEPROM_WRITE(dummy);
-      #endif
+      // For disabled Bilinear Grid write an empty 3x3 grid
+      const uint8_t grid_max_x = 3, grid_max_y = 3;
+      const xy_int_t bilinear_start{0}, bilinear_grid_spacing{0};
+      dummy = 0;
+      EEPROM_WRITE(grid_max_x);
+      EEPROM_WRITE(grid_max_y);
+      EEPROM_WRITE(bilinear_grid_spacing);
+      EEPROM_WRITE(bilinear_start);
+      for (uint16_t q = grid_max_x * grid_max_y; q--;) EEPROM_WRITE(dummy);
     }
 
     //
@@ -1371,15 +1349,6 @@ void MarlinSettings::postprocess() {
         uint8_t grid_max_x, grid_max_y;
         EEPROM_READ_ALWAYS(grid_max_x);                       // 1 byte
         EEPROM_READ_ALWAYS(grid_max_y);                       // 1 byte
-        #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-          if (grid_max_x == GRID_MAX_POINTS_X && grid_max_y == GRID_MAX_POINTS_Y) {
-            if (!validating) set_bed_leveling_enabled(false);
-            EEPROM_READ(bilinear_grid_spacing);        // 2 ints
-            EEPROM_READ(bilinear_start);               // 2 ints
-            EEPROM_READ(z_values);                     // 9 to 256 floats
-          }
-          else // EEPROM data is stale
-        #endif // AUTO_BED_LEVELING_BILINEAR
           {
             // Skip past disabled (or stale) Bilinear Grid data
             xy_int_t bgs, bs;
@@ -2705,18 +2674,6 @@ void MarlinSettings::reset() {
 
        //ubl.report_current_mesh();   // This is too verbose for large meshes. A better (more terse)
                                                   // solution needs to be found.
-      #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
-
-        if (leveling_is_valid()) {
-          for (uint8_t py = 0; py < GRID_MAX_POINTS_Y; py++) {
-            for (uint8_t px = 0; px < GRID_MAX_POINTS_X; px++) {
-              CONFIG_ECHO_START();
-              SERIAL_ECHOPAIR("  G29 W I", (int)px, " J", (int)py);
-              SERIAL_ECHOLNPAIR_F(" Z", LINEAR_UNIT(z_values[px][py]), 5);
-            }
-          }
-        }
-
       #endif
 
     #endif // HAS_LEVELING

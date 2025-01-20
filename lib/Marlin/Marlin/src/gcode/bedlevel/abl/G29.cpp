@@ -243,11 +243,7 @@ G29_TYPE GcodeSuite::G29() {
       int constexpr abl_points = GRID_MAX_POINTS;
     #endif
 
-    #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-
-      ABL_VAR float zoffset;
-
-    #elif ENABLED(AUTO_BED_LEVELING_LINEAR)
+    #if ENABLED(AUTO_BED_LEVELING_LINEAR)
 
       ABL_VAR int indexIntoAB[GRID_MAX_POINTS_X][GRID_MAX_POINTS_Y];
 
@@ -299,52 +295,7 @@ G29_TYPE GcodeSuite::G29() {
 
     abl_should_enable = planner.leveling_active;
 
-    #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-
-      const bool seen_w = parser.seen('W');
-      if (seen_w) {
-        if (!leveling_is_valid()) {
-          SERIAL_ERROR_MSG("No bilinear grid");
-          G29_RETURN(false);
-        }
-
-        const float rz = parser.seenval('Z') ? RAW_Z_POSITION(parser.value_linear_units()) : current_position.z;
-        if (!WITHIN(rz, -10, 10)) {
-          SERIAL_ERROR_MSG("Bad Z value");
-          G29_RETURN(false);
-        }
-
-        const float rx = RAW_X_POSITION(parser.linearval('X', NAN)),
-                    ry = RAW_Y_POSITION(parser.linearval('Y', NAN));
-        int8_t i = parser.byteval('I', -1), j = parser.byteval('J', -1);
-
-        if (!isnan(rx) && !isnan(ry)) {
-          // Get nearest i / j from rx / ry
-          i = (rx - bilinear_start.x + 0.5 * gridSpacing.x) / gridSpacing.x;
-          j = (ry - bilinear_start.y + 0.5 * gridSpacing.y) / gridSpacing.y;
-          LIMIT(i, 0, GRID_MAX_POINTS_X - 1);
-          LIMIT(j, 0, GRID_MAX_POINTS_Y - 1);
-        }
-        if (WITHIN(i, 0, GRID_MAX_POINTS_X - 1) && WITHIN(j, 0, GRID_MAX_POINTS_Y)) {
-          set_bed_leveling_enabled(false);
-          z_values[i][j] = rz;
-          #if ENABLED(ABL_BILINEAR_SUBDIVISION)
-            bed_level_virt_interpolate();
-          #endif
-          #if ENABLED(EXTENSIBLE_UI)
-            ExtUI::onMeshUpdate(i, j, rz);
-          #endif
-          set_bed_leveling_enabled(abl_should_enable);
-          if (abl_should_enable) report_current_position();
-        }
-        G29_RETURN(false);
-      } // parser.seen('W')
-
-    #else
-
-      constexpr bool seen_w = false;
-
-    #endif
+    constexpr bool seen_w = false;
 
     // Jettison bed leveling data
     if (!seen_w && parser.seen('J')) {
@@ -387,10 +338,6 @@ G29_TYPE GcodeSuite::G29() {
 
       abl_points = abl_grid_points.x * abl_grid_points.y;
       mean = 0;
-
-    #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
-
-      zoffset = parser.linearval('Z');
 
     #endif
 
@@ -465,25 +412,6 @@ G29_TYPE GcodeSuite::G29() {
     #endif
 
     if (!faux) remember_feedrate_scaling_off();
-
-    #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-
-      #if ENABLED(PROBE_MANUALLY)
-        if (!no_action)
-      #endif
-      if (gridSpacing != bilinear_grid_spacing || probe_position_lf != bilinear_start) {
-        // Reset grid to 0.0 or "not probed". (Also disables ABL)
-        reset_bed_level();
-
-        // Initialize a grid with the given dimensions
-        bilinear_grid_spacing = gridSpacing.asInt();
-        bilinear_start = probe_position_lf;
-
-        // Can't re-enable (on error) until the new grid is written
-        abl_should_enable = false;
-      }
-
-    #endif // AUTO_BED_LEVELING_BILINEAR
 
     #if ENABLED(AUTO_BED_LEVELING_3POINT)
 
@@ -562,16 +490,6 @@ G29_TYPE GcodeSuite::G29() {
       #elif ENABLED(AUTO_BED_LEVELING_3POINT)
 
         points[index].z = measured_z;
-
-      #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
-
-        const float newz = measured_z + zoffset;
-        z_values[meshCount.x][meshCount.y] = newz;
-        #if ENABLED(EXTENSIBLE_UI)
-          ExtUI::onMeshUpdate(meshCount, newz);
-        #endif
-
-        if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("Save X", meshCount.x, " Y", meshCount.y, " Z", measured_z + zoffset);
 
       #endif
     }
@@ -741,13 +659,6 @@ G29_TYPE GcodeSuite::G29() {
 
             incremental_LSF(&lsf_results, probePos, measured_z);
 
-          #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
-
-            z_values[meshCount.x][meshCount.y] = measured_z + zoffset;
-            #if ENABLED(EXTENSIBLE_UI)
-              ExtUI::onMeshUpdate(meshCount.x, meshCount.y, z_values[meshCount.x][meshCount.y]);
-            #endif
-
           #endif
 
           abl_should_enable = false;
@@ -820,18 +731,7 @@ G29_TYPE GcodeSuite::G29() {
 
   // Calculate leveling, print reports, correct the position
   if (!isnan(measured_z)) {
-    #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-
-      if (!dryrun) extrapolate_unprobed_bed_level();
-      print_bilinear_leveling_grid();
-
-      refresh_bed_level();
-
-      #if ENABLED(ABL_BILINEAR_SUBDIVISION)
-        print_bilinear_leveling_grid_virt();
-      #endif
-
-    #elif ENABLED(AUTO_BED_LEVELING_LINEAR)
+    #if ENABLED(AUTO_BED_LEVELING_LINEAR)
 
       // For LINEAR leveling calculate matrix, print reports, correct the position
 
@@ -939,18 +839,6 @@ G29_TYPE GcodeSuite::G29() {
         current_position = converted;
 
         if (DEBUGGING(LEVELING)) DEBUG_POS("G29 corrected XYZ", current_position);
-      }
-
-    #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
-
-      if (!dryrun) {
-        if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("G29 uncorrected Z:", current_position.z);
-
-        // Unapply the offset because it is going to be immediately applied
-        // and cause compensation movement in Z
-        current_position.z -= bilinear_z_offset(current_position);
-
-        if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(" corrected Z:", current_position.z);
       }
 
     #endif // ABL_PLANAR
