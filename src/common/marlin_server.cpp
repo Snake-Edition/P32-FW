@@ -820,7 +820,7 @@ void loop() {
     }
 
     // Revert quick_stop when commands already drained
-    if (server.flags & MARLIN_SFLG_STOPPED && !queue.has_commands_queued() && !planner.processing()) {
+    if (server.flags & MARLIN_SFLG_STOPPED && !is_processing()) {
         planner.resume_queuing();
         server.flags &= ~MARLIN_SFLG_STOPPED;
     }
@@ -1980,7 +1980,7 @@ static void _server_print_loop(void) {
         server.print_state = State::Pausing_WaitIdle;
         break;
     case State::Pausing_WaitIdle:
-        if (!queue.has_commands_queued() && !planner.processing() && gcode.busy_state == GcodeSuite::NOT_BUSY) {
+        if (!is_processing()) {
             park_head();
             server.print_state = State::Pausing_ParkHead;
         }
@@ -2043,9 +2043,10 @@ static void _server_print_loop(void) {
             abort_resuming = true;
         }
 
-        if (queue.has_commands_queued() || planner.processing()) {
+        if (is_processing()) {
             break;
         }
+
 #if ENABLED(CRASH_RECOVERY)
         if (crash_s.get_state() == Crash_s::RECOVERY) {
             endstops.enable_globally(true);
@@ -2110,7 +2111,7 @@ static void _server_print_loop(void) {
         server.print_state = State::Aborting_WaitIdle;
         break;
     case State::Aborting_WaitIdle:
-        if (queue.has_commands_queued() || planner.processing()) {
+        if (is_processing()) {
             break;
         }
 
@@ -2152,7 +2153,7 @@ static void _server_print_loop(void) {
         break;
 
     case State::Aborting_UnloadFilament:
-        if (!queue.has_commands_queued() && !planner.processing()) {
+        if (!is_processing()) {
 #if ENABLED(PRUSA_MMU2)
             if (MMU2::mmu2.Enabled()) {
                 safely_unload_filament_from_nozzle_to_mmu();
@@ -2162,7 +2163,7 @@ static void _server_print_loop(void) {
         }
         break;
     case State::Aborting_ParkHead:
-        if (!queue.has_commands_queued() && !planner.processing()) {
+        if (!is_processing()) {
             disable_XY();
 #ifndef Z_ALWAYS_ON
             disable_Z();
@@ -2177,7 +2178,7 @@ static void _server_print_loop(void) {
         break;
     case State::Aborting_Preview:
         // Wait for operations to finish
-        if (queue.has_commands_queued() || planner.processing()) {
+        if (is_processing()) {
             break;
         }
 
@@ -2195,7 +2196,7 @@ static void _server_print_loop(void) {
         break;
 
     case State::Finishing_WaitIdle:
-        if (!queue.has_commands_queued() && !planner.processing()) {
+        if (!is_processing()) {
 #if ENABLED(CRASH_RECOVERY)
             // TODO: the following should be moved to State::Finishing_ParkHead once the "stopping"
             // state is handled properly
@@ -2215,7 +2216,7 @@ static void _server_print_loop(void) {
         }
         break;
     case State::Finishing_UnloadFilament:
-        if (!queue.has_commands_queued() && !planner.processing()) {
+        if (!is_processing()) {
 #if ENABLED(PRUSA_MMU2)
             if (MMU2::mmu2.Enabled() && GCodeInfo::getInstance().is_singletool_gcode()) {
                 // When we are running single-filament gcode with MMU, we should unload current filament.
@@ -2226,7 +2227,7 @@ static void _server_print_loop(void) {
         }
         break;
     case State::Finishing_ParkHead:
-        if (!queue.has_commands_queued() && !planner.processing()) {
+        if (!is_processing()) {
             server.print_state = State::Finished;
             if (server.print_is_serial) {
                 fsm_destroy(ClientFSM::Serial_printing);
@@ -2353,7 +2354,7 @@ static void _server_print_loop(void) {
         break;
     }
     case State::CrashRecovery_XY_Measure: {
-        if (queue.has_commands_queued() || planner.processing()) {
+        if (is_processing()) {
             break;
         }
 
@@ -2369,7 +2370,7 @@ static void _server_print_loop(void) {
     }
     #if HAS_TOOLCHANGER()
     case State::CrashRecovery_Tool_Pickup: {
-        if (queue.has_commands_queued() || planner.processing()) {
+        if (is_processing()) {
             break;
         }
 
@@ -2417,7 +2418,7 @@ static void _server_print_loop(void) {
     }
     #endif /*HAS_TOOLCHANGER()*/
     case State::CrashRecovery_XY_HOME: {
-        if (queue.has_commands_queued() || planner.processing()) {
+        if (is_processing()) {
             break;
         }
 
