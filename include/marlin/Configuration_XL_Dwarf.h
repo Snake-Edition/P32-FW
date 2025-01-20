@@ -1168,19 +1168,6 @@
     // contours of the bed more closely than edge-to-edge straight moves.
     #define SEGMENT_LEVELED_MOVES
     #define LEVELED_SEGMENT_LENGTH 5.0 // (mm) Length of all segments (except the last one)
-
-    /**
-   * Enable the G26 Mesh Validation Pattern tool.
-   */
-    //#define G26_MESH_VALIDATION
-    #if ENABLED(G26_MESH_VALIDATION)
-        #define MESH_TEST_NOZZLE_SIZE 0.4 // (mm) Diameter of primary nozzle.
-        #define MESH_TEST_LAYER_HEIGHT 0.2 // (mm) Default layer height for the G26 Mesh Validation Tool.
-        #define MESH_TEST_HOTEND_TEMP 205 // (°C) Default nozzle temperature for the G26 Mesh Validation Tool.
-        #define MESH_TEST_BED_TEMP 60 // (°C) Default bed temperature for the G26 Mesh Validation Tool.
-        #define G26_XY_FEEDRATE 20 // (mm/s) Feedrate for XY Moves for the G26 Mesh Validation Tool.
-    #endif
-
 #endif
 
 #if ENABLED(AUTO_BED_LEVELING_UBL)

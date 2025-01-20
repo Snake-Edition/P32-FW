@@ -498,14 +498,6 @@ public:
       static void reselect_last_file();
     #endif
 
-    #if ENABLED(G26_MESH_VALIDATION)
-      static inline void chirp() {
-        #if HAS_BUZZER
-          buzz(LCD_FEEDBACK_FREQUENCY_DURATION_MS, LCD_FEEDBACK_FREQUENCY_HZ);
-        #endif
-      }
-    #endif
-
     #if ENABLED(AUTO_BED_LEVELING_UBL)
       static void ubl_plot(const uint8_t x_plot, const uint8_t y_plot);
     #endif
@@ -526,7 +518,7 @@ public:
     static constexpr bool wait_for_bl_move = false;
   #endif
 
-  #if HAS_LCD_MENU && EITHER(AUTO_BED_LEVELING_UBL, G26_MESH_VALIDATION)
+  #if HAS_LCD_MENU && ENABLED(AUTO_BED_LEVELING_UBL)
     static bool external_control;
     FORCE_INLINE static void capture() { external_control = true; }
     FORCE_INLINE static void release() { external_control = false; }
@@ -548,7 +540,7 @@ public:
 
     static void update_buttons();
     static inline bool button_pressed() { return BUTTON_CLICK(); }
-    #if EITHER(AUTO_BED_LEVELING_UBL, G26_MESH_VALIDATION)
+    #if ENABLED(AUTO_BED_LEVELING_UBL)
       static void wait_for_release();
     #endif
 

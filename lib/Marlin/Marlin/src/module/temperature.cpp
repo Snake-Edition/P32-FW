@@ -3872,11 +3872,7 @@ void Temperature::isr() {
       #define MIN_COOLING_SLOPE_TIME 60
     #endif
 
-    bool Temperature::wait_for_hotend(const uint8_t target_extruder, const bool no_wait_for_cooling/*=true*/, bool fan_cooling/*=false*/
-      #if G26_CLICK_CAN_CANCEL
-        , const bool click_to_cancel/*=false*/
-      #endif
-    ) {
+    bool Temperature::wait_for_hotend(const uint8_t target_extruder, const bool no_wait_for_cooling/*=true*/, bool fan_cooling/*=false*/) {
       #if TEMP_RESIDENCY_TIME > 0
         // Loop until the temperature has stabilized
         #define TEMP_CONDITIONS (!temp_hotend_residency_start_ms[target_extruder] || PENDING(now, temp_hotend_residency_start_ms[target_extruder] + (TEMP_RESIDENCY_TIME) * 1000UL))
@@ -3962,14 +3958,6 @@ void Temperature::isr() {
             old_temp = temp;
           }
         }
-
-        #if G26_CLICK_CAN_CANCEL
-          if (click_to_cancel && ui.use_click()) {
-            wait_for_heatup = false;
-            ui.quick_feedback();
-          }
-        #endif
-
       } while (wait_for_heatup && TEMP_CONDITIONS);
 
       /// reset fan speed
@@ -3996,11 +3984,7 @@ void Temperature::isr() {
       #define MIN_COOLING_SLOPE_TIME_BED 60
     #endif
 
-    bool Temperature::wait_for_bed(const bool no_wait_for_cooling/*=true*/
-      #if G26_CLICK_CAN_CANCEL
-        , const bool click_to_cancel/*=false*/
-      #endif
-    ) {
+    bool Temperature::wait_for_bed(const bool no_wait_for_cooling/*=true*/) {
       #if TEMP_BED_RESIDENCY_TIME > 0
         millis_t residency_start_ms = 0;
         bool first_loop = true;
@@ -4093,13 +4077,6 @@ void Temperature::isr() {
             old_temp = temp;
           }
         }
-
-        #if G26_CLICK_CAN_CANCEL
-          if (click_to_cancel && ui.use_click()) {
-            wait_for_heatup = false;
-            ui.quick_feedback();
-          }
-        #endif
 
         #if TEMP_BED_RESIDENCY_TIME > 0
           first_loop = false;

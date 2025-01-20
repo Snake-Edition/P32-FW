@@ -303,10 +303,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 21: NOOP; break;                                     // No error on unknown G21
       #endif
 
-      #if ENABLED(G26_MESH_VALIDATION)
-        case 26: G26(); break;                                    // G26: Mesh Validation Pattern generation
-      #endif
-
       #if ENABLED(NOZZLE_PARK_FEATURE)
         case 27: G27(); break;                                    // G27: Nozzle Park
       #endif

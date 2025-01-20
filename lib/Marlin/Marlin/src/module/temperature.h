@@ -173,8 +173,6 @@ enum ADCSensorState : char {
   #define unscalePID_d(d) ( float(d) * PID_dT )
 #endif
 
-#define G26_CLICK_CAN_CANCEL (HAS_LCD_MENU && ENABLED(G26_MESH_VALIDATION))
-
 // A temperature sensor
 typedef struct TempInfo {
   static constexpr float celsius_uninitialized = -1.0f;
@@ -732,11 +730,7 @@ class Temperature {
       }
 
       #if HAS_TEMP_HOTEND
-        static bool wait_for_hotend(const uint8_t target_extruder, const bool no_wait_for_cooling=true, bool fan_cooling=false
-          #if G26_CLICK_CAN_CANCEL
-            , const bool click_to_cancel=false
-          #endif
-        );
+        static bool wait_for_hotend(const uint8_t target_extruder, const bool no_wait_for_cooling=true, bool fan_cooling=false);
       #endif
 
       FORCE_INLINE static bool still_heating(const uint8_t e) {
@@ -815,11 +809,7 @@ class Temperature {
         start_watching_bed();
       }
 
-      static bool wait_for_bed(const bool no_wait_for_cooling=true
-        #if G26_CLICK_CAN_CANCEL
-          , const bool click_to_cancel=false
-        #endif
-      );
+      static bool wait_for_bed(const bool no_wait_for_cooling=true);
 
     #endif // HAS_HEATED_BED
 

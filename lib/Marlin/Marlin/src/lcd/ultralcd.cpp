@@ -200,7 +200,7 @@ millis_t MarlinUI::next_button_update_ms; // = 0
     return click;
   }
 
-  #if EITHER(AUTO_BED_LEVELING_UBL, G26_MESH_VALIDATION)
+  #if ENABLED(AUTO_BED_LEVELING_UBL)
 
     bool MarlinUI::external_control; // = false
 
