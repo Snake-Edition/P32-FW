@@ -110,13 +110,6 @@ void menu_tune() {
   EDIT_ITEM(int3, MSG_SPEED, &feedrate_percentage, 10, 999);
 
   //
-  // Manual bed leveling, Bed Z:
-  //
-  #if BOTH(MESH_BED_LEVELING, LCD_BED_LEVELING)
-    EDIT_ITEM(float43, MSG_BED_Z, &mbl.z_offset, -1, 1);
-  #endif
-
-  //
   // Nozzle:
   // Nozzle [1-4]:
   //

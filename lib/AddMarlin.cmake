@@ -41,7 +41,6 @@ if(BOARD_IS_MASTER_BOARD)
             Marlin/Marlin/src/feature/bed_preheat.cpp
             Marlin/Marlin/src/feature/bedlevel/abl/abl.cpp
             Marlin/Marlin/src/feature/bedlevel/bedlevel.cpp
-            Marlin/Marlin/src/feature/bedlevel/mbl/mesh_bed_leveling.cpp
             Marlin/Marlin/src/feature/bedlevel/ubl/ubl.cpp
             Marlin/Marlin/src/feature/bedlevel/ubl/ubl_G29.cpp
             Marlin/Marlin/src/feature/bedlevel/ubl/ubl_motion.cpp
@@ -67,7 +66,6 @@ if(BOARD_IS_MASTER_BOARD)
             Marlin/Marlin/src/gcode/bedlevel/G26.cpp
             Marlin/Marlin/src/gcode/bedlevel/G42.cpp
             Marlin/Marlin/src/gcode/bedlevel/M420.cpp
-            Marlin/Marlin/src/gcode/bedlevel/mbl/G29.cpp
             Marlin/Marlin/src/gcode/bedlevel/ubl/G29.cpp
             Marlin/Marlin/src/gcode/bedlevel/ubl/M421.cpp
             Marlin/Marlin/src/gcode/calibrate/G28.cpp

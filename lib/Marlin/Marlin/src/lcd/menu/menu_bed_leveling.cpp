@@ -36,7 +36,7 @@
   #include "../../module/probe.h"
 #endif
 
-#if EITHER(PROBE_MANUALLY, MESH_BED_LEVELING)
+#if ENABLED(PROBE_MANUALLY)
 
   #include "../../module/motion.h"
   #include "../../gcode/queue.h"
@@ -51,7 +51,7 @@
   constexpr uint8_t total_probe_points = (
     #if ENABLED(AUTO_BED_LEVELING_3POINT)
       3
-    #elif ABL_GRID || ENABLED(MESH_BED_LEVELING)
+    #elif ABL_GRID
       GRID_MAX_POINTS
     #endif
   );
@@ -71,7 +71,7 @@
   //
   void _lcd_level_bed_done() {
     if (!ui.wait_for_bl_move) {
-      #if MANUAL_PROBE_HEIGHT > 0 && DISABLED(MESH_BED_LEVELING)
+      #if MANUAL_PROBE_HEIGHT > 0
         // Display "Done" screen and wait for moves to complete
         line_to_z(MANUAL_PROBE_HEIGHT);
         ui.synchronize(GET_TEXT(MSG_LEVEL_BED_DONE));
@@ -105,9 +105,7 @@
         //
         ui.wait_for_bl_move = true;
         ui.goto_screen(_lcd_level_bed_done);
-        #if ENABLED(MESH_BED_LEVELING)
-          queue.inject_P(PSTR("G29 S2"));
-        #elif ENABLED(PROBE_MANUALLY)
+        #if ENABLED(PROBE_MANUALLY)
           queue.inject_P(PSTR("G29 V1"));
         #endif
       }
@@ -157,9 +155,7 @@
 
     // G29 Records Z, moves, and signals when it pauses
     ui.wait_for_bl_move = true;
-    #if ENABLED(MESH_BED_LEVELING)
-      queue.inject_P(manual_probe_index ? PSTR("G29 S2") : PSTR("G29 S1"));
-    #elif ENABLED(PROBE_MANUALLY)
+    #if ENABLED(PROBE_MANUALLY)
       queue.inject_P(PSTR("G29 V1"));
     #endif
   }
@@ -198,7 +194,7 @@
     queue.inject_P(PSTR("G28"));
   }
 
-#endif // PROBE_MANUALLY || MESH_BED_LEVELING
+#endif // PROBE_MANUALLY
 
 #if ENABLED(MESH_EDIT_MENU)
 
@@ -226,7 +222,6 @@
  *    Auto Home           (if homing needed)
  *    Leveling On/Off     (if data exists, and homed)
  *    Fade Height: ---    (Req: ENABLE_LEVELING_FADE_HEIGHT)
- *    Mesh Z Offset: ---  (Req: MESH_BED_LEVELING)
  *    Z Probe Offset: --- (Req: HAS_BED_PROBE, Opt: BABYSTEP_ZPROBE_OFFSET)
  *    Level Bed >
  *    Level Corners >     (if homed)
@@ -240,12 +235,12 @@ void menu_bed_leveling() {
   const bool is_homed = all_axes_known();
 
   // Auto Home if not using manual probing
-  #if NONE(PROBE_MANUALLY, MESH_BED_LEVELING)
+  #if DISABLED(PROBE_MANUALLY)
     if (!is_homed) GCODES_ITEM(MSG_AUTO_HOME, PSTR("G28"));
   #endif
 
   // Level Bed
-  #if EITHER(PROBE_MANUALLY, MESH_BED_LEVELING)
+  #if ENABLED(PROBE_MANUALLY)
     // Manual leveling uses a guided procedure
     SUBMENU(MSG_LEVEL_BED, _lcd_level_bed_continue);
   #else
@@ -269,13 +264,6 @@ void menu_bed_leveling() {
     // Shadow for editing the fade height
     editable.decimal = planner.z_fade_height;
     EDIT_ITEM_FAST(float3, MSG_Z_FADE_HEIGHT, &editable.decimal, 0, 100, [](){ set_z_fade_height(editable.decimal); });
-  #endif
-
-  //
-  // Mesh Bed Leveling Z-Offset
-  //
-  #if ENABLED(MESH_BED_LEVELING)
-    EDIT_ITEM(float43, MSG_BED_Z, &mbl.z_offset, -1, 1);
   #endif
 
   #if ENABLED(BABYSTEP_ZPROBE_OFFSET)

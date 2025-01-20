@@ -27,7 +27,7 @@
 #include "bedlevel.h"
 #include "../../module/planner.h"
 
-#if EITHER(MESH_BED_LEVELING, PROBE_MANUALLY)
+#if ENABLED(PROBE_MANUALLY)
   #include "../../module/motion.h"
 #endif
 
@@ -48,9 +48,7 @@
 
 bool leveling_is_valid() {
   return
-    #if ENABLED(MESH_BED_LEVELING)
-      mbl.has_mesh()
-    #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
+    #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
       !!bilinear_grid_spacing.x
     #elif ENABLED(AUTO_BED_LEVELING_UBL)
       ubl.mesh_is_valid()
@@ -134,9 +132,7 @@ void reset_bed_level() {
     ubl.reset();
   #else
     set_bed_leveling_enabled(false);
-    #if ENABLED(MESH_BED_LEVELING)
-      mbl.reset();
-    #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
+    #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
       bilinear_start.reset();
       bilinear_grid_spacing.reset();
       for (uint8_t x = 0; x < GRID_MAX_POINTS_X; x++)
@@ -152,7 +148,7 @@ void reset_bed_level() {
   #endif
 }
 
-#if EITHER(AUTO_BED_LEVELING_BILINEAR, MESH_BED_LEVELING)
+#if ENABLED(AUTO_BED_LEVELING_BILINEAR)
 
   /**
    * Enable to produce output in JSON format suitable
@@ -219,9 +215,9 @@ void reset_bed_level() {
     SERIAL_EOL();
   }
 
-#endif // AUTO_BED_LEVELING_BILINEAR || MESH_BED_LEVELING
+#endif // AUTO_BED_LEVELING_BILINEAR
 
-#if EITHER(MESH_BED_LEVELING, PROBE_MANUALLY)
+#if ENABLED(PROBE_MANUALLY)
 
   void _manual_goto_xy(const xy_pos_t &pos) {
 

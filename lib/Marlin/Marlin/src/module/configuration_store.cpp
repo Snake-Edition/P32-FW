@@ -193,11 +193,7 @@ typedef struct SettingsDataStruct {
   //
   float mbl_z_offset;                                   // mbl.z_offset
   uint8_t mesh_num_x, mesh_num_y;                       // GRID_MAX_POINTS_X, GRID_MAX_POINTS_Y
-  #if ENABLED(MESH_BED_LEVELING)
-    float mbl_z_values[GRID_MAX_POINTS_X][GRID_MAX_POINTS_Y]; // mbl.z_values
-  #else
-    float mbl_z_values[3][3];
-  #endif
+  float mbl_z_values[3][3];
 
   //
   // HAS_BED_PROBE
@@ -595,25 +591,13 @@ void MarlinSettings::postprocess() {
     // Mesh Bed Leveling
     //
     {
-      #if ENABLED(MESH_BED_LEVELING)
-        // Compile time test that sizeof(mbl.z_values) is as expected
-        static_assert(
-          sizeof(mbl.z_values) == (GRID_MAX_POINTS) * sizeof(mbl.z_values[0][0]),
-          "MBL Z array is the wrong size."
-        );
-        const uint8_t mesh_num_x = GRID_MAX_POINTS_X, mesh_num_y = GRID_MAX_POINTS_Y;
-        EEPROM_WRITE(mbl.z_offset);
-        EEPROM_WRITE(mesh_num_x);
-        EEPROM_WRITE(mesh_num_y);
-        EEPROM_WRITE(mbl.z_values);
-      #else // For disabled MBL write a default mesh
-        dummy = 0;
-        const uint8_t mesh_num_x = 3, mesh_num_y = 3;
-        EEPROM_WRITE(dummy); // z_offset
-        EEPROM_WRITE(mesh_num_x);
-        EEPROM_WRITE(mesh_num_y);
-        for (uint8_t q = mesh_num_x * mesh_num_y; q--;) EEPROM_WRITE(dummy);
-      #endif
+      // For disabled MBL write a default mesh
+      dummy = 0;
+      const uint8_t mesh_num_x = 3, mesh_num_y = 3;
+      EEPROM_WRITE(dummy); // z_offset
+      EEPROM_WRITE(mesh_num_x);
+      EEPROM_WRITE(mesh_num_y);
+      for (uint8_t q = mesh_num_x * mesh_num_y; q--;) EEPROM_WRITE(dummy);
     }
 
     //
@@ -1352,21 +1336,8 @@ void MarlinSettings::postprocess() {
         EEPROM_READ_ALWAYS(mesh_num_x);
         EEPROM_READ_ALWAYS(mesh_num_y);
 
-        #if ENABLED(MESH_BED_LEVELING)
-          if (!validating) mbl.z_offset = dummy;
-          if (mesh_num_x == GRID_MAX_POINTS_X && mesh_num_y == GRID_MAX_POINTS_Y) {
-            // EEPROM data fits the current mesh
-            EEPROM_READ(mbl.z_values);
-          }
-          else {
-            // EEPROM data is stale
-            if (!validating) mbl.reset();
-            for (uint16_t q = mesh_num_x * mesh_num_y; q--;) EEPROM_READ(dummy);
-          }
-        #else
-          // MBL is disabled - skip the stored data
-          for (uint16_t q = mesh_num_x * mesh_num_y; q--;) EEPROM_READ(dummy);
-        #endif // MESH_BED_LEVELING
+        // MBL is disabled - skip the stored data
+        for (uint16_t q = mesh_num_x * mesh_num_y; q--;) EEPROM_READ(dummy);
       }
 
       //
@@ -2699,11 +2670,7 @@ void MarlinSettings::reset() {
      */
     #if HAS_LEVELING
 
-      #if ENABLED(MESH_BED_LEVELING)
-
-        CONFIG_ECHO_HEADING("Mesh Bed Leveling:");
-
-      #elif ENABLED(AUTO_BED_LEVELING_UBL)
+      #if ENABLED(AUTO_BED_LEVELING_UBL)
 
         if (!forReplay) {
           CONFIG_ECHO_START();
@@ -2725,19 +2692,7 @@ void MarlinSettings::reset() {
         #endif
       );
 
-      #if ENABLED(MESH_BED_LEVELING)
-
-        if (leveling_is_valid()) {
-          for (uint8_t py = 0; py < GRID_MAX_POINTS_Y; py++) {
-            for (uint8_t px = 0; px < GRID_MAX_POINTS_X; px++) {
-              CONFIG_ECHO_START();
-              SERIAL_ECHOPAIR("  G29 S3 X", (int)px + 1, " Y", (int)py + 1);
-              SERIAL_ECHOLNPAIR_F(" Z", LINEAR_UNIT(mbl.z_values[px][py]), 5);
-            }
-          }
-        }
-
-      #elif ENABLED(AUTO_BED_LEVELING_UBL)
+      #if ENABLED(AUTO_BED_LEVELING_UBL)
 
         if (!forReplay) {
           SERIAL_EOL();

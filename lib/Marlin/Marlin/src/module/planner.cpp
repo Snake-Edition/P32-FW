@@ -967,13 +967,7 @@ void Planner::check_axes_activity() {
       #endif
 
       raw.z += (
-        #if ENABLED(MESH_BED_LEVELING)
-          mbl.get_z(raw
-            #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
-              , fade_scaling_factor
-            #endif
-          )
-        #elif ENABLED(AUTO_BED_LEVELING_UBL)
+        #if ENABLED(AUTO_BED_LEVELING_UBL)
           fade_scaling_factor ? fade_scaling_factor * ubl.get_z_correction(raw) : 0.0
         #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
           fade_scaling_factor ? fade_scaling_factor * bilinear_z_offset(raw) : 0.0
@@ -996,13 +990,7 @@ void Planner::check_axes_activity() {
         #endif
 
         raw.z -= (
-          #if ENABLED(MESH_BED_LEVELING)
-            mbl.get_z(raw
-              #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
-                , fade_scaling_factor
-              #endif
-            )
-          #elif ENABLED(AUTO_BED_LEVELING_UBL)
+          #if ENABLED(AUTO_BED_LEVELING_UBL)
             fade_scaling_factor ? fade_scaling_factor * ubl.get_z_correction(raw) : 0.0
           #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
             fade_scaling_factor ? fade_scaling_factor * bilinear_z_offset(raw) : 0.0

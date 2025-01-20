@@ -33,10 +33,6 @@
   #include "../../core/serial.h"
 #endif
 
-#if ENABLED(MESH_BED_LEVELING)
-  #include "../../feature/bedlevel/bedlevel.h"
-#endif
-
 #if ENABLED(BABYSTEP_ZPROBE_OFFSET)
 
   FORCE_INLINE void mod_probe_offset(const_float_t offs) {
@@ -115,10 +111,6 @@ void GcodeSuite::M290() {
         , hotend_offset[active_extruder].z
       );
     }
-    #endif
-
-    #if ENABLED(MESH_BED_LEVELING)
-      SERIAL_ECHOLNPGM("MBL Adjust Z", bedlevel.z_offset);
     #endif
 
     #if ENABLED(BABYSTEP_DISPLAY_TOTAL)

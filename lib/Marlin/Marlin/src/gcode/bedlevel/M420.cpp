@@ -225,9 +225,6 @@ void GcodeSuite::M420() {
           #if ENABLED(ABL_BILINEAR_SUBDIVISION)
             print_bilinear_leveling_grid_virt();
           #endif
-        #elif ENABLED(MESH_BED_LEVELING)
-          SERIAL_ECHOLNPGM("Mesh Bed Level data:");
-          mbl.report_mesh();
         #endif
       }
     #endif

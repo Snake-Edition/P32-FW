@@ -421,7 +421,7 @@ void menu_move();
 void lcd_move_z();
 void _lcd_draw_homing();
 
-#define HAS_LINE_TO_Z ANY(DELTA, PROBE_MANUALLY, MESH_BED_LEVELING, LEVEL_BED_CORNERS)
+#define HAS_LINE_TO_Z ANY(DELTA, PROBE_MANUALLY, LEVEL_BED_CORNERS)
 
 #if HAS_LINE_TO_Z
   void line_to_z(const float &z);

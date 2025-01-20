@@ -155,29 +155,7 @@ void safe_delay(millis_t ms) {
 
       SERIAL_EOL();
 
-    #elif ENABLED(MESH_BED_LEVELING)
-
-      SERIAL_ECHOPGM("Mesh Bed Leveling");
-      if (planner.leveling_active) {
-        SERIAL_ECHOLNPGM(" (enabled)");
-        const float z_offset = bedlevel.get_z_offset(),
-                    z_correction = bedlevel.get_z_correction(current_position);
-        SERIAL_ECHOPGM("MBL Adjustment Z", ftostr43sign(z_offset + z_correction, '+'));
-        #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
-          if (planner.z_fade_height) {
-            SERIAL_ECHOPGM(" (", ftostr43sign(
-              z_offset + z_correction * planner.fade_scaling_factor_for_z(current_position.z), '+'
-            ));
-            SERIAL_CHAR(')');
-          }
-        #endif
-      }
-      else
-        SERIAL_ECHOPGM(" (disabled)");
-
-      SERIAL_EOL();
-
-    #endif // MESH_BED_LEVELING
+    #endif // HAS_ABL_OR_UBL
   }
 
 #endif // DEBUG_LEVELING_FEATURE

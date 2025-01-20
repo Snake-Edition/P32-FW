@@ -278,8 +278,6 @@ void menu_info_board() {
       STATIC_ITEM(MSG_BILINEAR_LEVELING);                       // Bi-linear Leveling
     #elif ENABLED(AUTO_BED_LEVELING_UBL)
       STATIC_ITEM(MSG_UBL_LEVELING);                            // Unified Bed Leveling
-    #elif ENABLED(MESH_BED_LEVELING)
-      STATIC_ITEM(MSG_MESH_LEVELING);                           // Mesh Leveling
     #endif
     END_SCREEN();
   }

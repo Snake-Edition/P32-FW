@@ -520,7 +520,7 @@ public:
 
   #endif
 
-  #if ENABLED(LCD_BED_LEVELING) && EITHER(PROBE_MANUALLY, MESH_BED_LEVELING)
+  #if ENABLED(LCD_BED_LEVELING) && ENABLED(PROBE_MANUALLY)
     static bool wait_for_bl_move;
   #else
     static constexpr bool wait_for_bl_move = false;

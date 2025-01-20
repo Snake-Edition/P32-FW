@@ -1047,7 +1047,7 @@
 
 // @section leveling
 
-#if EITHER(MESH_BED_LEVELING, AUTO_BED_LEVELING_UBL)
+#if ENABLED(AUTO_BED_LEVELING_UBL)
 // Override the mesh area if the automatic (max) area is too large
 // The numbers are from the distance equation combined with relative position due to probe offset MESH_X_DIST define and function position_reachable_by_probe from motion.h respectively
 

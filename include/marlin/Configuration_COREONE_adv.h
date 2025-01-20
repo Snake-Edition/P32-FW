@@ -1050,7 +1050,7 @@
 
 // @section leveling
 
-#if EITHER(MESH_BED_LEVELING, AUTO_BED_LEVELING_UBL)
+#if ENABLED(AUTO_BED_LEVELING_UBL)
 // Override the mesh area if the automatic (max) area is too large
 #define MESH_MIN_X ((-(X_BED_SIZE / (GRID_MAX_POINTS_X - 2 - 1))) + 15)
 #define MESH_MIN_Y ((-(Y_BED_SIZE / (GRID_MAX_POINTS_Y - 2 - 1))) + 15)
