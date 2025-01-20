@@ -431,8 +431,8 @@ void Stepper::_set_position(const int32_t &a, const int32_t &b, const int32_t &c
 // when the stepper ISR resumes, we must be very sure that the movement
 // is properly canceled
 void Stepper::endstop_triggered(const AxisEnum axis) {
+    StepIsrDisabler step_guard;
 
-    const bool was_enabled = suspend();
     endstops_trigsteps[axis] = (
 #if IS_CORE
         (axis == CORE_AXIS_2
@@ -446,10 +446,6 @@ void Stepper::endstop_triggered(const AxisEnum axis) {
 
     // Discard the rest of the move if there is a current block
     PreciseStepping::quick_stop();
-
-    if (was_enabled) {
-        wake_up();
-    }
 }
 
 void Stepper::report_positions() {

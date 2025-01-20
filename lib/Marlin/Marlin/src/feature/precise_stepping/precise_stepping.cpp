@@ -1092,11 +1092,10 @@ FORCE_INLINE split_step_event_t split_buffered_step(const step_generator_state_t
 FORCE_INLINE void trigger_first_step_event_after_specified_ticks(const uint32_t ticks) {
     assert(ticks <= STEP_TIMER_MAX_TICKS_LIMIT);
 
-    DISABLE_STEPPER_DRIVER_INTERRUPT();
+    StepIsrDisabler step_guard;
     const uint16_t counter = __HAL_TIM_GET_COUNTER(&TimerHandle[STEP_TIMER_NUM].handle);
     const uint16_t deadline = counter + ticks;
     __HAL_TIM_SET_COMPARE(&TimerHandle[STEP_TIMER_NUM].handle, TIM_CHANNEL_1, deadline);
-    ENABLE_STEPPER_DRIVER_INTERRUPT();
 }
 
 FORCE_INLINE void append_split_step_event(const split_step_event_t &split_step_event, step_event_u16_t *&next_step_event, uint16_t &next_step_event_queue_head) {
@@ -1405,7 +1404,7 @@ void PreciseStepping::reset_queues() {
     }
 #endif
 
-    const bool was_enabled = stepper.suspend();
+    StepIsrDisabler step_guard;
     MoveIsrDisabler move_guard;
 
     // reset internal state and queues
@@ -1422,9 +1421,6 @@ void PreciseStepping::reset_queues() {
     Stepper::axis_did_move = 0;
     stop_pending = false;
     busy = false;
-    if (was_enabled) {
-        stepper.wake_up();
-    }
 }
 
 void mark_ownership(move_t &move) {

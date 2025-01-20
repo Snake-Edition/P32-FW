@@ -46,6 +46,28 @@
 #include "planner.h"
 #include "stepper/indirection.h"
 
+// Helper class to disable the STEP ISR
+class [[nodiscard]] StepIsrDisabler {
+    bool old_step_isr_state;
+
+public:
+    StepIsrDisabler()
+        : old_step_isr_state { STEPPER_ISR_ENABLED() } {
+        if (old_step_isr_state) {
+            DISABLE_STEPPER_DRIVER_INTERRUPT();
+        }
+    }
+
+    ~StepIsrDisabler() {
+        if (old_step_isr_state) {
+            ENABLE_STEPPER_DRIVER_INTERRUPT();
+        }
+    }
+
+    StepIsrDisabler(const StepIsrDisabler &) = delete;
+    StepIsrDisabler &operator=(const StepIsrDisabler &) = delete;
+};
+
 //
 // Stepper class definition
 //
@@ -164,14 +186,11 @@ public:
     static void babystep(const AxisEnum axis, const bool direction); // perform a short step with a single stepper motor, outside of any convention
 #endif
 
-    // Set the current position in steps
+    // Set the current position in steps for all axes at once
     static inline void set_position(const int32_t &a, const int32_t &b, const int32_t &c, const int32_t &e) {
         planner.synchronize();
-        const bool was_enabled = suspend();
+        StepIsrDisabler step_guard;
         _set_position(a, b, c, e);
-        if (was_enabled) {
-            wake_up();
-        }
     }
     static inline void set_position(const xyze_long_t &abce) { set_position(abce.a, abce.b, abce.c, abce.e); }
 
