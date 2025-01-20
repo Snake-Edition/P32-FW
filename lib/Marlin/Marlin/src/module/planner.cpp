@@ -1196,7 +1196,7 @@ bool Planner::busy() {
 void Planner::synchronize() {
   bool emptying_buffer_orig = emptying();
   emptying_buffer = true;
-  delay_before_delivering = 0;
+  start_moving();
   while (busy()) idle(true);
   emptying_buffer = emptying_buffer_orig;
 #if HAS_PHASE_STEPPING()
