@@ -67,7 +67,9 @@ extern osThreadId displayTaskHandle;
 
     if (hard_reset) {
         // Wipe xFlash
-        w25x_chip_erase();
+        w25x_chip_erase([] {
+            wdt_iwdg_refresh();
+        });
 
 #if BOOTLOADER()
         // Invalidate firmware by erasing part of it
