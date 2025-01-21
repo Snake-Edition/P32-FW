@@ -2444,9 +2444,9 @@ void Planner::set_max_jerk(const AxisEnum axis, float targetValue) {
 
 #endif
 
-void Motion_Parameters::save_reset() {
+void Motion_Parameters::save_reset(const bool no_limits) {
   save();
-  reset();
+  reset(no_limits);
 }
 
 void Motion_Parameters::save() {
@@ -2497,7 +2497,7 @@ void Motion_Parameters::load() const {
   planner.apply_settings(s);
 }
 
-void Motion_Parameters::reset() {
-  MarlinSettings::reset_motion();
+void Motion_Parameters::reset(const bool no_limits) {
+  MarlinSettings::reset_motion(no_limits);
 }
 

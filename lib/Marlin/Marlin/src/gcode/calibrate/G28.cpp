@@ -552,7 +552,7 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
     };
     if (!flags.no_change) {
       // Reset default feedrate and acceleration limits during homing
-      Motion_Parameters::reset();
+      Motion_Parameters::reset(true);
 
       auto s = planner.user_settings;
       s.max_acceleration_mm_per_s2[X_AXIS] = XY_HOMING_ACCELERATION;

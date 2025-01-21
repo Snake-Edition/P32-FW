@@ -1048,9 +1048,9 @@ class Motion_Parameters {
     // save motion parameters
     void save();
     // save motion parameters and reset them
-    void save_reset();
+    void save_reset(const bool no_limits=false);
     // reset motion parameters
-    static void reset();
+    static void reset(const bool no_limits=false);
     // load motion parameters back
     void load() const;
 

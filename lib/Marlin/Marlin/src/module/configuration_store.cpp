@@ -2047,9 +2047,10 @@ void MarlinSettings::postprocess() {
 #endif // !EEPROM_SETTINGS
 
 /**
- * Resets motion parameters only (speed, accel., etc.)
+ * @brief Resets motion parameters only to defaults (speed, accel., etc.)
+ * @param no_limits When true, do not apply any mode limit
  */
-void MarlinSettings::reset_motion() {
+void MarlinSettings::reset_motion(const bool no_limits) {
   auto s = planner.user_settings;
 
   LOOP_XYZE_N(i) {
@@ -2086,7 +2087,7 @@ void MarlinSettings::reset_motion() {
     planner.junction_deviation_mm = float(JUNCTION_DEVIATION_MM);
   #endif
 
-  planner.apply_settings(s);
+  planner.apply_settings(s, no_limits);
 }
 
 /**
