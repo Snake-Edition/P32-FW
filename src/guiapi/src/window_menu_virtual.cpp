@@ -11,6 +11,11 @@ void WindowMenuVirtualBase::setup_items() {
     for (int buffer_slot = 0; buffer_slot < item_buffer_size; buffer_slot++) {
         const auto index = buffer_slot_index(buffer_slot, scroll_offset);
         setup_buffer_slot(buffer_slot, index < item_count ? index : std::nullopt);
+
+        // Do initial loop to for items that do part of their inicialization inside it.
+        if (auto item = item_at_buffer_slot(buffer_slot)) {
+            item->Loop();
+        }
     }
 
     items_set_up_ = true;
@@ -67,6 +72,11 @@ void WindowMenuVirtualBase::set_scroll_offset(int set) {
         // If the buffer slot should now hold a different item, set it up
         if (new_index != old_index) {
             setup_buffer_slot(buffer_slot, (new_index < item_count) ? new_index : std::nullopt);
+
+            // Do initial loop to for items that do part of their inicialization inside it.
+            if (auto item = item_at_buffer_slot(buffer_slot)) {
+                item->Loop();
+            }
         }
     }
 }
