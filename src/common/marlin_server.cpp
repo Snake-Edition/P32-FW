@@ -198,13 +198,9 @@ namespace {
         resume_state_t resume; // resume data (state before pausing)
         bool enable_nozzle_temp_timeout; // enables nozzle temperature timeout in print pause
         uint32_t last_update; // last update tick count
-        uint32_t command; // actually running command
-        uint32_t command_begin; // variable for notification
-        uint32_t command_end; // variable for notification
         uint32_t knob_click_counter;
         uint32_t knob_move_counter;
         uint16_t flags; // server flags (MARLIN_SFLG)
-        uint8_t idle_cnt; // idle call counter
 
 #if ENABLED(AXIS_MEASURE)
         /// length of axes measured after crash
@@ -774,8 +770,6 @@ void static finalize_print(bool finished) {
     SERIAL_ECHOLNPGM(MSG_FILE_PRINTED);
 }
 
-static const uint8_t MARLIN_IDLE_CNT_BUSY = 1;
-
 #if ANY(CRASH_RECOVERY, POWER_PANIC)
 static void check_crash() {
     // reset the nested loop check once per main server iteration
@@ -808,16 +802,6 @@ void loop() {
 #if ANY(CRASH_RECOVERY, POWER_PANIC)
     check_crash();
 #endif
-    if (server.idle_cnt >= MARLIN_IDLE_CNT_BUSY) {
-        if (server.flags & MARLIN_SFLG_BUSY) {
-            log_debug(MarlinServer, "State: Ready");
-            server.flags &= ~MARLIN_SFLG_BUSY;
-            if ((Cmd(server.command) != Cmd::NONE) && (Cmd(server.command) != Cmd::M600)) {
-                _send_notify_event(Event::CommandEnd, server.command, 0);
-                server.command = ftrstd::to_underlying(Cmd::NONE);
-            }
-        }
-    }
 
     // Revert quick_stop when commands already drained
     if (server.flags & MARLIN_SFLG_STOPPED && !is_processing()) {
@@ -825,7 +809,6 @@ void loop() {
         server.flags &= ~MARLIN_SFLG_STOPPED;
     }
 
-    server.idle_cnt = 0;
     cycle();
 
 #if HAS_EMERGENCY_STOP()
@@ -854,38 +837,6 @@ static void idle(void) {
     }
 
     AutoRestore _ar(idle_running, true);
-
-    if (server.idle_cnt < MARLIN_IDLE_CNT_BUSY) {
-        server.idle_cnt++;
-    } else if ((server.flags & MARLIN_SFLG_BUSY) == 0) {
-
-        log_debug(MarlinServer, "State: Busy");
-        server.flags |= MARLIN_SFLG_BUSY;
-        if (parser.command_letter == 'G') {
-            switch (parser.codenum) {
-            case 28:
-            case 29:
-                server.command = ftrstd::to_underlying(Cmd::G) + parser.codenum;
-                break;
-            }
-        } else if (parser.command_letter == 'M') {
-            switch (parser.codenum) {
-            case 109:
-            case 190:
-            case 303:
-            // case 600: // hacked in gcode (_force_M600_notify)
-            case 701:
-            case 702:
-                server.command = ftrstd::to_underlying(Cmd::M) + parser.codenum;
-                break;
-            }
-        }
-        if (Cmd(server.command) != Cmd::NONE) {
-            server.command_begin = server.command;
-            server.command_end = server.command;
-            _send_notify_event(Event::CommandBegin, server.command, 0);
-        }
-    }
 
 #if HAS_EMERGENCY_STOP()
     // During printing, possibly block anytime
@@ -967,14 +918,6 @@ static void settings_load() {
 #if HAS_PHASE_STEPPING()
     phase_stepping::load();
 #endif
-}
-
-uint32_t get_command(void) {
-    return server.command;
-}
-
-void set_command(uint32_t command) {
-    server.command = command;
 }
 
 void test_start([[maybe_unused]] const uint64_t test_mask, [[maybe_unused]] const selftest::TestData test_data) {
@@ -2833,17 +2776,6 @@ static uint64_t _send_notify_events_to_client(int client_id, ClientQueue &queue,
             case Event::MediaRemoved:
             case Event::RequestCalibrationsScreen:
                 if (_send_notify_event_to_client(client_id, queue, evt_id, 0, 0)) {
-                    sent |= msk; // event sent, set bit
-                }
-                break;
-            // CommandBegin/End - one ui32 argument (CMD)
-            case Event::CommandBegin:
-                if (_send_notify_event_to_client(client_id, queue, evt_id, server.command_begin, 0)) {
-                    sent |= msk; // event sent, set bit
-                }
-                break;
-            case Event::CommandEnd:
-                if (_send_notify_event_to_client(client_id, queue, evt_id, server.command_end, 0)) {
                     sent |= msk; // event sent, set bit
                 }
                 break;

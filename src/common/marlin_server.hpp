@@ -31,7 +31,6 @@ namespace marlin_server {
 
 // server flags
 // FIXME define the same type for these and marlin_server.flags
-constexpr uint16_t MARLIN_SFLG_BUSY = 0x0004; // loop is busy
 constexpr uint16_t MARLIN_SFLG_EXCMODE = 0x0010; // exclusive mode enabled (currently used for selftest/wizard)
 constexpr uint16_t MARLIN_SFLG_STOPPED = 0x0020; // moves stopped until command drain
 
@@ -88,9 +87,6 @@ void print_start(const char *filename, const GCodeReaderPosition &resume_pos, ma
 /// Finalize serial print (exit print state and clean up)
 /// this is meant to be gracefull print finish, called when print finishes sucessfully.
 void serial_print_finalize();
-
-//
-uint32_t get_command();
 
 //
 void set_command(uint32_t command);

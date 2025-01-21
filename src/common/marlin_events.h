@@ -13,8 +13,6 @@ enum class Event : uint8_t {
     MediaError, // onMediaError();
     MediaRemoved, // onMediaRemoved();
     // Marlin events - other
-    CommandBegin, //
-    CommandEnd, //
     RequestCalibrationsScreen, //
     Acknowledge, // onAcknowledge - lowest priority
     NotAcknowledge, // onNotAcknowledge - lowest priority

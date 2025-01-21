@@ -39,7 +39,6 @@ typedef struct _marlin_client_t {
     EventMask events; // event mask
 
     uint32_t ack; // cached ack value from last Acknowledge event
-    uint32_t command; // processed command (G28,G29,M701,M702,M600)
     uint8_t id; // client id (0..MARLIN_MAX_CLIENTS-1)
 } marlin_client_t;
 
@@ -89,7 +88,6 @@ void init() {
         client->id = client_id;
         client->events = 0;
         marlin_clients++;
-        client->command = ftrstd::to_underlying(Cmd::NONE);
         marlin_client_task[client_id] = osThreadGetId();
     }
 }
@@ -166,14 +164,6 @@ void set_event_notify(uint64_t event_mask) {
     request.type = Request::Type::EventMask;
     request.event_mask = event_mask;
     _send_request_to_server_and_wait(request);
-}
-
-marlin_server::Cmd get_command() {
-    marlin_client_t *client = _client_ptr();
-    if (client) {
-        return marlin_server::Cmd(client->command);
-    }
-    return Cmd::NONE;
 }
 
 void _send_request_id_to_server_and_wait(const Request::Type type) {
@@ -450,12 +440,6 @@ static bool receive_and_process_client_message(marlin_client_t *client, size_t m
 
     client->events |= make_mask(client_event.event);
     switch (client_event.event) {
-    case Event::CommandBegin:
-        client->command = client_event.usr32;
-        break;
-    case Event::CommandEnd:
-        client->command = ftrstd::to_underlying(Cmd::NONE);
-        break;
     case Event::NotAcknowledge:
     case Event::Acknowledge:
         client->ack = client_event.usr32;

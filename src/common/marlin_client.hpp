@@ -32,9 +32,6 @@ int get_id();
 // sets event notification mask
 void set_event_notify(uint64_t notify_events);
 
-// returns currently running command or marlin_server::Cmd::NONE
-marlin_server::Cmd get_command();
-
 // enqueue gcode - thread-safe version
 void gcode(const char *gcode);
 
