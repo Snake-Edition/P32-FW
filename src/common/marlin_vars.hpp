@@ -13,6 +13,7 @@
 #include "inc/MarlinConfig.h"
 #include <assert.h>
 #include <tuple>
+#include <marlin_events.h>
 
 #if BOARD_IS_DWARF()
     #error "You're trying to add marlin_vars to Dwarf. Don't!"
@@ -335,6 +336,8 @@ public:
 
     /// Marlin variable for passing string data from the running gcode/FSM to the UI thread/whatever
     MarlinVariableString<64> generic_param_string;
+
+    MarlinVariable<marlin_server::Cmd> gcode_command; // Currently executed command, encoded as marlin_server::Cmd
 
 #if ENABLED(CANCEL_OBJECTS)
     void set_cancel_object_mask(uint64_t mask) {

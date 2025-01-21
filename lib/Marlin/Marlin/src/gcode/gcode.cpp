@@ -64,6 +64,7 @@ GcodeSuite gcode;
 #include <option/has_i2c_expander.h>
 #include <option/has_local_accelerometer.h>
 #include <option/has_remote_accelerometer.h>
+#include <marlin_vars.hpp>
 
 millis_t GcodeSuite::previous_move_ms;
 
@@ -926,7 +927,10 @@ void GcodeSuite::process_next_command() {
 
   // Parse the next command in the queue
   parser.parse(current_command);
+
+  marlin_vars().gcode_command = marlin_server::Cmd(parser.command_letter << 16 | parser.codenum);
   process_parsed_command();
+  marlin_vars().gcode_command = marlin_server::Cmd();
 }
 
 /**
