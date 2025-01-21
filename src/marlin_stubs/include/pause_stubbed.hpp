@@ -271,7 +271,6 @@ private:
 
     bool check_user_stop(Response response); //< stops motion and fsm and returns true it user triggered stop
     bool wait_for_motion_finish_or_user_stop(); //< waits until motion is finished; if stop is triggered then returns true
-    bool process_stop();
     void handle_filament_removal(LoadState state_to_set); //<checks if filament is present if not it sets a different state
 
     void ram_filament();
