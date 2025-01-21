@@ -887,7 +887,13 @@ bool PreciseStepping::is_waiting_before_delivering() {
         if (waiting_before_delivering_start_time == 0) {
             waiting_before_delivering_start_time = ticks_ms();
             return true;
-        } else if (Planner::is_full() || (ticks_diff(ticks_ms(), waiting_before_delivering_start_time) >= int32_t(Planner::delay_before_delivering))) {
+        } else if (
+            // block queue is full: no point in waiting
+            Planner::is_full()
+            // we have more than half of buffer full of optimized blocks ready
+            || (Planner::optimized_movesplanned() >= BLOCK_BUFFER_SIZE / 2)
+            // the timer expired
+            || (ticks_diff(ticks_ms(), waiting_before_delivering_start_time) >= int32_t(Planner::delay_before_delivering))) {
             Planner::delay_before_delivering = 0;
             waiting_before_delivering_start_time = 0;
         } else {
