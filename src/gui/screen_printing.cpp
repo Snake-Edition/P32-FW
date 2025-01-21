@@ -278,7 +278,7 @@ void screen_printing_data_t::windowEvent(window_t *sender, GUI_event_t event, vo
         if (
             stop_pressed
             && waiting_for_abort
-            && marlin_client::get_command() != Cmd::G29
+            && marlin_vars().gcode_command.get() != Cmd::G29
             && (p_state == printing_state_t::ABORTING || p_state == printing_state_t::PAUSED)) {
             marlin_client::print_abort();
             waiting_for_abort = false;

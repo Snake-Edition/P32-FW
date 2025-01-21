@@ -2085,7 +2085,7 @@ static void _server_print_loop(void) {
             break; // Wait for toolchange to end
         }
 #endif /*ENABLED(CRASH_RECOVERY)*/
-        if (Cmd(server.command) == Cmd::G28) {
+        if (marlin_vars().gcode_command.get() == Cmd::G28) {
             break; // Wait for homing to end
         }
 

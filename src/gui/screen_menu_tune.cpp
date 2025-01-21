@@ -30,7 +30,7 @@ ScreenMenuTune::ScreenMenuTune()
 void ScreenMenuTune::windowEvent(window_t *sender, GUI_event_t event, void *param) {
     switch (event) {
     case GUI_event_t::LOOP: {
-        const auto current_command = marlin_client::get_command();
+        const auto current_command = marlin_vars().gcode_command.get();
         Item<MI_M600>().set_enabled( //
             marlin_server::all_axes_homed()
             && marlin_server::all_axes_known()
