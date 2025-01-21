@@ -211,7 +211,9 @@ bool PausePrivatePhase::CanSafetyTimerExpire() const {
     if ((getPhase() == PhasesLoadUnload::MakeSureInserted_stoppable) || (getPhase() == PhasesLoadUnload::MakeSureInserted_unstoppable) || (getPhase() == PhasesLoadUnload::FilamentNotInFS)) { // special waiting state without button
         return true; // waits for filament sensor
     }
-    return ClientResponses::HasButton(getPhase()) && (ClientResponses::GetResponse(getPhase(), 0) != Response::Stop || ClientResponses::GetResponses(getPhase()).size() > 1); // button in current phase other than stop == can wait on user == can timeout
+    // We generally think of a Phase that it needs user interaction IFF it has a button.
+    // Yet if that button is "Stop" and it's the ONLY button within that Phase, that means the phase can be cancelled if user wishes so and does NOT REQUIRE user interaction as it is able to progress on it's own.
+    return ClientResponses::HasButton(getPhase()) && (ClientResponses::GetResponse(getPhase(), 0) != Response::Stop || ClientResponses::GetResponses(getPhase()).size() > 1);
 }
 
 void PausePrivatePhase::NotifyExpiredFromSafetyTimer() {
