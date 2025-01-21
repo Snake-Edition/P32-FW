@@ -27,8 +27,6 @@ void unhomed_z_lift(float amount_mm);
 class PausePrivatePhase : public IPause {
 protected:
     enum class LoadState {
-        _finish = INT_MAX,
-        _stopped = _finish - 1,
         start = 0,
         unload_start,
         filament_stuck_ask,
@@ -62,7 +60,8 @@ protected:
 #endif
         load_prime,
         stop,
-        _last = stop,
+        _finished, // From here on are only "terminal" states that have no handler linked to them apart from reporting final status of FSM
+        _stopped,
     };
 
 private:
@@ -93,8 +92,8 @@ protected:
     }
 
     // use only when necessary
-    bool finished() { return state == LoadState::_finish || state == LoadState::_stopped; }
-    bool finished_ok() { return state == LoadState::_finish; }
+    bool finished() { return state == LoadState::_finished || state == LoadState::_stopped; }
+    bool finished_ok() { return state == LoadState::_finished; }
 
     void clrRestoreTemp();
 
@@ -207,7 +206,7 @@ private:
     void stop_process(Response response);
 
     using StateHandler = void (Pause::*)(Response response);
-    static constexpr EnumArray<LoadState, StateHandler, static_cast<int>(LoadState::_last) + 1> state_handlers {
+    static constexpr EnumArray<LoadState, StateHandler, static_cast<int>(LoadState::_finished)> state_handlers {
         { LoadState::start, &Pause::start_process },
             { LoadState::unload_start, &Pause::unload_start_process },
             { LoadState::filament_stuck_ask, &Pause::filament_stuck_ask_process },

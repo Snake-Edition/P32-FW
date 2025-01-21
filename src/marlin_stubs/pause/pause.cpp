@@ -529,7 +529,7 @@ void Pause::await_filament_process([[maybe_unused]] Response response) {
     // If EXTRUDER sensor is not assigned or not working, or if the user fails to insert filament in time, show Warning and quit loading.
     if (!FSensors_instance().is_working(LogicalFilamentSensor::extruder) || ticks_diff(ticks_ms(), start_time_ms) > 10 * 60 * 1000) {
         marlin_server::set_warning(WarningType::FilamentLoadingTimeout);
-        set(LoadState::_finish);
+        set(LoadState::_finished);
         return;
     }
 
@@ -583,7 +583,7 @@ void Pause::move_to_purge_process([[maybe_unused]] Response response) {
         mapi::park_move_with_conditional_home(mapi::park_positions[mapi::ParkPosition::purge], mapi::ZAction::no_move);
     }
     if (load_type == LoadType::load_to_gears) {
-        set(LoadState::_finish);
+        set(LoadState::_finished);
     } else {
         set(LoadState::wait_temp);
     }
@@ -765,7 +765,7 @@ void Pause::load_prime_process([[maybe_unused]] Response response) {
     return;
 #endif
 
-    set(LoadState::_finish);
+    set(LoadState::_finished);
 }
 
 #if HAS_NOZZLE_CLEANER()
@@ -778,7 +778,7 @@ void Pause::load_nozzle_clean_process([[maybe_unused]] Response response) {
 
     if (loader_result.has_value() || loader_result.error() != GCodeLoader::BufferState::buffering) {
         nozzle_cleaner_gcode_loader.reset();
-        set(LoadState::_finish);
+        set(LoadState::_finished);
     }
 }
 #endif
@@ -823,7 +823,7 @@ void Pause::unload_start_process([[maybe_unused]] Response response) {
     if (FSensors_instance().HasMMU()) {
         if (load_type == LoadType::unload) {
             MMU2::mmu2.unload();
-            set(LoadState::_finish);
+            set(LoadState::_finished);
         } else if (load_type == LoadType::filament_change) {
             settings.mmu_filament_to_load = MMU2::mmu2.get_current_tool();
 
@@ -959,7 +959,7 @@ void Pause::unload_finish_or_change_process([[maybe_unused]] Response response) 
     if (load_type == LoadType::filament_change || load_type == LoadType::filament_stuck) {
         set(LoadState::load_start);
     } else {
-        set(LoadState::_finish);
+        set(LoadState::_finished);
     }
 }
 
