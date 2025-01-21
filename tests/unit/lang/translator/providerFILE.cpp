@@ -7,7 +7,7 @@ using namespace std;
 
 TEST_CASE("providerFILE::Translations test", "[translator]") {
     deque<string> stringKeys;
-    CHECK(LoadTranslatedStringsFile("MO/keys.txt", &stringKeys));
+    CHECK(LoadTranslatedStringsFile("keys.txt", &stringKeys));
 
     // initialize translation providers
     FILETranslationProvider providerCS("MO/cs.mo");
@@ -16,17 +16,17 @@ TEST_CASE("providerFILE::Translations test", "[translator]") {
     FILETranslationProvider providerFR("MO/fr.mo");
     FILETranslationProvider providerIT("MO/it.mo");
     FILETranslationProvider providerPL("MO/pl.mo");
-    // FILETranslationProvider providerPL("MO/ja.mo");
+    FILETranslationProvider providerJA("MO/ja.mo");
 
     // load transtaled strings
-    deque<string> csStrings, deStrings, esStrings, frStrings, itStrings, plStrings;
-    REQUIRE(LoadTranslatedStringsFile("MO/cs.txt", &csStrings));
-    REQUIRE(LoadTranslatedStringsFile("MO/de.txt", &deStrings));
-    REQUIRE(LoadTranslatedStringsFile("MO/es.txt", &esStrings));
-    REQUIRE(LoadTranslatedStringsFile("MO/fr.txt", &frStrings));
-    REQUIRE(LoadTranslatedStringsFile("MO/it.txt", &itStrings));
-    REQUIRE(LoadTranslatedStringsFile("MO/pl.txt", &plStrings));
-    // REQUIRE(LoadTranslatedStringsFile("MO/ja.txt", &jaStrings));
+    deque<string> csStrings, deStrings, esStrings, frStrings, itStrings, plStrings, jaStrings;
+    REQUIRE(LoadTranslatedStringsFile("cs.txt", &csStrings));
+    REQUIRE(LoadTranslatedStringsFile("de.txt", &deStrings));
+    REQUIRE(LoadTranslatedStringsFile("es.txt", &esStrings));
+    REQUIRE(LoadTranslatedStringsFile("fr.txt", &frStrings));
+    REQUIRE(LoadTranslatedStringsFile("it.txt", &itStrings));
+    REQUIRE(LoadTranslatedStringsFile("pl.txt", &plStrings));
+    REQUIRE(LoadTranslatedStringsFile("ja.txt", &jaStrings));
 
     // need to have at least the same amount of translations like the keys (normally there will be an exact number of them)
     REQUIRE(stringKeys.size() <= csStrings.size());
@@ -35,14 +35,13 @@ TEST_CASE("providerFILE::Translations test", "[translator]") {
     REQUIRE(stringKeys.size() <= frStrings.size());
     REQUIRE(stringKeys.size() <= itStrings.size());
     REQUIRE(stringKeys.size() <= plStrings.size());
-    // REQUIRE(stringKeys.size() <= jaStrings.size());
+    REQUIRE(stringKeys.size() <= jaStrings.size());
 
     set<unichar> nonASCIICharacters;
     {
         // explicitly add characters from language names
         // Čeština, Español, Français, Japanese
-        // static const uint8_t na[] = "Čšñçニホンゴ";
-        static const uint8_t na[] = "Čšñç";
+        static const uint8_t na[] = "Čšñçニホンゴ";
         string_view_utf8 nas = string_view_utf8::MakeRAM(na);
         StringReaderUtf8 reader(nas);
         unichar c;
@@ -51,12 +50,12 @@ TEST_CASE("providerFILE::Translations test", "[translator]") {
         }
     }
     REQUIRE(providerCS.EnsureFile());
-    REQUIRE(providerCS.EnsureFile());
+    REQUIRE(providerDE.EnsureFile());
     REQUIRE(providerES.EnsureFile());
     REQUIRE(providerFR.EnsureFile());
     REQUIRE(providerIT.EnsureFile());
     REQUIRE(providerPL.EnsureFile());
-    // REQUIRE(providerJA.EnsureFile());
+    REQUIRE(providerJA.EnsureFile());
 
     REQUIRE(CheckAllTheStrings(stringKeys, csStrings, providerCS, nonASCIICharacters, "cs"));
     REQUIRE(CheckAllTheStrings(stringKeys, deStrings, providerDE, nonASCIICharacters, "de"));
@@ -64,7 +63,7 @@ TEST_CASE("providerFILE::Translations test", "[translator]") {
     REQUIRE(CheckAllTheStrings(stringKeys, frStrings, providerFR, nonASCIICharacters, "fr"));
     REQUIRE(CheckAllTheStrings(stringKeys, itStrings, providerIT, nonASCIICharacters, "it"));
     REQUIRE(CheckAllTheStrings(stringKeys, plStrings, providerPL, nonASCIICharacters, "pl"));
-    // REQUIRE(CheckAllTheStrings(stringKeys, jaStrings, providerJA, nonASCIICharacters, "ja"));
+    REQUIRE(CheckAllTheStrings(stringKeys, jaStrings, providerJA, nonASCIICharacters, "ja"));
 
     CAPTURE(stringKeys.size());
 }

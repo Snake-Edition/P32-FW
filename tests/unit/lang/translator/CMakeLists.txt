@@ -42,50 +42,32 @@ target_include_directories(
 
 # add files for testing FILE provider
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/MOfilesTesting/keys.txt ${CMAKE_CURRENT_BINARY_DIR}/MO/keys.txt
-  COPYONLY
+  ${PROJECT_ROOT_DIR}/src/lang/po/cs/Prusa-Firmware-Buddy_cs.mo
+  ${CMAKE_CURRENT_BINARY_DIR}/MO/cs.mo COPYONLY
   )
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/MOfilesTesting/cs.txt ${CMAKE_CURRENT_BINARY_DIR}/MO/cs.txt COPYONLY
+  ${PROJECT_ROOT_DIR}/src/lang/po/de/Prusa-Firmware-Buddy_de.mo
+  ${CMAKE_CURRENT_BINARY_DIR}/MO/de.mo COPYONLY
   )
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/MOfilesTesting/cs.mo ${CMAKE_CURRENT_BINARY_DIR}/MO/cs.mo COPYONLY
+  ${PROJECT_ROOT_DIR}/src/lang/po/es/Prusa-Firmware-Buddy_es.mo
+  ${CMAKE_CURRENT_BINARY_DIR}/MO/es.mo COPYONLY
   )
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/MOfilesTesting/de.txt ${CMAKE_CURRENT_BINARY_DIR}/MO/de.txt COPYONLY
+  ${PROJECT_ROOT_DIR}/src/lang/po/fr/Prusa-Firmware-Buddy_fr.mo
+  ${CMAKE_CURRENT_BINARY_DIR}/MO/fr.mo COPYONLY
   )
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/MOfilesTesting/de.mo ${CMAKE_CURRENT_BINARY_DIR}/MO/de.mo COPYONLY
+  ${PROJECT_ROOT_DIR}/src/lang/po/it/Prusa-Firmware-Buddy_it.mo
+  ${CMAKE_CURRENT_BINARY_DIR}/MO/it.mo COPYONLY
   )
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/MOfilesTesting/en.txt ${CMAKE_CURRENT_BINARY_DIR}/MO/en.txt COPYONLY
+  ${PROJECT_ROOT_DIR}/src/lang/po/pl/Prusa-Firmware-Buddy_pl.mo
+  ${CMAKE_CURRENT_BINARY_DIR}/MO/pl.mo COPYONLY
   )
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/MOfilesTesting/en.mo ${CMAKE_CURRENT_BINARY_DIR}/MO/en.mo COPYONLY
-  )
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/MOfilesTesting/es.txt ${CMAKE_CURRENT_BINARY_DIR}/MO/es.txt COPYONLY
-  )
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/MOfilesTesting/es.mo ${CMAKE_CURRENT_BINARY_DIR}/MO/es.mo COPYONLY
-  )
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/MOfilesTesting/fr.mo ${CMAKE_CURRENT_BINARY_DIR}/MO/fr.mo COPYONLY
-  )
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/MOfilesTesting/fr.txt ${CMAKE_CURRENT_BINARY_DIR}/MO/fr.txt COPYONLY
-  )
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/MOfilesTesting/it.mo ${CMAKE_CURRENT_BINARY_DIR}/MO/it.mo COPYONLY
-  )
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/MOfilesTesting/it.txt ${CMAKE_CURRENT_BINARY_DIR}/MO/it.txt COPYONLY
-  )
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/MOfilesTesting/pl.mo ${CMAKE_CURRENT_BINARY_DIR}/MO/pl.mo COPYONLY
-  )
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/MOfilesTesting/pl.txt ${CMAKE_CURRENT_BINARY_DIR}/MO/pl.txt COPYONLY
+  ${PROJECT_ROOT_DIR}/src/lang/po/ja/Prusa-Firmware-Buddy_ja.mo
+  ${CMAKE_CURRENT_BINARY_DIR}/MO/ja.mo COPYONLY
   )
 
 configure_file(
