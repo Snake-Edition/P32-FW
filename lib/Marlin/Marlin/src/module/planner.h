@@ -616,6 +616,9 @@ class Planner {
     // Number of nonbusy moves currently in the planner
     FORCE_INLINE static uint8_t nonbusy_movesplanned() { return BLOCK_MOD(block_buffer_head - block_buffer_nonbusy); }
 
+    // Number of nonbusy, full optimized blocks currently in the planner
+    FORCE_INLINE static uint8_t optimized_movesplanned() { return BLOCK_MOD(block_buffer_planned - block_buffer_nonbusy); }
+
     // Remove all blocks from the buffer
     FORCE_INLINE static void clear_block_buffer() { block_buffer_nonbusy = block_buffer_planned = block_buffer_head = block_buffer_tail = 0; }
 

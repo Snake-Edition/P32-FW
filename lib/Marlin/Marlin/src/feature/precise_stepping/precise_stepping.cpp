@@ -1032,14 +1032,14 @@ void PreciseStepping::move_isr() {
     }
 
     StepGeneratorStatus status = process_one_move_segment_from_queue();
-    if (status == STEP_GENERATOR_STATUS_OK) {
-        // we produced enough steps in this iteration:
-        // stop immediately to avoid taking too much time
-        return;
-    } else if (status == STEP_GENERATOR_STATUS_FULL_STEP_EVENT_QUEUE) {
-        // full queue directly on the first iteration:
-        // spare some extra time to process a new block ahead of time
-        process_queue_of_blocks();
+    if (status != STEP_GENERATOR_STATUS_NO_STEP_EVENT_PRODUCED) {
+        // if the move queue is not full yet, spare some extra time to process a new optimized block
+        // if we have at least three available: one possible sync block, followed by one for use and
+        // another to ensure the final exit speed can be still changed.
+        if (!is_move_segment_queue_full() && planner.optimized_movesplanned() > 2) {
+            assert(planner.optimized_movesplanned() <= planner.nonbusy_movesplanned());
+            process_queue_of_blocks();
+        }
         return;
     }
 
