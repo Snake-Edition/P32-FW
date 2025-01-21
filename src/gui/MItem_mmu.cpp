@@ -93,10 +93,7 @@ MI_MMU_ISSUE_GCODE::MI_MMU_ISSUE_GCODE(const char *lbl, const char *gcode, is_hi
 }
 
 void MI_MMU_ISSUE_GCODE::click(IWindowMenu & /*window_menu*/) {
-    marlin_client::event_clr(marlin_server::Event::CommandBegin);
     marlin_client::gcode(gcode);
-    //    while (!marlin_client::event_clr(Event::CommandBegin))
-    //        marlin_client::loop();
     // gui_dlg_wait(gui_marlin_G28_or_G29_in_progress); // @@TODO perform some blocking wait on the LCD until the MMU finishes its job
     // Meanwhile an MMU error screen may occur!
 }
@@ -120,8 +117,6 @@ MI_MMU_ISSUE_GCODE_SLOT::MI_MMU_ISSUE_GCODE_SLOT(uint8_t slot_i, const char *lab
 void MI_MMU_ISSUE_GCODE_SLOT::click(IWindowMenu &) {
     std::array<char, MAX_CMD_SIZE> gcode;
     snprintf(gcode.data(), gcode.size(), gcode_fmt_, slot_i_);
-
-    marlin_client::event_clr(marlin_server::Event::CommandBegin);
     gui_try_gcode_with_msg(gcode.data());
 }
 
@@ -132,7 +127,6 @@ MI_MMU_PRELOAD_ALL::MI_MMU_PRELOAD_ALL()
 }
 
 void MI_MMU_PRELOAD_ALL::click(IWindowMenu & /*window_menu*/) {
-    marlin_client::event_clr(marlin_server::Event::CommandBegin);
     for (uint8_t i = 0; i < 5; ++i) {
         char gcode[] = "M704 Px";
         gcode[sizeof(gcode) - 2] = i + '0';
@@ -147,7 +141,6 @@ MI_MMU_LOAD_TEST_ALL::MI_MMU_LOAD_TEST_ALL()
 }
 
 void MI_MMU_LOAD_TEST_ALL::click(IWindowMenu & /*window_menu*/) {
-    marlin_client::event_clr(marlin_server::Event::CommandBegin);
     for (uint8_t i = 0; i < 5; ++i) {
         char gcode[] = "M1704 Px";
         gcode[sizeof(gcode) - 2] = i + '0';
