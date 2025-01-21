@@ -1187,6 +1187,7 @@ static void check_step_time(const step_event_i32_t &step_event) {
 
 StepGeneratorStatus PreciseStepping::process_one_move_segment_from_queue() {
     uint16_t produced_step_events_cnt = 0;
+    bool move_done = false;
 
     if (const move_t *move = get_current_unprocessed_move_segment(); move != nullptr) {
         if (!step_generator_state.initialized) {
@@ -1211,7 +1212,7 @@ StepGeneratorStatus PreciseStepping::process_one_move_segment_from_queue() {
             }
 
             step_event_i32_t new_step_event;
-            bool done = generate_next_step_event(new_step_event, step_generator_state);
+            move_done = generate_next_step_event(new_step_event, step_generator_state);
 
             // accumulate into or flush the buffered step
             if (new_step_event.flags) {
@@ -1247,17 +1248,15 @@ StepGeneratorStatus PreciseStepping::process_one_move_segment_from_queue() {
                 }
             }
 
-            if (done) {
+            if (move_done) {
                 // the move is complete: if we just flushed a buffered step and produced new one in
                 // the same iteration then we need to check for a free slot again; do so just below
-                // by resetting produced_step_events_cnt (we don't need the counter anymore)
-                produced_step_events_cnt = 0;
                 break;
             }
         }
     }
 
-    if (!produced_step_events_cnt) {
+    if (!produced_step_events_cnt || move_done) {
         // no moves or end of steps, check if we're waiting on the ending move
         if (const move_t *unprocessed_move = get_current_unprocessed_move_segment();
             unprocessed_move != nullptr && is_ending_empty_move(*unprocessed_move)) {
