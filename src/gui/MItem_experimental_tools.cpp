@@ -50,7 +50,7 @@ void MI_RESET_Z_AXIS_LEN::click([[maybe_unused]] IWindowMenu &window_menu) {
 
 static constexpr NumericInputConfig steps_per_unit_spin_config = {
     .min_value = 1,
-    .max_value = 1000,
+    .max_value = 2000,
 };
 
 /*****************************************************************************/
