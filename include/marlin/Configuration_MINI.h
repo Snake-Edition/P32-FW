@@ -997,11 +997,15 @@
 #ifdef MINI_I3_MK33
 	// X and Y axis travel speed (mm/m) to get to the first probe location
 	#define XY_PROBE_SPEED_INITIAL 8000
+#elif MINI_COREXY
+	#define XY_PROBE_SPEED_INITIAL 30000
 #endif
 
 // X and Y axis travel speed (mm/m) between probes
 #ifdef MINI_I3_MK33
 	#define XY_PROBE_SPEED  18000
+#elif MINI_COREXY
+	#define XY_PROBE_SPEED 30000
 #else
 	#define XY_PROBE_SPEED 5000
 #endif
@@ -1174,7 +1178,7 @@
 #endif
 
 #ifdef MINI_COREXY
-    #define Z_SIZE 255
+    #define Z_SIZE 256
 #elif MINI_I3_MK33
     #define Z_SIZE 210
 #else
