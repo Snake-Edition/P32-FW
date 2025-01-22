@@ -593,7 +593,8 @@ static xy_pos_t offset_for_probe_try(int try_idx) {
 #endif
 
 #if ENABLED(NOZZLE_LOAD_CELL)
-  static float loadcell_retare_for_analysis() {
+  static float loadcell_retare_for_analysis(millis_t tare_delay) {
+    safe_delay(tare_delay);
     loadcell.WaitBarrier(); // Sync samples before tare
     loadcell.analysis.Reset(); // Reset window to include the tare samples
     return loadcell.Tare();
@@ -625,7 +626,7 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
 
   #if ENABLED(NOZZLE_LOAD_CELL)
     auto H = loadcell.CreateLoadAboveErrEnforcer();
-    auto reference_tare = loadcell_retare_for_analysis(); ///< Use this value as reference for following tares
+    auto reference_tare = loadcell_retare_for_analysis(Z_FIRST_PROBE_DELAY); ///< Use this value as reference for following tares
     const auto max_tare_offset = std::abs(loadcell.GetThreshold()); ///< Maximal valid offset from reference_tare
   #endif
 
@@ -692,8 +693,7 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
         do_blocking_move_to_xy(center_pos + center_offset, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
 
         // re-tare the loadcell
-        safe_delay(Z_FIRST_PROBE_DELAY);
-        auto offset = loadcell_retare_for_analysis() - reference_tare;
+        auto offset = loadcell_retare_for_analysis(Z_FIRST_PROBE_DELAY) - reference_tare;
 
         SERIAL_ECHO_START();
         SERIAL_ECHOLNPAIR_F("Re-tared with offset ", offset);
@@ -701,8 +701,7 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
         // If tare value is suspicious, lift very high and try tare again
         if (std::abs(offset) > max_tare_offset) {
           do_blocking_move_to_z(current_position.z + Z_AFTER_PROBING, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
-          safe_delay(Z_FIRST_PROBE_DELAY);
-          reference_tare = loadcell_retare_for_analysis();
+          reference_tare = loadcell_retare_for_analysis(Z_FIRST_PROBE_DELAY);
 
           SERIAL_ECHO_START();
           SERIAL_ECHOLNPAIR_F("Lifted and took new reference tare ", reference_tare);
@@ -884,9 +883,6 @@ bool cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max) {
           should_continue = false;
           break;
         }
-
-        // dampen the system after the move
-        safe_delay(Z_FIRST_PROBE_DELAY);
       }
       probe_deployed = true;
 

@@ -1012,7 +1012,6 @@
             #endif
             do_blocking_move_to(start_pos.x, start_pos.y, start_pos.z);
             is_initial_probe = false;
-            safe_delay(Z_FIRST_PROBE_DELAY); // dampen the system
           }
 
           num_of_probed_points ++;

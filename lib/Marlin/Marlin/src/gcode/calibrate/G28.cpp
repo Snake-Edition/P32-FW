@@ -201,8 +201,6 @@
 
       if (DEBUGGING(LEVELING)) DEBUG_POS("home_z_safely", destination);
 
-      TERN_(SENSORLESS_HOMING, safe_delay(500)); // Short delay needed to settle
-
 #if ENABLED(PRUSA_TOOLCHANGER)
       do_blocking_move_to_xy(destination, PrusaToolChanger::limit_stealth_feedrate(XY_PROBE_FEEDRATE_MM_S));
 #elif HAS_NOZZLE_CLEANER()
@@ -264,8 +262,6 @@
       if (position_is_reachable(destination)) {
 
         if (DEBUGGING(LEVELING)) DEBUG_POS("detect_print_sheet", destination);
-
-        TERN_(SENSORLESS_HOMING, safe_delay(500)); // Short delay needed to settle
 
         do_blocking_move_to(destination);
         bool endstop_triggered;
