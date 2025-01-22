@@ -13,6 +13,11 @@
 #include <config_store/store_definition.hpp>
 #include <option/bootloader.h>
 
+#include <option/has_phase_stepping.h>
+#if HAS_PHASE_STEPPING()
+    #include <feature/phase_stepping/phase_stepping.hpp>
+#endif
+
 // Check that our presets cover all the item flags
 static_assert([] {
     journal::ItemFlags store_flags = 0;
@@ -44,6 +49,19 @@ extern osThreadId displayTaskHandle;
         },
     }
         .exec();
+
+#if HAS_PHASE_STEPPING()
+    // Phase stepping is a calibration that is stored on xFlash, not in the config store -> it needs special handling
+    if (!items_to_keep.test(std::to_underlying(Item::calibrations))) {
+        // Do this before entering the critical section, as it does all sorts of file access and logging
+
+        // Formally speaking, we should access phase_stepping only from the marlin thread.
+        // But all this function does is unlink files from the xFlash.
+        // These files are only accessed in specific phstep gcodes
+        // and it's not worth ensuring that they would happen to overwrite before we enter the final factory reset critical section a few lines below
+        phase_stepping::remove_from_persistent_storage();
+    }
+#endif
 
     // Disable task switching, we don't want anyone to screw up with anything now
     freertos::CriticalSection critical_section;
