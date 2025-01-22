@@ -14,7 +14,7 @@ void draw_img(point_ui16_t pt, const img::Resource &img, Color back_color = COLO
 void draw_line(point_ui16_t pt0, point_ui16_t pt1, Color clr);
 void draw_rect(Rect16 rc, Color clr);
 void draw_rounded_rect(Rect16 rect, Color back, Color front, uint8_t cor_rad, uint8_t cor_flag, Color secondary_col = COLOR_BLACK);
-void draw_text(Rect16 rc, const string_view_utf8 &str, const font_t *pf, Color clr_bg, Color clr_fg);
+void draw_text(Rect16 rc, const string_view_utf8 &str, const Font font, Color clr_bg, Color clr_fg);
 void fill_rect(Rect16 rc, Color clr);
 
 void set_pixel(point_ui16_t pt, Color clr);

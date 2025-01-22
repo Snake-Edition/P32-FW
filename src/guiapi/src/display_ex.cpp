@@ -491,9 +491,8 @@ void draw_img(point_ui16_t pt, const img::Resource &qoi, Color back_color, ropfn
     draw_qoi_ex_C(file, pt.x, pt.y, back_color, rop, subrect);
 }
 
-void draw_text(Rect16 rc, const string_view_utf8 &str, const font_t *pf, Color clr_bg, Color clr_fg) {
-    StringReaderUtf8 reader(str);
-    render_text_singleline(rc, reader, pf, clr_bg, clr_fg);
+void draw_text(Rect16 rc, const string_view_utf8 &str, const Font font, Color clr_bg, Color clr_fg) {
+    render_text_align(rc, str, font, clr_bg, clr_fg);
 }
 
 } // namespace display
