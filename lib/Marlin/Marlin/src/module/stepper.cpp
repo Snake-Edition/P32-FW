@@ -419,13 +419,9 @@ void Stepper::_set_position(const int32_t &a, const int32_t &b, const int32_t &c
 }
 
 // Signal endstops were triggered - This function can be called from
-// an ISR context  (Temperature, Stepper or limits ISR), so we must
-// be very careful here. If the interrupt being preempted was the
-// Stepper ISR (this CAN happen with the endstop limits ISR) then
-// when the stepper ISR resumes, we must be very sure that the movement
-// is properly canceled
+// an ISR context  (Temperature, Stepper or limits ISR).
 void Stepper::endstop_triggered(const AxisEnum axis) {
-    StepIsrDisabler step_guard;
+    PreciseStepping::quick_stop();
 
     endstops_trigsteps[axis] = (
 #if IS_CORE
@@ -437,9 +433,6 @@ void Stepper::endstop_triggered(const AxisEnum axis) {
         count_position[axis]
 #endif
     );
-
-    // Discard the rest of the move if there is a current block
-    PreciseStepping::quick_stop();
 }
 
 void Stepper::report_positions() {
