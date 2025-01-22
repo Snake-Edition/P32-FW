@@ -107,9 +107,6 @@
   #define analogInputToDigitalPin(p) (p)
 #endif
 
-// On AVR this is in math.h?
-#define square(x) ((x)*(x))
-
 #ifndef strncpy_P
   #define strncpy_P(dest, src, num) strncpy((dest), (src), (num))
 #endif
