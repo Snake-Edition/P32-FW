@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <device/board.h>
 #include "buddy/priorities_config.h"
+#include <disable_interrupts.h>
 
 #define DISABLE_HB_0  0x00000001
 #define DISABLE_HB_1  0x00000002
@@ -197,18 +198,18 @@ void ApplyPWMPattern() {
     // transition should be as smooth as possible
     uint32_t *pEdgeMaskList = (s_pActualEdgeMaskList == s_EdgeMaskList_A) ? s_EdgeMaskList_B : s_EdgeMaskList_A;
 
-    CRITICAL_SECTION_START;
+    {
+        buddy::DisableInterrupts _;
 
-    s_pActualEdgeMaskList = pEdgeMaskList;
-    uint32_t pulseIndex = s_PWMPulseCounter % PWM_PERIOD_LENGTH;
-    uint32_t pulseMask = s_PulseMaskList[pulseIndex];
-    uint32_t edgeMask = pulseMask << 16 | (~pulseMask & 0xFFFF);
-    uint32_t oldEdgeMask = s_pActualEdgeMaskList[pulseIndex];
-    s_pActualEdgeMaskList[pulseIndex] = edgeMask;
-    TIM3_IRQHandler();
-    s_pActualEdgeMaskList[pulseIndex] = oldEdgeMask;
-
-    CRITICAL_SECTION_END;
+        s_pActualEdgeMaskList = pEdgeMaskList;
+        uint32_t pulseIndex = s_PWMPulseCounter % PWM_PERIOD_LENGTH;
+        uint32_t pulseMask = s_PulseMaskList[pulseIndex];
+        uint32_t edgeMask = pulseMask << 16 | (~pulseMask & 0xFFFF);
+        uint32_t oldEdgeMask = s_pActualEdgeMaskList[pulseIndex];
+        s_pActualEdgeMaskList[pulseIndex] = edgeMask;
+        TIM3_IRQHandler();
+        s_pActualEdgeMaskList[pulseIndex] = oldEdgeMask;
+    }
 
     // clear buffers an prepare them for next pwm pattern
     pEdgeMaskList = (s_pActualEdgeMaskList == s_EdgeMaskList_A) ? s_EdgeMaskList_B : s_EdgeMaskList_A;

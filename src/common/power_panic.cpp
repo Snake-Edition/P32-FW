@@ -1094,7 +1094,7 @@ void ac_fault_isr() {
     }
 
     // TODO: can be avoided if running at the same priority as STEP_TIMER_PRIO
-    CRITICAL_SECTION_START;
+    buddy::DisableInterrupts _;
 
     // ensure the crash handler can't be re-triggered
     HAL_NVIC_DisableIRQ(buddy::hw::xDiag.getIRQn());
@@ -1278,7 +1278,6 @@ void ac_fault_isr() {
 
     // will continue in the main loop
     xTaskResumeFromISR(ac_fault_task);
-    CRITICAL_SECTION_END;
 }
 
 bool is_ac_fault_active() {

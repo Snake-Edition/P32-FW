@@ -778,7 +778,7 @@ void minkill(const bool steppers_off/*=false*/) {
   // Wait a short time (allows messages to get out before shutting down.
   for (int i = 1000; i--;) DELAY_US(600);
 
-  cli(); // Stop interrupts
+  __disable_irq(); // Stop interrupts
 
   // Wait to ensure all interrupts stopped
   for (int i = 1000; i--;) DELAY_US(250);

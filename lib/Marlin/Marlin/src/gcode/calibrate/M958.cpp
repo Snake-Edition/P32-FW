@@ -194,9 +194,8 @@ private:
 } // anonymous namespace
 
 static bool is_full() {
-    CRITICAL_SECTION_START;
+    buddy::DisableInterrupts _;
     bool retval = PreciseStepping::is_step_event_queue_full();
-    CRITICAL_SECTION_END;
     return retval;
 }
 
@@ -209,7 +208,7 @@ static void enqueue_step(int step_us, bool dir, StepEventFlag_t axis_flags) {
     assert(step_us <= STEP_TIMER_MAX_TICKS_LIMIT);
     uint16_t next_queue_head = 0;
 
-    CRITICAL_SECTION_START;
+    buddy::DisableInterrupts _;
     step_event_u16_t *step_event = PreciseStepping::get_next_free_step_event(next_queue_head);
     step_event->time_ticks = step_us;
     step_event->flags = axis_flags;
@@ -217,7 +216,6 @@ static void enqueue_step(int step_us, bool dir, StepEventFlag_t axis_flags) {
         step_event->flags ^= STEP_EVENT_FLAG_DIR_MASK;
     }
     PreciseStepping::step_event_queue.head = next_queue_head;
-    CRITICAL_SECTION_END;
 }
 
 /**
@@ -571,10 +569,8 @@ std::optional<VibrateMeasureResult> vibrate_measure(const VibrateMeasureParams &
     if (do_delayed_measurement) {
         const auto has_steps = []() {
             // Cannot use freertos::CriticalSection here - steppers have higher priority than RTOS-aware interrupts
-            CRITICAL_SECTION_START;
-            const auto result = PreciseStepping::has_step_events_queued();
-            CRITICAL_SECTION_END;
-            return result;
+            buddy::DisableInterrupts _;
+            return PreciseStepping::has_step_events_queued();
         };
 
         // Wait till all the movement is executed
@@ -1278,10 +1274,8 @@ MicrostepRestorer::MicrostepRestorer() {
 MicrostepRestorer::~MicrostepRestorer() {
     const auto has_steps = []() {
         // Cannot use freertos::CriticalSection here - steppers have higher priority than RTOS-aware interrupts
-        CRITICAL_SECTION_START;
-        const auto result = PreciseStepping::has_step_events_queued();
-        CRITICAL_SECTION_END;
-        return result;
+        buddy::DisableInterrupts _;
+        return PreciseStepping::has_step_events_queued();
     };
     while (has_steps()) {
         idle(true, true);

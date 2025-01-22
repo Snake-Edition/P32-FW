@@ -57,7 +57,6 @@ int32_t HX717::ReadValue(Channel nextChannel, uint32_t readyTimestamp) {
     assert(nextChannel != CHANNEL_NOT_SET);
 
     int32_t result = 0;
-    buddy::DisableInterrupts disable_interrupts(false);
     static constexpr int32_t zero = 0;
 
     // Conservative guesses + roughly checked by debugging
@@ -75,11 +74,12 @@ int32_t HX717::ReadValue(Channel nextChannel, uint32_t readyTimestamp) {
 
     // Read the value
     for (int index = 0; index < 24; index++) {
-        disable_interrupts.disable();
-        hx717Sck.write(Pin::State::high); //! Data are clocked out by rising edge of SCK
-        timing_delay_cycles(std::max(zero, minDelayCycles - pinWriteCycles));
-        hx717Sck.write(Pin::State::low);
-        disable_interrupts.resume();
+        {
+            buddy::DisableInterrupts _;
+            hx717Sck.write(Pin::State::high); //! Data are clocked out by rising edge of SCK
+            timing_delay_cycles(std::max(zero, minDelayCycles - pinWriteCycles));
+            hx717Sck.write(Pin::State::low);
+        }
 
         timing_delay_cycles(std::max(zero, minDelayCycles - pinWriteCycles - pinReadCycles - loopCycles - disableEnableIrqCycles));
         //! Sample data in the last moment before next clock rising edge
@@ -95,11 +95,12 @@ int32_t HX717::ReadValue(Channel nextChannel, uint32_t readyTimestamp) {
 
     // Configure the next read
     for (int index = 0; index < nextChannel; index++) {
-        disable_interrupts.disable();
-        hx717Sck.write(Pin::State::high);
-        timing_delay_cycles(std::max(zero, minDelayCycles - pinWriteCycles));
-        hx717Sck.write(Pin::State::low);
-        disable_interrupts.resume();
+        {
+            buddy::DisableInterrupts _;
+            hx717Sck.write(Pin::State::high);
+            timing_delay_cycles(std::max(zero, minDelayCycles - pinWriteCycles));
+            hx717Sck.write(Pin::State::low);
+        }
 
         timing_delay_cycles(std::max(zero, minDelayCycles - pinWriteCycles - loopCycles - disableEnableIrqCycles));
     }
