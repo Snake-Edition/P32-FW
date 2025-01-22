@@ -4,22 +4,52 @@
  */
 #pragma once
 
-#include "guitypes.hpp"
-#include "Rect16.h"
-#include "align.hpp"
-#include "font_flags.hpp"
-#include "raster_opfn.hpp"
-#include "../../lang/string_view_utf8.hpp"
-#include "fonts.hpp"
+#include <guitypes.hpp>
+#include <Rect16.h>
+#include <font_flags.hpp>
+#include <raster_opfn.hpp>
+#include <string_view_utf8.hpp>
+#include <str_utils.hpp>
+#include <fonts.hpp>
 
 uint32_t get_char_position_in_font(unichar c, const font_t *pf);
-size_ui16_t render_text_singleline(Rect16 rc, StringReaderUtf8 &reader, const font_t *pf, Color clr_bg, Color clr_fg);
-void render_text_align(Rect16 rc, const string_view_utf8 &text, Font, Color clr0, Color clr1, padding_ui8_t padding, text_flags flags, bool fill_rect = true);
-void render_icon_align(Rect16 rc, const img::Resource *res, Color clr_back, icon_flags flags);
 
-std::optional<size_ui16_t> characters_meas_text(const string_view_utf8 &str, uint16_t max_chars_per_line, uint16_t *numOfUTF8Chars = nullptr); // rewinds text to begin
-size_ui16_t font_meas_text(Font, const string_view_utf8 &str, uint16_t *numOfUTF8Chars); // rewinds text to begin
-void fill_between_rectangles(const Rect16 *r_out, const Rect16 *r_in, Color color);
+/**
+ * @brief Calculate text size without knowing the rectangle
+ * @param string                    translated string
+ * @param font                      used font
+ * @param multiline                 how does it handle newline (singleline has '\n' as terminated character)
+ * @return size of text rect
+ */
+size_ui16_t calculate_text_size(const string_view_utf8 &str, const Font font, is_multiline multiline);
+
+/**
+ * @brief Renders multiline / singleline text on the display
+ * @param rc                Specified rectangle
+ * @param reader            reader with translated text
+ * @param font              Font
+ * @param clr_bg            background color
+ * @param clr_fg            font/foreground color
+ * @param padding           Padding for the rectangle
+ * @param flags             Text flags consist of alignment and multiline
+ * @param fill_rect         Redraw text surrounding rectangles
+ */
+void render_text_align(Rect16 rc, StringReaderUtf8 &text, const Font font, Color clr_bg, Color clr_fg, padding_ui8_t padding = padding_ui8_t(), text_flags flags = text_flags(Align_t::Left()), bool fill_rect = true);
+
+/**
+ * @brief Renders multiline / singleline text on the display
+ * @param rc                Specified rectangle
+ * @param text              translated text
+ * @param font              Font
+ * @param clr_bg            background color
+ * @param clr_fg            font/foreground color
+ * @param padding           Padding for the rectangle
+ * @param flags             Text flags consist of alignment and multiline
+ * @param fill_rect         Redraw text surrounding rectangles
+ */
+void render_text_align(Rect16 rc, const string_view_utf8 &text, const Font font, Color clr_bg, Color clr_fg, padding_ui8_t padding = padding_ui8_t(), text_flags flags = text_flags(Align_t::Left()), bool fill_rect = true);
+
+void render_icon_align(Rect16 rc, const img::Resource *res, Color clr_back, icon_flags flags);
 
 void render_rect(Rect16 rc, Color clr); // to prevent direct access to display
 

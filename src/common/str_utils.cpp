@@ -6,6 +6,96 @@
 #include <cinttypes>
 #include <string_view_utf8.hpp>
 
+RectTextLayout::RectTextLayout(StringReaderUtf8 &reader, uint16_t max_cols, uint16_t max_rows, is_multiline multiline) {
+    data.fill(0);
+
+    if (max_cols == 0 || max_rows == 0) {
+        overflow = true;
+        return;
+    }
+
+    if (multiline == is_multiline::no) {
+        max_rows = 1;
+    }
+
+    std::optional<int> last_space_index = std::nullopt;
+    unichar c = 0;
+    int chars_this_line = 0;
+
+    while ((c = reader.getUtf8Char()) != 0) {
+        switch (c) {
+        case '\n': // new line
+
+            set_current_line_characters(chars_this_line);
+            if (!new_line(max_rows)) {
+                return;
+            }
+
+            chars_this_line = 0;
+            last_space_index = std::nullopt;
+            break;
+
+        case ' ': // remember space position
+
+            // erasing start space is not handled here
+            // Whenever we enter new line (except the first one), we always skip 1 char ('\n' || ' ') from the stream
+            // If there are more whitespace characters, its clearly a choice
+
+            last_space_index = chars_this_line;
+            [[fallthrough]];
+
+        default:
+            chars_this_line++;
+
+            if (chars_this_line > max_cols) {
+
+                if (!last_space_index || current_line == max_rows - 1) { // Do not wrap singleline texts
+                    last_space_index = max_cols;
+                    overflow = true;
+                }
+
+                // It does not count newline char and space before wrapped word
+                // Wrapping cuts overflown word and put it on the next line
+                // If word is too long for a line, it will return calculated layout up until that error
+
+                // count chars in next line
+                chars_this_line -= ((*last_space_index) + 1); // +1 space
+                set_current_line_characters(*last_space_index);
+                last_space_index = std::nullopt;
+
+                if (!new_line(max_rows)) {
+                    return;
+                }
+            }
+        }
+    }
+
+    set_current_line_characters(chars_this_line);
+    return;
+}
+
+void RectTextLayout::set_current_line_characters(uint8_t char_cnt) {
+    data[current_line] = char_cnt;
+    longest_char_cnt = std::max(longest_char_cnt, char_cnt);
+}
+
+uint8_t RectTextLayout::get_current_line_characters() const {
+    return get_line_characters(current_line);
+}
+
+uint8_t RectTextLayout::get_line_count() const {
+    return current_line == 0 && get_current_line_characters() == 0 ? 0 : current_line + 1;
+}
+
+bool RectTextLayout::new_line(uint8_t max_rows) {
+    if (current_line >= MaxLines || current_line + 1 >= max_rows) {
+        overflow = true;
+        return false;
+    }
+    current_line++;
+    return true;
+}
+
 static word_buffer ram_word_buffer;
 
 ram_buffer::ram_buffer() {

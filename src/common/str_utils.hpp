@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <assert.h>
 #include "../lang/string_view_utf8.hpp"
+#include "../guiapi/include/font_flags.hpp"
 
 inline constexpr char CHAR_SPACE = ' ';
 inline constexpr char CHAR_NBSP = '\xA0'; /// Non Breaking Space
@@ -199,49 +200,33 @@ private:
 /// numbers of characters in lines
 class RectTextLayout {
 public:
+    RectTextLayout(StringReaderUtf8 &reader, uint16_t max_cols, uint16_t max_rows, is_multiline multiline);
+
+    uint8_t get_width_in_chars() const { return longest_char_cnt; }
+
+    uint8_t get_height_in_chars() const { return get_line_count(); }
+
+    bool has_text_overflown() const { return overflow; }
+
+    uint8_t get_line_characters(uint8_t line) const { return data[line]; }
+
+    uint8_t get_line_count() const;
+
+private:
     static constexpr size_t MaxLines = 31;
     static constexpr uint8_t MaxCharInLine = 255; // uint8_t
-    using Data_t = std::array<uint8_t, MaxLines + 1>; // last elem stores current line
-private:
+    using Data_t = std::array<uint8_t, MaxLines>;
+
     Data_t data;
-    uint8_t currentLine() const { return data[MaxLines]; }
+    uint8_t current_line = 0;
+    uint8_t longest_char_cnt = 0;
+    bool overflow = false;
 
-public:
-    RectTextLayout() {
-        data.fill(0);
-    }
+    void set_current_line_characters(uint8_t char_cnt);
 
-    uint8_t LineCharacters(uint8_t line) const {
-        return data[line];
-    }
+    uint8_t get_current_line_characters() const;
 
-    uint8_t CurrentLineCharacters() const {
-        return LineCharacters(currentLine());
-    }
-
-    uint8_t GetLineCount() const {
-        return CurrentLineCharacters() == 0 ? currentLine() : currentLine() + 1;
-    }
-
-    // increment number of lines
-    bool NewLine() {
-        if (currentLine() >= MaxLines) {
-            return false;
-        }
-        data[MaxLines] += 1;
-        return true;
-    }
-
-    bool IncrementNumOfCharsUpTo(uint8_t max_val) {
-        if (currentLine() >= MaxLines) {
-            return false;
-        }
-        if (CurrentLineCharacters() >= max_val) {
-            return false;
-        }
-        data[currentLine()] += 1;
-        return true;
-    }
+    bool new_line(uint8_t max_rows);
 };
 
 ////////////////////////////////////////////////////////////////////////////////
