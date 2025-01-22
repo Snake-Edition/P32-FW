@@ -535,10 +535,10 @@ void PreciseStepping::init() {
     PreciseStepping::update_maximum_lookback_time();
 
     HAL_timer_start(STEP_TIMER_NUM, STEPPER_TIMER_RATE);
-    ENABLE_STEPPER_DRIVER_INTERRUPT();
+    StepIsrDisabler::setGlobalTimerState(true);
 
     HAL_timer_start(MOVE_TIMER_NUM, MOVE_TIMER_FREQUENCY);
-    ENABLE_MOVE_INTERRUPT();
+    MoveIsrDisabler::setGlobalTimerState(true);
 }
 
 void PreciseStepping::reset_from_halt(bool preserve_step_fraction) {

@@ -46,28 +46,6 @@
 #include "planner.h"
 #include "stepper/indirection.h"
 
-// Helper class to disable the STEP ISR
-class [[nodiscard]] StepIsrDisabler {
-    bool old_step_isr_state;
-
-public:
-    StepIsrDisabler()
-        : old_step_isr_state { STEPPER_ISR_ENABLED() } {
-        if (old_step_isr_state) {
-            DISABLE_STEPPER_DRIVER_INTERRUPT();
-        }
-    }
-
-    ~StepIsrDisabler() {
-        if (old_step_isr_state) {
-            ENABLE_STEPPER_DRIVER_INTERRUPT();
-        }
-    }
-
-    StepIsrDisabler(const StepIsrDisabler &) = delete;
-    StepIsrDisabler &operator=(const StepIsrDisabler &) = delete;
-};
-
 //
 // Stepper class definition
 //

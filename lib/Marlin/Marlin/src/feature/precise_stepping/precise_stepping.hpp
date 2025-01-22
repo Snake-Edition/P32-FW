@@ -7,6 +7,7 @@
  */
 #pragma once
 #include "common.hpp"
+#include <disable_interrupts.h>
 #include <atomic>
 
 #ifdef COREXY
@@ -68,27 +69,45 @@ static_assert(MoveFlag::MOVE_FLAG_Y_ACTIVE == (MoveFlag)PreciseSteppingFlag::PRE
 static_assert(MoveFlag::MOVE_FLAG_Z_ACTIVE == (MoveFlag)PreciseSteppingFlag::PRECISE_STEPPING_FLAG_Z_USED);
 static_assert(MoveFlag::MOVE_FLAG_E_ACTIVE == (MoveFlag)PreciseSteppingFlag::PRECISE_STEPPING_FLAG_E_USED);
 
-// Helper class to disable the MOVE ISR
-class [[nodiscard]] MoveIsrDisabler {
-    bool old_move_isr_state;
+// Helper class to disable timers from multiple threads or interrupts
+template <uint8_t TIMER_NUM>
+class [[nodiscard]] TimerDisabler {
+    static inline bool global_timer_state = false;
+    static inline uint8_t nesting_count = 0;
 
 public:
-    MoveIsrDisabler()
-        : old_move_isr_state { MOVE_ISR_ENABLED() } {
-        if (old_move_isr_state) {
-            DISABLE_MOVE_INTERRUPT();
+    static void setGlobalTimerState(bool enabled) {
+        buddy::DisableInterrupts _;
+        global_timer_state = enabled;
+        if (nesting_count == 0) {
+            if (enabled) {
+                HAL_timer_enable_interrupt(TIMER_NUM);
+            } else {
+                HAL_timer_disable_interrupt(TIMER_NUM);
+            }
         }
     }
 
-    ~MoveIsrDisabler() {
-        if (old_move_isr_state) {
-            ENABLE_MOVE_INTERRUPT();
+    TimerDisabler() {
+        buddy::DisableInterrupts _;
+        if (nesting_count++ == 0 && global_timer_state) {
+            HAL_timer_disable_interrupt(TIMER_NUM);
         }
     }
 
-    MoveIsrDisabler(const MoveIsrDisabler &) = delete;
-    MoveIsrDisabler &operator=(const MoveIsrDisabler &) = delete;
+    ~TimerDisabler() {
+        buddy::DisableInterrupts _;
+        if (--nesting_count == 0 && global_timer_state) {
+            HAL_timer_enable_interrupt(TIMER_NUM);
+        }
+    }
+
+    TimerDisabler(const TimerDisabler &) = delete;
+    TimerDisabler &operator=(const TimerDisabler &) = delete;
 };
+
+using MoveIsrDisabler = TimerDisabler<MOVE_TIMER_NUM>;
+using StepIsrDisabler = TimerDisabler<STEP_TIMER_NUM>;
 
 class PreciseStepping {
 
