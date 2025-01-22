@@ -9,6 +9,7 @@
 #include "wiring_analog.h"
 #include "wiring_digital.h"
 #include "Marlin/src/module/temperature.h"
+#include "Marlin/src/module/planner.h"
 #include <logging/log.hpp>
 #include "gpio.h"
 #include "timing.h"
@@ -131,8 +132,7 @@ void stop_marlin() {
     // stop marlin loop
     marlin_kill = true;
 
-    DISABLE_STEPPER_DRIVER_INTERRUPT();
-    DISABLE_MOVE_INTERRUPT();
+    planner.quick_stop();
     DISABLE_TEMPERATURE_INTERRUPT();
     dwarf_init_done = false;
     hwio_safe_state();
