@@ -6,7 +6,7 @@
 #include "st25dv64k.h"
 #include <buddy/main.h>
 #include <logging/log.hpp>
-#include "disable_interrupts.h"
+#include "interrupt_disabler.hpp"
 #include "utility_extensions.hpp"
 #include <string.h>
 

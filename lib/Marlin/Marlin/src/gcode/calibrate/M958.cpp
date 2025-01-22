@@ -194,7 +194,7 @@ private:
 } // anonymous namespace
 
 static bool is_full() {
-    buddy::DisableInterrupts _;
+    buddy::InterruptDisabler _;
     bool retval = PreciseStepping::is_step_event_queue_full();
     return retval;
 }
@@ -208,7 +208,7 @@ static void enqueue_step(int step_us, bool dir, StepEventFlag_t axis_flags) {
     assert(step_us <= STEP_TIMER_MAX_TICKS_LIMIT);
     uint16_t next_queue_head = 0;
 
-    buddy::DisableInterrupts _;
+    buddy::InterruptDisabler _;
     step_event_u16_t *step_event = PreciseStepping::get_next_free_step_event(next_queue_head);
     step_event->time_ticks = step_us;
     step_event->flags = axis_flags;
@@ -569,7 +569,7 @@ std::optional<VibrateMeasureResult> vibrate_measure(const VibrateMeasureParams &
     if (do_delayed_measurement) {
         const auto has_steps = []() {
             // Cannot use freertos::CriticalSection here - steppers have higher priority than RTOS-aware interrupts
-            buddy::DisableInterrupts _;
+            buddy::InterruptDisabler _;
             return PreciseStepping::has_step_events_queued();
         };
 
@@ -1274,7 +1274,7 @@ MicrostepRestorer::MicrostepRestorer() {
 MicrostepRestorer::~MicrostepRestorer() {
     const auto has_steps = []() {
         // Cannot use freertos::CriticalSection here - steppers have higher priority than RTOS-aware interrupts
-        buddy::DisableInterrupts _;
+        buddy::InterruptDisabler _;
         return PreciseStepping::has_step_events_queued();
     };
     while (has_steps()) {

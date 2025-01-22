@@ -2,7 +2,7 @@
 
 #include "cmath_ext.h"
 #include "cmsis_os.h"
-#include "disable_interrupts.h"
+#include "interrupt_disabler.hpp"
 #include "hwio_pindef.h"
 #include "qoi_decoder.hpp"
 #include "raster_opfn_c.h"
@@ -171,7 +171,7 @@ void st7789v_reset(void) {
     volatile uint16_t delay = 0;
     {
         InputEnabler rstInput(displayRst, Pull::up);
-        buddy::DisableInterrupts disable_interrupts;
+        buddy::InterruptDisabler _;
         while (rstInput.read() == Pin::State::low) {
             delay++;
         }

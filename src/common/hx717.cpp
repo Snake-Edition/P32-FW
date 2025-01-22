@@ -1,5 +1,5 @@
 #include "hx717.hpp"
-#include "disable_interrupts.h"
+#include "interrupt_disabler.hpp"
 #include "bsod.h"
 #include "timing.h"
 #include <limits>
@@ -75,7 +75,7 @@ int32_t HX717::ReadValue(Channel nextChannel, uint32_t readyTimestamp) {
     // Read the value
     for (int index = 0; index < 24; index++) {
         {
-            buddy::DisableInterrupts _;
+            buddy::InterruptDisabler _;
             hx717Sck.write(Pin::State::high); //! Data are clocked out by rising edge of SCK
             timing_delay_cycles(std::max(zero, minDelayCycles - pinWriteCycles));
             hx717Sck.write(Pin::State::low);
@@ -96,7 +96,7 @@ int32_t HX717::ReadValue(Channel nextChannel, uint32_t readyTimestamp) {
     // Configure the next read
     for (int index = 0; index < nextChannel; index++) {
         {
-            buddy::DisableInterrupts _;
+            buddy::InterruptDisabler _;
             hx717Sck.write(Pin::State::high);
             timing_delay_cycles(std::max(zero, minDelayCycles - pinWriteCycles));
             hx717Sck.write(Pin::State::low);

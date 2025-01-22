@@ -13,7 +13,7 @@ namespace freertos {
  *
  * For atomic operations on stepper interrupt
  * data or timing with nanosecond precision use
- * DisableInterrupt instead.
+ * InterruptDisabler instead.
  */
 class [[nodiscard]] CriticalSection {
 public:

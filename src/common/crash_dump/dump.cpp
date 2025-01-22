@@ -3,7 +3,7 @@
 #include <string.h>
 #include <crash_dump/dump.hpp>
 #include <stdio.h>
-#include "disable_interrupts.h"
+#include "interrupt_disabler.hpp"
 #include "utility_extensions.hpp"
 #include "w25x.h"
 #include "FreeRTOS.h"
@@ -203,7 +203,7 @@ void save_message(MsgType type, uint16_t error_code, const char *error, const ch
     // break in case debugger is attached and avoid saving message to eeprom
     crash_dump::before_dump();
 
-    buddy::DisableInterrupts disable_interrupts;
+    buddy::InterruptDisabler _;
     vTaskEndScheduler();
     if (!w25x_init()) {
         return;

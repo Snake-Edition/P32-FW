@@ -1094,7 +1094,7 @@ void ac_fault_isr() {
     }
 
     // TODO: can be avoided if running at the same priority as STEP_TIMER_PRIO
-    buddy::DisableInterrupts _;
+    buddy::InterruptDisabler _;
 
     // ensure the crash handler can't be re-triggered
     HAL_NVIC_DisableIRQ(buddy::hw::xDiag.getIRQn());

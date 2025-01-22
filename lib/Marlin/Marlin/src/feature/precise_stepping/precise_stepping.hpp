@@ -7,7 +7,7 @@
  */
 #pragma once
 #include "common.hpp"
-#include <disable_interrupts.h>
+#include <interrupt_disabler.hpp>
 #include <atomic>
 
 #ifdef COREXY
@@ -77,7 +77,7 @@ class [[nodiscard]] TimerDisabler {
 
 public:
     static void setGlobalTimerState(bool enabled) {
-        buddy::DisableInterrupts _;
+        buddy::InterruptDisabler _;
         global_timer_state = enabled;
         if (nesting_count == 0) {
             if (enabled) {
@@ -89,14 +89,14 @@ public:
     }
 
     TimerDisabler() {
-        buddy::DisableInterrupts _;
+        buddy::InterruptDisabler _;
         if (nesting_count++ == 0 && global_timer_state) {
             HAL_timer_disable_interrupt(TIMER_NUM);
         }
     }
 
     ~TimerDisabler() {
-        buddy::DisableInterrupts _;
+        buddy::InterruptDisabler _;
         if (--nesting_count == 0 && global_timer_state) {
             HAL_timer_enable_interrupt(TIMER_NUM);
         }

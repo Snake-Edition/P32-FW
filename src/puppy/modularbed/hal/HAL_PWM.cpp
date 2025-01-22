@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <device/board.h>
 #include "buddy/priorities_config.h"
-#include <disable_interrupts.h>
+#include <interrupt_disabler.hpp>
 
 #define DISABLE_HB_0  0x00000001
 #define DISABLE_HB_1  0x00000002
@@ -199,7 +199,7 @@ void ApplyPWMPattern() {
     uint32_t *pEdgeMaskList = (s_pActualEdgeMaskList == s_EdgeMaskList_A) ? s_EdgeMaskList_B : s_EdgeMaskList_A;
 
     {
-        buddy::DisableInterrupts _;
+        buddy::InterruptDisabler _;
 
         s_pActualEdgeMaskList = pEdgeMaskList;
         uint32_t pulseIndex = s_PWMPulseCounter % PWM_PERIOD_LENGTH;

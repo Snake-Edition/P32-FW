@@ -1,4 +1,4 @@
-#include <common/disable_interrupts.h>
+#include <common/interrupt_disabler.hpp>
 #include <common/timing_precise.hpp>
 #include <common/timing.h>
 #include <freertos/critical_section.hpp>
@@ -51,7 +51,7 @@ void power_on() {
 
         for (uint32_t i = 0; i < us_total; i += (us_high + us_low)) {
             {
-                buddy::DisableInterrupts disable_interrupts;
+                buddy::InterruptDisabler _;
                 MMUEnable.write(Pin::State::high);
                 delay_us_precise<us_high>();
                 MMUEnable.write(Pin::State::low);

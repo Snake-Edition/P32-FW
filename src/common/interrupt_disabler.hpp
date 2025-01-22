@@ -16,21 +16,21 @@ namespace buddy {
  * Interrupts are disabled when object is constructed by its default constructor
  * and resumed to original state once destroyed.
  */
-class DisableInterrupts {
+class InterruptDisabler {
     uint32_t m_primask;
 
 public:
-    DisableInterrupts() {
+    InterruptDisabler() {
         m_primask = __get_PRIMASK();
         __disable_irq();
     }
 
-    ~DisableInterrupts() {
+    ~InterruptDisabler() {
         __set_PRIMASK(m_primask);
     }
 
-    DisableInterrupts(const DisableInterrupts &other) = delete;
-    DisableInterrupts &operator=(const DisableInterrupts &other) = delete;
+    InterruptDisabler(const InterruptDisabler &other) = delete;
+    InterruptDisabler &operator=(const InterruptDisabler &other) = delete;
 };
 
 } // namespace buddy
