@@ -195,8 +195,7 @@ private:
 
 static bool is_full() {
     buddy::InterruptDisabler _;
-    bool retval = PreciseStepping::is_step_event_queue_full();
-    return retval;
+    return PreciseStepping::is_step_event_queue_full();
 }
 
 static void print_accelerometer_error(const char *error) {
