@@ -35,7 +35,7 @@ Crash_s::Crash_s()
 // Called from ISR
 void Crash_s::stop_and_save() {
     // freeze motion first
-    stepper.suspend();
+    planner.quick_stop();
     needs_stack_unwind = true;
 
     // get the current live block
@@ -84,8 +84,7 @@ void Crash_s::stop_and_save() {
     //       marlin state is also not saved, notably: absolute/relative axis state
     // marlin_server.motion_param.save();
 
-    // stop any movement: this will discard any planner state!
-    planner.quick_stop();
+    // reset current position
     planner.reset_position();
     crash_position = planner.get_machine_position_mm();
 

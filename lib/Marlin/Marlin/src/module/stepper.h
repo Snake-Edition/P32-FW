@@ -83,17 +83,6 @@ public:
     // Initialize stepper hardware
     static void init();
 
-    // Interrupt Service Routine and phases
-    static inline bool is_awake() { return STEPPER_ISR_ENABLED(); }
-
-    static inline bool suspend() {
-        const bool awake = is_awake();
-        if (awake) {
-            DISABLE_STEPPER_DRIVER_INTERRUPT();
-        }
-        return awake;
-    }
-
     // Get the position of a stepper, in steps
     static int32_t position(const AxisEnum axis) {
         return count_position[axis];
