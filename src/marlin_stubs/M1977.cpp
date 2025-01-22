@@ -157,8 +157,7 @@ PhasesPhaseStepping evaluate_result(Context &context) {
 void restore_axis_defaults(AxisEnum axis) {
     phase_stepping::EnsureDisabled _;
     phase_stepping::reset_compensation(axis);
-    phase_stepping::remove_from_persistent_storage(axis, phase_stepping::CorrectionType::forward);
-    phase_stepping::remove_from_persistent_storage(axis, phase_stepping::CorrectionType::backward);
+    phase_stepping::remove_from_persistent_storage(axis);
 }
 
 namespace state {

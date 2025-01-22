@@ -882,6 +882,17 @@ void remove_from_persistent_storage(AxisEnum axis, CorrectionType lut_type) {
     }
 }
 
+void remove_from_persistent_storage(AxisEnum axis) {
+    remove_from_persistent_storage(axis, phase_stepping::CorrectionType::forward);
+    remove_from_persistent_storage(axis, phase_stepping::CorrectionType::backward);
+}
+
+void remove_from_persistent_storage() {
+    for (int i = 0; i < phase_stepping::opts::SUPPORTED_AXIS_COUNT; i++) {
+        remove_from_persistent_storage(static_cast<AxisEnum>(i));
+    }
+}
+
 } // namespace phase_stepping
 
 // This function is intentionally placed inside the phase stepping source codes

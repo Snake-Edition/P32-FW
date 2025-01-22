@@ -433,6 +433,12 @@ void load_from_persistent_storage(AxisEnum axis);
  */
 void remove_from_persistent_storage(AxisEnum axis, CorrectionType lut_type);
 
+/// Removes luts for the specific axis from the persistent media
+void remove_from_persistent_storage(AxisEnum axis);
+
+/// Removes all LUTS from the persistent media
+void remove_from_persistent_storage();
+
 /**
  * Return if some processing is still pending.
  */
