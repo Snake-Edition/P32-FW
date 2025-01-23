@@ -116,7 +116,7 @@ typedef tskTCB TCB_t;
 // current thread from FreeRTOS
 extern PRIVILEGED_DATA TCB_t *volatile pxCurrentTCB;
 
-void raise_redscreen(ErrCode error_code, const char *error, const char *module) {
+[[noreturn]] void raise_redscreen(ErrCode error_code, const char *error, const char *module) {
     crash_dump::save_message(crash_dump::MsgType::RSOD, ftrstd::to_underlying(error_code), error, module);
     sys_reset();
 }
@@ -132,7 +132,7 @@ void raise_redscreen(ErrCode error_code, const char *error, const char *module) 
 }
 
 //! Fatal error that causes Redscreen
-void fatal_error(const char *error, const char *module) {
+[[noreturn]] void fatal_error(const char *error, const char *module) {
     // Unknown error code = we don't have prusa.io/###### site support for this error
     // In this case we have to dump error message and error title
     ErrCode error_code = ErrCode::ERR_UNDEF;

@@ -6,7 +6,7 @@
 
 extern version_t &boot_version; // (address) from flash -> "volatile" is not necessary
 
-extern void sys_reset(void) __attribute__((noreturn));
+[[noreturn]] extern void sys_reset(void);
 
 extern void sys_dfu_request_and_reset(void) __attribute__((noreturn));
 
