@@ -14,20 +14,14 @@
 
 namespace {
 
-#define ST25DV64K_RTOS
-
 constexpr const uint8_t BLOCK_DELAY = 5; // block delay [ms]
 constexpr const uint8_t BLOCK_BYTES = 4; // bytes per block
 
 constexpr const uint32_t RETRIES = 3;
 
-#define DELAY HAL_Delay
-
 uint8_t st25dv64k_initialised = 0;
 
-#ifdef ST25DV64K_RTOS
-
-    #include "cmsis_os.h"
+#include "cmsis_os.h"
 
 osSemaphoreId st25dv64k_sema = 0; // semaphore handle
 
@@ -43,13 +37,8 @@ inline void st25dv64k_unlock() {
     osSemaphoreRelease(st25dv64k_sema);
 }
 
-    #define st25dv64k_delay osDelay
-
-#else
-    #define st25dv64k_lock()
-    #define st25dv64k_unlock()
-    #define st25dv64k_delay HAL_Delay
-#endif // ST25DV64K_RTOS
+// For some reason, things go wrong if you try to use osDelay
+#define st25dv64k_delay HAL_Delay
 
 } // namespace
 
@@ -91,7 +80,7 @@ void try_fix_if_needed(const i2c::Result &result) {
     _out[1] = address & 0xff;
 
     i2c::Result result = eeprom_transmit(cmd, _out, sizeof(address));
-    DELAY(BLOCK_DELAY);
+    st25dv64k_delay(BLOCK_DELAY);
 
     return result;
 }
@@ -117,7 +106,7 @@ void try_fix_if_needed(const i2c::Result &result) {
             return result;
         }
 
-        DELAY(BLOCK_DELAY);
+        st25dv64k_delay(BLOCK_DELAY);
 
         size -= block_size;
         address += block_size;
