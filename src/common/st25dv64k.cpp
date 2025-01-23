@@ -19,8 +19,6 @@ constexpr const uint8_t BLOCK_BYTES = 4; // bytes per block
 
 constexpr const uint32_t RETRIES = 3;
 
-uint8_t st25dv64k_initialised = 0;
-
 freertos::Mutex &st25dv64k_mutex() {
     // Has to be initialized lazily - global variables get initialized after the EEPROM is first used
     static freertos::Mutex r;
@@ -266,11 +264,6 @@ void st25dv64k_present_pwd(uint8_t *pwd) {
 }
 
 void st25dv64k_init() {
-    if (st25dv64k_initialised) {
-        return;
-    }
-    st25dv64k_initialised = 1;
-
     st25dv64k_present_pwd(0);
     st25dv64k_wr_cfg(REG_ENDA3, 0xFF);
     st25dv64k_present_pwd(0);
