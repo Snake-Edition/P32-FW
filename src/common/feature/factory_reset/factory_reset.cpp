@@ -52,7 +52,8 @@ extern osThreadId displayTaskHandle;
 
 #if HAS_PHASE_STEPPING()
     // Phase stepping is a calibration that is stored on xFlash, not in the config store -> it needs special handling
-    if (!items_to_keep.test(std::to_underlying(Item::calibrations))) {
+    // On hard reset, we're clearing the whole xFlash anyway, no point in doing this separately
+    if (!hard_reset && !items_to_keep.test(std::to_underlying(Item::calibrations))) {
         // Do this before entering the critical section, as it does all sorts of file access and logging
 
         // Formally speaking, we should access phase_stepping only from the marlin thread.
