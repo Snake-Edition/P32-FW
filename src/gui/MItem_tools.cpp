@@ -601,6 +601,33 @@ MI_SKEW_YZ::MI_SKEW_YZ()
     : WiSpin(planner.skew_factor.yz, skew_spin_config, _(label), 0, is_enabled_t::no) {}
 
 /* -===============================================(:>- */
+static constexpr NumericInputConfig xy_axis_len_spin_config {
+    .min_value = 180,
+    .max_value = 999,
+    .unit = Unit::millimeter,
+};
+
+uint16_t X_BED_SIZE = 180;
+uint16_t Y_BED_SIZE = 180;
+
+// MI_X_BED_SIZE
+MI_X_AXIS_LEN::MI_X_AXIS_LEN()
+    : WiSpin(X_BED_SIZE, xy_axis_len_spin_config, _(label)) {}
+
+void MI_X_AXIS_LEN::OnClick() {
+    X_BED_SIZE = GetVal();
+}
+
+/* -===============================================(:>- */
+// MI_Y_BED_SIZE
+MI_Y_AXIS_LEN::MI_Y_AXIS_LEN()
+    : WiSpin(Y_BED_SIZE, xy_axis_len_spin_config, _(label)) {}
+
+void MI_Y_AXIS_LEN::OnClick() {
+    Y_BED_SIZE = GetVal();
+}
+
+/* -===============================================(:>- */
 uint8_t cold_mode = false;
 MI_COLD_MODE::MI_COLD_MODE()
     : WI_ICON_SWITCH_OFF_ON_t(cold_mode, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
@@ -619,6 +646,7 @@ void MI_COLD_MODE::OnChange(size_t /*old_index*/) {
         }
     }
 }
+
 /* -===============================================(:>- */
 
 /*****************************************************************************/

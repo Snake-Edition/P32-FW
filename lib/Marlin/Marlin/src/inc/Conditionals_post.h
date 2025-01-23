@@ -56,12 +56,12 @@
 #define Z_MAX_LENGTH (Z_MAX_POS - (Z_MIN_POS))
 
 // Defined only if the sanity-check is bypassed
-#ifndef X_BED_SIZE
-  #define X_BED_SIZE X_MAX_LENGTH
-#endif
-#ifndef Y_BED_SIZE
-  #define Y_BED_SIZE Y_MAX_LENGTH
-#endif
+// #ifndef X_BED_SIZE
+//   #define X_BED_SIZE X_MAX_LENGTH
+// #endif
+// #ifndef Y_BED_SIZE
+//   #define Y_BED_SIZE Y_MAX_LENGTH
+// #endif
 
 // Require 0,0 bed center for Delta and SCARA
 #if IS_KINEMATIC
