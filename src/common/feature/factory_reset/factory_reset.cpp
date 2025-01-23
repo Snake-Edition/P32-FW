@@ -67,6 +67,13 @@ extern osThreadId displayTaskHandle;
     // Disable task switching, we don't want anyone to screw up with anything now
     freertos::CriticalSection critical_section;
 
+    // freertos::CriticalSection actually only disables preemptive context switches,
+    // so if we happen to get stuck on some mutex (I2C/config store/flash),
+    // we would lose the context and things we don't want might happen
+    // To remedy this, let's give this thread the highest priority
+    // so that the OS returns here as soon as a mutex is unlocked
+    osThreadSetPriority(osThreadGetId(), osPriorityRealtime);
+
     // Kick the watchdog
     wdt_iwdg_refresh();
 
