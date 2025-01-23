@@ -592,8 +592,21 @@ void Planner::forward_pass_kernel(block_t * const previous, block_t * const curr
   // point in the buffer. When the plan is bracketed by either the beginning of the
   // buffer and a maximum entry speed or two maximum entry speeds, every block in between
   // cannot logically be further improved. Hence, we don't have to recompute them anymore.
-  if (current->entry_speed_sqr == current->max_entry_speed_sqr)
-    block_buffer_planned = prev_index;
+  if (current->entry_speed_sqr == current->max_entry_speed_sqr) {
+    // The planned block might be advanced automatically as it transitions to busy state.
+    // Since this can happen even without recomputation for an already-optimal plan, we
+    // need to ensure the block stays non-busy as we move the pointer.
+    if (previous->flag.recalculate) {
+      // the block was already locked, we can safely advance the pointer
+      block_buffer_planned = prev_index;
+    } else {
+      // ensure the ISR doesn't advance the pointer behind our's back
+      MoveIsrDisabler _;
+      if (!is_block_busy(previous)) {
+        block_buffer_planned = prev_index;
+      }
+    }
+  }
 }
 
 /**
