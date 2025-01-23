@@ -39,7 +39,7 @@ void export_phase_responses(::nanobind::module_ &m, char const *name) {
     std::map<int, std::vector<int>> responses_map;
     for (const auto &entry : magic_enum::enum_entries<enum_T>()) {
         std::vector<int> responses;
-        for (const auto response : ClientResponses::GetResponses(entry.first)) {
+        for (const auto response : ClientResponses::get_available_responses(entry.first)) {
             if (static_cast<int>(response) != 0) {
                 responses.push_back(static_cast<int>(response));
             }

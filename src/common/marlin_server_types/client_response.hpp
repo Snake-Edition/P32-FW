@@ -1028,7 +1028,7 @@ public:
     }
 
     // get all responses accepted in phase
-    static constexpr const PhaseResponses &GetResponses(FSMAndPhase fsm_phase) {
+    static constexpr const PhaseResponses &get_available_responses(FSMAndPhase fsm_phase) {
         return get_fsm_responses(fsm_phase.fsm, fsm_phase.phase);
     }
 
@@ -1050,16 +1050,16 @@ public:
     }
 
     // get response from PhaseResponses by index
-    static constexpr const Response &GetResponse(FSMAndPhase phase, const uint8_t index) {
+    static constexpr const Response &get_available_response(FSMAndPhase phase, const uint8_t index) {
         if (index >= MAX_RESPONSES) {
             return ResponseNone;
         }
-        return GetResponses(phase)[index];
+        return get_available_responses(phase)[index];
     }
 
     template <class T>
-    static bool HasButton(const T phase) {
-        return GetResponse(phase, 0) != Response::_none; // this phase has no responses
+    static bool has_available_responses(const T phase) {
+        return get_available_response(phase, 0) != Response::_none; // this phase has no responses
     }
 };
 

@@ -171,7 +171,7 @@ WinsAxisNok::WinsAxisNok(ScreenCrashRecovery &screen)
     , icon_x_axis(&screen, { col_2, row_4 + row_nok_shift })
     , text_y_axis(&screen, text_y_axis_nok_rc, is_multiline::no, is_closed_on_click_t::no, _(en_text_Y_axis))
     , icon_y_axis(&screen, { col_2, row_5 + row_nok_shift })
-    , radio(&screen, GuiDefaults::GetButtonRect_AvoidFooter(screen.GetRect()), ClientResponses::GetResponses(PhasesCrashRecovery::axis_NOK), &texts) {
+    , radio(&screen, GuiDefaults::GetButtonRect_AvoidFooter(screen.GetRect()), ClientResponses::get_available_responses(PhasesCrashRecovery::axis_NOK), &texts) {
 
     line.SetBackColor(COLOR_ORANGE);
     text_long.SetAlignment(Align_t::Center());
@@ -191,7 +191,7 @@ WinsRepeatedCrash::WinsRepeatedCrash(ScreenCrashRecovery &screen)
           _(en_text_repeat_info)
     #endif /*HAS_TOOLCHANGER()*/
               )
-    , radio(&screen, GuiDefaults::GetButtonRect_AvoidFooter(screen.GetRect()), ClientResponses::GetResponses(PhasesCrashRecovery::repeated_crash), &texts) {
+    , radio(&screen, GuiDefaults::GetButtonRect_AvoidFooter(screen.GetRect()), ClientResponses::get_available_responses(PhasesCrashRecovery::repeated_crash), &texts) {
 
     text_long.SetAlignment(Align_t::Center());
     text_info.SetAlignment(Align_t::Center());
@@ -206,7 +206,7 @@ WinsHomeFail::WinsHomeFail(ScreenCrashRecovery &screen)
     , icon_nozzle_crash(&screen, icon_nozzle_crash_rc, &img::nozzle_crash_101x64)
     , icon_nozzle(&screen, icon_nozzle_rc, &img::nozzle_shape_48x48)
     , text_info(&screen, text_repeat_info_rc, is_multiline::yes, is_closed_on_click_t::no, _(en_text_homefail_info))
-    , radio(&screen, GuiDefaults::GetButtonRect_AvoidFooter(screen.GetRect()), ClientResponses::GetResponses(PhasesCrashRecovery::home_fail), &texts) {
+    , radio(&screen, GuiDefaults::GetButtonRect_AvoidFooter(screen.GetRect()), ClientResponses::get_available_responses(PhasesCrashRecovery::home_fail), &texts) {
 
     text_long.SetAlignment(Align_t::Center());
     text_info.SetAlignment(Align_t::Center());
@@ -236,7 +236,7 @@ WinsToolRecovery::WinsToolRecovery(ScreenCrashRecovery &screen)
         { &screen, { tool_col_1 + 5, tool_row_1 } },
         { &screen, { tool_col_1 + 5, tool_row_2 } },
     }
-    , radio(&screen, GuiDefaults::GetButtonRect_AvoidFooter(screen.GetRect()), ClientResponses::GetResponses(PhasesCrashRecovery::tool_recovery), &texts) {
+    , radio(&screen, GuiDefaults::GetButtonRect_AvoidFooter(screen.GetRect()), ClientResponses::get_available_responses(PhasesCrashRecovery::tool_recovery), &texts) {
 
     text_long.SetAlignment(Align_t::Center());
     text_careful.SetAlignment(Align_t::Center());

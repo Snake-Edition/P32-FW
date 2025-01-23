@@ -211,7 +211,7 @@ bool PausePrivatePhase::CanSafetyTimerExpire() const {
     }
     // We generally think of a Phase that it needs user interaction IFF it has a button.
     // Yet if that button is "Stop" and it's the ONLY button within that Phase, that means the phase can be cancelled if user wishes so and does NOT REQUIRE user interaction as it is able to progress on it's own.
-    return ClientResponses::HasButton(getPhase()) && (ClientResponses::GetResponse(getPhase(), 0) != Response::Stop || ClientResponses::GetResponses(getPhase()).size() > 1);
+    return ClientResponses::has_available_responses(getPhase()) && (ClientResponses::get_available_response(getPhase(), 0) != Response::Stop || ClientResponses::get_available_responses(getPhase()).size() > 1);
 }
 
 void PausePrivatePhase::NotifyExpiredFromSafetyTimer() {

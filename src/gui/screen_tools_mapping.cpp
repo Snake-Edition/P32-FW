@@ -1172,7 +1172,7 @@ void ToolsMappingBody::windowEvent([[maybe_unused]] window_t *sender, GUI_event_
             break;
         }
 
-        auto response = ClientResponses::GetResponse(preview_phase, current_idx - cnt_current_items);
+        auto response = ClientResponses::get_available_response(preview_phase, current_idx - cnt_current_items);
 
         // Back in right state undoes going to right
         if (response == Response::Back && state == State::right) {

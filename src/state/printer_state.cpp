@@ -96,7 +96,7 @@ bool is_warning_attention(const fsm::BaseData &data) {
 tuple<ErrCode, const Response *> warning_dialog(const fsm::BaseData &data) {
     WarningType wtype = static_cast<WarningType>(*data.GetData().data());
     auto phase = GetEnumFromPhaseIndex<PhasesWarning>(data.GetPhase());
-    const Response *buttons = ClientResponses::GetResponses(phase).data();
+    const Response *buttons = ClientResponses::get_available_responses(phase).data();
     const ErrCode code(warning_type_to_error_code(wtype));
     return make_tuple(code, buttons);
 }
@@ -342,21 +342,21 @@ StateWithDialog get_state_with_dialog(bool ready) {
     case ClientFSM::Load_unload:
         if (fsm_states.is_active(ClientFSM::Printing)) {
             if (auto attention_code = load_unload_attention_while_printing(*fsm_states[ClientFSM::Load_unload]); attention_code.has_value()) {
-                const Response *responses = ClientResponses::GetResponses(GetEnumFromPhaseIndex<PhasesLoadUnload>(data.GetPhase())).data();
-                return { state, attention_code, fsm_gen, responses };
+                const Response *buttons = ClientResponses::get_available_responses(GetEnumFromPhaseIndex<PhasesLoadUnload>(data.GetPhase())).data();
+                return { state, attention_code, fsm_gen, buttons };
             }
         } // TODO: handle normal load unload
         break;
     case ClientFSM::QuickPause: {
-        const Response *responses = ClientResponses::GetResponses(GetEnumFromPhaseIndex<PhasesQuickPause>(data.GetPhase())).data();
-        return { state, ErrCode::CONNECT_QUICK_PAUSE, fsm_gen, responses };
+        const Response *available_responses = ClientResponses::get_available_responses(GetEnumFromPhaseIndex<PhasesQuickPause>(data.GetPhase())).data();
+        return { state, ErrCode::CONNECT_QUICK_PAUSE, fsm_gen, available_responses };
         break;
     }
 #if ENABLED(CRASH_RECOVERY)
     case ClientFSM::CrashRecovery:
         if (auto attention_code = crash_recovery_attention(GetEnumFromPhaseIndex<PhasesCrashRecovery>(data.GetPhase())); attention_code.has_value()) {
-            const Response *responses = ClientResponses::GetResponses(GetEnumFromPhaseIndex<PhasesCrashRecovery>(data.GetPhase())).data();
-            return { state, attention_code, fsm_gen, responses };
+            const Response *available_responses = ClientResponses::get_available_responses(GetEnumFromPhaseIndex<PhasesCrashRecovery>(data.GetPhase())).data();
+            return { state, attention_code, fsm_gen, available_responses };
         }
         break;
 #endif
@@ -367,8 +367,8 @@ StateWithDialog get_state_with_dialog(bool ready) {
     case ClientFSM::PrintPreview: {
         auto phase = GetEnumFromPhaseIndex<PhasesPrintPreview>(data.GetPhase());
         if (auto attention_code = attention_while_printpreview(phase); attention_code.has_value()) {
-            const Response *responses = ClientResponses::GetResponses(phase).data();
-            return { state, attention_code, fsm_gen, responses };
+            const Response *available_responses = ClientResponses::get_available_responses(phase).data();
+            return { state, attention_code, fsm_gen, available_responses };
         }
         break;
     }
