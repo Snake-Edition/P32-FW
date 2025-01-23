@@ -3,6 +3,7 @@
 
 #include <option/has_nfc.h>
 #include <nfc.hpp>
+#include <freertos/mutex.hpp>
 
 #include "i2c.hpp"
 #include "cmsis_os.h"
@@ -13,7 +14,6 @@
 #include <algorithm>
 
 namespace {
-
 constexpr const uint8_t BLOCK_DELAY = 5; // block delay [ms]
 constexpr const uint8_t BLOCK_BYTES = 4; // bytes per block
 
@@ -21,20 +21,18 @@ constexpr const uint32_t RETRIES = 3;
 
 uint8_t st25dv64k_initialised = 0;
 
-#include "cmsis_os.h"
-
-osSemaphoreId st25dv64k_sema = 0; // semaphore handle
+freertos::Mutex &st25dv64k_mutex() {
+    // Has to be initialized lazily - global variables get initialized after the EEPROM is first used
+    static freertos::Mutex r;
+    return r;
+}
 
 inline void st25dv64k_lock() {
-    if (st25dv64k_sema == 0) {
-        osSemaphoreDef(st25dv64kSema);
-        st25dv64k_sema = osSemaphoreCreate(osSemaphore(st25dv64kSema), 1);
-    }
-    osSemaphoreWait(st25dv64k_sema, osWaitForever);
+    st25dv64k_mutex().lock();
 }
 
 inline void st25dv64k_unlock() {
-    osSemaphoreRelease(st25dv64k_sema);
+    st25dv64k_mutex().unlock();
 }
 
 // For some reason, things go wrong if you try to use osDelay
