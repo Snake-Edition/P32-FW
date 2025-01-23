@@ -107,13 +107,6 @@
 #endif
 
 namespace ExtUI {
-  static struct {
-    uint8_t printer_killed : 1;
-    #if ENABLED(JOYSTICK)
-      uint8_t jogging : 1;
-    #endif
-  } flags;
-
   #ifdef __SAM3X8E__
     /**
      * Implement a special millis() to allow time measurement
@@ -154,20 +147,6 @@ namespace ExtUI {
       return (uint32_t)(currTime / (F_CPU / 8000));
     }
   #endif // __SAM3X8E__
-
-  void delay_us(unsigned long us) { DELAY_US(us); }
-
-  void delay_ms(unsigned long ms) {
-    if (flags.printer_killed)
-      DELAY_US(ms * 1000);
-    else
-      safe_delay(ms);
-  }
-
-  void yield() {
-    if (!flags.printer_killed)
-      thermalManager.manage_heater();
-  }
 
   void enableHeater(const extruder_t extruder) {
     #if HOTENDS && HEATER_IDLE_HANDLER
@@ -1064,14 +1043,6 @@ void MarlinUI::update() {
     }
   #endif // SDSUPPORT
   ExtUI::onIdle();
-}
-
-void MarlinUI::kill_screen(PGM_P const error, PGM_P const component) {
-  using namespace ExtUI;
-  if (!flags.printer_killed) {
-    flags.printer_killed = true;
-    onPrinterKilled(error, component);
-  }
 }
 
 #endif // EXTENSIBLE_UI

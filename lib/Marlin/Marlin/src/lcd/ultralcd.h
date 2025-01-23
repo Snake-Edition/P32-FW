@@ -389,8 +389,6 @@ public:
     #endif
 
     static bool get_blink();
-    static void kill_screen(PGM_P const lcd_error, PGM_P const lcd_component);
-    static void draw_kill_screen();
     static void set_status(const char* const message, const bool persist=false);
     static void set_status_P(PGM_P const message, const int8_t level=0);
     static void status_printf_P(const uint8_t level, PGM_P const fmt, ...);

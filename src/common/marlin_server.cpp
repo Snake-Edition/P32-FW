@@ -3279,6 +3279,12 @@ void marlin_server_steppers_timeout_warning() {
 //-----------------------------------------------------------------------------
 // ExtUI event handlers
 
+[[noreturn]] void kill(PGM_P const lcd_error, PGM_P const lcd_component, [[maybe_unused]] const bool steppers_off) {
+    const char *msg = lcd_error ?: GET_TEXT(MSG_KILLED);
+    log_info(MarlinServer, "Printer killed: %s", msg);
+    fatal_error(msg, lcd_component);
+}
+
 namespace ExtUI {
 
 using namespace marlin_server;
@@ -3295,13 +3301,6 @@ void onIdle() {
     buddy::metrics::record_dwarf_internal_temperatures();
 #endif
     print_utils_loop();
-}
-
-void onPrinterKilled(PGM_P const msg, PGM_P const component) {
-    log_info(MarlinServer, "Printer killed: %s", msg);
-    vTaskEndScheduler();
-    wdt_iwdg_refresh(); // watchdog reset
-    fatal_error(msg, component);
 }
 
 void onPrintTimerStarted() {

@@ -2379,8 +2379,6 @@
 // Enable Marlin dev mode which adds some special commands
 //#define MARLIN_DEV_MODE
 
-#define OVERRIDE_KILL_METHOD
-
 /**
  * M862.x support for print checking Q commands (P are always supported)
  */

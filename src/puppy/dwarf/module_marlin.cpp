@@ -179,10 +179,6 @@ int digitalRead(uint32_t marlinPin) {
     return gpio_get(marlinPin);
 }
 
-#if DISABLED(OVERRIDE_KILL_METHOD)
-    #error Dwarf needs OVERRIDE_KILL_METHOD kill method enabled
-#endif
-
 void kill(PGM_P const lcd_error /*=nullptr*/, PGM_P const lcd_component /*=nullptr*/, [[maybe_unused]] const bool steppers_off /*=false*/) {
     log_error(Marlin, "Printer killed: %s: %s", lcd_component, lcd_error);
     dwarf::ModbusControl::TriggerMarlinKillFault(dwarf_shared::errors::FaultStatusMask::MARLIN_KILLED, lcd_component, lcd_error);

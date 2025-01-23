@@ -240,10 +240,6 @@ namespace ExtUI {
     FORCE_INLINE uint32_t safe_millis() { return millis(); } // TODO: Implement for AVR
   #endif
 
-  void delay_us(unsigned long us);
-  void delay_ms(unsigned long ms);
-  void yield();
-
   /**
    * Media access routines
    *
@@ -290,7 +286,6 @@ namespace ExtUI {
   void onMediaError();
   void onMediaRemoved();
   void onPlayTone(const uint16_t frequency, const uint16_t duration);
-  void onPrinterKilled(PGM_P const error, PGM_P const component);
   void onPrintTimerStarted();
   void onPrintTimerPaused();
   void onPrintTimerStopped();
