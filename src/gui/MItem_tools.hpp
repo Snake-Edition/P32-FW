@@ -434,6 +434,22 @@ public:
 };
 /* -===============================================(:>- */
 
+class MI_X_AXIS_LEN : public WiSpin {
+    constexpr static const char *const label = N_("X-axis length");
+
+public:
+    MI_X_AXIS_LEN();
+    virtual void OnClick() override;
+};
+
+class MI_Y_AXIS_LEN : public WiSpin {
+    constexpr static const char *const label = N_("Y-axis length");
+
+public:
+    MI_Y_AXIS_LEN();
+    virtual void OnClick() override;
+};
+
 class MI_COLD_MODE : public WI_ICON_SWITCH_OFF_ON_t {
     constexpr static const char *const label = N_("Cold Mode");
 

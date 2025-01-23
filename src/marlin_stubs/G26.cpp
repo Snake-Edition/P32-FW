@@ -107,14 +107,14 @@ constexpr float y_step = 20;
 constexpr float y_step = 30;
 #endif
 constexpr float x_min = 10;
-constexpr float x_max = X_BED_SIZE - 10;
+constexpr float x_max = 180 - 10;
 constexpr float y_min = 30;
 constexpr float y1 = y_min + y_step;
 constexpr float y2 = y1 + y_step;
 constexpr float y3 = y2 + y_step;
 constexpr float y4 = y3 + y_step;
 constexpr float y5 = y4 + y_step;
-static_assert(Y_BED_SIZE > y5, "snake pattern out of bed");
+static_assert(180 > y5, "snake pattern out of bed");
 
 /// Path of Manhattan snake
 /// Alternate X and Y coordinates.

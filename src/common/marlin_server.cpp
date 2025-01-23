@@ -562,6 +562,12 @@ void init(void) {
 #if HAS_SHEET_PROFILES()
     SteelSheets::CheckIfCurrentValid();
 #endif
+
+    X_BED_SIZE = 180;
+#ifdef MINI_I3_MK33
+    X_BED_SIZE = 250;
+#endif
+
     settings_load();
 }
 
@@ -2642,7 +2648,7 @@ void retract() {
 
 void lift_head() {
 #if ENABLED(NOZZLE_PARK_FEATURE)
-    const constexpr xyz_pos_t park = XYZ_NOZZLE_PARK_POINT;
+    const xyz_pos_t park = XYZ_NOZZLE_PARK_POINT;
     plan_move_by(NOZZLE_PARK_Z_FEEDRATE, 0, 0, _MIN(park.z, Z_MAX_POS - current_position.z));
 #endif // ENABLED(NOZZLE_PARK_FEATURE)
 }

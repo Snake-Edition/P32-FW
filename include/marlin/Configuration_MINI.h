@@ -1163,11 +1163,8 @@
 // @section machine
 
 // The size of the print bed
-#ifdef MINI_I3_MK33
-    #define X_BED_SIZE 250
-#else
-    #define X_BED_SIZE 180
-#endif
+extern uint16_t X_BED_SIZE;
+
 
 #ifdef MINI_LONG_BED
     #define Y_BED_SIZE 250
@@ -1202,9 +1199,9 @@
 
 #define Z_MIN_POS 0
 #ifdef MINI_I3_MK33
-	#define X_MAX_POS (X_BED_SIZE + 1)
+	#define X_MAX_POS (X_BED_SIZE + 1.f)
 #else
-	#define X_MAX_POS X_BED_SIZE
+	#define X_MAX_POS ((float)X_BED_SIZE)
 #endif
 
 #ifdef MINI_COREXY
@@ -1726,8 +1723,8 @@
 	#endif
     // Specify a park position as { X, Y, Z }
 
-    #define X_NOZZLE_PARK_POINT (X_MAX_POS - 10)
-    #define Y_NOZZLE_PARK_POINT (Y_MAX_POS - 10)
+    #define X_NOZZLE_PARK_POINT (X_MAX_POS - 10.f)
+    #define Y_NOZZLE_PARK_POINT (Y_MAX_POS - 10.f)
     #define Z_NOZZLE_PARK_POINT 20
     #define XYZ_NOZZLE_PARK_POINT \
         {X_NOZZLE_PARK_POINT, Y_NOZZLE_PARK_POINT, Z_NOZZLE_PARK_POINT}
