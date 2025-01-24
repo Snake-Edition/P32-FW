@@ -21,7 +21,6 @@ class txtroll_t {
         paused,
     };
 
-    Rect16 rect;
     uint16_t phase_progress;
     uint16_t draw_progress;
     uint16_t hidden_char_cnt;
@@ -32,8 +31,7 @@ class txtroll_t {
 
     static size_t instance_counter;
 
-    static Rect16 rect_meas(Rect16 rc, const string_view_utf8 &text, Font font, padding_ui8_t padding, Align_t alignment);
-    static uint16_t meas(Rect16 rc, const string_view_utf8 &text, Font pf);
+    static uint16_t meas(Rect16 rc, const string_view_utf8 &text, Font font, padding_ui8_t padding);
 
 public:
     txtroll_t()
@@ -48,9 +46,9 @@ public:
 
     ~txtroll_t() { --instance_counter; }
 
-    void Init(Rect16 rc, const string_view_utf8 &text, Font font, padding_ui8_t padding, Align_t alignment);
+    void Init(const Rect16 &rect, const string_view_utf8 &text, Font font, padding_ui8_t padding);
     invalidate_t Tick();
-    void render_text(Rect16 rc, const string_view_utf8 &text, Font font, Color clr_back, Color clr_text, padding_ui8_t padding, Align_t alignment, bool fill_rect = true) const;
+    void render_text(const Rect16 &rect, const string_view_utf8 &text, Font font, Color clr_back, Color clr_text, padding_ui8_t padding = padding_ui8_t(0, 0, 0, 0), Align_t alignment = Align_t::Left()) const;
     bool NeedInit() const { return phase == phase_t::uninitialized; }
     void Reset() {
         if (phase != phase_t::uninitialized) {

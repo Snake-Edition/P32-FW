@@ -241,7 +241,7 @@ void IWindowMenuItem::Print(Rect16 rect) {
     const auto label_rect = getLabelRect(rect);
 
     if (is_focused() && focused_menu_item_roll.NeedInit()) {
-        focused_menu_item_roll.Init(label_rect, label, label_font, GuiDefaults::MenuPaddingItems, GuiDefaults::MenuAlignment());
+        focused_menu_item_roll.Init(label_rect, label, label_font, GuiDefaults::MenuPaddingItems);
     }
 
     if (IsLabelInvalid()) {
