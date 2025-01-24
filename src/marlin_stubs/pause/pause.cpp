@@ -77,8 +77,7 @@ GCodeLoader nozzle_cleaner_gcode_loader;
     HAS_BUZZER || \
     NUM_RUNOUT_SENSORS > 1 || \
     ENABLED(DUAL_X_CARRIAGE) || \
-    ENABLED(ADVANCED_PAUSE_CONTINUOUS_PURGE) || \
-    ENABLED(SDSUPPORT)
+    ENABLED(ADVANCED_PAUSE_CONTINUOUS_PURGE)
 #error unsupported
 #endif
 // clang-format on

@@ -67,12 +67,7 @@ void GcodeSuite::M125() {
     park_point += hotend_offset[active_extruder];
   #endif
 
-  #if ENABLED(SDSUPPORT)
-    const bool sd_printing = IS_SD_PRINTING();
-  #else
-    constexpr bool sd_printing = false;
-  #endif
-
+  constexpr bool sd_printing = false;
   constexpr bool show_lcd = false;
 
   if (pause_print(retract, park_point, 0, show_lcd)) {

@@ -302,10 +302,6 @@ public:
     uint8_t data = 0;
     millis_t transfer_window = millis() + RX_TIMESLICE;
 
-    #if ENABLED(SDSUPPORT)
-      PORT_REDIRECT(card.transfer_port_index);
-    #endif
-
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Warray-bounds"
 

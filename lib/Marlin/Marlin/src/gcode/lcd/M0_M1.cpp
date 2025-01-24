@@ -31,12 +31,6 @@
   #include "../../lcd/extensible_ui/ui_api.h"
 #endif
 
-#include "../../sd/cardreader.h"
-
-#if HAS_LEDS_OFF_FLAG
-  #include "../../feature/leds/printer_event_leds.h"
-#endif
-
 #if ENABLED(HOST_PROMPT_SUPPORT)
   #include "../../feature/host_actions.h"
 #endif
@@ -118,10 +112,6 @@ void GcodeSuite::M0_M1() {
   }
   else
     while (wait_for_user) idle(true);
-
-  #if HAS_LEDS_OFF_FLAG
-    printerEventLEDs.onResumeAfterWait();
-  #endif
 
   wait_for_user = false;
 }

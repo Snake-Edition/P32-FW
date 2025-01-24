@@ -32,7 +32,6 @@
   #include "ultralcd.h"
   #include "fontutils.h"
   MarlinUI ui;
-  #include "../sd/cardreader.h"
   #if ENABLED(EXTENSIBLE_UI)
     #define START_OF_UTF8_CHAR(C) (((C) & 0xC0u) != 0x80u)
   #endif
@@ -103,10 +102,6 @@
       #if PROGRESS_MSG_EXPIRE > 0
         expire_status_ms = persist ? 0 : progress_bar_ms + PROGRESS_MSG_EXPIRE;
       #endif
-    #endif
-
-    #if BOTH(FILAMENT_LCD_DISPLAY, SDSUPPORT)
-      next_filament_display = millis() + 5000UL; // Show status message for 5s
     #endif
 
     #if ENABLED(EXTENSIBLE_UI)
@@ -205,10 +200,6 @@
     PGM_P msg = nullptr;
     if (printingIsPaused())
       msg = print_paused;
-    #if ENABLED(SDSUPPORT)
-      else if (IS_SD_PRINTING())
-        return set_status(card.longest_filename(), true);
-    #endif
     else if (print_job_timer.isRunning())
       msg = printing;
 
@@ -227,15 +218,7 @@
     }
   }
 
-  #if ENABLED(SDSUPPORT)
-    extern bool wait_for_user, wait_for_heatup;
-  #endif
-
   void MarlinUI::abort_print() {
-    #if ENABLED(SDSUPPORT)
-      wait_for_heatup = wait_for_user = false;
-      card.flag.abort_sd_printing = true;
-    #endif
     #ifdef ACTION_ON_CANCEL
       host_action_cancel();
     #endif
@@ -246,7 +229,7 @@
     set_status_P(GET_TEXT(MSG_PRINT_ABORTED));
   }
 
-  #if ANY(PARK_HEAD_ON_PAUSE, SDSUPPORT)
+  #if ENABLED(PARK_HEAD_ON_PAUSE)
     #include "../gcode/queue.h"
   #endif
 
@@ -259,8 +242,6 @@
 
     #if ENABLED(PARK_HEAD_ON_PAUSE)
       queue.inject_P(PSTR("M25 P\nM24"));
-    #elif ENABLED(SDSUPPORT)
-      queue.inject_P(PSTR("M25"));
     #elif defined(ACTION_ON_PAUSE)
       host_action_pause();
     #endif
@@ -271,7 +252,6 @@
     #if ENABLED(PARK_HEAD_ON_PAUSE)
       wait_for_heatup = wait_for_user = false;
     #endif
-    if (IS_SD_PAUSED()) queue.inject_P(PSTR("M24"));
     #ifdef ACTION_ON_RESUME
       host_action_resume();
     #endif
@@ -286,15 +266,7 @@
       #else
         constexpr progress_t p = 0;
       #endif
-      return (p
-        #if ENABLED(SDSUPPORT)
-          #if HAS_PRINT_PROGRESS_PERMYRIAD
-            ?: card.permyriadDone()
-          #else
-            ?: card.percentDone()
-          #endif
-        #endif
-      );
+      return p;
     }
 
   #endif

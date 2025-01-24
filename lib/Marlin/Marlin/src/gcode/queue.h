@@ -151,10 +151,6 @@ private:
 
   static void get_serial_commands();
 
-  #if ENABLED(SDSUPPORT)
-    static void get_sdcard_commands();
-  #endif
-
   static void _commit_command(bool say_ok
     #if NUM_SERIAL > 1
       , int16_t p=-1

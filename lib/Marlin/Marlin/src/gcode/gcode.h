@@ -212,7 +212,6 @@
  * M502 - Revert to the default "factory settings". ** Does not write them to EEPROM! **
  * M503 - Print the current settings (in memory): "M503 S<verbose>". S0 specifies compact output.
  * M504 - Validate EEPROM contents. (Requires EEPROM_SETTINGS)
- * M524 - Abort the current SD print job started with M24. (Requires SDSUPPORT)
  * M540 - Enable/disable SD card abort on endstop hit: "M540 S<state>". (Requires SD_ABORT_ON_ENDSTOP_HIT)
  * M569 - Enable stealthChop on an axis. (Requires at least one _DRIVER_TYPE to be TMC2130/2160/2208/2209/5130/5160)
  * M572 - Set parameters for pressure advance.
@@ -261,7 +260,6 @@
  *
  * ************ Custom codes - This can change to suit future G-code regulations
  * G425 - Calibrate using a conductive object. (Requires CALIBRATION_GCODE)
- * M928 - Start SD logging: "M928 filename.gco". Stop with M29. (Requires SDSUPPORT)
  * M958 - Excite harmonic vibration and measure amplitude
  * M959 - Tune input shaper
  * M970 - Set/enable phase stepping
@@ -580,7 +578,7 @@ private:
 
   static void M18_M84();
 
-  #if ENABLED(SDSUPPORT) || ENABLED(SDCARD_GCODES)
+  #if ENABLED(SDCARD_GCODES)
     static void M20();
     static void M21();
     static void M22();
@@ -596,7 +594,7 @@ private:
 
   static void M31();
 
-  #if ENABLED(SDSUPPORT) || ENABLED(SDCARD_GCODES)
+  #if ENABLED(SDCARD_GCODES)
     static void M32();
     #if ENABLED(LONG_FILENAME_HOST_SUPPORT)
       static void M33();
@@ -883,10 +881,6 @@ private:
     static void M503();
   #endif
 
-  #if ENABLED(SDSUPPORT)
-    static void M524();
-  #endif
-
   #if ENABLED(SD_ABORT_ON_ENDSTOP_HIT)
     static void M540();
   #endif
@@ -984,10 +978,6 @@ private:
     static void M916();
     static void M917();
     static void M918();
-  #endif
-
-  #if ENABLED(SDSUPPORT)
-    static void M928();
   #endif
 
   #if ENABLED(MAGNETIC_PARKING_EXTRUDER)

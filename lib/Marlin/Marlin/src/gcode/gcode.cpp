@@ -419,7 +419,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
       case 17: M17(); break;                                      // M17: Enable all stepper motors
 
-      #if ENABLED(SDSUPPORT) || ENABLED(SDCARD_GCODES)
+      #if ENABLED(SDCARD_GCODES)
         case 20: M20(); break;                                    // M20: List SD card
         case 21: M21(); break;                                    // M21: Init SD card
         case 22: M22(); break;                                    // M22: Release SD card
@@ -441,11 +441,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
           case 34: M34(); break;                                  // M34: Set SD card sorting options
         #endif
 
-      #endif // SDSUPPORT
-
-      #if ENABLED(SDSUPPORT)
-        case 928: M928(); break;                                  // M928: Start SD write
-      #endif // SDSUPPORT
+      #endif // SDCARD_GCODES
 
       case 31: M31(); break;                                      // M31: Report time since the start of SD print or last M109
       case 42: M42(); break;                                      // M42: Change pin state
@@ -738,10 +734,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       case 502: M502(); break;                                    // M502: Revert to default settings
       #if DISABLED(DISABLE_M503)
         case 503: M503(); break;                                  // M503: print settings currently in memory
-      #endif
-
-      #if ENABLED(SDSUPPORT)
-        case 524: M524(); break;                                   // M524: Abort the current SD print job
       #endif
 
       #if ENABLED(SD_ABORT_ON_ENDSTOP_HIT)

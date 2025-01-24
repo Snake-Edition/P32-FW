@@ -68,12 +68,7 @@
   #include "../../feature/emergency_parser.h"
 #endif
 
-#if ENABLED(SDSUPPORT)
-  #include "../../sd/cardreader.h"
-  #define IFSD(A,B) (A)
-#else
-  #define IFSD(A,B) (B)
-#endif
+#define IFSD(A,B) (B)
 
 #if HAS_TRINAMIC
   #include "../../feature/tmc_util.h"
@@ -953,19 +948,7 @@ namespace ExtUI {
   void FileList::refresh() { num_files = 0xFFFF; }
 
   bool FileList::seek(const uint16_t pos, const bool skip_range_check) {
-    #if ENABLED(SDSUPPORT)
-      if (!skip_range_check && (pos + 1) > count()) return false;
-      const uint16_t nr =
-        #if ENABLED(SDCARD_RATHERRECENTFIRST) && DISABLED(SDCARD_SORT_ALPHA)
-          count() - 1 -
-        #endif
-      pos;
-
-      card.getfilename_sorted(nr);
-      return card.filename[0] != '\0';
-    #else
-      return false;
-    #endif
+    return false;
   }
 
   const char* FileList::filename() {
@@ -989,25 +972,13 @@ namespace ExtUI {
   }
 
   bool FileList::isAtRootDir() {
-    return (true
-      #if ENABLED(SDSUPPORT)
-        && card.flag.workDirIsRoot
-      #endif
-    );
+    return true;
   }
 
   void FileList::upDir() {
-    #if ENABLED(SDSUPPORT)
-      card.cdup();
-      num_files = 0xFFFF;
-    #endif
   }
 
   void FileList::changeDir(const char * const dirname) {
-    #if ENABLED(SDSUPPORT)
-      card.cd(dirname);
-      num_files = 0xFFFF;
-    #endif
   }
 
 } // namespace ExtUI
@@ -1015,33 +986,10 @@ namespace ExtUI {
 // At the moment, we piggy-back off the ultralcd calls, but this could be cleaned up in the future
 
 void MarlinUI::init() {
-  #if ENABLED(SDSUPPORT) && PIN_EXISTS(SD_DETECT)
-    SET_INPUT_PULLUP(SD_DETECT_PIN);
-  #endif
-
   ExtUI::onStartup();
 }
 
 void MarlinUI::update() {
-  #if ENABLED(SDSUPPORT)
-    static bool last_sd_status;
-    const bool sd_status = IS_SD_INSERTED();
-    if (sd_status != last_sd_status) {
-      last_sd_status = sd_status;
-      if (sd_status) {
-        card.mount();
-        if (card.isMounted())
-          ExtUI::onMediaInserted();
-        else
-          ExtUI::onMediaError();
-      }
-      else {
-        const bool ok = card.isMounted();
-        card.release();
-        if (ok) ExtUI::onMediaRemoved();
-      }
-    }
-  #endif // SDSUPPORT
   ExtUI::onIdle();
 }
 

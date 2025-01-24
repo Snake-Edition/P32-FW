@@ -32,10 +32,6 @@ class PrinterEventLEDs {
 private:
   static uint8_t old_intensity;
 
-  #if HAS_LEDS_OFF_FLAG
-    static bool leds_off_after_print;
-  #endif
-
   static inline void set_done() {
     #if ENABLED(LED_COLOR_PRESETS)
       leds.set_default();
@@ -59,29 +55,6 @@ public:
     static inline void onHeatingDone() { leds.set_color(LEDColorWhite()); }
     static inline void onPidTuningDone(LEDColor c) { leds.set_color(c); }
   #endif
-
-  #if ENABLED(SDSUPPORT)
-
-    static inline void onPrintCompleted() {
-      leds.set_green();
-      #if HAS_LEDS_OFF_FLAG
-        leds_off_after_print = true;
-      #else
-        safe_delay(2000);
-        set_done();
-      #endif
-    }
-
-    static inline void onResumeAfterWait() {
-      #if HAS_LEDS_OFF_FLAG
-        if (leds_off_after_print) {
-          set_done();
-          leds_off_after_print = false;
-        }
-      #endif
-    }
-
-  #endif // SDSUPPORT
 };
 
 extern PrinterEventLEDs printerEventLEDs;

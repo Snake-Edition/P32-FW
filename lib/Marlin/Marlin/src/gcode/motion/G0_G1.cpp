@@ -29,8 +29,6 @@
   #include "../../feature/fwretract.h"
 #endif
 
-#include "../../sd/cardreader.h"
-
 #if ENABLED(NANODLP_Z_SYNC)
   #include "../../module/planner.h"
 #endif

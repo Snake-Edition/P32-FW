@@ -28,7 +28,6 @@
 #include "stepper.h"
 
 #include "../Marlin.h"
-#include "../sd/cardreader.h"
 #include "temperature.h"
 #include "../lcd/ultralcd.h"
 #include <option/has_loadcell.h>
@@ -36,10 +35,6 @@
 
 #if ENABLED(ENDSTOP_INTERRUPTS_FEATURE)
   #include HAL_PATH(../HAL, endstop_interrupts.h)
-#endif
-
-#if BOTH(SD_ABORT_ON_ENDSTOP_HIT, SDSUPPORT)
-  #include "printcounter.h" // for print_job_timer
 #endif
 
 #if ENABLED(BLTOUCH)
@@ -395,15 +390,6 @@ void Endstops::event_handler() {
       if (TEST(hit_state, Z_MIN_PROBE)) _ENDSTOP_HIT_ECHO(P, 'P');
     #endif
     SERIAL_EOL();
-
-    #if BOTH(SD_ABORT_ON_ENDSTOP_HIT, SDSUPPORT)
-      if (planner.abort_on_endstop_hit) {
-        card.stopSDPrint();
-        quickstop_stepper();
-        thermalManager.disable_all_heaters();
-        print_job_timer.stop();
-      }
-    #endif
   }
   prev_hit_state = hit_state;
 }

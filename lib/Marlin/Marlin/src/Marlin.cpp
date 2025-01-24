@@ -51,7 +51,6 @@
 #include "module/endstops.h"
 #include "module/probe.h"
 #include "module/temperature.h"
-#include "sd/cardreader.h"
 #include "module/configuration_store.h"
 #include "module/printcounter.h" // PrintCounter or Stopwatch
 #include "feature/closedloop.h"
@@ -127,10 +126,6 @@
 
 #if HAS_CUTTER
   #include "feature/spindle_laser.h"
-#endif
-
-#if ENABLED(SDSUPPORT)
-  CardReader card;
 #endif
 
 #if ENABLED(G38_PROBE_TARGET)
@@ -341,14 +336,14 @@ void disable_all_steppers() {
  * Printing is active when the print job timer is running
  */
 bool printingIsActive() {
-  return print_job_timer.isRunning() || IS_SD_PRINTING();
+  return print_job_timer.isRunning();
 }
 
 /**
  * Printing is paused according to SD or host indicators
  */
 bool printingIsPaused() {
-  return print_job_timer.isPaused() || IS_SD_PAUSED();
+  return print_job_timer.isPaused();
 }
 
 /**
@@ -891,10 +886,6 @@ void setup() {
   ui.init();
   ui.reset_status();
 
-  #if ENABLED(SDSUPPORT)
-    card.mount(); // Mount the SD card before settings.first_load
-  #endif
-
   // Load data from EEPROM if available (or use defaults)
   // This also updates variables in the planner, elsewhere
   settings.first_load();
@@ -1094,31 +1085,6 @@ void loop() {
   #endif
 
     idle(false); // Do an idle first so boot is slightly faster
-
-    #if ENABLED(SDSUPPORT)
-
-      card.checkautostart();
-
-      if (card.flag.abort_sd_printing) {
-        card.stopSDPrint(
-          #if SD_RESORT
-            true
-          #endif
-        );
-        queue.clear();
-        quickstop_stepper();
-        print_job_timer.stop();
-        #if DISABLED(SD_ABORT_NO_COOLDOWN)
-          thermalManager.disable_all_heaters();
-        #endif
-        thermalManager.zero_fan_speeds();
-        wait_for_heatup = false;
-        #ifdef EVENT_GCODE_SD_STOP
-          queue.inject_P(PSTR(EVENT_GCODE_SD_STOP));
-        #endif
-      }
-
-    #endif // SDSUPPORT
 
     queue.advance();
 
