@@ -116,7 +116,7 @@ extern osThreadId displayTaskHandle;
 
         assert(config_store().get_backend().get_journal_state() == journal::Backend::JournalState::ColdStart);
 
-        journal::ItemFlags exclude_flags;
+        journal::ItemFlags exclude_flags = 0;
         for (size_t i = 0; i < std::to_underlying(Item::_cnt); i++) {
             if (!items_to_keep.test(i)) {
                 exclude_flags |= items_config[i].item_flags;
