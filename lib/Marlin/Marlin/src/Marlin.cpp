@@ -87,10 +87,6 @@
   #include "feature/digipot/digipot.h"
 #endif
 
-#if ENABLED(MAX7219_DEBUG)
-  #include "feature/Max7219_Debug_LEDs.h"
-#endif
-
 #if HAS_COLOR_LEDS
   #include "feature/leds/leds.h"
 #endif
@@ -640,10 +636,6 @@ void idle(
 
   endstops.event_handler();
 
-  #if ENABLED(MAX7219_DEBUG)
-    max7219.idle_tasks();
-  #endif
-
   ui.update();
 
   #if ENABLED(HOST_KEEPALIVE_FEATURE)
@@ -767,10 +759,6 @@ void setup() {
 
   #if HAS_DRIVER(L6470)
     L6470.init();         // setup SPI and then init chips
-  #endif
-
-  #if ENABLED(MAX7219_DEBUG)
-    max7219.init();
   #endif
 
   #if ENABLED(DISABLE_DEBUG)
