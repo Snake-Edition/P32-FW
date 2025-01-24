@@ -2221,10 +2221,6 @@ static_assert(   _ARR_TEST(3,0) && _ARR_TEST(3,1) && _ARR_TEST(3,2)
   #error "USB_CS_PIN and USB_INTR_PIN are required for USB_FLASH_DRIVE_SUPPORT."
 #endif
 
-#if ENABLED(SD_FIRMWARE_UPDATE) && !defined(__AVR_ATmega2560__)
-  #error "SD_FIRMWARE_UPDATE requires an ATmega2560-based (Arduino Mega) board."
-#endif
-
 #if ENABLED(GCODE_MACROS) && !WITHIN(GCODE_MACROS_SLOTS, 1, 10)
   #error "GCODE_MACROS_SLOTS must be a number from 1 to 10."
 #endif

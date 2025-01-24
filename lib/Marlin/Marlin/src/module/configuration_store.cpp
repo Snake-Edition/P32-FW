@@ -56,10 +56,6 @@
     #include "config_store/store_c_api.h"
 #endif // USE_PRUSA_EEPROM_AS_SOURCE_OF_DEFAULT_VALUES
 
-#if ENABLED(SD_FIRMWARE_UPDATE)
-  #include "../HAL/shared/persistent_store_api.h"
-#endif
-
 #include "probe.h"
 
 #if HAS_LEVELING
@@ -204,25 +200,6 @@ void MarlinSettings::postprocess() {
   if (oldpos != current_position)
     report_current_position();
 }
-
-#if ENABLED(SD_FIRMWARE_UPDATE)
-
-  bool MarlinSettings::sd_update_status() {
-    uint8_t val;
-    persistentStore.read_data(SD_FIRMWARE_UPDATE_EEPROM_ADDR, &val);
-    return (val == SD_FIRMWARE_UPDATE_ACTIVE_VALUE);
-  }
-
-  bool MarlinSettings::set_sd_update_status(const bool enable) {
-    if (enable != sd_update_status())
-      persistentStore.write_data(
-        SD_FIRMWARE_UPDATE_EEPROM_ADDR,
-        enable ? SD_FIRMWARE_UPDATE_ACTIVE_VALUE : SD_FIRMWARE_UPDATE_INACTIVE_VALUE
-      );
-    return true;
-  }
-
-#endif // SD_FIRMWARE_UPDATE
 
 #define DEBUG_OUT ENABLED(EEPROM_CHITCHAT)
 #include "../core/debug_out.h"

@@ -151,7 +151,6 @@ if(BOARD_IS_MASTER_BOARD)
             Marlin/Marlin/src/HAL/shared/backtrace/unwmemaccess.cpp
             Marlin/Marlin/src/HAL/shared/eeprom_spi.cpp
             Marlin/Marlin/src/HAL/shared/HAL_spi_L6470.cpp
-            Marlin/Marlin/src/HAL/shared/persistent_store_api.cpp
             Marlin/Marlin/src/libs/buzzer.cpp
             Marlin/Marlin/src/libs/crc16.cpp
             Marlin/Marlin/src/libs/hex_print_routines.cpp
