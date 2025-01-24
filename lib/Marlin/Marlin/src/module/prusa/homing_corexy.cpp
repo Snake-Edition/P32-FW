@@ -6,8 +6,8 @@
 #include "homing_corexy.hpp"
 
 // sanity checks
-#ifdef PRECISE_HOMING
-    #error "HAS_PRECISE_HOMING_COREXY() is mutually exclusive with PRECISE_HOMING"
+#if HAS_PRECISE_HOMING()
+    #error "HAS_PRECISE_HOMING_COREXY() is mutually exclusive with HAS_PRECISE_HOMING()"
 #endif
 #ifdef HAS_TMC_WAVETABLE
     // Wavetable restoration needs to happen after refinement succeeds, and

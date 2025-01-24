@@ -29,6 +29,7 @@
 #include <option/has_mmu2.h>
 #include <option/has_modularbed.h>
 #include <option/has_precise_homing_corexy.h>
+#include <option/has_precise_homing.h>
 #include <option/has_toolchanger.h>
 
 // clang-format off

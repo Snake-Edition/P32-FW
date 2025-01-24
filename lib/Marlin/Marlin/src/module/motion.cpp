@@ -84,7 +84,7 @@
 #define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
 #include "../core/debug_out.h"
 
-#if ENABLED(PRECISE_HOMING)
+#if HAS_PRECISE_HOMING()
   #include "prusa/homing_cart.hpp"
 #endif
 
@@ -183,8 +183,8 @@ const feedRate_t homing_feedrate_mm_s[XYZ] PROGMEM = {
   MMM_TO_MMS(HOMING_FEEDRATE_Z)
 };
 
-#if ENABLED(PRECISE_HOMING)
-float homing_bump_divisor[] = { 0, 0, 0 }; // on printers with PRECISE_HOMING, the divisor will be loaded from eeprom
+#if HAS_PRECISE_HOMING()
+float homing_bump_divisor[] = { 0, 0, 0 }; // on printers with HAS_PRECISE_HOMING, the divisor will be loaded from eeprom
 #else
 float homing_bump_divisor[] = HOMING_BUMP_DIVISOR;
 #endif
@@ -1655,9 +1655,9 @@ void set_axis_is_at_home(const AxisEnum axis, [[maybe_unused]] bool homing_z_wit
       }
     #else
       current_position[axis] = base_home_pos(axis)
-        #if ENABLED(PRECISE_HOMING)
+        #if HAS_PRECISE_HOMING()
           - calibrated_home_offset(axis)
-        #endif // ENABLED(PRECISE_HOMING)
+        #endif
       ;
     #endif
   #endif
@@ -1839,13 +1839,13 @@ bool homeaxis(const AxisEnum axis, const feedRate_t fr_mm_s, bool invert_home_di
 
     float probe_offset;
     for(size_t attempt = 0;;) {
-      #if ENABLED(PRECISE_HOMING)
+      #if HAS_PRECISE_HOMING()
         if ((axis == X_AXIS || axis == Y_AXIS) && !invert_home_dir) {
           probe_offset = home_axis_precise(axis, axis_home_dir, can_calibrate, fr_mm_s);
           attempt = HOMING_MAX_ATTEMPTS; // call home_axis_precise() just once
         }
         else
-      #endif // ENABLED(PRECISE_HOMING)
+      #endif
         {
           if (attempt > 0 && axis == Z_AXIS) {
             // Z has no move back and after the first attempt we might be left too close on the

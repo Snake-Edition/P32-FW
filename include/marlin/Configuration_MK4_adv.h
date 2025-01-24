@@ -24,6 +24,7 @@
 // clang-format off
 
 #include <buddy/filename_defs.h>
+#include <option/has_precise_homing.h>
 
 /**
  * Configuration_adv.h
@@ -472,7 +473,7 @@
 //kill command after probing fails
 //#define HALT_ON_PROBING_ERROR
 //after enabling HOMING_MAX_ATTEMPTS, homing can fail
-#ifdef PRECISE_HOMING // we do not want homing to fail, when precise homing is disabled
+#if HAS_PRECISE_HOMING() // we do not want homing to fail, when precise homing is disabled
     #define HOMING_MAX_ATTEMPTS 10
 #endif
 

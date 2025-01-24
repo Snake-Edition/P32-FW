@@ -293,7 +293,7 @@ static void reenable_wavetable(AxisEnum axis)
 /**
  *###G28: Home all axes according to settings <a href="https://reprap.org/wiki/G-code#G28:_Move_to_Origin_.28Home.29">G28: Move to Origin (Home)</a>
  *
- *If `PRECISE_HOMING` is enabled, there are specific amount
+ *If `HAS_PRECISE_HOMING()` is enabled, there are specific amount
  *of tries to home an X/Y axis. If it fails it runs re-calibration
  *
  *Home to all axes with no parameters.

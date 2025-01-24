@@ -29,6 +29,7 @@
 #include <option/has_mmu2.h>
 #include <option/has_modularbed.h>
 #include <option/has_precise_homing_corexy.h>
+#include <option/has_precise_homing.h>
 #include <option/has_toolchanger.h>
 
 // clang-format off
@@ -1166,12 +1167,6 @@
 #define X_END_GAP 5
 #define Y_END_GAP 5
 #define Z_END_GAP 10
-
-/**
- * Calibrates X, Y homing positions and uses
- * the reference to provide repeatable homing position.
- */
-#define PRECISE_HOMING
 
 /**
  * Number of precise homing tries

@@ -26,6 +26,7 @@
 #include <option/has_toolchanger.h>
 #include <option/has_loadcell.h>
 #include <option/has_precise_homing_corexy.h>
+#include <option/has_precise_homing.h>
 
 // clang-format off
 
