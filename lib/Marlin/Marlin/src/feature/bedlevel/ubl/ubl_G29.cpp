@@ -643,60 +643,6 @@
 
     #endif // UBL_DEVEL_DEBUGGING
 
-    #if ENABLED(EEPROM_SETTINGS)
-      //
-      // Load a Mesh from the EEPROM
-      //
-      if (parser.seen('L')) {     // Load Current Mesh Data
-        g29_storage_slot = parser.has_value() ? parser.value_int() : storage_slot;
-
-        int16_t a = settings.calc_num_meshes();
-
-        if (!a) {
-          SERIAL_ECHOLNPGM("?EEPROM storage not available.");
-          return;
-        }
-
-        if (!WITHIN(g29_storage_slot, 0, a - 1)) {
-          SERIAL_ECHOLNPAIR("?Invalid storage slot.\n?Use 0 to ", a - 1);
-          return;
-        }
-
-        settings.load_mesh(g29_storage_slot);
-        storage_slot = g29_storage_slot;
-
-        SERIAL_ECHOLNPGM("Done.");
-      }
-
-      //
-      // Store a Mesh in the EEPROM
-      //
-
-      if (parser.seen('S')) {     // Store (or Save) Current Mesh Data
-        g29_storage_slot = parser.has_value() ? parser.value_int() : storage_slot;
-
-        if (g29_storage_slot == -1)                     // Special case, the user wants to 'Export' the mesh to the
-          return report_current_mesh();                 // host program to be saved on the user's computer
-
-        int16_t a = settings.calc_num_meshes();
-
-        if (!a) {
-          SERIAL_ECHOLNPGM("?EEPROM storage not available.");
-          goto LEAVE;
-        }
-
-        if (!WITHIN(g29_storage_slot, 0, a - 1)) {
-          SERIAL_ECHOLNPAIR("?Invalid storage slot.\n?Use 0 to ", a - 1);
-          goto LEAVE;
-        }
-
-        settings.store_mesh(g29_storage_slot);
-        storage_slot = g29_storage_slot;
-
-        SERIAL_ECHOLNPGM("Done.");
-      }
-    #endif
-
     if (parser.seen('T'))
       display_map(g29_map_type);
 
@@ -707,10 +653,6 @@
         gcode.process_subcommands_now_P("G29 P3.13");
         gcode.process_subcommands_now_P("G29 A");
     }
-
-    #if ENABLED(EEPROM_SETTINGS)
-    LEAVE:
-    #endif
 
     #ifdef Z_PROBE_END_SCRIPT
       if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("Z Probe End Script: ", Z_PROBE_END_SCRIPT);

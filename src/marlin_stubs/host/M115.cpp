@@ -93,12 +93,7 @@ void GcodeSuite::M115() {
     );
 
     // EEPROM (M500, M501)
-    cap_line(PSTR("EEPROM")
-    #if ENABLED(EEPROM_SETTINGS)
-                 ,
-        true
-    #endif
-    );
+    cap_line(PSTR("EEPROM"));
 
     // Volumetric Extrusion (M200)
     cap_line(PSTR("VOLUMETRIC")

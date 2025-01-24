@@ -22,7 +22,7 @@
  */
 #include "../../inc/MarlinConfigPre.h"
 
-#if EITHER(EEPROM_SETTINGS, SD_FIRMWARE_UPDATE)
+#if ENABLED(SD_FIRMWARE_UPDATE)
 
   #include "persistent_store_api.h"
   PersistentStore persistentStore;

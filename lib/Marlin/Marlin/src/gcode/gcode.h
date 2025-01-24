@@ -882,9 +882,6 @@ private:
   #if DISABLED(DISABLE_M503)
     static void M503();
   #endif
-  #if ENABLED(EEPROM_SETTINGS)
-    static void M504();
-  #endif
 
   #if ENABLED(SDSUPPORT)
     static void M524();

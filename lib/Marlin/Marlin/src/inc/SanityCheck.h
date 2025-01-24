@@ -2213,7 +2213,7 @@ static_assert(   _ARR_TEST(3,0) && _ARR_TEST(3,1) && _ARR_TEST(3,2)
 
 #endif
 
-#if ENABLED(PRINTCOUNTER) && DISABLED(EEPROM_SETTINGS)
+#if ENABLED(PRINTCOUNTER)
   #error "PRINTCOUNTER requires EEPROM_SETTINGS. Please update your Configuration."
 #endif
 

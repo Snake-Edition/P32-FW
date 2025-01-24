@@ -219,16 +219,7 @@
   }
 
   bool unified_bed_leveling::sanity_check() {
-    uint8_t error_flag = 0;
-
-    #if ENABLED(EEPROM_SETTINGS)
-      if (settings.calc_num_meshes() < 1) {
-        SERIAL_ECHOLNPGM("?Mesh too big for EEPROM.");
-        error_flag++;
-      }
-    #endif
-
-    return !!error_flag;
+    return 0;
   }
 
 #endif // AUTO_BED_LEVELING_UBL

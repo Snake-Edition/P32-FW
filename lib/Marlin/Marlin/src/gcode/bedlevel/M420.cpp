@@ -29,10 +29,6 @@
 #include "../../module/planner.h"
 #include "../../module/probe.h"
 
-#if ENABLED(EEPROM_SETTINGS)
-  #include "../../module/configuration_store.h"
-#endif
-
 #if ENABLED(EXTENSIBLE_UI)
   #include "../../lcd/extensible_ui/ui_api.h"
 #endif
@@ -104,30 +100,8 @@ void GcodeSuite::M420() {
 
       set_bed_leveling_enabled(false);
 
-      #if ENABLED(EEPROM_SETTINGS)
-        const int8_t storage_slot = parser.has_value() ? parser.value_int() : ubl.storage_slot;
-        const int16_t a = settings.calc_num_meshes();
-
-        if (!a) {
-          SERIAL_ECHOLNPGM("?EEPROM storage not available.");
-          return;
-        }
-
-        if (!WITHIN(storage_slot, 0, a - 1)) {
-          SERIAL_ECHOLNPGM("?Invalid storage slot.");
-          SERIAL_ECHOLNPAIR("?Use 0 to ", a - 1);
-          return;
-        }
-
-        settings.load_mesh(storage_slot);
-        ubl.storage_slot = storage_slot;
-
-      #else
-
-        SERIAL_ECHOLNPGM("?EEPROM storage not available.");
-        return;
-
-      #endif
+      SERIAL_ECHOLNPGM("?EEPROM storage not available.");
+      return;
     }
 
     // L or V display the map info

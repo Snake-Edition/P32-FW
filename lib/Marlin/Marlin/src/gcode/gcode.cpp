@@ -739,9 +739,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #if DISABLED(DISABLE_M503)
         case 503: M503(); break;                                  // M503: print settings currently in memory
       #endif
-      #if ENABLED(EEPROM_SETTINGS)
-        case 504: M504(); break;                                  // M504: Validate EEPROM contents
-      #endif
 
       #if ENABLED(SDSUPPORT)
         case 524: M524(); break;                                   // M524: Abort the current SD print job
