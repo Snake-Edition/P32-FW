@@ -30,7 +30,6 @@
 #if HAS_DISPLAY
   #include "../gcode/queue.h"
   #include "ultralcd.h"
-  #include "fontutils.h"
   MarlinUI ui;
   #if ENABLED(EXTENSIBLE_UI)
     #define START_OF_UTF8_CHAR(C) (((C) & 0xC0u) != 0x80u)
