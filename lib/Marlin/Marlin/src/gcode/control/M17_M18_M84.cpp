@@ -26,10 +26,6 @@
 #include "../../module/stepper.h"
 #include "gcode/parser.h"
 
-#if BOTH(AUTO_BED_LEVELING_UBL, ULTRA_LCD)
-  #include "../../feature/bedlevel/bedlevel.h"
-#endif
-
 /** \addtogroup G-Codes
  * @{
  */

@@ -55,7 +55,6 @@
 
 #elif ANY(miniVIKI, VIKI2, ELB_FULL_GRAPHIC_CONTROLLER, AZSMZ_12864)
 
-  #define IS_ULTRA_LCD
   #define DOGLCD
   #define IS_ULTIPANEL
 
@@ -189,7 +188,6 @@
 // 128x64 I2C OLED LCDs - SSD1306/SSD1309/SH1106
 #define HAS_SSD1306_OLED_I2C ANY(U8GLIB_SSD1306, U8GLIB_SSD1309, U8GLIB_SH1106)
 #if HAS_SSD1306_OLED_I2C
-  #define IS_ULTRA_LCD
   #define DOGLCD
 #endif
 
@@ -318,14 +316,9 @@
   #define ULTIPANEL
 #endif
 #if ENABLED(ULTIPANEL)
-  #define IS_ULTRA_LCD
   #ifndef NEWPANEL
     #define NEWPANEL
   #endif
-#endif
-
-#if ENABLED(IS_ULTRA_LCD)
-  #define ULTRA_LCD
 #endif
 
 #if ENABLED(IS_RRW_KEYPAD)
@@ -341,7 +334,7 @@
 #endif
 
 // Aliases for LCD features
-#define HAS_SPI_LCD          ENABLED(ULTRA_LCD)
+#define HAS_SPI_LCD         0
 #define HAS_DISPLAY         (HAS_SPI_LCD || ENABLED(EXTENSIBLE_UI))
 #define HAS_GRAPHICAL_LCD    ENABLED(DOGLCD)
 #define HAS_CHARACTER_LCD   (HAS_SPI_LCD && !HAS_GRAPHICAL_LCD)

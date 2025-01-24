@@ -73,7 +73,7 @@
  *
  * "M" Codes
  *
- * M0   - Unconditional stop - Wait for user to press a button on the LCD (Only if ULTRA_LCD is enabled)
+ * M0   - Unconditional stop - Wait for user to press a button on the LCD.
  * M1   -> M0
  * M3   - Turn ON Laser | Spindle (clockwise), set Power | Speed. (Requires SPINDLE_FEATURE or LASER_FEATURE)
  * M4   - Turn ON Laser | Spindle (counter-clockwise), set Power | Speed. (Requires SPINDLE_FEATURE or LASER_FEATURE)
