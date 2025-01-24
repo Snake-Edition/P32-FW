@@ -1,6 +1,5 @@
 #include "window_dlg_warning.hpp"
 
-#include "img_resources.hpp"
 #include <common/enum_array.hpp>
 #include <common/find_error.hpp>
 #include <common/fsm_base_types.hpp>
@@ -12,11 +11,9 @@
 static constexpr int16_t icon_size = 48;
 static constexpr int16_t qr_size = GuiDefaults::QRSize;
 static constexpr const img::Resource *phone_resource = &img::hand_qr_59x72;
-
-static constexpr Rect16 screen_rect = GuiDefaults::RectScreen;
-static constexpr uint16_t padding = HAS_MINI_DISPLAY() ? 6 : 26;
+static constexpr uint16_t padding = GuiDefaults::WarningDlgPadding;
 static constexpr int16_t top_row_height = std::max({ icon_size, (int16_t)phone_resource->h, qr_size });
-static constexpr int16_t top_row_width_spare_space = screen_rect.Width() - (icon_size + phone_resource->w + qr_size + 2 * padding);
+static constexpr int16_t top_row_width_spare_space = GuiDefaults::RectScreen.Width() - (icon_size + phone_resource->w + qr_size + 2 * padding);
 static_assert(top_row_width_spare_space > 0);
 
 static constexpr int16_t icon_left = top_row_width_spare_space / 2;
@@ -39,12 +36,6 @@ static constexpr Rect16 qr_rect = {
     qr_size,
     qr_size,
 };
-
-static constexpr Rect16 text_rect = Rect16::fromLTRB(
-    padding,
-    padding + top_row_height + padding,
-    screen_rect.Width() - padding,
-    GuiDefaults::GetButtonRect(screen_rect).Top());
 
 const img::Resource *warning_dialog_icon(WarningType warning_type) {
     switch (warning_type) {
@@ -79,12 +70,12 @@ const img::Resource *warning_dialog_icon(WarningType warning_type) {
 }
 
 DialogWarning::DialogWarning(fsm::BaseData data)
-    : IDialogMarlin(screen_rect)
+    : IDialogMarlin(GuiDefaults::RectScreen)
     , icon(this, icon_rect, nullptr)
     , phone(this, phone_rect, phone_resource)
     , qr(this, qr_rect, ErrCode::ERR_UNDEF)
-    , text(this, text_rect, is_multiline::yes, is_closed_on_click_t::yes, {})
-    , button(this, GuiDefaults::GetButtonRect(screen_rect), PhasesWarning::_last) {
+    , text(this, GuiDefaults::WarningDlgTextRect, is_multiline::yes, is_closed_on_click_t::yes, {})
+    , button(this, GuiDefaults::GetButtonRect(GuiDefaults::RectScreen), PhasesWarning::_last) {
     CaptureNormalWindow(button);
     Change(data);
 }

@@ -6,6 +6,7 @@
 #include "window_text.hpp"
 #include "radio_button_fsm.hpp"
 #include <gui/qr.hpp>
+#include "img_resources.hpp"
 
 static_assert(sizeof(fsm::PhaseData) == sizeof(WarningType), "If this does not hold, we need to revise how we send the type through teh fsm machinery.");
 class DialogWarning : public IDialogMarlin {

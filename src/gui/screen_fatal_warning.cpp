@@ -14,7 +14,7 @@
 
 using namespace crash_dump;
 
-static const constexpr uint16_t left_padding = ScreenFatalWarning::title_rect.Left();
+static const constexpr uint16_t left_padding = GuiDefaults::RedscreenTitleRect.Left();
 static const constexpr uint16_t text_start_y = 85;
 static const constexpr uint16_t qr_start_x = (GuiDefaults::ScreenWidth * 2) / 3;
 static const constexpr uint16_t info_text_width = 293;
@@ -34,7 +34,7 @@ static constexpr const char *const unknown_err_txt = N_("Unknown Error");
 ScreenFatalWarning::ScreenFatalWarning()
     : ScreenResetError(fw_version_rect)
     , header(this)
-    , err_title(this, title_rect, is_multiline::no)
+    , err_title(this, GuiDefaults::RedscreenTitleRect, is_multiline::no)
     , err_description(this, descr_rect, is_multiline::yes)
     , hand_icon(this, hand_rect, &img::hand_qr_59x72)
     , qr(this, QR_rect, ErrCode::ERR_UNDEF)

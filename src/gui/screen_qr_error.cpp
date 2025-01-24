@@ -17,7 +17,6 @@
 using namespace crash_dump;
 
 static const constexpr Rect16 hand_rect = GuiDefaults::EnableDialogBigLayout ? Rect16(270, 95, 60, 82) : Rect16(20, 155, 64, 82);
-static const constexpr Rect16 descr_rect = GuiDefaults::EnableDialogBigLayout ? Rect16(30, 85, 230, 170) : Rect16(10, 50, GuiDefaults::ScreenWidth - 20, 220);
 static const constexpr Rect16 QR_rect = GuiDefaults::EnableDialogBigLayout ? Rect16(320, 85, 130, 130) : Rect16(90, 140, 130, 130);
 static const constexpr Rect16 link_rect = GuiDefaults::EnableDialogBigLayout ? Rect16(30, 277, 170, 20) : Rect16(0, 270, GuiDefaults::ScreenWidth, 13);
 static const constexpr Rect16 qr_code_rect = GuiDefaults::EnableDialogBigLayout ? Rect16(320, 257, 130, 20) : Rect16(100, 295, 64, 13);
@@ -31,8 +30,8 @@ static constexpr const char *const unknown_err_txt = N_("Unknown Error");
 ScreenErrorQR::ScreenErrorQR()
     : ScreenResetError(fw_version_rect)
     , header(this)
-    , err_title(this, title_rect, is_multiline::no)
-    , err_description(this, descr_rect, is_multiline::yes)
+    , err_title(this, GuiDefaults::RedscreenTitleRect, is_multiline::no)
+    , err_description(this, GuiDefaults::RedscreenDescriptionRect, is_multiline::yes)
     , hand_icon(this, hand_rect, &img::hand_qr_59x72)
     , qr(this, QR_rect, ErrCode::ERR_UNDEF)
     , help_txt(this, help_txt_rect, is_multiline::no)
