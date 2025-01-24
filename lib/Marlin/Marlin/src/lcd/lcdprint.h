@@ -12,13 +12,8 @@
 
 #include "../inc/MarlinConfigPre.h"
 
-#if HAS_GRAPHICAL_LCD
-  #include "dogm/u8g_fontutf8.h"
-  typedef u8g_uint_t lcd_uint_t;
-#else
-  #define _UxGT(a) a
-  typedef uint8_t lcd_uint_t;
-#endif
+#define _UxGT(a) a
+typedef uint8_t lcd_uint_t;
 
 #define START_OF_UTF8_CHAR(C) (((C) & 0xC0u) != 0x80u)
 

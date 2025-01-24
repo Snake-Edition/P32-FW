@@ -26,12 +26,7 @@
  * Conditionals that need to be set before Configuration_adv.h or pins.h
  */
 
-#if ENABLED(CARTESIO_UI)
-
-  #define DOGLCD
-  #define IS_ULTIPANEL
-
-#elif ENABLED(ZONESTAR_LCD)
+#if ENABLED(ZONESTAR_LCD)
 
   #define ADC_KEYPAD
   #define IS_RRW_KEYPAD
@@ -53,31 +48,9 @@
 
   #define IS_RRD_FG_SC
 
-#elif ANY(miniVIKI, VIKI2, ELB_FULL_GRAPHIC_CONTROLLER, AZSMZ_12864)
-
-  #define DOGLCD
-  #define IS_ULTIPANEL
-
-  #if ENABLED(miniVIKI)
-    #define U8GLIB_ST7565_64128N
-  #elif ENABLED(VIKI2)
-    #define U8GLIB_ST7565_64128N
-  #elif ENABLED(ELB_FULL_GRAPHIC_CONTROLLER)
-    #define U8GLIB_LM6059_AF
-    #define SD_DETECT_INVERTED
-  #elif ENABLED(AZSMZ_12864)
-    #define U8GLIB_ST7565_64128N
-  #endif
-
 #elif ENABLED(OLED_PANEL_TINYBOY2)
 
   #define IS_U8GLIB_SSD1306
-  #define IS_ULTIPANEL
-
-#elif ENABLED(REPRAPWORLD_GRAPHICAL_LCD)
-
-  #define DOGLCD
-  #define U8GLIB_ST7920
   #define IS_ULTIPANEL
 
 #elif ENABLED(CR10_STOCKDISPLAY)
@@ -107,34 +80,6 @@
 
   #define MINIPANEL
 
-#elif ANY(FYSETC_MINI_12864_X_X, FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0, FYSETC_MINI_12864_2_1)
-
-  #define FYSETC_MINI_12864
-  #define DOGLCD
-  #define IS_ULTIPANEL
-  #define LED_COLORS_REDUCE_GREEN
-  #if HAS_POWER_SWITCH && EITHER(FYSETC_MINI_12864_2_0, FYSETC_MINI_12864_2_1)
-    #define LED_BACKLIGHT_TIMEOUT 10000
-  #endif
-
-  // Require LED backlighting enabled
-  #if EITHER(FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0)
-    #define RGB_LED
-  #elif ENABLED(FYSETC_MINI_12864_2_1)
-    #define LED_CONTROL_MENU
-    #define NEOPIXEL_LED
-    #undef NEOPIXEL_TYPE
-    #define NEOPIXEL_TYPE       NEO_RGB
-    #if NEOPIXEL_PIXELS < 3
-      #undef NEOPIXELS_PIXELS
-      #define NEOPIXEL_PIXELS     3
-    #endif
-    #ifndef NEOPIXEL_BRIGHTNESS
-      #define NEOPIXEL_BRIGHTNESS 127
-    #endif
-    //#define NEOPIXEL_STARTUP_TEST
-  #endif
-
 #elif ENABLED(ULTI_CONTROLLER)
 
   #define IS_ULTIPANEL
@@ -153,14 +98,6 @@
 
 #if ENABLED(IS_RRD_FG_SC)
   #define REPRAP_DISCOUNT_FULL_GRAPHIC_SMART_CONTROLLER
-#endif
-
-#if EITHER(MAKRPANEL, MINIPANEL)
-  #define IS_ULTIPANEL
-  #define DOGLCD
-  #if ENABLED(MAKRPANEL)
-    #define U8GLIB_ST7565_64128N
-  #endif
 #endif
 
 #if ENABLED(IS_U8GLIB_SSD1306)
@@ -185,19 +122,6 @@
   #define ENCODER_STEPS_PER_MENU_ITEM 1
 #endif
 
-// 128x64 I2C OLED LCDs - SSD1306/SSD1309/SH1106
-#define HAS_SSD1306_OLED_I2C ANY(U8GLIB_SSD1306, U8GLIB_SSD1309, U8GLIB_SH1106)
-#if HAS_SSD1306_OLED_I2C
-  #define DOGLCD
-#endif
-
-// ST7920-based graphical displays
-#if ANY(REPRAP_DISCOUNT_FULL_GRAPHIC_SMART_CONTROLLER, LCD_FOR_MELZI, SILVER_GATE_GLCD_CONTROLLER)
-  #define DOGLCD
-  #define U8GLIB_ST7920
-  #define IS_RRD_SC
-#endif
-
 // RepRapDiscount LCD or Graphical LCD with rotary click encoder
 #if ENABLED(IS_RRD_SC)
   #define REPRAP_DISCOUNT_SMART_CONTROLLER
@@ -210,19 +134,6 @@
 // Basic Ultipanel-like displays
 #if ANY(ULTIMAKERCONTROLLER, REPRAP_DISCOUNT_SMART_CONTROLLER, G3D_PANEL, RIGIDBOT_PANEL, PANEL_ONE, U8GLIB_SH1106)
   #define IS_ULTIPANEL
-#endif
-
-// Einstart OLED has Cardinal nav via pins defined in pins_EINSTART-S.h
-#if ENABLED(U8GLIB_SH1106_EINSTART)
-  #define DOGLCD
-  #define IS_ULTIPANEL
-#endif
-
-// FSMC/SPI TFT Panels
-#if ENABLED(FSMC_GRAPHICAL_TFT)
-  #define DOGLCD
-  #define IS_ULTIPANEL
-  #define DELAYED_BACKLIGHT_INIT
 #endif
 
 /**
@@ -335,7 +246,6 @@
 
 // Aliases for LCD features
 #define HAS_DISPLAY          ENABLED(EXTENSIBLE_UI)
-#define HAS_GRAPHICAL_LCD    ENABLED(DOGLCD)
 #define HAS_ADC_BUTTONS      ENABLED(ADC_KEYPAD)
 
 /**

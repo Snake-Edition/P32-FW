@@ -158,20 +158,6 @@
   #endif
 #endif
 
-#if HAS_GRAPHICAL_LCD
-  enum MarlinFont : uint8_t {
-    FONT_STATUSMENU = 1,
-    FONT_EDIT,
-    FONT_MENU
-  };
-#else
-  enum HD44780CharSet : uint8_t {
-    CHARSET_MENU,
-    CHARSET_INFO,
-    CHARSET_BOOT
-  };
-#endif
-
 ////////////////////////////////////////////
 //////////// MarlinUI Singleton ////////////
 ////////////////////////////////////////////

@@ -544,7 +544,7 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
  * LCD Info Screen Style
  */
 #if LCD_INFO_SCREEN_STYLE > 0
-  #if HAS_GRAPHICAL_LCD || LCD_WIDTH < 20 || LCD_HEIGHT < 4
+  #if LCD_WIDTH < 20 || LCD_HEIGHT < 4
     #error "Alternative LCD_INFO_SCREEN_STYLE requires 20x4 Character LCD."
   #elif LCD_INFO_SCREEN_STYLE > 1
     #error "LCD_INFO_SCREEN_STYLE only has options 0 and 1 at this time."
@@ -559,14 +559,12 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
     #error "LCD_PROGRESS_BAR requires SDSUPPORT or LCD_SET_PROGRESS_MANUALLY."
   #elif 1
     #error "LCD_PROGRESS_BAR requires a character LCD."
-  #elif HAS_GRAPHICAL_LCD
-    #error "LCD_PROGRESS_BAR does not apply to graphical displays."
   #elif ENABLED(FILAMENT_LCD_DISPLAY)
     #error "LCD_PROGRESS_BAR and FILAMENT_LCD_DISPLAY are not fully compatible. Comment out this line to use both."
   #elif PROGRESS_MSG_EXPIRE < 0
     #error "PROGRESS_MSG_EXPIRE must be greater than or equal to 0."
   #endif
-#elif ENABLED(LCD_SET_PROGRESS_MANUALLY) && !HAS_GRAPHICAL_LCD && DISABLED(EXTENSIBLE_UI)
+#elif ENABLED(LCD_SET_PROGRESS_MANUALLY) && DISABLED(EXTENSIBLE_UI)
   #error "LCD_SET_PROGRESS_MANUALLY requires LCD_PROGRESS_BAR, Graphical LCD, or EXTENSIBLE_UI."
 #endif
 
@@ -577,7 +575,7 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
 /**
  * Custom Boot and Status screens
  */
-#if EITHER(SHOW_CUSTOM_BOOTSCREEN, CUSTOM_STATUS_SCREEN_IMAGE) && !HAS_GRAPHICAL_LCD
+#if EITHER(SHOW_CUSTOM_BOOTSCREEN, CUSTOM_STATUS_SCREEN_IMAGE)
   #error "Graphical LCD is required for SHOW_CUSTOM_BOOTSCREEN and CUSTOM_STATUS_SCREEN_IMAGE."
 #endif
 
@@ -640,7 +638,7 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
     #error "BABYSTEPPING only implemented for Z axis on deltabots."
   #elif ENABLED(BABYSTEP_ZPROBE_OFFSET) && !HAS_BED_PROBE
     #error "BABYSTEP_ZPROBE_OFFSET requires a probe."
-  #elif ENABLED(BABYSTEP_ZPROBE_GFX_OVERLAY) && !HAS_GRAPHICAL_LCD
+  #elif ENABLED(BABYSTEP_ZPROBE_GFX_OVERLAY)
     #error "BABYSTEP_ZPROBE_GFX_OVERLAY requires a Graphical LCD."
   #elif ENABLED(BABYSTEP_ZPROBE_GFX_OVERLAY) && DISABLED(BABYSTEP_ZPROBE_OFFSET)
     #error "BABYSTEP_ZPROBE_GFX_OVERLAY requires a BABYSTEP_ZPROBE_OFFSET."
@@ -1175,7 +1173,7 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
   #endif
 #endif
 
-#if ENABLED(MESH_EDIT_GFX_OVERLAY) && !(ENABLED(AUTO_BED_LEVELING_UBL) && HAS_GRAPHICAL_LCD)
+#if ENABLED(MESH_EDIT_GFX_OVERLAY)
   #error "MESH_EDIT_GFX_OVERLAY requires AUTO_BED_LEVELING_UBL and a Graphical LCD."
 #endif
 
@@ -2394,12 +2392,10 @@ static_assert(   _ARR_TEST(3,0) && _ARR_TEST(3,1) && _ARR_TEST(3,2)
   #undef _PIN_CONFLICT
 #endif
 
-#if !HAS_GRAPHICAL_LCD
-  #if ENABLED(PRINT_PROGRESS_SHOW_DECIMALS)
-    #error "PRINT_PROGRESS_SHOW_DECIMALS currently requires a Graphical LCD."
-  #elif ENABLED(SHOW_REMAINING_TIME)
-    #error "SHOW_REMAINING_TIME currently requires a Graphical LCD."
-  #endif
+#if ENABLED(PRINT_PROGRESS_SHOW_DECIMALS)
+  #error "PRINT_PROGRESS_SHOW_DECIMALS currently requires a Graphical LCD."
+#elif ENABLED(SHOW_REMAINING_TIME)
+  #error "SHOW_REMAINING_TIME currently requires a Graphical LCD."
 #endif
 
 #if ENABLED(GCODE_COMPATIBILITY_MK3) && ENABLED(GCODE_MOTION_MODES)
