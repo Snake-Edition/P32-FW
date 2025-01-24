@@ -385,7 +385,14 @@ void phase_stepping::set_phase_origin(AxisEnum axis, float pos) {
     axis_state.active = was_active;
 }
 
-void phase_stepping::enable_phase_stepping(AxisEnum axis_num) {
+namespace phase_stepping {
+
+/**
+ * Enables phase stepping for axis. Reconfigures the motor driver. It is not
+ * safe to invoke this procedure within interrupt context. No movement shall be
+ * be in progress.
+ **/
+static void enable_phase_stepping(AxisEnum axis_num) {
     assert(axis_num < SUPPORTED_AXIS_COUNT);
     assert(!axis_states[axis_num].enabled);
     if (!planner.draining()) {
@@ -500,7 +507,12 @@ static void step_to_phase(AxisEnum axis, int phase) {
 }
 #endif
 
-void phase_stepping::disable_phase_stepping(AxisEnum axis_num) {
+/**
+ * Disable phase stepping for axis. Reconfigures the motor driver. It is not
+ * safe to invoke this procedure within interrupt context. No movement shall be
+ * in progress.
+ **/
+static void disable_phase_stepping(AxisEnum axis_num) {
     assert(axis_num < SUPPORTED_AXIS_COUNT);
     assert(axis_states[axis_num].enabled);
     assert(!planner.processing());
@@ -548,6 +560,8 @@ void phase_stepping::disable_phase_stepping(AxisEnum axis_num) {
         HAL_TIM_Base_Stop_IT(&TIM_HANDLE_FOR(phase_stepping));
     }
 }
+
+} // namespace phase_stepping
 
 void phase_stepping::enable(AxisEnum axis_num, bool enable) {
     assert(axis_num < SUPPORTED_AXIS_COUNT);

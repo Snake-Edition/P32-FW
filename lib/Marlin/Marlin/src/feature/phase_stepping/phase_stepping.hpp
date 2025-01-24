@@ -121,20 +121,6 @@ void set_phase_origin(AxisEnum axis_num, float pos);
 void enable(AxisEnum axis_num, bool enable);
 
 /**
- * Enables phase stepping for axis. Reconfigures the motor driver. It is not
- * safe to invoke this procedure within interrupt context. No movement shall be
- * be in progress.
- **/
-void enable_phase_stepping(AxisEnum axis_num);
-
-/**
- * Disable phase stepping for axis. Reconfigures the motor driver. It is not
- * safe to invoke this procedure within interrupt context. No movement shall be
- * in progress.
- **/
-void disable_phase_stepping(AxisEnum axis_num);
-
-/**
  * Clear any current and all pending targets, stopping all motion on
  * phase-stepped axes. Doesn't perform any ramp-down.
  **/
