@@ -75,7 +75,6 @@ GCodeLoader nozzle_cleaner_gcode_loader;
     (!ENABLED(ADVANCED_PAUSE_FEATURE)) || \
     HAS_FILAMENT_SENSOR || \
     HAS_BUZZER || \
-    HAS_LCD_MENU || \
     NUM_RUNOUT_SENSORS > 1 || \
     ENABLED(DUAL_X_CARRIAGE) || \
     ENABLED(ADVANCED_PAUSE_CONTINUOUS_PURGE) || \

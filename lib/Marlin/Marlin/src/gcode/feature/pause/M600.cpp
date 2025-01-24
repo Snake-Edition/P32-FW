@@ -33,10 +33,6 @@
   #include "../../../module/tool_change.h"
 #endif
 
-#if HAS_LCD_MENU
-  #include "../../../lcd/ultralcd.h"
-#endif
-
 #if ENABLED(MMU2_MENUS)
   #include "../../../lcd/menu/menu_mmu2.h"
 #endif
@@ -71,11 +67,6 @@ void GcodeSuite::M600() {
         DXC_ext = active_extruder;
       #endif
     }
-  #endif
-
-  // Show initial "wait for start" message
-  #if HAS_LCD_MENU && DISABLED(MMU2_MENUS)
-    lcd_pause_show_message(PAUSE_MESSAGE_CHANGING, PAUSE_MODE_PAUSE_PRINT, target_extruder);
   #endif
 
   #if ENABLED(HOME_BEFORE_FILAMENT_CHANGE)

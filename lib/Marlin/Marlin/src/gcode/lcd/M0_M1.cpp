@@ -27,10 +27,6 @@
 #include "../gcode.h"
 #include "../../module/stepper.h"
 
-#if HAS_LCD_MENU
-  #include "../../lcd/ultralcd.h"
-#endif
-
 #if ENABLED(EXTENSIBLE_UI)
   #include "../../lcd/extensible_ui/ui_api.h"
 #endif
@@ -90,18 +86,7 @@ void GcodeSuite::M0_M1() {
 
   planner.synchronize();
 
-  #if HAS_LCD_MENU
-
-    if (has_message)
-      ui.set_status(args, true);
-    else {
-      LCD_MESSAGEPGM(MSG_USERWAIT);
-      #if ENABLED(LCD_PROGRESS_BAR) && PROGRESS_MSG_EXPIRE > 0
-        ui.reset_progress_bar_timeout();
-      #endif
-    }
-
-  #elif ENABLED(EXTENSIBLE_UI)
+  #if ENABLED(EXTENSIBLE_UI)
 
     if (has_message)
       ExtUI::onUserConfirmRequired(args); // Can this take an SRAM string??
@@ -136,10 +121,6 @@ void GcodeSuite::M0_M1() {
 
   #if HAS_LEDS_OFF_FLAG
     printerEventLEDs.onResumeAfterWait();
-  #endif
-
-  #if HAS_LCD_MENU
-    ui.reset_status();
   #endif
 
   wait_for_user = false;

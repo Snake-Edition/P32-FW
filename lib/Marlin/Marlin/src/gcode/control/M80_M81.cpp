@@ -27,10 +27,6 @@
 
 #include "../../inc/MarlinConfig.h"
 
-#if HAS_LCD_MENU
-  #include "../../lcd/ultralcd.h"
-#endif
-
 #if HAS_SUICIDE
   #include "../../Marlin.h"
 #endif
@@ -88,10 +84,6 @@
       delay(100); // Wait for power to settle
       restore_stepper_drivers();
     #endif
-
-    #if HAS_LCD_MENU
-      ui.reset_status();
-    #endif
   }
 
 #endif // HAS_POWER_SWITCH
@@ -125,10 +117,6 @@ void GcodeSuite::M81() {
     suicide();
   #elif HAS_POWER_SWITCH
     PSU_OFF();
-  #endif
-
-  #if HAS_LCD_MENU
-    LCD_MESSAGEPGM_P(PSTR(MACHINE_NAME " " MSG_OFF "."));
   #endif
 }
 

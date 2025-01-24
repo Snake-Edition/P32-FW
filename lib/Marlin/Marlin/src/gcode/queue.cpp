@@ -462,9 +462,6 @@ void GCodeQueue::get_serial_commands() {
           // Process critical commands early
           if (strcmp(command, "M108") == 0) {
             wait_for_heatup = false;
-            #if HAS_LCD_MENU
-              wait_for_user = false;
-            #endif
           }
           if (strcmp(command, "M112") == 0) kill(PSTR("Emergency stop (M112)"), nullptr, true);
           if (strcmp(command, "M410") == 0) quickstop_stepper();
@@ -564,13 +561,7 @@ void GCodeQueue::get_serial_commands() {
             #if ENABLED(PRINTER_EVENT_LEDS)
               printerEventLEDs.onPrintCompleted();
               #if HAS_RESUME_CONTINUE
-                inject_P(PSTR("M0 S"
-                  #if HAS_LCD_MENU
-                    "1800"
-                  #else
-                    "60"
-                  #endif
-                ));
+                inject_P(PSTR("M0 S60"));
               #endif
             #endif // PRINTER_EVENT_LEDS
           }

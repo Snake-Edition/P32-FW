@@ -30,7 +30,7 @@
 #define HAS_DIGITAL_BUTTONS (!HAS_ADC_BUTTONS && ENABLED(NEWPANEL) || BUTTONS_EXIST(EN1, EN2) || ANY_BUTTON(ENC, BACK, UP, DWN, LFT, RT))
 #define HAS_SHIFT_ENCODER   (!HAS_ADC_BUTTONS && (ENABLED(REPRAPWORLD_KEYPAD) || (HAS_SPI_LCD && DISABLED(NEWPANEL))))
 #define HAS_ENCODER_WHEEL  ((!HAS_ADC_BUTTONS && ENABLED(NEWPANEL)) || BUTTONS_EXIST(EN1, EN2))
-#define HAS_ENCODER_ACTION (HAS_LCD_MENU || ENABLED(ULTIPANEL_FEEDMULTIPLY))
+#define HAS_ENCODER_ACTION ENABLED(ULTIPANEL_FEEDMULTIPLY)
 
 // I2C buttons must be read in the main thread
 #define HAS_SLOW_BUTTONS EITHER(LCD_I2C_VIKI, LCD_I2C_PANELOLU2)
@@ -61,45 +61,6 @@
   #else
     #define LCD_UPDATE_INTERVAL 100
   #endif
-
-  #if HAS_LCD_MENU
-
-    #if HAS_GRAPHICAL_LCD
-      #define SETCURSOR(col, row) lcd_moveto(col * (MENU_FONT_WIDTH), (row + 1) * (MENU_FONT_HEIGHT))
-      #define SETCURSOR_RJ(len, row) lcd_moveto(LCD_PIXEL_WIDTH - (len) * (MENU_FONT_WIDTH), (row + 1) * (MENU_FONT_HEIGHT))
-    #else
-      #define SETCURSOR(col, row) lcd_moveto(col, row)
-      #define SETCURSOR_RJ(len, row) lcd_moveto(LCD_WIDTH - (len), row)
-    #endif
-
-    #include "lcdprint.h"
-
-    void _wrap_string(uint8_t &col, uint8_t &row, const char * const string, read_byte_cb_t cb_read_byte, const bool wordwrap=false);
-    inline void wrap_string_P(uint8_t &col, uint8_t &row, PGM_P const pstr, const bool wordwrap=false) { _wrap_string(col, row, pstr, read_byte_rom, wordwrap); }
-    inline void wrap_string(uint8_t &col, uint8_t &row, const char * const string, const bool wordwrap=false) { _wrap_string(col, row, string, read_byte_ram, wordwrap); }
-
-    #if ENABLED(SDSUPPORT)
-      #include "../sd/cardreader.h"
-    #endif
-
-    typedef void (*screenFunc_t)();
-    typedef void (*menuAction_t)();
-
-    // Manual Movement
-    extern float move_menu_scale;
-
-    #if ENABLED(ADVANCED_PAUSE_FEATURE)
-      void lcd_pause_show_message(const PauseMessage message,
-                                  const PauseMode mode=PAUSE_MODE_SAME,
-                                  const uint8_t extruder=active_extruder);
-    #endif
-
-    #if ENABLED(AUTO_BED_LEVELING_UBL)
-      void lcd_mesh_edit_setup(const float &initial);
-      float lcd_mesh_edit();
-    #endif
-
-  #endif // HAS_LCD_MENU
 
 #endif
 
@@ -248,9 +209,6 @@ class MarlinUI {
 public:
 
   MarlinUI() {
-    #if HAS_LCD_MENU
-      currentScreen = status_screen;
-    #endif
   }
 
   #if HAS_BUZZER
@@ -410,99 +368,7 @@ public:
 
   #endif
 
-  #if HAS_LCD_MENU
-
-    #if ENABLED(TOUCH_BUTTONS)
-      static uint8_t repeat_delay;
-    #endif
-
-    #if ENABLED(ENCODER_RATE_MULTIPLIER)
-      static bool encoderRateMultiplierEnabled;
-      static millis_t lastEncoderMovementMillis;
-      static void enable_encoder_multiplier(const bool onoff);
-    #endif
-
-    #if ENABLED(SDSUPPORT)
-      #if ENABLED(SCROLL_LONG_FILENAMES)
-        static uint8_t filename_scroll_pos, filename_scroll_max;
-      #endif
-      static const char * scrolled_filename(CardReader &theCard, const uint8_t maxlen, uint8_t hash, const bool doScroll);
-    #endif
-
-    #if IS_KINEMATIC
-      static bool processing_manual_move;
-    #else
-      static constexpr bool processing_manual_move = false;
-    #endif
-
-    #if E_MANUAL > 1
-      static int8_t manual_move_e_index;
-    #else
-      static constexpr int8_t manual_move_e_index = 0;
-    #endif
-
-    static int16_t preheat_hotend_temp[2], preheat_bed_temp[2];
-    static uint8_t preheat_fan_speed[2];
-
-    // Select Screen (modal NO/YES style dialog)
-    static bool selection;
-    static void set_selection(const bool sel) { selection = sel; }
-    static bool update_selection();
-
-    static void manage_manual_move();
-
-    static bool lcd_clicked;
-    static bool use_click();
-
-    static void synchronize(PGM_P const msg=nullptr);
-
-    static screenFunc_t currentScreen;
-    static void goto_screen(const screenFunc_t screen, const uint16_t encoder=0, const uint8_t top=0, const uint8_t items=0);
-    static void save_previous_screen();
-    static void goto_previous_screen(
-      #if ENABLED(TURBO_BACK_MENU_ITEM)
-        const bool is_back
-      #endif
-    );
-
-    #if ENABLED(TURBO_BACK_MENU_ITEM)
-      // Various menu items require a "void (*)()" to point to
-      // this function so a default argument *won't* work
-      static inline void goto_previous_screen() { goto_previous_screen(false); }
-    #endif
-
-    static void return_to_status();
-    static inline bool on_status_screen() { return currentScreen == status_screen; }
-    static inline void run_current_screen() { (*currentScreen)(); }
-
-    #if ENABLED(LIGHTWEIGHT_UI)
-      static void lcd_in_status(const bool inStatus);
-    #endif
-
-    static inline void defer_status_screen(const bool defer=true) {
-      #if LCD_TIMEOUT_TO_STATUS
-        defer_return_to_status = defer;
-      #else
-        UNUSED(defer);
-      #endif
-    }
-
-    static inline void goto_previous_screen_no_defer() {
-      defer_status_screen(false);
-      goto_previous_screen();
-    }
-
-    #if ENABLED(SD_REPRINT_LAST_SELECTED_FILE)
-      static void reselect_last_file();
-    #endif
-
-    #if ENABLED(AUTO_BED_LEVELING_UBL)
-      static void ubl_plot(const uint8_t x_plot, const uint8_t y_plot);
-    #endif
-
-    static void draw_select_screen_prompt(PGM_P const pref, const char * const string=nullptr, PGM_P const suff=nullptr);
-
-  #elif HAS_SPI_LCD
+  #if HAS_SPI_LCD
 
     static constexpr bool lcd_clicked = false;
     static constexpr bool on_status_screen() { return true; }
@@ -516,13 +382,7 @@ public:
     static constexpr bool wait_for_bl_move = false;
   #endif
 
-  #if HAS_LCD_MENU && ENABLED(AUTO_BED_LEVELING_UBL)
-    static bool external_control;
-    FORCE_INLINE static void capture() { external_control = true; }
-    FORCE_INLINE static void release() { external_control = false; }
-  #else
-    static constexpr bool external_control = false;
-  #endif
+  static constexpr bool external_control = false;
 
   #if HAS_ENCODER_ACTION
 
@@ -584,13 +444,6 @@ private:
   #endif
 
   #if HAS_SPI_LCD
-    #if HAS_LCD_MENU
-      #if LCD_TIMEOUT_TO_STATUS
-        static bool defer_return_to_status;
-      #else
-        static constexpr bool defer_return_to_status = false;
-      #endif
-    #endif
     static void draw_status_screen();
   #endif
 };

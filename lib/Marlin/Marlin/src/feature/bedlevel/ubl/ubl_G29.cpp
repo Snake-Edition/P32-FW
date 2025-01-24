@@ -81,10 +81,6 @@
 
   #define UBL_G29_P31
 
-  #if HAS_LCD_MENU
-    void _lcd_ubl_output_map_lcd();
-  #endif
-
   #define SIZE_OF_LITTLE_RAISE 1
   #define BIG_RAISE_NOT_NEEDED 0
 
@@ -532,58 +528,8 @@
         #endif // HAS_BED_PROBE
 
         case 2: {
-          #if HAS_LCD_MENU
-            //
-            // Manually Probe Mesh in areas that can't be reached by the probe
-            //
-            SERIAL_ECHOLNPGM("Manually probing unreachable mesh locations.");
-            do_blocking_move_to_z(Z_CLEARANCE_BETWEEN_PROBES);
-
-            if (parser.seen('C') && !xy_seen) {
-              /**
-               * Use a good default location for the path.
-               * The flipped > and < operators in these comparisons is intentional.
-               * It should cause the probed points to follow a nice path on Cartesian printers.
-               * It may make sense to have Delta printers default to the center of the bed.
-               * Until that is decided, this can be forced with the X and Y parameters.
-               */
-              g29_pos.set(
-                #if IS_KINEMATIC
-                  X_HOME_POS, Y_HOME_POS
-                #else
-                  probe_offset.x > 0 ? X_BED_SIZE : 0,
-                  probe_offset.y < 0 ? Y_BED_SIZE : 0
-                #endif
-              );
-            }
-
-            if (parser.seen('B')) {
-              g29_card_thickness = parser.has_value() ? parser.value_float() : measure_business_card_thickness((float) Z_CLEARANCE_BETWEEN_PROBES);
-              if (ABS(g29_card_thickness) > 1.5f) {
-                SERIAL_ECHOLNPGM("?Error in Business Card measurement.");
-                return;
-              }
-              probe_deployed = true;
-            }
-
-            if (!position_is_reachable(g29_pos)) {
-              SERIAL_ECHOLNPGM("XY outside printable radius.");
-              return;
-            }
-
-            const float height = parser.floatval('H', Z_CLEARANCE_BETWEEN_PROBES);
-            manually_probe_remaining_mesh(g29_pos, height, g29_card_thickness, parser.seen('T'));
-
-            SERIAL_ECHOLNPGM("G29 P2 finished.");
-
-            report_current_position();
-
-          #else
-
-            SERIAL_ECHOLNPGM("?P2 is only available when an LCD is present.");
-            return;
-
-          #endif
+          SERIAL_ECHOLNPGM("?P2 is only available when an LCD is present.");
+          return;
         } break;
 
         case 3: {
@@ -651,12 +597,8 @@
         }
 
         case 4: // Fine Tune (i.e., Edit) the Mesh
-          #if HAS_LCD_MENU
-            fine_tune_mesh(g29_pos, parser.seen('T'));
-          #else
-            SERIAL_ECHOLNPGM("?P4 is only available when an LCD is present.");
-            return;
-          #endif
+          SERIAL_ECHOLNPGM("?P4 is only available when an LCD is present.");
+          return;
           break;
 
         case 5: adjust_mesh_to_mean(g29_c_flag, g29_constant); break;
@@ -770,13 +712,6 @@
     LEAVE:
     #endif
 
-    #if HAS_LCD_MENU
-      ui.reset_alert_level();
-      ui.quick_feedback();
-      ui.reset_status();
-      ui.release();
-    #endif
-
     #ifdef Z_PROBE_END_SCRIPT
       if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("Z Probe End Script: ", Z_PROBE_END_SCRIPT);
       if (probe_deployed) {
@@ -868,10 +803,6 @@
  * This attempts to fill in locations closest to the nozzle's start location first.
  */
     void unified_bed_leveling::probe_entire_mesh(const xy_pos_t &near, const bool do_ubl_mesh_map, const bool stow_probe, const bool do_furthest) {
-      #if HAS_LCD_MENU
-        ui.capture();
-      #endif
-
       save_ubl_active_state_and_disable();  // No bed level correction so only raw data is obtained
 
       #if ENABLED(NOZZLE_LOAD_CELL)
@@ -898,18 +829,6 @@
         SERIAL_ECHOLNPAIR("\nProbing mesh point ", point_num, "/", int(GRID_MAX_POINTS), ".\n");
         #if HAS_DISPLAY
           ui.status_printf_P(0, PSTR(S_FMT " %i/%i"), GET_TEXT(MSG_PROBING_MESH), point_num, int(GRID_MAX_POINTS));
-        #endif
-
-        #if HAS_LCD_MENU
-          if (ui.button_pressed()) {
-            ui.quick_feedback(false); // Preserve button state for click-and-hold
-            SERIAL_ECHOLNPGM("\nMesh only partially populated.\n");
-            STOW_PROBE();
-            ui.wait_for_release();
-            ui.quick_feedback();
-            ui.release();
-            return restore_ubl_active_state_and_leave();
-          }
         #endif
 
         best = do_furthest
@@ -1068,274 +987,8 @@
 
   #endif // HAS_BED_PROBE
 
-  #if HAS_LCD_MENU
-
-    typedef void (*clickFunc_t)();
-
-    bool click_and_hold(const clickFunc_t func=nullptr) {
-      if (ui.button_pressed()) {
-        ui.quick_feedback(false);                // Preserve button state for click-and-hold
-        const millis_t nxt = millis() + 1500UL;
-        while (ui.button_pressed()) {                // Loop while the encoder is pressed. Uses hardware flag!
-          idle(true);                             // idle, of course
-          if (ELAPSED(millis(), nxt)) {           // After 1.5 seconds
-            ui.quick_feedback();
-            if (func) (*func)();
-            ui.wait_for_release();
-            return true;
-          }
-        }
-      }
-      serial_delay(15);
-      return false;
-    }
-
-    void unified_bed_leveling::move_z_with_encoder(const float &multiplier) {
-      ui.wait_for_release();
-      while (!ui.button_pressed()) {
-        idle(true);
-        gcode.reset_stepper_timeout(); // Keep steppers powered
-        if (encoder_diff) {
-          do_blocking_move_to_z(current_position.z + float(encoder_diff) * multiplier);
-          encoder_diff = 0;
-        }
-      }
-    }
-
-    float unified_bed_leveling::measure_point_with_encoder() {
-      KEEPALIVE_STATE(PAUSED_FOR_USER);
-      move_z_with_encoder(0.01f);
-      return current_position.z;
-    }
-
-    static void echo_and_take_a_measurement() { SERIAL_ECHOLNPGM(" and take a measurement."); }
-
-    float unified_bed_leveling::measure_business_card_thickness(float in_height) {
-      ui.capture();
-      save_ubl_active_state_and_disable();   // Disable bed level correction for probing
-
-      do_blocking_move_to(0.5f * (MESH_MAX_X - (MESH_MIN_X)), 0.5f * (MESH_MAX_Y - (MESH_MIN_Y)), in_height);
-        //, _MIN(planner.settings.max_feedrate_mm_s[X_AXIS], planner.settings.max_feedrate_mm_s[Y_AXIS]) * 0.5f);
-      planner.synchronize();
-
-      SERIAL_ECHOPGM("Place shim under nozzle");
-      LCD_MESSAGEPGM(MSG_UBL_BC_INSERT);
-      ui.return_to_status();
-      echo_and_take_a_measurement();
-
-      const float z1 = measure_point_with_encoder();
-      do_blocking_move_to_z(current_position.z + SIZE_OF_LITTLE_RAISE);
-      planner.synchronize();
-
-      SERIAL_ECHOPGM("Remove shim");
-      LCD_MESSAGEPGM(MSG_UBL_BC_REMOVE);
-      echo_and_take_a_measurement();
-
-      const float z2 = measure_point_with_encoder();
-
-      do_blocking_move_to_z(current_position.z + Z_CLEARANCE_BETWEEN_PROBES);
-
-      const float thickness = ABS(z1 - z2);
-
-      if (g29_verbose_level > 1) {
-        SERIAL_ECHOPAIR_F("Business Card is ", thickness, 4);
-        SERIAL_ECHOLNPGM("mm thick.");
-      }
-
-      ui.release();
-
-      restore_ubl_active_state_and_leave();
-
-      return thickness;
-    }
-
-    void unified_bed_leveling::manually_probe_remaining_mesh(const xy_pos_t &pos, const float &z_clearance, const float &thick, const bool do_ubl_mesh_map) {
-
-      ui.capture();
-
-      save_ubl_active_state_and_disable();  // No bed level correction so only raw data is obtained
-      do_blocking_move_to_xy_z(current_position, z_clearance);
-
-      ui.return_to_status();
-
-      mesh_index_pair location;
-      xy_int8_t &lpos = location.pos;
-      do {
-        location = find_closest_mesh_point_of_type(INVALID, pos);
-        // It doesn't matter if the probe can't reach the NAN location. This is a manual probe.
-        if (!location.valid()) continue;
-
-        const xyz_pos_t ppos = {
-          mesh_index_to_xpos(lpos.x),
-          mesh_index_to_ypos(lpos.y),
-          Z_CLEARANCE_BETWEEN_PROBES
-        };
-
-        if (!position_is_reachable(ppos)) break; // SHOULD NOT OCCUR (find_closest_mesh_point only returns reachable points)
-
-        LCD_MESSAGEPGM(MSG_UBL_MOVING_TO_NEXT);
-
-        do_blocking_move_to(ppos);
-        do_blocking_move_to_z(z_clearance);
-
-        KEEPALIVE_STATE(PAUSED_FOR_USER);
-        ui.capture();
-
-        if (do_ubl_mesh_map) display_map(g29_map_type);  // show user where we're probing
-
-        serialprintPGM(parser.seen('B') ? GET_TEXT(MSG_UBL_BC_INSERT) : GET_TEXT(MSG_UBL_BC_INSERT2));
-
-        const float z_step = 0.01f;                         // existing behavior: 0.01mm per click, occasionally step
-        //const float z_step = planner.mm_per_step[Z_AXIS]; // approx one step each click
-
-        move_z_with_encoder(z_step);
-
-        if (click_and_hold()) {
-          SERIAL_ECHOLNPGM("\nMesh only partially populated.");
-          do_blocking_move_to_z(Z_CLEARANCE_DEPLOY_PROBE);
-          ui.release();
-          return restore_ubl_active_state_and_leave();
-        }
-
-        z_values[lpos.x][lpos.y] = current_position.z - thick;
-        #if ENABLED(EXTENSIBLE_UI)
-          ExtUI::onMeshUpdate(location, z_values[lpos.x][lpos.y]);
-        #endif
-
-        if (g29_verbose_level > 2)
-          SERIAL_ECHOLNPAIR_F("Mesh Point Measured at: ", z_values[lpos.x][lpos.y], 6);
-        SERIAL_FLUSH(); // Prevent host M105 buffer overrun.
-      } while (location.valid());
-
-      if (do_ubl_mesh_map) display_map(g29_map_type);  // show user where we're probing
-
-      restore_ubl_active_state_and_leave();
-      do_blocking_move_to_xy_z(pos, Z_CLEARANCE_DEPLOY_PROBE);
-    }
-
-    inline void set_message_with_feedback(PGM_P const msg_P) {
-      ui.set_status_P(msg_P);
-      ui.quick_feedback();
-    }
-
-    void abort_fine_tune() {
-      ui.return_to_status();
-      do_blocking_move_to_z(Z_CLEARANCE_BETWEEN_PROBES);
-      set_message_with_feedback(GET_TEXT(MSG_EDITING_STOPPED));
-    }
-
-    void unified_bed_leveling::fine_tune_mesh(const xy_pos_t &pos, const bool do_ubl_mesh_map) {
-      if (!parser.seen('R'))      // fine_tune_mesh() is special. If no repetition count flag is specified
-        g29_repetition_cnt = 1;   // do exactly one mesh location. Otherwise use what the parser decided.
-
-      #if ENABLED(UBL_MESH_EDIT_MOVES_Z)
-        const float h_offset = parser.seenval('H') ? parser.value_linear_units() : 0;
-        if (!WITHIN(h_offset, 0, 10)) {
-          SERIAL_ECHOLNPGM("Offset out of bounds. (0 to 10mm)\n");
-          return;
-        }
-      #endif
-
-      mesh_index_pair location;
-
-      if (!position_is_reachable(pos)) {
-        SERIAL_ECHOLNPGM("(X,Y) outside printable radius.");
-        return;
-      }
-
-      save_ubl_active_state_and_disable();
-
-      LCD_MESSAGEPGM(MSG_UBL_FINE_TUNE_MESH);
-      ui.capture();                                         // Take over control of the LCD encoder
-
-      do_blocking_move_to_xy_z(pos, Z_CLEARANCE_BETWEEN_PROBES); // Move to the given XY with probe clearance
-
-      #if ENABLED(UBL_MESH_EDIT_MOVES_Z)
-        do_blocking_move_to_z(h_offset);                    // Move Z to the given 'H' offset
-      #endif
-
-      MeshFlags done_flags{0};
-      xy_int8_t &lpos = location.pos;
-      do {
-        location = find_closest_mesh_point_of_type(SET_IN_BITMAP, pos, false, &done_flags);
-
-        if (lpos.x < 0) break;                              // Stop when there are no more reachable points
-
-        done_flags.mark(lpos);                              // Mark this location as 'adjusted' so a new
-                                                            // location is used on the next loop
-        const xyz_pos_t raw = {
-          mesh_index_to_xpos(lpos.x),
-          mesh_index_to_ypos(lpos.y),
-          Z_CLEARANCE_BETWEEN_PROBES
-        };
-
-        if (!position_is_reachable(raw)) break;             // SHOULD NOT OCCUR (find_closest_mesh_point_of_type only returns reachable)
-
-        do_blocking_move_to(raw);                           // Move the nozzle to the edit point with probe clearance
-
-        #if ENABLED(UBL_MESH_EDIT_MOVES_Z)
-          do_blocking_move_to_z(h_offset);                  // Move Z to the given 'H' offset before editing
-        #endif
-
-        KEEPALIVE_STATE(PAUSED_FOR_USER);
-
-        if (do_ubl_mesh_map) display_map(g29_map_type);     // Display the current point
-
-        ui.refresh();
-
-        float new_z = z_values[lpos.x][lpos.y];
-        if (isnan(new_z)) new_z = 0;                        // Invalid points begin at 0
-        new_z = FLOOR(new_z * 1000) * 0.001f;               // Chop off digits after the 1000ths place
-
-        lcd_mesh_edit_setup(new_z);
-
-        do {
-          new_z = lcd_mesh_edit();
-          #if ENABLED(UBL_MESH_EDIT_MOVES_Z)
-            do_blocking_move_to_z(h_offset + new_z);        // Move the nozzle as the point is edited
-          #endif
-          idle(true);
-          SERIAL_FLUSH();                                   // Prevent host M105 buffer overrun.
-        } while (!ui.button_pressed());
-
-        if (!lcd_map_control) ui.return_to_status();        // Just editing a single point? Return to status
-
-        if (click_and_hold(abort_fine_tune)) break;         // Button held down? Abort editing
-
-        z_values[lpos.x][lpos.y] = new_z;                   // Save the updated Z value
-        #if ENABLED(EXTENSIBLE_UI)
-          ExtUI::onMeshUpdate(location, new_z);
-        #endif
-
-        serial_delay(20);                                   // No switch noise
-        ui.refresh();
-
-      } while (lpos.x >= 0 && --g29_repetition_cnt > 0);
-
-      ui.release();
-
-      if (do_ubl_mesh_map) display_map(g29_map_type);
-      restore_ubl_active_state_and_leave();
-
-      do_blocking_move_to_xy_z(pos, Z_CLEARANCE_BETWEEN_PROBES);
-
-      LCD_MESSAGEPGM(MSG_UBL_DONE_EDITING_MESH);
-      SERIAL_ECHOLNPGM("Done Editing Mesh");
-
-      if (lcd_map_control)
-        ui.goto_screen(_lcd_ubl_output_map_lcd);
-      else
-        ui.return_to_status();
-    }
-
-  #endif // HAS_LCD_MENU
-
   bool unified_bed_leveling::g29_parameter_parsing() {
     bool err_flag = false;
-
-    #if HAS_LCD_MENU
-      set_message_with_feedback(GET_TEXT(MSG_UBL_DOING_G29));
-    #endif
 
     g29_constant = 0;
     g29_repetition_cnt = 0;
@@ -1472,9 +1125,6 @@
       ubl_state_recursion_chk++;
       if (ubl_state_recursion_chk != 1) {
         SERIAL_ECHOLNPGM("save_ubl_active_state_and_disabled() called multiple times in a row.");
-        #if HAS_LCD_MENU
-          set_message_with_feedback(GET_TEXT(MSG_UBL_SAVE_ERROR));
-        #endif
         return;
       }
     #endif
@@ -1486,9 +1136,6 @@
     #if ENABLED(UBL_DEVEL_DEBUGGING)
       if (--ubl_state_recursion_chk) {
         SERIAL_ECHOLNPGM("restore_ubl_active_state_and_leave() called too many times.");
-        #if HAS_LCD_MENU
-          set_message_with_feedback(GET_TEXT(MSG_UBL_RESTORE_ERROR));
-        #endif
         return;
       }
     #endif

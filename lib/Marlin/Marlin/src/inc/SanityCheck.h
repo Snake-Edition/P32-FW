@@ -570,7 +570,7 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
   #error "LCD_SET_PROGRESS_MANUALLY requires LCD_PROGRESS_BAR, Graphical LCD, or EXTENSIBLE_UI."
 #endif
 
-#if !HAS_LCD_MENU && ENABLED(SD_REPRINT_LAST_SELECTED_FILE)
+#if ENABLED(SD_REPRINT_LAST_SELECTED_FILE)
   #error "SD_REPRINT_LAST_SELECTED_FILE currently requires a Marlin-native LCD menu."
 #endif
 
@@ -992,7 +992,7 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
     #error "You probably want to use Max Endstops for DELTA!"
   #elif ENABLED(ENABLE_LEVELING_FADE_HEIGHT) && !UBL_SEGMENTED
     #error "ENABLE_LEVELING_FADE_HEIGHT on DELTA requires AUTO_BED_LEVELING_UBL."
-  #elif ENABLED(DELTA_AUTO_CALIBRATION) && !(HAS_BED_PROBE || HAS_LCD_MENU)
+  #elif ENABLED(DELTA_AUTO_CALIBRATION) && !(HAS_BED_PROBE)
     #error "DELTA_AUTO_CALIBRATION requires a probe or LCD Controller."
   #endif
 #endif
@@ -1196,11 +1196,7 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
  * LCD_BED_LEVELING requirements
  */
 #if ENABLED(LCD_BED_LEVELING)
-  #if !HAS_LCD_MENU
-    #error "LCD_BED_LEVELING requires a programmable LCD controller."
-  #else
-    #error "LCD_BED_LEVELING requires AUTO_BED_LEVELING."
-  #endif
+  #error "LCD_BED_LEVELING requires a programmable LCD controller."
 #endif
 
 /**

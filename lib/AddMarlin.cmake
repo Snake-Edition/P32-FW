@@ -117,7 +117,6 @@ if(BOARD_IS_MASTER_BOARD)
             Marlin/Marlin/src/gcode/host/M16.cpp
             Marlin/Marlin/src/gcode/lcd/M0_M1.cpp
             Marlin/Marlin/src/gcode/lcd/M117.cpp
-            Marlin/Marlin/src/gcode/lcd/M145.cpp
             Marlin/Marlin/src/gcode/lcd/M300.cpp
             Marlin/Marlin/src/gcode/lcd/M73_PE.cpp
             Marlin/Marlin/src/gcode/motion/G0_G1.cpp

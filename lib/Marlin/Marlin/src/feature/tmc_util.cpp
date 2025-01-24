@@ -44,10 +44,6 @@
   #endif
 #endif
 
-#if HAS_LCD_MENU
-  #include "../module/stepper.h"
-#endif
-
 #if !defined(STALL_THRESHOLD_TMC2130) && !BOARD_IS_DWARF()
   #include <config_store/store_instance.hpp>
 #endif

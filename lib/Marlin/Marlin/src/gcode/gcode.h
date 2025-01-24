@@ -149,7 +149,6 @@
  * M129 - EtoP Closed. (Requires BARICUDA)
  * M140 - Set bed target temp. S<temp>
  * M141 - Set heated chamber target temp. S<temp> (Requires a chamber heater)
- * M145 - Set heatup values for materials on the LCD. H<hotend> B<bed> F<fan speed> for S<material> (0=PLA, 1=ABS)
  * M149 - Set temperature units. (Requires TEMPERATURE_UNITS_SUPPORT)
  * M150 - Set Status LED Color as R<red> U<green> B<blue> P<bright>. Values 0-255. (Requires BLINKM, RGB_LED, RGBW_LED, NEOPIXEL_LED, PCA9533, or PCA9632).
  * M155 - Auto-report temperatures with interval of S<seconds>. (Requires AUTO_REPORT_TEMPERATURES)
@@ -714,10 +713,6 @@ private:
 
   #if HAS_TEMP_HEATBREAK_CONTROL
     static void M142();
-  #endif
-
-  #if HOTENDS && HAS_LCD_MENU
-    static void M145();
   #endif
 
   #if ENABLED(TEMPERATURE_UNITS_SUPPORT)

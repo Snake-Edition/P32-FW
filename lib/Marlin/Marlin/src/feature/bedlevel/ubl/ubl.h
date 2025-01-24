@@ -115,10 +115,6 @@ class unified_bed_leveling {
 
     static bed_mesh_t z_values;
 
-    #if HAS_LCD_MENU
-      static bool lcd_map_control;
-    #endif
-
     static volatile int encoder_diff; // Volatile because it's changed at interrupt time.
 
     /// Tracked on probe_major_points. You have to reset it yourself before the procedure

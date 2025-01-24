@@ -31,10 +31,6 @@
 #include "../../../sd/cardreader.h"
 #include "../../../module/printcounter.h"
 
-#if HAS_LCD_MENU
-  #include "../../../lcd/ultralcd.h"
-#endif
-
 /**
  * M125: Store current position and move to parking position.
  *       Called on pause (by M25) to prevent material leaking onto the
@@ -77,12 +73,7 @@ void GcodeSuite::M125() {
     constexpr bool sd_printing = false;
   #endif
 
-  #if HAS_LCD_MENU
-    lcd_pause_show_message(PAUSE_MESSAGE_PAUSING, PAUSE_MODE_PAUSE_PRINT);
-    const bool show_lcd = parser.seenval('P');
-  #else
-    constexpr bool show_lcd = false;
-  #endif
+  constexpr bool show_lcd = false;
 
   if (pause_print(retract, park_point, 0, show_lcd)) {
     if (!sd_printing || show_lcd) {

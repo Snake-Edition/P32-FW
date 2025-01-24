@@ -28,4 +28,3 @@
 #endif
 
 #define EXTENSIBLE_UI
-#define NO_LCD_MENUS

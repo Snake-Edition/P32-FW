@@ -302,13 +302,6 @@
 #endif
 
 /**
- * Override here because this is set in Configuration_adv.h
- */
-#if HAS_LCD_MENU && DISABLED(ELB_FULL_GRAPHIC_CONTROLLER)
-  #undef SD_DETECT_INVERTED
-#endif
-
-/**
  * Set defaults for missing (newer) options
  */
 #ifndef DISABLE_INACTIVE_X

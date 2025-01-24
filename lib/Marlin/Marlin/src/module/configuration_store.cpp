@@ -720,15 +720,9 @@ void MarlinSettings::postprocess() {
     {
       _FIELD_TEST(ui_preheat_hotend_temp);
 
-      #if HOTENDS && HAS_LCD_MENU
-        const int16_t (&ui_preheat_hotend_temp)[2]  = ui.preheat_hotend_temp,
-                      (&ui_preheat_bed_temp)[2]     = ui.preheat_bed_temp;
-        const uint8_t (&ui_preheat_fan_speed)[2]    = ui.preheat_fan_speed;
-      #else
-        constexpr int16_t ui_preheat_hotend_temp[2] = { PREHEAT_1_TEMP_HOTEND, PREHEAT_2_TEMP_HOTEND },
-                          ui_preheat_bed_temp[2]    = { PREHEAT_1_TEMP_BED, PREHEAT_2_TEMP_BED };
-        constexpr uint8_t ui_preheat_fan_speed[2]   = { PREHEAT_1_FAN_SPEED, PREHEAT_2_FAN_SPEED };
-      #endif
+      constexpr int16_t ui_preheat_hotend_temp[2] = { PREHEAT_1_TEMP_HOTEND, PREHEAT_2_TEMP_HOTEND },
+                        ui_preheat_bed_temp[2]    = { PREHEAT_1_TEMP_BED, PREHEAT_2_TEMP_BED };
+      constexpr uint8_t ui_preheat_fan_speed[2]   = { PREHEAT_1_FAN_SPEED, PREHEAT_2_FAN_SPEED };
 
       EEPROM_WRITE(ui_preheat_hotend_temp);
       EEPROM_WRITE(ui_preheat_bed_temp);
@@ -1444,14 +1438,8 @@ void MarlinSettings::postprocess() {
       {
         _FIELD_TEST(ui_preheat_hotend_temp);
 
-        #if HOTENDS && HAS_LCD_MENU
-          int16_t (&ui_preheat_hotend_temp)[2]  = ui.preheat_hotend_temp,
-                  (&ui_preheat_bed_temp)[2]     = ui.preheat_bed_temp;
-          uint8_t (&ui_preheat_fan_speed)[2]    = ui.preheat_fan_speed;
-        #else
-          int16_t ui_preheat_hotend_temp[2], ui_preheat_bed_temp[2];
-          uint8_t ui_preheat_fan_speed[2];
-        #endif
+        int16_t ui_preheat_hotend_temp[2], ui_preheat_bed_temp[2];
+        uint8_t ui_preheat_fan_speed[2];
         EEPROM_READ(ui_preheat_hotend_temp); // 2 floats
         EEPROM_READ(ui_preheat_bed_temp);    // 2 floats
         EEPROM_READ(ui_preheat_fan_speed);   // 2 floats
@@ -2255,19 +2243,6 @@ void MarlinSettings::reset() {
   #endif
 
   //
-  // Preheat parameters
-  //
-
-  #if HOTENDS && HAS_LCD_MENU
-    ui.preheat_hotend_temp[0] = PREHEAT_1_TEMP_HOTEND;
-    ui.preheat_hotend_temp[1] = PREHEAT_2_TEMP_HOTEND;
-    ui.preheat_bed_temp[0] = PREHEAT_1_TEMP_BED;
-    ui.preheat_bed_temp[1] = PREHEAT_2_TEMP_BED;
-    ui.preheat_fan_speed[0] = PREHEAT_1_FAN_SPEED;
-    ui.preheat_fan_speed[1] = PREHEAT_2_FAN_SPEED;
-  #endif
-
-  //
   // Hotend PID
   //
 
@@ -2459,24 +2434,6 @@ void MarlinSettings::reset() {
       SERIAL_ECHOPGM("  G21    ; Units in mm");
       say_units(false);
     #endif
-    SERIAL_EOL();
-
-    #if HAS_LCD_MENU
-
-      // Temperature units - for Ultipanel temperature options
-
-      CONFIG_ECHO_START();
-      #if ENABLED(TEMPERATURE_UNITS_SUPPORT)
-        SERIAL_ECHOPGM("  M149 ");
-        SERIAL_CHAR(parser.temp_units_code());
-        SERIAL_ECHOPGM(" ; Units in ");
-        serialprintPGM(parser.temp_units_name());
-      #else
-        SERIAL_ECHOLNPGM("  M149 C ; Units in Celsius");
-      #endif
-
-    #endif
-
     SERIAL_EOL();
 
     #if DISABLED(NO_VOLUMETRICS)
@@ -2745,21 +2702,6 @@ void MarlinSettings::reset() {
       SERIAL_EOL();
 
     #endif // [XYZ]_DUAL_ENDSTOPS
-
-    #if HOTENDS && HAS_LCD_MENU
-
-      CONFIG_ECHO_HEADING("Material heatup parameters:");
-      for (uint8_t i = 0; i < COUNT(ui.preheat_hotend_temp); i++) {
-        CONFIG_ECHO_START();
-        SERIAL_ECHOLNPAIR(
-            "  M145 S", (int)i
-          , " H", TEMP_UNIT(ui.preheat_hotend_temp[i])
-          , " B", TEMP_UNIT(ui.preheat_bed_temp[i])
-          , " F", int(ui.preheat_fan_speed[i])
-        );
-      }
-
-    #endif
 
     #if HAS_PID_HEATING
 

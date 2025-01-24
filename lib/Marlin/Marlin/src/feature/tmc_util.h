@@ -173,9 +173,6 @@ class TMCMarlinBase : public TMC, public TMCStorage {
       }
       void set_pwm_thrs(const uint32_t thrs) {
         TMC::TPWMTHRS(tmc_feedrate_to_period(axis_id, this->microsteps(), thrs, planner.settings.axis_steps_per_mm[axis_id]));
-        #if HAS_LCD_MENU
-          this->stored.hybrid_thrs = thrs;
-        #endif
       }
     #endif
     #if USE_SENSORLESS
@@ -186,9 +183,6 @@ class TMCMarlinBase : public TMC, public TMCStorage {
       void stall_sensitivity(int16_t sgt_val) {
         sgt_val = (int16_t)constrain(sgt_val, sgt_min, sgt_max);
         TMC::sgt(sgt_val);
-        #if HAS_LCD_MENU
-          this->stored.homing_thrs = sgt_val;
-        #endif
       }
       void stall_max_period(uint32_t max_period){
         max_period = (uint32_t)constrain(max_period, 0, 1048575);
@@ -197,17 +191,6 @@ class TMCMarlinBase : public TMC, public TMCStorage {
 
       #if ENABLED(SPI_ENDSTOPS)
         bool test_stall_status();
-      #endif
-    #endif
-
-    #if HAS_LCD_MENU
-      inline void refresh_stepper_current() { rms_current(this->val_mA); }
-
-      #if ENABLED(HYBRID_THRESHOLD)
-        inline void refresh_hybrid_thrs() { set_pwm_thrs(this->stored.hybrid_thrs); }
-      #endif
-      #if USE_SENSORLESS
-        inline void refresh_homing_thrs() { stall_sensitivity(this->stored.homing_thrs); }
       #endif
     #endif
 };
@@ -251,9 +234,6 @@ class TMCMarlin<TMC2209Stepper> : public TMCMarlinBase<TMC2209Stepper> {
       void stall_sensitivity(int16_t sgt_val) {
         sgt_val = (int16_t)constrain(sgt_val, sgt_min, sgt_max);
         TMC2209Stepper::SGTHRS(sgt_val);
-        #if HAS_LCD_MENU
-          this->stored.homing_thrs = sgt_val;
-        #endif
       }
     #endif
 

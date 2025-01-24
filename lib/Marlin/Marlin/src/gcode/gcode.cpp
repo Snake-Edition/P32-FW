@@ -570,10 +570,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 142: M142(); break;
       #endif
 
-      #if HOTENDS && HAS_LCD_MENU
-        case 145: M145(); break;                                  // M145: Set material heatup parameters
-      #endif
-
       #if ENABLED(TEMPERATURE_UNITS_SUPPORT)
         case 149: M149(); break;                                  // M149: Set temperature units
       #endif
