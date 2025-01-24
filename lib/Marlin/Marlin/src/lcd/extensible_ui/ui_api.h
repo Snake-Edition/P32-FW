@@ -82,11 +82,6 @@ namespace ExtUI {
   void enableHeater(const heater_t);
   void enableHeater(const extruder_t);
 
-  #if ENABLED(JOYSTICK)
-    void jog(const xyz_float_t &dir);
-    void _joystick_update(xyz_float_t &norm_jog);
-  #endif
-
   /**
    * Getters and setters
    * Should be used by the EXTENSIBLE_UI to query or change Marlin's state.

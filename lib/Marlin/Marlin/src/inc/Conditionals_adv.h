@@ -129,8 +129,3 @@
     #define LED_USER_PRESET_BRIGHTNESS 255
   #endif
 #endif
-
-// Poll-based jogging for joystick and other devices
-#if ENABLED(JOYSTICK)
-  #define POLL_JOG
-#endif

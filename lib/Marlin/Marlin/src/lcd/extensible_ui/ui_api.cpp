@@ -173,42 +173,6 @@ namespace ExtUI {
     #endif
   }
 
-  #if ENABLED(JOYSTICK)
-    /**
-     * Jogs in the direction given by the vector (dx, dy, dz).
-     * The values range from -1 to 1 mapping to the maximum
-     * feedrate for an axis.
-     *
-     * The axis will continue to jog until this function is
-     * called with all zeros.
-     */
-    void jog(const xyz_float_t &dir) {
-      // The "destination" variable is used as a scratchpad in
-      // Marlin by GCODE routines, but should remain untouched
-      // during manual jogging, allowing us to reuse the space
-      // for our direction vector.
-      destination = dir;
-      flags.jogging = !NEAR_ZERO(dir.x) || !NEAR_ZERO(dir.y) || !NEAR_ZERO(dir.z);
-    }
-
-    // Called by the polling routine in "joystick.cpp"
-    void _joystick_update(xyz_float_t &norm_jog) {
-      if (flags.jogging) {
-        #define OUT_OF_RANGE(VALUE) (VALUE < -1.0f || VALUE > 1.0f)
-
-        if (OUT_OF_RANGE(destination.x) || OUT_OF_RANGE(destination.y) || OUT_OF_RANGE(destination.z)) {
-          // If destination on any axis is out of range, it
-          // probably means the UI forgot to stop jogging and
-          // ran GCODE that wrote a position to destination.
-          // To prevent a disaster, stop jogging.
-          flags.jogging = false;
-          return;
-        }
-        norm_jog = destination;
-      }
-    }
-  #endif
-
   bool isHeaterIdle(const extruder_t extruder) {
     return false
       #if HOTENDS && HEATER_IDLE_HANDLER
@@ -292,22 +256,13 @@ namespace ExtUI {
   }
 
   float getAxisPosition_mm(const axis_t axis) {
-    return
-      #if ENABLED(JOYSTICK)
-        flags.jogging ? destination[axis] :
-      #endif
-      current_position[axis];
+    return current_position[axis];
   }
 
   float getAxisPosition_mm(const extruder_t extruder) {
     const extruder_t old_tool = getActiveTool();
     setActiveTool(extruder);
-    const float epos = (
-      #if ENABLED(JOYSTICK)
-        flags.jogging ? destination.e :
-      #endif
-      current_position.e
-    );
+    const float epos = current_position.e;
     setActiveTool(old_tool);
     return epos;
   }

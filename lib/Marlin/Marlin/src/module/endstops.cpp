@@ -41,10 +41,6 @@
   #include "../feature/bltouch.h"
 #endif
 
-#if ENABLED(JOYSTICK)
-  #include "../feature/joystick.h"
-#endif
-
 #if HAS_LOADCELL()
   #include "loadcell.hpp"
 #endif
@@ -484,11 +480,6 @@ void __O2 Endstops::M119() {
   #if ENABLED(BLTOUCH)
     bltouch._reset_SW_mode();
   #endif
-
-  #if ENABLED(JOYSTICK_DEBUG)
-    joystick.report();
-  #endif
-
 } // Endstops::M119
 
 // The following routines are called from an ISR context. It could be the temperature ISR, the

@@ -47,7 +47,6 @@ if(BOARD_IS_MASTER_BOARD)
             Marlin/Marlin/src/feature/host_actions.cpp
             Marlin/Marlin/src/feature/input_shaper/input_shaper.cpp
             Marlin/Marlin/src/feature/input_shaper/input_shaper_config.cpp
-            Marlin/Marlin/src/feature/joystick.cpp
             Marlin/Marlin/src/feature/power.cpp
             Marlin/Marlin/src/feature/pressure_advance/pressure_advance.cpp
             Marlin/Marlin/src/feature/pressure_advance/pressure_advance_config.cpp
