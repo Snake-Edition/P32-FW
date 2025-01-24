@@ -52,7 +52,7 @@
   #include "../../feature/prusa/crash_recovery.hpp"
 #endif
 
-#if ENABLED(PRECISE_HOMING_COREXY)
+#if HAS_PRECISE_HOMING_COREXY()
   #include "../../module/prusa/homing_corexy.hpp"
 #endif
 
@@ -342,7 +342,7 @@ void GcodeSuite::G28() {
   #if ENABLED(DETECT_PRINT_SHEET)
     flags.check_sheet = !parser.boolval('P');
   #endif
-  #if ENABLED(PRECISE_HOMING_COREXY)
+  #if HAS_PRECISE_HOMING_COREXY()
     flags.no_refine = parser.seen('I'); // do not perform precise refinement
   #endif
 
@@ -646,8 +646,8 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   // Only allow wavetable change if homing performs a backoff. This backoff is made in the way that it ends on stepper zero-position, so that re-enabling wavetable is safe.
   bool wavetable_off_X = false, wavetable_off_Y = false;
   #ifdef HAS_TMC_WAVETABLE
-    #if ENABLED(PRECISE_HOMING_COREXY)
-      #error "wavetable switching currently not compatible with PRECISE_HOMING_COREXY"
+    #if HAS_PRECISE_HOMING_COREXY()
+      #error "wavetable switching currently not compatible with HAS_PRECISE_HOMING_COREXY()"
     #endif
     #ifdef HOMING_BACKOFF_POST_MM
       constexpr xyz_float_t homing_backoff = HOMING_BACKOFF_POST_MM;
@@ -697,7 +697,7 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
     failed = !homeaxis(Y_AXIS, fr_mm_s, false, reenable_wt_Y, flags.can_calibrate);
   }
 
-  #if ENABLED(PRECISE_HOMING_COREXY)
+  #if HAS_PRECISE_HOMING_COREXY()
     // absolute refinement requires both axes to be already probed
     if (!failed && ( doX || ENABLED(CODEPENDENT_XY_HOMING)) && doY && !flags.no_refine) {
       #if DISABLED(PRUSA_TOOLCHANGER)

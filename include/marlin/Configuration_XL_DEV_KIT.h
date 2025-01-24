@@ -1168,9 +1168,6 @@
 #define Y_END_GAP 10
 #define Z_END_GAP 10
 
-// Refine homing XY offsets on COREXY
-#define PRECISE_HOMING_COREXY HAS_PRECISE_HOMING_COREXY()
-
 // Improve homing reliability by fixing motion parameters while homing
 #define IMPROVE_HOMING_RELIABILITY
 

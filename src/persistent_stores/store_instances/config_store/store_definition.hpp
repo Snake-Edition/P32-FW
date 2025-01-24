@@ -47,7 +47,7 @@
     #include <common/sheet.hpp>
 #endif
 
-#if ENABLED(PRECISE_HOMING_COREXY)
+#if HAS_PRECISE_HOMING_COREXY()
     #include <Marlin/src/module/prusa/homing_corexy_config.hpp>
 #endif
 
@@ -605,10 +605,10 @@ struct CurrentStore
     StoreItem<bool, false, ItemFlag::hw_config | ItemFlag::common_misconfigurations, journal::hash("Reduce Display Baudrate")> reduce_display_baudrate;
 #endif
 
-#if ENABLED(PRECISE_HOMING_COREXY)
+#if HAS_PRECISE_HOMING_COREXY()
     StoreItem<CoreXYGridOrigin, COREXY_NO_GRID_ORIGIN, ItemFlag::calibrations, journal::hash("CoreXY calibrated grid origin")> corexy_grid_origin;
 #endif
-#if ENABLED(PRECISE_HOMING_COREXY) && HAS_TRINAMIC && defined(XY_HOMING_MEASURE_SENS_MIN)
+#if HAS_PRECISE_HOMING_COREXY() && HAS_TRINAMIC && defined(XY_HOMING_MEASURE_SENS_MIN)
     StoreItem<CoreXYHomeTMCSens, COREXY_NO_HOME_TMC_SENS, ItemFlag::calibrations, journal::hash("CoreXY home TMC calibration")> corexy_home_tmc_sens;
 #endif
 };

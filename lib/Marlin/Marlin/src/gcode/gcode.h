@@ -286,7 +286,7 @@
 #include <option/has_i2c_expander.h>
 #include <option/has_local_accelerometer.h>
 #include <option/has_remote_accelerometer.h>
-
+#include <option/has_precise_homing_corexy.h>
 #include <option/has_phase_stepping.h>
 
 #if ENABLED(I2C_POSITION_ENCODERS)
@@ -308,7 +308,7 @@ struct G28Flags {
   #if ENABLED(MARLIN_DEV_MODE)
     bool simulate = false;
   #endif
-  #if ENABLED(PRECISE_HOMING_COREXY)
+  #if HAS_PRECISE_HOMING_COREXY()
     bool no_refine = false;
   #endif
   #if ENABLED(DETECT_PRINT_SHEET)

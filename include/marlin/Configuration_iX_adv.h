@@ -1776,7 +1776,7 @@
         #define XY_HOMING_JERK 8
         #define X_CURRENT_HOME X_CURRENT
         #define Y_CURRENT_HOME Y_CURRENT
-        #if ENABLED(PRECISE_HOMING_COREXY)
+        #if HAS_PRECISE_HOMING_COREXY()
             #define PRECISE_HOMING_COREXY_RETRIES 3    // count: maximum number of refinement attempts
             #define XY_HOMING_HOLDING_CURRENT 900      // mA: holding current for fixed motor
             #define XY_HOMING_ORIGIN_OFFSET 5.f        // mm: parallel distance from initial origin

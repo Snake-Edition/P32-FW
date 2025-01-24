@@ -7,12 +7,12 @@
 
 // sanity checks
 #ifdef PRECISE_HOMING
-    #error "PRECISE_HOMING_COREXY is mutually exclusive with PRECISE_HOMING"
+    #error "HAS_PRECISE_HOMING_COREXY() is mutually exclusive with PRECISE_HOMING"
 #endif
 #ifdef HAS_TMC_WAVETABLE
     // Wavetable restoration needs to happen after refinement succeeds, and
     // not per-axis as currently done. Ensure the setting is not enabled by mistake.
-    #error "PRECISE_HOMING_COREXY is not compatible with HAS_TMC_WAVETABLE"
+    #error "HAS_PRECISE_HOMING_COREXY() is not compatible with HAS_TMC_WAVETABLE"
 #endif
 
 #include "../planner.h"
