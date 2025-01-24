@@ -696,10 +696,6 @@ void idle(
     }
   #endif
 
-  #if ENABLED(USB_FLASH_DRIVE_SUPPORT)
-    Sd2Card::idle();
-  #endif
-
   #if ENABLED(PRUSA_MMU2)
     MMU2::mmu2.mmu_loop();
   #endif

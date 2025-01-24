@@ -2217,10 +2217,6 @@ static_assert(   _ARR_TEST(3,0) && _ARR_TEST(3,1) && _ARR_TEST(3,2)
   #error "PRINTCOUNTER requires EEPROM_SETTINGS. Please update your Configuration."
 #endif
 
-#if ENABLED(USB_FLASH_DRIVE_SUPPORT) && !PINS_EXIST(USB_CS, USB_INTR)
-  #error "USB_CS_PIN and USB_INTR_PIN are required for USB_FLASH_DRIVE_SUPPORT."
-#endif
-
 #if ENABLED(GCODE_MACROS) && !WITHIN(GCODE_MACROS_SLOTS, 1, 10)
   #error "GCODE_MACROS_SLOTS must be a number from 1 to 10."
 #endif
