@@ -2,6 +2,8 @@
 
 #include <cstdint>
 #include <ctime>
+#include <array>
+#include <utility>
 
 namespace time_tools {
 
@@ -28,7 +30,7 @@ enum class TimezoneOffsetMinutes : uint8_t {
 
 /// Mapping of TimezoneOffsetMinutes -> actual amount of minutes
 /// !!! This value has to be negated for <0 timezones
-constexpr std::array<int8_t, ftrstd::to_underlying(TimezoneOffsetMinutes::_cnt)> timezone_offset_minutes_value = {
+constexpr std::array<int8_t, std::to_underlying(TimezoneOffsetMinutes::_cnt)> timezone_offset_minutes_value = {
     0, 30, 45
 };
 
