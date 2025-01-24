@@ -1746,28 +1746,6 @@
   #define Z_STEPPER_COUNT 1
 #endif
 
-#if HAS_SPI_LCD
-  // Get LCD character width/height, which may be overridden by pins, configs, etc.
-  #ifndef LCD_WIDTH
-    #if HAS_GRAPHICAL_LCD
-      #define LCD_WIDTH 21
-    #elif ENABLED(ULTIPANEL)
-      #define LCD_WIDTH 20
-    #else
-      #define LCD_WIDTH 16
-    #endif
-  #endif
-  #ifndef LCD_HEIGHT
-    #if HAS_GRAPHICAL_LCD
-      #define LCD_HEIGHT 5
-    #elif ENABLED(ULTIPANEL)
-      #define LCD_HEIGHT 4
-    #else
-      #define LCD_HEIGHT 2
-    #endif
-  #endif
-#endif
-
 #if ENABLED(SDSUPPORT)
   #if SD_CONNECTION_IS(ONBOARD) && DISABLED(NO_SD_HOST_DRIVE)
     //

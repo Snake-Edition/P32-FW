@@ -1663,7 +1663,7 @@ bool Planner::_populate_block(block_t * const block,
         // Buffer is draining so add extra time. The amount of time added increases if the buffer is still emptied more.
         const uint32_t nst = segment_time_us + LROUND(2 * time_diff / total_blocks_queued);
         inverse_secs = 1000000.0f / nst;
-        #if defined(XY_FREQUENCY_LIMIT) || HAS_SPI_LCD
+        #if defined(XY_FREQUENCY_LIMIT)
           segment_time_us = nst;
         #endif
       }

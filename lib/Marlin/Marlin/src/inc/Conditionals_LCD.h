@@ -334,10 +334,9 @@
 #endif
 
 // Aliases for LCD features
-#define HAS_SPI_LCD         0
-#define HAS_DISPLAY         (HAS_SPI_LCD || ENABLED(EXTENSIBLE_UI))
+#define HAS_DISPLAY          ENABLED(EXTENSIBLE_UI)
 #define HAS_GRAPHICAL_LCD    ENABLED(DOGLCD)
-#define HAS_CHARACTER_LCD   (HAS_SPI_LCD && !HAS_GRAPHICAL_LCD)
+#define HAS_CHARACTER_LCD    0
 #define HAS_ADC_BUTTONS      ENABLED(ADC_KEYPAD)
 
 /**

@@ -28,41 +28,12 @@
 #endif
 
 #define HAS_DIGITAL_BUTTONS (!HAS_ADC_BUTTONS && ENABLED(NEWPANEL) || BUTTONS_EXIST(EN1, EN2) || ANY_BUTTON(ENC, BACK, UP, DWN, LFT, RT))
-#define HAS_SHIFT_ENCODER   (!HAS_ADC_BUTTONS && (ENABLED(REPRAPWORLD_KEYPAD) || (HAS_SPI_LCD && DISABLED(NEWPANEL))))
+#define HAS_SHIFT_ENCODER   (!HAS_ADC_BUTTONS && (ENABLED(REPRAPWORLD_KEYPAD)))
 #define HAS_ENCODER_WHEEL  ((!HAS_ADC_BUTTONS && ENABLED(NEWPANEL)) || BUTTONS_EXIST(EN1, EN2))
 #define HAS_ENCODER_ACTION ENABLED(ULTIPANEL_FEEDMULTIPLY)
 
 // I2C buttons must be read in the main thread
 #define HAS_SLOW_BUTTONS EITHER(LCD_I2C_VIKI, LCD_I2C_PANELOLU2)
-
-#if HAS_SPI_LCD
-
-  #include "../Marlin.h"
-
-  #if ENABLED(ADVANCED_PAUSE_FEATURE)
-    #include "../feature/pause.h"
-    #include "../module/motion.h" // for active_extruder
-  #endif
-
-  enum LCDViewAction : uint8_t {
-    LCDVIEW_NONE,
-    LCDVIEW_REDRAW_NOW,
-    LCDVIEW_CALL_REDRAW_NEXT,
-    LCDVIEW_CLEAR_CALL_REDRAW,
-    LCDVIEW_CALL_NO_REDRAW
-  };
-
-  #if HAS_ADC_BUTTONS
-    uint8_t get_ADC_keyValue();
-  #endif
-
-  #if ENABLED(TOUCH_BUTTONS)
-    #define LCD_UPDATE_INTERVAL 50
-  #else
-    #define LCD_UPDATE_INTERVAL 100
-  #endif
-
-#endif
 
 // REPRAPWORLD_KEYPAD (and ADC_KEYPAD)
 #if ENABLED(REPRAPWORLD_KEYPAD)
@@ -270,81 +241,7 @@ public:
       static constexpr uint8_t get_progress_percent() { return 0; }
     #endif
 
-    #if HAS_SPI_LCD
-
-      static millis_t next_button_update_ms;
-
-      static bool detected();
-
-      static LCDViewAction lcdDrawUpdate;
-      static inline bool should_draw() { return bool(lcdDrawUpdate); }
-      static inline void refresh(const LCDViewAction type) { lcdDrawUpdate = type; }
-      static inline void refresh() { refresh(LCDVIEW_CLEAR_CALL_REDRAW); }
-
-      #if ENABLED(SHOW_CUSTOM_BOOTSCREEN)
-        static void draw_custom_bootscreen(const uint8_t frame=0);
-        static void show_custom_bootscreen();
-      #endif
-
-      #if ENABLED(SHOW_BOOTSCREEN)
-        static void draw_marlin_bootscreen(const bool line2=false);
-        static void show_marlin_bootscreen();
-        static void show_bootscreen();
-      #endif
-
-      #if HAS_GRAPHICAL_LCD
-
-        static bool drawing_screen, first_page;
-
-        static void set_font(const MarlinFont font_nr);
-
-      #else
-
-        static constexpr bool drawing_screen = false, first_page = true;
-
-        static void set_custom_characters(const HD44780CharSet screen_charset=CHARSET_INFO);
-
-        #if ENABLED(LCD_PROGRESS_BAR)
-          static millis_t progress_bar_ms;  // Start time for the current progress bar cycle
-          static void draw_progress_bar(const uint8_t percent);
-          #if PROGRESS_MSG_EXPIRE > 0
-            static millis_t expire_status_ms; // = 0
-            static inline void reset_progress_bar_timeout() { expire_status_ms = 0; }
-          #endif
-        #endif
-
-      #endif
-
-      static uint8_t lcd_status_update_delay;
-
-      #if HAS_LCD_CONTRAST
-        static int16_t contrast;
-        static void set_contrast(const int16_t value);
-        static inline void refresh_contrast() { set_contrast(contrast); }
-      #endif
-
-      #if BOTH(FILAMENT_LCD_DISPLAY, SDSUPPORT)
-        static millis_t next_filament_display;
-      #endif
-
-      static void quick_feedback(const bool clear_buttons=true);
-      #if HAS_BUZZER
-        static void completion_feedback(const bool good=true);
-      #endif
-
-      #if DISABLED(LIGHTWEIGHT_UI)
-        static void draw_status_message(const bool blink);
-      #endif
-
-      #if ENABLED(ADVANCED_PAUSE_FEATURE)
-        static void draw_hotend_status(const uint8_t row, const uint8_t extruder);
-      #endif
-
-      static void status_screen();
-
-    #else
-      static void refresh() {}
-    #endif
+    static void refresh() {}
 
     static bool get_blink();
     static void set_status(const char* const message, const bool persist=false);
@@ -365,14 +262,6 @@ public:
     static inline void reset_status() {}
     static inline void reset_alert_level() {}
     static constexpr bool has_status() { return false; }
-
-  #endif
-
-  #if HAS_SPI_LCD
-
-    static constexpr bool lcd_clicked = false;
-    static constexpr bool on_status_screen() { return true; }
-    static inline void run_current_screen() { status_screen(); }
 
   #endif
 
@@ -441,10 +330,6 @@ private:
 
   #if HAS_DISPLAY
     static void finish_status(const bool persist);
-  #endif
-
-  #if HAS_SPI_LCD
-    static void draw_status_screen();
   #endif
 };
 

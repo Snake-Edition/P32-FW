@@ -891,10 +891,6 @@ void setup() {
   ui.init();
   ui.reset_status();
 
-  #if HAS_SPI_LCD && ENABLED(SHOW_BOOTSCREEN)
-    ui.show_bootscreen();
-  #endif
-
   #if ENABLED(SDSUPPORT)
     card.mount(); // Mount the SD card before settings.first_load
   #endif
@@ -1060,7 +1056,7 @@ void setup() {
     queue.inject_P(PSTR(STARTUP_COMMANDS));
   #endif
 
-  #if ENABLED(INIT_SDCARD_ON_BOOT) && !HAS_SPI_LCD
+  #if ENABLED(INIT_SDCARD_ON_BOOT)
     card.beginautostart();
   #endif
 

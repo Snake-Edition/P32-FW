@@ -9,11 +9,6 @@
 
 #include "../inc/MarlinConfig.h"
 
-#if HAS_SPI_LCD
-  #include "ultralcd.h"
-  #include "../Marlin.h"
-#endif
-
 #include "fontutils.h"
 
 uint8_t read_byte_ram(uint8_t * str) {
