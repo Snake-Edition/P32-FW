@@ -329,6 +329,8 @@ float home_axis_precise(AxisEnum axis, int axis_home_dir, bool can_calibrate, fl
 
     load_divisor_from_eeprom();
 
+    PrintStatusMessageGuard status_guard;
+
     for (int try_nr = 0; try_nr < tries; ++try_nr) {
         SERIAL_ECHO_START();
         SERIAL_ECHOPAIR("== Precise Homing axis ", axis_codes[axis]);
@@ -350,7 +352,7 @@ float home_axis_precise(AxisEnum axis, int axis_home_dir, bool can_calibrate, fl
         SensitivityCalibration sens_calibration { axis, reset_sens_calibration };
 
         while (can_calibrate && !sens_calibration.is_calibrated()) {
-            ui.status_printf_P(0, "Recalibrating %c axis. Printer may vibrate and be noisier.", axis_codes[axis]);
+            status_guard.update<PrintStatusMessage::calibrating_axis>({ .axis = axis });
             home_and_get_calibration_offset(axis, axis_home_dir, probe_offset, false, fr_mm_s);
             if (planner.draining()) {
                 // ensure we do not save aborted calibration probes
