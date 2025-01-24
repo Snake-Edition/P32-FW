@@ -387,11 +387,14 @@ void phase_stepping::set_phase_origin(AxisEnum axis, float pos) {
 
 void phase_stepping::enable_phase_stepping(AxisEnum axis_num) {
     assert(axis_num < SUPPORTED_AXIS_COUNT);
-    if (axis_states[axis_num].enabled) {
-        return;
+    assert(!axis_states[axis_num].enabled);
+    if (!planner.draining()) {
+        // If we are within an aborted move, we must still allow to re-enable phase stepping:
+        // we might be within an EnsureDisabled block. In such case motion is already stopped,
+        // and it will re-initialize phase stepping on the next move. If we're not within an
+        // aborted move though we must ensure there's no existing motion going on.
+        assert(!planner.has_blocks_queued() && !PreciseStepping::processing());
     }
-
-    assert(planner.draining() || (!planner.has_blocks_queued() && !PreciseStepping::processing()));
 
     // We know that PHASE_STEPPING is enabled only on TMC2130 boards
     TMCStepperType &stepper = stepper_axis(axis_num);
@@ -499,10 +502,7 @@ static void step_to_phase(AxisEnum axis, int phase) {
 
 void phase_stepping::disable_phase_stepping(AxisEnum axis_num) {
     assert(axis_num < SUPPORTED_AXIS_COUNT);
-    if (!axis_states[axis_num].enabled) {
-        return;
-    }
-
+    assert(axis_states[axis_num].enabled);
     assert(!planner.processing());
 
     // We know that PHASE_STEPPING is enabled only on TMC2130 boards
