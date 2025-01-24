@@ -85,12 +85,7 @@ void GcodeSuite::M115() {
     );
 
     // BINARY_FILE_TRANSFER (M28 B1)
-    cap_line(PSTR("BINARY_FILE_TRANSFER")
-    #if ENABLED(BINARY_FILE_TRANSFER)
-                 ,
-        true
-    #endif
-    );
+    cap_line(PSTR("BINARY_FILE_TRANSFER"));
 
     // EEPROM (M500, M501)
     cap_line(PSTR("EEPROM"));

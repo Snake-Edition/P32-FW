@@ -40,10 +40,6 @@ GCodeQueue queue;
   #include "../feature/leds/printer_event_leds.h"
 #endif
 
-#if ENABLED(BINARY_FILE_TRANSFER)
-  #include "../feature/binary_protocol.h"
-#endif
-
 /**
  * GCode line number handling. Hosts may opt to include line numbers when
  * sending commands to Marlin, and lines will be checked for sequentiality.
@@ -348,18 +344,6 @@ void GCodeQueue::get_serial_commands() {
                 , serial_comment_paren_mode[NUM_SERIAL] = { false }
               #endif
             ;
-
-  #if ENABLED(BINARY_FILE_TRANSFER)
-    if (card.flag.binary_mode) {
-      /**
-       * For binary stream file transfer, use serial_line_buffer as the working
-       * receive buffer (which limits the packet size to MAX_CMD_SIZE).
-       * The receive buffer also limits the packet size for reliable transmission.
-       */
-      binaryStream[card.transfer_port_index].receive(serial_line_buffer[card.transfer_port_index]);
-      return;
-    }
-  #endif
 
   // If the command buffer is empty for too long,
   // send "wait" to indicate Marlin is still waiting.
