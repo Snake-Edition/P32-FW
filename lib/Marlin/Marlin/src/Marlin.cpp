@@ -384,11 +384,7 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
   if (max_inactive_time && ELAPSED(ms, gcode.previous_move_ms + max_inactive_time)) {
     SERIAL_ERROR_START();
     SERIAL_ECHOLNPAIR(MSG_KILL_INACTIVE_TIME, parser.command_ptr);
-    kill(PSTR("Inactive time kill")
-#if PROGMEM_EMULATED
-    		, parser.command_ptr
-#endif
-    		);
+    kill(PSTR("Inactive time kill"), parser.command_ptr);
   }
 
   // Prevent steppers timing-out in the middle of M600
