@@ -27,10 +27,9 @@
   #include "../libs/buzzer.h"
 #endif
 
-#define HAS_DIGITAL_BUTTONS (!HAS_ADC_BUTTONS && ENABLED(NEWPANEL) || BUTTONS_EXIST(EN1, EN2) || ANY_BUTTON(ENC, BACK, UP, DWN, LFT, RT))
+#define HAS_DIGITAL_BUTTONS (BUTTONS_EXIST(EN1, EN2) || ANY_BUTTON(ENC, BACK, UP, DWN, LFT, RT))
 #define HAS_SHIFT_ENCODER   (!HAS_ADC_BUTTONS && (ENABLED(REPRAPWORLD_KEYPAD)))
-#define HAS_ENCODER_WHEEL  ((!HAS_ADC_BUTTONS && ENABLED(NEWPANEL)) || BUTTONS_EXIST(EN1, EN2))
-#define HAS_ENCODER_ACTION ENABLED(ULTIPANEL_FEEDMULTIPLY)
+#define HAS_ENCODER_WHEEL   (BUTTONS_EXIST(EN1, EN2))
 
 // I2C buttons must be read in the main thread
 #define HAS_SLOW_BUTTONS EITHER(LCD_I2C_VIKI, LCD_I2C_PANELOLU2)
@@ -259,56 +258,7 @@ public:
 
   static constexpr bool external_control = false;
 
-  #if HAS_ENCODER_ACTION
-
-    static volatile uint8_t buttons;
-    #if ENABLED(REPRAPWORLD_KEYPAD)
-      static volatile uint8_t keypad_buttons;
-      static bool handle_keypad();
-    #endif
-    #if HAS_SLOW_BUTTONS
-      static volatile uint8_t slow_buttons;
-      static uint8_t read_slow_buttons();
-    #endif
-
-    static void update_buttons();
-    static inline bool button_pressed() { return BUTTON_CLICK(); }
-    #if ENABLED(AUTO_BED_LEVELING_UBL)
-      static void wait_for_release();
-    #endif
-
-    static uint32_t encoderPosition;
-
-    #if ENABLED(REVERSE_ENCODER_DIRECTION)
-      #define ENCODERBASE -1
-    #else
-      #define ENCODERBASE +1
-    #endif
-
-    #if EITHER(REVERSE_MENU_DIRECTION, REVERSE_SELECT_DIRECTION)
-      static int8_t encoderDirection;
-      static inline void encoder_direction_normal() { encoderDirection = ENCODERBASE; }
-    #else
-      static constexpr int8_t encoderDirection = ENCODERBASE;
-      static inline void encoder_direction_normal() {}
-    #endif
-
-    #if ENABLED(REVERSE_MENU_DIRECTION)
-      static inline void encoder_direction_menus()  { encoderDirection = -(ENCODERBASE); }
-    #else
-      static inline void encoder_direction_menus()  {}
-    #endif
-    #if ENABLED(REVERSE_SELECT_DIRECTION)
-      static inline void encoder_direction_select()  { encoderDirection = -(ENCODERBASE); }
-    #else
-      static inline void encoder_direction_select()  {}
-    #endif
-
-  #else
-
-    static inline void update_buttons() {}
-
-  #endif
+  static inline void update_buttons() {}
 
 private:
 

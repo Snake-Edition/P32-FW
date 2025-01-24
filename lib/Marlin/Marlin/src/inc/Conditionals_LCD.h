@@ -26,32 +26,9 @@
  * Conditionals that need to be set before Configuration_adv.h or pins.h
  */
 
-#if ENABLED(ZONESTAR_LCD)
-
-  #define ADC_KEYPAD
-  #define IS_RRW_KEYPAD
-  #define REPRAPWORLD_KEYPAD_MOVE_STEP 10.0
-  #define ADC_KEY_NUM 8
-  #define IS_ULTIPANEL
-
-  // This helps to implement ADC_KEYPAD menus
-  #define REVERSE_MENU_DIRECTION
-  #define ENCODER_PULSES_PER_STEP 1
-  #define ENCODER_STEPS_PER_MENU_ITEM 1
-  #define ENCODER_FEEDRATE_DEADZONE 2
-
-#elif ENABLED(RADDS_DISPLAY)
-  #define IS_ULTIPANEL
-  #define ENCODER_PULSES_PER_STEP 2
-
-#elif EITHER(ANET_FULL_GRAPHICS_LCD, BQ_LCD_SMART_CONTROLLER)
+#if EITHER(ANET_FULL_GRAPHICS_LCD, BQ_LCD_SMART_CONTROLLER)
 
   #define IS_RRD_FG_SC
-
-#elif ENABLED(OLED_PANEL_TINYBOY2)
-
-  #define IS_U8GLIB_SSD1306
-  #define IS_ULTIPANEL
 
 #elif ENABLED(CR10_STOCKDISPLAY)
 
@@ -80,14 +57,6 @@
 
   #define MINIPANEL
 
-#elif ENABLED(ULTI_CONTROLLER)
-
-  #define IS_ULTIPANEL
-  #define U8GLIB_SSD1309
-  #define LCD_RESET_PIN LCD_PINS_D6 //  This controller need a reset pin
-  #define ENCODER_PULSES_PER_STEP 2
-  #define ENCODER_STEPS_PER_MENU_ITEM 2
-
 #elif ENABLED(MAKEBOARD_MINI_2_LINE_DISPLAY_1602)
 
   #define IS_RRD_SC
@@ -104,36 +73,9 @@
   #define U8GLIB_SSD1306
 #endif
 
-#if ENABLED(OVERLORD_OLED)
-  #define IS_ULTIPANEL
-  #define U8GLIB_SH1106
-  /**
-   * PCA9632 for buzzer and LEDs via i2c
-   * No auto-inc, red and green leds switched, buzzer
-   */
-  #define PCA9632
-  #define PCA9632_NO_AUTO_INC
-  #define PCA9632_GRN         0x00
-  #define PCA9632_RED         0x02
-  #define PCA9632_BUZZER
-  #define PCA9632_BUZZER_DATA { 0x09, 0x02 }
-
-  #define ENCODER_PULSES_PER_STEP     1 // Overlord uses buttons
-  #define ENCODER_STEPS_PER_MENU_ITEM 1
-#endif
-
 // RepRapDiscount LCD or Graphical LCD with rotary click encoder
 #if ENABLED(IS_RRD_SC)
   #define REPRAP_DISCOUNT_SMART_CONTROLLER
-#endif
-
-/**
- * SPI Ultipanels
- */
-
-// Basic Ultipanel-like displays
-#if ANY(ULTIMAKERCONTROLLER, REPRAP_DISCOUNT_SMART_CONTROLLER, G3D_PANEL, RIGIDBOT_PANEL, PANEL_ONE, U8GLIB_SH1106)
-  #define IS_ULTIPANEL
 #endif
 
 /**
@@ -149,35 +91,6 @@
     #define LCD_WIDTH 20
     #define LCD_HEIGHT 4
   #endif
-
-#elif ENABLED(LCD_I2C_PANELOLU2)
-
-  // PANELOLU2 LCD with status LEDs, separate encoder and click inputs
-
-  #define LCD_I2C_TYPE_MCP23017
-  #define LCD_I2C_ADDRESS 0x20 // I2C Address of the port expander
-  #define LCD_USE_I2C_BUZZER   // Enable buzzer on LCD (optional)
-  #define IS_ULTIPANEL
-
-#elif ENABLED(LCD_I2C_VIKI)
-
-  /**
-   * Panucatt VIKI LCD with status LEDs, integrated click & L/R/U/P buttons, separate encoder inputs
-   *
-   * This uses the LiquidTWI2 library v1.2.3 or later ( https://github.com/lincomatic/LiquidTWI2 )
-   * Make sure the LiquidTWI2 directory is placed in the Arduino or Sketchbook libraries subdirectory.
-   * Note: The pause/stop/resume LCD button pin should be connected to the Arduino
-   *       BTN_ENC pin (or set BTN_ENC to -1 if not used)
-   */
-  #define LCD_I2C_TYPE_MCP23017
-  #define LCD_I2C_ADDRESS 0x20 // I2C Address of the port expander
-  #define LCD_USE_I2C_BUZZER   // Enable buzzer on LCD (requires LiquidTWI2 v1.2.3 or later)
-  #define IS_ULTIPANEL
-
-  #define ENCODER_FEEDRATE_DEADZONE 4
-
-  #define STD_ENCODER_PULSES_PER_STEP 1
-  #define STD_ENCODER_STEPS_PER_MENU_ITEM 2
 
 #elif ENABLED(G3D_PANEL)
 
@@ -211,37 +124,8 @@
   #define ENCODER_FEEDRATE_DEADZONE 6
 #endif
 
-// Shift register panels
-// ---------------------
-// 2 wire Non-latching LCD SR from:
-// https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/schematics#!shiftregister-connection
-#if ENABLED(FF_INTERFACEBOARD)
-  #define SR_LCD_3W_NL    // Non latching 3 wire shift register
-  #define IS_ULTIPANEL
-#elif ENABLED(SAV_3DLCD)
-  #define SR_LCD_2W_NL    // Non latching 2 wire shift register
-  #define IS_ULTIPANEL
-#endif
-
-#if ENABLED(IS_ULTIPANEL)
-  #define ULTIPANEL
-#endif
-#if ENABLED(ULTIPANEL)
-  #ifndef NEWPANEL
-    #define NEWPANEL
-  #endif
-#endif
-
 #if ENABLED(IS_RRW_KEYPAD)
   #define REPRAPWORLD_KEYPAD
-#endif
-
-// Keypad needs a move step
-#if ENABLED(REPRAPWORLD_KEYPAD)
-  #define NEWPANEL
-  #ifndef REPRAPWORLD_KEYPAD_MOVE_STEP
-    #define REPRAPWORLD_KEYPAD_MOVE_STEP 1.0
-  #endif
 #endif
 
 // Aliases for LCD features
@@ -811,7 +695,7 @@
 #endif
 
 #define HAS_SOFTWARE_ENDSTOPS        EITHER(MIN_SOFTWARE_ENDSTOPS, MAX_SOFTWARE_ENDSTOPS)
-#define HAS_RESUME_CONTINUE          ANY(EXTENSIBLE_UI, NEWPANEL, EMERGENCY_PARSER)
+#define HAS_RESUME_CONTINUE          ANY(EXTENSIBLE_UI, EMERGENCY_PARSER)
 #define HAS_COLOR_LEDS               ANY(BLINKM, RGB_LED, RGBW_LED, PCA9632, PCA9533, NEOPIXEL_LED)
 #define HAS_LEDS_OFF_FLAG            (BOTH(PRINTER_EVENT_LEDS, SDSUPPORT) && HAS_RESUME_CONTINUE)
 #define HAS_PRINT_PROGRESS           EITHER(SDSUPPORT, LCD_SET_PROGRESS_MANUALLY)

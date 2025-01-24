@@ -248,13 +248,6 @@ typedef struct SettingsDataStruct {
   #endif
 
   //
-  // ULTIPANEL
-  //
-  int16_t ui_preheat_hotend_temp[2],                    // M145 S0 H
-          ui_preheat_bed_temp[2];                       // M145 S0 B
-  uint8_t ui_preheat_fan_speed[2];                      // M145 S0 F
-
-  //
   // PIDTEMP
   //
   PIDC_t hotendPID[HOTENDS];                            // M301 En PIDC / M303 En U
@@ -712,21 +705,6 @@ void MarlinSettings::postprocess() {
         #endif
 
       #endif
-    }
-
-    //
-    // LCD Preheat settings
-    //
-    {
-      _FIELD_TEST(ui_preheat_hotend_temp);
-
-      constexpr int16_t ui_preheat_hotend_temp[2] = { PREHEAT_1_TEMP_HOTEND, PREHEAT_2_TEMP_HOTEND },
-                        ui_preheat_bed_temp[2]    = { PREHEAT_1_TEMP_BED, PREHEAT_2_TEMP_BED };
-      constexpr uint8_t ui_preheat_fan_speed[2]   = { PREHEAT_1_FAN_SPEED, PREHEAT_2_FAN_SPEED };
-
-      EEPROM_WRITE(ui_preheat_hotend_temp);
-      EEPROM_WRITE(ui_preheat_bed_temp);
-      EEPROM_WRITE(ui_preheat_fan_speed);
     }
 
     //
@@ -1430,19 +1408,6 @@ void MarlinSettings::postprocess() {
           #endif
 
         #endif
-      }
-
-      //
-      // LCD Preheat settings
-      //
-      {
-        _FIELD_TEST(ui_preheat_hotend_temp);
-
-        int16_t ui_preheat_hotend_temp[2], ui_preheat_bed_temp[2];
-        uint8_t ui_preheat_fan_speed[2];
-        EEPROM_READ(ui_preheat_hotend_temp); // 2 floats
-        EEPROM_READ(ui_preheat_bed_temp);    // 2 floats
-        EEPROM_READ(ui_preheat_fan_speed);   // 2 floats
       }
 
       //

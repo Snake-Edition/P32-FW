@@ -1727,11 +1727,6 @@
 //#define ULTIMAKERCONTROLLER
 
 //
-// ULTIPANEL as seen on Thingiverse.
-//
-//#define ULTIPANEL
-
-//
 // PanelOne from T3P3 (via RAMPS 1.4 AUX2/AUX3)
 // http://reprap.org/wiki/PanelOne
 //
