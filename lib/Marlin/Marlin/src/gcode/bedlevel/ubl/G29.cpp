@@ -286,12 +286,17 @@ void GcodeSuite::G29() {
         if (ubl.g29_nozzle_cleaning_failed) {
             plan_park_move_to_xyz({ { XYZ_NOZZLE_PARK_POINT } }, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE);
 
-            if (marlin_server::prompt_warning(WarningType::NozzleCleaningFailed) != Response::Retry) {
+            const auto response = marlin_server::prompt_warning(WarningType::NozzleCleaningFailed);
+            if (response == Response::Ignore) {
+                // Continue executing the function
+
+            } else if (response == Response::Retry) {
+                continue;
+
+            } else { // if(response == Response::Abort)
                 marlin_server::print_abort();
                 return;
             }
-
-            continue;
         }
     #endif
 

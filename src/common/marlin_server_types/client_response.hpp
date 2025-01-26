@@ -872,7 +872,7 @@ class ClientResponses {
             { PhasesWarning::BedUnevenAlignmentPrompt, { Response::Yes, Response::No } },
 #endif
 #if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-            { PhasesWarning::NozzleCleaningFailed, { Response::Retry, Response::Abort } },
+            { PhasesWarning::NozzleCleaningFailed, { Response::Retry, Response::Ignore, Response::Abort } },
 #endif
 #if HAS_CEILING_CLEARANCE()
             { PhasesWarning::CeilingClearanceViolation, { Response::Continue, Response::Abort } },
