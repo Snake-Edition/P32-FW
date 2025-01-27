@@ -257,10 +257,17 @@ void report_current_position() {
  */
 void sync_plan_position() {
   if (DEBUGGING(LEVELING)) DEBUG_POS("sync_plan_position", current_position);
-  planner.set_position_mm(current_position);
+  if (!planner.draining()) {
+    planner.set_position_mm(current_position);
+  }
 }
 
-void sync_plan_position_e() { planner.set_e_position_mm(current_position.e); }
+void sync_plan_position_e() {
+  if (DEBUGGING(LEVELING)) DEBUG_POS("sync_plan_position", current_position);
+  if (!planner.draining()) {
+    planner.set_e_position_mm(current_position.e);
+  }
+}
 
 /**
  * Get the stepper positions in the cartes[] array.
