@@ -22,7 +22,7 @@
 
 #include "../gcode.h"
 #include "../../module/planner.h"
-#include "../../lcd/marlinui.h"
+#include "../../lcd/ultralcd.h"
 
 /** \addtogroup G-Codes
  * @{
