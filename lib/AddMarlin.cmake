@@ -35,8 +35,7 @@ if(BOARD_IS_MASTER_BOARD)
   # Full Marlin configuration for printing (*BUDDY boards)
   target_sources(
     Marlin
-    PRIVATE Marlin/Marlin/src/core/multi_language.cpp
-            Marlin/Marlin/src/feature/babystep.cpp
+    PRIVATE Marlin/Marlin/src/feature/babystep.cpp
             Marlin/Marlin/src/feature/backlash.cpp
             Marlin/Marlin/src/feature/bed_preheat.cpp
             Marlin/Marlin/src/feature/bedlevel/bedlevel.cpp
