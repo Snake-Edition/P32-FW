@@ -866,9 +866,6 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   phstep_disabler.release();
 
   if (!failed) {
-    // Clear endstop state for polled stallGuard endstops
-    TERN_(SPI_ENDSTOPS, endstops.clear_endstop_state());
-
     // Move to a height where we can use the full xy-area
     TERN_(DELTA_HOME_TO_SAFE_ZONE, do_blocking_move_to_z(delta_clip_start_height));
   }

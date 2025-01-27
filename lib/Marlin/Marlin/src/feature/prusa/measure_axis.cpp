@@ -19,16 +19,8 @@
 
     #define _CAN_HOME(A) \
         ((A##_MIN_PIN > -1 && A##_HOME_DIR < 0) || (A##_MAX_PIN > -1 && A##_HOME_DIR > 0))
-    #if X_SPI_SENSORLESS
-        #define CAN_HOME_X true
-    #else
-        #define CAN_HOME_X _CAN_HOME(X)
-    #endif
-    #if Y_SPI_SENSORLESS
-        #define CAN_HOME_Y true
-    #else
-        #define CAN_HOME_Y _CAN_HOME(Y)
-    #endif
+    #define CAN_HOME_X _CAN_HOME(X)
+    #define CAN_HOME_Y _CAN_HOME(Y)
 
 Measure_axis::Measure_axis(bool measure_x, bool measure_y, xy_bool_t invert_dir, feedRate_t fr_mm_s,
     float raise_z, bool no_modifiers, bool default_acceleration, bool default_current)

@@ -188,10 +188,6 @@ class TMCMarlinBase : public TMC, public TMCStorage {
         max_period = (uint32_t)constrain(max_period, 0, 1048575);
         TMC2130Stepper::TCOOLTHRS(max_period);
       }
-
-      #if ENABLED(SPI_ENDSTOPS)
-        bool test_stall_status();
-      #endif
     #endif
 };
 
@@ -324,21 +320,6 @@ void initial_test_tmc_connection();
 
   bool tmc_enable_stallguard(TMCMarlin<TMC2660Stepper>);
   void tmc_disable_stallguard(TMCMarlin<TMC2660Stepper>, const bool);
-
-  #if ENABLED(SPI_ENDSTOPS)
-    template<class TMC>
-    bool TMCMarlinBase<TMC>::test_stall_status() {
-      this->switchCSpin(LOW);
-
-      // read stallGuard flag from TMC library, will handle HW and SW SPI
-      TMC2130_n::DRV_STATUS_t drv_status{0};
-      drv_status.sr = this->DRV_STATUS();
-
-      this->switchCSpin(HIGH);
-
-      return drv_status.stallGuard;
-    }
-  #endif // SPI_ENDSTOPS
 
 #endif // USE_SENSORLESS
 

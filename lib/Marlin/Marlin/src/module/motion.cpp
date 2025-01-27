@@ -1222,37 +1222,6 @@ feedRate_t get_homing_bump_feedrate(const AxisEnum axis) {
         #endif
       }
 
-      #if ENABLED(SPI_ENDSTOPS)
-        switch (axis) {
-          case X_AXIS: if (ENABLED(X_SPI_SENSORLESS)) endstops.tmc_spi_homing.x = true; break;
-          #if HAS_Y_AXIS
-            case Y_AXIS: if (ENABLED(Y_SPI_SENSORLESS)) endstops.tmc_spi_homing.y = true; break;
-          #endif
-          #if HAS_Z_AXIS
-            case Z_AXIS: if (ENABLED(Z_SPI_SENSORLESS)) endstops.tmc_spi_homing.z = true; break;
-          #endif
-          #if HAS_I_AXIS
-            case I_AXIS: if (ENABLED(I_SPI_SENSORLESS)) endstops.tmc_spi_homing.i = true; break;
-          #endif
-          #if HAS_J_AXIS
-            case J_AXIS: if (ENABLED(J_SPI_SENSORLESS)) endstops.tmc_spi_homing.j = true; break;
-          #endif
-          #if HAS_K_AXIS
-            case K_AXIS: if (ENABLED(K_SPI_SENSORLESS)) endstops.tmc_spi_homing.k = true; break;
-          #endif
-          #if HAS_U_AXIS
-            case U_AXIS: if (ENABLED(U_SPI_SENSORLESS)) endstops.tmc_spi_homing.u = true; break;
-          #endif
-          #if HAS_V_AXIS
-            case V_AXIS: if (ENABLED(V_SPI_SENSORLESS)) endstops.tmc_spi_homing.v = true; break;
-          #endif
-          #if HAS_W_AXIS
-            case W_AXIS: if (ENABLED(W_SPI_SENSORLESS)) endstops.tmc_spi_homing.w = true; break;
-          #endif
-          default: break;
-        }
-      #endif
-
       #if ENABLED(IMPROVE_HOMING_RELIABILITY) && HOMING_SG_GUARD_DURATION > 0
         sg_guard_period = millis() + default_sg_guard_duration;
       #endif
@@ -1325,37 +1294,6 @@ feedRate_t get_homing_bump_feedrate(const AxisEnum axis) {
           case W_AXIS: tmc_disable_stallguard(stepperW, enable_stealth.w); break;
         #endif
       }
-
-      #if ENABLED(SPI_ENDSTOPS)
-        switch (axis) {
-          case X_AXIS: if (ENABLED(X_SPI_SENSORLESS)) endstops.tmc_spi_homing.x = false; break;
-          #if HAS_Y_AXIS
-            case Y_AXIS: if (ENABLED(Y_SPI_SENSORLESS)) endstops.tmc_spi_homing.y = false; break;
-          #endif
-          #if HAS_Z_AXIS
-            case Z_AXIS: if (ENABLED(Z_SPI_SENSORLESS)) endstops.tmc_spi_homing.z = false; break;
-          #endif
-          #if HAS_I_AXIS
-            case I_AXIS: if (ENABLED(I_SPI_SENSORLESS)) endstops.tmc_spi_homing.i = false; break;
-          #endif
-          #if HAS_J_AXIS
-            case J_AXIS: if (ENABLED(J_SPI_SENSORLESS)) endstops.tmc_spi_homing.j = false; break;
-          #endif
-          #if HAS_K_AXIS
-            case K_AXIS: if (ENABLED(K_SPI_SENSORLESS)) endstops.tmc_spi_homing.k = false; break;
-          #endif
-          #if HAS_U_AXIS
-            case U_AXIS: if (ENABLED(U_SPI_SENSORLESS)) endstops.tmc_spi_homing.u = false; break;
-          #endif
-          #if HAS_V_AXIS
-            case V_AXIS: if (ENABLED(V_SPI_SENSORLESS)) endstops.tmc_spi_homing.v = false; break;
-          #endif
-          #if HAS_W_AXIS
-            case W_AXIS: if (ENABLED(W_SPI_SENSORLESS)) endstops.tmc_spi_homing.w = false; break;
-          #endif
-          default: break;
-        }
-      #endif
     }
 
   #endif // SENSORLESS_HOMING
@@ -1801,21 +1739,9 @@ bool homeaxis(const AxisEnum axis, const feedRate_t fr_mm_s, bool invert_home_di
   #else
     #define _CAN_HOME(A) \
       (axis == _AXIS(A) && ((A##_MIN_PIN > -1 && A##_HOME_DIR < 0) || (A##_MAX_PIN > -1 && A##_HOME_DIR > 0)))
-    #if X_SPI_SENSORLESS
-      #define CAN_HOME_X true
-    #else
-      #define CAN_HOME_X _CAN_HOME(X)
-    #endif
-    #if Y_SPI_SENSORLESS
-      #define CAN_HOME_Y true
-    #else
-      #define CAN_HOME_Y _CAN_HOME(Y)
-    #endif
-    #if Z_SPI_SENSORLESS
-      #define CAN_HOME_Z true
-    #else
-      #define CAN_HOME_Z _CAN_HOME(Z)
-    #endif
+    #define CAN_HOME_X _CAN_HOME(X)
+    #define CAN_HOME_Y _CAN_HOME(Y)
+    #define CAN_HOME_Z _CAN_HOME(Z)
     if (!CAN_HOME_X && !CAN_HOME_Y && !CAN_HOME_Z) return true;
   #endif
 
