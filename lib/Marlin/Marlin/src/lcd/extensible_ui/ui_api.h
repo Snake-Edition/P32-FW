@@ -224,18 +224,6 @@ namespace ExtUI {
   #endif
 
   /**
-   * Delay and timing routines
-   * Should be used by the EXTENSIBLE_UI to safely pause or measure time
-   * safe_millis must be called at least every 1 sec to guarantee time
-   * yield should be called within lengthy loops
-   */
-  #ifdef __SAM3X8E__
-    uint32_t safe_millis();
-  #else
-    FORCE_INLINE uint32_t safe_millis() { return millis(); } // TODO: Implement for AVR
-  #endif
-
-  /**
    * Media access routines
    *
    * Should be used by the EXTENSIBLE_UI to operate on files

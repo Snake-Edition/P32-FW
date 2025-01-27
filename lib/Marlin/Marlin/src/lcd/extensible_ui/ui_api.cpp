@@ -100,47 +100,6 @@
 #endif
 
 namespace ExtUI {
-  #ifdef __SAM3X8E__
-    /**
-     * Implement a special millis() to allow time measurement
-     * within an ISR (such as when the printer is killed).
-     *
-     * To keep proper time, must be called at least every 1s.
-     */
-    uint32_t safe_millis() {
-      // Not killed? Just call millis()
-      if (!flags.printer_killed) return millis();
-
-      static uint32_t currTimeHI = 0; /* Current time */
-
-      // Machine was killed, reinit SysTick so we are able to compute time without ISRs
-      if (currTimeHI == 0) {
-        // Get the last time the Arduino time computed (from CMSIS) and convert it to SysTick
-        currTimeHI = (uint32_t)((GetTickCount() * (uint64_t)(F_CPU / 8000)) >> 24);
-
-        // Reinit the SysTick timer to maximize its period
-        SysTick->LOAD  = SysTick_LOAD_RELOAD_Msk;                    // get the full range for the systick timer
-        SysTick->VAL   = 0;                                          // Load the SysTick Counter Value
-        SysTick->CTRL  = // MCLK/8 as source
-                         // No interrupts
-                         SysTick_CTRL_ENABLE_Msk;                    // Enable SysTick Timer
-     }
-
-      // Check if there was a timer overflow from the last read
-      if (SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk) {
-        // There was. This means (SysTick_LOAD_RELOAD_Msk * 1000 * 8)/F_CPU ms has elapsed
-        currTimeHI++;
-      }
-
-      // Calculate current time in milliseconds
-      uint32_t currTimeLO = SysTick_LOAD_RELOAD_Msk - SysTick->VAL; // (in MCLK/8)
-      uint64_t currTime = ((uint64_t)currTimeLO) | (((uint64_t)currTimeHI) << 24);
-
-      // The ms count is
-      return (uint32_t)(currTime / (F_CPU / 8000));
-    }
-  #endif // __SAM3X8E__
-
   void enableHeater(const extruder_t extruder) {
     #if HOTENDS && HEATER_IDLE_HANDLER
       thermalManager.reset_heater_idle_timer(extruder - E0);
