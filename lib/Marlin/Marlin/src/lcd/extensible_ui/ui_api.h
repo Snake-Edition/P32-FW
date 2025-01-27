@@ -240,35 +240,10 @@ namespace ExtUI {
    *
    * Should be used by the EXTENSIBLE_UI to operate on files
    */
-  bool isMediaInserted();
-  bool isPrintingFromMediaPaused();
-  bool isPrintingFromMedia();
   bool isPrinting();
-
-  void printFile(const char *filename);
   void stopPrint();
   void pausePrint();
   void resumePrint();
-
-  class FileList {
-    private:
-      uint16_t num_files;
-
-    public:
-      FileList();
-      void refresh();
-      bool seek(const uint16_t, const bool skip_range_check = false);
-
-      const char *longFilename();
-      const char *shortFilename();
-      const char *filename();
-      bool isDir();
-
-      void changeDir(const char * const dirname);
-      void upDir();
-      bool isAtRootDir();
-      uint16_t count();
-  };
 
   /**
    * Event callback routines
@@ -277,9 +252,6 @@ namespace ExtUI {
    */
   void onStartup();
   void onIdle();
-  void onMediaInserted();
-  void onMediaError();
-  void onMediaRemoved();
   void onPlayTone(const uint16_t frequency, const uint16_t duration);
   void onPrintTimerStarted();
   void onPrintTimerPaused();

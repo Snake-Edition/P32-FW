@@ -858,23 +858,8 @@ namespace ExtUI {
     #endif
   }
 
-  void printFile(const char *filename) {
-  }
-
-  bool isPrintingFromMediaPaused() {
-    return false;
-  }
-
-  bool isPrintingFromMedia() {
-    return false;
-  }
-
   bool isPrinting() {
-    return (planner.processing() || isPrintingFromMedia());
-  }
-
-  bool isMediaInserted() {
-    return false;
+    return planner.processing();
   }
 
   void pausePrint() {
@@ -894,45 +879,6 @@ namespace ExtUI {
     strcpy_P(msg, pstr);
     onUserConfirmRequired(msg);
   }
-
-  FileList::FileList() { refresh(); }
-
-  void FileList::refresh() { num_files = 0xFFFF; }
-
-  bool FileList::seek(const uint16_t pos, const bool skip_range_check) {
-    return false;
-  }
-
-  const char* FileList::filename() {
-    return "";
-  }
-
-  const char* FileList::shortFilename() {
-    return "";
-  }
-
-  const char* FileList::longFilename() {
-    return "";
-  }
-
-  bool FileList::isDir() {
-    return false;
-  }
-
-  uint16_t FileList::count() {
-    return 0;
-  }
-
-  bool FileList::isAtRootDir() {
-    return true;
-  }
-
-  void FileList::upDir() {
-  }
-
-  void FileList::changeDir(const char * const dirname) {
-  }
-
 } // namespace ExtUI
 
 // At the moment, we piggy-back off the ultralcd calls, but this could be cleaned up in the future
