@@ -75,7 +75,6 @@ void ScreenPrintPreview::Change(fsm::BaseData data) {
         break;
 
     case PhasesPrintPreview::main_dialog:
-        gcode_description.update(gcode);
         assert(gcode.is_loaded() && "GCodeInfo must be initialized before ScreenPrintPreview is created");
         show_main_dialog();
         break;
@@ -136,11 +135,7 @@ void ScreenPrintPreview::hide_main_dialog() {
 }
 
 void ScreenPrintPreview::show_main_dialog() {
-    for (auto &line : gcode_description.description_lines) {
-        line.title.Show();
-        line.value.Show();
-    }
-
+    gcode_description.update(gcode);
     thumbnail.Show();
     radio.Show();
     title_text.Show();
