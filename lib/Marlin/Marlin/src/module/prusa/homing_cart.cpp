@@ -1,9 +1,7 @@
 #include "homing_cart.hpp"
 
-#include <PersistentStorage.h>
 #include <config_store/store_instance.hpp>
 
-#include "Marlin.h" // for suspend_auto_report
 #include "../motion.h"
 #include "../stepper.h"
 #include "feature/prusa/crash_recovery.hpp"
@@ -14,6 +12,41 @@ inline constexpr float HOMING_BUMP_DIVISOR_STEP = 1.03f;
 inline constexpr float homing_bump_divisor_dflt[] = HOMING_BUMP_DIVISOR;
 inline constexpr float homing_bump_divisor_max[] = HOMING_BUMP_DIVISOR_MAX;
 inline constexpr float homing_bump_divisor_min[] = HOMING_BUMP_DIVISOR_MIN;
+
+static constexpr uint8_t homeSamplesCount = config_store_ns::CurrentStore::precise_homing_axis_sample_count;
+
+static void pushHomeSample(uint16_t mscnt, uint8_t axis) {
+    const auto index = config_store().precise_homing_sample_history_index.get(axis);
+    config_store().precise_homing_sample_history.set(axis * homeSamplesCount + index, mscnt);
+    config_store().precise_homing_sample_history_index.set(axis, (index + 1) % homeSamplesCount);
+}
+
+static bool isCalibratedHome(uint16_t (&mscnt)[homeSamplesCount], uint8_t axis) {
+    const auto offset = axis * homeSamplesCount;
+
+    bool is_calibrated = true;
+    auto &store_array = config_store().precise_homing_sample_history;
+
+    for (uint_fast8_t i = 0; i < homeSamplesCount; ++i) {
+        auto sample = store_array.get(i + offset);
+
+        if (sample == store_array.get_default_val(i + offset)) {
+            is_calibrated = false;
+            sample = 0;
+        }
+
+        mscnt[i] = sample;
+    }
+    return is_calibrated;
+}
+
+[[maybe_unused]] static void erase_axis(uint8_t axis) {
+    config_store().precise_homing_sample_history_index.set_to_default(axis);
+
+    for (int i = homeSamplesCount * axis, e = homeSamplesCount * axis + homeSamplesCount; i < e; i++) {
+        config_store().precise_homing_sample_history.set_to_default(i);
+    }
+}
 
 /**
  *  Move back and forth to endstop
@@ -30,9 +63,9 @@ static int32_t home_and_get_mscnt(AxisEnum axis, int axis_home_dir, feedRate_t f
  *          always 256 microsteps per step, range 0 to 1023
  */
 static int get_calibrated_home(const AxisEnum axis, bool &calibrated) {
-    uint16_t mscntRead[PersistentStorage::homeSamplesCount];
-    calibrated = PersistentStorage::isCalibratedHome(mscntRead, axis);
-    return home_modus(mscntRead, PersistentStorage::homeSamplesCount, 96);
+    uint16_t mscntRead[homeSamplesCount];
+    calibrated = isCalibratedHome(mscntRead, axis);
+    return home_modus(mscntRead, homeSamplesCount, 96);
 }
 
 /**
@@ -95,7 +128,7 @@ static int32_t home_and_get_calibration_offset(AxisEnum axis, int axis_home_dir,
         if ((probe_offset >= axis_home_min_diff(axis))
             && (probe_offset <= axis_home_max_diff(axis))
             && store_samples) {
-            PersistentStorage::pushHomeSample(mscnt, axis);
+            pushHomeSample(mscnt, axis);
         } else {
             break_loop = true;
         }
@@ -365,7 +398,7 @@ float home_axis_precise(AxisEnum axis, int axis_home_dir, bool can_calibrate, fl
             sens_calibration.update_probe_offset_avg(probe_offset);
 
             if (sens_calibration.is_calibrated()) {
-                PersistentStorage::erase_axis(axis);
+                erase_axis(axis);
             }
         }
 #endif

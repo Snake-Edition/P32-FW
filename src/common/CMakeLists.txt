@@ -228,8 +228,4 @@ if(BOARD_IS_MASTER_BOARD)
   add_subdirectory(feature)
 endif()
 
-if(HAS_PRECISE_HOMING)
-  target_sources(firmware PRIVATE PersistentStorage.cpp)
-endif()
-
 add_subdirectory(utils)
