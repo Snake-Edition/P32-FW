@@ -78,7 +78,7 @@ public:
     }
 
 protected:
-    constexpr inline JournalItemBase(const DataT &val)
+    consteval inline JournalItemBase(const DataT &val)
         : data(val) {}
 
     /// Sets the config to the provided value \p in
@@ -129,7 +129,7 @@ public:
     using Base = JournalItemBase<DataT, backend, ram_only>;
 
 public:
-    constexpr JournalItem()
+    consteval JournalItem()
         : Base(default_val) {
         // Current implementation of journal relies heavily on this
         static_assert(sizeof(JournalItem) == sizeof(DataT));
@@ -229,7 +229,7 @@ public:
         }
     }
 
-    constexpr JournalItemArray()
+    consteval JournalItemArray()
         requires(sizeof(JournalItemArray) == sizeof(ItemArray)) // Current implementation of journal relies heavily on this
     {
         if constexpr (is_std_array_v<DefaultVal>) {
@@ -238,6 +238,7 @@ public:
             data_array.fill(default_val);
         }
     }
+
     JournalItemArray(const JournalItemArray &other) = delete;
     JournalItemArray &operator=(const JournalItemArray &other) = delete;
 

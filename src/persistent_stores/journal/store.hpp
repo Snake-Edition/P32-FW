@@ -108,7 +108,9 @@ public:
         });
     }
 
-    Store() = default;
+    consteval Store()
+        : Config {} {}
+
     Store(const Store &other) = delete;
     Store(Store &&other) = delete;
     Store &operator=(const Store &other) = delete;
@@ -117,7 +119,7 @@ public:
 
 template <class Config, class DeprecatedItems, const std::span<const journal::Backend::MigrationFunction> &MigrationFunctions>
 inline Store<Config, DeprecatedItems, MigrationFunctions> &store() {
-    static Store<Config, DeprecatedItems, MigrationFunctions> str {};
+    static constinit Store<Config, DeprecatedItems, MigrationFunctions> str {};
     return str;
 }
 } // namespace journal
