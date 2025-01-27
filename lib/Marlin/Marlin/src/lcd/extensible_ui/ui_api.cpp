@@ -68,8 +68,6 @@
   #include "../../feature/emergency_parser.h"
 #endif
 
-#define IFSD(A,B) (B)
-
 #if HAS_TRINAMIC
   #include "../../feature/tmc_util.h"
   #include "../../module/stepper/indirection.h"
@@ -861,23 +859,22 @@ namespace ExtUI {
   }
 
   void printFile(const char *filename) {
-    IFSD(card.openAndPrintFile(filename), NOOP);
   }
 
   bool isPrintingFromMediaPaused() {
-    return IFSD(isPrintingFromMedia() && !IS_SD_PRINTING(), false);
+    return false;
   }
 
   bool isPrintingFromMedia() {
-    return IFSD(card.isFileOpen(), false);
+    return false;
   }
 
   bool isPrinting() {
-    return (planner.processing() || isPrintingFromMedia() || IFSD(IS_SD_PRINTING(), false));
+    return (planner.processing() || isPrintingFromMedia());
   }
 
   bool isMediaInserted() {
-    return IFSD(IS_SD_INSERTED() && card.isMounted(), false);
+    return false;
   }
 
   void pausePrint() {
@@ -907,23 +904,23 @@ namespace ExtUI {
   }
 
   const char* FileList::filename() {
-    return IFSD(card.longFilename[0] ? card.longFilename : card.filename, "");
+    return "";
   }
 
   const char* FileList::shortFilename() {
-    return IFSD(card.filename, "");
+    return "";
   }
 
   const char* FileList::longFilename() {
-    return IFSD(card.longFilename, "");
+    return "";
   }
 
   bool FileList::isDir() {
-    return IFSD(card.flag.filenameIsDir, false);
+    return false;
   }
 
   uint16_t FileList::count() {
-    return IFSD((num_files = (num_files == 0xFFFF ? card.get_num_Files() : num_files)), 0);
+    return 0;
   }
 
   bool FileList::isAtRootDir() {
