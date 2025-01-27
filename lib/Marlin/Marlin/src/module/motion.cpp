@@ -1310,6 +1310,22 @@ feedRate_t get_homing_bump_feedrate(const AxisEnum axis) {
 
   #endif // SENSORLESS_HOMING
 
+void do_homing_move_axis_rel(const AxisEnum axis, const float distance, const feedRate_t fr_mm_s) {
+  assert(fr_mm_s != 0.f);
+
+  // avoid trashing the position when aborted
+  planner.synchronize();
+  if (planner.draining())
+    return;
+
+  CBI(axis_known_position, axis);
+  current_position[axis] = 0;
+  sync_plan_position();
+  current_position[axis] = distance;
+  planner.buffer_segment(current_position, fr_mm_s, active_extruder);
+  planner.synchronize();
+}
+
 /**
  * Home an individual linear axis
  * @param homing_z_with_probe false to use sensorless homing instead of probe
@@ -1380,26 +1396,8 @@ uint8_t do_homing_move(const AxisEnum axis, const float distance, const feedRate
 
   #if ENABLED(MOVE_BACK_BEFORE_HOMING)
     if (can_move_back_before_homing && ((axis == X_AXIS) || (axis == Y_AXIS))) {
-      abce_pos_t target;
-      planner.get_axis_position_mm(target);
-      target[axis] = 0;
-      planner.set_machine_position_mm(target);
       float dist = (distance > 0) ? -MOVE_BACK_BEFORE_HOMING_DISTANCE : MOVE_BACK_BEFORE_HOMING_DISTANCE;
-      target[axis] = dist;
-      
-      #if IS_KINEMATIC && DISABLED(CLASSIC_JERK)
-        const xyze_float_t delta_mm_cart{0};
-      #endif
-      
-      // Set delta/cartesian axes directly
-      planner.buffer_segment(target      
-        #if IS_KINEMATIC && DISABLED(CLASSIC_JERK)
-          , delta_mm_cart
-        #endif
-        , real_fr_mm_s, active_extruder
-      );
-
-      planner.synchronize();
+      do_homing_move_axis_rel(axis, dist, real_fr_mm_s);
   }
   #endif
 
@@ -1420,34 +1418,7 @@ uint8_t do_homing_move(const AxisEnum axis, const float distance, const feedRate
     }
   #endif
 
-  #if IS_SCARA
-    // Tell the planner the axis is at 0
-    current_position[axis] = 0;
-    sync_plan_position();
-    current_position[axis] = distance;
-    line_to_current_position(real_fr_mm_s);
-  #else
-    abce_pos_t target;
-    planner.get_axis_position_mm(target);
-    target[axis] = 0;
-    planner.set_machine_position_mm(target);
-    target[axis] = distance;
-
-    #if IS_KINEMATIC && DISABLED(CLASSIC_JERK)
-      const xyze_float_t delta_mm_cart{0};
-    #endif
-
-    // Set delta/cartesian axes directly
-    planner.buffer_segment(target
-      #if IS_KINEMATIC && DISABLED(CLASSIC_JERK)
-        , delta_mm_cart
-      #endif
-      , real_fr_mm_s, active_extruder
-    );
-
-  #endif
-
-  planner.synchronize();
+  do_homing_move_axis_rel(axis, distance, real_fr_mm_s);
 
   #if ENABLED(NOZZLE_LOAD_CELL) && HOMING_Z_WITH_PROBE
     if (moving_probe_toward_bed) {
@@ -1476,50 +1447,6 @@ uint8_t do_homing_move(const AxisEnum axis, const float distance, const feedRate
 
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("<<< do_homing_move(", axis_codes[axis], ")");
   return trigger_state;
-}
-
-static void do_blocking_move_axis(const AxisEnum axis, const float distance, const feedRate_t fr_mm_s) {
-  if (DEBUGGING(LEVELING)) {
-    DEBUG_ECHOPAIR(">>> do_blocking_move_axis(", axis_codes[axis], ", ", distance, ", ");
-    if (fr_mm_s)
-      DEBUG_ECHO(fr_mm_s);
-    else
-      DEBUG_ECHOPAIR("[", homing_feedrate(axis), "]");
-    DEBUG_ECHOLNPGM(")");
-  }
-
-  const feedRate_t real_fr_mm_s = fr_mm_s ?: homing_feedrate(axis);
-
-  #if IS_SCARA
-    // Tell the planner the axis is at 0
-    current_position[axis] = 0;
-    sync_plan_position();
-    current_position[axis] = distance;
-    line_to_current_position(real_fr_mm_s);
-  #else
-    abce_pos_t target;
-    planner.get_axis_position_mm(target);
-    target[axis] = 0;
-    planner.set_machine_position_mm(target);
-    target[axis] = distance;
-
-    #if IS_KINEMATIC && DISABLED(CLASSIC_JERK)
-      const xyze_float_t delta_mm_cart{0};
-    #endif
-
-    // Set delta/cartesian axes directly
-    planner.buffer_segment(target
-      #if IS_KINEMATIC && DISABLED(CLASSIC_JERK)
-        , delta_mm_cart
-      #endif
-      , real_fr_mm_s, active_extruder
-    );
-
-  #endif
-
-  planner.synchronize();
-
-  if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("<<< do_blocking_move_axis(", axis_codes[axis], ")");
 }
 
 /**
@@ -1916,13 +1843,15 @@ float homeaxis_single_run(const AxisEnum axis, const int axis_home_dir, const fe
     }
   #endif
 
+  const feedRate_t real_fr_mm_s = fr_mm_s ?: homing_feedrate(axis);
+
   #if ENABLED(MOVE_BACK_BEFORE_HOMING)
     #ifndef MOVE_BACK_BEFORE_HOMING_DISTANCE_FIRST
       #define MOVE_BACK_BEFORE_HOMING_DISTANCE_FIRST MOVE_BACK_BEFORE_HOMING_DISTANCE
     #endif
     if ((axis == X_AXIS) || (axis == Y_AXIS)) {
       const float move_back_distance = attempt ? MOVE_BACK_BEFORE_HOMING_DISTANCE : MOVE_BACK_BEFORE_HOMING_DISTANCE_FIRST;
-      do_blocking_move_axis(axis, axis_home_dir * -move_back_distance, fr_mm_s);
+      do_homing_move_axis_rel(axis, axis_home_dir * -move_back_distance, real_fr_mm_s);
     }
   #endif // ENABLED(MOVE_BACK_BEFORE_HOMING)
 
@@ -1932,7 +1861,7 @@ float homeaxis_single_run(const AxisEnum axis, const int axis_home_dir, const fe
     #else
       axis
     #endif
-      ) * axis_home_dir, fr_mm_s, false, homing_z_with_probe);
+      ) * axis_home_dir, real_fr_mm_s, false, homing_z_with_probe);
 
   #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH) && DISABLED(BLTOUCH_HS_MODE)
     if (axis == Z_AXIS && homing_z_with_probe) {
@@ -1957,7 +1886,7 @@ float homeaxis_single_run(const AxisEnum axis, const int axis_home_dir, const fe
 
     // Move away from the endstop by the axis HOME_BUMP_MM
     if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Move Away:");
-    do_blocking_move_axis(axis, -bump, fr_mm_s);
+    do_homing_move_axis_rel(axis, -bump, real_fr_mm_s);
 
     // Slow move towards endstop until triggered
     if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Home 2 Slow:");
@@ -1983,7 +1912,7 @@ float homeaxis_single_run(const AxisEnum axis, const int axis_home_dir, const fe
         // very fine tuning. That tuning works only on that default feedrate,
         // not on the slow one (on the slow one, the touch is not actually
         // detected).
-        bump_feedrate = fr_mm_s;
+        bump_feedrate = real_fr_mm_s;
 #else
         bump_feedrate = MMM_TO_MMS(Z_PROBE_SPEED_SLOW);
 #endif

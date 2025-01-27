@@ -148,76 +148,29 @@ void Measure_axis::sensorless_disable(AxisEnum axis) {
 }
 
 void Measure_axis::home_back(AxisEnum axis) {
+    // FIXME: duplicit code
     #if ENABLED(MOVE_BACK_BEFORE_HOMING)
-
-    // TODO: don't reset positions
-    current_position.pos[axis] = 0;
-    sync_plan_position();
     const int axis_home_dir = (
         #if ENABLED(DUAL_X_CARRIAGE)
         axis == X_AXIS ? x_home_dir(active_extruder) :
         #endif
             invert_dir[axis] ? (-home_dir(axis))
                              : home_dir(axis));
-
-    abce_pos_t target;
-    planner.get_axis_position_mm(target);
-    target[axis] = 0;
-    planner.set_machine_position_mm(target);
     float dist = (axis_home_dir > 0) ? -MOVE_BACK_BEFORE_HOMING_DISTANCE : MOVE_BACK_BEFORE_HOMING_DISTANCE;
-    target[axis] = dist;
-
-        #if IS_KINEMATIC && DISABLED(CLASSIC_JERK)
-    const xyze_float_t delta_mm_cart { 0 };
-        #endif
-
-    // Set delta/cartesian axes directly
-    planner.buffer_segment(target
-        #if IS_KINEMATIC && DISABLED(CLASSIC_JERK)
-        ,
-        delta_mm_cart
-        #endif
-        ,
-        fr[axis], active_extruder);
+    do_homing_move_axis_rel(axis, dist, fr[axis]);
     #endif
 }
 
 void Measure_axis::home_start(AxisEnum axis, bool invert) {
-    /// FIXME: duplicit code
+    // FIXME: duplicit code
     const int axis_home_dir = (
     #if ENABLED(DUAL_X_CARRIAGE)
         axis == X_AXIS ? x_home_dir(active_extruder) :
     #endif
             invert_dir[axis] ^ invert ? (-home_dir(axis))
                                       : home_dir(axis));
-    float distance = 1.5f * max_length(axis) * axis_home_dir;
-
-    #if IS_SCARA
-    // Tell the planner the axis is at 0
-    current_position[axis] = 0;
-    sync_plan_position();
-    current_position[axis] = distance;
-    line_to_current_position(fr[axis]);
-    #else
-    abce_pos_t target = { planner.get_axis_position_mm(A_AXIS), planner.get_axis_position_mm(B_AXIS), planner.get_axis_position_mm(C_AXIS), planner.get_axis_position_mm(E_AXIS) };
-    target[axis] = 0;
-    planner.set_machine_position_mm(target);
-    target[axis] = distance;
-
-        #if IS_KINEMATIC && DISABLED(CLASSIC_JERK)
-    const xyze_float_t delta_mm_cart { 0 };
-        #endif
-
-    // Set delta/cartesian axes directly
-    planner.buffer_segment(target
-        #if IS_KINEMATIC && DISABLED(CLASSIC_JERK)
-        ,
-        delta_mm_cart
-        #endif
-        ,
-        fr[axis], active_extruder);
-
-    #endif
+    float dist = 1.5f * max_length(axis) * axis_home_dir;
+    do_homing_move_axis_rel(axis, dist, fr[axis]);
 }
 
 void Measure_axis::home_finish(AxisEnum axis) {
