@@ -91,6 +91,12 @@ void GcodeSuite::M92() {
     return report_M92(true, target_extruder);
   }
 
+  // We need to synchronize before we can change axis steps per unit
+  planner.synchronize();
+  if (planner.draining()) {
+    return;
+  }
+
   {
     auto s = planner.user_settings;
 
