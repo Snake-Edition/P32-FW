@@ -130,8 +130,9 @@ public:
 
 public:
     constexpr JournalItem()
-        requires(sizeof(JournalItem) == sizeof(DataT)) // Current implementation of journal relies heavily on this
         : Base(default_val) {
+        // Current implementation of journal relies heavily on this
+        static_assert(sizeof(JournalItem) == sizeof(DataT));
     }
 
     /// Sets the config to the provided value \p in
