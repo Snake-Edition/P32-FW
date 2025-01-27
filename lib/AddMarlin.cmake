@@ -139,7 +139,6 @@ if(BOARD_IS_MASTER_BOARD)
             Marlin/Marlin/src/gcode/units/M82_M83.cpp
             Marlin/Marlin/src/HAL/HAL_STM32_F4_F7/Servo.cpp
             Marlin/Marlin/src/HAL/HAL_STM32_F4_F7/STM32F7/TMC2660.cpp
-            Marlin/Marlin/src/HAL/shared/HAL_spi_L6470.cpp
             Marlin/Marlin/src/libs/buzzer.cpp
             Marlin/Marlin/src/libs/crc16.cpp
             Marlin/Marlin/src/libs/hex_print_routines.cpp
@@ -154,7 +153,6 @@ if(BOARD_IS_MASTER_BOARD)
             Marlin/Marlin/src/module/prusa/homing_utils.cpp
             Marlin/Marlin/src/module/scara.cpp
             Marlin/Marlin/src/module/servo.cpp
-            Marlin/Marlin/src/module/stepper/L6470.cpp
             Marlin/Marlin/src/module/stepper/TMC26X.cpp
     )
 

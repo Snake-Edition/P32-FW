@@ -32,11 +32,6 @@
 #include <stdlib.h>
 #include "SPI.h"
 
-#if HAS_DRIVER(L6470)
-  #include "libs/L6470/L6470_Marlin.h"
-  extern uint8_t axis_known_position;
-#endif
-
 void stop();
 
 void idle(
@@ -51,11 +46,7 @@ void manage_inactivity(const bool ignore_stepper_queue=false);
 //
 // X, Y, Z Stepper enable / disable
 //
-#if AXIS_DRIVER_TYPE_X(L6470)
-  extern L6470 stepperX;
-  #define X_enable  NOOP
-  #define X_disable stepperX.free()
-#elif HAS_X_ENABLE
+#if HAS_X_ENABLE
   #define X_enable  X_ENABLE_WRITE( X_ENABLE_ON)
   #define X_disable X_ENABLE_WRITE(!X_ENABLE_ON)
 #else
@@ -63,11 +54,7 @@ void manage_inactivity(const bool ignore_stepper_queue=false);
   #define X_disable NOOP
 #endif
 
-#if AXIS_DRIVER_TYPE_X2(L6470)
-  extern L6470 stepperX2;
-  #define X2_enable  NOOP
-  #define X2_disable stepperX2.free()
-#elif HAS_X2_ENABLE
+#if HAS_X2_ENABLE
   #define X2_enable  X2_ENABLE_WRITE( X_ENABLE_ON)
   #define X2_disable X2_ENABLE_WRITE(!X_ENABLE_ON)
 #else
@@ -78,11 +65,7 @@ void manage_inactivity(const bool ignore_stepper_queue=false);
 #define  enable_X() do{ X_enable; X2_enable; }while(0)
 #define disable_X() do{ X_disable; X2_disable; CBI(axis_known_position, X_AXIS); }while(0)
 
-#if AXIS_DRIVER_TYPE_Y(L6470)
-  extern L6470 stepperY;
-  #define Y_enable  NOOP
-  #define Y_disable stepperY.free()
-#elif HAS_Y_ENABLE
+#if HAS_Y_ENABLE
   #define Y_enable  Y_ENABLE_WRITE( Y_ENABLE_ON)
   #define Y_disable Y_ENABLE_WRITE(!Y_ENABLE_ON)
 #else
@@ -90,11 +73,7 @@ void manage_inactivity(const bool ignore_stepper_queue=false);
   #define Y_disable NOOP
 #endif
 
-#if AXIS_DRIVER_TYPE_Y2(L6470)
-  extern L6470 stepperY2;
-  #define Y2_enable  NOOP
-  #define Y2_disable stepperY2.free()
-#elif HAS_Y2_ENABLE
+#if HAS_Y2_ENABLE
   #define Y2_enable  Y2_ENABLE_WRITE( Y_ENABLE_ON)
   #define Y2_disable Y2_ENABLE_WRITE(!Y_ENABLE_ON)
 #else
@@ -115,11 +94,7 @@ void manage_inactivity(const bool ignore_stepper_queue=false);
   #define disable_XY() do{disable_X(); disable_Y(); }while(0)
 #endif
 
-#if AXIS_DRIVER_TYPE_Z(L6470)
-  extern L6470 stepperZ;
-  #define Z_enable  NOOP
-  #define Z_disable stepperZ.free()
-#elif HAS_Z_ENABLE
+#if HAS_Z_ENABLE
   #define Z_enable  Z_ENABLE_WRITE( Z_ENABLE_ON)
   #define Z_disable Z_ENABLE_WRITE(!Z_ENABLE_ON)
 #else
@@ -127,11 +102,7 @@ void manage_inactivity(const bool ignore_stepper_queue=false);
   #define Z_disable NOOP
 #endif
 
-#if AXIS_DRIVER_TYPE_Z2(L6470)
-  extern L6470 stepperZ2;
-  #define Z2_enable  NOOP
-  #define Z2_disable stepperZ2.free()
-#elif HAS_Z2_ENABLE
+#if HAS_Z2_ENABLE
   #define Z2_enable  Z2_ENABLE_WRITE( Z_ENABLE_ON)
   #define Z2_disable Z2_ENABLE_WRITE(!Z_ENABLE_ON)
 #else
@@ -139,11 +110,7 @@ void manage_inactivity(const bool ignore_stepper_queue=false);
   #define Z2_disable NOOP
 #endif
 
-#if AXIS_DRIVER_TYPE_Z3(L6470)
-  extern L6470 stepperZ3;
-  #define Z3_enable  NOOP
-  #define Z3_disable stepperZ3.free()
-#elif HAS_Z3_ENABLE
+#if HAS_Z3_ENABLE
   #define Z3_enable  Z3_ENABLE_WRITE( Z_ENABLE_ON)
   #define Z3_disable Z3_ENABLE_WRITE(!Z_ENABLE_ON)
 #else
@@ -159,11 +126,7 @@ void manage_inactivity(const bool ignore_stepper_queue=false);
 //
 
 // define the individual enables/disables
-#if AXIS_DRIVER_TYPE_E0(L6470)
-  extern L6470 stepperE0;
-  #define  E0_enable NOOP
-  #define E0_disable do{ stepperE0.free(); CBI(axis_known_position, E_AXIS); }while(0)
-#elif HAS_E0_ENABLE
+#if HAS_E0_ENABLE
   #define  E0_enable E0_ENABLE_WRITE( E_ENABLE_ON)
   #define E0_disable E0_ENABLE_WRITE(!E_ENABLE_ON)
 #else
@@ -171,11 +134,7 @@ void manage_inactivity(const bool ignore_stepper_queue=false);
   #define E0_disable NOOP
 #endif
 
-#if AXIS_DRIVER_TYPE_E1(L6470)
-  extern L6470 stepperE1;
-  #define  E1_enable NOOP
-  #define E1_disable do{ stepperE1.free(); CBI(axis_known_position, E_AXIS); }while(0)
-#elif (E_STEPPERS > 1 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E1_ENABLE
+#if (E_STEPPERS > 1 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E1_ENABLE
   #define  E1_enable E1_ENABLE_WRITE( E_ENABLE_ON)
   #define E1_disable E1_ENABLE_WRITE(!E_ENABLE_ON)
 #else
@@ -183,11 +142,7 @@ void manage_inactivity(const bool ignore_stepper_queue=false);
   #define E1_disable NOOP
 #endif
 
-#if AXIS_DRIVER_TYPE_E2(L6470)
-  extern L6470 stepperE2;
-  #define  E2_enable NOOP
-  #define E2_disable do{ stepperE2.free(); CBI(axis_known_position, E_AXIS); }while(0)
-#elif (E_STEPPERS > 2 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E2_ENABLE
+#if (E_STEPPERS > 2 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E2_ENABLE
   #define  E2_enable E2_ENABLE_WRITE( E_ENABLE_ON)
   #define E2_disable E2_ENABLE_WRITE(!E_ENABLE_ON)
 #else
@@ -195,11 +150,7 @@ void manage_inactivity(const bool ignore_stepper_queue=false);
   #define E2_disable NOOP
 #endif
 
-#if AXIS_DRIVER_TYPE_E3(L6470)
-  extern L6470 stepperE3;
-  #define  E3_enable NOOP
-  #define E3_disable do{ stepperE3.free(); CBI(axis_known_position, E_AXIS); }while(0)
-#elif (E_STEPPERS > 3 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E3_ENABLE
+#if (E_STEPPERS > 3 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E3_ENABLE
   #define  E3_enable E3_ENABLE_WRITE( E_ENABLE_ON)
   #define E3_disable E3_ENABLE_WRITE(!E_ENABLE_ON)
 #else
@@ -207,11 +158,7 @@ void manage_inactivity(const bool ignore_stepper_queue=false);
   #define E3_disable NOOP
 #endif
 
-#if AXIS_DRIVER_TYPE_E4(L6470)
-  extern L6470 stepperE4;
-  #define  E4_enable NOOP
-  #define E4_disable do{ stepperE4.free(); CBI(axis_known_position, E_AXIS); }while(0)
-#elif (E_STEPPERS > 4 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E4_ENABLE
+#if (E_STEPPERS > 4 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E4_ENABLE
   #define  E4_enable E4_ENABLE_WRITE( E_ENABLE_ON)
   #define E4_disable E4_ENABLE_WRITE(!E_ENABLE_ON)
 #else
@@ -219,11 +166,7 @@ void manage_inactivity(const bool ignore_stepper_queue=false);
   #define E4_disable NOOP
 #endif
 
-#if AXIS_DRIVER_TYPE_E5(L6470)
-  extern L6470 stepperE5;
-  #define  E5_enable NOOP
-  #define E5_disable do{ stepperE5.free(); CBI(axis_known_position, E_AXIS); }while(0)
-#elif (E_STEPPERS > 5 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E5_ENABLE
+#if (E_STEPPERS > 5 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E5_ENABLE
   #define  E5_enable E5_ENABLE_WRITE( E_ENABLE_ON)
   #define E5_disable E5_ENABLE_WRITE(!E_ENABLE_ON)
 #else

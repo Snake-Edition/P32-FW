@@ -43,10 +43,6 @@ void reset_stepper_drivers() {
     tmc26x_init_to_defaults();
   #endif
 
-  #if HAS_DRIVER(L6470)
-    L6470.init_to_defaults();
-  #endif
-
   #if HAS_TRINAMIC
     reset_trinamic_drivers();
   #endif

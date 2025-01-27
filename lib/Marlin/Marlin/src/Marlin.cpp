@@ -167,10 +167,6 @@
   #include "feature/prusa/MMU2/mmu2_mk4.h"
 #endif
 
-#if HAS_DRIVER(L6470)
-  #include "libs/L6470/L6470_Marlin.h"
-#endif
-
 bool Running = true;
 
 // For M109 and M190, this flag may be cleared (by M108) to exit the wait loop
@@ -583,10 +579,6 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
     monitor_tmc_driver();
   #endif
 
-  #if ENABLED(MONITOR_L6470_DRIVER_STATUS)
-    L6470.monitor_driver();
-  #endif
-
   // Limit check_axes_activity frequency to 10Hz
   static millis_t next_check_axes_ms = 0;
   if (ELAPSED(ms, next_check_axes_ms)) {
@@ -752,10 +744,6 @@ void stop() {
 void setup() {
 
   HAL_init();
-
-  #if HAS_DRIVER(L6470)
-    L6470.init();         // setup SPI and then init chips
-  #endif
 
   #if ENABLED(DISABLE_DEBUG)
     // Disable any hardware debug to free up pins for IO

@@ -25,7 +25,6 @@
 #define _A5984              0x002
 #define _DRV8825            0x003
 #define _LV8729             0x004
-#define _L6470              0x105
 #define _TB6560             0x006
 #define _TB6600             0x007
 #define _TMC2100            0x008
