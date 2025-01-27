@@ -56,7 +56,6 @@ if(BOARD_IS_MASTER_BOARD)
             Marlin/Marlin/src/feature/prusa/restore_z.cpp
             Marlin/Marlin/src/feature/runout.cpp
             Marlin/Marlin/src/feature/spindle_laser.cpp
-            Marlin/Marlin/src/feature/touch/xpt2046.cpp
             Marlin/Marlin/src/feature/twibus.cpp
             Marlin/Marlin/src/gcode/bedlevel/G42.cpp
             Marlin/Marlin/src/gcode/bedlevel/M420.cpp
