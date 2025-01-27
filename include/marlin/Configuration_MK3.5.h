@@ -1578,13 +1578,6 @@
 //#define SPI_SPEED SPI_QUARTER_SPEED
 //#define SPI_SPEED SPI_EIGHTH_SPEED
 
-/**
- * SD CARD: ENABLE CRC
- *
- * Use CRC checks and retries on the SD communication.
- */
-//#define SD_CHECK_AND_RETRY
-
 //
 // ENCODER SETTINGS
 //
