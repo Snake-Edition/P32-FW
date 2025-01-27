@@ -251,7 +251,7 @@ void IWindowMenuItem::Print(Rect16 rect) {
 
         } else {
             // Not focused -> render without roll
-            render_text_align(label_rect, label, label_font, mi_color_back, mi_color_text, GuiDefaults::MenuPaddingItems, GuiDefaults::MenuAlignment(), true);
+            render_text_align(label_rect, label, label_font, mi_color_back, mi_color_text, GuiDefaults::MenuPaddingItems, text_flags(GuiDefaults::MenuAlignment(), is_multiline::no, check_overflow::no), true);
         }
     }
 

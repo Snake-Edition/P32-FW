@@ -11,14 +11,16 @@
 
 enum class is_multiline : bool { no,
     yes };
+enum class check_overflow : bool { no,
+    yes };
 
 struct text_flags {
     Align_t align;
     is_multiline multiline;
+    check_overflow overflow;
 
-    text_flags(Align_t align, is_multiline multiline = is_multiline::no)
+    text_flags(Align_t align, is_multiline multiline = is_multiline::no, check_overflow overflow = check_overflow::yes)
         : align(align)
-        , multiline(multiline) {}
-
-    bool IsMultiline() { return multiline == is_multiline::yes; }
+        , multiline(multiline)
+        , overflow(overflow) {}
 };

@@ -142,7 +142,7 @@ void render_text_align(Rect16 rc, StringReaderUtf8 &reader, const Font f, Color 
     auto reader_copy = reader.copy();
     const RectTextLayout layout = RectTextLayout(reader_copy, rc_pad.Width() / font->w, rc_pad.Height() / font->h, flags.multiline);
 
-    assert(!layout.has_text_overflown());
+    assert(flags.overflow == check_overflow::no || !layout.has_text_overflown());
 
     if (layout.get_width_in_chars() == 0 || layout.get_height_in_chars() == 0) {
         if (fill_rect) {

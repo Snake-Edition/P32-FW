@@ -83,7 +83,7 @@ void txtroll_t::Init(const Rect16 &rect, const string_view_utf8 &text, Font font
 
 void txtroll_t::render_text(const Rect16 &rect, const string_view_utf8 &text, Font font, Color clr_back, Color clr_text, padding_ui8_t padding, Align_t alignment) const {
     const Rect16 text_rect = Rect16(rect.Left() + px_cd, rect.Top(), rect.Width() - px_cd, rect.Height());
-    render_text_align(text_rect, StringReaderUtf8(text).skip(draw_progress), font, clr_back, clr_text, padding, text_flags(alignment, is_multiline::no), true);
+    render_text_align(text_rect, StringReaderUtf8(text).skip(draw_progress), font, clr_back, clr_text, padding, text_flags(alignment, is_multiline::no, check_overflow::no), true);
     display::fill_rect(Rect16(rect.Left(), rect.Top(), px_cd, rect.Height()), clr_back);
 }
 
