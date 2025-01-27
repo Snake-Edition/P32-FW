@@ -996,10 +996,6 @@ void setup() {
     queue.inject_P(PSTR(STARTUP_COMMANDS));
   #endif
 
-  #if ENABLED(INIT_SDCARD_ON_BOOT)
-    card.beginautostart();
-  #endif
-
   #if ENABLED(HOST_PROMPT_SUPPORT)
     host_action_prompt_end();
   #endif
