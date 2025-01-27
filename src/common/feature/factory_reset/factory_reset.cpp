@@ -19,20 +19,24 @@
 #endif
 
 // Check that our presets cover all the item flags
-static_assert([] {
+static constexpr auto store_flags = [] {
     journal::ItemFlags store_flags = 0;
-    config_store_ns::CurrentStore s;
+    config_store_ns::CurrentStore s {};
     visit_all_struct_fields(s, [&](auto &item) {
         store_flags |= item.flags;
     });
 
+    return store_flags;
+}();
+static constexpr auto preset_flags = [] {
     journal::ItemFlags preset_flags = 0;
     for (const auto &item : FactoryReset::items_config) {
         preset_flags |= item.item_flags;
     }
 
-    return preset_flags == store_flags;
-}());
+    return preset_flags;
+}();
+static_assert(store_flags == preset_flags);
 
 extern osThreadId displayTaskHandle;
 
