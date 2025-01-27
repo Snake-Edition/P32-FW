@@ -2342,6 +2342,7 @@ void Planner::refresh_acceleration_rates() {
 
 // Recalculate position, mm_per_step, mm_per_half_step and mm_per_mstep if settings.axis_steps_per_mm or settings.axis_msteps_per_mm changes!
 void Planner::refresh_positioning() {
+  assert(!planner.processing());
   LOOP_XYZE_N(i) {
     mm_per_step[i] = 1.f / settings.axis_steps_per_mm[i];
     mm_per_half_step[i] = mm_per_step[i] / 2.f;
