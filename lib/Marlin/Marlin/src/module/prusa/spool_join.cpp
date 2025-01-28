@@ -44,16 +44,10 @@ bool SpoolJoin::add_join(uint8_t spool_1, uint8_t spool_2) {
     if (num_joins >= joins.size() || !is_tool_enabled(spool_1) || !is_tool_enabled(spool_2) || spool_1 == spool_2) {
         return false;
     }
-
     // join will be added at the end of existing joins, so when for example
     // 0 will join with 1, and we want to join0 with 2,  actual join created will be 1 -> 2,
     // because we first want to join 0 -> 1, and then 1 -> 2
-    for (size_t i = 0; i < num_joins; ++i) {
-        if (joins[i].spool_1 == spool_1) {
-            spool_1 = joins[i].spool_2;
-            i = -1; // reset the search as we don't have order guaranteed
-        }
-    }
+    spool_1 = get_last_spool_2_from_chain_unlocked(spool_1);
 
     // Prevent adding loops
     if (get_first_spool_1_from_chain_unlocked(spool_2) == get_first_spool_1_from_chain_unlocked(spool_1)) {
@@ -166,6 +160,21 @@ bool SpoolJoin::remove_join_chain_containing_unlocked(uint8_t spool) {
         // we don't have it
         return false;
     }
+}
+
+uint8_t SpoolJoin::get_last_spool_2_from_chain(uint8_t spool_1) const {
+    std::unique_lock lock(mutex);
+    return get_last_spool_2_from_chain_unlocked(spool_1);
+}
+
+uint8_t SpoolJoin::get_last_spool_2_from_chain_unlocked(uint8_t spool_1) const {
+    for (size_t i = 0; i < num_joins; ++i) {
+        if (joins[i].spool_1 == spool_1) {
+            spool_1 = joins[i].spool_2;
+            i = -1; // reset the loop and search again
+        }
+    }
+    return spool_1;
 }
 
 uint8_t SpoolJoin::get_first_spool_1_from_chain(uint8_t spool_2) const {
