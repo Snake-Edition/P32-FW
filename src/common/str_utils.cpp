@@ -16,7 +16,7 @@ RectTextLayout::RectTextLayout(StringReaderUtf8 &reader, uint16_t max_cols, uint
         max_rows = 1;
     }
 
-    std::optional<int> last_space_index = std::nullopt;
+    std::optional<int> split_index = std::nullopt;
     unichar c = 0;
     int chars_this_line = 0;
 
@@ -25,41 +25,45 @@ RectTextLayout::RectTextLayout(StringReaderUtf8 &reader, uint16_t max_cols, uint
         case '\n': // new line
 
             set_current_line_characters(chars_this_line);
+            skip_char[current_line] = true;
             if (!new_line(max_rows)) {
                 return;
             }
 
             chars_this_line = 0;
-            last_space_index = std::nullopt;
+            split_index = std::nullopt;
             break;
 
+        case 0x3002: // Japanese dot
+        case 0x3001: // Japanese comma
         case ' ': // remember space position
 
             // erasing start space is not handled here
             // Whenever we enter new line (except the first one), we always skip 1 char ('\n' || ' ') from the stream
             // If there are more whitespace characters, its clearly a choice
 
-            last_space_index = chars_this_line;
+            split_index = chars_this_line + 1;
+            skip_char[current_line] = (c == ' ');
             [[fallthrough]];
 
         default:
             chars_this_line++;
 
             if (chars_this_line > max_cols) {
-
-                if (!last_space_index || current_line == max_rows - 1) { // Do not wrap singleline texts
-                    last_space_index = max_cols;
+                if (!split_index || current_line == max_rows - 1) { // Do not wrap singleline texts
+                    split_index = max_cols;
                     overflow = true;
+                    skip_char[current_line] = false;
                 }
 
                 // It does not count newline char and space before wrapped word
                 // Wrapping cuts overflown word and put it on the next line
-                // If word is too long for a line, it will return calculated layout up until that error
+                // If word is too long for a line, it will split the word on max_cols
 
                 // count chars in next line
-                chars_this_line -= ((*last_space_index) + 1); // +1 space
-                set_current_line_characters(*last_space_index);
-                last_space_index = std::nullopt;
+                chars_this_line -= *split_index;
+                set_current_line_characters(*split_index - (skip_char[current_line] ? 1 : 0));
+                split_index = std::nullopt;
 
                 if (!new_line(max_rows)) {
                     return;
@@ -68,6 +72,7 @@ RectTextLayout::RectTextLayout(StringReaderUtf8 &reader, uint16_t max_cols, uint
         }
     }
 
+    skip_char[current_line] = false;
     set_current_line_characters(chars_this_line);
     return;
 }

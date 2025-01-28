@@ -9,6 +9,7 @@
 #include <assert.h>
 #include "../lang/string_view_utf8.hpp"
 #include "../guiapi/include/font_flags.hpp"
+#include <bitset>
 
 /// Result of from_chars_light
 struct from_chars_light_result {
@@ -87,10 +88,13 @@ public:
 
     uint8_t get_line_count() const;
 
+    bool get_skip_char_on_line(uint8_t line) const { return skip_char[line]; }
+
 private:
     static constexpr size_t MaxLines = 31;
     static constexpr uint8_t MaxCharInLine = 255; // uint8_t
     using Data_t = std::array<uint8_t, MaxLines>;
+    std::bitset<MaxLines> skip_char = {};
 
     Data_t data = {};
     uint8_t current_line = 0;

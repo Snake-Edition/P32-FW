@@ -172,12 +172,12 @@ void render_text_align(Rect16 rc, StringReaderUtf8 &reader, const Font f, Color 
             display::fill_rect(behind, clr_bg);
         }
 
-        // Apart from first line, always skip one character, that splits the lines ('\n' || ' ')
-        if (i) {
+        render_line(reader, line_char_cnt, line_rect, font, clr_bg, clr_fg);
+
+        // skip character, that splits the lines (usually '\n' || ' ')
+        if (layout.get_skip_char_on_line(i)) {
             reader.skip(1);
         }
-
-        render_line(reader, line_char_cnt, line_rect, font, clr_bg, clr_fg);
     }
 
     /// fill borders (padding)
