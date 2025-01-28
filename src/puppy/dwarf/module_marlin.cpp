@@ -3,24 +3,19 @@
 #include <device/peripherals.h>
 #include <device/hal.h>
 #include "Marlin.h"
-#include "accelerometer.hpp"
 #include "modbus/ModbusTask.hpp"
 #include <PuppyConfig.hpp>
 #include "wiring_analog.h"
 #include "wiring_digital.h"
-#include "Marlin/src/module/temperature.h"
 #include "Marlin/src/module/planner.h"
 #include <logging/log.hpp>
 #include "gpio.h"
-#include "timing.h"
 #include "modbus/ModbusInit.hpp" //for modbus::modbus_control
 #include "loadcell.hpp"
 #include "led.h"
 #include "adc.hpp"
 #include "safe_state.h"
 #include "Cheese.hpp"
-#include "hwio.h"
-#include "trigger_crash_dump.h"
 #include "fanctl.hpp"
 #include "task_startup.h"
 #include <hal/HAL_MultiWatchdog.hpp>
@@ -183,6 +178,7 @@ void kill(PGM_P const lcd_error /*=nullptr*/, PGM_P const lcd_component /*=nullp
     log_error(Marlin, "Printer killed: %s: %s", lcd_component, lcd_error);
     dwarf::ModbusControl::TriggerMarlinKillFault(dwarf_shared::errors::FaultStatusMask::MARLIN_KILLED, lcd_component, lcd_error);
     stop_marlin();
+    NVIC_SystemReset();
 }
 
 #include "SPI.h"
