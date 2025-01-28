@@ -140,6 +140,9 @@ private:
     // When assigning to a right that's already mapped/joined to something, we risk that the previous tool would lose it's mapping.
     void handle_right_steal();
 
+    // cleans up from the right and switches to left
+    void cleanup_and_return_to_left();
+
     // ensures all idx_to_real and pos_to_real arrays are in a 'nice to draw' order
     void ensure_nicely_ordered();
 
