@@ -27,6 +27,15 @@ endif()
 
 include(ProjectOptions.cmake)
 
+# link time optimizations to disable LTO run cmake with -DDISABLE_LTO
+if(NOT DEFINED DISABLE_LTO AND NOT DEVELOPER_MODE)
+  set(COMPILE_WITH_LTO ON)
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+else()
+  set(COMPILE_WITH_LTO OFF)
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+endif()
+
 # Check GCC Version
 get_recommended_gcc_version(RECOMMENDED_TOOLCHAIN_VERSION)
 if(CMAKE_CROSSCOMPILING AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL
@@ -479,11 +488,6 @@ objcopy(firmware "binary" ".bin")
 
 # generate linker map file
 target_link_options(firmware PUBLIC -Wl,-Map=firmware.map,--print-memory-usage)
-
-# link time optimizations
-if(NOT DEVELOPER_MODE)
-  set_target_properties(firmware PROPERTIES INTERPROCEDURAL_OPTIMIZATION True)
-endif()
 
 # inform about the firmware's size in terminal
 report_size(firmware)

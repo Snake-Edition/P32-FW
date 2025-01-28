@@ -29,6 +29,9 @@ else()
   message(FATAL_ERROR "Unknown HW platform of mcu \"${MCU}\"")
 endif()
 
+# Can't compile with LTO, there are several problems especially when comiling with MPU
+set_property(TARGET FreeRTOS PROPERTY INTERPROCEDURAL_OPTIMIZATION OFF)
+
 add_library(cmsis_rtos Source/CMSIS_RTOS/cmsis_os.c)
 target_include_directories(cmsis_rtos PUBLIC Source/CMSIS_RTOS)
 target_link_libraries(cmsis_rtos PRIVATE FreeRTOS)
