@@ -412,13 +412,12 @@ TEST_CASE("RectTextLayout: input misalignment", "[layout]") {
 
     SECTION("First line is too long") {
         // It should return print out cropped word and the rest on the next row
-        // ONE CHARACTER WILL BE CUT from the next line (same as if it was space)
         StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("111111\n11\n111"));
         auto layout = RectTextLayout(reader, 5, 5, is_multiline::yes);
         REQUIRE(layout.get_height_in_chars() == 4);
         REQUIRE(layout.get_width_in_chars() == 5);
         REQUIRE(layout.get_line_characters(0) == 5);
-        REQUIRE(layout.get_line_characters(1) == 0);
+        REQUIRE(layout.get_line_characters(1) == 1);
         REQUIRE(layout.get_line_characters(2) == 2);
         REQUIRE(layout.get_line_characters(3) == 3);
         REQUIRE(layout.has_text_overflown() == true);
@@ -426,7 +425,6 @@ TEST_CASE("RectTextLayout: input misalignment", "[layout]") {
 
     SECTION("Some line is too long") {
         // It should return print out cropped word and the rest on the next row
-        // ONE CHARACTER WILL BE CUT from the next line (same as if it was space)
         StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("111\n1 11\n1111111\n11"));
         auto layout = RectTextLayout(reader, 5, 5, is_multiline::yes);
         REQUIRE(layout.get_height_in_chars() == 5);
@@ -434,9 +432,23 @@ TEST_CASE("RectTextLayout: input misalignment", "[layout]") {
         REQUIRE(layout.get_line_characters(0) == 3);
         REQUIRE(layout.get_line_characters(1) == 4);
         REQUIRE(layout.get_line_characters(2) == 5);
-        REQUIRE(layout.get_line_characters(3) == 1);
+        REQUIRE(layout.get_line_characters(3) == 2);
         REQUIRE(layout.get_line_characters(4) == 2);
         REQUIRE(layout.has_text_overflown() == true);
+    }
+
+    SECTION("Line too long with space at the end") {
+        // It should return print out cropped word and the rest on the next row
+        // In this case, space is handled like a newline character (skipped in the next row)
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("111\n11111 1111\n11"));
+        auto layout = RectTextLayout(reader, 5, 5, is_multiline::yes);
+        REQUIRE(layout.get_height_in_chars() == 4);
+        REQUIRE(layout.get_width_in_chars() == 5);
+        REQUIRE(layout.get_line_characters(0) == 3);
+        REQUIRE(layout.get_line_characters(1) == 5);
+        REQUIRE(layout.get_line_characters(2) == 4);
+        REQUIRE(layout.get_line_characters(3) == 2);
+        REQUIRE(layout.has_text_overflown() == false);
     }
 
     SECTION("Not enough height") {
@@ -449,6 +461,32 @@ TEST_CASE("RectTextLayout: input misalignment", "[layout]") {
         REQUIRE(layout.get_line_characters(2) == 4);
         REQUIRE(layout.get_line_characters(3) == 0);
         REQUIRE(layout.has_text_overflown() == true);
+    }
+}
+
+TEST_CASE("RextTextLayout: Word wrapping japanese", "[layout]") {
+
+    SECTION("Japanese comma & dot: text wrap #1") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("ロードセルキャリ。プリンタロードセルキャリ、ードセルキャリロードセルキャリ"));
+        auto layout = RectTextLayout(reader, 15, 3, is_multiline::yes);
+        CHECK(layout.get_height_in_chars() == 3);
+        CHECK(layout.get_width_in_chars() == 15);
+        CHECK(layout.get_line_characters(0) == 9);
+        CHECK(layout.get_line_characters(1) == 13);
+        CHECK(layout.get_line_characters(2) == 15);
+        CHECK(layout.has_text_overflown() == false);
+    }
+
+    SECTION("Japanese comma & dot: text wrap #2") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("ロードセルキャリリ リンタロードセルキャリ、ードセルキャリローー"));
+        auto layout = RectTextLayout(reader, 10, 4, is_multiline::yes);
+        CHECK(layout.get_height_in_chars() == 4);
+        CHECK(layout.get_width_in_chars() == 10);
+        CHECK(layout.get_line_characters(0) == 9);
+        CHECK(layout.get_line_characters(1) == 10);
+        CHECK(layout.get_line_characters(2) == 2);
+        CHECK(layout.get_line_characters(3) == 10);
+        CHECK(layout.has_text_overflown() == true);
     }
 }
 
@@ -527,7 +565,7 @@ TEST_CASE("RextTextLayout: Word wrapping", "[layout]") {
         REQUIRE(layout.get_width_in_chars() == 5);
         REQUIRE(layout.get_line_characters(0) == 3); // '1 1'
         REQUIRE(layout.get_line_characters(1) == 5); // '11111'
-        REQUIRE(layout.get_line_characters(2) == 0); // ''
+        REQUIRE(layout.get_line_characters(2) == 1); // '1'
         REQUIRE(layout.has_text_overflown() == true);
     }
 
