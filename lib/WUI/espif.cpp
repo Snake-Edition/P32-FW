@@ -113,6 +113,8 @@ static std::atomic<uint8_t> init_countdown = 20;
 static std::atomic<bool> seen_intron = false;
 static std::atomic<bool> seen_pong = false;
 static std::atomic<bool> reset_parser = false;
+// 0 means "unknown" or "not associated"
+static std::atomic<int8_t> signal_strength = 0;
 
 // UART
 static std::atomic<bool> esp_detected;
@@ -676,10 +678,18 @@ static void uart_input(uint8_t *data, size_t size, struct netif *netif) {
                 state = HeaderByte2;
                 c++;
                 break;
-            case MSG_PACKET_V2:
-                process_link_change(*c++, netif);
+            case MSG_PACKET_V2: {
+                // The byte holds both link status and the signal strength.
+                //
+                // * 1: (historically / backwards compatible mode) ‒ link up, unknown signal strength
+                // * 0: Link down
+                // * negative: Link up, number meaning the signal strength.
+                int8_t signal = static_cast<int8_t>(*c++);
+                signal_strength.store(signal > 0 ? 0 : signal);
+                process_link_change(signal, netif);
                 state = HeaderByte2;
                 break;
+            }
             default:
                 assert(false && "internal inconsistency");
                 state = Intron;
@@ -1011,4 +1021,13 @@ EspLinkState esp_link_state() {
     }
     assert(0);
     return EspLinkState::Init;
+}
+
+std::optional<int8_t> esp_signal_strength() {
+    int8_t result = signal_strength.load();
+    if (result == 0) {
+        return std::nullopt;
+    } else {
+        return result;
+    }
 }
