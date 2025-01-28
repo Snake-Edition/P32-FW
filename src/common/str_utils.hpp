@@ -92,7 +92,7 @@ private:
     static constexpr uint8_t MaxCharInLine = 255; // uint8_t
     using Data_t = std::array<uint8_t, MaxLines>;
 
-    Data_t data;
+    Data_t data = {};
     uint8_t current_line = 0;
     uint8_t longest_char_cnt = 0;
     bool overflow = false;

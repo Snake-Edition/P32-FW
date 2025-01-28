@@ -7,10 +7,8 @@
 #include <string_view_utf8.hpp>
 
 RectTextLayout::RectTextLayout(StringReaderUtf8 &reader, uint16_t max_cols, uint16_t max_rows, is_multiline multiline) {
-    data.fill(0);
-
     if (max_cols == 0 || max_rows == 0) {
-        overflow = true;
+        overflow = (reader.getUtf8Char() != 0);
         return;
     }
 

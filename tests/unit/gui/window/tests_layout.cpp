@@ -320,7 +320,7 @@ TEST_CASE("RectTextLayout: Basics", "[layout]") {
     SECTION("Empty space will always overflow") {
         StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH(""));
         auto layout = RectTextLayout(reader, 0, 0, is_multiline::no);
-        REQUIRE(layout.has_text_overflown() == true);
+        REQUIRE(layout.has_text_overflown() == false);
     }
 
     SECTION("Not enough height") {
