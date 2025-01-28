@@ -60,12 +60,12 @@ MI_METRICS_ENABLE::MI_METRICS_ENABLE()
     : WI_ICON_SWITCH_OFF_ON_t(config_store().enable_metrics.get(), _("Enable Metrics")) {}
 
 void MI_METRICS_ENABLE::OnChange([[maybe_unused]] size_t old_index) {
-    config_store().enable_metrics.set(index);
+    config_store().enable_metrics.set(value());
     logging::syslog_reconfigure();
     metrics_reconfigure();
     if (value() && !config_store().enable_metrics.get()) {
         MsgBoxWarning(_("Failed to enable metrics. Check your settings."), Responses_Ok);
-        set_value(false, false);
+        set_value(false);
     }
 }
 

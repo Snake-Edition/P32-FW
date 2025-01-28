@@ -47,14 +47,14 @@ void MI_SIDE_FSENSOR_REMAP::OnChange([[maybe_unused]] size_t old_index) {
         Screens::Access()->Get()->Validate(); // Do not redraw this menu yet
 
         // Change index by what user selected)
-        set_value(side_fsensor_remap::is_remapped(), false);
+        set_value(side_fsensor_remap::is_remapped());
 
         Validate(); // Do not redraw this switch yet
         marlin_client::test_start_with_data(stmFSensor, static_cast<ToolMask>(mask)); // Start filament sensor calibration for moved tools
 
     } else {
         // Change index by what user selected)
-        set_value(side_fsensor_remap::is_remapped(), false);
+        set_value(side_fsensor_remap::is_remapped());
     }
 }
 #endif /*HAS_TOOLCHANGER() && HAS_SIDE_FSENSOR()*/
@@ -132,7 +132,7 @@ void MI_EMERGENCY_STOP_ENABLE::OnChange([[maybe_unused]] size_t old_index) {
             config_store().emergency_stop_enable.set(false);
         } else {
             // revert the change in GUI and keep config store intact
-            set_value(true, false);
+            set_value(true);
         }
     }
 }

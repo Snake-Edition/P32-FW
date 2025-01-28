@@ -103,7 +103,7 @@ MI_FILAMENT_REQUIRES_FILTRATION::MI_FILAMENT_REQUIRES_FILTRATION()
     : MI_COMMON(false, _("Requires Filtration")) {}
 
 void MI_FILAMENT_REQUIRES_FILTRATION::update() {
-    set_value(filament_type.parameters().requires_filtration, false);
+    set_value(filament_type.parameters().requires_filtration);
     set_enabled(filament_type.is_customizable());
 }
 
@@ -118,7 +118,7 @@ MI_FILAMENT_IS_ABRASIVE::MI_FILAMENT_IS_ABRASIVE()
     : MI_COMMON(false, _("Is Abrasive")) {}
 
 void MI_FILAMENT_IS_ABRASIVE::update() {
-    set_value(filament_type.parameters().is_abrasive, false);
+    set_value(filament_type.parameters().is_abrasive);
     set_enabled(filament_type.is_customizable());
 }
 
@@ -134,7 +134,7 @@ MI_FILAMENT_VISIBLE::MI_FILAMENT_VISIBLE()
 }
 
 void MI_FILAMENT_VISIBLE::update() {
-    set_value(filament_type.is_visible(), false);
+    set_value(filament_type.is_visible());
 
     // Ad-hoc filament types don't have configurable visibility
     set_is_hidden(std::holds_alternative<AdHocFilamentType>(filament_type));

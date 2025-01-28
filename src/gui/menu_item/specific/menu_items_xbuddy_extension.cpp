@@ -85,6 +85,5 @@ void MI_CAM_USB_PWR::OnChange([[maybe_unused]] size_t old_index) {
 }
 
 void MI_CAM_USB_PWR::Loop() {
-    // What does this do?
-    set_value(buddy::xbuddy_extension().usb_power(), false);
+    set_value(buddy::xbuddy_extension().usb_power());
 };

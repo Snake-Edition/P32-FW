@@ -36,9 +36,9 @@ void IMI_AnySensor::update() {
     const uint8_t bit_mask = (1 << sensor_index);
 
     if (is_side) {
-        SetIndex(bool(config_store().fsensor_side_enabled_bits.get() & bit_mask));
+        set_value(bool(config_store().fsensor_side_enabled_bits.get() & bit_mask));
     } else {
-        SetIndex(bool(config_store().fsensor_extruder_enabled_bits.get() & bit_mask));
+        set_value(bool(config_store().fsensor_extruder_enabled_bits.get() & bit_mask));
     }
 }
 
@@ -46,13 +46,12 @@ void IMI_AnySensor::OnChange(size_t old_index) {
     // Enabling/disabling FS can generate gcodes (I'm looking at you, MMU!).
     // Fail the action if there's no space in the queue.
     if (!gui_check_space_in_gcode_queue_with_msg()) {
-        // SetIndex doesn't call OnChange
-        SetIndex(old_index);
+        set_value(old_index > 0);
         return;
     }
 
     const uint8_t bit_mask = (1 << sensor_index);
-    const auto update_f = [&](auto val) { return index ? (val | bit_mask) : (val & ~bit_mask); };
+    const auto update_f = [&](auto val) { return value() ? (val | bit_mask) : (val & ~bit_mask); };
 
     if (is_side) {
         config_store().fsensor_side_enabled_bits.transform(update_f);
@@ -63,8 +62,8 @@ void IMI_AnySensor::OnChange(size_t old_index) {
     auto &fss = FSensors_instance();
     fss.request_enable_state_update();
 
-    if (index && !fss.gui_wait_for_init_with_msg()) {
-        SetIndex(0);
+    if (value() && !fss.gui_wait_for_init_with_msg()) {
+        set_value(false);
     }
 }
 

@@ -18,7 +18,7 @@ MI_CONNECT_ENABLED::MI_CONNECT_ENABLED()
     : WI_ICON_SWITCH_OFF_ON_t(config_store().connect_enabled.get(), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
 
 void MI_CONNECT_ENABLED::OnChange([[maybe_unused]] size_t old_index) {
-    config_store().connect_enabled.set(static_cast<bool>(index));
+    config_store().connect_enabled.set(static_cast<bool>(value()));
     // Connect will catch up with new config in its next iteration
 }
 
@@ -31,8 +31,8 @@ void MI_CONNECT_ENABLED::Loop() {
     // access to our items (AFAIK).
     //
     // It should be cheap anyway - both the eeprom access is cached in RAM and
-    // the SetIndex checks it is different before doing anything.
-    SetIndex(config_store().connect_enabled.get());
+    // the set_value checks it is different before doing anything.
+    set_value(config_store().connect_enabled.get());
 }
 
 MI_CONNECT_STATUS::MI_CONNECT_STATUS()

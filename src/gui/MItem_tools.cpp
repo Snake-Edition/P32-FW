@@ -122,24 +122,23 @@ MI_FILAMENT_SENSOR::MI_FILAMENT_SENSOR()
 }
 
 void MI_FILAMENT_SENSOR::update() {
-    SetIndex(config_store().fsensor_enabled.get());
+    set_value(config_store().fsensor_enabled.get());
 }
 
 void MI_FILAMENT_SENSOR::OnChange(size_t old_index) {
     // Enabling/disabling FS can generate gcodes (I'm looking at you, MMU!).
     // Fail the action if there's no space in the queue.
     if (!gui_check_space_in_gcode_queue_with_msg()) {
-        // SetIndex doesn't call OnChange
-        SetIndex(old_index);
+        set_value(old_index > 0);
         return;
     }
 
     auto &fss = FSensors_instance();
-    fss.set_enabled_global(index);
+    fss.set_enabled_global(value());
 
-    if (index && !fss.gui_wait_for_init_with_msg()) {
+    if (value() && !fss.gui_wait_for_init_with_msg()) {
         FSensors_instance().set_enabled_global(false);
-        SetIndex(old_index);
+        set_value(old_index > 0);
     }
 
     // Signal to the parent to check for changed
@@ -155,7 +154,7 @@ bool MI_STUCK_FILAMENT_DETECTION::init_index() const {
 
 void MI_STUCK_FILAMENT_DETECTION::OnChange(size_t old_index) {
     if (!gui_try_gcode_with_msg(value() ? "M591 S1 P" : "M591 S0 P")) {
-        set_value(old_index, false);
+        set_value(old_index > 0);
     }
 }
 
@@ -167,7 +166,7 @@ MI_STEALTH_MODE::MI_STEALTH_MODE()
 
 void MI_STEALTH_MODE::OnChange(size_t old_index) {
     if (!gui_try_gcode_with_msg(value() ? "M9150" : "M9140")) {
-        set_value(old_index, false);
+        set_value(old_index > 0);
     }
 }
 
@@ -454,7 +453,7 @@ MI_TIMEZONE_SUMMER::MI_TIMEZONE_SUMMER()
     : WI_ICON_SWITCH_OFF_ON_t(static_cast<uint8_t>(config_store().timezone_summer.get()), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
 
 void MI_TIMEZONE_SUMMER::OnChange([[maybe_unused]] size_t old_index) {
-    config_store().timezone_summer.set(static_cast<time_tools::TimezoneOffsetSummerTime>(index));
+    config_store().timezone_summer.set(static_cast<time_tools::TimezoneOffsetSummerTime>(value()));
 }
 
 /*****************************************************************************/
@@ -788,7 +787,7 @@ void MI_SET_READY::click([[maybe_unused]] IWindowMenu &window_menu) {
 MI_PHASE_STEPPING_TOGGLE::MI_PHASE_STEPPING_TOGGLE()
     : WI_ICON_SWITCH_OFF_ON_t(0, _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
     bool phstep_enabled = config_store().get_phase_stepping_enabled();
-    set_value(phstep_enabled, false);
+    set_value(phstep_enabled);
 }
 
 void MI_PHASE_STEPPING_TOGGLE::OnChange([[maybe_unused]] size_t old_index) {
@@ -796,22 +795,22 @@ void MI_PHASE_STEPPING_TOGGLE::OnChange([[maybe_unused]] size_t old_index) {
         return;
     }
 
-    if (index && (config_store().selftest_result_phase_stepping.get() != TestResult_Passed)) {
+    if (value() && (config_store().selftest_result_phase_stepping.get() != TestResult_Passed)) {
     #if PRINTER_IS_PRUSA_iX() || PRINTER_IS_PRUSA_COREONE()
         if (MsgBoxQuestion(_("Turn on Phase stepping uncalibrated?"), Responses_YesNo) == Response::No) {
             AutoRestore ar(event_in_progress, true);
-            set_value(old_index, false);
+            set_value(old_index);
             return;
         }
     #else
         AutoRestore ar(event_in_progress, true);
         MsgBoxWarning(_("Phase stepping not ready: perform calibration first."), Responses_Ok);
-        set_value(old_index, false);
+        set_value(old_index);
         return;
     #endif
     }
 
-    if (index) {
+    if (value()) {
         marlin_client::gcode("M970 X1 Y1"); // turn phase stepping on
     } else {
         marlin_client::gcode("M970 X0 Y0"); // turn phase stepping off
@@ -820,7 +819,7 @@ void MI_PHASE_STEPPING_TOGGLE::OnChange([[maybe_unused]] size_t old_index) {
     // we need to wait until the action actually takes place so that when returning
     // to the menu (if any) the new state is already reflected
     gui_dlg_wait([&]() {
-        if (index == config_store().get_phase_stepping_enabled()) {
+        if (value() == config_store().get_phase_stepping_enabled()) {
             Screens::Access()->Close();
         }
     });
@@ -939,8 +938,8 @@ MI_SIDE_LEDS_DIMMING::MI_SIDE_LEDS_DIMMING()
     : WI_ICON_SWITCH_OFF_ON_t(config_store().side_leds_dimming_enabled.get(), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
 void MI_SIDE_LEDS_DIMMING::OnChange(size_t) {
-    config_store().side_leds_dimming_enabled.set(index);
-    leds::side_strip_control.set_dimming_enabled(index);
+    config_store().side_leds_dimming_enabled.set(value());
+    leds::side_strip_control.set_dimming_enabled(value());
 }
 #endif
 
@@ -1027,7 +1026,7 @@ void MI_LOG_TO_TXT::OnChange(size_t) {
 
     if (!logging::file_log_enable(filepath.str())) {
         MsgBoxError(_("Failed to open file '%s' for writing.").formatted(fmt_buf, filename), Responses_Ok);
-        set_value(false, false);
+        set_value(false);
         return;
     }
 

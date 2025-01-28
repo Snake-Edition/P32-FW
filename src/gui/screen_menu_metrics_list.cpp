@@ -17,7 +17,7 @@ MI_METRIC::MI_METRIC(metric_t *metric)
 }
 
 void MI_METRIC::OnChange(size_t) {
-    metric_->enabled = index;
+    metric_->enabled = value();
 }
 
 WindowMenuMetricsList::WindowMenuMetricsList(window_t *parent, Rect16 rect)

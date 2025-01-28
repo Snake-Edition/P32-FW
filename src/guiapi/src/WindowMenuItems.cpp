@@ -29,22 +29,16 @@ void MI_EXIT::click(IWindowMenu &window_menu) {
 
 WI_ICON_SWITCH_OFF_ON_t::WI_ICON_SWITCH_OFF_ON_t(bool value, const string_view_utf8 &label, const img::Resource *id_icon, is_enabled_t enabled, is_hidden_t hidden)
     : IWindowMenuItem(label, 36, id_icon, enabled, hidden)
-    , index(value_)
     , value_(value) //
 {
     touch_extension_only_ = true;
 }
 
-void WI_ICON_SWITCH_OFF_ON_t::set_value(bool set, bool emit_change) {
-    if (value_ == set) {
-        return;
+void WI_ICON_SWITCH_OFF_ON_t::set_value(bool set) {
+    if (value_ != set) {
+        value_ = set;
+        InValidateExtension();
     }
-
-    value_ = set;
-    if (emit_change) {
-        OnChange(!value_);
-    }
-    InValidateExtension();
 }
 
 invalidate_t WI_ICON_SWITCH_OFF_ON_t::change(int) {
@@ -53,7 +47,9 @@ invalidate_t WI_ICON_SWITCH_OFF_ON_t::change(int) {
 }
 
 void WI_ICON_SWITCH_OFF_ON_t::click(IWindowMenu &) {
-    set_value(!value_, true);
+    value_ = !value_;
+    OnChange(!value_);
+    InValidateExtension();
 }
 
 void WI_ICON_SWITCH_OFF_ON_t::printExtension(Rect16 extension_rect, [[maybe_unused]] Color color_text, Color color_back, ropfn raster_op) const {

@@ -14,7 +14,7 @@ MI_FILAMENT::MI_FILAMENT(FilamentType filament_type)
     , filament_params(filament_type.parameters()) //
 {
     FilamentTypeGUI::setup_menu_item(filament_type, filament_params, *this);
-    set_value(filament_type.is_visible(), false);
+    set_value(filament_type.is_visible());
 }
 
 void MI_FILAMENT::OnChange(size_t) {

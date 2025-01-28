@@ -36,7 +36,7 @@ void MI_ENCLOSURE_ENABLE::OnChange([[maybe_unused]] size_t old_index) {
         },
             _(wait_str));
         if (!xl_enclosure.isEnabled()) {
-            set_value(0, false);
+            set_value(false);
         }
     }
 }

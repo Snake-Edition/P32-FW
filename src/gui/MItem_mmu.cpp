@@ -206,7 +206,7 @@ MI_MMU_ENABLE::MI_MMU_ENABLE()
 }
 
 void MI_MMU_ENABLE::OnChange(size_t old_index) {
-    if (!index) {
+    if (!value()) {
         // Disale MMU
         marlin_client::gcode("M709 S0");
 
@@ -223,7 +223,7 @@ void MI_MMU_ENABLE::OnChange(size_t old_index) {
         // logical_sensors.extruder is not synchronized, but in this case it it OK
         if (!is_fsensor_working_state(FSensors_instance().sensor_state(LogicalFilamentSensor::extruder))) {
             MsgBoxWarning(_("Can't enable MMU: calibrate and enable the printer's filament sensor first."), Responses_Ok);
-            SetIndex(old_index);
+            set_value(old_index > 0);
             return;
         }
 
@@ -232,7 +232,7 @@ void MI_MMU_ENABLE::OnChange(size_t old_index) {
 }
 
 void MI_MMU_ENABLE::Loop() {
-    set_value(config_store().mmu2_enabled.get(), 0);
+    set_value(config_store().mmu2_enabled.get());
 }
 
 /**********************************************************************************************/
