@@ -61,8 +61,8 @@ add_compile_options(
 
 # append custom C/C++ flags
 if(CUSTOM_COMPILE_OPTIONS)
-  string(REPLACE " " ";" CUSTOM_COMPILE_OPTIONS "${CUSTOM_COMPILE_OPTIONS}")
-  add_compile_options(${CUSTOM_COMPILE_OPTIONS})
+  string(REPLACE " " ";" EXTRA_COMPILE_OPTIONS "${CUSTOM_COMPILE_OPTIONS}")
+  add_compile_options(${EXTRA_COMPILE_OPTIONS})
 endif()
 
 # find bootloader.bin location
@@ -341,7 +341,9 @@ if(BOARD IN_LIST BUDDY_BOARDS AND HAS_PUPPIES_BOOTLOADER)
       dwarf
       SOURCE_DIR "${DWARF_SOURCE_DIR}"
       BINARY_DIR "${DWARF_BINARY_DIR}"
-      CMAKE_ARGS --preset xl-dwarf_${CMAKE_BUILD_TYPE_lower}_boot -B "${DWARF_BINARY_DIR}"
+      CMAKE_ARGS
+        --preset xl-dwarf_${CMAKE_BUILD_TYPE_lower}_boot -B "${DWARF_BINARY_DIR}"
+        $<$<BOOL:${CUSTOM_COMPILE_OPTIONS}>:-DCUSTOM_COMPILE_OPTIONS=${CUSTOM_COMPILE_OPTIONS}>
       INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step"
       BUILD_BYPRODUCTS "${DWARF_BINARY_PATH}" "${DWARF_BINARY_DIR}/firmware"
       STEP_TARGETS build
@@ -362,8 +364,10 @@ if(BOARD IN_LIST BUDDY_BOARDS AND HAS_PUPPIES_BOOTLOADER)
       modularbed
       SOURCE_DIR "${MODULARBED_SOURCE_DIR}"
       BINARY_DIR "${MODULARBED_BINARY_DIR}"
-      CMAKE_ARGS --preset ${PRINTER_lower}-modularbed_${CMAKE_BUILD_TYPE_lower}_boot -B
-                 "${MODULARBED_BINARY_DIR}"
+      CMAKE_ARGS
+        --preset ${PRINTER_lower}-modularbed_${CMAKE_BUILD_TYPE_lower}_boot -B
+        "${MODULARBED_BINARY_DIR}"
+        $<$<BOOL:${CUSTOM_COMPILE_OPTIONS}>:-DCUSTOM_COMPILE_OPTIONS=${CUSTOM_COMPILE_OPTIONS}>
       INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step"
       BUILD_BYPRODUCTS "${MODULARBED_BINARY_PATH}" "${MODULARBED_BINARY_DIR}/firmware"
       STEP_TARGETS build
@@ -386,8 +390,10 @@ if(BOARD IN_LIST BUDDY_BOARDS AND HAS_PUPPIES_BOOTLOADER)
       xbuddy_extension
       SOURCE_DIR "${XBUDDY_EXTENSION_SOURCE_DIR}"
       BINARY_DIR "${XBUDDY_EXTENSION_BINARY_DIR}"
-      CMAKE_ARGS --preset ${PRINTER_lower}-xbuddy-extension_${CMAKE_BUILD_TYPE_lower}_boot -B
-                 "${XBUDDY_EXTENSION_BINARY_DIR}"
+      CMAKE_ARGS
+        --preset ${PRINTER_lower}-xbuddy-extension_${CMAKE_BUILD_TYPE_lower}_boot -B
+        "${XBUDDY_EXTENSION_BINARY_DIR}"
+        $<$<BOOL:${CUSTOM_COMPILE_OPTIONS}>:-DCUSTOM_COMPILE_OPTIONS=${CUSTOM_COMPILE_OPTIONS}>
       INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step"
       BUILD_BYPRODUCTS "${XBUDDY_EXTENSION_BINARY_PATH}" "${XBUDDY_EXTENSION_BINARY_DIR}/firmware"
       STEP_TARGETS build
