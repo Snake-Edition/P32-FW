@@ -96,6 +96,23 @@ void MI_WIFI_STATUS_t::Loop() {
     ChangeInformation(_(state_str));
 }
 
+MI_WIFI_SIGNAL_t::MI_WIFI_SIGNAL_t()
+    : MenuItemAutoUpdatingLabel(
+        _("Signal"),
+        [this](std::span<char> buffer) {
+            const auto val = value();
+            if (val.has_value()) {
+                // For some reason, int8_t doesn't want to be printed in negative? :-O
+                int v = *val;
+                assert(v < 0);
+                snprintf(buffer.data(), buffer.size(), "%i dB", v);
+            } else {
+                snprintf(buffer.data(), buffer.size(), "---");
+            }
+        },
+        [](auto) -> std::optional<int8_t> { return esp_signal_strength(); } //
+    ) {}
+
 // ===================================================
 // MI_WIFI_SSID
 // ===================================================
