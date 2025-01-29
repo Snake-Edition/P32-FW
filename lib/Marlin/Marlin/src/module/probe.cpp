@@ -950,7 +950,7 @@ float probe_here(float expected_trigger_z)
  *   - Raise to the BETWEEN height
  * - Return the probed Z position
  */
-float probe_at_point(const float &rx, const float &ry, const ProbePtRaise raise_after/*=PROBE_PT_NONE*/, const uint8_t verbose_level/*=0*/, const bool probe_relative/*=true*/) {
+float probe_at_point(const xy_pos_t &pos, const ProbePtRaise raise_after/*=PROBE_PT_NONE*/, const uint8_t verbose_level/*=0*/, const bool probe_relative/*=true*/) {
   if (DEBUGGING(LEVELING)) {
     DEBUG_ECHOLNPAIR(
       ">>> probe_at_point(", LOGICAL_X_POSITION(rx), ", ", LOGICAL_Y_POSITION(ry),
@@ -962,7 +962,7 @@ float probe_at_point(const float &rx, const float &ry, const ProbePtRaise raise_
   }
 
   // TODO: Adapt for SCARA, where the offset rotates
-  xyz_pos_t npos = { rx, ry };
+  xyz_pos_t npos = pos;
   if (probe_relative) {
     if (!position_is_reachable_by_probe(npos)) {
       #if ENABLED(HALT_ON_PROBING_ERROR)
@@ -1029,14 +1029,14 @@ float probe_at_point(const float &rx, const float &ry, const ProbePtRaise raise_
   }
 
   if (verbose_level > 2) {
-    SERIAL_ECHOPAIR_F("Bed X: ", LOGICAL_X_POSITION(rx), 3);
-    SERIAL_ECHOPAIR_F(" Y: ", LOGICAL_Y_POSITION(ry), 3);
+    SERIAL_ECHOPAIR_F("Bed X: ", LOGICAL_X_POSITION(pos.x), 3);
+    SERIAL_ECHOPAIR_F(" Y: ", LOGICAL_Y_POSITION(pos.y), 3);
     SERIAL_ECHOLNPAIR_F(" Z: ", measured_z, 3);
   }
 
   {
-      int logical_x = LOGICAL_X_POSITION(rx);
-      int logical_y = LOGICAL_Y_POSITION(ry);
+      int logical_x = LOGICAL_X_POSITION(pos.x);
+      int logical_y = LOGICAL_Y_POSITION(pos.y);
       metric_record_custom(&metric_probe_z, " x=%i,y=%i,v=%.3f", logical_x, logical_y, (double)measured_z);
   }
 
