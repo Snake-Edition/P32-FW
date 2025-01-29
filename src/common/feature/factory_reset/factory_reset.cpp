@@ -40,8 +40,8 @@ extern osThreadId displayTaskHandle;
     assert(osThreadGetId() == displayTaskHandle);
 
     MsgBoxBuilder {
-        .type = MsgBoxType::pepa_centered,
-        .text = _("Performing factory reset.\nPlease wait..."),
+        .type = MsgBoxType::warning,
+        .text = _("Performing factory reset.\nDo not turn off the printer."),
         .responses = Responses_NONE,
         .loop_callback = [] {
             // Close the dialog immediately (but it will keep being displayed because we dont't redraw the screen)
