@@ -821,7 +821,11 @@ FORCE_INLINE move_t *append_beginning_empty_move() {
         move->start_v = 0.;
         move->half_accel = 0.;
         move->axes_r = { 0., 0., 0., 0. };
-        move->move_time = PreciseStepping::max_lookback_time + 0.001; // For now, the epsilon o 1ms is applied to ensure that even with big rounding errors, move_time will be much bigger than max_lookback_time.
+
+        // Ensure move_time to be much bigger than max_lookback_time
+        move->move_time = PreciseStepping::get_first_move_delay();
+        assert(move->move_time > PreciseStepping::max_lookback_time);
+
         move->start_pos = PreciseStepping::total_start_pos;
         move->print_time = 0.;
         move->reference_cnt = 0;

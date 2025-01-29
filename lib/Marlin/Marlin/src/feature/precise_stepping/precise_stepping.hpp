@@ -353,6 +353,16 @@ public:
 
     static void update_maximum_lookback_time();
 
+    static double get_first_move_delay() {
+        // For now, the epsilon o 1ms is applied to ensure that even with big rounding errors,
+        // move_time will be much bigger than max_lookback_time.
+        return max_lookback_time + 0.001;
+    }
+
+    static uint32_t get_first_move_delay_us() {
+        return get_first_move_delay() * 1e6;
+    }
+
     // This function must be called after the whole actual move segment is processed or the artificially
     // created move segment is processed, as in the input shaper case.
     static void move_segment_processed_handler();
