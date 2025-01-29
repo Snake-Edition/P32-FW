@@ -51,6 +51,7 @@ std::atomic<bool> PreciseStepping::stop_pending = false;
 std::atomic<bool> PreciseStepping::busy = false;
 volatile uint8_t PreciseStepping::step_dl_miss = 0;
 volatile uint8_t PreciseStepping::step_ev_miss = 0;
+volatile uint32_t PreciseStepping::time_last_block_us;
 
 #if !BOARD_IS_DWARF()
 std::atomic<uint32_t> PreciseStepping::stall_count = 0;
@@ -628,6 +629,8 @@ uint16_t PreciseStepping::process_one_step_event_from_queue() {
                 block_t *current_block = Planner::get_current_processed_block();
                 if (current_block->flag.sync_position) {
                     Stepper::_set_position(current_block->sync_step_position);
+                } else {
+                    time_last_block_us = ticks_us();
                 }
                 Planner::discard_current_block();
                 Stepper::count_position_last_block = Stepper::count_position;

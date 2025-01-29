@@ -8,6 +8,7 @@
 #pragma once
 #include "common.hpp"
 #include <interrupt_disabler.hpp>
+#include <timing.h>
 #include <atomic>
 
 #ifdef COREXY
@@ -356,6 +357,11 @@ public:
     // created move segment is processed, as in the input shaper case.
     static void move_segment_processed_handler();
 
+    // Return the timestamp (us) of the last block discarding time
+    static uint32_t get_time_of_last_block_us() {
+        return time_last_block_us;
+    }
+
     // Reset the step/move queue
     static void quick_stop() { stop_pending = true; }
 
@@ -370,6 +376,7 @@ public:
 
     static volatile uint8_t step_dl_miss; // stepper deadline misses
     static volatile uint8_t step_ev_miss; // stepper event misses
+    static volatile uint32_t time_last_block_us; // time of last block discarding event
 
 private:
     static uint32_t waiting_before_delivering_start_time;
