@@ -23,8 +23,8 @@ public:
     static constexpr int32_t undefined_value = std::numeric_limits<int32_t>::min();
     static constexpr int UNDEFINED_INIT_MAX_CNT = 6; // Maximum number of undefined samples to ignore during startup (>=0)
     static constexpr int UNDEFINED_SAMPLE_MAX_CNT = 2; // About 6ms of stale data @ 320Hz, 78ms over a channel switch
-    static constexpr unsigned int STATIC_TARE_SAMPLE_CNT = 16;
-    static constexpr unsigned int TOUCHDOWN_DELAY_MS = 50; // Milliseconds of pause required after trigger for the analysis model
+    static constexpr unsigned int STATIC_TARE_SAMPLE_CNT = 48; // 150ms of data @ 320Hz
+    static constexpr unsigned int TOUCHDOWN_DELAY_MS = 150; // Milliseconds of pause required after trigger for the analysis model
 
     static constexpr float XY_PROBE_THRESHOLD { 40 };
     static constexpr float XY_PROBE_HYSTERESIS { 20 };
