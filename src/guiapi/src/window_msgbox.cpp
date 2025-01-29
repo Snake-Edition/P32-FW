@@ -92,6 +92,14 @@ void MsgBoxBase::windowEvent(window_t *sender, GUI_event_t event, void *param) {
         return;
     }
 
+    case GUI_event_t::TOUCH_SWIPE_LEFT:
+    case GUI_event_t::TOUCH_SWIPE_RIGHT:
+        if (flags.close_on_click == is_closed_on_click_t::yes && pButtons->GetBtnCount() == 0) {
+            Screens::Access()->Close();
+            return;
+        }
+        break;
+
     default:
         break;
     }
