@@ -17,12 +17,11 @@ void set_axis_e_config(const Config &config) {
     // ensure moves are not being processed as we change parameters
     assert(PreciseStepping::move_segment_queue_size() == 0);
 
-    // update internal filter parameters
-    PressureAdvance::pressure_advance_params = create_pressure_advance_params(config);
-
     // set step generator
     e_axis_config = config;
     if (config.pressure_advance > 0.f) {
+        // update internal filter parameters
+        PressureAdvance::pressure_advance_params = create_pressure_advance_params(config);
         PreciseStepping::physical_axis_step_generator_types |= PRESSURE_ADVANCE_STEP_GENERATOR_E;
     } else {
         PreciseStepping::physical_axis_step_generator_types &= ~PRESSURE_ADVANCE_STEP_GENERATOR_E;
