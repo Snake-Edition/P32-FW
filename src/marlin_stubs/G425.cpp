@@ -46,6 +46,7 @@
 #include "../../module/endstops.h"
 #include "../../module/prusa/homing_corexy.hpp"
 #include "../../feature/bedlevel/bedlevel.h"
+#include "../../feature/pressure_advance/pressure_advance_config.hpp"
 #include "Marlin/src/gcode/gcode.h"
 #include "../../module/stepper.h"
 
@@ -559,6 +560,9 @@ inline void calibrate_toolhead(measurements_t &m, const uint8_t extruder) {
     TEMPORARY_BACKLASH_CORRECTION(all_on);
     TEMPORARY_BACKLASH_SMOOTHING(0.0f);
 
+    // Disable PA to reduce filter delay during probe analysis
+    pressure_advance::PressureAdvanceDisabler pa_disabler;
+
 #if HOTENDS > 1
     set_nozzle(m, extruder);
 #else
@@ -667,6 +671,9 @@ inline void calibrate_all_simple() {
     // Reset planner state
     planner.synchronize();
     planner.reset_position();
+
+    // Disable PA to reduce filter delay during probe analysis
+    pressure_advance::PressureAdvanceDisabler pa_disabler;
 
     // Zero hotend offsets
     reset_hotend_offsets();
