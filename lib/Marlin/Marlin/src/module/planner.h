@@ -722,7 +722,7 @@ class Planner {
      *  hints       - optional parameters to aid planner calculations
      */
     static bool buffer_segment(const abce_pos_t &abce
-      , const_feedRate_t fr_mm_s
+      , const feedRate_t fr_mm_s
       , const uint8_t extruder=active_extruder
       , const PlannerHints &hints=PlannerHints()
     );
@@ -738,7 +738,7 @@ class Planner {
      *  extruder     - optional target extruder (otherwise active_extruder)
      *  hints        - optional parameters to aid planner calculations
      */
-    static bool buffer_line(const xyze_pos_t &cart, const_feedRate_t fr_mm_s
+    static bool buffer_line(const xyze_pos_t &cart, const feedRate_t fr_mm_s
       , const uint8_t extruder=active_extruder
       , const PlannerHints &hints=PlannerHints()
     );

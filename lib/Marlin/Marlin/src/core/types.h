@@ -215,7 +215,6 @@ typedef float celsius_float_t;
 #else
   typedef const float const_float_t;
 #endif
-typedef const_float_t const_feedRate_t;
 typedef const_float_t const_celsius_float_t;
 
 // Conversion macros
