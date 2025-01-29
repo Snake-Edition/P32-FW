@@ -53,7 +53,7 @@ MI_METRICS_INFO_LABEL::MI_METRICS_INFO_LABEL()
     : IWindowMenuItem(_("What is this?"), &img::question_16x16) {}
 
 void MI_METRICS_INFO_LABEL::click(IWindowMenu &) {
-    MsgBoxInfo(_("This feature allows you to gather diagnostic data to show in Grafana.\n\nBe careful, it can send unencrypted data to the internet."));
+    MsgBoxInfo(_("This feature allows you to gather diagnostic data to show in Grafana.\n\nBe careful, it can send unencrypted data to the internet."), Responses_Ok);
 }
 
 MI_METRICS_ENABLE::MI_METRICS_ENABLE()
