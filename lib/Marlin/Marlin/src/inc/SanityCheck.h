@@ -206,10 +206,6 @@
   #error "BEEPER is now BEEPER_PIN. Please update your pins definitions."
 #elif defined(STAT_LED_RED) || defined(STAT_LED_BLUE)
   #error "STAT_LED_RED/STAT_LED_BLUE are now STAT_LED_RED_PIN/STAT_LED_BLUE_PIN. Please update your pins definitions."
-#elif defined(LCD_PIN_BL)
-  #error "LCD_PIN_BL is now LCD_BACKLIGHT_PIN. Please update your pins definitions."
-#elif defined(LCD_PIN_RESET)
-  #error "LCD_PIN_RESET is now LCD_RESET_PIN. Please update your pins definitions."
 #elif defined(EXTRUDER_0_AUTO_FAN_PIN) || defined(EXTRUDER_1_AUTO_FAN_PIN) || defined(EXTRUDER_2_AUTO_FAN_PIN) || defined(EXTRUDER_3_AUTO_FAN_PIN)
   #error "EXTRUDER_[0123]_AUTO_FAN_PIN is now E[0123]_AUTO_FAN_PIN. Please update your Configuration_adv.h."
 #elif defined(min_software_endstops) || defined(max_software_endstops)

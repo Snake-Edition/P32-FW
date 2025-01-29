@@ -443,10 +443,6 @@
   #define Z_MIN_PIN          -1
 #endif
 
-#ifndef LCD_PINS_D4
-  #define LCD_PINS_D4 -1
-#endif
-
 /**
  * Auto-Assignment for Dual X, Dual Y, Multi-Z Steppers
  *
