@@ -363,7 +363,14 @@ public:
     }
 
     // Reset the step/move queue
-    static void quick_stop() { stop_pending = true; }
+    static void quick_stop() {
+        bool expected = false;
+        stop_pending.compare_exchange_weak(expected, true);
+        if (!expected) {
+            // only update on first trigger
+            time_last_block_us = ticks_us();
+        }
+    }
 
     // Return true if the motion is being stopped
     static bool stopping() { return stop_pending; }
