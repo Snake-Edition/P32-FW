@@ -39,6 +39,7 @@
 #include "temperature.h"
 #include "endstops.h"
 #include "planner.h"
+#include <feature/pressure_advance/pressure_advance_config.hpp>
 
 #include "../gcode/gcode.h"
 #include "../lcd/ultralcd.h"
@@ -624,6 +625,9 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
   if (endstop_triggered)
     *endstop_triggered = true;
 
+  // We expect PA delays to be already avoided here
+  assert(pressure_advance::PressureAdvanceDisabler::is_active());
+
   #if ENABLED(NOZZLE_LOAD_CELL)
     auto H = loadcell.CreateLoadAboveErrEnforcer();
     auto reference_tare = loadcell_retare_for_analysis(Z_FIRST_PROBE_DELAY); ///< Use this value as reference for following tares
@@ -859,6 +863,9 @@ bool cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max) {
   const int required_clean_cnt = 3;
   int consecutive_clean_cnt = 0;
 
+  // Disable PA to reduce filter delay during probe analysis
+  pressure_advance::PressureAdvanceDisabler pa_disabler;
+
   // Enable loadcell high precision across the entire sequence to prime the noise filters
   auto loadcellPrecisionEnabler = Loadcell::HighPrecisionEnabler(loadcell);
 
@@ -999,6 +1006,9 @@ float probe_at_point(const xy_pos_t &pos, const ProbePtRaise raise_after/*=PROBE
 
   // Move the probe to the starting XYZ
   do_blocking_move_to(npos, MMM_TO_MMS(XY_PROBE_SPEED));
+
+  // Disable PA to reduce filter delay during probe analysis
+  pressure_advance::PressureAdvanceDisabler pa_disabler;
 
   #if ENABLED(NOZZLE_LOAD_CELL)
     // HighPrecision needs to be enabled with some time margin to prime the filters.
