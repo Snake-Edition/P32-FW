@@ -740,6 +740,8 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
         // Return slowly back
         float move_back = 0.09f;
         do_blocking_move_to_z(current_position.z + move_back, MMM_TO_MMS(Z_PROBE_SPEED_BACK_MOVE));
+        if (planner.draining())
+          return NAN;
         uint32_t move_back_end = micros();
       #endif
 
