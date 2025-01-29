@@ -28,7 +28,10 @@ endif()
 include(ProjectOptions.cmake)
 
 # link time optimizations to disable LTO run cmake with -DDISABLE_LTO
-if(NOT DEFINED DISABLE_LTO AND NOT DEVELOPER_MODE)
+if(NOT DEFINED DISABLE_LTO
+   AND NOT DEVELOPER_MODE
+   AND NOT BOARD STREQUAL DWARF
+   )
   set(COMPILE_WITH_LTO ON)
   set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 else()
