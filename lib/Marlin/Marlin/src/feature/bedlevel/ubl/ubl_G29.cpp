@@ -48,6 +48,7 @@
   #endif
 
   #include <feature/print_status_message/print_status_message_guard.hpp>
+  #include <feature/pressure_advance/pressure_advance_config.hpp>
   #include <i18n.h>
 
   #if ENABLED(NOZZLE_LOAD_CELL)
@@ -744,6 +745,7 @@
  */
     void unified_bed_leveling::probe_entire_mesh(const xy_pos_t &near, const bool do_ubl_mesh_map, const bool stow_probe, const bool do_furthest) {
       save_ubl_active_state_and_disable();  // No bed level correction so only raw data is obtained
+      pressure_advance::PressureAdvanceDisabler pa_disabler; // Reduce move delays as we don't extrude
 
       #if ENABLED(NOZZLE_LOAD_CELL)
         // Enable loadcell high precision across the entire sequence to prime the noise filters
@@ -811,6 +813,7 @@
 
     void unified_bed_leveling::probe_major_points(const xy_pos_t area_a, const xy_pos_t area_b, const bool do_ubl_mesh_map, const bool stow_probe) {
       save_ubl_active_state_and_disable();  // No bed level correction so only raw data is obtained
+      pressure_advance::PressureAdvanceDisabler pa_disabler; // Reduce move delays as we don't extrude
 
       #if ENABLED(NOZZLE_LOAD_CELL)
         // Enable loadcell high precision across the entire sequence to prime the noise filters
@@ -1372,6 +1375,8 @@
     #include "../../../libs/vector_3.h"
 
     void unified_bed_leveling::tilt_mesh_based_on_probed_grid(const bool do_3_pt_leveling) {
+      pressure_advance::PressureAdvanceDisabler pa_disabler; // Reduce move delays as we don't extrude
+
       const float x_min = probe_min_x(), x_max = probe_max_x(),
                   y_min = probe_min_y(), y_max = probe_max_y(),
                   dx = (x_max - x_min) / (g29_grid_size - 1),

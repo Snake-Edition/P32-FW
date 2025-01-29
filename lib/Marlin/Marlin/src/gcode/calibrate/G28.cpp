@@ -89,6 +89,7 @@
 
 #include "../../../../../../src/common/trinamic.h" // for disabling Wave Table during homing
 #include <feature/phase_stepping/phase_stepping.hpp> // for disabling phase stepping during homing
+#include <feature/pressure_advance/pressure_advance_config.hpp> // for disabling PA during homing
 
 #include <option/has_nozzle_cleaner.h>
 
@@ -580,8 +581,9 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
   TERN_(HAS_DUPLICATION_MODE, set_duplication_enabled(false));
 
-  // Disable phase stepping just before homing XY. This will synchronize only if needed
+  // Disable phase stepping/PA just before homing XY. This will synchronize only if needed
   phase_stepping::EnsureSuitableForHoming phstep_disabler;
+  pressure_advance::PressureAdvanceDisabler pa_disabler;
 
   // Homing feedrate
   float fr_mm_s = flags.no_change ? feedrate_mm_s : 0.0f;
