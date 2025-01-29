@@ -89,16 +89,20 @@ static TIM_HandleTypeDef *_pwm_p_htim[] = {
 };
 
 // buddy pwm output maximum values
-static constexpr int _pwm_max[] = { TIM3_default_Period, TIM3_default_Period, TIM1_default_Period, TIM1_default_Period };
+static constexpr int _pwm_max[] =
 #if PRINTER_IS_PRUSA_iX()
+    { static_cast<int>(std::round(static_cast<int>(TIM3_default_Period) * (MAX_HEATBREAK_TURBINE_POWER / 100.0))),
+        TIM3_default_Period, TIM1_default_Period, TIM1_default_Period };
 static_assert(std::clamp(MAX_HEATBREAK_TURBINE_POWER, 0, 100) == MAX_HEATBREAK_TURBINE_POWER);
 static_assert(std::clamp(MIN_HEATBREAK_TURBINE_POWER, 0, 100) == MIN_HEATBREAK_TURBINE_POWER);
 
 static_assert(MAX_HEATBREAK_TURBINE_POWER > MIN_HEATBREAK_TURBINE_POWER);
 
-// iX turbine PWM is inverted, minimum corresponds to maximum power and vice versa
-static constexpr int _pwm_turbine_min = static_cast<double>(_pwm_max[HWIO_PWM_TURBINE]) * (1 - (MAX_HEATBREAK_TURBINE_POWER / 100.0));
-static constexpr int _pwm_turbine_max = static_cast<double>(_pwm_max[HWIO_PWM_TURBINE]) * (1 - (MIN_HEATBREAK_TURBINE_POWER / 100.0));
+// bottom PWM threshold for the turbine to spin
+// values below it will be equated to 0
+static constexpr int _pwm_turbine_min_threshold = static_cast<int>(static_cast<int>(TIM3_default_Period) * (MIN_HEATBREAK_TURBINE_POWER / 100.0));
+#else
+    { TIM3_default_Period, TIM3_default_Period, TIM1_default_Period, TIM1_default_Period };
 #endif
 
 static const TIM_OC_InitTypeDef sConfigOC_default = {
@@ -250,15 +254,12 @@ void _hwio_pwm_analogWrite_set_val(int i_pwm, int val) {
         uint32_t pulse = (val * pwm_max) / _pwm_analogWrite_max;
 #if PRINTER_IS_PRUSA_iX()
         if (i_pwm == HWIO_PWM_TURBINE) {
-            // iX turbine fan PWM is inversed
-            pulse = pwm_max - pulse;
-
-            if (pulse > _pwm_turbine_max) {
-                // if below minimum power, set power to 0 (equals max pwm when inversed)
-                pulse = pwm_max;
-            } else if (pulse < _pwm_turbine_min) {
-                pulse = _pwm_turbine_min;
+            if (pulse < _pwm_turbine_min_threshold) {
+                // if below minimum threshold, set turbine PWM to 0
+                pulse = 0;
             }
+            // inverting the PWM value for the iX turbine
+            pulse = _pwm_analogWrite_max - pulse;
         }
 #endif
         hwio_pwm_set_val(i_pwm, pulse);
