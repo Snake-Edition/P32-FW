@@ -304,7 +304,7 @@ void Planner::init() {
  * is not and will not use the block while we modify it, so it is safe to
  * alter its values.
  */
-void Planner::calculate_trapezoid_for_block(block_t * const block, const_float_t entry_speed, const_float_t exit_speed) {
+void Planner::calculate_trapezoid_for_block(block_t * const block, const float entry_speed, const float exit_speed) {
   // Store new block parameters
   block->initial_speed = entry_speed;
   block->final_speed = exit_speed;
@@ -450,7 +450,7 @@ void Planner::calculate_trapezoid_for_block(block_t * const block, const_float_t
 
 // The kernel called by recalculate() when scanning the plan from last to first entry.
 void Planner::reverse_pass_kernel(block_t * const previous, block_t * const current, const block_t * const next
-  OPTARG(HINTS_SAFE_EXIT_SPEED, const_float_t safe_exit_speed_sqr)
+  OPTARG(HINTS_SAFE_EXIT_SPEED, const float safe_exit_speed_sqr)
 ) {
   // If entry speed is already at the maximum entry speed, and there was no change of speed
   // in the next block, there is no need to recheck. Block is cruising and there is no need to
@@ -497,7 +497,7 @@ void Planner::reverse_pass_kernel(block_t * const previous, block_t * const curr
  * recalculate() needs to go over the current plan twice.
  * Once in reverse and once forward. This implements the reverse pass.
  */
-void Planner::reverse_pass(TERN_(HINTS_SAFE_EXIT_SPEED, const_float_t safe_exit_speed_sqr)) {
+void Planner::reverse_pass(TERN_(HINTS_SAFE_EXIT_SPEED, const float safe_exit_speed_sqr)) {
   // Initialize block index to the last block in the planner buffer.
   uint8_t current_index = block_buffer_head,
           prev_index = prev_block_index(block_buffer_head);
@@ -654,7 +654,7 @@ void Planner::forward_pass() {
  * according to the entry_factor for each junction. Must be called by
  * recalculate() after updating the blocks.
  */
-void Planner::recalculate_trapezoids(TERN_(HINTS_SAFE_EXIT_SPEED, const_float_t safe_exit_speed_sqr)) {
+void Planner::recalculate_trapezoids(TERN_(HINTS_SAFE_EXIT_SPEED, const float safe_exit_speed_sqr)) {
   // The tail may be changed by the ISR so get a local copy.
   uint8_t block_index = block_buffer_nonbusy,
           head_block_index = block_buffer_head,
@@ -748,7 +748,7 @@ void Planner::recalculate_trapezoids(TERN_(HINTS_SAFE_EXIT_SPEED, const_float_t 
   }
 }
 
-void Planner::recalculate(TERN_(HINTS_SAFE_EXIT_SPEED, const_float_t safe_exit_speed_sqr)) {
+void Planner::recalculate(TERN_(HINTS_SAFE_EXIT_SPEED, const float safe_exit_speed_sqr)) {
   // Initialize block index to the last block in the planner buffer.
   const uint8_t block_index = prev_block_index(block_buffer_head);
   // If there is just one block, no planning can be done. Avoid it!
@@ -920,7 +920,7 @@ void Planner::check_axes_activity() {
    * This is the reciprocal of the circular cross-section area.
    * Return 1.0 with volumetric off or a diameter of 0.0.
    */
-  inline float calculate_volumetric_multiplier(const_float_t diameter) {
+  inline float calculate_volumetric_multiplier(const float diameter) {
     return (parser.volumetric_enabled && diameter) ? 1.0f / CIRCLE_AREA(diameter * 0.5f) : 1;
   }
 
@@ -2272,7 +2272,7 @@ void Planner::set_position_mm(const xyze_pos_t &xyze) {
 /**
  * Setters for planner position (also setting stepper position).
  */
-void Planner::set_e_position_mm(const_float_t e) {
+void Planner::set_e_position_mm(const float e) {
   const uint8_t axis_index = E_AXIS_N(active_extruder);
   #if ENABLED(DISTINCT_E_FACTORS)
     last_extruder = active_extruder;

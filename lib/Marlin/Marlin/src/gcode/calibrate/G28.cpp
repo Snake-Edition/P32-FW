@@ -231,7 +231,7 @@
      * @retval true print sheet detected
      * @retval false print sheet not detected or move was interrupted
      */
-    static bool detect_print_sheet(const_float_t z_homing_height) {
+    static bool detect_print_sheet(const float z_homing_height) {
       DEBUG_SECTION(log_G28, "detect_print_sheet", DEBUGGING(LEVELING));
 
       // Disallow detection if if X or Y or Z homing is needed

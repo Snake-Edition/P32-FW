@@ -526,7 +526,7 @@ void do_blocking_move_around_nozzle_cleaner_to_xy(const xy_pos_t& destination, c
 }
 
 #if HAS_Z_AXIS
-  uint8_t do_z_clearance(const_float_t zclear, const bool lower_allowed/*=false*/) {
+  uint8_t do_z_clearance(const float zclear, const bool lower_allowed/*=false*/) {
     float zdest = zclear;
     if (!lower_allowed) NOLESS(zdest, current_position.z);
     NOMORE(zdest, Z_MAX_POS);
