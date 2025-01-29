@@ -38,7 +38,7 @@
 #include "motion.h"
 #include "temperature.h"
 #include "endstops.h"
-#include "planner.h"
+#include <module/planner.h>
 #include <feature/pressure_advance/pressure_advance_config.hpp>
 
 #include "../gcode/gcode.h"
@@ -736,17 +736,22 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
       }
 
       #if ENABLED(NOZZLE_LOAD_CELL)
-        // The analysis profile *expects* a delay after touchdown. This was previously provided by
-        // the implicit 1st move delay, which is automatically elided now. Re-introduce it here
-        // until we can handle it at the model level.
-        safe_delay(Loadcell::TOUCHDOWN_DELAY_MS);
+        // The analysis profile *expects* a delay after touchdown. Compensate for the
+        // synchronization and first move delay to wait precisely the amount requested.
+        uint32_t move_fwd_end = PreciseStepping::get_time_of_last_block_us();
+        uint32_t elapsed_us = ticks_diff(ticks_us(), move_fwd_end);
+        uint32_t start_delay_us = PreciseStepping::get_first_move_delay_us();
+        uint32_t precomp_ms = (elapsed_us + start_delay_us) / 1000;
+        assert(precomp_ms <= Loadcell::TOUCHDOWN_DELAY_MS); // we handle underflow, but catch it on debug
+        millis_t delay_ms = std::min<uint32_t>(Loadcell::TOUCHDOWN_DELAY_MS - precomp_ms, Loadcell::TOUCHDOWN_DELAY_MS);
+        safe_delay(delay_ms);
 
         // Return slowly back
         float move_back = 0.09f;
         do_blocking_move_to_z(current_position.z + move_back, MMM_TO_MMS(Z_PROBE_SPEED_BACK_MOVE));
         if (planner.draining())
           return NAN;
-        uint32_t move_back_end = micros();
+        uint32_t move_back_end = PreciseStepping::get_time_of_last_block_us();
       #endif
 
       #if ENABLED(MEASURE_BACKLASH_WHEN_PROBING)
