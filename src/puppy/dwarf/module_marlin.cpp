@@ -178,7 +178,7 @@ void kill(PGM_P const lcd_error /*=nullptr*/, PGM_P const lcd_component /*=nullp
     log_error(Marlin, "Printer killed: %s: %s", lcd_component, lcd_error);
     dwarf::ModbusControl::TriggerMarlinKillFault(dwarf_shared::errors::FaultStatusMask::MARLIN_KILLED, lcd_component, lcd_error);
     stop_marlin();
-    NVIC_SystemReset();
+    // keep running for modbus
 }
 
 #include "SPI.h"

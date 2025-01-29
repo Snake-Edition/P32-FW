@@ -236,7 +236,11 @@ void disable_e_stepper(const uint8_t e);
 void disable_e_steppers();
 void disable_all_steppers();
 
+#if BOARD_IS_DWARF()
+void kill(PGM_P const lcd_error, PGM_P const lcd_component=nullptr, const bool steppers_off=false);
+#else
 [[noreturn]] void kill(PGM_P const lcd_error, PGM_P const lcd_component=nullptr, const bool steppers_off=false);
+#endif
 
 void quickstop_stepper();
 
