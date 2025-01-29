@@ -70,8 +70,6 @@
   #error "Z_LATE_ENABLE can't be used with COREXZ, COREZX, COREYZ, or COREZY."
 #elif defined(X_HOME_RETRACT_MM)
   #error "[XYZ]_HOME_RETRACT_MM settings have been renamed [XYZ]_HOME_BUMP_MM."
-#elif defined(SDCARDDETECTINVERTED)
-  #error "SDCARDDETECTINVERTED is now SD_DETECT_INVERTED. Please update your configuration."
 #elif defined(BTENABLED)
   #error "BTENABLED is now BLUETOOTH. Please update your configuration."
 #elif defined(CUSTOM_MENDEL_NAME)
@@ -206,8 +204,6 @@
   #error "BLTOUCH_FORCE_OPEN_DRAIN_MODE is obsolete. Please update your configuration."
 #elif defined(BEEPER)
   #error "BEEPER is now BEEPER_PIN. Please update your pins definitions."
-#elif defined(SDCARDDETECT)
-  #error "SDCARDDETECT is now SD_DETECT_PIN. Please update your pins definitions."
 #elif defined(STAT_LED_RED) || defined(STAT_LED_BLUE)
   #error "STAT_LED_RED/STAT_LED_BLUE are now STAT_LED_RED_PIN/STAT_LED_BLUE_PIN. Please update your pins definitions."
 #elif defined(LCD_PIN_BL)
@@ -348,12 +344,6 @@
   #error "MENU_ITEM_CASE_LIGHT is now CASE_LIGHT_MENU. Please update your configuration."
 #elif defined(ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED)
   #error "ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED is now SD_ABORT_ON_ENDSTOP_HIT. Please update your Configuration_adv.h."
-#elif defined(LPC_SD_LCD) || defined(LPC_SD_ONBOARD) || defined(LPC_SD_CUSTOM_CABLE)
-  #error "LPC_SD_(LCD|ONBOARD|CUSTOM_CABLE) are now SDCARD_CONNECTION. Please update your Configuration_adv.h."
-#elif defined(USB_SD_DISABLED)
-  #error "USB_SD_DISABLED is now NO_SD_HOST_DRIVE. Please update your Configuration_adv.h."
-#elif defined(USB_SD_ONBOARD)
-  #error "USB_SD_ONBOARD is obsolete. Disable NO_SD_HOST_DRIVE instead."
 #elif POWER_SUPPLY == 1
   #error "Replace POWER_SUPPLY 1 by enabling PSU_CONTROL and setting PSU_ACTIVE_HIGH to 'false'."
 #elif POWER_SUPPLY == 2
@@ -362,8 +352,6 @@
   #error "POWER_SUPPLY is now obsolete. Please remove it from Configuration.h."
 #elif defined(MKS_ROBIN_TFT)
   #error "MKS_ROBIN_TFT is now FSMC_GRAPHICAL_TFT. Please update your configuration."
-#elif defined(SDPOWER)
-  #error "SDPOWER is now SDPOWER_PIN. Please update your configuration and/or pins."
 #elif defined(STRING_SPLASH_LINE1) || defined(STRING_SPLASH_LINE2)
   #error "STRING_SPLASH_LINE[12] are now obsolete. Please remove them from Configuration.h."
 #elif defined(Z_PROBE_ALLEN_KEY_DEPLOY_1_X) || defined(Z_PROBE_ALLEN_KEY_STOW_1_X)

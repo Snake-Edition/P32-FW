@@ -260,13 +260,6 @@
   #undef TEMP_BED_PIN
 #endif
 
-#if !PIN_EXISTS(SD_DETECT)
-  #undef SD_DETECT_PIN
-#endif
-#if !PIN_EXISTS(SDPOWER)
-  #undef SDPOWER_PIN
-#endif
-
 //
 // Analog Pin Assignments
 //
@@ -765,9 +758,6 @@
 #if defined(LCD_PINS_RS) && LCD_PINS_RS >= 0
   REPORT_NAME_DIGITAL(__LINE__, LCD_PINS_RS)
 #endif
-#if defined(LCD_SDSS) && LCD_SDSS >= 0
-  REPORT_NAME_DIGITAL(__LINE__, LCD_SDSS)
-#endif
 #if PIN_EXISTS(LED_GREEN)
   REPORT_NAME_DIGITAL(__LINE__, LED_GREEN_PIN)
 #endif
@@ -888,18 +878,9 @@
 // #if defined(SCL) && SCL >= 0
 //   REPORT_NAME_DIGITAL(__LINE__, SCL)
 // #endif
-#if PIN_EXISTS(SD_DETECT)
-  REPORT_NAME_DIGITAL(__LINE__, SD_DETECT_PIN)
-#endif
 // #if defined(SDA) && SDA >= 0
 //   REPORT_NAME_DIGITAL(__LINE__, SDA)
 // #endif
-#if PIN_EXISTS(SDPOWER)
-  REPORT_NAME_DIGITAL(__LINE__, SDPOWER_PIN)
-#endif
-#if defined(SDSS) && SDSS >= 0
-  REPORT_NAME_DIGITAL(__LINE__, SDSS)
-#endif
 #if defined(SERVO0) && SERVO0 >= 0
   REPORT_NAME_DIGITAL(__LINE__, SERVO0)
 #endif

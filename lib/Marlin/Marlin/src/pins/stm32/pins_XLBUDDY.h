@@ -124,9 +124,4 @@
 
 #define FAN_PIN                MARLIN_PIN(FAN)
 
-
 #undef E0_AUTO_FAN_PIN         // no auto fan pin - handled by dwarf
-
-
-#define SDSS                   80  //it means "NC"
-#define SD_DETECT_PIN          80  //it means "NC"

@@ -102,11 +102,6 @@
 #define HEATER_HEATBREAK_PIN   MARLIN_PIN(FAN1)
 #define FAN1_PIN               MARLIN_PIN(FAN1)
 
-
-#define SDSS                   80  //it means "NC"
-#define SD_DETECT_PIN          80  //it means "NC"
-
-
 #if defined(MARLIN_PORT_HEATER_ENABLE) && defined(MARLIN_PIN_NR_HEATER_ENABLE)
   #define PS_ON_PIN              MARLIN_PIN(HEATER_ENABLE)
 #endif
