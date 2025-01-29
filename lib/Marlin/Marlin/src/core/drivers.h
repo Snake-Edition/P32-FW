@@ -117,12 +117,3 @@
                                    || AXIS_DRIVER_TYPE(A,TMC2209) \
                                    || AXIS_DRIVER_TYPE(A,TMC5130) \
                                    || AXIS_DRIVER_TYPE(A,TMC5160) )
-
-//
-// Stretching 'drivers.h' to include LPC/SAMD51 SD options
-//
-#define _SDCARD_LCD          1
-#define _SDCARD_ONBOARD      2
-#define _SDCARD_CUSTOM_CABLE 3
-#define _SDCARD_ID(V) _CAT(_SDCARD_, V)
-#define SD_CONNECTION_IS(V) (_SDCARD_ID(SDCARD_CONNECTION) == _SDCARD_ID(V))
