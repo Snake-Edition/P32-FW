@@ -98,6 +98,7 @@ public:
 enum class PhaseWait : PhaseUnderlyingType {
     generic,
     homing,
+    homing_calibration,
     _cnt,
     _last = _cnt - 1,
 };

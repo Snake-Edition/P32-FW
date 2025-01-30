@@ -18,6 +18,7 @@ static const constexpr int second_text_y_offset = GuiDefaults::EnableDialogBigLa
 static constexpr EnumArray<PhaseWait, const char *, PhaseWait::_cnt> phase_texts {
     { PhaseWait::generic, nullptr },
     { PhaseWait::homing, N_("Printer may vibrate and be noisier during homing.") },
+    { PhaseWait::homing_calibration, N_("Recalibrating home. This may take some time.") },
 };
 
 window_dlg_wait_t::window_dlg_wait_t(Rect16 rect, const string_view_utf8 &second_text_string)
