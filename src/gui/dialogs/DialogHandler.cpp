@@ -108,27 +108,6 @@ struct FSMDialogDef {
     }
 };
 
-struct FSMWaitDef {
-    static constexpr ClientFSM fsm = ClientFSM::Wait;
-
-    static constexpr EnumArray<PhaseWait, const char *, PhaseWait::_cnt> phase_texts {
-        { PhaseWait::generic, nullptr },
-        { PhaseWait::homing, N_("Printer may vibrate and be noisier during homing.") },
-    };
-
-    static void open(fsm::BaseData data) {
-        DialogHandler::Access().ptr = make_dialog_ptr<window_dlg_wait_t>(_(phase_texts[data.GetPhase()]));
-    }
-
-    static void close() {
-        // Do nothing, is handled elsewhere
-    }
-
-    static void change(fsm::BaseData) {
-        // No changes supported
-    }
-};
-
 template <ClientFSM fsm_>
 struct FSMPrintDef {
     static constexpr ClientFSM fsm = fsm_;
@@ -175,7 +154,7 @@ struct FSMDisplayConfigDef {
 };
 
 using FSMDisplayConfig = FSMDisplayConfigDef<
-    FSMWaitDef,
+    FSMDialogDef<ClientFSM::Wait, window_dlg_wait_t>,
     FSMPrintDef<ClientFSM::Serial_printing>,
     FSMDialogDef<ClientFSM::Load_unload, DialogLoadUnload>,
     FSMScreenDef<ClientFSM::Preheat, ScreenPreheat>,

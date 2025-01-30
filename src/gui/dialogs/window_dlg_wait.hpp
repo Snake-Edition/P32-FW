@@ -21,8 +21,12 @@ class window_dlg_wait_t : public IDialogMarlin {
 public:
     window_dlg_wait_t(Rect16 rect, const string_view_utf8 &second_string = string_view_utf8::MakeNULLSTR());
 
+    window_dlg_wait_t(fsm::BaseData data);
+
     window_dlg_wait_t(const string_view_utf8 &second_string)
         : window_dlg_wait_t(GuiDefaults::DialogFrameRect, second_string) {}
+
+    virtual void Change(fsm::BaseData) override;
 };
 
 /*!*********************************************************************************************************************

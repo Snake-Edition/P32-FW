@@ -15,6 +15,11 @@ static const constexpr int animation_x = GuiDefaults::EnableDialogBigLayout ? 22
 static const constexpr int text_y_offset = GuiDefaults::EnableDialogBigLayout ? 30 : 10; // text point on y axis
 static const constexpr int second_text_y_offset = GuiDefaults::EnableDialogBigLayout ? 67 : 45; // text point on y axis
 
+static constexpr EnumArray<PhaseWait, const char *, PhaseWait::_cnt> phase_texts {
+    { PhaseWait::generic, nullptr },
+    { PhaseWait::homing, N_("Printer may vibrate and be noisier during homing.") },
+};
+
 window_dlg_wait_t::window_dlg_wait_t(Rect16 rect, const string_view_utf8 &second_text_string)
     : IDialogMarlin(rect)
     , text(this, { rect.Left(), int16_t(rect.Top() + text_y_offset), rect.Width(), uint16_t(30) }, is_multiline::no, is_closed_on_click_t::no, _("Please wait"))
@@ -25,6 +30,13 @@ window_dlg_wait_t::window_dlg_wait_t(Rect16 rect, const string_view_utf8 &second
 
     second_text.set_font(GuiDefaults::FooterFont);
     second_text.SetAlignment(Align_t::Center());
+}
+
+window_dlg_wait_t::window_dlg_wait_t(fsm::BaseData data)
+    : window_dlg_wait_t(_(phase_texts[data.GetPhase()])) {}
+
+void window_dlg_wait_t::Change(fsm::BaseData data) {
+    second_text.SetText(_(phase_texts[data.GetPhase()]));
 }
 
 void gui_dlg_wait(stdext::inplace_function<void()> closing_callback, const string_view_utf8 &second_string) {
