@@ -101,7 +101,7 @@ enum MessageType {
     MSG_SCAN_AP_GET = 11,
 };
 
-static constexpr uint8_t SUPPORTED_FW_VERSION = 12;
+static constexpr uint8_t SUPPORTED_FW_VERSION = 13;
 
 // NIC state
 static std::atomic<uint8_t> fw_version;

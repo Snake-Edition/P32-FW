@@ -48,7 +48,7 @@
 // Externals with no header
 esp_err_t mac_init(void);
 
-#define FW_VERSION 12
+#define FW_VERSION 13
 
 #define SCAN_MAX_STORED_SSIDS 64
 #define SSID_LEN              32
@@ -80,7 +80,7 @@ struct __attribute__((packed)) header {
     union {
         uint8_t version; // when type == MSG_DEVINFO_V2
         uint8_t unused; // when type == MSG_CLIENTCONFIG_V2 || type == MSG_SCAN_START || type == MSG_SCAN_STOP
-        uint8_t up; // when type == MSG_PACKET_V2
+        int8_t link_status; // when type == MSG_PACKET_V2
         uint8_t ap_count; // when type == MSG_SCAN_AP_GET
         uint8_t ap_index; // when type == MSG_SCAN_AP_GET
     };
@@ -174,11 +174,11 @@ static void IRAM_ATTR free_wifi_send_buff(wifi_send_buff *buff) {
     free(buff);
 }
 
-static void send_link_status(uint8_t up) {
-    ESP_LOGI(TAG, "Sending link status: %d", up);
+static void send_link_status(int8_t status) {
+    ESP_LOGI(TAG, "Sending link status: %d", status);
     struct header header;
     header.type = MSG_PACKET_V2;
-    header.up = up;
+    header.link_status = status;
     header.size = htons(0);
     xSemaphoreTake(uart_mtx, portMAX_DELAY);
     uart_write_bytes(UART_NUM_0, intron, sizeof(intron));
@@ -611,13 +611,20 @@ static void read_wifi_client_message() {
     send_device_info();
 }
 
-static int get_link_status() {
-    static wifi_ap_record_t ap_info;
+static int8_t get_link_status() {
+    static wifi_ap_record_t ap_info = {};
     esp_err_t ret = esp_wifi_sta_get_ap_info(&ap_info);
     // ap_info is not important, just not receiven ESP_ERR_WIFI_NOT_CONNECT means we are associated
+    int8_t signal = ap_info.rssi;
+    if (signal >= 0) {
+        // Cap the signal strength to "strong" to preserve back compatibility.
+        // (signal this strong is mostly unheard of in practice anyway, but
+        // theoretically possible)
+        signal = -1;
+    }
     const bool online = ret == ESP_OK;
     associated = online;
-    return online;
+    return online ? signal : 0;
 }
 
 static void check_online_status() {
@@ -802,7 +809,7 @@ static void IRAM_ATTR uart_tx_thread(void *arg) {
             // ESP_LOGI(TAG, "Printing packet to UART");
             struct header header;
             header.type = MSG_PACKET_V2;
-            header.up = get_link_status();
+            header.link_status = get_link_status();
             header.size = htons(buff->len);
             xSemaphoreTake(uart_mtx, portMAX_DELAY);
             uart_write_bytes(UART_NUM_0, intron, sizeof(intron));

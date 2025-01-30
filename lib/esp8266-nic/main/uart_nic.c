@@ -45,7 +45,7 @@
 int ieee80211_output_pbuf(esp_aio_t *aio);
 esp_err_t mac_init(void);
 
-#define FW_VERSION 12
+#define FW_VERSION 13
 
 #define SCAN_MAX_STORED_SSIDS 64
 #define SSID_LEN              32
@@ -78,7 +78,7 @@ struct __attribute__((packed)) header {
     union {
         uint8_t version; // when type == MSG_DEVINFO_V2
         uint8_t unused; // when type == MSG_CLIENTCONFIG_V2 || type == MSG_SCAN_START || type == MSG_SCAN_STOP
-        uint8_t up; // when type == MSG_PACKET_V2
+        int8_t link_status; // when type == MSG_PACKET_V2
         uint8_t ap_count; // when type == MSG_SCAN_AP_GET
         uint8_t ap_index; // when type == MSG_SCAN_AP_GET
     };
@@ -185,10 +185,10 @@ static struct {
     .should_reconnect = false,
 };
 
-static void IRAM_ATTR send_link_status(uint8_t up) {
+static void IRAM_ATTR send_link_status(int8_t status) {
     struct uart0_tx_queue_item queue_item;
     queue_item.header.type = MSG_PACKET_V2;
-    queue_item.header.up = up;
+    queue_item.header.link_status = status;
     queue_item.header.size = htons(0);
     queue_item.data = NULL;
     queue_item.rx_buffer = NULL;
@@ -441,7 +441,7 @@ static void IRAM_ATTR event_handler(void *arg, esp_event_base_t event_base, int3
     }
 }
 
-static int get_link_status();
+static int8_t get_link_status();
 
 static int IRAM_ATTR wifi_receive_cb(void *buffer, uint16_t len, void *eb) {
 
@@ -459,7 +459,7 @@ static int IRAM_ATTR wifi_receive_cb(void *buffer, uint16_t len, void *eb) {
 
     struct uart0_tx_queue_item queue_item;
     queue_item.header.type = MSG_PACKET_V2;
-    queue_item.header.up = get_link_status();
+    queue_item.header.link_status = get_link_status();
     queue_item.header.size = htons(len);
     queue_item.data = buffer;
     queue_item.rx_buffer = eb;
@@ -513,13 +513,19 @@ static void IRAM_ATTR wait_for_intron() {
     }
 }
 
-static int IRAM_ATTR get_link_status() {
-    static wifi_ap_record_t ap_info;
+static int8_t IRAM_ATTR get_link_status() {
+    static wifi_ap_record_t ap_info = {};
     esp_err_t ret = esp_wifi_sta_get_ap_info(&ap_info);
-    // ap_info is not important, just not receiven ESP_ERR_WIFI_NOT_CONNECT means we are associated
     const bool online = ret == ESP_OK;
     associated = online;
-    return online;
+    int8_t signal = ap_info.rssi;
+    if (signal >= 0) {
+        // Cap the signal strangth to "strong" to preserve back compatibility.
+        // (signal this strong is mostly unheard of in practice anyway, but
+        // theoretically possible)
+        signal = -1;
+    }
+    return online ? signal : 0;
 }
 
 static void IRAM_ATTR handle_rx_msg_packet_v2(uint8_t *data, struct header header) {
