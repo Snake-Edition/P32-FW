@@ -98,6 +98,11 @@
 #include <option/has_wastebin.h>
 #include <option/has_dwarf.h>
 
+#include <option/has_ceiling_clearance.h>
+#if HAS_CEILING_CLEARANCE()
+  #include <feature/ceiling_clearance/ceiling_clearance.hpp>
+#endif
+
 #define XYZ_CONSTS(T, NAME, OPT) const PROGMEM XYZval<T> NAME##_P = { X_##OPT, Y_##OPT, Z_##OPT }
 
 XYZ_CONSTS(float, base_min_pos,   MIN_POS);
@@ -1313,6 +1318,11 @@ uint8_t do_homing_move(const AxisEnum axis, const float distance, const feedRate
       DEBUG_ECHOPAIR("[", homing_feedrate(axis), "]");
     DEBUG_ECHOLNPGM(")");
   }
+
+  #if HAS_CEILING_CLEARANCE()
+    // The homing move is doing all sorts of voodoo with the positions and was triggering false ceiling clearance events
+    buddy::CeilingClearanceCheckDisabler ccd;
+  #endif
 
   #if HOMING_Z_WITH_PROBE && HAS_HEATED_BED && ENABLED(WAIT_FOR_BED_HEATER)
     if (homing_z_with_probe) {
