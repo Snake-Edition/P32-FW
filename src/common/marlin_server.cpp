@@ -497,6 +497,9 @@ constexpr EncodedFSMResponse empty_encoded_fsm_response = {
 };
 static EncodedFSMResponse server_side_encoded_fsm_response = empty_encoded_fsm_response;
 
+/// Whether marlin_server::cycle() is currently running - for nesting prevention
+static bool is_cycle_running = false;
+
 //-----------------------------------------------------------------------------
 // forward declarations of private functions
 
@@ -660,11 +663,10 @@ static void cycle() {
     buddy::xbuddy_extension().step();
 #endif
 
-    static bool is_nested = false;
-    if (is_nested) {
+    if (is_cycle_running) {
         return;
     }
-    AutoRestore _nr(is_nested, true);
+    AutoRestore _nr(is_cycle_running, true);
 
     bool call_print_loop = true;
 #if HAS_SELFTEST()
@@ -3256,6 +3258,14 @@ FSMResponseVariant get_response_variant_from_phase(FSMAndPhase fsm_and_phase) {
 Response wait_for_response(FSMAndPhase fsm_and_phase) {
     // Warning phase response is consumed in marlin_server::handle_warnings
     assert(fsm_and_phase != PhasesWarning::Warning);
+
+    // If marlin_server::cycle is currently running, that means that it will not be called nestedly inside the idle() we are using here
+    // Responses are processed in _process_server_valid_request that is called from cycle()
+    // That means that in this case the server would never process any response and we would get stuck in an infinite loop.
+    // At this point we can as well do a bsod so that we can easily analyse the issue.
+    if (is_cycle_running) {
+        bsod("wait_for_response inside cycle");
+    }
 
     while (true) {
         if (auto r = get_response_from_phase(fsm_and_phase); r != Response::_none) {
