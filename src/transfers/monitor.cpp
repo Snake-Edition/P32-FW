@@ -34,7 +34,7 @@ Monitor::Slot::~Slot() {
         bool destruction_handled;
         {
             Lock lock2(owner.history_mutex);
-            destruction_handled = (static_cast<transfers::TransferId>(owner.current_id) == owner.history_latest);
+            destruction_handled = (owner.current_id.load() == owner.history_latest);
         }
 
         if (!destruction_handled) {
@@ -174,7 +174,7 @@ optional<Monitor::Slot> Monitor::allocate(Type type, const char *dest, size_t ex
         return nullopt;
     }
 
-    if (static_cast<transfers::TransferId>(current_id) == static_cast<transfers::TransferId>(0)) {
+    if (current_id.load() == static_cast<transfers::TransferId>(0)) {
         // Special-case: lazy initialize by a random number. Initialization in
         // the construction was too early and the HW generator wasn't ready.
         // Using the usual `random` call also produced predictable, always the
@@ -194,7 +194,7 @@ optional<Monitor::Slot> Monitor::allocate(Type type, const char *dest, size_t ex
         history_len = 0;
         current_id = *override_id;
     } else {
-        transfers::TransferId desired = static_cast<transfers::TransferId>(current_id);
+        transfers::TransferId desired = current_id.load();
         desired++;
         current_id.store(desired);
     }
