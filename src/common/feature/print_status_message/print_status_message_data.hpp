@@ -22,9 +22,6 @@ struct PrintStatusMessageDataProgress {
     /// Target value we are aiming for
     float target = 0;
 
-    /// If the
-    AxisEnum axis = X_AXIS;
-
     bool operator==(const PrintStatusMessageDataProgress &) const = default;
 };
 
