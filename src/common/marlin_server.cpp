@@ -3241,6 +3241,10 @@ FSM_notifier::~FSM_notifier() {
 }
 
 FSMResponseVariant get_response_variant_from_phase(FSMAndPhase fsm_and_phase) {
+    // The FSM should be active the whole time we're waiting for the response.
+    // If it isn't, something's probably wrong
+    assert(fsm_states[fsm_and_phase.fsm].has_value());
+
     // FIXME: Critical section is used to mimic original behaviour with std::atomic
     //        However, maybe we should instead require that the calling task
     //        is actually Marlin task. This is most probably the case,
