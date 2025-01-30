@@ -10,7 +10,7 @@
 #include "ScreenHandler.hpp"
 
 static const constexpr uint16_t ANIMATION_MILISEC_DELAY = 500; // number of milisecond for frame change
-static const constexpr int animation_y = GuiDefaults::EnableDialogBigLayout ? 120 : 130; // animation anchor point on Y axis
+static const constexpr int animation_y = 130; // animation anchor point on Y axis
 static const constexpr int animation_x = GuiDefaults::EnableDialogBigLayout ? 220 : 110; // animation anchor point on X axis
 static const constexpr int text_y_offset = GuiDefaults::EnableDialogBigLayout ? 30 : 10; // text point on y axis
 static const constexpr int second_text_y_offset = GuiDefaults::EnableDialogBigLayout ? 67 : 45; // text point on y axis
