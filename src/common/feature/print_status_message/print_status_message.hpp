@@ -15,6 +15,9 @@ struct PrintStatusMessage {
         recalibrating_home,
         calibrating_axis,
         probing_bed,
+
+        dwelling,
+
         absorbing_heat,
 
         waiting_for_hotend_temp,
@@ -65,6 +68,7 @@ struct PrintStatusMessage {
         TypeRecord<Type::recalibrating_home, std::monostate>,
         TypeRecord<Type::calibrating_axis, PrintStatusMessageDataAxisProgress>,
         TypeRecord<Type::probing_bed, PrintStatusMessageDataProgress>,
+        TypeRecord<Type::dwelling, PrintStatusMessageDataProgress>,
         TypeRecord<Type::absorbing_heat, PrintStatusMessageDataProgress>,
         TypeRecord<Type::waiting_for_hotend_temp, PrintStatusMessageDataProgress>,
         TypeRecord<Type::waiting_for_bed_temp, PrintStatusMessageDataProgress>,

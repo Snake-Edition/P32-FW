@@ -23,6 +23,7 @@
 #include "../gcode.h"
 #include "../../module/planner.h"
 #include "../../lcd/ultralcd.h"
+#include <feature/print_status_message/print_status_message_guard.hpp>
 
 /** \addtogroup G-Codes
  * @{
@@ -52,7 +53,8 @@ void GcodeSuite::G4() {
     SERIAL_ECHOLNPGM(STR_Z_MOVE_COMP);
   #endif
 
-  if (!ui.has_status()) LCD_MESSAGE(MSG_DWELL);
+  PrintStatusMessageGuard psmg;
+  psmg.update<PrintStatusMessage::dwelling>({.current = static_cast<float>(dwell_ms / 1000), .target = 0});
 
   dwell(dwell_ms);
 }
