@@ -362,6 +362,19 @@ void GcodeSuite::G28() {
 /** @}*/
 
 bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
+  #if ENABLED(MARLIN_DEV_MODE)
+    if (S) {
+      planner.synchronize();
+      if (planner.draining())
+        return;
+      LOOP_NUM_AXES(a) set_axis_is_at_home((AxisEnum)a);
+      sync_plan_position();
+      SERIAL_ECHOLNPGM("Simulated Homing");
+      report_current_position();
+      return;
+    }
+  #endif
+
   PrintStatusMessageGuard statusGuard(PrintStatusMessage::make<PrintStatusMessage::homing>({}));
   HomingReporter reporter;
 
@@ -379,16 +392,6 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
    */
   #if ENABLED(LASER_FEATURE)
     planner.laser_inline.status.isPowered = false;
-  #endif
-
-  #if ENABLED(MARLIN_DEV_MODE)
-    if (S) {
-      LOOP_NUM_AXES(a) set_axis_is_at_home((AxisEnum)a);
-      sync_plan_position();
-      SERIAL_ECHOLNPGM("Simulated Homing");
-      report_current_position();
-      return;
-    }
   #endif
 
   // Home (O)nly if position is unknown with respect to the required axes
