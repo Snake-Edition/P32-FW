@@ -8,6 +8,7 @@
 #include "cpu_utils.hpp"
 #include "img_resources.hpp"
 #include "netdev.h"
+#include <espif.h>
 #include "transfers/monitor.hpp"
 #include <config_store/store_instance.hpp>
 #include <guiconfig/guiconfig.h>
@@ -49,16 +50,36 @@ void window_header_t::updateNetwork() {
     const auto active_interface = netdev_get_active_id();
     const auto interface_status = netdev_get_status(active_interface);
 
-    icon_network.SetRes((active_interface == NETDEV_ESP_ID) ? &img::wifi_16x16 : &img::lan_16x16);
+    const bool shadow = interface_status != NETDEV_NETIF_UP;
+    const img::Resource *net_icon = nullptr;
+    if (active_interface == NETDEV_ESP_ID) {
+        // Unknown signal -> show as "full signal" (to have some icon).
+        const int8_t strength = esp_signal_strength().value_or(0);
+        // In the shadow mode, we always do a "full" icon.
+        //
+        // The signal levels are based on random Internet discussions. We may
+        // want to tune them further.
+        if (shadow || strength >= -70) {
+            net_icon = &img::wifi_16x16;
+        } else if (strength >= -80) {
+            net_icon = &img::wifi_mid_16x16;
+        } else {
+            net_icon = &img::wifi_low_16x16;
+        }
+    } else {
+        net_icon = &img::lan_16x16;
+    }
+
+    icon_network.SetRes(net_icon);
 
     // Not connected at all -> hide icon
     icon_network.set_visible(interface_status != NETDEV_UNLINKED);
 
     // Not fully connected -> make the icon gray
-    icon_network.set_shadow(interface_status != NETDEV_NETIF_UP);
+    icon_network.set_shadow(shadow);
 
 #if !HAS_MINI_DISPLAY()
-    icon_metrics.set_shadow(interface_status != NETDEV_NETIF_UP);
+    icon_metrics.set_shadow(shadow);
 #endif
 
 #if BUDDY_ENABLE_CONNECT()

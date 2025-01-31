@@ -3,6 +3,8 @@ info_16x16.png
 arrow_right_10x16.png
 question_16x16.png
 wifi_16x16.png
+wifi_low_16x16.png
+wifi_mid_16x16.png
 wifi_insecure_16x16.png
 lan_16x16.png
 speed_16x16.png
