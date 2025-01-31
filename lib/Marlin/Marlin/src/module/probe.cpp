@@ -597,8 +597,9 @@ static xy_pos_t offset_for_probe_try(int try_idx) {
   static float loadcell_retare_for_analysis(millis_t tare_delay) {
     safe_delay(tare_delay);
     loadcell.WaitBarrier(); // Sync samples before tare
-    loadcell.analysis.Reset(); // Reset window to include the tare samples
-    return loadcell.Tare();
+    float tare = loadcell.Tare();
+    loadcell.analysis.Reset(); // Reset window to remove tare offset jump
+    return tare;
   }
 #endif
 
