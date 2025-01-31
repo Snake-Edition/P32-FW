@@ -1892,7 +1892,7 @@ float homeaxis_single_run(const AxisEnum axis, const int axis_home_dir, const fe
     if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Home 2 Slow:");
 
     // Early abort if a quick stop was issued
-    if (planner.quick_stop_count != initial_quick_stop_count)
+    if (planner.draining() || planner.quick_stop_count != initial_quick_stop_count)
       return NAN;
 
     #if HOMING_Z_WITH_PROBE && ENABLED(BLTOUCH) && DISABLED(BLTOUCH_HS_MODE)
@@ -2036,7 +2036,7 @@ float homeaxis_single_run(const AxisEnum axis, const int axis_home_dir, const fe
   #endif
 
     // Check if any of the moves were aborted and avoid setting any state
-    if (planner.quick_stop_count != initial_quick_stop_count)
+    if (planner.draining() || planner.quick_stop_count != initial_quick_stop_count)
       return NAN;
 
   #if IS_SCARA
