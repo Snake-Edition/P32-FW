@@ -50,7 +50,7 @@ void window_header_t::updateNetwork() {
     const auto active_interface = netdev_get_active_id();
     const auto interface_status = netdev_get_status(active_interface);
 
-    const bool shadow = interface_status != NETDEV_NETIF_UP;
+    const bool shadow = (interface_status != NETDEV_NETIF_UP);
     const img::Resource *net_icon = nullptr;
     if (active_interface == NETDEV_ESP_ID) {
         // Unknown signal -> show as "full signal" (to have some icon).
