@@ -26,16 +26,16 @@ struct ColorRGBW {
         };
     };
 
-    ColorRGBW(uint32_t data_ = 0)
+    constexpr ColorRGBW(uint32_t data_ = 0)
         : data(data_) {}
 
-    ColorRGBW(uint8_t r_, uint8_t g_, uint8_t b_)
+    constexpr ColorRGBW(uint8_t r_, uint8_t g_, uint8_t b_)
         : b(b_)
         , r(r_)
         , g(g_)
         , w(0) {}
 
-    ColorRGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w)
+    constexpr ColorRGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w)
         : b(b)
         , r(r)
         , g(g)
@@ -55,6 +55,10 @@ struct ColorRGBW {
     ColorRGBW operator*(double e) const {
         return ColorRGBW { static_cast<uint8_t>(r * e), static_cast<uint8_t>(g * e), static_cast<uint8_t>(b * e) };
     }
+
+    ColorRGBW fade(float brightness) const;
+
+    ColorRGBW cross_fade(const ColorRGBW &c2, float ratio) const;
 };
 
 } // namespace leds

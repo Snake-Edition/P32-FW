@@ -21,4 +21,22 @@ ColorRGBW ColorRGBW::from_hsv(ColorHSV hsv) {
     return ColorRGBW(convert(5), convert(3), convert(1), 0);
 }
 
+ColorRGBW ColorRGBW::fade(float brightness) const {
+    uint8_t nr = r * brightness;
+    uint8_t ng = g * brightness;
+    uint8_t nb = b * brightness;
+    uint8_t nw = w * brightness;
+    return { nr, ng, nb, nw };
+}
+
+ColorRGBW ColorRGBW::cross_fade(const ColorRGBW &c, float ratio) const {
+    float old_ratio = std::max(0.5f - ratio, 0.0f) * 2;
+    float new_ratio = std::max(ratio - 0.5f, 0.0f) * 2;
+    uint8_t nr = r * old_ratio + c.r * new_ratio;
+    uint8_t ng = g * old_ratio + c.g * new_ratio;
+    uint8_t nb = b * old_ratio + c.b * new_ratio;
+    uint8_t nw = w * old_ratio + c.w * new_ratio;
+    return { nr, ng, nb, nw };
+}
+
 } // namespace leds
