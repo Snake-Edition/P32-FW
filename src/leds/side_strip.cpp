@@ -26,14 +26,14 @@ void SideStrip::Update() {
         //
         // The channels on these strips are also apparently being GRB, not RGB,
         // as the Neopixel driver expects.
-        leds.Set(ColorRGBW(current_color.g, current_color.r, current_color.b).data, 0);
-        leds.Set(ColorRGBW(enclosure_fan_pwm, current_color.w, 0).data, 1);
+        leds.set(ColorRGBW(current_color.g, current_color.r, current_color.b).data, 0);
+        leds.set(ColorRGBW(enclosure_fan_pwm, current_color.w, 0).data, 1);
     } else {
         for (size_t i = 0; i < led_drivers_count; ++i) {
-            leds.Set(ColorRGBW(current_color.g, current_color.r, current_color.b).data, i);
+            leds.set(ColorRGBW(current_color.g, current_color.r, current_color.b).data, i);
         }
     }
 
-    leds.Tick();
+    leds.update();
 #endif
 }

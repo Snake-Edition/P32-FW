@@ -31,7 +31,7 @@
 
 using namespace leds;
 
-using Neopixels = neopixel::SPI_10M5Hz<4, GuiLedsWriter::write>;
+using Neopixels = neopixel::LedsSPI10M5Hz<4, GuiLedsWriter::write>;
 
 Neopixels &getNeopixels() {
     static Neopixels ret;
@@ -50,11 +50,11 @@ void leds::Init() {
 #endif
 }
 void leds::ForceRefresh(size_t cnt) {
-    getNeopixels().ForceRefresh(cnt);
+    getNeopixels().force_refresh(cnt);
 }
 
 void leds::TickLoop() {
-    getNeopixels().Tick();
+    getNeopixels().update();
 
 #if HAS_SIDE_LEDS()
     #if HAS_DOOR_SENSOR()
@@ -79,7 +79,7 @@ void leds::SetNth(ColorRGBW clr, leds::index n) {
             SetNth(clr, leds::index(i));
         }
     } else {
-        getNeopixels().Set(clr.data, size_t(n));
+        getNeopixels().set(clr.data, size_t(n));
     }
 }
 
@@ -124,7 +124,7 @@ void leds::enter_power_panic() {
     SPI_INIT(lcd);
     leds::SetNth(ColorRGBW(), leds::index::count_);
     leds::ForceRefresh(size_t(leds::index::count_));
-    getNeopixels().Tick();
+    getNeopixels().update();
 
     // 5. reenable display task
     osThreadResume(displayTaskHandle);

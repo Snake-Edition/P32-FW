@@ -71,14 +71,14 @@ private:
 #if PRINTER_IS_PRUSA_XL()
     /// First driver in the daisy chain: RGB, second driver: W + enclosure fan
     static constexpr size_t led_drivers_count = 2;
-    neopixel::SPI_10M5Hz<led_drivers_count, SideStripWriter::write> leds;
+    neopixel::LedsSPI10M5Hz<led_drivers_count, SideStripWriter::write> leds;
 
 #elif PRINTER_IS_PRUSA_iX()
     /// 3x 3 or 3 x 6 RGB drivers in the U shape along the gantry (left, back, right)
     /// Newer strips have double the segments (the 3 x 6 version), just
     /// unconditionally send data for the variant with more segments
     static constexpr size_t led_drivers_count = 18;
-    neopixel::SPI_10M5Hz<led_drivers_count, SideStripWriter::write> leds;
+    neopixel::LedsSPI10M5Hz<led_drivers_count, SideStripWriter::write> leds;
 
 #elif PRINTER_IS_PRUSA_COREONE() || defined(UNITTESTS)
     // Single white-only driver
