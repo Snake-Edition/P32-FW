@@ -1472,6 +1472,9 @@ uint8_t do_homing_move(const AxisEnum axis, const float distance, const feedRate
 void set_axis_is_at_home(const AxisEnum axis, [[maybe_unused]] bool homing_z_with_probe) {
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> set_axis_is_at_home(", axis_codes[axis], ")");
 
+  // ensure we're not within an aborted move: caller needs to check!
+  assert(!planner.draining());
+
   SBI(axis_known_position, axis);
   SBI(axis_homed, axis);
 
