@@ -364,10 +364,8 @@
         bed_preheat.wait_for_preheat();
     }
 
-    const int8_t p_val = parser.intval('P', -1);
-    const bool may_move = p_val == 1 || p_val == 2 || p_val == 4 || parser.seen('J');
-
     // Check for commands that require the printer to be homed
+    const bool may_move = g29_phase_value == 1 || g29_phase_value == 2 || g29_phase_value == 4;
     if (may_move) {
       planner.synchronize();
       if (axes_need_homing()) gcode.home_all_axes();
