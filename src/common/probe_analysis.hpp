@@ -205,6 +205,9 @@ public:
     /// How many samples to ignore at the beginning/end of a sample sequence (related to some features)
     const int skipBorderSamples;
 
+    /// Initial sampling frequency, will be changed by SetSamplingIntervalMs() from a real data
+    static constexpr float initialFrequency = 320.0f;
+
     /// Time interval in seconds specifying the subset of samples before haltStart that should be used for the analysis.
     static constexpr float analysisLookback = 0.300;
 
@@ -348,7 +351,7 @@ protected:
 
 protected:
     /// Time interval in seconds between consecutive samples.
-    float samplingInterval = 1.0f / 320.0f;
+    float samplingInterval = 1.0f / initialFrequency;
 
     /// True if Analyse() is being process (and no samples should be processed)
     std::atomic<bool> analysisInProgress = false;

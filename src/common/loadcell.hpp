@@ -29,7 +29,12 @@ public:
     static constexpr float XY_PROBE_THRESHOLD { 40 };
     static constexpr float XY_PROBE_HYSTERESIS { 20 };
 
-    buddy::ProbeAnalysis<320> analysis;
+    static constexpr unsigned int ANALYSIS_WINDOW_SIZE = 400; // Effective window size
+    static constexpr unsigned int MIN_ANALYSIS_WINDOW_SIZE = buddy::ProbeAnalysisBase::initialFrequency
+        * (TOUCHDOWN_DELAY_MS / 1000.f + buddy::ProbeAnalysisBase::analysisLookback + buddy::ProbeAnalysisBase::analysisLookahead);
+    static_assert(ANALYSIS_WINDOW_SIZE >= MIN_ANALYSIS_WINDOW_SIZE);
+
+    buddy::ProbeAnalysis<ANALYSIS_WINDOW_SIZE> analysis;
     std::atomic<bool> xy_endstop_enabled { false };
     static_assert(std::atomic<decltype(xy_endstop_enabled)::value_type>::is_always_lock_free, "Lock free type must be used from ISR.");
 
