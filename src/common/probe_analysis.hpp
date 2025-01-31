@@ -206,7 +206,7 @@ public:
     const int skipBorderSamples;
 
     /// Time interval in seconds specifying the subset of samples before haltStart that should be used for the analysis.
-    static constexpr float analysisLookback = 0.150;
+    static constexpr float analysisLookback = 0.300;
 
     /// Time interval in seconds specifying the subset of samples after haltEnd that should be used for the analysis.
     static constexpr float analysisLookahead = 0.300;
