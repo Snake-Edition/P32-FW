@@ -109,7 +109,10 @@ MI_CONNECT_REGISTER::MI_CONNECT_REGISTER()
 }
 
 void MI_CONNECT_REGISTER::click([[maybe_unused]] IWindowMenu &window_menu) {
-    DialogConnectRegister::Show();
+    const bool already_registered = strlen(config_store().connect_token.get().data()) > 0;
+    if (!already_registered || MsgBoxQuestion(_("Previous registration to Connect will be forgotten. Proceed?"), Responses_YesNo) == Response::Yes) {
+        DialogConnectRegister::Show();
+    }
 }
 
 ScreenMenuConnect::ScreenMenuConnect()
