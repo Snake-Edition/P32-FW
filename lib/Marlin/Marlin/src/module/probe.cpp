@@ -717,6 +717,10 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
 
         METRIC_DEF(probe_start, "probe_start", METRIC_VALUE_EVENT, 0, METRIC_ENABLED);
         metric_record_event(&probe_start);
+
+        // Sync enough samples before moving downwards to ensure the pre-compression line can be fit
+        // when the Z move is very short
+        loadcell.WaitBarrier(ticks_us() + loadcell.analysis.analysisLookback * 1e6);
       #endif
 
       // Probe downward slowly to find the bed
