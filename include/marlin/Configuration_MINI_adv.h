@@ -1541,7 +1541,11 @@
     #define INTERPOLATE true // Interpolate X/Y/Z_MICROSTEPS to 256
 
     #if AXIS_IS_TMC(X)
-        #define X_CURRENT 350 // (mA) RMS current. Multiply by 1.414 for peak current.
+		#ifdef MINI_I3_MK33
+	        #define X_CURRENT 300 // (mA) RMS current.  MK3 motors
+		#else
+    	    #define X_CURRENT 400 // (mA) RMS current. Multiply by 1.414 for peak current.
+		#endif
         #define X_MICROSTEPS 16 // 0..256
         #define X_RSENSE 0.22
     #endif
@@ -1553,7 +1557,11 @@
     #endif
 
     #if AXIS_IS_TMC(Y)
-        #define Y_CURRENT 350
+		#ifdef MINI_I3_MK33
+			#define Y_CURRENT 370 // (mA) RMS current.  MK3 motors
+		#else
+	        #define Y_CURRENT 400
+		#endif
         #define Y_MICROSTEPS 16
         #define Y_RSENSE 0.22
     #endif
