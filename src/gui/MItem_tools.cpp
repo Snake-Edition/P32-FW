@@ -610,6 +610,27 @@ MI_SKEW_XZ::MI_SKEW_XZ()
 MI_SKEW_YZ::MI_SKEW_YZ()
     : WiSpin(planner.skew_factor.yz, skew_spin_config, _(label), 0, is_enabled_t::no) {}
 
+/* -===============================================(:>- */
+uint8_t cold_mode = false;
+MI_COLD_MODE::MI_COLD_MODE()
+    : WI_ICON_SWITCH_OFF_ON_t(cold_mode, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
+
+void MI_COLD_MODE::OnChange(size_t /*old_index*/) {
+    cold_mode = index;
+    if (cold_mode) {
+        char code[15];
+        snprintf(code, 15, "M104 T0 S%d", cold_mode_temp);
+        if (Temperature::temp_hotend[0].celsius < cold_mode_temp) {
+            marlin_server::enqueue_gcode(code);
+        }
+        snprintf(code, 15, "M140 S%d", cold_mode_temp);
+        if (Temperature::temp_bed.celsius < cold_mode_temp) {
+            marlin_server::enqueue_gcode(code);
+        }
+    }
+}
+/* -===============================================(:>- */
+
 /*****************************************************************************/
 // MI_FAN_CHECK
 MI_FAN_CHECK::MI_FAN_CHECK()
