@@ -435,6 +435,15 @@ public:
 };
 /* -===============================================(:>- */
 
+class MI_COLD_MODE : public WI_ICON_SWITCH_OFF_ON_t {
+    constexpr static const char *const label = N_("Cold Mode");
+
+public:
+    MI_COLD_MODE();
+    virtual void OnChange(size_t old_index) override;
+};
+/* -===============================================(:>- */
+
 class MI_INFO_BED_TEMP : public WI_TEMP_LABEL_t {
     static constexpr const char *const label = N_("Bed Temperature");
 

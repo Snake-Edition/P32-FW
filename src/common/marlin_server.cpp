@@ -1685,6 +1685,9 @@ bool fan_checks() {
 
 static void resuming_reheating() {
     if (hotendErrorChecker.isFailed()) {
+        if (cold_mode && thermalManager.degTargetHotend(0) == cold_mode_temp) {
+            return;
+        }
         set_warning(WarningType::HotendTempDiscrepancy);
         thermalManager.setTargetHotend(0, 0);
 #if FAN_COUNT > 0
