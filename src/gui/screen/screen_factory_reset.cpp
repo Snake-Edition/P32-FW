@@ -69,11 +69,11 @@ public:
 
 private:
     virtual void OnChange(size_t) final {
-        bitset_->set(std::to_underlying(item_), GetIndex());
+        bitset_->set(std::to_underlying(item_), get_index());
     }
 
     virtual void printExtension(Rect16 extension_rect, [[maybe_unused]] Color color_text, Color color_back, ropfn raster_op) const override {
-        MenuItemSwitch::printExtension(extension_rect, GetIndex() ? COLOR_GREEN : COLOR_RED, color_back, raster_op);
+        MenuItemSwitch::printExtension(extension_rect, get_index() ? COLOR_GREEN : COLOR_RED, color_back, raster_op);
     }
 };
 

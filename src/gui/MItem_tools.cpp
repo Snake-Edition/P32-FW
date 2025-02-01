@@ -378,7 +378,7 @@ MI_SOUND_MODE::MI_SOUND_MODE()
 }
 
 void MI_SOUND_MODE::OnChange(size_t /*old_index*/) {
-    Sound_SetMode(static_cast<eSOUND_MODE>(GetIndex()));
+    Sound_SetMode(static_cast<eSOUND_MODE>(get_index()));
 }
 
 /*****************************************************************************/
@@ -444,7 +444,7 @@ MI_TIMEZONE_MIN::MI_TIMEZONE_MIN()
 }
 
 void MI_TIMEZONE_MIN::OnChange([[maybe_unused]] size_t old_index) {
-    config_store().timezone_minutes.set(static_cast<time_tools::TimezoneOffsetMinutes>(GetIndex()));
+    config_store().timezone_minutes.set(static_cast<time_tools::TimezoneOffsetMinutes>(get_index()));
 }
 
 /*****************************************************************************/
@@ -470,7 +470,7 @@ MI_TIME_FORMAT::MI_TIME_FORMAT()
 }
 
 void MI_TIME_FORMAT::OnChange([[maybe_unused]] size_t old_index) {
-    config_store().time_format.set(static_cast<time_tools::TimeFormat>(GetIndex()));
+    config_store().time_format.set(static_cast<time_tools::TimeFormat>(get_index()));
 }
 
 /*****************************************************************************/
@@ -1000,7 +1000,7 @@ MI_DISPLAY_BAUDRATE::MI_DISPLAY_BAUDRATE()
 }
 
 void MI_DISPLAY_BAUDRATE::OnChange(size_t) {
-    config_store().reduce_display_baudrate.set(GetIndex());
+    config_store().reduce_display_baudrate.set(get_index());
 }
 #endif
 

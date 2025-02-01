@@ -281,15 +281,15 @@ MI_MMU_NEXTRUDER_REWORK::MI_MMU_NEXTRUDER_REWORK()
         config_store().is_mmu_rework.get()) {}
 
 void MI_MMU_NEXTRUDER_REWORK::OnChange([[maybe_unused]] size_t old_index) {
-    if (!flip_mmu_rework(GetIndex() == 0)) {
-        SetIndex(old_index); // revert the index change of the toggle in case the user aborted the dialog
+    if (!flip_mmu_rework(get_index() == 0)) {
+        set_index(old_index); // revert the index change of the toggle in case the user aborted the dialog
         return;
     }
 
     // Enabling MMU rework hides the FS_Autoload option from the menu - BFW-4290
     // However the request was that the autoload "stays active"
     // So we have to make sure that it's on when you activate the rework
-    if (GetIndex()) {
+    if (get_index()) {
         marlin_client::set_fs_autoload(true);
         config_store().fs_autoload_enabled.set(true);
     }
