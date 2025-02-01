@@ -604,7 +604,7 @@ static constexpr NumericInputConfig xy_axis_len_spin_config {
 };
 
 uint16_t X_BED_SIZE = 180;
-// uint16_t Y_BED_SIZE = 180;
+uint16_t Y_BED_SIZE = 180;
 
 // MI_X_BED_SIZE
 MI_X_AXIS_LEN::MI_X_AXIS_LEN()
@@ -620,7 +620,7 @@ MI_Y_AXIS_LEN::MI_Y_AXIS_LEN()
     : WiSpin(Y_BED_SIZE, xy_axis_len_spin_config, _(label)) {}
 
 void MI_Y_AXIS_LEN::OnClick() {
-    // Y_BED_SIZE=GetVal();
+    Y_BED_SIZE = GetVal();
 }
 
 /* -===============================================(:>- */

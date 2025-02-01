@@ -568,6 +568,11 @@ void init(void) {
     X_BED_SIZE = 250;
 #endif
 
+    Y_BED_SIZE = 180;
+#ifdef MINI_I3_MK33
+    Y_BED_SIZE = 210;
+#endif
+
     settings_load();
 }
 

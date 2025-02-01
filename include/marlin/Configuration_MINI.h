@@ -1164,15 +1164,9 @@
 
 // The size of the print bed
 extern uint16_t X_BED_SIZE;
+extern uint16_t Y_BED_SIZE;
 
 
-#ifdef MINI_LONG_BED
-    #define Y_BED_SIZE 250
-#elif MINI_I3_MK33
-    #define Y_BED_SIZE 210
-#else
-    #define Y_BED_SIZE 180
-#endif
 
 #ifdef MINI_COREXY
     #define Z_SIZE 256
@@ -1205,9 +1199,9 @@ extern uint16_t X_BED_SIZE;
 #endif
 
 #ifdef MINI_COREXY
-    #define Y_MAX_POS (Y_BED_SIZE + 1)
+    #define Y_MAX_POS (Y_BED_SIZE + 1.f)
 #else
-    #define Y_MAX_POS Y_BED_SIZE
+    #define Y_MAX_POS ((float)Y_BED_SIZE)
 #endif
 
 #ifdef USE_PRUSA_EEPROM_AS_SOURCE_OF_DEFAULT_VALUES
