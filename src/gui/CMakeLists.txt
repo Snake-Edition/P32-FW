@@ -50,6 +50,7 @@ target_sources(
           screen_hardfault.cpp
           screen_help_fw_update.cpp
           screen_home.cpp
+          screen_mbl_values.cpp
           screen_menu.cpp
           screen_menu_cancel_object.cpp
           screen_menu_change_filament.cpp

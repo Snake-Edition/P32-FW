@@ -110,6 +110,7 @@ using MI_EXPERIMENTAL_SETTINGS
     = MI_SCREEN<N_("Experimental Settings"), class ScreenMenuExperimentalSettings, nullptr, is_hidden_t::no>;
 
 /* -===============================================(:>- */
+
 class MI_SNAKE_SETTINGS : public IWindowMenuItem {
     static constexpr const char *const label = N_("Snake Settings");
 
@@ -150,9 +151,18 @@ public:
 protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
-/* -===============================================(:>- */
 
-/**********************************************************************************************/
+class MI_MBL_VALUES : public IWindowMenuItem {
+    static constexpr const char *const label = "MBL values";
+
+public:
+    MI_MBL_VALUES();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+/* -===============================================(:>- */
 
 using MI_USER_INTERFACE
     = MI_SCREEN<N_("User Interface"), class ScreenMenuUserInterface>;
