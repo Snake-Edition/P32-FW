@@ -519,7 +519,8 @@ void resume_loop() {
         // Set bed temperature to prevent bed from cooling down
         thermalManager.setTargetBed(state_buf.planner.target_bed);
         break;
-    case ResumeState::Resume:
+
+    case ResumeState::Resume: {
         // setup the paused state
         // This applies for PowerPanic from paused AND from printing too
         // because printing after power up starts from pause
@@ -527,14 +528,12 @@ void resume_loop() {
         resume.pos = state_buf.crash.crash_current_position;
         resume.fan_speed = state_buf.planner.fan_speed;
         resume.print_speed = state_buf.planner.print_speed;
+        resume.nozzle_temp_paused = state_buf.planner.was_paused; // Nozzle temperatures are stored in resume
         HOTEND_LOOP() {
             resume.nozzle_temp[e] = state_buf.planner.target_nozzle[e];
             if (state_buf.planner.was_paused) {
                 marlin_server::set_temp_to_display(state_buf.planner.target_nozzle[e], e);
             }
-        }
-        if (state_buf.planner.was_paused) {
-            resume.nozzle_temp_paused = true; // Nozzle temperatures are stored in resume
         }
         marlin_server::set_resume_data(&resume);
 
@@ -617,6 +616,7 @@ void resume_loop() {
             resume_state = ResumeState::WaitForHeaters;
         }
         break;
+    }
 
     case ResumeState::WaitForHeaters: {
         // enqueue a proper wait-for-temperature loop

@@ -6,6 +6,9 @@ if(BOARD MATCHES ".*BUDDY")
     logging PRIVATE LwIP # log_dest_syslog.cpp
                     tinyusb::tinyusb # log_dest_usb.cpp
     )
+  if(HAS_FILE_LOG)
+    target_sources(logging PRIVATE log_dest_file.cpp)
+  endif()
 endif()
 
 if(BOARD STREQUAL "DWARF" OR BOARD STREQUAL "XL_DEV_KIT_XLB")
