@@ -74,11 +74,11 @@ ScreenMenuVersionInfo::ScreenMenuVersionInfo()
         }
     }
 
+#ifdef MINI_I3_MK33
+    begin += snprintf(begin, end - begin, "i3 MK3.3\n");
+#endif
 #ifdef MINI_COREXY
     begin += snprintf(begin, end - begin, "COREXY\n");
-#endif
-#ifdef MINI_LONG_BED
-    begin += snprintf(begin, end - begin, "long bed\n");
 #endif
 
     if (end > begin) {
