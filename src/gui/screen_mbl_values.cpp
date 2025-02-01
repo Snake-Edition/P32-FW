@@ -41,7 +41,7 @@ void screen_mbl_values_t::draw() {
             snprintf(text, sizeof(text), "%1.3f", static_cast<double>(num));
             const int16_t x = ix * block_size;
             const int16_t y = (GRID_MAJOR_POINTS_Y - 1 - iy) * block_size;
-            display::draw_text(Rect16(x, y, block_size, block_size), string_view_utf8::MakeRAM((const uint8_t *)text), resource_font(Font::normal), COLOR_BLACK, COLOR_WHITE);
+            display::draw_text(Rect16(x, y, block_size, block_size), string_view_utf8::MakeRAM((const uint8_t *)text), Font::normal, COLOR_BLACK, COLOR_WHITE);
         }
     }
 
@@ -74,7 +74,7 @@ void screen_mbl_values_t::draw() {
     y_tilt *= (GRID_MAJOR_POINTS_Y - 1) / points;
 
     snprintf(text, sizeof(text), "X tilt %1.3f mm", static_cast<double>(x_tilt));
-    display::draw_text(Rect16(10, GuiDefaults::RectScreen.Height() - 40, GuiDefaults::RectScreen.Width() - 10, 20), string_view_utf8::MakeRAM((const uint8_t *)text), resource_font(Font::normal), COLOR_BLACK, COLOR_WHITE);
+    display::draw_text(Rect16(10, GuiDefaults::RectScreen.Height() - 40, GuiDefaults::RectScreen.Width() - 10, 20), string_view_utf8::MakeRAM((const uint8_t *)text), Font::normal, COLOR_BLACK, COLOR_WHITE);
     snprintf(text, sizeof(text), "Y tilt %1.3f mm", static_cast<double>(y_tilt));
-    display::draw_text(Rect16(10, GuiDefaults::RectScreen.Height() - 20, GuiDefaults::RectScreen.Width() - 10, 20), string_view_utf8::MakeRAM((const uint8_t *)text), resource_font(Font::normal), COLOR_BLACK, COLOR_WHITE);
+    display::draw_text(Rect16(10, GuiDefaults::RectScreen.Height() - 20, GuiDefaults::RectScreen.Width() - 10, 20), string_view_utf8::MakeRAM((const uint8_t *)text), Font::normal, COLOR_BLACK, COLOR_WHITE);
 }

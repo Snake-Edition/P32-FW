@@ -28,7 +28,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 13.
 14. **Adjust brightness**: You can change brightness of the display. It does not dim the light but draws darker colors.
 15. **Cold mode (min.temp.)**: If you enable Cold Mode, temperatures (once set) won't drop below 30°C. For safety reasons cold mode must be enabled after every start of the printer.
-16. ~~**Show MBL and tilt**: After mesh bed leveling (G29) you can go to `Snake Settings` and see the MBL Z levels at the measured points and check the tilt of the axes. Levels are shifted to avoid negative numbers.~~
+16. **Show MBL and tilt**: After mesh bed leveling (G29) you can go to `Snake Settings` and see the MBL Z levels at the measured points and check the tilt of the axes. Levels are shifted to avoid negative numbers.
 17. ~~**Speed up**: Parking, unparking and other moves are done faster.~~
 18. **Different printers**: Next to a standard version, other versions are released:
     1. coreXY
