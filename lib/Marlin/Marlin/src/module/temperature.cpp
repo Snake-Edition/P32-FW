@@ -1532,7 +1532,7 @@ void Temperature::manage_heater() {
           float feed_forward = .0f;
       #endif
 
-          temp_hotend[e].soft_pwm_amount = (temp_hotend[e].celsius > temp_range[e].mintemp) && temp_hotend[e].celsius < temp_range[e].maxtemp ?
+          temp_hotend[e].soft_pwm_amount = (temp_hotend[e].celsius > temp_range[e].mintemp || cold_mode) && temp_hotend[e].celsius < temp_range[e].maxtemp ?
       #if ENABLED(MODEL_DETECT_STUCK_THERMISTOR)
               (int)(pid_output = get_pid_output_hotend(feed_forward, e))
       #else
@@ -1542,12 +1542,16 @@ void Temperature::manage_heater() {
       #if ENABLED(MODEL_DETECT_STUCK_THERMISTOR)
           thermal_model_protection(pid_output, feed_forward, e);
       #endif
+          // Use 20% power only if too cold (does not overheat if thermistor fails)
+          if (cold_mode && temp_hotend[e].celsius < temp_range[e].mintemp) temp_hotend[e].soft_pwm_amount *= .2f;
         }
 
       #if WATCH_HOTENDS
         if (hotend_idle[e].timed_out)
           start_watching_hotend(e);
-        else
+        else {
+          if (cold_mode && temp_hotend[e].celsius <= temp_range[e].mintemp)
+            start_watching_hotend(e);
           // Make sure temperature is increasing
           if (watch_hotend[e].next_ms && ELAPSED(ms, watch_hotend[e].next_ms)) { // Time to check this extruder?
             if (degHotend(e) < watch_hotend[e].target)                           // Failed to increase enough?
@@ -1555,6 +1559,7 @@ void Temperature::manage_heater() {
             else                                                                 // Start again if the target is still far off
               start_watching_hotend(e);
           }
+        }
       #endif
 
     } // HOTEND_LOOP
@@ -1611,8 +1616,9 @@ void Temperature::manage_heater() {
         else
       #endif
       {
-        #if ENABLED(PIDTEMPBED)
-          temp_bed.soft_pwm_amount = WITHIN(temp_bed.celsius, BED_MINTEMP, BED_MAXTEMP) ? (int)get_pid_output_bed() >> soft_pwm_bit_shift : 0;
+        #if ENABLED(PIDTEMPBED)          
+          bool heat = temp_bed.celsius <= BED_MAXTEMP && (cold_mode || temp_bed.celsius >= BED_MINTEMP);
+          temp_bed.soft_pwm_amount = heat ? (int)get_pid_output_bed() >> soft_pwm_bit_shift : 0;
         #else
           // Check if temperature is within the correct band
           if (WITHIN(temp_bed.celsius, BED_MINTEMP, BED_MAXTEMP)) {
@@ -2631,7 +2637,7 @@ void Temperature::readings_ready() {
         if (heater_on && rawtemp < temp_range[e].raw_min * tdir)
       #endif /*ENABLED(PRUSA_TOOLCHANGER)*/
         {
-              min_temp_error((heater_ind_t)e);
+              if (!cold_mode) min_temp_error((heater_ind_t)e);
         }
       }
     }
@@ -2654,7 +2660,8 @@ void Temperature::readings_ready() {
       #endif
     ;
       if (BEDCMP(temp_bed.raw, maxtemp_raw_BED)) max_temp_error(H_BED);
-      if (bed_on && BEDCMP(mintemp_raw_BED, temp_bed.raw)) min_temp_error(H_BED);
+      if (!cold_mode)
+        if (bed_on && BEDCMP(mintemp_raw_BED, temp_bed.raw)) min_temp_error(H_BED);
     #endif
   #endif
 
@@ -3136,12 +3143,13 @@ void Temperature::isr() {
       return true;
     }
 
-    void Temperature::setTargetHotend(const int16_t celsius, const uint8_t E_NAME) {
+    void Temperature::setTargetHotend(int16_t celsius, const uint8_t E_NAME) {
     #if BOARD_IS_MASTER_BOARD()
         // We cannot overwrite target temps while the safety_timer is active, deactivate it first
         buddy::safety_timer().reset_restore_nonblocking();
     #endif
 
+        if (cold_mode && celsius < cold_mode_temp) celsius = cold_mode_temp;
         const uint8_t ee = HOTEND_INDEX;
         const int16_t new_temp = _MIN(celsius, temp_range[ee].maxtemp - HEATER_MAXTEMP_SAFETY_MARGIN);
 
@@ -3262,9 +3270,11 @@ void Temperature::isr() {
       return temp_bed.target <= 0 || std::abs(temp_bed.target - temp_bed.celsius) <= TEMP_BED_HYSTERESIS;
     }
 
-    void Temperature::setTargetBed(const int16_t celsius) {
+    void Temperature::setTargetBed(int16_t celsius) {
       // We cannot overwrite target temps while the safety_timer is active, deactivate it first
       buddy::safety_timer().reset_restore_nonblocking();
+
+      if (cold_mode && celsius < cold_mode_temp) celsius = cold_mode_temp;
 
     #if ENABLED(AUTO_POWER_CONTROL)
         if (celsius) {

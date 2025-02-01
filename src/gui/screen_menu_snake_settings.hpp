@@ -21,8 +21,8 @@ using ScreenMenuSnakeSettings__ = ScreenMenu<EFooter::On, MI_RETURN
     // ,MI_X_MAX_FEEDRATE, MI_Y_MAX_FEEDRATE
     // ,MI_X_SENSITIVITY, MI_X_SENSITIVITY_RESET, MI_Y_SENSITIVITY, MI_Y_SENSITIVITY_RESET
     // ,MI_X_STEALTH, MI_Y_STEALTH, MI_Z_STEALTH, MI_E_STEALTH
-    // ,MI_COLD_MODE
-    >;
+    ,
+    MI_COLD_MODE>;
 
 class ScreenMenuSnakeSettings : public ScreenMenuSnakeSettings__ {
 public:
@@ -45,7 +45,7 @@ public:
 
 /*********************************************************************************/
 
-using ScreenMenuSnakeTuneSettings__ = ScreenMenu<EFooter::On, MI_RETURN
+using ScreenMenuSnakeTuneSettings__ = ScreenMenu<EFooter::On, MI_RETURN, MI_BRIGHTNESS, MI_SKEW_XY, MI_SKEW_XZ, MI_SKEW_YZ
 #if PRINTER_IS_PRUSA_MINI()
     ,
     MI_BRIGHTNESS //, MI_DISPLAY_REINIT_TIMEOUT
@@ -55,8 +55,8 @@ using ScreenMenuSnakeTuneSettings__ = ScreenMenu<EFooter::On, MI_RETURN
     MI_SKEW_XY, MI_SKEW_XZ, MI_SKEW_YZ, MI_CURRENT_X, MI_CURRENT_Y, MI_CURRENT_Z, MI_CURRENT_E, MI_RESET_CURRENTS
     //,MI_X_MAX_FEEDRATE, MI_Y_MAX_FEEDRATE
     //,MI_X_STEALTH, MI_Y_STEALTH, MI_Z_STEALTH, MI_E_STEALTH
-    //,MI_COLD_MODE
     ,
+    MI_COLD_MODE,
     MI_SNAKE>;
 
 class ScreenMenuSnakeTuneSettings : public ScreenMenuSnakeTuneSettings__ {

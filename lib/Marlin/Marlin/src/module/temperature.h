@@ -34,6 +34,9 @@
   #include "../feature/power.h"
 #endif
 
+extern uint8_t cold_mode;
+const constexpr uint8_t cold_mode_temp = 30;
+
 #include <option/has_local_bed.h>
 #include <option/has_modular_bed.h>
 #if HAS_MODULAR_BED()
@@ -587,7 +590,7 @@ class Temperature {
     #if HOTENDS
 
       #if HAS_TEMP_HOTEND
-        static void setTargetHotend(const int16_t celsius, const uint8_t E_NAME);
+        static void setTargetHotend(int16_t celsius, const uint8_t E_NAME);
 
         /// @returns whether the hotend has stabilized on the target temperature (or if the target temp is 0)
         static bool is_hotend_temperature_reached(uint8_t hotend);
@@ -650,7 +653,7 @@ class Temperature {
         static inline void start_watching_bed() {}
       #endif
 
-      static void setTargetBed(const int16_t celsius);
+      static void setTargetBed(int16_t celsius);
 
       /// @returns whether the bed has stabilized on the target temperature (or if the target temp is 0)
       static bool is_bed_temperature_reached();
