@@ -80,9 +80,6 @@ ScreenMenuVersionInfo::ScreenMenuVersionInfo()
 #ifdef MINI_COREXY
     begin += snprintf(begin, end - begin, "COREXY\n");
 #endif
-#ifdef MINI_LONG_BED
-    begin += snprintf(begin, end - begin, "long bed\n");
-#endif
 
     if (end > begin) {
         // c=20 r=4

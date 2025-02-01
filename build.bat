@@ -30,22 +30,6 @@ move /Y build\minixy-en-pl_release_emptyboot\firmware.bbf build\Snake_MINI_coreX
 python utils/build.py --bootloader empty --preset minixy-en-jp --final
 move /Y build\minixy-en-jp_release_emptyboot\firmware.bbf build\Snake_MINI_coreXY_en-jp.bbf
 
-rem long bed (250 mm)
-python utils/build.py --bootloader empty --preset miniLG-en-cs --final
-move /Y build\minilg-en-cs_release_emptyboot\firmware.bbf build\Snake_MINI_long_bed_en-cs.bbf
-python utils/build.py --bootloader empty --preset miniLG-en-de --final
-move /Y build\minilg-en-de_release_emptyboot\firmware.bbf build\Snake_MINI_long_bed_en-de.bbf
-python utils/build.py --bootloader empty --preset miniLG-en-es --final
-move /Y build\minilg-en-es_release_emptyboot\firmware.bbf build\Snake_MINI_long_bed_en-es.bbf
-python utils/build.py --bootloader empty --preset miniLG-en-fr --final
-move /Y build\minilg-en-fr_release_emptyboot\firmware.bbf build\Snake_MINI_long_bed_en-fr.bbf
-python utils/build.py --bootloader empty --preset miniLG-en-it --final
-move /Y build\minilg-en-it_release_emptyboot\firmware.bbf build\Snake_MINI_long_bed_en-it.bbf
-python utils/build.py --bootloader empty --preset miniLG-en-pl --final
-move /Y build\minilg-en-pl_release_emptyboot\firmware.bbf build\Snake_MINI_long_bed_en-pl.bbf
-python utils/build.py --bootloader empty --preset miniLG-en-jp --final
-move /Y build\minilg-en-jp_release_emptyboot\firmware.bbf build\Snake_MINI_long_bed_en-jp.bbf
-
 rem i3 MK3.3
 python utils/build.py --bootloader empty --preset mini_i3_mk33-en-cs --final
 move /Y build\mini_i3_mk33-en-cs_release_emptyboot\firmware.bbf build\Snake_MINI_i3_MK33_en-cs.bbf
