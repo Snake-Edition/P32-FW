@@ -5,6 +5,22 @@
 
 LOG_COMPONENT_DEF(EEPROM, logging::Severity::info);
 
+extern "C" uint16_t get_x_length_mm() {
+    float ret = 0.F;
+#ifdef USE_PRUSA_EEPROM_AS_SOURCE_OF_DEFAULT_VALUES
+    ret = config_store().axis_x_length_mm.get();
+#endif
+    return ret;
+}
+
+extern "C" uint16_t get_y_length_mm() {
+    float ret = 0.F;
+#ifdef USE_PRUSA_EEPROM_AS_SOURCE_OF_DEFAULT_VALUES
+    ret = config_store().axis_y_length_mm.get();
+#endif
+    return ret;
+}
+
 extern "C" float get_z_max_pos_mm() {
     float ret = 0.F;
 #ifdef USE_PRUSA_EEPROM_AS_SOURCE_OF_DEFAULT_VALUES
@@ -21,6 +37,18 @@ extern "C" float get_z_max_pos_mm() {
 
 extern "C" uint16_t get_z_max_pos_mm_rounded() {
     return static_cast<uint16_t>(std::lround(get_z_max_pos_mm()));
+}
+
+extern "C" void set_x_length_mm(float length) {
+#ifdef USE_PRUSA_EEPROM_AS_SOURCE_OF_DEFAULT_VALUES
+    config_store().axis_x_length_mm.set(length);
+#endif
+}
+
+extern "C" void set_y_length_mm(float length) {
+#ifdef USE_PRUSA_EEPROM_AS_SOURCE_OF_DEFAULT_VALUES
+    config_store().axis_y_length_mm.set(length);
+#endif
 }
 
 extern "C" void set_z_max_pos_mm(float max_pos) {

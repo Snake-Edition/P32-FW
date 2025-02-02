@@ -563,15 +563,8 @@ void init(void) {
     SteelSheets::CheckIfCurrentValid();
 #endif
 
-    X_BED_SIZE = 180;
-#ifdef MINI_I3_MK33
-    X_BED_SIZE = 250;
-#endif
-
-    Y_BED_SIZE = 180;
-#ifdef MINI_I3_MK33
-    Y_BED_SIZE = 210;
-#endif
+    X_BED_SIZE = get_x_length_mm();
+    Y_BED_SIZE = get_y_length_mm();
 
     settings_load();
 }

@@ -616,6 +616,7 @@ MI_X_AXIS_LEN::MI_X_AXIS_LEN()
 
 void MI_X_AXIS_LEN::OnClick() {
     X_BED_SIZE = GetVal();
+    set_x_length_mm(X_BED_SIZE);
 }
 
 /* -===============================================(:>- */
@@ -625,6 +626,7 @@ MI_Y_AXIS_LEN::MI_Y_AXIS_LEN()
 
 void MI_Y_AXIS_LEN::OnClick() {
     Y_BED_SIZE = GetVal();
+    set_y_length_mm(Y_BED_SIZE);
 }
 
 /* -===============================================(:>- */
