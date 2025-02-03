@@ -795,6 +795,11 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
                 return false;
               }
 
+              // Fail straight away if draining
+              if(planner.draining()) {
+                return true;
+              }
+
               bool ignore_fail = false;
 
               // Ran out of attempts -> report detect fail
