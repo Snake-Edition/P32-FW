@@ -24,8 +24,6 @@
 #include "selftest_heater_config.hpp"
 #include "selftest_loadcell_config.hpp"
 #include "selftest_fsensor_config.hpp"
-#include "selftest_gears_config.hpp"
-#include "selftest_gears.hpp"
 #include "selftest_revise_printer_setup.hpp"
 #include "calibration_z.hpp"
 #include "fanctl.hpp"
@@ -184,8 +182,6 @@ static constexpr std::array<const FSensorConfig_t, HOTENDS> Config_FSensorMMU = 
     { .extruder_id = 0 },
 } };
 
-static constexpr SelftestGearsConfig gears_config = { .feedrate = 8 };
-
 // class representing whole self-test
 class CSelftest : public ISelftest {
 public:
@@ -215,7 +211,6 @@ protected:
     selftest::IPartHandler *pHotendSpecify;
     std::array<selftest::IPartHandler *, HOTENDS> m_pLoadcell;
     std::array<selftest::IPartHandler *, HOTENDS> pFSensor;
-    selftest::IPartHandler *pGearsCalib;
 
     SelftestResult m_result;
 };
@@ -424,11 +419,6 @@ void CSelftest::Loop() {
 #endif
 
         break;
-    case stsGears:
-        if (selftest::phase_gears(pGearsCalib, gears_config)) {
-            return;
-        }
-        break;
     case stsSelftestStop:
         restoreAfterSelftest();
         break;
@@ -475,7 +465,6 @@ bool CSelftest::Abort() {
         abort_part(&loadcell);
     }
     abort_part((selftest::IPartHandler **)&pFSensor);
-    abort_part(&pGearsCalib);
 
     m_State = stsAborted;
 

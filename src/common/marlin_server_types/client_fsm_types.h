@@ -1,6 +1,7 @@
 #pragma once
 
 #include <option/has_dwarf.h>
+#include <option/has_gearbox_alignment.h>
 #include <option/has_modularbed.h>
 #include <option/has_toolchanger.h>
 #include <option/has_loadcell.h>
@@ -52,6 +53,9 @@ enum class ClientFSM : uint8_t {
     #endif
     #if HAS_BELT_TUNING()
     BeltTuning,
+    #endif
+    #if HAS_GEARBOX_ALIGNMENT()
+    GearboxAlignment,
     #endif
     Wait, ///< FSM that only blocks the screen with a "please wait" text
     _none, // cannot be created, must have same index as _count

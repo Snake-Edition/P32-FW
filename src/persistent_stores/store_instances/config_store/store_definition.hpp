@@ -643,7 +643,7 @@ struct DeprecatedStore
 {
     // There was a ConfigStore version already before last eeprom version of SelftestResult was made, so it doesn't have old eeprom predecessor
     StoreItem<SelftestResult_pre_23, defaults::selftest_result_pre_23, journal::hash("Selftest Result")> selftest_result_pre_23;
-    // Selftest Result version before adding Gears Calibration result to EEPROM
+    // Selftest Result version before adding Gearbox Alignment result to EEPROM
     StoreItem<SelftestResult_pre_gears, defaults::selftest_result_pre_gears, journal::hash("Selftest Result V23")> selftest_result_pre_gears;
 
     // Changing Filament Sensor default state to remove necessity of FS dialog on startup

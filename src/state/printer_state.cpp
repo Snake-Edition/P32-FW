@@ -3,6 +3,7 @@
 #include <fsm_states.hpp>
 #include <client_response.hpp>
 #include <marlin_vars.hpp>
+#include <option/has_gearbox_alignment.h>
 #include <option/has_mmu2.h>
 #include <option/has_dwarf.h>
 #include <option/has_input_shaper_calibration.h>
@@ -201,6 +202,9 @@ DeviceState get_state(bool ready) {
 #if HAS_BELT_TUNING()
     case ClientFSM::BeltTuning:
 #endif
+#if HAS_GEARBOX_ALIGNMENT()
+    case ClientFSM::GearboxAlignment:
+#endif
     case ClientFSM::Serial_printing:
         // FIXME: BFW-3893 Sadly there is no way (without saving state in this function)
         //  to distinguish between preheat from main screen,
@@ -388,6 +392,9 @@ StateWithDialog get_state_with_dialog(bool ready) {
 #endif
 #if HAS_BELT_TUNING()
     case ClientFSM::BeltTuning:
+#endif
+#if HAS_GEARBOX_ALIGNMENT()
+    case ClientFSM::GearboxAlignment:
 #endif
     case ClientFSM::Preheat:
         // TODO: On some future sunny day, we want to cover all the selftests

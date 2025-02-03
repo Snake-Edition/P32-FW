@@ -11,6 +11,7 @@
 #include "printers.h"
 #include "MarlinPin.h"
 #include "metric.h"
+#include <option/has_gearbox_alignment.h>
 #include <option/has_loadcell.h>
 #include <option/has_toolchanger.h>
 #include <option/has_side_leds.h>
@@ -29,6 +30,10 @@
 
 #if HAS_INPUT_SHAPER_CALIBRATION()
     #include "M1959.hpp"
+#endif
+
+#if HAS_GEARBOX_ALIGNMENT()
+    #include "gcode_gearbox_alignment.hpp"
 #endif
 
 #include <logging/log.hpp>
@@ -263,6 +268,11 @@ bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
         case 1978:
             PrusaGcodeSuite::M1978();
             break;
+#if HAS_GEARBOX_ALIGNMENT()
+        case 1979:
+            PrusaGcodeSuite::M1979();
+            break;
+#endif
         case 9140:
             PrusaGcodeSuite::M9140();
             break;

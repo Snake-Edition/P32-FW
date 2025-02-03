@@ -11,6 +11,7 @@
 #include "window_dlg_warning.hpp"
 #include <screen_network_setup.hpp>
 #include <screen_fan_selftest.hpp>
+#include <option/has_gearbox_alignment.h>
 #include <option/has_phase_stepping.h>
 #include <option/has_input_shaper_calibration.h>
 #include <option/has_coldpull.h>
@@ -51,6 +52,10 @@ using SerialPrint = ScreenDialogDoesNotExist;
 
 #if HAS_BELT_TUNING()
     #include <gui/wizard/screen_belt_tuning_wizard.hpp>
+#endif
+
+#if HAS_GEARBOX_ALIGNMENT()
+    #include "screen_gearbox_alignment.hpp"
 #endif
 
 alignas(std::max_align_t) static std::array<uint8_t, 2560> mem_space;
@@ -181,6 +186,9 @@ using FSMDisplayConfig = FSMDisplayConfigDef<
 #endif
 #if HAS_BELT_TUNING()
     FSMScreenDef<ClientFSM::BeltTuning, ScreenBeltTuningWizard>,
+#endif
+#if HAS_GEARBOX_ALIGNMENT()
+    FSMScreenDef<ClientFSM::GearboxAlignment, ScreenGearboxAlignment>,
 #endif
 
     // This is here so that we can worry-free write commas at the end of each argument

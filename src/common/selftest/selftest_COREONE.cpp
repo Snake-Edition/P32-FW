@@ -10,7 +10,6 @@
 #include "selftest_axis_interface.hpp"
 #include "selftest_fsensor_config.hpp"
 #include "selftest_fsensor_interface.hpp"
-#include "selftest_gears.hpp"
 #include "selftest_heater_config.hpp"
 #include "selftest_heaters_interface.hpp"
 #include "selftest_loadcell_config.hpp"
@@ -163,8 +162,6 @@ static constexpr std::array<const FSensorConfig_t, HOTENDS> Config_FSensorMMU = 
 } };
 #endif
 
-static constexpr SelftestGearsConfig gears_config = { .feedrate = 8 };
-
 // class representing whole self-test
 class CSelftest : public ISelftest {
 public:
@@ -194,7 +191,6 @@ protected:
     selftest::IPartHandler *pBed;
     std::array<selftest::IPartHandler *, HOTENDS> m_pLoadcell;
     std::array<selftest::IPartHandler *, HOTENDS> pFSensor;
-    selftest::IPartHandler *pGearsCalib;
 
     SelftestResult m_result;
 };
@@ -331,11 +327,6 @@ void CSelftest::Loop() {
 #endif
 
         break;
-    case stsGears:
-        if (selftest::phase_gears(pGearsCalib, gears_config)) {
-            return;
-        }
-        break;
     case stsSelftestStop:
         restoreAfterSelftest();
         break;
@@ -392,7 +383,6 @@ bool CSelftest::Abort() {
         abort_part(&loadcell);
     }
     abort_part((selftest::IPartHandler **)&pFSensor);
-    abort_part((selftest::IPartHandler **)&pGearsCalib);
     m_State = stsAborted;
 
     phaseFinish();

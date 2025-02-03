@@ -151,6 +151,11 @@ void do_snake(Action action, Tool tool = Tool::_first) {
         case Action::Fans:
             marlin_client::gcode("M1978");
             break;
+#if HAS_GEARBOX_ALIGNMENT()
+        case Action::Gears:
+            marlin_client::gcode("M1979");
+            break;
+#endif
         default:
             has_test_special_handling = false;
             break;

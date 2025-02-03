@@ -1,3 +1,6 @@
+if(HAS_GEARBOX_ALIGNMENT)
+  add_subdirectory(gearbox_alignment)
+endif()
 if(HAS_NOZZLE_CLEANER)
   add_subdirectory(nozzle_cleaner)
 endif()

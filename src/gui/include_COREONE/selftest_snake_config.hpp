@@ -84,7 +84,7 @@ inline constexpr MenuItemText blank_item_texts[] {
     { Action::Loadcell, N_("%d Loadcell Test") },
     { Action::ZCheck, N_("%d Z Axis Test") },
     { Action::Heaters, N_("%d Heater Test") },
-    { Action::Gears, N_("%d Gears Calibration") },
+    { Action::Gears, N_("%d Gearbox Alignment") },
     { Action::FilamentSensorCalibration, N_("%d Filament Sensor Calibration") },
 };
 

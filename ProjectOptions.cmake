@@ -383,7 +383,7 @@ set_feature_for_printers(HAS_NOZZLE_CLEANER "iX")
 set_feature_for_printers(HAS_BELT_TUNING "XL" "iX")
 set_feature_for_printers_master_board(HAS_I2C_EXPANDER "MK3.5" "MK4" "COREONE")
 set_feature_for_printers(HAS_WASTEBIN "iX")
-set_feature_for_printers(HAS_GEARS_CALIBRATION "MK4" "COREONE")
+set_feature_for_printers_master_board(HAS_GEARBOX_ALIGNMENT "MK4" "COREONE")
 
 # Set printer board
 set(BOARDS_WITH_ADVANCED_POWER "XBUDDY" "XLBUDDY" "DWARF")

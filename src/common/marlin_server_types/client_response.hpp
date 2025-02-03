@@ -22,7 +22,7 @@
 #include <option/has_belt_tuning.h>
 #include <option/has_coldpull.h>
 #include <option/has_emergency_stop.h>
-#include <option/has_gears_calibration.h>
+#include <option/has_gearbox_alignment.h>
 #include <option/has_input_shaper_calibration.h>
 #include <option/has_loadcell.h>
 #include <option/has_mmu2.h>
@@ -252,18 +252,6 @@ enum class PhasesSelftest : PhaseUnderlyingType {
     FSensor_fail,
     _first_FSensor = FSensor_ask_unload,
     _last_FSensor = FSensor_fail,
-
-    #if HAS_GEARS_CALIBRATION()
-    GearsCalib_filament_check,
-    GearsCalib_filament_loaded_ask_unload,
-    GearsCalib_filament_unknown_ask_unload,
-    GearsCalib_release_screws,
-    GearsCalib_alignment,
-    GearsCalib_tighten,
-    GearsCalib_done,
-    _first_GearsCalib = GearsCalib_filament_check,
-    _last_GearsCalib = GearsCalib_done,
-    #endif
 
     CalibZ,
     _first_CalibZ = CalibZ,
@@ -568,6 +556,21 @@ enum class PhaseBeltTuning : PhaseUnderlyingType {
 constexpr inline ClientFSM client_fsm_from_phase(PhaseBeltTuning) { return ClientFSM::BeltTuning; }
 #endif
 
+#if HAS_GEARBOX_ALIGNMENT()
+enum class PhaseGearboxAlignment : PhaseUnderlyingType {
+    intro,
+    filament_loaded_ask_unload,
+    filament_unknown_ask_unload,
+    loosen_screws,
+    alignment,
+    tighten_screws,
+    done,
+    finish,
+    _last = finish,
+};
+constexpr inline ClientFSM client_fsm_from_phase(PhaseGearboxAlignment) { return ClientFSM::GearboxAlignment; }
+#endif
+
 // static class for work with fsm responses (like button click)
 // encode responses - get them from marlin client, to marlin server and decode them again
 class ClientResponses {
@@ -723,87 +726,77 @@ class ClientResponses {
 
     static constexpr EnumArray<PhasesSelftest, PhaseResponses, CountPhases<PhasesSelftest>()> SelftestResponses {
         { PhasesSelftest::_none, {} },
-            { PhasesSelftest::Loadcell_prepare, {} },
-            { PhasesSelftest::Loadcell_move_away, {} },
-            { PhasesSelftest::Loadcell_tool_select, {} },
-            { PhasesSelftest::Loadcell_cooldown, { Response::Abort } },
+        { PhasesSelftest::Loadcell_prepare, {} },
+        { PhasesSelftest::Loadcell_move_away, {} },
+        { PhasesSelftest::Loadcell_tool_select, {} },
+        { PhasesSelftest::Loadcell_cooldown, { Response::Abort } },
 
-            { PhasesSelftest::Loadcell_user_tap_ask_abort, { Response::Continue, Response::Abort } },
-            { PhasesSelftest::Loadcell_user_tap_countdown, {} },
-            { PhasesSelftest::Loadcell_user_tap_check, {} },
-            { PhasesSelftest::Loadcell_user_tap_ok, {} },
-            { PhasesSelftest::Loadcell_fail, {} },
+        { PhasesSelftest::Loadcell_user_tap_ask_abort, { Response::Continue, Response::Abort } },
+        { PhasesSelftest::Loadcell_user_tap_countdown, {} },
+        { PhasesSelftest::Loadcell_user_tap_check, {} },
+        { PhasesSelftest::Loadcell_user_tap_ok, {} },
+        { PhasesSelftest::Loadcell_fail, {} },
 
-            { PhasesSelftest::FSensor_ask_unload, { Response::Continue, Response::Unload, Response::Abort } },
-            { PhasesSelftest::FSensor_wait_tool_pick, {} },
-            { PhasesSelftest::FSensor_unload_confirm, { Response::Yes, Response::No } },
-            { PhasesSelftest::FSensor_calibrate, {} },
-            { PhasesSelftest::FSensor_insertion_wait, { Response::Abort_invalidate_test } },
-            { PhasesSelftest::FSensor_insertion_ok, { Response::Continue, Response::Abort_invalidate_test } },
-            { PhasesSelftest::FSensor_insertion_calibrate, { Response::Abort_invalidate_test } },
-            { PhasesSelftest::Fsensor_enforce_remove, { Response::Abort_invalidate_test } },
-            { PhasesSelftest::FSensor_done, {} },
-            { PhasesSelftest::FSensor_fail, {} },
+        { PhasesSelftest::FSensor_ask_unload, { Response::Continue, Response::Unload, Response::Abort } },
+        { PhasesSelftest::FSensor_wait_tool_pick, {} },
+        { PhasesSelftest::FSensor_unload_confirm, { Response::Yes, Response::No } },
+        { PhasesSelftest::FSensor_calibrate, {} },
+        { PhasesSelftest::FSensor_insertion_wait, { Response::Abort_invalidate_test } },
+        { PhasesSelftest::FSensor_insertion_ok, { Response::Continue, Response::Abort_invalidate_test } },
+        { PhasesSelftest::FSensor_insertion_calibrate, { Response::Abort_invalidate_test } },
+        { PhasesSelftest::Fsensor_enforce_remove, { Response::Abort_invalidate_test } },
+        { PhasesSelftest::FSensor_done, {} },
+        { PhasesSelftest::FSensor_fail, {} },
 
-#if HAS_GEARS_CALIBRATION()
-            { PhasesSelftest::GearsCalib_filament_check, { Response::Continue, Response::Skip } },
-            { PhasesSelftest::GearsCalib_filament_loaded_ask_unload, { Response::Unload, Response::Abort } },
-            { PhasesSelftest::GearsCalib_filament_unknown_ask_unload, { Response::Continue, Response::Unload, Response::Abort } },
-            { PhasesSelftest::GearsCalib_release_screws, { Response::Continue, Response::Skip } },
-            { PhasesSelftest::GearsCalib_alignment, {} },
-            { PhasesSelftest::GearsCalib_tighten, { Response::Continue } },
-            { PhasesSelftest::GearsCalib_done, { Response::Continue } },
-#endif
+        { PhasesSelftest::CalibZ, {} },
 
-            { PhasesSelftest::CalibZ, {} },
+        { PhasesSelftest::Axis, {} },
 
-            { PhasesSelftest::Axis, {} },
+        { PhasesSelftest::Heaters, {} },
+        { PhasesSelftest::HeatersDisabledDialog, { Response::Ok } },
+        { PhasesSelftest::Heaters_AskBedSheetAfterFail, { Response::Ok, Response::Retry } },
 
-            { PhasesSelftest::Heaters, {} },
-            { PhasesSelftest::HeatersDisabledDialog, { Response::Ok } },
-            { PhasesSelftest::Heaters_AskBedSheetAfterFail, { Response::Ok, Response::Retry } },
+        { PhasesSelftest::FirstLayer_mbl, {} },
+        { PhasesSelftest::FirstLayer_print, {} },
 
-            { PhasesSelftest::FirstLayer_mbl, {} },
-            { PhasesSelftest::FirstLayer_print, {} },
+        { PhasesSelftest::FirstLayer_filament_known_and_not_unsensed, { Response::Next, Response::Unload } },
+        { PhasesSelftest::FirstLayer_filament_not_known_or_unsensed, { Response::Next, Response::Load, Response::Unload } },
+        { PhasesSelftest::FirstLayer_calib, { Response::Next } },
+        { PhasesSelftest::FirstLayer_use_val, { Response::Yes, Response::No } },
+        { PhasesSelftest::FirstLayer_start_print, { Response::Next } },
+        { PhasesSelftest::FirstLayer_reprint, { Response::Yes, Response::No } },
+        { PhasesSelftest::FirstLayer_clean_sheet, { Response::Next } },
+        { PhasesSelftest::FirstLayer_failed, { Response::Next } },
 
-            { PhasesSelftest::FirstLayer_filament_known_and_not_unsensed, { Response::Next, Response::Unload } },
-            { PhasesSelftest::FirstLayer_filament_not_known_or_unsensed, { Response::Next, Response::Load, Response::Unload } },
-            { PhasesSelftest::FirstLayer_calib, { Response::Next } },
-            { PhasesSelftest::FirstLayer_use_val, { Response::Yes, Response::No } },
-            { PhasesSelftest::FirstLayer_start_print, { Response::Next } },
-            { PhasesSelftest::FirstLayer_reprint, { Response::Yes, Response::No } },
-            { PhasesSelftest::FirstLayer_clean_sheet, { Response::Next } },
-            { PhasesSelftest::FirstLayer_failed, { Response::Next } },
+        { PhasesSelftest::Dock_needs_calibration, { Response::Continue, Response::Abort } },
+        { PhasesSelftest::Dock_move_away, {} },
+        { PhasesSelftest::Dock_wait_user_park1, { Response::Continue, Response::Abort } },
+        { PhasesSelftest::Dock_wait_user_park2, { Response::Continue, Response::Abort } },
+        { PhasesSelftest::Dock_wait_user_park3, { Response::Continue, Response::Abort } },
+        { PhasesSelftest::Dock_wait_user_remove_pins, { Response::Continue, Response::Abort } },
+        { PhasesSelftest::Dock_wait_user_loosen_pillar, { Response::Continue, Response::Abort } },
+        { PhasesSelftest::Dock_wait_user_lock_tool, { Response::Continue, Response::Abort } },
+        { PhasesSelftest::Dock_wait_user_tighten_top_screw, { Response::Continue, Response::Abort } },
+        { PhasesSelftest::Dock_measure, { Response::Abort } },
+        { PhasesSelftest::Dock_wait_user_tighten_bottom_screw, { Response::Continue, Response::Abort } },
+        { PhasesSelftest::Dock_wait_user_install_pins, { Response::Continue, Response::Abort } },
+        { PhasesSelftest::Dock_selftest_park_test, { Response::Abort } },
+        { PhasesSelftest::Dock_selftest_failed, {} },
+        { PhasesSelftest::Dock_calibration_success, { Response::Continue } },
 
-            { PhasesSelftest::Dock_needs_calibration, { Response::Continue, Response::Abort } },
-            { PhasesSelftest::Dock_move_away, {} },
-            { PhasesSelftest::Dock_wait_user_park1, { Response::Continue, Response::Abort } },
-            { PhasesSelftest::Dock_wait_user_park2, { Response::Continue, Response::Abort } },
-            { PhasesSelftest::Dock_wait_user_park3, { Response::Continue, Response::Abort } },
-            { PhasesSelftest::Dock_wait_user_remove_pins, { Response::Continue, Response::Abort } },
-            { PhasesSelftest::Dock_wait_user_loosen_pillar, { Response::Continue, Response::Abort } },
-            { PhasesSelftest::Dock_wait_user_lock_tool, { Response::Continue, Response::Abort } },
-            { PhasesSelftest::Dock_wait_user_tighten_top_screw, { Response::Continue, Response::Abort } },
-            { PhasesSelftest::Dock_measure, { Response::Abort } },
-            { PhasesSelftest::Dock_wait_user_tighten_bottom_screw, { Response::Continue, Response::Abort } },
-            { PhasesSelftest::Dock_wait_user_install_pins, { Response::Continue, Response::Abort } },
-            { PhasesSelftest::Dock_selftest_park_test, { Response::Abort } },
-            { PhasesSelftest::Dock_selftest_failed, {} },
-            { PhasesSelftest::Dock_calibration_success, { Response::Continue } },
-
-            { PhasesSelftest::ToolOffsets_wait_user_confirm_start, { Response::Continue, Response::Abort } },
-            { PhasesSelftest::ToolOffsets_wait_user_clean_nozzle_cold, { Response::Heatup, Response::Continue } },
-            { PhasesSelftest::ToolOffsets_wait_user_clean_nozzle_hot, { Response::Cooldown, Response::Continue } },
-            { PhasesSelftest::ToolOffsets_wait_user_install_sheet, { Response::Continue } },
-            { PhasesSelftest::ToolOffsets_pin_install_prepare, {} },
-            { PhasesSelftest::ToolOffsets_wait_user_install_pin, { Response::Continue } },
-            { PhasesSelftest::ToolOffsets_wait_stable_temp, {} },
-            { PhasesSelftest::ToolOffsets_wait_calibrate, {} },
-            { PhasesSelftest::ToolOffsets_wait_move_away, {} },
-            { PhasesSelftest::ToolOffsets_wait_user_remove_pin, { Response::Continue } },
-            { PhasesSelftest::RevisePrinterStatus_ask_revise, { Response::Adjust, Response::Skip } },
-            { PhasesSelftest::RevisePrinterStatus_revise, { Response::Done } },
-            { PhasesSelftest::RevisePrinterStatus_ask_retry, { Response::Yes, Response::No } },
+        { PhasesSelftest::ToolOffsets_wait_user_confirm_start, { Response::Continue, Response::Abort } },
+        { PhasesSelftest::ToolOffsets_wait_user_clean_nozzle_cold, { Response::Heatup, Response::Continue } },
+        { PhasesSelftest::ToolOffsets_wait_user_clean_nozzle_hot, { Response::Cooldown, Response::Continue } },
+        { PhasesSelftest::ToolOffsets_wait_user_install_sheet, { Response::Continue } },
+        { PhasesSelftest::ToolOffsets_pin_install_prepare, {} },
+        { PhasesSelftest::ToolOffsets_wait_user_install_pin, { Response::Continue } },
+        { PhasesSelftest::ToolOffsets_wait_stable_temp, {} },
+        { PhasesSelftest::ToolOffsets_wait_calibrate, {} },
+        { PhasesSelftest::ToolOffsets_wait_move_away, {} },
+        { PhasesSelftest::ToolOffsets_wait_user_remove_pin, { Response::Continue } },
+        { PhasesSelftest::RevisePrinterStatus_ask_revise, { Response::Adjust, Response::Skip } },
+        { PhasesSelftest::RevisePrinterStatus_revise, { Response::Done } },
+        { PhasesSelftest::RevisePrinterStatus_ask_retry, { Response::Yes, Response::No } },
     };
 
     static constexpr EnumArray<PhaseNetworkSetup, PhaseResponses, CountPhases<PhaseNetworkSetup>()> network_setup_responses {
@@ -975,6 +968,19 @@ class ClientResponses {
     };
 #endif
 
+#if HAS_GEARBOX_ALIGNMENT()
+    static constexpr EnumArray<PhaseGearboxAlignment, PhaseResponses, CountPhases<PhaseGearboxAlignment>()> gearbox_alignment_responses {
+        { PhaseGearboxAlignment::intro, { Response::Continue, Response::Skip } },
+        { PhaseGearboxAlignment::filament_loaded_ask_unload, { Response::Unload, Response::Abort } },
+        { PhaseGearboxAlignment::filament_unknown_ask_unload, { Response::Continue, Response::Unload, Response::Abort } },
+        { PhaseGearboxAlignment::loosen_screws, { Response::Continue, Response::Skip } },
+        { PhaseGearboxAlignment::alignment, {} },
+        { PhaseGearboxAlignment::tighten_screws, { Response::Continue } },
+        { PhaseGearboxAlignment::done, { Response::Continue } },
+        { PhaseGearboxAlignment::finish, {} },
+    };
+#endif
+
     static constexpr EnumArray<ClientFSM, std::span<const PhaseResponses>, ClientFSM::_count> fsm_phase_responses {
         { ClientFSM::Serial_printing, {} },
             { ClientFSM::Load_unload, LoadUnloadResponses },
@@ -1002,6 +1008,9 @@ class ClientResponses {
 #endif
 #if HAS_BELT_TUNING()
             { ClientFSM::BeltTuning, belt_tuning_responses },
+#endif
+#if HAS_GEARBOX_ALIGNMENT()
+            { ClientFSM::GearboxAlignment, gearbox_alignment_responses },
 #endif
             { ClientFSM::Wait, {} },
     };
@@ -1066,9 +1075,6 @@ enum class SelftestParts {
 #if FILAMENT_SENSOR_IS_ADC()
     FSensor,
 #endif
-#if HAS_GEARS_CALIBRATION()
-    GearsCalib,
-#endif
     FirstLayer,
     FirstLayerQuestions,
 #if HAS_TOOLCHANGER()
@@ -1091,10 +1097,6 @@ static constexpr PhasesSelftest SelftestGetFirstPhaseFromPart(SelftestParts part
 #if FILAMENT_SENSOR_IS_ADC()
     case SelftestParts::FSensor:
         return PhasesSelftest::_first_FSensor;
-#endif
-#if HAS_GEARS_CALIBRATION()
-    case SelftestParts::GearsCalib:
-        return PhasesSelftest::_first_GearsCalib;
 #endif
     case SelftestParts::CalibZ:
         return PhasesSelftest::_first_CalibZ;
@@ -1130,10 +1132,6 @@ static constexpr PhasesSelftest SelftestGetLastPhaseFromPart(SelftestParts part)
 #if FILAMENT_SENSOR_IS_ADC()
     case SelftestParts::FSensor:
         return PhasesSelftest::_last_FSensor;
-#endif
-#if HAS_GEARS_CALIBRATION()
-    case SelftestParts::GearsCalib:
-        return PhasesSelftest::_last_GearsCalib;
 #endif
     case SelftestParts::CalibZ:
         return PhasesSelftest::_last_CalibZ;
@@ -1180,11 +1178,6 @@ static constexpr SelftestParts SelftestGetPartFromPhase(PhasesSelftest ph) {
 #if FILAMENT_SENSOR_IS_ADC()
     if (SelftestPartContainsPhase(SelftestParts::FSensor, ph)) {
         return SelftestParts::FSensor;
-    }
-#endif
-#if HAS_GEARS_CALIBRATION()
-    if (SelftestPartContainsPhase(SelftestParts::GearsCalib, ph)) {
-        return SelftestParts::GearsCalib;
     }
 #endif
     if (SelftestPartContainsPhase(SelftestParts::Axis, ph)) {

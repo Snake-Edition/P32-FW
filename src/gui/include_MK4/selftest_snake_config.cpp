@@ -71,9 +71,8 @@ uint64_t get_test_mask(Action action) {
         return stmLoadcell;
     case Action::ZAlign:
         return stmZcalib;
-    case Action::Gears:
-        return stmGears;
     case Action::Fans:
+    case Action::Gears:
         bsod("get_test_mask");
     case Action::_count:
         break;

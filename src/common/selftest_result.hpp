@@ -113,7 +113,7 @@ struct SelftestResult_pre_gears {
 bool operator==(SelftestResult_pre_gears lhs, SelftestResult_pre_gears rhs);
 
 /**
- * @brief Test results compacted in eeprom. Added gears calibration result to eeprom for snake selftest compatibility
+ * @brief Test results compacted in eeprom. Added gearbox alignment result to eeprom for snake selftest compatibility
  */
 struct SelftestResult {
     SelftestResult() = default;

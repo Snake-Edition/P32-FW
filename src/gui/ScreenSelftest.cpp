@@ -13,7 +13,6 @@
 #include "selftest_frame_revise_printer_setup.hpp"
 #include "selftest_frame_axis.hpp"
 #include "selftest_frame_fsensor.hpp"
-#include "selftest_frame_gears_calib.hpp"
 #include "selftest_frame_loadcell.hpp"
 #include "selftest_frame_calib_z.hpp"
 #include "selftest_frame_temp.hpp"
@@ -36,11 +35,6 @@ ScreenSelftest::fnc ScreenSelftest::Get(SelftestParts part) {
 #if FILAMENT_SENSOR_IS_ADC()
     case SelftestParts::FSensor:
         return creator<SelftestFrameFSensor>;
-#endif
-
-#if HAS_GEARS_CALIBRATION()
-    case SelftestParts::GearsCalib:
-        return creator<SelftestFrameGearsCalib>;
 #endif
 
 #if BOARD_IS_XLBUDDY()
@@ -122,9 +116,6 @@ string_view_utf8 ScreenSelftest::getCaption(SelftestParts part) {
 #if FILAMENT_SENSOR_IS_ADC()
     case SelftestParts::FSensor:
 #endif
-#if HAS_GEARS_CALIBRATION()
-    case SelftestParts::GearsCalib:
-#endif
     case SelftestParts::Heaters:
     case SelftestParts::CalibZ:
     case SelftestParts::RevisePrinterSetup:
@@ -150,9 +141,6 @@ const img::Resource *ScreenSelftest::getIconId(SelftestParts part) {
 #endif
 #if FILAMENT_SENSOR_IS_ADC()
     case SelftestParts::FSensor:
-#endif
-#if HAS_GEARS_CALIBRATION()
-    case SelftestParts::GearsCalib:
 #endif
     case SelftestParts::Heaters:
     case SelftestParts::CalibZ:
