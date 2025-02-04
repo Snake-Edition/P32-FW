@@ -135,6 +135,7 @@ void M1703(); //< Wi-fi setup. Prusa platform specific
 void M1978(); //< Fan Selftest
 
 void M9140(); //< Set normal (non-stealth) mode
+void M9141(); //< Get stealth mode status
 void M9150(); //< Set stealth mode
 
 void M9200(); //< Re-load IS settings from config store

@@ -266,6 +266,9 @@ bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
         case 9140:
             PrusaGcodeSuite::M9140();
             break;
+        case 9141:
+            PrusaGcodeSuite::M9141();
+            break;
         case 9150:
             PrusaGcodeSuite::M9150();
             break;

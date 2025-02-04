@@ -27,6 +27,25 @@ void PrusaGcodeSuite::M9140() {
 }
 
 /**
+ *### M9141: Stealth mode status
+ *
+ * Internal GCode
+ *
+ *#### Usage
+ *
+ *    M9141
+ *
+ * Outputs the current status of stealth mode
+ */
+void PrusaGcodeSuite::M9141() {
+    if (config_store().stealth_mode.get()) {
+        SERIAL_ECHOLNPGM("Stealth mode is enabled");
+    } else {
+        SERIAL_ECHOLNPGM("Stealth mode is disabled");
+    }
+}
+
+/**
  *### M9150: Enable stealth mode
  *
  * Internal GCode
