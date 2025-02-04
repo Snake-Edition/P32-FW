@@ -543,7 +543,11 @@ void do_blocking_move_around_nozzle_cleaner_to_xy(const xy_pos_t& destination, c
     if (!lower_allowed) NOLESS(zdest, current_position.z);
     NOMORE(zdest, Z_MAX_POS);
 
-    if (zdest != current_position.z) {
+    if (TEST(axis_known_position, Z_AXIS)) {
+      // axis position is known: perform a regular move
+      do_blocking_move_to_z(zdest);
+    } else if (zdest != current_position.z) {
+      // axis position is unknown: perform a homing move to detect the endstop
       planner.synchronize(); // Wait for planner moves to finish!
 
       remember_feedrate_scaling_off();
@@ -553,6 +557,12 @@ void do_blocking_move_around_nozzle_cleaner_to_xy(const xy_pos_t& destination, c
       const auto distance = zdest - current_position.z;
       current_position.z = zdest;
       const auto trigger_state = do_homing_move(Z_AXIS, distance); // Move as a homing move to stop if we reach endstop
+      if (planner.draining()) {
+        return 0;
+      }
+      if (trigger_state) {
+        current_position.z = Z_MAX_POS;
+      }
       sync_plan_position();
 
       if (!endstop_enabled) {
