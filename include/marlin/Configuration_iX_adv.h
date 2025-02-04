@@ -492,10 +492,6 @@
 
 // Enable this if X or Y can't home without homing the other axis first.
 #define CODEPENDENT_XY_HOMING true
-#include <option/has_nozzle_cleaner.h>
-#if HAS_NOZZLE_CLEANER()
-    #define AVOID_NOZZLE_CLEANER_Y_FIRST false
-#endif
 
 
 /**

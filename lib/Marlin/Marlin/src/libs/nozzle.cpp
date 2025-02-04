@@ -201,14 +201,13 @@ Nozzle nozzle;
         do_blocking_move_to_z(_MAX(park.z, current_position.z), fr_z);
     }
 
-  #ifdef XY_NOZZLE_PRE_PARK_POINT
-  static constexpr xyz_pos_t default_park{{XYZ_NOZZLE_PARK_POINT}};
-  if(park == default_park) {
-    static constexpr xy_pos_t pre_park{{XY_NOZZLE_PRE_PARK_POINT}};
-    do_blocking_move_around_nozzle_cleaner_to_xy(pre_park, fr_xy);
-  }
-  #endif
-  
+    #ifdef X_NOZZLE_PRE_PARK_POINT
+      static constexpr xyz_pos_t default_park{{XYZ_NOZZLE_PARK_POINT}};
+      if(park == default_park) {
+        xy_pos_t pre_park{{{X_NOZZLE_PRE_PARK_POINT, std::min(current_position.y, static_cast<float>(Y_WASTEBIN_SAFE_POINT))}}};
+        do_blocking_move_around_nozzle_cleaner_to_xy(pre_park, fr_xy);
+      }
+    #endif
     do_blocking_move_around_nozzle_cleaner_to_xy(park, fr_xy);
     report_current_position();
   }

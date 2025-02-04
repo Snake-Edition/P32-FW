@@ -519,15 +519,15 @@ void do_blocking_move_to_xy_z(const xy_pos_t &raw, const float &z, const feedRat
 }
 
 void do_blocking_move_around_nozzle_cleaner_to_xy(const xy_pos_t& destination, const feedRate_t& feedrate) {
-  #if !HAS_NOZZLE_CLEANER()
-    do_blocking_move_to_xy(destination, feedrate);
-  #elif AVOID_NOZZLE_CLEANER_Y_FIRST
-    do_blocking_move_to_y(destination.y, feedrate);
-    do_blocking_move_to_x(destination.x, feedrate);
-  #else
-    do_blocking_move_to_x(destination.x, feedrate);
-    do_blocking_move_to_y(destination.y, feedrate);
+  #if HAS_NOZZLE_CLEANER()
+    if(current_position.y > Y_WASTEBIN_SAFE_POINT) {
+      if(current_position.x > (X_NOZZLE_PARK_POINT+1) && current_position.x < X_WASTEBIN_POINT) {
+        do_blocking_move_to_x(X_WASTEBIN_POINT);
+      }
+      do_blocking_move_to_y(Y_WASTEBIN_SAFE_POINT);
+    }
   #endif
+    do_blocking_move_to_xy(destination, feedrate);
 }
 
 #if HAS_Z_AXIS
