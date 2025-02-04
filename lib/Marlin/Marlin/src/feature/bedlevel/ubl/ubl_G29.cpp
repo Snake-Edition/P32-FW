@@ -365,7 +365,7 @@
     }
 
     // Check for commands that require the printer to be homed
-    const bool may_move = g29_phase_value == 1 || g29_phase_value == 2 || g29_phase_value == 4;
+    const bool may_move = g29_phase_value == 1 || g29_phase_value == 2 || g29_phase_value == 4 || parser.seen('J');
     if (may_move) {
       planner.synchronize();
       if (axes_need_homing()) gcode.home_all_axes();
