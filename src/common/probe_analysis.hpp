@@ -209,10 +209,20 @@ public:
     static constexpr float initialFrequency = 320.0f;
 
     /// Time interval in seconds specifying the subset of samples before haltStart that should be used for the analysis.
-    static constexpr float analysisLookback = 0.300;
+    static constexpr float analysisLookback = 0.300f;
 
-    /// Time interval in seconds specifying the subset of samples after haltEnd that should be used for the analysis.
-    static constexpr float analysisLookahead = 0.300;
+    /// Time interval in seconds specifying the samples ignored when calculating the intersection
+    /// between decompression and after-decompression line features.
+    static constexpr float analysisDecompressionGap = 0.030f;
+
+    /// Expected time interval in seconds specifying the time required for the nozzle lift off the
+    /// bed starting from the trigger endpoint
+    static constexpr float analysisExpectedRaiseTime = 0.100f;
+
+    /// Time interval in seconds specifying the subset of samples after haltEnd that should be used
+    /// for the analysis. Lookahead should have enough samples to match the lenght of the
+    /// pre-compression line after accounting for raise time, plus some margin.
+    static constexpr float analysisLookahead = analysisLookback + analysisDecompressionGap + analysisExpectedRaiseTime;
 
     /// Currently recorded samples (moving window).
     CircleBufferBaseT<Record> &window;
@@ -271,18 +281,19 @@ public:
 
     /// Calculate error when the load of given sample range would be represented by two specific lines
     ///
-    /// Those lines are the result of linear regression over [start, split) and [split, end].
+    /// Those lines are the result of linear regression over [start, split) and [split + gapSamples, end].
     /// Please note, that the `split` sample is included in the second line/regression and excluded from the first.
     ///
     /// Returns (NaN, Line::Invalid, Line::Invalid) on error.
-    std::tuple<float, Line, Line> CalculateErrorWhenLoadRepresentedAsLines(SamplesRange samples, Sample split);
+    std::tuple<float, Line, Line> CalculateErrorWhenLoadRepresentedAsLines(SamplesRange samples, Sample split, size_t gapSamples);
 
-    /// Find the best two-line representation of load for given sample range
+    /// Find the best two-line representation of load for given sample range, ignoring the
+    /// intersection point (gapSamples).
     ///
     /// Returns the split sample as accepted by CalculateErrorWhenLoadRepresentedAsLines
     /// and the two lines.
     /// Returns (window.end(), Line::Invalid, Line::Invalid) on error.
-    std::tuple<Sample, Line, Line> FindBestTwoLinesApproximation(SamplesRange samples);
+    std::tuple<Sample, Line, Line> FindBestTwoLinesApproximation(SamplesRange samples, size_t gapSamples);
 
     /// Compensate for the fact that loadcell data are delayed in respect to Z axis coordinates.
     bool CompensateForSystemDelay();

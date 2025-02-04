@@ -207,11 +207,11 @@ ProbeAnalysisBase::Sample ProbeAnalysisBase::ClosestSample(Time time, SearchDire
     return std::max(std::min(sample, window.end() - 1), window.begin());
 }
 
-std::tuple<float, ProbeAnalysisBase::Line, ProbeAnalysisBase::Line> ProbeAnalysisBase::CalculateErrorWhenLoadRepresentedAsLines(SamplesRange samples, Sample split) {
+std::tuple<float, ProbeAnalysisBase::Line, ProbeAnalysisBase::Line> ProbeAnalysisBase::CalculateErrorWhenLoadRepresentedAsLines(SamplesRange samples, Sample split, size_t gap) {
     // linear regression
     auto getLoad = [](Sample s) { return s->load; };
     Line leftLine = LinearRegression(SamplesRange(samples.first, split - 1), getLoad);
-    Line rightLine = LinearRegression(SamplesRange(split, samples.last), getLoad);
+    Line rightLine = LinearRegression(SamplesRange(split + gap, samples.last), getLoad);
 
     // early exit if something went wrong
     if (!leftLine.IsValid() || !rightLine.IsValid()) {
@@ -232,8 +232,9 @@ std::tuple<float, ProbeAnalysisBase::Line, ProbeAnalysisBase::Line> ProbeAnalysi
     return std::make_tuple(error, leftLine, rightLine);
 }
 
-std::tuple<ProbeAnalysisBase::Sample, ProbeAnalysisBase::Line, ProbeAnalysisBase::Line> ProbeAnalysisBase::FindBestTwoLinesApproximation(SamplesRange samples) {
-    if (samples.Size() < 3) {
+std::tuple<ProbeAnalysisBase::Sample, ProbeAnalysisBase::Line, ProbeAnalysisBase::Line> ProbeAnalysisBase::FindBestTwoLinesApproximation(SamplesRange samples, size_t sampleGap) {
+    // Ensure we have at least 2 samples per segment + gap
+    if (samples.Size() < (3 + sampleGap)) {
         return std::make_tuple(window.end(), Line::Invalid(), Line::Invalid());
     }
 
@@ -242,7 +243,7 @@ std::tuple<ProbeAnalysisBase::Sample, ProbeAnalysisBase::Line, ProbeAnalysisBase
     Line leftLine, rightLine;
 
     for (auto split = samples.first + 1; split < samples.last; ++split) {
-        auto result = CalculateErrorWhenLoadRepresentedAsLines(samples, split);
+        auto result = CalculateErrorWhenLoadRepresentedAsLines(samples, split, sampleGap);
         float error = std::get<0>(result);
         if (!std::isnan(error) && error < bestError) {
             bestSplit = split;
@@ -318,10 +319,11 @@ bool ProbeAnalysisBase::CalculateAnalysisRange(Features &features) {
 
 bool ProbeAnalysisBase::CalculateLoadLineApproximationFeatures(Features &features) {
     auto getLoad = [](Sample s) { return s->load; };
+    size_t gapSamples = static_cast<size_t>(analysisDecompressionGap / samplingInterval);
 
-    std::tie(std::ignore, features.beforeCompressionLine, features.compressionLine) = FindBestTwoLinesApproximation(SamplesRange(features.analysisStart, features.fallEnd - skipBorderSamples));
+    std::tie(std::ignore, features.beforeCompressionLine, features.compressionLine) = FindBestTwoLinesApproximation(SamplesRange(features.analysisStart, features.fallEnd - skipBorderSamples), 0);
     features.compressedLine = LinearRegression(SamplesRange(features.fallEnd + skipBorderSamples, features.riseStart - skipBorderSamples), getLoad);
-    std::tie(std::ignore, features.decompressionLine, features.afterDecompressionLine) = FindBestTwoLinesApproximation(SamplesRange(features.riseStart + skipBorderSamples, features.analysisEnd));
+    std::tie(std::ignore, features.decompressionLine, features.afterDecompressionLine) = FindBestTwoLinesApproximation(SamplesRange(features.riseStart + skipBorderSamples, features.analysisEnd), gapSamples);
 
     features.compressionStartTime = features.beforeCompressionLine.FindIntersection(features.compressionLine);
     features.compressionEndTime = features.compressionLine.FindIntersection(features.compressedLine);
@@ -365,7 +367,7 @@ void ProbeAnalysisBase::CalculateLoadMeans(Features &features) {
     SamplesRange beforeCompressionSamples(features.analysisStart, ClosestSample(features.compressionStartTime, SearchDirection::Backward));
     features.loadMeanBeforeCompression = calcLoadMean(beforeCompressionSamples);
 
-    SamplesRange afterDecompressionSamples(ClosestSample(features.decompressionEndTime, SearchDirection::Forward), features.analysisEnd);
+    SamplesRange afterDecompressionSamples(ClosestSample(features.decompressionEndTime + analysisDecompressionGap, SearchDirection::Forward), features.analysisEnd);
     features.loadMeanAfterDecompression = calcLoadMean(afterDecompressionSamples);
 }
 
