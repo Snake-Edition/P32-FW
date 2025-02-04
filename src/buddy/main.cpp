@@ -275,6 +275,10 @@ extern "C" void main_cpp(void) {
     nfc::turn_off();
 #endif
 
+#if HAS_GUI()
+    SPI_INIT(lcd);
+#endif
+
 #if PRINTER_IS_PRUSA_MK4() || PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_COREONE()
     /*
      * MK3.5 HW detected on MK4 firmware or vice versa
@@ -337,10 +341,6 @@ extern "C" void main_cpp(void) {
 
 #if BOARD_IS_BUDDY() || BOARD_IS_XBUDDY()
     hw_tim3_init();
-#endif
-
-#if HAS_GUI()
-    SPI_INIT(lcd);
 #endif
 
 #if BOARD_IS_XBUDDY() || BOARD_IS_XLBUDDY()
@@ -654,9 +654,6 @@ void init_error_screen() {
 #endif
 
     if constexpr (option::has_gui) {
-        // init lcd spi and timer for buzzer
-        SPI_INIT(lcd);
-
 #if !(_DEBUG)
     #if HAS_GUI() && !(BOARD_IS_XLBUDDY())
         hw_tim2_init(); // TIM2 is used to generate buzzer PWM, except on XL. Not needed without display.
