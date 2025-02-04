@@ -206,14 +206,15 @@ SCENARIO("analysis properly calculates probe features", "[probe_analysis]") {
             auto result = analysis.CalculateErrorWhenLoadRepresentedAsLines(
                 ProbeAnalysisT::SamplesRange(
                     analysis.window.begin(), analysis.window.begin() + 4),
-                analysis.window.begin() + 3);
+                analysis.window.begin() + 3, 0);
             REQUIRE_THAT(std::get<0>(result), Catch::Matchers::WithinRel(0.16666666f));
         }
 
         WHEN("load is being approximated by two lines") {
             auto result = analysis.FindBestTwoLinesApproximation(ProbeAnalysisT::SamplesRange(
-                analysis.window.begin(),
-                analysis.window.begin() + 4));
+                                                                     analysis.window.begin(),
+                                                                     analysis.window.begin() + 4),
+                0);
             REQUIRE_THAT(2, IsDistanceBetween(analysis.window.begin(), std::get<0>(result)));
         }
     }
