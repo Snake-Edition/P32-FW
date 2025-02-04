@@ -215,12 +215,12 @@ DialogNumericInput::DialogNumericInput(const string_view_utf8 &prompt, double in
 
                 auto &wnd = ui.txt_prompt;
                 wnd.set_enabled(false);
-                wnd.set_font(Font::big);
                 wnd.set_is_multiline(true);
                 wnd.SetTextColor(COLOR_WHITE);
                 wnd.SetAlignment(Align_t::RightBottom());
                 wnd.SetText(prompt);
                 wnd.SetRect(Rect16::fromLTWH(x, y, result_w, h));
+                wnd.auto_select_font(Font::big);
                 RegisterSubWin(wnd);
 
                 y += h;
