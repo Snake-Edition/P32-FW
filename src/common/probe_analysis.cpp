@@ -319,11 +319,12 @@ bool ProbeAnalysisBase::CalculateAnalysisRange(Features &features) {
 
 bool ProbeAnalysisBase::CalculateLoadLineApproximationFeatures(Features &features) {
     auto getLoad = [](Sample s) { return s->load; };
-    size_t gapSamples = static_cast<size_t>(analysisDecompressionGap / samplingInterval);
+    size_t compressionGapSamples = static_cast<size_t>(analysisCompressionGap / samplingInterval);
+    size_t decompressionGapSamples = static_cast<size_t>(analysisDecompressionGap / samplingInterval);
 
-    std::tie(std::ignore, features.beforeCompressionLine, features.compressionLine) = FindBestTwoLinesApproximation(SamplesRange(features.analysisStart, features.fallEnd - skipBorderSamples), 0);
+    std::tie(std::ignore, features.beforeCompressionLine, features.compressionLine) = FindBestTwoLinesApproximation(SamplesRange(features.analysisStart, features.fallEnd - skipBorderSamples), compressionGapSamples);
     features.compressedLine = LinearRegression(SamplesRange(features.fallEnd + skipBorderSamples, features.riseStart - skipBorderSamples), getLoad);
-    std::tie(std::ignore, features.decompressionLine, features.afterDecompressionLine) = FindBestTwoLinesApproximation(SamplesRange(features.riseStart + skipBorderSamples, features.analysisEnd), gapSamples);
+    std::tie(std::ignore, features.decompressionLine, features.afterDecompressionLine) = FindBestTwoLinesApproximation(SamplesRange(features.riseStart + skipBorderSamples, features.analysisEnd), decompressionGapSamples);
 
     features.compressionStartTime = features.beforeCompressionLine.FindIntersection(features.compressionLine);
     features.compressionEndTime = features.compressionLine.FindIntersection(features.compressedLine);
@@ -364,7 +365,7 @@ void ProbeAnalysisBase::CalculateLoadMeans(Features &features) {
         }) / static_cast<float>(samples.Size());
     };
 
-    SamplesRange beforeCompressionSamples(features.analysisStart, ClosestSample(features.compressionStartTime, SearchDirection::Backward));
+    SamplesRange beforeCompressionSamples(features.analysisStart, ClosestSample(features.compressionStartTime - analysisCompressionGap, SearchDirection::Backward));
     features.loadMeanBeforeCompression = calcLoadMean(beforeCompressionSamples);
 
     SamplesRange afterDecompressionSamples(ClosestSample(features.decompressionEndTime + analysisDecompressionGap, SearchDirection::Forward), features.analysisEnd);

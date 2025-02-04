@@ -208,8 +208,9 @@ public:
     /// Initial sampling frequency, will be changed by SetSamplingIntervalMs() from a real data
     static constexpr float initialFrequency = 320.0f;
 
-    /// Time interval in seconds specifying the subset of samples before haltStart that should be used for the analysis.
-    static constexpr float analysisLookback = 0.300f;
+    /// Time interval in seconds specifying the samples ignored when calculating the intersection
+    /// between before and compression line features.
+    static constexpr float analysisCompressionGap = 0.010f;
 
     /// Time interval in seconds specifying the samples ignored when calculating the intersection
     /// between decompression and after-decompression line features.
@@ -219,10 +220,17 @@ public:
     /// bed starting from the trigger endpoint
     static constexpr float analysisExpectedRaiseTime = 0.100f;
 
+    /// Time interval in seconds specifying the length of samples used for the before and after
+    /// compression lines.
+    static constexpr float analysisBaselineTime = 0.300f;
+
+    /// Time interval in seconds specifying the subset of samples before haltStart that should be used for the analysis.
+    static constexpr float analysisLookback = analysisBaselineTime + analysisCompressionGap;
+
     /// Time interval in seconds specifying the subset of samples after haltEnd that should be used
     /// for the analysis. Lookahead should have enough samples to match the lenght of the
     /// pre-compression line after accounting for raise time, plus some margin.
-    static constexpr float analysisLookahead = analysisLookback + analysisDecompressionGap + analysisExpectedRaiseTime;
+    static constexpr float analysisLookahead = analysisBaselineTime + analysisDecompressionGap + analysisExpectedRaiseTime;
 
     /// Currently recorded samples (moving window).
     CircleBufferBaseT<Record> &window;
