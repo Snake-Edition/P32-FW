@@ -115,9 +115,11 @@ public:
     struct Features {
         Sample analysisStart;
         Line fallLine;
+        Sample fallStart;
         Sample fallEnd;
         Line haltLine;
         Sample riseStart;
+        Sample riseEnd;
         Line riseLine;
         Sample analysisEnd;
 

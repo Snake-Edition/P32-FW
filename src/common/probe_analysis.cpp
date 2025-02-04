@@ -276,29 +276,43 @@ bool ProbeAnalysisBase::CompensateForSystemDelay() {
 }
 
 void ProbeAnalysisBase::CalculateHaltSpan(Features &features) {
-    Sample fallEnd = window.end() - 1;
-    Sample riseStart = fallEnd;
-    bool extendingHalt = true;
+    // find the start of the fall line
+    Sample fallStart = window.begin();
+    for (auto it = fallStart + 1; it < window.end(); ++it) {
+        if (fallStart->z != it->z) {
+            break;
+        }
+        fallStart = it;
+    }
 
-    const auto to_forward_iterator = [](auto rit) {
-        auto r = rit.base();
-        return --r;
-    };
+    // find the end of the raise line
+    Sample riseEnd = window.end() - 1;
+    for (auto it = riseEnd; it > fallStart; --it) {
+        if (riseEnd->z != it->z) {
+            break;
+        }
+        riseEnd = it;
+    }
 
     // iterate backwards and find range of the first global minimum
-    for (auto it = window.rbegin(), e = window.rend(); it != e; ++it) {
+    Sample fallEnd = riseEnd;
+    Sample riseStart = fallStart;
+    bool extendingHalt = true;
+    for (auto it = riseEnd; it > fallStart; --it) {
         if (it->z < fallEnd->z) {
-            fallEnd = riseStart = to_forward_iterator(it);
+            fallEnd = riseStart = it;
             extendingHalt = true;
         } else if (extendingHalt && it->z == fallEnd->z) {
-            fallEnd = to_forward_iterator(it);
+            fallEnd = it;
         } else {
             extendingHalt = false;
         }
     }
 
+    features.fallStart = fallStart;
     features.fallEnd = fallEnd;
     features.riseStart = riseStart;
+    features.riseEnd = riseEnd;
 }
 
 bool ProbeAnalysisBase::CalculateAnalysisRange(Features &features) {
@@ -337,9 +351,9 @@ bool ProbeAnalysisBase::CalculateLoadLineApproximationFeatures(Features &feature
 bool ProbeAnalysisBase::CalculateZLineApproximationFeatures(Features &features) {
     auto getZ = [](Sample s) { return s->z; };
 
-    features.fallLine = LinearRegression(SamplesRange(features.analysisStart, features.fallEnd - skipBorderSamples), getZ);
+    features.fallLine = LinearRegression(SamplesRange(features.fallStart + skipBorderSamples, features.fallEnd - skipBorderSamples), getZ);
     features.haltLine = LinearRegression(SamplesRange(features.fallEnd + skipBorderSamples, features.riseStart - skipBorderSamples), getZ);
-    features.riseLine = LinearRegression(SamplesRange(features.riseStart + skipBorderSamples, features.analysisEnd), getZ);
+    features.riseLine = LinearRegression(SamplesRange(features.riseStart + skipBorderSamples, features.riseEnd - skipBorderSamples), getZ);
 
     return features.fallLine.IsValid() && features.haltLine.IsValid() && features.riseLine.IsValid();
 }
@@ -626,8 +640,10 @@ void ProbeAnalysisBase::log_features_metrics(const Features &features, std::opti
     uint32_t window_start_ts = lastSampleTimestamp - window.size() * samplingInterval * 1e6f;
 
     float analysis_start = samplingInterval * std::distance(window.begin(), features.analysisStart);
+    float fall_start = samplingInterval * std::distance(window.begin(), features.fallStart);
     float fall_end = samplingInterval * std::distance(window.begin(), features.fallEnd);
     float rise_start = samplingInterval * std::distance(window.begin(), features.riseStart);
+    float rise_end = samplingInterval * std::distance(window.begin(), features.riseEnd);
     float analysis_end = samplingInterval * std::distance(window.begin(), features.analysisEnd);
 
     auto record_line = [&](metric_t &metric, const Line &line, float start_t, float end_t) {
@@ -640,13 +656,13 @@ void ProbeAnalysisBase::log_features_metrics(const Features &features, std::opti
     };
 
     METRIC_DEF(mbl_fall_line_m, "mbl_fl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
-    record_line(mbl_fall_line_m, features.fallLine, analysis_start, fall_end);
+    record_line(mbl_fall_line_m, features.fallLine, fall_start, fall_end);
 
     METRIC_DEF(mbl_halt_line_m, "mbl_hl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
     record_line(mbl_halt_line_m, features.haltLine, fall_end, rise_start);
 
     METRIC_DEF(mbl_rise_line_m, "mbl_rl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
-    record_line(mbl_rise_line_m, features.riseLine, rise_start, analysis_end);
+    record_line(mbl_rise_line_m, features.riseLine, rise_start, rise_end);
 
     METRIC_DEF(mbl_detected_z_m, "mbl_dz", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
     if (detected_z.has_value()) {
