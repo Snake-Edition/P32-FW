@@ -1028,18 +1028,25 @@ JsonResult DirRenderer::renderState(size_t resume_point, json::JsonOutput &outpu
         }
 
         state.childsize = nullopt;
-        // Will skip all the .bbf and other files still being transfered
-        // (that's actually what we want, they are not usable until renamed).
-        if (state.ent->d_type == DT_DIR && filename_is_printable(state.ent->d_name)) {
+        if (state.ent->d_type == DT_DIR && filename_is_transferrable(state.ent->d_name)) {
+            // Suspicion: This might actualy be a partial file. Check and decide what to do about it.
+            const bool is_printable = filename_is_printable(state.ent->d_name);
             MutablePath path(state.base_path);
             path.push(state.ent->d_name);
-            // This also checks validity of the file
-            if (auto st_opt = transfers::Transfer::get_transfer_partial_file_stat(path); st_opt.has_value()) {
+            auto st_opt = transfers::Transfer::get_transfer_partial_file_stat(path);
+            if (st_opt.has_value() && is_printable) {
+                // A print file ‒ report it even while we are downloading, it can be printed right away.
                 state.ent->d_type = DT_REG;
                 state.childsize = st_opt->st_size;
                 state.read_only = true;
-            } else {
+            } else if (st_opt.has_value()) {
+                // This is a bbf that's being transfered. Hide it completely until it is complete.
                 continue;
+            } else {
+                // It is a directory with a stupid name, but not a running
+                // transfer. Act as if it is just a directory.
+                state.read_only = false;
+                state.childsize = child_size(state.base_path, state.ent->d_name);
             }
         } else {
             state.read_only = false;
