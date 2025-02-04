@@ -15,6 +15,13 @@ enum class Font : uint8_t {
 #if HAS_LARGE_DISPLAY()
     large,
 #endif
+
+    largest_available =
+#if HAS_LARGE_DISPLAY()
+        large,
+#else
+        big,
+#endif
 };
 
 struct font_t {

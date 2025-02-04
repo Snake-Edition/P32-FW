@@ -71,6 +71,31 @@ void WindowButton::SetText(const string_view_utf8 &txt) {
     window_text_t::SetText(txt);
 }
 
+bool window_text_t::check_text_overflow() const {
+    const auto font = resource_font(get_font());
+    StringReaderUtf8 reader(GetText());
+    return RectTextLayout(reader, GetRect().Width() / font->w, GetRect().Height() / font->h, flags.multiline ? is_multiline::yes : is_multiline::no).has_text_overflown();
+}
+
+void window_text_t::auto_select_font(Font largest, Font smallest) {
+    static constexpr std::array font_list {
+#if HAS_LARGE_DISPLAY()
+        Font::large,
+#endif
+            Font::big,
+            Font::normal,
+            Font::small
+    };
+
+    const Font *fnt = font_list.begin();
+    while (*fnt != largest) {
+        fnt++;
+    }
+    do {
+        set_font(*fnt);
+    } while (!check_text_overflow() && *fnt++ != smallest);
+}
+
 void WindowButton::unconditionalDraw() {
     if (icon_) {
         window_aligned_t::unconditionalDraw(); // background
