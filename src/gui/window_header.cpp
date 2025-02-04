@@ -277,7 +277,7 @@ void window_header_t::updateIcons() {
     icon_metrics.set_visible(config_store().enable_metrics.get());
 #endif
 
-    icon_stealth.set_visible(marlin_vars().stealth_mode.get());
+    icon_stealth.set_visible(config_store().stealth_mode.get());
 
     updateAllRects();
 }

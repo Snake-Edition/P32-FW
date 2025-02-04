@@ -907,7 +907,6 @@ static void settings_load() {
     marlin_vars().fan_check_enabled = config_store().fan_check_enabled.get();
     marlin_vars().fs_autoload_enabled = config_store().fs_autoload_enabled.get();
 
-    marlin_vars().stealth_mode = config_store().stealth_mode.get();
     planner.set_stealth_mode(config_store().stealth_mode.get());
 
     job_id = config_store().job_id.get();
@@ -2903,7 +2902,7 @@ static void _server_update_vars() {
 #endif
     marlin_vars().print_speed = static_cast<uint16_t>(feedrate_percentage);
 
-    auto progress_data = oProgressData.mode_specific(marlin_vars().stealth_mode);
+    auto progress_data = oProgressData.mode_specific(config_store().stealth_mode.get());
 
     // If the mode-specific progress data is all empty (never set by the M73 command),
     // fall back to standard mode progress data to show at least something

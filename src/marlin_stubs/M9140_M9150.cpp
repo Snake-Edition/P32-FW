@@ -20,7 +20,6 @@
  */
 void PrusaGcodeSuite::M9140() {
     config_store().stealth_mode.set(false);
-    marlin_vars().stealth_mode = false;
     planner.synchronize();
     planner.set_stealth_mode(false);
 
@@ -43,7 +42,6 @@ void PrusaGcodeSuite::M9140() {
  */
 void PrusaGcodeSuite::M9150() {
     config_store().stealth_mode.set(true);
-    marlin_vars().stealth_mode = true;
     planner.synchronize();
     planner.set_stealth_mode(true);
 

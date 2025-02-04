@@ -6,6 +6,8 @@
 #include "M73_PE.h"
 #include "../Marlin/src/libs/stopwatch.h"
 #include "marlin_vars.hpp"
+#include "config_store/store_instance.hpp"
+
 extern Stopwatch print_job_timer;
 
 ClProgressData oProgressData;
@@ -158,7 +160,7 @@ void M73_PE_no_parser(const M73_Params &params) {
             SERIAL_EOL();
         }
 
-        const uint32_t time_to_pause = oProgressData.mode_specific(marlin_vars().stealth_mode).time_to_pause.mGetValue();
+        const uint32_t time_to_pause = oProgressData.mode_specific(config_store().stealth_mode.get()).time_to_pause.mGetValue();
         if (time_to_pause != marlin_server::TIME_TO_END_INVALID) {
             const int print_speed = marlin_vars().print_speed;
             SERIAL_ECHOPAIR(" Change: ", print_speed > 0 ? ((time_to_pause * 100) / print_speed) / 60 : 0, "m;");
