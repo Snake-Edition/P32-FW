@@ -279,6 +279,14 @@ extern "C" void main_cpp(void) {
     SPI_INIT(lcd);
 #endif
 
+#if BOARD_IS_XLBUDDY()
+    hw_init_spi_side_leds();
+#endif
+
+#if PRINTER_IS_PRUSA_iX()
+    SPI_INIT(led);
+#endif
+
 #if PRINTER_IS_PRUSA_MK4() || PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_COREONE()
     /*
      * MK3.5 HW detected on MK4 firmware or vice versa
@@ -351,10 +359,6 @@ extern "C" void main_cpp(void) {
     I2C_INIT(touch);
 #endif
 
-#if PRINTER_IS_PRUSA_iX()
-    SPI_INIT(led);
-#endif
-
 #if (BOARD_IS_XBUDDY())
     SPI_INIT(accelerometer);
 #endif
@@ -377,10 +381,6 @@ extern "C" void main_cpp(void) {
 
 #if HAS_GUI() && !(BOARD_IS_XLBUDDY())
     hw_tim2_init(); // TIM2 is used to generate buzzer PWM, except on older versions of XL. Not needed without display.
-#endif
-
-#if BOARD_IS_XLBUDDY()
-    hw_init_spi_side_leds();
 #endif
 
 #if HAS_PUPPIES()
