@@ -135,6 +135,8 @@ extern osThreadId displayTaskHandle;
         if (exclude_flags & config_store_ns::ItemFlag::hw_config) {
             config_store().force_default_hw_config.set(true);
         }
+
+        config_store().config_version.set(config_store_ns::CurrentStore::newest_config_version);
     }
 
     // We cannot display msg box here - it would be trying to load an icon from xFlash that we've probably wiped.
