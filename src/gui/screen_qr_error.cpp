@@ -13,6 +13,9 @@
 #include <config_store/store_instance.hpp>
 #include <guiconfig/guiconfig.h>
 #include <option/has_leds.h>
+#if HAS_LEDS()
+    #include <leds/status_leds_handler.hpp>
+#endif
 
 using namespace crash_dump;
 
@@ -37,9 +40,6 @@ ScreenErrorQR::ScreenErrorQR()
     , help_txt(this, help_txt_rect, is_multiline::no)
     , help_link(this, link_rect, ErrCode::ERR_UNDEF)
     , qr_code_txt(this, qr_code_rect, is_multiline::no)
-#if HAS_LEDS()
-    , anim(Animator_LCD_leds().start_animations(Fading(leds::ColorRGBW(255, 0, 0), 500), 10))
-#endif
     , title_line(this, title_line_rect) {
 
     display::enable_resource_file();
@@ -111,4 +111,8 @@ ScreenErrorQR::ScreenErrorQR()
         title_line.Hide();
         hide_qr();
     }
+
+#if HAS_LEDS()
+    leds::StatusLedsHandler::instance().set_error();
+#endif
 }

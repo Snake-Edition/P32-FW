@@ -44,7 +44,7 @@ target_sources(
 
 # has LEDS
 if(HAS_LEDS)
-  target_sources(firmware PRIVATE gui_leds.cpp led_lcd_cs_selector.cpp)
+  target_sources(firmware PRIVATE led_lcd_cs_selector.cpp)
 endif()
 
 if(HAS_TOOLCHANGER)

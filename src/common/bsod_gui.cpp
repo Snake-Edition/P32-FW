@@ -12,7 +12,6 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
-#include "led_animations/animation.hpp"
 
 #include <iterator>
 #include <stdarg.h>

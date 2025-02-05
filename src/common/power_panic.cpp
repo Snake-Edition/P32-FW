@@ -65,7 +65,7 @@
 #include "ili9488.hpp"
 #include <option/has_leds.h>
 #if HAS_LEDS()
-    #include <led_animations/animator.hpp>
+    #include <leds/led_manager.hpp>
 #endif
 
 #include <option/has_side_leds.h>
@@ -804,7 +804,7 @@ bool shutdown_loop() {
 
 #if HAS_LEDS()
     case ShutdownState::leds:
-        leds::enter_power_panic();
+        leds::LEDManager::instance().enter_power_panic();
         break;
 #endif
 

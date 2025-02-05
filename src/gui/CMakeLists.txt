@@ -220,10 +220,6 @@ add_subdirectory(screen)
 add_subdirectory(menu_item)
 add_subdirectory(standard_frame)
 
-if(HAS_LEDS)
-  add_subdirectory(led_animations)
-endif()
-
 if(HAS_BED_LEVEL_CORRECTION)
   target_sources(firmware PRIVATE screen_menu_bed_level_correction.cpp)
 endif()

@@ -3,7 +3,7 @@
 
 #include <option/has_leds.h>
 #if HAS_LEDS()
-    #include "led_animations/printer_animation_state.hpp"
+    #include "leds/status_leds_handler.hpp"
 #endif
 
 /** \addtogroup G-Codes
@@ -20,9 +20,6 @@
 
 void GcodeSuite::M601() {
     marlin_server::print_pause();
-#if HAS_LEDS()
-    PrinterStateAnimation::force_printer_state_until(PrinterState::Warning, PrinterState::Printing);
-#endif
 }
 
 /**

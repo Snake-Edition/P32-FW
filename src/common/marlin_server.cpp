@@ -80,9 +80,6 @@
 #include "media_prefetch_instance.hpp"
 
 #include <option/has_leds.h>
-#if HAS_LEDS()
-    #include "led_animations/printer_animation_state.hpp"
-#endif
 
 #include "fanctl.hpp"
 #include "lcd/extensible_ui/ui_api.h"

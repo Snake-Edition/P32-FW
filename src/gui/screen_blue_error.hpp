@@ -8,9 +8,6 @@
 #include <window_header.hpp>
 #include <status_footer.hpp>
 #include <option/has_leds.h>
-#if HAS_LEDS()
-    #include <led_animations/animator.hpp>
-#endif /*HAS_LEDS()*/
 
 /**
  * @brief Blue screen with error message.
@@ -34,7 +31,4 @@ protected:
     window_text_t header; ///< BSOD, HARDFAULT, WATCHDOG, Needs to be filled in child
     window_text_t title; ///< Title with hardfault source or filename of bsod, Needs to be filled in child
     window_text_t description; ///< Description of error, Needs to be filled in child
-#if HAS_LEDS()
-    AnimatorLCD::AnimationGuard anim; ///< Blue flashing
-#endif /*HAS_LEDS()*/
 };

@@ -2,13 +2,14 @@
 
 #include <enum_array.hpp>
 #include <leds/color.hpp>
+#include <timing.h>
 
 namespace leds {
 
 template <template <size_t count> typename AnimationType, typename AnimationEnum, size_t count>
 class AnimationController {
 public:
-    using Mapping = EnumArray<AnimationEnum, typename AnimationType<count>::Params, static_cast<int>(AnimationEnum::_count) + 1>;
+    using Mapping = EnumArray<AnimationEnum, typename AnimationType<count>::Params, static_cast<int>(AnimationEnum::_last) + 1>;
 
     AnimationController(const Mapping &anim_mapping, AnimationEnum startup_type)
         : animation_mapping(anim_mapping)
@@ -19,18 +20,14 @@ public:
     void update() {
         uint32_t time_ms = ticks_ms();
 
-        auto new_data = current_animation.second.render();
+        data_ = current_animation.second.render();
 
-        float xfade = static_cast<float>(time_ms - current_animation.second.get_start_time()) / transition_time;
+        float xfade = static_cast<float>(time_ms - current_animation.second.get_start_time()) / transition_time_ms;
         if (xfade < 1.0f) {
             auto prev_data = prev_animation.second.render();
             for (size_t i = 0; i < count; ++i) {
-                new_data[i] = prev_data[i].cross_fade(new_data[i], xfade);
+                data_[i] = prev_data[i].cross_fade(data_[i], xfade);
             }
-        }
-
-        for (size_t i = 0; i < count; ++i) {
-            data_[i] = new_data[i];
         }
     }
 
@@ -42,18 +39,18 @@ public:
         }
     }
 
-    std::span<ColorRGBW> data() {
+    std::span<const ColorRGBW, count> data() const {
         return data_;
     }
 
 private:
-    using AnimPair = std::pair<AnimationEnum, AnimationType<count>>;
+    using AnimationPair = std::pair<AnimationEnum, AnimationType<count>>;
 
-    static constexpr uint32_t transition_time { 400 };
+    static constexpr uint32_t transition_time_ms { 400 };
 
     const Mapping &animation_mapping;
-    AnimPair current_animation;
-    AnimPair prev_animation;
+    AnimationPair current_animation;
+    AnimationPair prev_animation;
 
     std::array<ColorRGBW, count> data_;
 };

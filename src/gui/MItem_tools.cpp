@@ -57,7 +57,7 @@
 #endif
 
 #if HAS_LEDS()
-    #include <led_animations/animator.hpp>
+    #include <leds/status_leds_handler.hpp>
 #endif
 
 #if HAS_SIDE_LEDS()
@@ -860,13 +860,13 @@ void MI_LOAD_SETTINGS::click(IWindowMenu & /*window_menu*/) {
 /**********************************************************************************************/
 // MI_LEDS_ENABLE
 MI_LEDS_ENABLE::MI_LEDS_ENABLE()
-    : WI_ICON_SWITCH_OFF_ON_t(Animator_LCD_leds().animator_state(), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
+    : WI_ICON_SWITCH_OFF_ON_t(leds::StatusLedsHandler::instance().get_active(), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
 void MI_LEDS_ENABLE::OnChange(size_t old_index) {
     if (old_index) {
-        Animator_LCD_leds().pause_animator();
+        leds::StatusLedsHandler::instance().set_active(false);
     } else {
-        Animator_LCD_leds().start_animator();
+        leds::StatusLedsHandler::instance().set_active(true);
     }
 }
 #endif

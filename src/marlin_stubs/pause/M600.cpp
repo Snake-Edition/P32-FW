@@ -51,7 +51,7 @@ LOG_COMPONENT_REF(PRUSA_GCODE);
 
 #include <option/has_leds.h>
 #if HAS_LEDS()
-    #include "led_animations/printer_animation_state.hpp"
+    #include "leds/status_leds_handler.hpp"
 #endif
 #if ENABLED(PRUSA_SPOOL_JOIN)
     #include "module/prusa/spool_join.hpp"
@@ -151,10 +151,6 @@ void M600_manual(const GCodeParser2 &p) {
     if (target_extruder < 0) {
         return;
     }
-
-#if HAS_LEDS()
-    auto guard = PrinterStateAnimation::force_printer_state(PrinterState::Warning);
-#endif
 
     xyz_pos_t park_point = XYZ_NOZZLE_PARK_POINT_M600;
 

@@ -9,7 +9,6 @@
 #include "screen_reset_error.hpp"
 #include "window_header.hpp"
 #include "status_footer.hpp"
-#include "led_animations/animator.hpp"
 
 class ScreenFatalWarning : public ScreenResetError {
 
@@ -21,7 +20,6 @@ class ScreenFatalWarning : public ScreenResetError {
     window_text_t help_txt;
     TextErrorUrlWindow help_link;
     window_text_t qr_code_txt;
-    AnimatorLCD::AnimationGuard anim;
 
 public:
     ScreenFatalWarning();

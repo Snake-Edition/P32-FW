@@ -139,6 +139,12 @@ public:
         set(colors.begin(), colors.size());
     }
 
+    void set_all(uint32_t color) {
+        for (size_t i = 0; i < COUNT; ++i) {
+            set(color, i);
+        }
+    }
+
     void force_refresh(size_t cnt) {
         leds_to_rewrite = cnt;
     }

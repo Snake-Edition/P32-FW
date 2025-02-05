@@ -1,6 +1,6 @@
 #pragma once
 #include <array>
-#include "gui_leds.hpp"
+#include <leds/color.hpp>
 
 template <size_t COUNT>
 struct LedsDummy {

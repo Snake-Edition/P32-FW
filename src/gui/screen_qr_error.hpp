@@ -10,9 +10,6 @@
 #include <gui/qr.hpp>
 #include <gui/text_error_url.hpp>
 #include <option/has_leds.h>
-#if HAS_LEDS()
-    #include "led_animations/animator.hpp"
-#endif
 
 struct ScreenErrorQR : public ScreenResetError {
 
@@ -24,9 +21,6 @@ struct ScreenErrorQR : public ScreenResetError {
     window_text_t help_txt;
     TextErrorUrlWindow help_link;
     window_text_t qr_code_txt;
-#if HAS_LEDS()
-    AnimatorLCD::AnimationGuard anim;
-#endif
     BasicWindow title_line;
 
 public:
