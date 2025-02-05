@@ -592,6 +592,7 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   endstops.enable(true); // Enable endstops for next homing move
 
   #define _UNSAFE(A) (homeZ && TERN0(Z_SAFE_HOMING, axes_should_home(_BV(A##_AXIS))))
+  #define _DOAXIS(A, V) (((V) && !flags.only_if_needed) || axes_should_home(_BV(A##_AXIS)))
 
   const bool homeZ = TERN0(HAS_Z_AXIS, Z),
               NUM_AXIS_LIST(              // Other axes should be homed before Z safe-homing
@@ -613,10 +614,19 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
                 && homeU == homeX, && homeV == homeX, && homeW == homeX
               ),
               NUM_AXIS_LIST(
-                doX = home_all || homeX, doY = home_all || homeY, doZ = home_all || homeZ,
-                doI = home_all || homeI, doJ = home_all || homeJ, doK = home_all || homeK,
-                doU = home_all || homeU, doV = home_all || homeV, doW = home_all || homeW
+                doX = _DOAXIS(X, home_all || homeX),
+                doY = _DOAXIS(Y, home_all || homeY),
+                doZ = _DOAXIS(Z, home_all || homeZ),
+                doI = _DOAXIS(I, home_all || homeI),
+                doJ = _DOAXIS(J, home_all || homeJ),
+                doK = _DOAXIS(K, home_all || homeK),
+                doU = _DOAXIS(U, home_all || homeU),
+                doV = _DOAXIS(V, home_all || homeV),
+                doW = _DOAXIS(W, home_all || homeW)
               );
+
+  #undef _UNSAFE
+  #undef _DOAXIS
 
   #if HAS_Z_AXIS
     UNUSED(needZ); UNUSED(homeZZ);
