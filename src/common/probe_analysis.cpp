@@ -242,7 +242,7 @@ std::tuple<ProbeAnalysisBase::Sample, ProbeAnalysisBase::Line, ProbeAnalysisBase
     Sample bestSplit = window.end();
     Line leftLine, rightLine;
 
-    for (auto split = samples.first + 1; split < samples.last; ++split) {
+    for (auto split = samples.first + 1; split < (samples.last - sampleGap); ++split) {
         auto result = CalculateErrorWhenLoadRepresentedAsLines(samples, split, sampleGap);
         float error = std::get<0>(result);
         if (!std::isnan(error) && error < bestError) {
