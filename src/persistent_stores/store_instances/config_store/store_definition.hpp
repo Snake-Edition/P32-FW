@@ -92,6 +92,9 @@ struct ItemFlag {
     /// Items that are dev only and are not even configurable in the production FW
     /// Quite similar to common_misconfigurations for the use cases
     static constexpr ItemFlags dev_items = 1 << 9;
+
+    /// Special items, completely outside of categorization and selective factory reset, that have a specific handling
+    static constexpr ItemFlags special = 1 << 10;
 }; // namespace ItemFlag
 
 /**
@@ -546,7 +549,7 @@ struct CurrentStore
     void set_input_shaper_axis_config(AxisEnum axis, const input_shaper::AxisConfig &);
 
     /// If set to true, will run the set HW defaults section in perform_config_check (and set itself to false) on next boot
-    StoreItem<bool, false, ItemFlag::hw_config, journal::hash("Force Default HW Config")> force_default_hw_config;
+    StoreItem<bool, false, ItemFlag::special, journal::hash("Force Default HW Config")> force_default_hw_config;
 
     /// FW base printer model from the last boot of the printer.
     /// Used for detecting when the printer has been upgraded to a different base model with the same board (for example MK3.5 -> MK3.9)

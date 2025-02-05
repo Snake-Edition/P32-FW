@@ -26,6 +26,9 @@ static constexpr auto store_flags = [] {
         store_flags |= item.flags;
     });
 
+    // Exclude special items, they are special
+    store_flags &= ~config_store_ns::ItemFlag::special;
+
     return store_flags;
 }();
 static constexpr auto preset_flags = [] {
