@@ -2,6 +2,8 @@
 #include <filament.hpp>
 #include <temperature.hpp>
 
+#include <option/has_filament_heatbreak_param.h>
+
 /** \addtogroup G-Codes
  * @{
  */
@@ -22,6 +24,7 @@
  * - `T` - Nozzle temperature
  * - `P` - Nozzle preheat temperature
  * - `B` - Bed temperature
+ * - `H` - Heatbreak temperature
  * - `A` - Is abrasive
  *
  * - `C` - Target chamber temperature
@@ -73,6 +76,10 @@ void PrusaGcodeSuite::M865() {
     p.store_option('B', params.heatbed_temperature);
 
     p.store_option('A', params.is_abrasive);
+
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+    p.store_option('H', params.heatbreak_temperature);
+#endif
 
 #if HAS_CHAMBER_API()
     p.store_option('C', params.chamber_target_temperature);
