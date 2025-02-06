@@ -76,6 +76,11 @@ MI_FILAMENT_NOZZLE_PREHEAT_TEMPERATURE::MI_FILAMENT_NOZZLE_PREHEAT_TEMPERATURE()
 MI_FILAMENT_BED_TEMPERATURE::MI_FILAMENT_BED_TEMPERATURE()
     : MI_SPIN(&FilamentTypeParameters::heatbed_temperature, numeric_input_config::bed_temperature, HAS_MINI_DISPLAY() ? N_("Bed Temp") : N_("Bed Temperature")) {}
 
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+MI_FILAMENT_HEATBREAK_TEMPERATURE::MI_FILAMENT_HEATBREAK_TEMPERATURE()
+    : MI_SPIN(&FilamentTypeParameters::heatbreak_temperature, numeric_input_config::heatbreak_temperature, HAS_MINI_DISPLAY() ? N_("Heatbreak Temp") : N_("Heatbreak Temperature")) {}
+#endif
+
 #if HAS_CHAMBER_API()
 namespace {
 void setup_chamber_temp_item(IWindowMenuItem &item) {

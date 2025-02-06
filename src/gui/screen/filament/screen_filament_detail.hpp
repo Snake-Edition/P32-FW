@@ -10,6 +10,7 @@
 #include <numeric_input_config.hpp>
 
 #include <option/has_chamber_api.h>
+#include <option/has_filament_heatbreak_param.h>
 
 namespace screen_filament_detail {
 
@@ -84,6 +85,13 @@ public:
     MI_FILAMENT_BED_TEMPERATURE();
 };
 
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+class MI_FILAMENT_HEATBREAK_TEMPERATURE final : public MI_SPIN<decltype(FilamentTypeParameters::heatbreak_temperature)> {
+public:
+    MI_FILAMENT_HEATBREAK_TEMPERATURE();
+};
+#endif
+
 #if HAS_CHAMBER_API()
 class MI_FILAMENT_MIN_CHAMBER_TEMPERATURE final : public MI_SPIN<decltype(FilamentTypeParameters::chamber_min_temperature)> {
 public:
@@ -144,6 +152,9 @@ using ScreenFilamentDetail_ = ScreenMenu<EFooter::Off,
     MI_FILAMENT_NOZZLE_TEMPERATURE,
     MI_FILAMENT_NOZZLE_PREHEAT_TEMPERATURE,
     MI_FILAMENT_BED_TEMPERATURE,
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+    MI_FILAMENT_HEATBREAK_TEMPERATURE,
+#endif
 #if HAS_CHAMBER_API()
     MI_FILAMENT_TARGET_CHAMBER_TEMPERATURE,
     MI_FILAMENT_MIN_CHAMBER_TEMPERATURE,
