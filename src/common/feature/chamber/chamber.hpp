@@ -78,7 +78,7 @@ private:
     std::optional<Temperature> thermistor_temperature_;
     std::optional<Temperature> target_temperature_;
 
-    Capabilities capabilities_nolock(Backend backend) const;
+    Capabilities capabilities_nolock() const;
 };
 
 Chamber &chamber();
