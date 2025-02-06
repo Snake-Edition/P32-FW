@@ -761,7 +761,7 @@
         { 200, 200, 40, 45 }
 #else
     #define DEFAULT_MAX_FEEDRATE \
-        { 180, 180, 12, 80 }
+        { 400, 400, 12, 80 }
 #endif
 
 /// HW limits of feed rate
@@ -787,7 +787,7 @@
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4[, E5]]]]]
  */
 #define DEFAULT_MAX_ACCELERATION \
-    { 1250, 1250, 400, 4000 }
+    { 4000, 4000, 400, 5000 }
 
 /// HW limits of max acceleration
 #ifdef MINI_I3_MK33
@@ -813,9 +813,9 @@
  *   M204 R    Retract Acceleration
  *   M204 T    Travel Acceleration
  */
-#define DEFAULT_ACCELERATION 1250 // X, Y, Z and E acceleration for printing moves
+#define DEFAULT_ACCELERATION 4000 // X, Y, Z and E acceleration for printing moves
 #define DEFAULT_RETRACT_ACCELERATION 1250 // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION 1250 // X, Y, Z acceleration for travel (non printing) moves
+#define DEFAULT_TRAVEL_ACCELERATION 4000 // X, Y, Z acceleration for travel (non printing) moves
 
 //
 // Use Junction Deviation instead of traditional Jerk Limiting
