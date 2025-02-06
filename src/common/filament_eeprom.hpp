@@ -2,6 +2,8 @@
 
 #include "filament.hpp"
 
+#include <option/has_chamber_api.h>
+
 // For historic reasons, the FilamentTypeParameters is split across multiple structures in the EEPROM
 
 // !!! DO NOT CHANGE - this is used in config store
@@ -25,6 +27,7 @@ public:
     constexpr bool operator!=(const FilamentTypeParameters_EEPROM1 &) const = default;
 };
 
+#if HAS_CHAMBER_API()
 // !!! DO NOT CHANGE - this is used in config store
 struct __attribute__((packed)) FilamentTypeParameters_EEPROM2 {
 
@@ -46,3 +49,4 @@ public:
     constexpr bool operator==(const FilamentTypeParameters_EEPROM2 &) const = default;
     constexpr bool operator!=(const FilamentTypeParameters_EEPROM2 &) const = default;
 };
+#endif
