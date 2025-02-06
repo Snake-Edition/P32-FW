@@ -1,4 +1,5 @@
 #include "screen_fatal_warning.hpp"
+#include "display.hpp"
 #include "img_resources.hpp"
 #include "config.h"
 #include "ScreenHandler.hpp"
@@ -43,7 +44,7 @@ ScreenFatalWarning::ScreenFatalWarning()
     , qr_code_txt(this, qr_code_rect, is_multiline::no)
     , anim(Animator_LCD_leds().start_animations(Fading(leds::ColorRGBW(255, 0, 0), 500), 10)) {
 
-    img::enable_resource_file();
+    display::enable_resource_file();
 
     help_link.set_font(Font::small);
     qr_code_txt.set_font(Font::small);

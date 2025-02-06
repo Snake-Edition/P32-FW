@@ -1,4 +1,5 @@
 #include "screen_qr_error.hpp"
+#include "display.hpp"
 #include "img_resources.hpp"
 #include "config.h"
 #include "ScreenHandler.hpp"
@@ -42,7 +43,7 @@ ScreenErrorQR::ScreenErrorQR()
 #endif
     , title_line(this, title_line_rect) {
 
-    img::enable_resource_file();
+    display::enable_resource_file();
     SetRedLayout();
     title_line.SetBackColor(COLOR_WHITE);
     help_link.set_font(Font::small);

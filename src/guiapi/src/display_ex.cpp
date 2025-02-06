@@ -463,12 +463,37 @@ void set_pixel(point_ui16_t pt, Color clr) {
     set_pixel_colorFormatNative(pt.x, pt.y, native_color);
 }
 
+static bool enabled = false;
+static FILE *file = nullptr;
+
+#if HAS_ST7789_DISPLAY()
+// Need to save RAM, good enough for MINI
+// TODO try bypassing stdio buffer altogether, we are already buffering in draw_qoi_ex_C
+static constexpr size_t SZ = 128;
+#else
+static constexpr size_t SZ = 512;
+#endif
+
+void enable_resource_file() {
+    enabled = true;
+}
+
+static FILE *get_resource_file() {
+    if (!file && enabled) {
+        file = fopen("/internal/res/qoi.data", "rb");
+        if (file) {
+            setvbuf(file, nullptr, _IOFBF, SZ);
+        }
+    }
+    return file;
+}
+
 void draw_img(point_ui16_t pt, const img::Resource &qoi, Color back_color, ropfn rop, Rect16 subrect) {
     FILE *file;
 
     // Use provided file or default resource file
     if (!qoi.file) {
-        file = img::get_resource_file();
+        file = get_resource_file();
     } else {
         file = qoi.file;
     }

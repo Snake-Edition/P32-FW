@@ -26,7 +26,7 @@ enum {
 namespace img {
 
 struct Resource {
-    FILE *file; ///< Open file handle, nullptr to use default get_resource_file()
+    FILE *file; ///< Open file handle, nullptr to use default resource file
     size_t offset; ///< Offset in file [byte]
     size_t size; ///< Size of resource (informative) [byte]
     uint16_t w; ///< Width (informative) [pixel]

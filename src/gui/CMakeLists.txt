@@ -22,8 +22,6 @@ target_sources(
           gui_media_events.cpp
           gui_time.cpp
           guimain.cpp
-          img_resources.cpp
-          img_resources.cpp
           IScreenPrinting.cpp
           lazyfilelist.cpp
           logger.cpp

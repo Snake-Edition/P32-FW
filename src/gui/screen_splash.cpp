@@ -213,7 +213,7 @@ screen_splash_data_t::screen_splash_data_t()
 }
 
 screen_splash_data_t::~screen_splash_data_t() {
-    img::enable_resource_file(); // now it is safe to use resources from xFlash
+    display::enable_resource_file(); // now it is safe to use resources from xFlash
 }
 
 void screen_splash_data_t::draw() {

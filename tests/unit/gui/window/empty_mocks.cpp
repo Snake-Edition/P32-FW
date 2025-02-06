@@ -22,8 +22,6 @@ void notify_server_about_encoder_move() {}
 void notify_server_about_knob_click() {}
 } // namespace marlin_client
 
-FILE *img::get_resource_file() { return nullptr; }
-
 void _bsod(const char *fmt, const char *fine_name, int line_number, ...) {
     while (1)
         ;
