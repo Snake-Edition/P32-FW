@@ -85,7 +85,7 @@ static void set_chamber_temperature(buddy::Temperature target, bool wait_for_hea
     }
 
     /// How long we should wait until displaying a warning that we're failing to reach the temperature
-    static constexpr int32_t warning_timeout_ms = 10 * 60 * 1000;
+    static constexpr int32_t warning_timeout_ms = 30 * 60 * 1000;
 
     uint32_t warning_timeout_start = ticks_ms();
     SkippableGCode::Guard skippable_operation;
