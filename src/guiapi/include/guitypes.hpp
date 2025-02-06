@@ -45,15 +45,6 @@ struct Resource {
         , h(0) {}
 };
 
-/**
- * @brief Child of Resource with non trivial destructor
- * designed to open file in ctor and close it in dtor
- */
-struct ResourceSingleFile : public Resource {
-    ResourceSingleFile(const char *name);
-    ~ResourceSingleFile();
-};
-
 } // namespace img
 
 enum class EFooter { Off,

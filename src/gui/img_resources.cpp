@@ -30,15 +30,4 @@ FILE *get_resource_file() {
     return file;
 }
 
-img::ResourceSingleFile::ResourceSingleFile(const char *name)
-    : Resource(0, 0, 0, 0) {
-    file = open_file_and_disable_buff(name);
-}
-
-img::ResourceSingleFile::~ResourceSingleFile() {
-    if (file) {
-        fclose(file);
-    }
-}
-
 } // namespace img
