@@ -37,6 +37,7 @@
 #include <option/has_i2c_expander.h>
 #include <option/has_xbuddy_extension.h>
 #include <option/has_emergency_stop.h>
+#include <option/has_side_leds.h>
 #include <option/xl_enclosure_support.h>
 #include <option/has_precise_homing_corexy.h>
 #include <option/has_precise_homing.h>
@@ -608,6 +609,7 @@ struct CurrentStore
 #if HAS_XBUDDY_EXTENSION()
     StoreItem<XBEFanTestResults, XBEFanTestResults {}, ItemFlag::calibrations, journal::hash("XBE Chamber fan selftest results")> xbe_fan_test_results;
     StoreItem<bool, true, ItemFlag::features, journal::hash("XBE USB Host power")> xbe_usb_power;
+    StoreItem<uint8_t, 102, ItemFlag::features, journal::hash("XBuddy Extension Chamber Fan Max Control Limit")> chamber_fan_max_control_pwm;
 #endif
 
 #if HAS_EMERGENCY_STOP()
