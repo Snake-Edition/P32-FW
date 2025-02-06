@@ -68,35 +68,17 @@ void PrusaGcodeSuite::M865() {
         params = {};
     }
 
-    // We cannot use store_option here because FilamentTypeParameters is packed :(
-    if (const auto opt = p.option<decltype(FilamentTypeParameters::nozzle_temperature)>('T')) {
-        params.nozzle_temperature = *opt;
-    }
-    if (const auto opt = p.option<decltype(FilamentTypeParameters::nozzle_preheat_temperature)>('P')) {
-        params.nozzle_preheat_temperature = *opt;
-    }
-    if (const auto opt = p.option<decltype(FilamentTypeParameters::heatbed_temperature)>('B')) {
-        params.heatbed_temperature = *opt;
-    }
+    p.store_option('T', params.nozzle_temperature);
+    p.store_option('P', params.nozzle_preheat_temperature);
+    p.store_option('B', params.heatbed_temperature);
 
-    if (const auto opt = p.option<bool>('A')) {
-        params.is_abrasive = *opt;
-    }
+    p.store_option('A', params.is_abrasive);
 
 #if HAS_CHAMBER_API()
-    if (const auto opt = p.option<uint8_t>('C')) {
-        params.chamber_target_temperature = *opt;
-    }
-    if (const auto opt = p.option<uint8_t>('D')) {
-        params.chamber_min_temperature = *opt;
-    }
-    if (const auto opt = p.option<uint8_t>('E')) {
-        params.chamber_max_temperature = *opt;
-    }
-
-    if (const auto opt = p.option<bool>('F')) {
-        params.requires_filtration = *opt;
-    }
+    p.store_option('C', params.chamber_target_temperature);
+    p.store_option('D', params.chamber_min_temperature);
+    p.store_option('E', params.chamber_max_temperature);
+    p.store_option('F', params.requires_filtration);
 #endif
 
     std::array<char, filament_name_buffer_size - 1> name_buf;
