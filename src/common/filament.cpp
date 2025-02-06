@@ -240,12 +240,18 @@ FilamentTypeParameters FilamentType::parameters() const {
 #if HAS_CHAMBER_API()
                                          const FilamentTypeParameters_EEPROM2 &e2,
 #endif
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+                                         const FilamentTypeParameters_EEPROM3 &e3,
+#endif
                                          std::monostate) {
         return FilamentTypeParameters {
             .name = e1.name,
             .nozzle_temperature = e1.nozzle_temperature,
             .nozzle_preheat_temperature = e1.nozzle_preheat_temperature,
             .heatbed_temperature = e1.heatbed_temperature,
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+            .heatbreak_temperature = e3.heatbreak_temperature,
+#endif
 #if HAS_CHAMBER_API()
             .chamber_min_temperature = e2.decode_chamber_temp(e2.chamber_min_temperature),
             .chamber_max_temperature = e2.decode_chamber_temp(e2.chamber_max_temperature),
@@ -266,6 +272,9 @@ FilamentTypeParameters FilamentType::parameters() const {
 #if HAS_CHAMBER_API()
                 config_store().user_filament_parameters_2.get(v.index),
 #endif
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+                config_store().user_filament_parameters_3.get(v.index),
+#endif
                 std::monostate());
 
         } else if constexpr (std::is_same_v<T, AdHocFilamentType>) {
@@ -273,6 +282,9 @@ FilamentTypeParameters FilamentType::parameters() const {
                 config_store().adhoc_filament_parameters.get(v.tool),
 #if HAS_CHAMBER_API()
                 config_store().adhoc_filament_parameters_2.get(v.tool),
+#endif
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+                config_store().adhoc_filament_parameters_3.get(v.tool),
 #endif
                 std::monostate());
 
@@ -306,6 +318,11 @@ void FilamentType::set_parameters(const FilamentTypeParameters &set) const {
         .chamber_target_temperature = e2.encode_chamber_temp(set.chamber_target_temperature),
     };
 #endif
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+    const FilamentTypeParameters_EEPROM3 e3 {
+        .heatbreak_temperature = set.heatbreak_temperature,
+    };
+#endif
 
     std::visit([&]<typename T>(const T &v) {
         if constexpr (std::is_same_v<T, PresetFilamentType>) {
@@ -316,11 +333,17 @@ void FilamentType::set_parameters(const FilamentTypeParameters &set) const {
 #if HAS_CHAMBER_API()
             config_store().user_filament_parameters_2.set(v.index, e2);
 #endif
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+            config_store().user_filament_parameters_3.set(v.index, e3);
+#endif
 
         } else if constexpr (std::is_same_v<T, AdHocFilamentType>) {
             config_store().adhoc_filament_parameters.set(v.tool, e1);
 #if HAS_CHAMBER_API()
             config_store().adhoc_filament_parameters_2.set(v.tool, e2);
+#endif
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+            config_store().adhoc_filament_parameters_3.set(v.tool, e3);
 #endif
 
         } else if constexpr (std::is_same_v<T, PendingAdHocFilamentType>) {

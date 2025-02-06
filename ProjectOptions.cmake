@@ -315,6 +315,7 @@ set_feature_for_printers(HAS_HUMAN_INTERACTIONS "MINI" "MK4" "MK3.5" "XL" "COREO
 set_feature_for_printers_master_board(HAS_LOADCELL "MK4" "iX" "XL" "XL_DEV_KIT" "COREONE")
 set_feature_for_printers_master_board(HAS_SHEET_PROFILES "MK3.5" "MINI")
 set_feature_for_printers_master_board(HAS_HEATBREAK_TEMP "MK4" "iX" "XL" "XL_DEV_KIT" "COREONE")
+set_feature_for_printers_master_board(HAS_FILAMENT_HEATBREAK_PARAM "iX")
 set(PRINTERS_WITH_RESOURCES "MINI" "MK4" "MK3.5" "XL" "iX" "COREONE")
 set_feature_for_printers(HAS_BOWDEN "MINI")
 set(PRINTERS_WITH_PUPPIES_BOOTLOADER "XL" "iX" "XL_DEV_KIT" "COREONE")

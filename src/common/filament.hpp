@@ -9,6 +9,7 @@
 #include <str_utils.hpp>
 
 #include <option/has_chamber_api.h>
+#include <option/has_filament_heatbreak_param.h>
 
 // !!! DO NOT CHANGE - this is used in config store
 /// Maximum length of a filament name, including the terminating zero
@@ -46,6 +47,11 @@ public:
 
     /// Bed temperature for the filament, in degrees Celsius
     uint16_t heatbed_temperature;
+
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+    /// Target heatbreak temperature for the filament
+    uint8_t heatbreak_temperature = DEFAULT_HEATBREAK_TEMPERATURE;
+#endif
 
 #if HAS_CHAMBER_API()
     /// Minimum temperature at which it's recommended to print this material
