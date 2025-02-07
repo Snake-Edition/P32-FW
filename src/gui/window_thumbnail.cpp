@@ -25,7 +25,7 @@ void WindowPreviewThumbnail::unconditionalDraw() {
     }
 
     FILE f {};
-    img::Resource res(&f);
+    img::FileResource res { &f };
 
     if (!gcode_reader->stream_thumbnail_start(Width(), Height(), IGcodeReader::ImgType::QOI)) {
         return;
@@ -66,7 +66,7 @@ void WindowProgressThumbnail::unconditionalDraw() {
     }
 
     FILE f {};
-    img::Resource res(&f);
+    img::FileResource res { &f };
 
     bool have_old_alternative { false };
 

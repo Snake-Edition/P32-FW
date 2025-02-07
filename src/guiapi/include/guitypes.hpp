@@ -26,20 +26,13 @@ enum {
 namespace img {
 
 struct Resource {
-    FILE *file; ///< Open file handle, nullptr to use default resource file
-    size_t offset; ///< Offset in file [byte]
-    uint16_t w; ///< Width (informative) [pixel]
-    uint16_t h; ///< Height (informative) [pixel]
-    constexpr Resource(size_t offset, uint16_t w, uint16_t h)
-        : file(nullptr)
-        , offset(offset)
-        , w(w)
-        , h(h) {}
-    constexpr Resource(FILE *file)
-        : file(file)
-        , offset(0)
-        , w(0)
-        , h(0) {}
+    size_t offset; ///< Offset in resource file [byte]
+    uint16_t w; ///< Width [pixel]
+    uint16_t h; ///< Height [pixel]
+};
+
+struct FileResource {
+    FILE *file; ///< File containing a single QOI image
 };
 
 } // namespace img

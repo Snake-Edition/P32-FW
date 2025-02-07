@@ -489,14 +489,7 @@ static FILE *get_resource_file() {
 }
 
 void draw_img(point_ui16_t pt, const img::Resource &qoi, Color back_color, ropfn rop, Rect16 subrect) {
-    FILE *file;
-
-    // Use provided file or default resource file
-    if (!qoi.file) {
-        file = get_resource_file();
-    } else {
-        file = qoi.file;
-    }
+    FILE *file = get_resource_file();
 
     if (!file) {
         return;
@@ -514,6 +507,10 @@ void draw_img(point_ui16_t pt, const img::Resource &qoi, Color back_color, ropfn
     // Seek to the beginning of the image and draw
     fseek(file, qoi.offset, SEEK_SET);
     draw_qoi_ex_C(file, pt.x, pt.y, back_color, rop, subrect);
+}
+
+void draw_img(point_ui16_t pt, const img::FileResource &qoi) {
+    draw_qoi_ex_C(qoi.file, pt.x, pt.y, COLOR_BLACK, ropfn(), Rect16());
 }
 
 void draw_text(Rect16 rc, const string_view_utf8 &str, const Font font, Color clr_bg, Color clr_fg) {
