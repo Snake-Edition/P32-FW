@@ -6,6 +6,8 @@
 #include <img_resources.hpp>
 #include "display_math_helper.h"
 #include <bsod.h>
+#include <sys/fcntl.h>
+#include <sys/unistd.h>
 
 #if HAS_ST7789_DISPLAY()
     #include "st7789v.hpp"
@@ -464,48 +466,28 @@ void set_pixel(point_ui16_t pt, Color clr) {
 }
 
 static bool enabled = false;
-static FILE *file = nullptr;
 
-#if HAS_ST7789_DISPLAY()
-// Need to save RAM, good enough for MINI
-// TODO try bypassing stdio buffer altogether, we are already buffering in draw_qoi_ex_C
-static constexpr size_t SZ = 128;
-#else
-static constexpr size_t SZ = 512;
-#endif
+// We are using unbuffered API here, because we don't need the stdio buffer.
+// Reads are already buffered in QOI drawing routines.
+static int resource_fd = -1;
 
 void enable_resource_file() {
     enabled = true;
 }
 
-static FILE *get_resource_file() {
-    if (!file && enabled) {
-        file = fopen("/internal/res/qoi.data", "rb");
-        if (file) {
-            setvbuf(file, nullptr, _IOFBF, SZ);
-        }
-    }
-    return file;
-}
-
-class FileReader final : public AbstractByteReader {
-private:
-    FILE *file;
-
+class ResourceFileReader final : public AbstractByteReader {
 public:
-    explicit FileReader(FILE *file_)
-        : file { file_ } {}
-
     std::span<std::byte> read(std::span<std::byte> buffer) final {
-        size_t nread = fread(buffer.data(), 1, buffer.size(), file);
+        size_t nread = ::read(resource_fd, buffer.data(), buffer.size());
         return { buffer.data(), nread };
     }
 };
 
 void draw_img(point_ui16_t pt, const img::Resource &qoi, Color back_color, ropfn rop, Rect16 subrect) {
-    FILE *file = get_resource_file();
-
-    if (!file) {
+    if (resource_fd == -1 && enabled) {
+        resource_fd = ::open("/internal/res/qoi.data", 0);
+    }
+    if (resource_fd == -1) {
         return;
         /** we can actually get here if we draw img before bootstrap
          * so we must not call bsod. 3 reproducers:
@@ -519,8 +501,8 @@ void draw_img(point_ui16_t pt, const img::Resource &qoi, Color back_color, ropfn
     }
 
     // Seek to the beginning of the image and draw
-    fseek(file, qoi.offset, SEEK_SET);
-    FileReader reader { file };
+    ::lseek(resource_fd, qoi.offset, SEEK_SET);
+    ResourceFileReader reader;
     draw_qoi_ex_C(reader, pt.x, pt.y, back_color, rop, subrect);
 }
 
