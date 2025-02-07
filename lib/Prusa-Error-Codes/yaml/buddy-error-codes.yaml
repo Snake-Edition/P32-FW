@@ -1274,3 +1274,19 @@ Errors:
     id: "FILAMENT_LOADING_TIMEOUT"
     type: "CONNECT"
     gui_layout: "warning_dialog"
+
+  - code: "XX837"
+    printers: [COREONE]
+    title: "Open Chamber Ventilation"
+    text: "Ensure the top ventilation grille is open for proper airflow."
+    id: "OPEN_CHAMBER_VENTS"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
+
+  - code: "XX838"
+    printers: [COREONE]
+    title: "Close Chamber Ventilation"
+    text: "Ensure the top ventilation grille is closed for optimal chamber temperature."
+    id: "CLOSE_CHAMBER_VENTS"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
