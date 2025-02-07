@@ -3,7 +3,6 @@
 #if HAS_GUI()
     #include <guiconfig/GuiDefaults.hpp>
 #endif
-#include "gcode_thumb_decoder.h"
 #include <cstring>
 #include <option/developer_mode.h>
 #include <Marlin/src/module/motion.h>

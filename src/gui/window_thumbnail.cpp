@@ -3,8 +3,33 @@
  */
 
 #include "window_thumbnail.hpp"
-#include "gcode_thumb_decoder.h"
+#include "gcode_reader_interface.hpp"
 #include "display.hpp"
+
+class GCodeQOIReader final : public AbstractByteReader {
+private:
+    IGcodeReader *reader;
+
+public:
+    explicit GCodeQOIReader(IGcodeReader *reader_)
+        : reader { reader_ } {}
+
+    std::span<std::byte> read(std::span<std::byte> buffer) final {
+        // TODO implement reading multiple bytes at a time
+        size_t n = buffer.size();
+        size_t pos = 0;
+        auto data = buffer.data();
+        while (n != pos) {
+            char c;
+            if (reader->stream_getc(c) == IGcodeReader::Result_t::RESULT_OK) {
+                data[pos++] = (std::byte)c;
+            } else {
+                break;
+            }
+        }
+        return { data, pos };
+    }
+};
 
 //-------------------------- Thumbnail --------------------------------------
 
@@ -24,19 +49,12 @@ void WindowPreviewThumbnail::unconditionalDraw() {
         return;
     }
 
-    FILE f {};
-    img::FileResource res { &f };
-
     if (!gcode_reader->stream_thumbnail_start(Width(), Height(), IGcodeReader::ImgType::QOI)) {
         return;
     }
 
-    if (f_gcode_thumb_open(*gcode_reader, &f) != 0) {
-        return;
-    }
-
+    GCodeQOIReader res { gcode_reader.get() };
     display::draw_img(point_ui16(Left(), Top()), res);
-    f_gcode_thumb_close(&f);
 }
 
 //------------------------- Progress Thumbnail -----------------------------------
@@ -65,9 +83,6 @@ void WindowProgressThumbnail::unconditionalDraw() {
         return;
     }
 
-    FILE f {};
-    img::FileResource res { &f };
-
     bool have_old_alternative { false };
 
     if (!gcode_reader->stream_thumbnail_start(Width(), Height(), IGcodeReader::ImgType::QOI)) {
@@ -78,15 +93,11 @@ void WindowProgressThumbnail::unconditionalDraw() {
         }
     }
 
-    if (f_gcode_thumb_open(*gcode_reader, &f) != 0) {
-        return;
-    }
-
     // Draw whole thumbnail:
+    GCodeQOIReader res { gcode_reader.get() };
     display::draw_img(point_ui16(have_old_alternative ? get_old_left() : Left(), Top()), res);
 
     redraw_whole = false;
-    f_gcode_thumb_close(&f);
 }
 
 void WindowProgressThumbnail::pauseDeinit() {

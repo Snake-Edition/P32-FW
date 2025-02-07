@@ -1,7 +1,6 @@
 #pragma once
 
 #include "step.h"
-#include <gcode/gcode_thumb_decoder.h>
 #include <gcode/gcode_reader_any.hpp>
 #include <unique_file_ptr.hpp>
 

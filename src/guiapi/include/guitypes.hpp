@@ -4,7 +4,6 @@
 #include "marlin_server_types/general_response.hpp"
 
 #include <cstdint>
-#include <cstdio>
 #include <cstring>
 #include <optional>
 
@@ -29,10 +28,6 @@ struct Resource {
     size_t offset; ///< Offset in resource file [byte]
     uint16_t w; ///< Width [pixel]
     uint16_t h; ///< Height [pixel]
-};
-
-struct FileResource {
-    FILE *file; ///< File containing a single QOI image
 };
 
 } // namespace img

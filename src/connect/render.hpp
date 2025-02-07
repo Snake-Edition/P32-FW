@@ -5,7 +5,6 @@
 #include "planner.hpp"
 
 #include <segmented_json.h>
-#include <gcode_thumb_decoder.h>
 #include <gcode_reader_any.hpp>
 #include <unique_file_ptr.hpp>
 #include <unique_dir_ptr.hpp>

@@ -524,11 +524,6 @@ void draw_img(point_ui16_t pt, const img::Resource &qoi, Color back_color, ropfn
     draw_qoi_ex_C(reader, pt.x, pt.y, back_color, rop, subrect);
 }
 
-void draw_img(point_ui16_t pt, const img::FileResource &qoi) {
-    FileReader reader { qoi.file };
-    draw_qoi_ex_C(reader, pt.x, pt.y, COLOR_BLACK, ropfn(), Rect16());
-}
-
 void draw_img(point_ui16_t pt, AbstractByteReader &reader) {
     draw_qoi_ex_C(reader, pt.x, pt.y, COLOR_BLACK, ropfn(), Rect16());
 }
