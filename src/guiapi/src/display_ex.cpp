@@ -38,8 +38,8 @@ void clear(const Color clr) {
 
 } // namespace display
 
-static inline void draw_qoi_ex_C(FILE *pf, uint16_t point_x, uint16_t point_y, Color back_color, ropfn rop, Rect16 subrect) {
-    st7789v_draw_qoi_ex(pf, point_x, point_y, back_color, rop.ConvertToC(), subrect);
+static inline void draw_qoi_ex_C(AbstractByteReader &reader, uint16_t point_x, uint16_t point_y, Color back_color, ropfn rop, Rect16 subrect) {
+    st7789v_draw_qoi_ex(reader, point_x, point_y, back_color, rop.ConvertToC(), subrect);
 }
 
 static inline void set_pixel_colorFormatNative(uint16_t point_x, uint16_t point_y, uint32_t nativeclr) {
@@ -83,8 +83,8 @@ void clear(const Color clr) {
 
 } // namespace display
 
-static inline void draw_qoi_ex_C(FILE *pf, uint16_t point_x, uint16_t point_y, Color back_color, ropfn rop, Rect16 subrect) {
-    ili9488_draw_qoi_ex(pf, point_x, point_y, back_color, rop.ConvertToC(), subrect);
+static inline void draw_qoi_ex_C(AbstractByteReader &reader, uint16_t point_x, uint16_t point_y, Color back_color, ropfn rop, Rect16 subrect) {
+    ili9488_draw_qoi_ex(reader, point_x, point_y, back_color, rop.ConvertToC(), subrect);
 }
 
 static inline void set_pixel_colorFormatNative(uint16_t point_x, uint16_t point_y, uint32_t nativeclr) {
@@ -139,7 +139,7 @@ void clear(const Color clr) {
 
 } // namespace display
 
-static inline void draw_qoi_ex_C(FILE *pf, uint16_t point_x, uint16_t point_y, Color back_color, ropfn rop, Rect16 subrect) {
+static inline void draw_qoi_ex_C(AbstractByteReader &reader, uint16_t point_x, uint16_t point_y, Color back_color, ropfn rop, Rect16 subrect) {
     // todo
 }
 
@@ -488,6 +488,20 @@ static FILE *get_resource_file() {
     return file;
 }
 
+class FileReader final : public AbstractByteReader {
+private:
+    FILE *file;
+
+public:
+    explicit FileReader(FILE *file_)
+        : file { file_ } {}
+
+    std::span<std::byte> read(std::span<std::byte> buffer) final {
+        size_t nread = fread(buffer.data(), 1, buffer.size(), file);
+        return { buffer.data(), nread };
+    }
+};
+
 void draw_img(point_ui16_t pt, const img::Resource &qoi, Color back_color, ropfn rop, Rect16 subrect) {
     FILE *file = get_resource_file();
 
@@ -506,11 +520,17 @@ void draw_img(point_ui16_t pt, const img::Resource &qoi, Color back_color, ropfn
 
     // Seek to the beginning of the image and draw
     fseek(file, qoi.offset, SEEK_SET);
-    draw_qoi_ex_C(file, pt.x, pt.y, back_color, rop, subrect);
+    FileReader reader { file };
+    draw_qoi_ex_C(reader, pt.x, pt.y, back_color, rop, subrect);
 }
 
 void draw_img(point_ui16_t pt, const img::FileResource &qoi) {
-    draw_qoi_ex_C(qoi.file, pt.x, pt.y, COLOR_BLACK, ropfn(), Rect16());
+    FileReader reader { qoi.file };
+    draw_qoi_ex_C(reader, pt.x, pt.y, COLOR_BLACK, ropfn(), Rect16());
+}
+
+void draw_img(point_ui16_t pt, AbstractByteReader &reader) {
+    draw_qoi_ex_C(reader, pt.x, pt.y, COLOR_BLACK, ropfn(), Rect16());
 }
 
 void draw_text(Rect16 rc, const string_view_utf8 &str, const Font font, Color clr_bg, Color clr_fg) {

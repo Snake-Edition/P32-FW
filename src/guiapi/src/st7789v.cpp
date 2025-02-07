@@ -615,9 +615,8 @@ void st7789v_ctrl_set(uint8_t ctrl) {
     st7789v_cmd(CMD_WRCTRLD, &st7789v_config.control, sizeof(st7789v_config.control));
 }
 
-void st7789v_draw_qoi_ex(FILE *pf, uint16_t point_x, uint16_t point_y, Color back_color, uint8_t rop, Rect16 subrect) {
+void st7789v_draw_qoi_ex(AbstractByteReader &reader, uint16_t point_x, uint16_t point_y, Color back_color, uint8_t rop, Rect16 subrect) {
     assert(!st7789v_buff_borrowed && "Buffer lent to someone");
-    assert(pf);
 
     // Current pixel position starts top-left where the image is placed
     point_i16_t pos = { static_cast<int16_t>(point_x), static_cast<int16_t>(point_y) };
@@ -641,7 +640,8 @@ void st7789v_draw_qoi_ex(FILE *pf, uint16_t point_x, uint16_t point_y, Color bac
 #endif /*0*/
 
     // Read header and image size to tweak drawn subrect
-    if (size_t nread = fread(i_buf.data(), 1, qoi::Decoder::HEADER_SIZE, pf); nread != qoi::Decoder::HEADER_SIZE) {
+    auto header = reader.read(i_buf.subspan(0, qoi::Decoder::HEADER_SIZE));
+    if (header.size() != qoi::Decoder::HEADER_SIZE) {
         return; // Header couldn't be read
     }
     Rect16 img_rect = Rect16(pos, qoi::Decoder::get_image_size(std::span<uint8_t, qoi::Decoder::HEADER_SIZE>(i_buf)));
@@ -664,10 +664,9 @@ void st7789v_draw_qoi_ex(FILE *pf, uint16_t point_x, uint16_t point_y, Color bac
     qoi::Decoder qoi_decoder; ///< QOI decoding statemachine
     while (1) {
         // Read more data from file
-        if (size_t nread = fread(i_buf.data(), 1, i_buf.size(), pf); nread == 0) {
+        i_data = reader.read(i_buf);
+        if (i_data.empty()) {
             break; // Picture ends
-        } else {
-            i_data = std::span<uint8_t>(i_buf.begin(), nread);
         }
 
         // Process input data
