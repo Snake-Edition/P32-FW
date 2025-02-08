@@ -1650,8 +1650,10 @@
     #if AXIS_IS_TMC(X)
 		#ifdef MINI_I3_MK33
 	        #define X_CURRENT 300 // (mA) RMS current.  MK3 motors
+		#elif MINI_COREXY
+            #define X_CURRENT 400 // (mA) RMS current. Multiply by 1.414 for peak current.
 		#else
-    	    #define X_CURRENT 400 // (mA) RMS current. Multiply by 1.414 for peak current.
+    	    #define X_CURRENT 350 // (mA) RMS current. Multiply by 1.414 for peak current.
 		#endif
         #define X_MICROSTEPS 16 // 0..256
         #define X_RSENSE 0.22
@@ -1666,8 +1668,10 @@
     #if AXIS_IS_TMC(Y)
 		#ifdef MINI_I3_MK33
 			#define Y_CURRENT 370 // (mA) RMS current.  MK3 motors
-		#else
+		#elif MINI_COREXY
 	        #define Y_CURRENT 400
+		#else
+	        #define Y_CURRENT 350
 		#endif
         #define Y_MICROSTEPS 16
         #define Y_RSENSE 0.22
