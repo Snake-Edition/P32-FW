@@ -53,8 +53,8 @@ void GCodePreview::step(string_view, bool, uint8_t *buffer, size_t buffer_size, 
          * gcode reader say there is one, we send it.
          */
 
-        bool has_thumbnail = gcode->stream_thumbnail_start(width, height, IGcodeReader::ImgType::PNG, allow_larger);
-        if (!has_thumbnail) {
+        thumbnail_reader = gcode->stream_thumbnail_start(width, height, IGcodeReader::ImgType::PNG, allow_larger);
+        if (!thumbnail_reader) {
             /*
              * Something is wrong. We don't care about exactly what, we simply
              * don't have the preview -> 404.
@@ -72,13 +72,8 @@ void GCodePreview::step(string_view, bool, uint8_t *buffer, size_t buffer_size, 
     out.next = Continue();
     if (buffer_size >= MIN_CHUNK_SIZE) {
         written += http::render_chunk(handling, buffer, buffer_size, [&](uint8_t *buffer_, size_t buffer_size_) {
-            int got = 0;
-            for (size_t i = 0; i < buffer_size_; i++) {
-                if (gcode->stream_getc(*reinterpret_cast<char *>(&buffer_[i])) != IGcodeReader::Result_t::RESULT_OK) {
-                    break;
-                }
-                ++got;
-            }
+            assert(thumbnail_reader);
+            int got = thumbnail_reader->read({ buffer_, buffer_size_ }).size();
             if (got > 0) {
                 return got;
             } else {

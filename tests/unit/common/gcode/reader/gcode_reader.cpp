@@ -69,8 +69,8 @@ struct DummyReader : public GcodeReaderCommon {
         return Result_t::RESULT_OK;
     }
 
-    virtual bool stream_thumbnail_start(uint16_t, uint16_t, ImgType, bool) override {
-        return true;
+    virtual AbstractByteReader *stream_thumbnail_start(uint16_t, uint16_t, ImgType, bool) override {
+        return nullptr;
     }
 
     virtual uint32_t get_gcode_stream_size_estimate() override {

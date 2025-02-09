@@ -8,6 +8,7 @@
 
 PlainGcodeReader::PlainGcodeReader(FILE &f, const struct stat &stat_info)
     : GcodeReaderCommon(f) {
+    this->ptr_stream_getc = static_cast<stream_getc_type>(&PlainGcodeReader::stream_getc_impl);
     file_size = stat_info.st_size;
 }
 
@@ -15,21 +16,19 @@ bool PlainGcodeReader::stream_metadata_start() {
     bool success = fseek(file.get(), 0, SEEK_SET) == 0;
     stream_mode_ = success ? StreamMode::metadata : StreamMode::none;
     gcodes_in_metadata = 0;
-    set_ptr_stream_getc(&PlainGcodeReader::stream_getc_impl);
     return success;
 }
 IGcodeReader::Result_t PlainGcodeReader::stream_gcode_start(uint32_t offset) {
     bool success = fseek(file.get(), offset, SEEK_SET) == 0;
     stream_mode_ = success ? StreamMode::gcode : StreamMode::none;
-    set_ptr_stream_getc(&PlainGcodeReader::stream_getc_impl);
     return success ? Result_t::RESULT_OK : Result_t::RESULT_ERROR;
 }
-bool PlainGcodeReader::stream_thumbnail_start(uint16_t expected_width, uint16_t expected_height, ImgType expected_type, bool allow_larger) {
+AbstractByteReader *PlainGcodeReader::stream_thumbnail_start(uint16_t expected_width, uint16_t expected_height, ImgType expected_type, bool allow_larger) {
     // search for begining of thumbnail in file
     static const size_t MAX_SEARCH_LINES = 2048;
     // We want to do simple scan through beginning of file, so we use gcode stream for that, it doesn't skip towards end of file like metadata stream
     if (stream_gcode_start() != IGcodeReader::Result_t::RESULT_OK) {
-        return false;
+        return nullptr;
     }
 
     GcodeBuffer buffer;
@@ -38,15 +37,15 @@ bool PlainGcodeReader::stream_thumbnail_start(uint16_t expected_width, uint16_t 
         long unsigned int num_bytes = 0;
         if (IsBeginThumbnail(buffer, expected_width, expected_height, expected_type, allow_larger, num_bytes)) {
             stream_mode_ = StreamMode::thumbnail;
-            thumbnail_size = num_bytes;
-            base64_decoder.Reset();
-            ptr_stream_getc = static_cast<stream_getc_type>(&PlainGcodeReader::stream_getc_thumbnail_impl);
-            return true;
+            thumbnail_reader.gcode_reader = this;
+            thumbnail_reader.thumbnail_size = num_bytes;
+            thumbnail_reader.base64_decoder.Reset();
+            return &thumbnail_reader;
         }
     }
 
     stream_mode_ = StreamMode::none;
-    return false;
+    return nullptr;
 }
 
 PlainGcodeReader::Result_t PlainGcodeReader::stream_getc_impl(char &out) {
@@ -120,14 +119,30 @@ IGcodeReader::Result_t PlainGcodeReader::stream_get_line(GcodeBuffer &buffer, Co
     return Result_t::RESULT_EOF;
 }
 
-IGcodeReader::Result_t PlainGcodeReader::stream_getc_thumbnail_impl(char &out) {
-    auto file = this->file.get();
+std::span<std::byte> PlainGcodeReader::ThumbnailReader::read(std::span<std::byte> buffer) {
+    // TODO implement reading multiple bytes at a time
+    size_t n = buffer.size();
+    size_t pos = 0;
+    auto data = buffer.data();
+    while (n != pos) {
+        char c;
+        if (getc(c) == IGcodeReader::Result_t::RESULT_OK) {
+            data[pos++] = (std::byte)c;
+        } else {
+            break;
+        }
+    }
+    return { data, pos };
+}
+
+IGcodeReader::Result_t PlainGcodeReader::ThumbnailReader::getc(char &out) {
+    FILE *file = gcode_reader->file.get();
     long pos = ftell(file);
     while (true) {
         if (thumbnail_size == 0) {
             return Result_t::RESULT_EOF;
         }
-        if (!range_valid(pos, pos + 1)) {
+        if (!gcode_reader->range_valid(pos, pos + 1)) {
             return Result_t::RESULT_OUT_OF_RANGE;
         }
         int c = fgetc(file);

@@ -24,7 +24,7 @@ public:
 
     virtual bool stream_metadata_start() override;
     virtual Result_t stream_gcode_start(uint32_t offset = 0) override;
-    virtual bool stream_thumbnail_start(uint16_t expected_width, uint16_t expected_height, ImgType expected_type, bool allow_larger = false) override;
+    virtual AbstractByteReader *stream_thumbnail_start(uint16_t expected_width, uint16_t expected_height, ImgType expected_type, bool allow_larger = false) override;
     virtual Result_t stream_get_line(GcodeBuffer &buffer, Continuations) override;
     virtual uint32_t get_gcode_stream_size_estimate() override;
     virtual uint32_t get_gcode_stream_size() override;
@@ -142,4 +142,12 @@ private:
      * @return Status of the header.
      */
     Result_t read_and_check_header();
+
+    struct ThumbnailReader final : public AbstractByteReader {
+        FILE *file = nullptr;
+        size_t size = 0;
+
+        std::span<std::byte> read(std::span<std::byte>) final;
+    };
+    ThumbnailReader thumbnail_reader;
 };

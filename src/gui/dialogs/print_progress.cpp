@@ -161,7 +161,6 @@ void PrintProgress::UpdateTexts() {
         hide_col_text_fields();
         info_text.SetText(_(finish_print_text));
         info_text.Show();
-        thumbnail.redrawWhole(); // thumbnaill will be invalidated by hiding estime_label above, we need to force it to redraw entirely
         thumbnail.Invalidate();
         mode = ProgressMode_t::END_PREVIEW;
         break;
@@ -172,9 +171,8 @@ void PrintProgress::UpdateTexts() {
 
 void PrintProgress::updateLoop(visibility_changed_t visibility_changed) {
 
-    // ProgressMode_t::STOPPED_INIT invokes redrawWhole(), due to black screen bug during Stopping from plink/Connect
+    // ProgressMode_t::STOPPED_INIT invokes Invalidate(), due to black screen bug during Stopping from plink/Connect
     if (visibility_changed == visibility_changed_t::yes || mode == ProgressMode_t::STOPPED_INIT) {
-        thumbnail.redrawWhole();
         thumbnail.Invalidate();
     }
 

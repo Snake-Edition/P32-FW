@@ -791,10 +791,10 @@ tuple<JsonResult, size_t> PreviewRenderer::render(uint8_t *buffer, size_t buffer
     }
 
     size_t written = 0;
-
-    if (!started) {
+    if (!thumbnail_reader) {
         // get any thumbnail bigger than 17x17
-        if (!gcode->stream_thumbnail_start(17, 17, IGcodeReader::ImgType::PNG, true)) {
+        thumbnail_reader = gcode->stream_thumbnail_start(17, 17, IGcodeReader::ImgType::PNG, true);
+        if (!thumbnail_reader) {
             // no thumbnail found in gcode, just dont send anything
             return make_tuple(JsonResult::Complete, 0);
         }
@@ -802,26 +802,17 @@ tuple<JsonResult, size_t> PreviewRenderer::render(uint8_t *buffer, size_t buffer
         memcpy(buffer, intro, intro_len);
         written += intro_len;
         buffer += intro_len;
-        started = true;
     }
 
     bool write_end = false;
     while ((buffer_size - written) >= (encoded_chunk_size + 1)) { // if there is space for another chunk (and ending \0)
         // read chunk of decoded data
         uint8_t dec_chunk[decoded_chunk_size] = { 0 };
-        size_t decoded_len = 0;
-        while (decoded_len < decoded_chunk_size) {
-            if (gcode->stream_getc(reinterpret_cast<char &>(dec_chunk[decoded_len])) != IGcodeReader::Result_t::RESULT_OK) {
-                // probably end of data, or error. Either way stop reading and send whatever was read till now.
-                // if error happens while sending thumbnail, there is not much that can be done to signal that anyway.
-                write_end = true;
-                break;
-            }
-            ++decoded_len;
-        }
-        // encode data, if there is something to encode
-        if (decoded_len == 0) {
-            // nothing to encode, end
+        size_t decoded_len = thumbnail_reader->read({ dec_chunk, decoded_chunk_size }).size();
+        if (decoded_len != decoded_chunk_size) {
+            // probably end of data, or error. Either way stop reading and send whatever was read till now.
+            // if error happens while sending thumbnail, there is not much that can be done to signal that anyway.
+            write_end = true;
             break;
         }
         [[maybe_unused]] size_t encoded_len;

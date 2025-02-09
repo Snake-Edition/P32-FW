@@ -15,6 +15,7 @@ namespace nhttp::printer {
 class GCodePreview {
 private:
     AnyGcodeFormatReader gcode;
+    AbstractByteReader *thumbnail_reader = nullptr;
     std::optional<uint32_t> etag;
     bool headers_sent = false;
     bool can_keep_alive;

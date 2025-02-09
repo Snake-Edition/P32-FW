@@ -8,6 +8,7 @@
 #include <transfers/partial_file.hpp>
 #include <transfers/transfer.hpp>
 
+#include "abstract_byte_reader.hpp"
 #include "gcode_reader_restore_info.hpp"
 #include "gcode_reader_result.hpp"
 
@@ -83,9 +84,16 @@ public:
     virtual Result_t stream_gcode_start(uint32_t offset = 0) = 0;
 
     /**
-     * @brief Find thumbnail with specified parameters and strart streaming it.
+     * @brief Find thumbnail with specified parameters and start streaming it.
+     * May return nullptr if thumbnail was not found.
+     * Lifetime of returned pointer is tied to the lifetime of `this` gcode
+     * reader, you are not supposed to free it. Returned pointer is valid until
+     * some other method is invoked on `this` gcode reader.
+     * End of data is signaled by byte reader returning less data than
+     * the capacity of the provided buffer, eventually returning empty span.
+     * Errors are not indicated specially.
      */
-    virtual bool stream_thumbnail_start(uint16_t expected_width, uint16_t expected_height, ImgType expected_type, bool allow_larger = false) = 0;
+    virtual AbstractByteReader *stream_thumbnail_start(uint16_t expected_width, uint16_t expected_height, ImgType expected_type, bool allow_larger = false) = 0;
 
     /**
      * @brief Get line from stream specified before by start_xx function

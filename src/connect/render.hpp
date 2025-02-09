@@ -17,11 +17,12 @@ namespace connect_client {
 class PreviewRenderer final : public json::ChunkRenderer {
 private:
     IGcodeReader *gcode;
-    bool started = false;
+    AbstractByteReader *thumbnail_reader;
 
 public:
     PreviewRenderer(IGcodeReader *gcode)
-        : gcode(gcode) {}
+        : gcode(gcode)
+        , thumbnail_reader(nullptr) {}
     virtual std::tuple<json::JsonResult, size_t> render(uint8_t *buffer, size_t buffer_size) override;
 };
 

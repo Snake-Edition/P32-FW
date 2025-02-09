@@ -6,31 +6,6 @@
 #include "gcode_reader_interface.hpp"
 #include "display.hpp"
 
-class GCodeQOIReader final : public AbstractByteReader {
-private:
-    IGcodeReader *reader;
-
-public:
-    explicit GCodeQOIReader(IGcodeReader *reader_)
-        : reader { reader_ } {}
-
-    std::span<std::byte> read(std::span<std::byte> buffer) final {
-        // TODO implement reading multiple bytes at a time
-        size_t n = buffer.size();
-        size_t pos = 0;
-        auto data = buffer.data();
-        while (n != pos) {
-            char c;
-            if (reader->stream_getc(c) == IGcodeReader::Result_t::RESULT_OK) {
-                data[pos++] = (std::byte)c;
-            } else {
-                break;
-            }
-        }
-        return { data, pos };
-    }
-};
-
 //-------------------------- Thumbnail --------------------------------------
 
 WindowThumbnail::WindowThumbnail(window_t *parent, Rect16 rect)
@@ -48,20 +23,15 @@ void WindowPreviewThumbnail::unconditionalDraw() {
     if (!gcode_reader.is_open()) {
         return;
     }
-
-    if (!gcode_reader->stream_thumbnail_start(Width(), Height(), IGcodeReader::ImgType::QOI)) {
-        return;
+    if (AbstractByteReader *thumbnail_reader = gcode_reader->stream_thumbnail_start(Width(), Height(), IGcodeReader::ImgType::QOI)) {
+        display::draw_img(point_ui16(Left(), Top()), *thumbnail_reader);
     }
-
-    GCodeQOIReader res { gcode_reader.get() };
-    display::draw_img(point_ui16(Left(), Top()), res);
 }
 
 //------------------------- Progress Thumbnail -----------------------------------
 
 WindowProgressThumbnail::WindowProgressThumbnail(window_t *parent, Rect16 rect, size_t allowed_old_thumbnail_width)
     : WindowThumbnail(parent, rect)
-    , redraw_whole(true)
     , old_allowed_width(allowed_old_thumbnail_width) {
     gcode_reader = AnyGcodeFormatReader { GCodeInfo::getInstance().GetGcodeFilepath() };
 }
@@ -78,26 +48,14 @@ void WindowProgressThumbnail::unconditionalDraw() {
         return;
     }
 
-    // TODO: check if redraw_whole is still needed, Invalidate might be enough now
-    if (!redraw_whole) { // No longer drawing image per-progress, so draw is only valid if the whole image wants to be drawn
-        return;
-    }
-
-    bool have_old_alternative { false };
-
-    if (!gcode_reader->stream_thumbnail_start(Width(), Height(), IGcodeReader::ImgType::QOI)) {
-        if (old_allowed_width < Width() && !gcode_reader->stream_thumbnail_start(old_allowed_width, Height(), IGcodeReader::ImgType::QOI)) {
-            return;
-        } else {
-            have_old_alternative = true;
+    AbstractByteReader *thumbnail_reader = gcode_reader->stream_thumbnail_start(Width(), Height(), IGcodeReader::ImgType::QOI);
+    if (thumbnail_reader) {
+        display::draw_img(point_ui16(Left(), Top()), *thumbnail_reader);
+    } else {
+        if (old_allowed_width < Width() && (thumbnail_reader = gcode_reader->stream_thumbnail_start(old_allowed_width, Height(), IGcodeReader::ImgType::QOI))) {
+            display::draw_img(point_ui16(get_old_left(), Top()), *thumbnail_reader);
         }
     }
-
-    // Draw whole thumbnail:
-    GCodeQOIReader res { gcode_reader.get() };
-    display::draw_img(point_ui16(have_old_alternative ? get_old_left() : Left(), Top()), res);
-
-    redraw_whole = false;
 }
 
 void WindowProgressThumbnail::pauseDeinit() {
@@ -106,8 +64,4 @@ void WindowProgressThumbnail::pauseDeinit() {
 
 void WindowProgressThumbnail::pauseReinit() {
     gcode_reader = AnyGcodeFormatReader { GCodeInfo::getInstance().GetGcodeFilepath() };
-}
-
-void WindowProgressThumbnail::redrawWhole() {
-    redraw_whole = true;
 }

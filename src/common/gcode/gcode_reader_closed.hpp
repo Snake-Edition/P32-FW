@@ -9,8 +9,8 @@ class ClosedReader final : public IGcodeReader {
     Result_t stream_gcode_start(uint32_t = 0) override {
         return Result_t::RESULT_ERROR;
     }
-    bool stream_thumbnail_start(uint16_t, uint16_t, ImgType, bool = false) override {
-        return false;
+    AbstractByteReader *stream_thumbnail_start(uint16_t, uint16_t, ImgType, bool = false) override {
+        return nullptr;
     }
     Result_t stream_get_line(GcodeBuffer &, Continuations) override {
         return Result_t::RESULT_ERROR;
