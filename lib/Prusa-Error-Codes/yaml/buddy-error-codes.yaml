@@ -1276,7 +1276,7 @@ Errors:
     gui_layout: "warning_dialog"
 
   - code: "XX837"
-    printers: [COREONE]
+    printers: [COREONE, XL]
     title: "Open Chamber Ventilation"
     text: "Ensure the top ventilation grille is open for proper airflow."
     id: "OPEN_CHAMBER_VENTS"
@@ -1284,7 +1284,7 @@ Errors:
     gui_layout: "warning_dialog"
 
   - code: "XX838"
-    printers: [COREONE]
+    printers: [COREONE, XL]
     title: "Close Chamber Ventilation"
     text: "Ensure the top ventilation grille is closed for optimal chamber temperature."
     id: "CLOSE_CHAMBER_VENTS"
