@@ -375,7 +375,8 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
     }
   #endif
 
-  PrintStatusMessageGuard statusGuard(PrintStatusMessage::make<PrintStatusMessage::homing>({}));
+  PrintStatusMessageGuard statusGuard;
+  statusGuard.update<PrintStatusMessage::homing>({});
   HomingReporter reporter;
 
   #if HAS_CEILING_CLEARANCE()

@@ -12,7 +12,6 @@ public:
     using Record = PrintStatusMessageRecord;
 
     explicit PrintStatusMessageGuard();
-    explicit PrintStatusMessageGuard(const Message &msg);
     PrintStatusMessageGuard(const PrintStatusMessageGuard &) = delete;
 
     ~PrintStatusMessageGuard();

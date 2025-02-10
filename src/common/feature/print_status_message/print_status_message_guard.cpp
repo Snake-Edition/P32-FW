@@ -17,11 +17,6 @@ PrintStatusMessageGuard::PrintStatusMessageGuard() {
     psm.active_guard_ = this;
 }
 
-PrintStatusMessageGuard::PrintStatusMessageGuard(const Message &msg)
-    : PrintStatusMessageGuard() {
-    update(msg);
-}
-
 PrintStatusMessageGuard::~PrintStatusMessageGuard() {
     auto &psm = print_status_message();
     std::scoped_lock guard(psm.mutex_);
