@@ -234,12 +234,25 @@ void filament_gcodes::M1701_no_parser(const std::optional<float> &fast_load_leng
 
         settings.SetParkPoint({ X_AXIS_LOAD_POS, Y_AXIS_LOAD_POS, z_min_pos > 0 ? std::max(current_position.z, z_min_pos) : NAN });
 
-        // catch filament in gear and then ask for temp
-        if (!Pause::Instance().perform(Pause::LoadType::load_to_gears, settings) || FSensors_instance().no_filament_surely(LogicalFilamentSensor::extruder)) {
-            // do not ask for filament type after stop was pressed or filament was removed from FS
+        const uint16_t orig_temp = Temperature::degTargetHotend(active_extruder);
+
+        auto unload_and_reset = [&] {
+            thermalManager.setTargetHotend(orig_temp, active_extruder);
+            marlin_server::set_temp_to_display(orig_temp, active_extruder);
             Pause::Instance().perform(Pause::LoadType::unload_from_gears, settings);
             M70X_process_user_response(PreheatStatus::Result::DoneNoFilament, target_extruder);
             FSensors_instance().ClrAutoloadSent();
+        };
+
+        if (orig_temp < EXTRUDE_MINTEMP) {
+            thermalManager.setTargetHotend(EXTRUDE_MINTEMP, active_extruder);
+            marlin_server::set_temp_to_display(EXTRUDE_MINTEMP, active_extruder);
+        }
+
+        // catch filament in gear and then ask for temp
+        if (!Pause::Instance().perform(Pause::LoadType::load_to_gears, settings) || FSensors_instance().no_filament_surely(LogicalFilamentSensor::extruder)) {
+            // do not ask for filament type after stop was pressed or filament was removed from FS
+            unload_and_reset();
             return;
         }
 
@@ -249,9 +262,7 @@ void filament_gcodes::M1701_no_parser(const std::optional<float> &fast_load_leng
 
             if (preheat_ret.first) {
                 // canceled
-                Pause::Instance().perform(Pause::LoadType::unload_from_gears, settings);
-                M70X_process_user_response(PreheatStatus::Result::DoneNoFilament, target_extruder);
-                FSensors_instance().ClrAutoloadSent();
+                unload_and_reset();
                 return;
             }
 
