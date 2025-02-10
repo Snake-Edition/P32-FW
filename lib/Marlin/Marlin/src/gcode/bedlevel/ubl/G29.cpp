@@ -284,7 +284,11 @@ void GcodeSuite::G29() {
 
     #if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
         if (ubl.g29_nozzle_cleaning_failed) {
-            plan_park_move_to_xyz({ { XYZ_NOZZLE_PARK_POINT } }, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE);
+            // Using the M600 position for this. While we are not changing
+            // filament, we want the nozzle to park at an accessible place to
+            // have it cleaned and the M600 position happens to be just what we
+            // need.
+            plan_park_move_to_xyz({ { XYZ_NOZZLE_PARK_POINT_M600 } }, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE);
 
             const auto response = marlin_server::prompt_warning(WarningType::NozzleCleaningFailed);
             if (response == Response::Ignore) {
