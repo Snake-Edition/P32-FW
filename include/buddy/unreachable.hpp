@@ -1,7 +1,7 @@
 /// @file
 #pragma once
 
-#include <common/bsod.h>
+#include <bsod.h>
 
 /// Declare codepath as unreachable.
 ///

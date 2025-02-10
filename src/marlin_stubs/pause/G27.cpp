@@ -75,14 +75,14 @@ void GcodeSuite::G27() {
 }
 
 void G27_no_parser(const G27Params &params) {
-    xyz_pos_t park_position { mapi::park_positions[params.where_to_park] };
+    mapi::ParkingPosition park_position { mapi::park_positions[params.where_to_park] };
     xyz_bool_t do_axis = { { { true, true, true } } };
 
     // If any park position was given, move only specified axes
     if (!(isnan(params.park_position.x) && isnan(params.park_position.y) && isnan(params.park_position.z))) {
         for (uint8_t i = 0; i < 3; i++) {
-            do_axis.pos[i] = !isnan(params.park_position.pos[i]);
-            park_position.pos[i] = do_axis.pos[i] ? params.park_position.pos[i] : current_position.pos[i];
+            do_axis[i] = !isnan(params.park_position.pos[i]);
+            park_position[i] = do_axis.pos[i] ? params.park_position.pos[i] : current_position.pos[i];
         }
     }
 
@@ -90,7 +90,7 @@ void G27_no_parser(const G27Params &params) {
     if (axes_need_homing(X_AXIS | Y_AXIS | Z_AXIS)) {
         if (do_axis == xyz_bool_t { { { false, false, true } } } && params.z_action == mapi::ZAction::move_to_at_least) {
             // Only Z axis is given in P=0 mode, do Z clearance
-            do_z_clearance(park_position.z);
+            do_z_clearance(std::get<float>(park_position.z));
             return;
         }
     }

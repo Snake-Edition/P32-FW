@@ -95,7 +95,7 @@ void filament_gcodes::M701_no_parser(FilamentType filament_to_be_loaded, const s
     settings.SetRetractLength(0.f);
     settings.SetMmuFilamentToLoad(mmu_slot);
 
-    xyz_pos_t park_position = mapi::park_positions[do_purge_only ? mapi::ParkPosition::purge : mapi::ParkPosition::load];
+    mapi::ParkingPosition park_position = mapi::park_positions[do_purge_only ? mapi::ParkPosition::purge : mapi::ParkPosition::load];
     if (z_min_pos > 0) {
         park_position.z = std::max(current_position.z, z_min_pos);
     }
@@ -151,7 +151,13 @@ void filament_gcodes::M702_no_parser(std::optional<float> unload_length, float z
     settings.SetExtruder(target_extruder);
     settings.SetUnloadLength(unload_length);
     settings.SetRetractLength(0.f);
-    xyz_pos_t park_position = { X_AXIS_UNLOAD_POS, Y_AXIS_UNLOAD_POS, z_min_pos > 0 ? std::max(current_position.z, z_min_pos) : NAN };
+    mapi::ParkingPosition park_position = {
+        X_AXIS_UNLOAD_POS,
+        Y_AXIS_UNLOAD_POS,
+        (z_min_pos) > 0
+            ? std::max(current_position.z, z_min_pos)
+            : mapi::ParkingPosition::unchanged
+    };
     settings.SetParkPoint(park_position);
     xyze_pos_t current_position_tmp = current_position;
 
@@ -232,7 +238,15 @@ void filament_gcodes::M1701_no_parser(const std::optional<float> &fast_load_leng
         settings.SetRetractLength(0.f);
         float e_pos_to_restore = current_position.e;
 
-        settings.SetParkPoint({ X_AXIS_LOAD_POS, Y_AXIS_LOAD_POS, z_min_pos > 0 ? std::max(current_position.z, z_min_pos) : NAN });
+        mapi::ParkingPosition pos = {
+            X_AXIS_LOAD_POS,
+            Y_AXIS_LOAD_POS,
+            (z_min_pos > 0)
+                ? std::max(current_position.z, z_min_pos)
+                : mapi::ParkingPosition::unchanged
+        };
+
+        settings.SetParkPoint(pos);
 
         const uint16_t orig_temp = Temperature::degTargetHotend(active_extruder);
 
@@ -271,7 +285,7 @@ void filament_gcodes::M1701_no_parser(const std::optional<float> &fast_load_leng
             filament::set_color_to_load(std::nullopt);
 
             if (z_min_pos > 0 && z_min_pos > current_position.z + 0.1F) {
-                xyz_pos_t park_position = { NAN, NAN, z_min_pos };
+                mapi::ParkingPosition park_position({ mapi::ParkingPosition::unchanged, mapi::ParkingPosition::unchanged, z_min_pos });
                 // Returning to previous position is unwanted outside of printing (M1701 should be used only outside of printing)
                 settings.SetParkPoint(park_position);
             }
@@ -312,7 +326,7 @@ void filament_gcodes::M1600_no_parser(FilamentType filament_to_be_loaded, uint8_
     xyze_pos_t current_position_tmp = current_position;
 
     pause::Settings settings;
-    xyz_pos_t park_position = { X_AXIS_UNLOAD_POS, Y_AXIS_UNLOAD_POS, std::max(current_position.z, (float)Z_AXIS_LOAD_POS) };
+    mapi::ParkingPosition park_position = { X_AXIS_UNLOAD_POS, Y_AXIS_UNLOAD_POS, std::max(current_position.z, (float)Z_AXIS_LOAD_POS) };
     settings.SetParkPoint(park_position);
     settings.SetExtruder(target_extruder);
     settings.SetRetractLength(0.f);

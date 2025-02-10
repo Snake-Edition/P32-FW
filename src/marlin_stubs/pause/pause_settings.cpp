@@ -83,9 +83,10 @@ void Settings::SetParkZFeedrate(const std::optional<float> &feedrate) {
         park_z_feedrate = GetDefaultParkZFeedrate();
     }
 }
-
-void Settings::SetParkPoint(const xyz_pos_t &park_point) {
-    park_pos = park_point; // TODO check limits
+void Settings::SetParkPoint(const mapi::ParkingPosition &park_point) {
+    // Currently parking handles it's NaN values internally.
+    // TODO: Refactor parking to use ParkingPosition instead of xyz_pos_t
+    park_pos = park_point.to_nan_xyz_pos();
     park_pos.z = std::min(park_pos.z, get_z_max_pos_mm());
 }
 

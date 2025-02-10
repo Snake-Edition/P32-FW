@@ -1,9 +1,10 @@
 #pragma once
 
 #include <core/types.h>
-#include <common/enum_array.hpp>
+#include <enum_array.hpp>
 
 #include <option/has_wastebin.h>
+#include <buddy/unreachable.hpp>
 
 namespace mapi {
 
@@ -23,16 +24,62 @@ enum class ParkPosition : uint8_t {
     _cnt,
 };
 
-static constexpr EnumArray<ParkPosition, xyz_pos_t, ParkPosition::_cnt> park_positions {
-    { ParkPosition::park, xyz_pos_t({ { XYZ_NOZZLE_PARK_POINT } }) },
-#if HAS_WASTEBIN()
-        { ParkPosition::purge, xyz_pos_t({ X_WASTEBIN_POINT, Y_WASTEBIN_POINT, Z_AXIS_LOAD_POS }) },
-#else
-        { ParkPosition::purge, xyz_pos_t({ X_AXIS_LOAD_POS, Y_AXIS_LOAD_POS, Z_AXIS_LOAD_POS }) },
-#endif
-        { ParkPosition::load, xyz_pos_t({ X_AXIS_LOAD_POS, Y_AXIS_LOAD_POS, Z_AXIS_LOAD_POS }) },
+/*
+This variant version of xyz_pos_t tries to solve the problem of xyz_t having overloaded meaning,
+1. absolute position (position in a physical sense) - cannot be NaN
+2. position to change to (can be NaN -> it means no change on that specific axis)
+
+This class serves as representation of a position with higher level of abstraction,
+it forces you to handle the ParkingPosition::Unchanged value and deal with the real meaning of this class.
+
+It's intended use it to produce xyz_pos_t instance at the end of it's lifetime, having handled ParkingPosition::Unchanged values before that.
+*/
+struct ParkingPosition {
+    // special marker indicating "leave the synchronized xyz_pos_t on that axis as is"
+    struct Unchanged {
+        constexpr auto operator<=>(const Unchanged &) const = default;
+    };
+    using Variant = std::variant<float, Unchanged>;
+
+    static constexpr Variant unchanged = Unchanged {};
+    Variant x, y, z;
+
+    // Synchronizes this provided position and provides appropriate xyz_pos_t
+    xyz_pos_t to_xyz_pos(const xyz_pos_t &pos) const;
+
+    // Do not use if not necessary! This method currently works as a
+    // bridge between unrefactored parts still using xyz_pos_t
+    // Should not be needed upon more refactoring
+    xyz_pos_t to_nan_xyz_pos() const;
+
+    static ParkingPosition from_xyz_pos(const xyz_pos_t &pos);
+
+    // Provide array-like access if needed
+    inline Variant &operator[](size_t index) {
+        switch (index) {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        default:
+            BUDDY_UNREACHABLE();
+        }
+    }
 };
 
-void park_move_with_conditional_home(const xyz_pos_t &park_position, ZAction z_action);
+static constexpr EnumArray<ParkPosition, ParkingPosition, ParkPosition::_cnt> park_positions {
+    { ParkPosition::park, ParkingPosition(XYZ_NOZZLE_PARK_POINT) },
+#if HAS_WASTEBIN()
+        { ParkPosition::purge, ParkingPosition { X_WASTEBIN_POINT, Y_WASTEBIN_POINT, Z_AXIS_LOAD_POS } },
+#else
+        { ParkPosition::purge, ParkingPosition { X_AXIS_LOAD_POS, Y_AXIS_LOAD_POS, Z_AXIS_LOAD_POS } },
+
+#endif
+        { ParkPosition::load, ParkingPosition { X_AXIS_LOAD_POS, Y_AXIS_LOAD_POS, Z_AXIS_LOAD_POS } },
+};
+
+void park_move_with_conditional_home(const ParkingPosition &park_position, ZAction z_action);
 
 } // namespace mapi
