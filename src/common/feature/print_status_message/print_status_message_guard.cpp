@@ -3,7 +3,7 @@
 
 extern osThreadId defaultTaskHandle;
 
-PrintStatusMessageGuard::PrintStatusMessageGuard() {
+PrintStatusMessageGuard::PrintStatusMessageGuard(bool clear_temporary_msg) {
     assert(xTaskGetCurrentTaskHandle() == defaultTaskHandle);
 
     auto &psm = print_status_message();
@@ -12,8 +12,10 @@ PrintStatusMessageGuard::PrintStatusMessageGuard() {
     parent_guard_ = psm.active_guard_;
     record_.id = psm.id_counter_++;
 
-    // Clear any running temporary message -> gets overriden by the guard
-    psm.temporary_message_ = {};
+    if (clear_temporary_msg) {
+        psm.temporary_message_ = {};
+    }
+
     psm.active_guard_ = this;
 }
 
