@@ -1500,17 +1500,17 @@
 
 #if ENABLED(NOZZLE_PARK_FEATURE)
     // Specify a park position as { X, Y, Z }
-    #define X_NOZZLE_PARK_POINT (X_MAX_POS - 10)
-    #define Y_NOZZLE_PARK_POINT (Y_MIN_POS + 10)
-    #define Z_NOZZLE_PARK_POINT (20) // !!! THESE ARE NOT ABSOLUTE COORDINATES, BUT A RAISE VALUE (HOPEFULLY EVERYWHERE)
-    #define Z_NOZZLE_PARK_POINT_MIN 168 // Always raise the nozzle by this amount when parking on print end
+    #define X_NOZZLE_PARK_POINT (X_MAX_POS - 10.0f)
+    #define Y_NOZZLE_PARK_POINT (Y_MIN_POS + 10.0f)
+    #define Z_NOZZLE_PARK_POINT (20.0f) // !!! THESE ARE NOT ABSOLUTE COORDINATES, BUT A RAISE VALUE (HOPEFULLY EVERYWHERE)
+    #define Z_NOZZLE_PARK_POINT_MIN 168.0f // Always raise the nozzle by this amount when parking on print end
 
     #define XYZ_NOZZLE_PARK_POINT \
         {X_NOZZLE_PARK_POINT, Y_NOZZLE_PARK_POINT, Z_NOZZLE_PARK_POINT}
 
     #define X_NOZZLE_PARK_POINT_M600 X_AXIS_LOAD_POS
     #define Y_NOZZLE_PARK_POINT_M600 Y_AXIS_LOAD_POS
-    #define Z_NOZZLE_PARK_POINT_M600    60
+    #define Z_NOZZLE_PARK_POINT_M600    60.0f
     #define XYZ_NOZZLE_PARK_POINT_M600 \
         {X_NOZZLE_PARK_POINT_M600, Y_NOZZLE_PARK_POINT_M600, Z_NOZZLE_PARK_POINT_M600}
 
@@ -1519,7 +1519,7 @@
 
     #define X_AXIS_LOAD_POS X_NOZZLE_PARK_POINT
     #define Y_AXIS_LOAD_POS Y_NOZZLE_PARK_POINT
-    #define Z_AXIS_LOAD_POS  40
+    #define Z_AXIS_LOAD_POS  40.0f
 
     #define X_AXIS_UNLOAD_POS X_AXIS_LOAD_POS
     #define Y_AXIS_UNLOAD_POS Y_AXIS_LOAD_POS

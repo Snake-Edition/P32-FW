@@ -1358,26 +1358,26 @@
 #define NOZZLE_PARK_FEATURE
 
 #if ENABLED(NOZZLE_PARK_FEATURE)
-    #define Z_AXIS_LOAD_POS  40
-    #define Z_AXIS_UNLOAD_POS 20
-    #define Y_AXIS_LOAD_POS    (std::numeric_limits<float>::quiet_NaN())
-    #define Y_AXIS_UNLOAD_POS  (std::numeric_limits<float>::quiet_NaN())
+    #define Z_AXIS_LOAD_POS  40.0f
+    #define Z_AXIS_UNLOAD_POS 20.0f
+    #define Y_AXIS_LOAD_POS    mapi::ParkingPosition::unchanged
+    #define Y_AXIS_UNLOAD_POS  mapi::ParkingPosition::unchanged
     // homing to this pos makes PTFE tube last longer
-    #define X_AXIS_LOAD_POS  ((X_MAX_POS) / 4)
-    #define X_AXIS_UNLOAD_POS  ((X_MAX_POS) / 4)
+    #define X_AXIS_LOAD_POS  ((X_MAX_POS) / 4.0f)
+    #define X_AXIS_UNLOAD_POS  ((X_MAX_POS) / 4.0f)
     // Specify a park position as { X, Y, Z }
 
-    #define X_NOZZLE_PARK_POINT (X_MAX_POS - 10)
-    #define Y_NOZZLE_PARK_POINT (Y_MAX_POS - 10)
-    #define Z_NOZZLE_PARK_POINT 20 // !!! THESE ARE NOT ABSOLUTE COORDINATES, BUT A RAISE VALUE (HOPEFULLY EVERYWHERE)
-    // #define Z_NOZZLE_PARK_POINT_MIN 10 // Always raise the nozzle by this amount when parking on print end
+    #define X_NOZZLE_PARK_POINT (X_MAX_POS - 10.0f)
+    #define Y_NOZZLE_PARK_POINT (Y_MAX_POS - 10.0f)
+    #define Z_NOZZLE_PARK_POINT 20.0f // !!! THESE ARE NOT ABSOLUTE COORDINATES, BUT A RAISE VALUE (HOPEFULLY EVERYWHERE)
+    // #define Z_NOZZLE_PARK_POINT_MIN 10.0f // Always raise the nozzle by this amount when parking on print end
 
     #define XYZ_NOZZLE_PARK_POINT \
         {X_NOZZLE_PARK_POINT, Y_NOZZLE_PARK_POINT, Z_NOZZLE_PARK_POINT}
 
-    #define X_NOZZLE_PARK_POINT_M600    (X_MIN_POS + 10)
-    #define Y_NOZZLE_PARK_POINT_M600    (Y_MIN_POS + 10)
-    #define Z_NOZZLE_PARK_POINT_M600    20
+    #define X_NOZZLE_PARK_POINT_M600    (X_MIN_POS + 10.0f)
+    #define Y_NOZZLE_PARK_POINT_M600    (Y_MIN_POS + 10.0f)
+    #define Z_NOZZLE_PARK_POINT_M600    20.0f
     #define XYZ_NOZZLE_PARK_POINT_M600 \
         {X_NOZZLE_PARK_POINT_M600, Y_NOZZLE_PARK_POINT_M600, Z_NOZZLE_PARK_POINT_M600}
 

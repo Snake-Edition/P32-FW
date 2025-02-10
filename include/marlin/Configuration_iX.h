@@ -1491,15 +1491,15 @@
 #define NOZZLE_PARK_FEATURE
 
 #if ENABLED(NOZZLE_PARK_FEATURE)
-    #define X_WASTEBIN_POINT 267.4
-    #define Y_WASTEBIN_POINT 305
-    #define Y_V_BLADE_POINT 284.75
-    #define Y_WASTEBIN_SAFE_POINT 270
+    #define X_WASTEBIN_POINT 267.4f
+    #define Y_WASTEBIN_POINT 305.0f
+    #define Y_V_BLADE_POINT 284.75f
+    #define Y_WASTEBIN_SAFE_POINT 270.0f
 
-    #define X_NOZZLE_PARK_POINT 208.75
-    #define Y_NOZZLE_PARK_POINT 305
-    #define Z_NOZZLE_PARK_POINT 10 // !!! THESE ARE NOT ABSOLUTE COORDINATES, BUT A RAISE VALUE (HOPEFULLY EVERYWHERE)
-    // #define Z_NOZZLE_PARK_POINT_MIN 10 // Always raise the nozzle by this amount when parking on print end
+    #define X_NOZZLE_PARK_POINT 208.75f
+    #define Y_NOZZLE_PARK_POINT 305.0f
+    #define Z_NOZZLE_PARK_POINT 10.0f // !!! THESE ARE NOT ABSOLUTE COORDINATES, BUT A RAISE VALUE (HOPEFULLY EVERYWHERE)
+    // #define Z_NOZZLE_PARK_POINT_MIN 10.0f // Always raise the nozzle by this amount when parking on print end
 
     #define XYZ_NOZZLE_PARK_POINT \
         {X_NOZZLE_PARK_POINT, Y_NOZZLE_PARK_POINT, Z_NOZZLE_PARK_POINT}
@@ -1515,7 +1515,7 @@
     #define NOZZLE_PARK_XY_FEEDRATE 200 // (mm/s) X and Y axes feedrate (also used for delta Z axis)
     #define NOZZLE_PARK_Z_FEEDRATE 5 // (mm/s) Z axis feedrate (not used for delta printers)
 
-    #define Y_AXIS_LOAD_POS 10
+    #define Y_AXIS_LOAD_POS 10.0f
     #define X_AXIS_LOAD_POS X_WASTEBIN_POINT
     #define Z_AXIS_LOAD_POS Z_NOZZLE_PARK_POINT
 

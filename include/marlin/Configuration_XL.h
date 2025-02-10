@@ -27,7 +27,6 @@
 #include <option/has_loadcell.h>
 #include <option/has_precise_homing_corexy.h>
 #include <option/has_precise_homing.h>
-
 // clang-format off
 
 /**
@@ -1488,22 +1487,22 @@
 #define NOZZLE_PARK_FEATURE
 
 #if ENABLED(NOZZLE_PARK_FEATURE)
-    #define Y_AXIS_PURGE_POS -7 ///< Position where slicer purges extruders on XL
+    #define Y_AXIS_PURGE_POS -7.0f ///< Position where slicer purges extruders on XL
     static_assert(Y_AXIS_PURGE_POS > Y_MIN_POS, "Invalid purge position");
 
-    #define Z_AXIS_LOAD_POS  40
-    #define Z_AXIS_UNLOAD_POS 20
+    #define Z_AXIS_LOAD_POS   40.0f
+    #define Z_AXIS_UNLOAD_POS 20.0f
     #define Y_AXIS_LOAD_POS    Y_AXIS_PURGE_POS
     #define Y_AXIS_UNLOAD_POS  Y_AXIS_PURGE_POS
-    #define X_AXIS_LOAD_POS  (std::numeric_limits<float>::quiet_NaN())
-    #define X_AXIS_UNLOAD_POS  (std::numeric_limits<float>::quiet_NaN())
+    #define X_AXIS_LOAD_POS  mapi::ParkingPosition::unchanged
+    #define X_AXIS_UNLOAD_POS  mapi::ParkingPosition::unchanged
 
     // Specify a park position as { X, Y, Z }
     // Park at the back of XL
-    #define X_NOZZLE_PARK_POINT (X_MIN_POS + 10)
-    #define Y_NOZZLE_PARK_POINT (Y_MAX_POS - 110)
-    #define Z_NOZZLE_PARK_POINT 20 // !!! THESE ARE NOT ABSOLUTE COORDINATES, BUT A RAISE VALUE (HOPEFULLY EVERYWHERE)
-    // #define Z_NOZZLE_PARK_POINT_MIN 10 // Always raise the nozzle by this amount when parking on print end
+    #define X_NOZZLE_PARK_POINT (X_MIN_POS + 10.0f)
+    #define Y_NOZZLE_PARK_POINT (Y_MAX_POS - 110.0f)
+    #define Z_NOZZLE_PARK_POINT (20.0f)
+    // #define Z_NOZZLE_PARK_POINT_MIN 10.0f // Always raise the nozzle by this amount when parking on print end
 
     #define XYZ_NOZZLE_PARK_POINT \
         {X_NOZZLE_PARK_POINT, Y_NOZZLE_PARK_POINT, Z_NOZZLE_PARK_POINT}
