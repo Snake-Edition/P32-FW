@@ -34,4 +34,5 @@ ScreenBlueError::ScreenBlueError()
     }
 
     description.set_font(description_font);
+    description.set_check_overflow(false);
 }
