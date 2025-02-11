@@ -111,6 +111,10 @@ bool IWinMenuContainer::SwapVisibility(IWindowMenuItem &item0, IWindowMenuItem &
         return false; // both visible and hidden must be assigned
     }
 
+    // Invalidate both items to circumvent set_is_hidden assertion
+    visible_item->Invalidate();
+    hidden_item->Invalidate();
+
     bool is_dev_only = visible_item->IsDevOnly();
     bool should_transfer_focus = visible_item->is_focused();
 

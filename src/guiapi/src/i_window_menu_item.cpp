@@ -464,3 +464,16 @@ void IWindowMenuItem::event(WindowMenuItemEventContext &ctx) {
     }
 #endif
 }
+
+void IWindowMenuItem::set_is_hidden(is_hidden_t set) {
+    // set_is_hidden should only be called before the items are first rendered
+    // the WindowMenu is not equipped to handle items appearing and disappearing (except for SwapVisibility)
+    assert(invalid_extension && invalid_icon && invalid_label);
+
+    const bool wasHidden = IsHidden();
+    hidden = static_cast<uint8_t>(set);
+
+    if (!IsHidden() && wasHidden) {
+        Invalidate();
+    }
+}

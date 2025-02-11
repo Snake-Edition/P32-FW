@@ -205,14 +205,8 @@ public:
         set_show_disabled_extension(false);
     }
 
-    inline void set_is_hidden(is_hidden_t set) {
-        const bool wasHidden = IsHidden();
-        hidden = static_cast<uint8_t>(set);
+    void set_is_hidden(is_hidden_t set);
 
-        if (!IsHidden() && wasHidden) {
-            Invalidate();
-        }
-    }
     inline void set_is_hidden(bool set = true) {
         set_is_hidden(set ? is_hidden_t::yes : is_hidden_t::no);
     }
