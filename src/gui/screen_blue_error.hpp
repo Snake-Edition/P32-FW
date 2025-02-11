@@ -31,8 +31,6 @@ public:
     static const constexpr size_t description_expected_chars = description_char_width * description_char_height;
 
 protected:
-    virtual void draw() override;
-
     window_text_t header; ///< BSOD, HARDFAULT, WATCHDOG, Needs to be filled in child
     window_text_t title; ///< Title with hardfault source or filename of bsod, Needs to be filled in child
     window_text_t description; ///< Description of error, Needs to be filled in child
