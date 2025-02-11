@@ -20,6 +20,14 @@ public:
         flags.multiline = set;
     }
 
+    bool checks_overflow() const {
+        return flags.check_overflow;
+    }
+
+    void set_check_overflow(bool set) {
+        flags.check_overflow = set;
+    }
+
     /// \returns whether the text would overflow the rectangle
     bool check_text_overflow() const;
 

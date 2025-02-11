@@ -42,7 +42,7 @@ void window_text_t::unconditionalDraw() {
         GetParent() ? GetParent()->GetBackColor() : GetBackColor(),
         invert_text_back_colors ? GetTextColor() : GetBackColor(),
         invert_text_back_colors ? GetBackColor() : GetTextColor(),
-        padding, { GetAlignment(), is_multiline(flags.multiline) },
+        padding, { GetAlignment(), is_multiline(flags.multiline), check_overflow(flags.check_overflow) },
         GuiDefaults::MenuItemCornerRadius, MIC_ALL_CORNERS, flags.has_round_corners);
 }
 

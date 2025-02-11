@@ -62,6 +62,7 @@ union WindowFlags {
         bool has_long_hold_screen_action : 1 = false; // 13 - screen will use default callback for long press
         bool has_icon : 1 = false; // 14 - optional or alternative icon for window
         bool has_round_corners : 1 = false; // 15 - window has round corners with default corner radius
+        bool check_overflow : 1 = true; ///< Assert that the text does not overflow (window_text only)
         union { // 18 .. 1F - 8bit variable used in child classes
             uint8_t align_data; // used in window_aligned_t
             struct {
@@ -71,6 +72,8 @@ union WindowFlags {
         } class_specific = { .align_data = 0 };
     };
 };
+
+static_assert(sizeof(WindowFlags) == 4);
 
 // current state of button, event is stored into buffer on button change
 enum class BtnState_t : uint8_t {
