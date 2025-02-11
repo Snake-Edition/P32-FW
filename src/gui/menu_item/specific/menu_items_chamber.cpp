@@ -10,7 +10,11 @@ using namespace buddy;
 // MI_CHAMBER_TARGET_TEMP
 // ============================================
 MI_CHAMBER_TARGET_TEMP::MI_CHAMBER_TARGET_TEMP(const char *label)
-    : WiSpin(0, numeric_input_config::chamber_temp_with_off(), _(label), &img::enclosure_16x16) {}
+    : WiSpin(0, numeric_input_config::chamber_temp_with_off(), _(label), &img::enclosure_16x16) //
+{
+    const auto caps = chamber().capabilities();
+    set_is_hidden(!caps.always_show_temperature_control && !caps.temperature_control());
+}
 
 void MI_CHAMBER_TARGET_TEMP::OnClick() {
     chamber().set_target_temperature(value_opt());
@@ -21,11 +25,9 @@ void MI_CHAMBER_TARGET_TEMP::Loop() {
         return;
     }
 
-    const auto caps = chamber().capabilities();
-    const bool temp_ctrl = caps.temperature_control();
+    const bool temp_ctrl = chamber().capabilities().temperature_control();
     const auto new_val = (temp_ctrl ? chamber().target_temperature() : std::nullopt);
 
-    set_is_hidden(!caps.always_show_temperature_control && !temp_ctrl);
     set_enabled(temp_ctrl);
     set_value(new_val);
 }
