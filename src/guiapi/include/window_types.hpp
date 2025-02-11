@@ -41,39 +41,36 @@ enum class win_type_t : uint8_t {
 };
 
 // todo add can capture flag (needed in frame event and SetCapture)
-union WindowFlags {
-    uint32_t data;
-    struct {
-        win_type_t type : 2 = win_type_t::normal; // 00 .. 01 - type of window
-        bool visible : 1 = true; // 02 - is visible
-        bool enabled : 1 = true; // 03 - is enabled (can be focused)
-        bool invalid : 1 = true; // 04 - content is invalid (draw)
-        bool invalid_background : 1 = true; // 05 - some windows might suport not drawing background
-        bool color_scheme_background : 1 = false; // 06 - select between color and pointer to color_scheme, for background color
-        bool color_scheme_foreground : 1 = false; // 07 - select between color and pointer to color_scheme, for foreground color
-        is_closed_on_click_t close_on_click : 1 = is_closed_on_click_t::no; // 09 - window id dialog
-        bool hidden_behind_dialog : 1 = false; // 0A - there is an dialog over this window
-        is_closed_on_timeout_t timeout_close : 1 = is_closed_on_timeout_t::no; // 0B - menu timeout flag - it's meant to be used in window_frame_t
-        is_closed_on_printing_t print_close : 1 = is_closed_on_printing_t::no; // 0C - should be closed, if print is started
-        bool shadow : 1 = false; // 0D - executable (causes darker colors)
-        bool enforce_capture_when_not_visible : 1 = false; // 0E - normally invisible / hidden_behind_dialog windows does not get capture
-        bool has_relative_subwins : 1 = false; // 0F - X Y coords of all children are relative to this, screen cannot have this flag because 1st level windows can be dialogs and they must not have relative coords
-        bool multiline : 1 = false; // 10 - multiline text affect window_text_t anf its children
-        bool has_long_hold_screen_action : 1 = false; // 13 - screen will use default callback for long press
-        bool has_icon : 1 = false; // 14 - optional or alternative icon for window
-        bool has_round_corners : 1 = false; // 15 - window has round corners with default corner radius
-        bool check_overflow : 1 = true; ///< Assert that the text does not overflow (window_text only)
-        union { // 18 .. 1F - 8bit variable used in child classes
-            uint8_t align_data; // used in window_aligned_t
-            struct {
-                uint8_t button_count : 4; // used in RadioButton
-                uint8_t button_index : 4; // used in RadioButton
-            };
-        } class_specific = { .align_data = 0 };
-    };
+struct WindowFlags {
+    win_type_t type : 2 = win_type_t::normal; // 00 .. 01 - type of window
+    bool visible : 1 = true; // 02 - is visible
+    bool enabled : 1 = true; // 03 - is enabled (can be focused)
+    bool invalid : 1 = true; // 04 - content is invalid (draw)
+    bool invalid_background : 1 = true; // 05 - some windows might suport not drawing background
+    bool color_scheme_background : 1 = false; // 06 - select between color and pointer to color_scheme, for background color
+    bool color_scheme_foreground : 1 = false; // 07 - select between color and pointer to color_scheme, for foreground color
+    is_closed_on_click_t close_on_click : 1 = is_closed_on_click_t::no; // 09 - window id dialog
+    bool hidden_behind_dialog : 1 = false; // 0A - there is an dialog over this window
+    is_closed_on_timeout_t timeout_close : 1 = is_closed_on_timeout_t::no; // 0B - menu timeout flag - it's meant to be used in window_frame_t
+    is_closed_on_printing_t print_close : 1 = is_closed_on_printing_t::no; // 0C - should be closed, if print is started
+    bool shadow : 1 = false; // 0D - executable (causes darker colors)
+    bool enforce_capture_when_not_visible : 1 = false; // 0E - normally invisible / hidden_behind_dialog windows does not get capture
+    bool has_relative_subwins : 1 = false; // 0F - X Y coords of all children are relative to this, screen cannot have this flag because 1st level windows can be dialogs and they must not have relative coords
+    bool multiline : 1 = false; // 10 - multiline text affect window_text_t anf its children
+    bool has_long_hold_screen_action : 1 = false; // 13 - screen will use default callback for long press
+    bool has_icon : 1 = false; // 14 - optional or alternative icon for window
+    bool has_round_corners : 1 = false; // 15 - window has round corners with default corner radius
+    bool check_overflow : 1 = true; ///< Assert that the text does not overflow (window_text only)
+    union { // 18 .. 1F - 8bit variable used in child classes
+        uint8_t align_data; // used in window_aligned_t
+        struct {
+            uint8_t button_count : 4; // used in RadioButton
+            uint8_t button_index : 4; // used in RadioButton
+        };
+    } class_specific = { .align_data = 0 };
 };
 
-static_assert(sizeof(WindowFlags) == 4);
+static_assert(sizeof(WindowFlags) <= 4);
 
 // current state of button, event is stored into buffer on button change
 enum class BtnState_t : uint8_t {
@@ -84,5 +81,3 @@ enum class BtnState_t : uint8_t {
     HeldAndRight,
     HeldAndReleased
 };
-
-static_assert(sizeof(WindowFlags) == sizeof(WindowFlags::data), "WindowFlags structure invalid");
