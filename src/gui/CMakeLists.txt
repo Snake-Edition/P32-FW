@@ -89,7 +89,6 @@ target_sources(
           screen_reset_error.cpp
           screen_splash.cpp
           screen_stack_overflow.cpp
-          screen_sysinf.cpp
           screen_watchdog.cpp
           ScreenFactory.cpp
           ScreenHandler.cpp

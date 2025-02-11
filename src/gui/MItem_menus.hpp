@@ -63,9 +63,6 @@ using MI_SENSOR_INFO
 using MI_ODOMETER
     = MI_SCREEN<N_("Statistics"), class ScreenMenuOdometer>;
 
-using MI_SYS_INFO
-    = MI_SCREEN<N_("System Info"), class screen_sysinfo_data_t>;
-
 using MI_FAIL_STAT
     = MI_SCREEN<N_("Fail Stats"), class ScreenMenuFailStat>;
 

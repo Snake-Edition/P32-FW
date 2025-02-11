@@ -2,7 +2,6 @@
 #include "ScreenHandler.hpp"
 #include "str_utils.hpp"
 #include <option/buddy_enable_connect.h>
-#include "screen_sysinf.hpp"
 #include "screen_qr_error.hpp"
 #include "screen_messages.hpp"
 #include "translator.hpp"
@@ -86,7 +85,6 @@ template struct MI_SCREEN_CTOR<ScreenFilamentsVisibility>;
 template struct MI_SCREEN_CTOR<ScreenMenuVersionInfo>;
 template struct MI_SCREEN_CTOR<ScreenMenuSensorInfo>;
 template struct MI_SCREEN_CTOR<ScreenMenuOdometer>;
-template struct MI_SCREEN_CTOR<screen_sysinfo_data_t>;
 template struct MI_SCREEN_CTOR<ScreenMenuFailStat>;
 template struct MI_SCREEN_CTOR<ScreenMenuTemperature>;
 template struct MI_SCREEN_CTOR<ScreenMenuMove>;
