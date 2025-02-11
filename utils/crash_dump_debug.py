@@ -35,6 +35,11 @@ parser = argparse.ArgumentParser(
 parser.add_argument("--dump", type=Path, required=True)
 parser.add_argument('--elf', type=Path)
 parser.add_argument('--gdb', type=Path)
+parser.add_argument(
+    '--fast',
+    action='store_true',
+    help=
+    'print thread information, stack traces and exit the debugger immediately')
 args = parser.parse_args()
 
 # check provided arguments
@@ -60,6 +65,11 @@ if not os.path.isfile(args.gdb) and which(args.gdb) is None:
 # setup command and launch debugger
 cmd = f'{args.gdb} {args.elf} -ex "set target-charset ASCII" -ex "target remote | \\"{crash_debug_path}\\" --elf \\"{args.elf}\\" --dump \\"{args.dump}\\""'
 cmd += f' -ex "source {project_root_dir}/utils/freertos-gdb-plugin/freertos-gdb-plugin.py"'
+if args.fast:
+    cmd += f' -ex "freertos info threads"'
+    cmd += f' -ex "freertos thread apply all bt"'
+    cmd += f' -ex "quit"'
+
 print("Launching GDB with arguments:")
 print(cmd)
 os.system(cmd)
