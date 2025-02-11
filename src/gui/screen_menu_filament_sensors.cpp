@@ -12,6 +12,10 @@ IMI_AnySensor::IMI_AnySensor(uint8_t sensor_index, bool is_side, const char *lab
 {
     update();
 
+#if HAS_TOOLCHANGER()
+    set_is_hidden(!prusa_toolchanger.is_tool_enabled(sensor_index));
+#endif
+
     // Format label
     {
         StringBuilder sb(label);
@@ -28,10 +32,6 @@ IMI_AnySensor::IMI_AnySensor(uint8_t sensor_index, bool is_side, const char *lab
 void IMI_AnySensor::update() {
     // Disable the item if the global filament enable is off
     set_enabled(config_store().fsensor_enabled.get());
-
-#if HAS_TOOLCHANGER()
-    set_is_hidden(!prusa_toolchanger.is_tool_enabled(sensor_index));
-#endif
 
     const uint8_t bit_mask = (1 << sensor_index);
 
