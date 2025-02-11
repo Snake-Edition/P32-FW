@@ -74,7 +74,7 @@ DialogWarning::DialogWarning(fsm::BaseData data)
     , icon(this, icon_rect, nullptr)
     , phone(this, phone_rect, phone_resource)
     , qr(this, qr_rect, ErrCode::ERR_UNDEF)
-    , text(this, GuiDefaults::WarningDlgTextRect, is_multiline::yes, is_closed_on_click_t::yes, {})
+    , text(this, GuiDefaults::WarningDlgTextRect, is_multiline::yes, is_closed_on_click_t::no, {})
     , button(this, GuiDefaults::GetButtonRect(GuiDefaults::RectScreen), PhasesWarning::_last) {
     CaptureNormalWindow(button);
     Change(data);
