@@ -35,3 +35,12 @@ ScreenBlueError::ScreenBlueError()
 
     description.set_font(description_font);
 }
+
+void ScreenBlueError::draw() {
+    ScreenResetError::unconditionalDraw();
+    fw_version_txt.Draw();
+    header.Draw();
+    title.Draw();
+    // Do not check overflow (stack dump can be very long)
+    render_text_align(description_rect, description.GetText(), description.get_font(), GetBackColor(), COLOR_WHITE, padding_ui8_t(), text_flags(Align_t::Left(), is_multiline::yes, check_overflow::no), true);
+}
