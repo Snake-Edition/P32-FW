@@ -273,29 +273,6 @@ void MI_XFLASH_RESET::click(IWindowMenu & /*window_menu*/) {
 }
 
 /*****************************************************************************/
-// MI_EE_SAVEXML
-MI_EE_SAVEXML::MI_EE_SAVEXML()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
-}
-
-void MI_EE_SAVEXML::click(IWindowMenu & /*window_menu*/) {
-    // eeprom_save_xml_to_usb("/usb/eeprom.xml"); // TODO(ConfigStore): Not yet migrated
-}
-
-/*****************************************************************************/
-// MI_EE_CLEAR
-MI_EE_CLEAR::MI_EE_CLEAR()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev) {
-}
-
-void MI_EE_CLEAR::click(IWindowMenu & /*window_menu*/) {
-    static constexpr uint32_t empty = 0xffffffff;
-    for (uint16_t address = 0; address <= (8096 - 4); address += 4) {
-        st25dv64k_user_write_bytes(address, &empty, sizeof(empty));
-    }
-}
-
-/*****************************************************************************/
 // MI_M600
 MI_M600::MI_M600()
     : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {

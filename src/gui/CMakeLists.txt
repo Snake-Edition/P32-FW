@@ -51,7 +51,6 @@ target_sources(
           screen_menu.cpp
           screen_menu_cancel_object.cpp
           screen_menu_control.cpp
-          screen_menu_eeprom.cpp
           screen_menu_enclosure.cpp
           screen_menu_error_test.cpp
           screen_menu_fail_stat.cpp

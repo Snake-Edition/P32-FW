@@ -14,7 +14,6 @@
 #include "screen_menu_fw_update.hpp"
 #include "screen_menu_network_status.hpp"
 #include "screen_menu_network_settings.hpp"
-#include "screen_menu_eeprom.hpp"
 #include "screen_menu_footer_settings.hpp"
 #include "screen_prusa_link.hpp"
 #include "screen_menu_connect.hpp"
@@ -95,7 +94,6 @@ template struct MI_SCREEN_CTOR<ScreenMenuWifiSettings>;
 template struct MI_SCREEN_CTOR<screen_messages_data_t>;
 template struct MI_SCREEN_CTOR<ScreenMenuConnect>;
 template struct MI_SCREEN_CTOR<ScreenMenuPrusaLink>;
-template struct MI_SCREEN_CTOR<ScreenMenuEeprom>;
 template struct MI_SCREEN_CTOR<ScreenMenuFooterSettings>;
 template struct MI_SCREEN_CTOR<ScreenMenuFooterSettingsAdv>;
 template struct MI_SCREEN_CTOR<ScreenMenuExperimentalSettings>;

@@ -93,9 +93,6 @@ using MI_PRUSA_CONNECT
 using MI_PRUSALINK
     = MI_SCREEN<N_("PrusaLink"), class ScreenMenuPrusaLink>;
 
-using MI_EEPROM
-    = MI_SCREEN<N_("EEPROM"), class ScreenMenuEeprom, nullptr, is_hidden_t::dev>;
-
 using MI_FOOTER_SETTINGS
     = MI_SCREEN<N_("Footer"), class ScreenMenuFooterSettings>;
 

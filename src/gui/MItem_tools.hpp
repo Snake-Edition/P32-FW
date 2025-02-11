@@ -158,26 +158,6 @@ protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
 
-class MI_EE_SAVEXML : public IWindowMenuItem {
-    static constexpr const char *const label = "TODO EE Save XML"; // intentionally not translated, only for debugging
-
-public:
-    MI_EE_SAVEXML();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
-class MI_EE_CLEAR : public IWindowMenuItem {
-    static constexpr const char *const label = "EE Clear"; // intentionally not translated, only for debugging
-
-public:
-    MI_EE_CLEAR();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
 class MI_M600 : public IWindowMenuItem {
     static constexpr const char *const label = N_("Change Filament");
     bool enqueued = false; // Used to avoid multiple M600 enqueue

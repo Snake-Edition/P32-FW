@@ -81,7 +81,7 @@ using ScreenMenuHardware__ = ScreenMenu<GuiDefaults::MenuFooter,
     // ================================
     MI_PRINTER_SETUP,
     MI_EXPERIMENTAL_SETTINGS,
-    MI_XFLASH_RESET, MI_EEPROM
+    MI_XFLASH_RESET
 #ifdef HAS_TMC_WAVETABLE
     ,
     MI_WAVETABLE_XYZ
