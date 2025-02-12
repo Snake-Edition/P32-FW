@@ -79,13 +79,7 @@ struct FSMScreenDef {
     static constexpr ClientFSM fsm = fsm_;
 
     static void open([[maybe_unused]] fsm::BaseData data) {
-        open_screen_if_not_opened(+[](const ScreenFactory::Creator::Arg &) -> ScreenFactory::UniquePtr {
-            auto screen = ScreenFactory::Screen<Screen>();
-            if (const auto data = marlin_vars().get_fsm_states()[fsm_]) {
-                static_cast<Screen *>(screen.get())->Change(*data);
-            }
-            return screen;
-        });
+        open_screen_if_not_opened(ScreenFactory::Screen<Screen>);
     }
 
     static void close() {
