@@ -990,7 +990,7 @@ Errors:
   - code: "XX801"
     title: "Warning"
     text: "Please complete Calibrations & Tests before using the printer."
-    id: "PRINT_PREVIEW_UNFINISHED_SELFTEST"
+    id: "UNFINISHED_SELFTEST"
     type: "CONNECT"
 
   - code: "XX802"
@@ -1276,7 +1276,7 @@ Errors:
     gui_layout: "warning_dialog"
 
   - code: "XX837"
-    printers: [COREONE, XL]
+    printers: [COREONE]
     title: "Open Chamber Ventilation"
     text: "Ensure the top ventilation grille is open for proper airflow."
     id: "OPEN_CHAMBER_VENTS"
@@ -1284,7 +1284,7 @@ Errors:
     gui_layout: "warning_dialog"
 
   - code: "XX838"
-    printers: [COREONE, XL]
+    printers: [COREONE]
     title: "Close Chamber Ventilation"
     text: "Ensure the top ventilation grille is closed for optimal chamber temperature."
     id: "CLOSE_CHAMBER_VENTS"
