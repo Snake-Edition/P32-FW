@@ -241,6 +241,16 @@ public:
     MI_MMU_LOAD_FAILS();
 };
 
+class MI_MMU_INVOKE_MAINTENANCE : public IWindowMenuItem {
+    constexpr static const char *const label = N_("Invoke MMU maintenance");
+
+public:
+    MI_MMU_INVOKE_MAINTENANCE();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
 class MI_MMU_TOTAL_LOAD_FAILS : public WI_INFO_t {
     constexpr static const char *const label = N_("Total Load Fails");
 

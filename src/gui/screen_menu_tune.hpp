@@ -98,7 +98,8 @@ using ScreenMenuTune__ = ScreenMenu<EFooter::On, MI_RETURN,
 #endif
 #if HAS_MMU2()
     MI_MMU_CUTTER,
-#endif
+    MI_MMU_INVOKE_MAINTENANCE,
+#endif // HAS_MMU2()
 #if ENABLED(CRASH_RECOVERY)
     MI_CRASH_DETECTION,
     MI_CRASH_SENSITIVITY_XY,

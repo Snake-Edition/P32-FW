@@ -6,6 +6,7 @@
 #include "window_msgbox.hpp"
 #include "ScreenSelftest.hpp"
 #include <filament_sensors_handler.hpp>
+#include <mmu2/fail_bucket.hpp>
 
 #include "screen_menu_mmu_preload_to_mmu.hpp"
 #include "screen_menu_mmu_load_test_filament.hpp"
@@ -273,6 +274,15 @@ static constexpr std::array mmu_rework_items = std::to_array<const char *>({
     N_("Stock"),
     N_("MMU"),
 });
+/**********************************************************************************************/
+
+// MMU INVOKE MAINTENANCE
+MI_MMU_INVOKE_MAINTENANCE::MI_MMU_INVOKE_MAINTENANCE()
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev) {}
+
+void MI_MMU_INVOKE_MAINTENANCE::click(IWindowMenu & /*window_menu*/) {
+    config_store().mmu_fail_bucket.set(MMU2::overflow_limit);
+}
 
 MI_MMU_NEXTRUDER_REWORK::MI_MMU_NEXTRUDER_REWORK()
     : MenuItemSelectMenu(_(HAS_LOADCELL() ? N_("Nextruder") : N_("Extruder"))) {
