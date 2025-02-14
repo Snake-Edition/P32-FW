@@ -113,7 +113,7 @@ endif()
 # /web directory
 add_gzip_resource("web/favicon.ico" "/web/favicon.ico")
 add_gzip_resource("web/index.html" "/web/index.html")
-add_gzip_resource("web/main.c46deb79f6521856a45f.js" "/web/main.c46deb79f6521856a45f.js")
+add_gzip_resource("web/main.b41402ed4d6d019ca007.js" "/web/main.b41402ed4d6d019ca007.js")
 add_gzip_resource("web/main.71c989a4a290e5c10892.css" "/web/main.71c989a4a290e5c10892.css")
 
 # add languages
