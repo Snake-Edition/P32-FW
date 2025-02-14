@@ -860,6 +860,7 @@ void Pause::unload_start_process([[maybe_unused]] Response response) {
     }
 }
 
+#if HAS_LOADCELL()
 void Pause::filament_stuck_ask_process(Response response) {
     setPhase(PhasesLoadUnload::FilamentStuck);
 
@@ -867,6 +868,7 @@ void Pause::filament_stuck_ask_process(Response response) {
         set(LoadState::ram_sequence);
     }
 }
+#endif
 
 void Pause::ram_sequence_process([[maybe_unused]] Response response) {
     if (!ensureSafeTemperatureNotifyProgress(0, 50)) {
