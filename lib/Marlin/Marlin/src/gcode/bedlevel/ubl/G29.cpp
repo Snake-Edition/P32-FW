@@ -308,12 +308,12 @@ void GcodeSuite::G29() {
         // If we've done some measuring in this phase and it is too uneven, offer running Z calib
         if (
             ubl.g29_min_max_measured_z.has_value()
-            && ubl.g29_min_max_measured_z->second - ubl.g29_min_max_measured_z->first >= MBL_Z_DIFF_CALIB_WARNING_THRESHOLD
+            && ubl.g29_min_max_measured_z->max - ubl.g29_min_max_measured_z->min >= MBL_Z_DIFF_CALIB_WARNING_THRESHOLD
 
             // Hack for the supplemenary "probe near purge place" - that is done after print area MBL and we don't want to offer Z align after that
             && !parser.seenval('C') //
         ) {
-            log_warning(Marlin, "Uneven bed detected: %f - %f", (double)ubl.g29_min_max_measured_z->first, (double)ubl.g29_min_max_measured_z->second);
+            log_warning(Marlin, "Uneven bed detected: %f - %f", (double)ubl.g29_min_max_measured_z->min, (double)ubl.g29_min_max_measured_z->max);
 
             if (marlin_server::prompt_warning(WarningType::BedUnevenAlignmentPrompt) == Response::Yes) {
                 // calib_Z does not have its own holder - we have to handle that

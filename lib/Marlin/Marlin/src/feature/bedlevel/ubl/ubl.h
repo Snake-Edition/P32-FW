@@ -111,7 +111,11 @@ class unified_bed_leveling {
     static volatile int encoder_diff; // Volatile because it's changed at interrupt time.
 
     /// Tracked on probe_major_points. You have to reset it yourself before the procedure
-    static std::optional<std::pair<float, float>> g29_min_max_measured_z;
+    struct MeasuredZ {
+      float min;
+      float max;
+    };
+    static std::optional<MeasuredZ> g29_min_max_measured_z;
 
     bool g29_probing_failed = false;
     bool g29_nozzle_cleaning_failed = false;

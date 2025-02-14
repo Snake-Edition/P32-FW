@@ -98,7 +98,7 @@
   xy_float_t unified_bed_leveling::g29_size;
   bool unified_bed_leveling::g29_size_seen;
 
-  std::optional<std::pair<float, float>> unified_bed_leveling::g29_min_max_measured_z;
+  std::optional<unified_bed_leveling::MeasuredZ> unified_bed_leveling::g29_min_max_measured_z;
 
   #if HAS_BED_PROBE
     int  unified_bed_leveling::g29_grid_size;
@@ -891,8 +891,8 @@
           }
           z_values[x][y] = measured_z;
 
-          const auto prev_measured_z = g29_min_max_measured_z.value_or(std::make_pair(measured_z, measured_z));
-          g29_min_max_measured_z = { std::min(prev_measured_z.first, measured_z), std::max(prev_measured_z.second, measured_z) };
+          const auto prev_measured_z = g29_min_max_measured_z.value_or(MeasuredZ{measured_z, measured_z});
+          g29_min_max_measured_z = { std::min(prev_measured_z.min, measured_z), std::max(prev_measured_z.max, measured_z) };
           log_info(Marlin, "Measured z: %f", (double) measured_z);
           
           #if PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_MINI()
