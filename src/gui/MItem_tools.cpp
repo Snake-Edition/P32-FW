@@ -738,11 +738,16 @@ void MI_FOOTER_RESET::click([[maybe_unused]] IWindowMenu &window_menu) {
     Screens::Access()->Close();
 }
 
+static constexpr const char *heatup_bed_values[] = {
+    N_("Nozzle"),
+    N_("Noz&Bed"),
+};
+
 MI_HEATUP_BED::MI_HEATUP_BED()
-    : WI_ICON_SWITCH_OFF_ON_t(config_store().preheat_bed.get(), _("Preheat Bed")) {
+    : MenuItemSwitch(_("For Filament Change, Preheat"), heatup_bed_values, config_store().heatup_bed.get()) {
 }
-void MI_HEATUP_BED::OnChange(size_t) {
-    config_store().preheat_bed.set(value());
+void MI_HEATUP_BED::OnChange(size_t old_index) {
+    config_store().heatup_bed.set(!old_index);
 }
 
 MI_SET_READY::MI_SET_READY()

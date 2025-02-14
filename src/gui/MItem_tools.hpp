@@ -505,12 +505,12 @@ protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
 
-class MI_HEATUP_BED : public WI_ICON_SWITCH_OFF_ON_t {
+class MI_HEATUP_BED : public MenuItemSwitch {
 public:
     MI_HEATUP_BED();
 
 protected:
-    void OnChange(size_t) override;
+    void OnChange(size_t old_index) override;
 };
 
 /******************************************************************/

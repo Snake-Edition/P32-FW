@@ -319,7 +319,7 @@ void filament_gcodes::M1600_no_parser(FilamentType filament_to_be_loaded, uint8_
             .target_extruder = static_cast<int8_t>(target_extruder),
             .save = true,
             .enforce_target_temp = true,
-            .preheat_bed = config_store().preheat_bed.get(),
+            .preheat_bed = config_store().heatup_bed.get(),
         });
         filament = config_store().get_filament_type(target_extruder);
         if (filament == FilamentType::none) {
