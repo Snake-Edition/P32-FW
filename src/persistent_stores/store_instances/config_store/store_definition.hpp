@@ -628,7 +628,8 @@ struct CurrentStore
 #if HAS_XBUDDY_EXTENSION()
     StoreItem<XBEFanTestResults, XBEFanTestResults {}, ItemFlag::calibrations, journal::hash("XBE Chamber fan selftest results")> xbe_fan_test_results;
     StoreItem<bool, true, ItemFlag::features, journal::hash("XBE USB Host power")> xbe_usb_power;
-    StoreItem<uint8_t, 102, ItemFlag::features, journal::hash("XBuddy Extension Chamber Fan Max Control Limit")> chamber_fan_max_control_pwm;
+    StoreItem<uint8_t, 102, ItemFlag::features, journal::hash("XBuddy Extension Chamber Fan Max Control Limit")> xbe_cooling_fan_max_auto_pwm;
+    StoreItem<uint8_t, 255, ItemFlag::features, journal::hash("XBE Filtration Fan Max Auto PWM")> xbe_filtration_fan_max_auto_pwm;
 #endif
 
 #if HAS_EMERGENCY_STOP()
