@@ -15,6 +15,14 @@ constexpr PhasesWarning warning_type_phase_constexpr(WarningType warning) {
     case WarningType::ProbingFailed:
         return PhasesWarning::ProbingFailed;
 
+    case WarningType::FilamentSensorStuckHelp:
+        return PhasesWarning::FilamentSensorStuckHelp;
+
+#if HAS_MMU2()
+    case WarningType::FilamentSensorStuckHelpMMU:
+        return PhasesWarning::FilamentSensorStuckHelpMMU;
+#endif
+
 #if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
     case WarningType::NozzleCleaningFailed:
         return PhasesWarning::NozzleCleaningFailed;

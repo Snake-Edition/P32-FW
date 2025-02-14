@@ -82,6 +82,7 @@ bool is_warning_attention(const fsm::BaseData &data) {
     switch (code) {
     // Note: We don't consider these attention, so just note the dialog code and slap
     // it on whatever state we decide, that the printer is in later.
+    case ErrCode::ERR_MECHANICAL_FILAMENT_SENSORS_DISABLED:
     case ErrCode::CONNECT_NOZZLE_TIMEOUT:
     case ErrCode::CONNECT_HEATERS_TIMEOUT:
 #if _DEBUG
@@ -513,6 +514,14 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
 #endif
     case WarningType::ProbingFailed:
         return ErrCode::CONNECT_PROBING_FAILED;
+    case WarningType::FilamentSensorStuckHelp:
+        return ErrCode::ERR_MECHANICAL_FILAMENT_SENSOR_STUCK_HELP;
+#if HAS_MMU2()
+    case WarningType::FilamentSensorStuckHelpMMU:
+        return ErrCode::ERR_MECHANICAL_FILAMENT_SENSOR_STUCK_HELP_MMU;
+#endif
+    case WarningType::FilamentSensorsDisabled:
+        return ErrCode::ERR_MECHANICAL_FILAMENT_SENSORS_DISABLED;
 #if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
     case WarningType::NozzleCleaningFailed:
         return ErrCode::CONNECT_NOZZLE_CLEANING_FAILED;

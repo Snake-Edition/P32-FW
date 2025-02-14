@@ -391,6 +391,12 @@ enum class PhasesWarning : PhaseUnderlyingType {
 
     ProbingFailed,
 
+    FilamentSensorStuckHelp,
+
+#if HAS_MMU2()
+    FilamentSensorStuckHelpMMU,
+#endif
+
 #if ENABLED(DETECT_PRINT_SHEET)
     /// Shown on failed print sheet detection. Custom handling.
     SteelSheetNotDetected,
@@ -853,6 +859,10 @@ class ClientResponses {
             { PhasesWarning::EnclosureFilterExpiration, { Response::Ignore, Response::Postpone5Days, Response::Done } },
 #endif
             { PhasesWarning::ProbingFailed, { Response::Yes, Response::No } },
+            { PhasesWarning::FilamentSensorStuckHelp, { Response::Ok, Response::FS_disable } },
+#if HAS_MMU2()
+            { PhasesWarning::FilamentSensorStuckHelpMMU, { Response::Ok } },
+#endif
 #if ENABLED(DETECT_PRINT_SHEET)
             { PhasesWarning::SteelSheetNotDetected, { Response::Retry, Response::Ignore } },
 #endif
