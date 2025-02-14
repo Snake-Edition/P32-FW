@@ -23,12 +23,20 @@
     #include <menu_item/specific/menu_items_xbuddy_extension.hpp>
 #endif
 
+#include <option/has_chamber_api.h>
+#if HAS_CHAMBER_API()
+    #include <menu_item/specific/menu_items_chamber.hpp>
+#endif
+
 using ScreenMenuUserInterface__ = ScreenMenu<GuiDefaults::MenuFooter, MI_RETURN,
     MI_FOOTER_SETTINGS, MI_SORT_FILES,
 #if not PRINTER_IS_PRUSA_MINI()
     MI_PRINT_PROGRESS_TIME,
 #endif
     MI_TIMEOUT, MI_SOUND_MODE, MI_HEATUP_BED,
+#if HAS_CHAMBER_API()
+    MI_PREHEAT_CHAMBER,
+#endif
 #if HAS_ST7789_DISPLAY()
     // We could potentionally have MINI display without buzzer.
     // So we only allow sound control for ST7789

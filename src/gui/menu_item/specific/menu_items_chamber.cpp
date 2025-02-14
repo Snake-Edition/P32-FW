@@ -40,3 +40,14 @@ MI_CHAMBER_TEMP::MI_CHAMBER_TEMP(const char *label)
 {
     set_is_hidden(!chamber().capabilities().temperature_reporting);
 }
+
+// MI_PREHEAT_CHAMBER
+// ============================================
+MI_PREHEAT_CHAMBER::MI_PREHEAT_CHAMBER()
+    : WI_ICON_SWITCH_OFF_ON_t(config_store().preheat_chamber.get(), _("Preheat Chamber")) {
+    set_is_hidden(!chamber().capabilities().temperature_control());
+}
+
+void MI_PREHEAT_CHAMBER::OnChange(size_t) {
+    config_store().preheat_chamber.set(value());
+}

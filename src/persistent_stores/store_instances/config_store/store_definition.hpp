@@ -390,6 +390,10 @@ struct CurrentStore
     void set_filament_type(uint8_t index, FilamentType value);
 
     StoreItem<bool, false, ItemFlag::features, journal::hash("Heatup Bed")> preheat_bed;
+#if HAS_CHAMBER_API()
+    /// Note: with C1, this is more like "pre-cool"
+    StoreItem<bool, true, ItemFlag::features, journal::hash("Preheat Chamber")> preheat_chamber;
+#endif
 
     StoreItem<float, defaults::nozzle_diameter, ItemFlag::hw_config, journal::hash("Nozzle Diameter 0")> nozzle_diameter_0;
 #if HOTENDS > 1 // for now only doing one ifdef for simplicity
