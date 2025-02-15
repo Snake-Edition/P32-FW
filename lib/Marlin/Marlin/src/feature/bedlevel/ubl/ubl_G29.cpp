@@ -914,15 +914,16 @@
         auto loadcellPrecisionEnabler = Loadcell::HighPrecisionEnabler(loadcell);
       #endif
 
-
-            // set max XY acceleration for probing
-            constexpr xyze_float_t max_accel = DEFAULT_MAX_ACCELERATION;
-            auto s = planner.user_settings;            
-            s.max_acceleration_mm_per_s2[X_AXIS] = max_accel.x;
-            s.max_acceleration_mm_per_s2[Y_AXIS] = max_accel.y;
-            s.acceleration = 9999;
-            s.travel_acceleration = 9999;
-            planner.apply_settings(s);
+      // set max XY acceleration for probing
+      {
+        constexpr xyze_float_t max_accel = DEFAULT_MAX_ACCELERATION;
+        auto s = planner.user_settings;            
+        s.max_acceleration_mm_per_s2[X_AXIS] = max_accel.x;
+        s.max_acceleration_mm_per_s2[Y_AXIS] = max_accel.y;
+        s.acceleration = 9999;
+        s.travel_acceleration = 9999;
+        planner.apply_settings(s);
+      }
 
       #if UBL_TRAVEL_ACCELERATION
         auto saved_acceleration = planner.settings.travel_acceleration;
