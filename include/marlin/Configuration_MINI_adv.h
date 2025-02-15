@@ -1651,7 +1651,7 @@
 		#ifdef MINI_I3_MK33
 	        #define X_CURRENT 300 // (mA) RMS current.  MK3 motors
 		#elif MINI_COREXY
-            #define X_CURRENT 400 // (mA) RMS current. Multiply by 1.414 for peak current.
+            #define X_CURRENT 450 // (mA) RMS current. Multiply by 1.414 for peak current.
 		#else
     	    #define X_CURRENT 350 // (mA) RMS current. Multiply by 1.414 for peak current.
 		#endif
@@ -1669,7 +1669,7 @@
 		#ifdef MINI_I3_MK33
 			#define Y_CURRENT 370 // (mA) RMS current.  MK3 motors
 		#elif MINI_COREXY
-	        #define Y_CURRENT 400
+	        #define Y_CURRENT 450
 		#else
 	        #define Y_CURRENT 350
 		#endif
