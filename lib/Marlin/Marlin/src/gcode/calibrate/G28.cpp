@@ -207,7 +207,7 @@
     do_blocking_move_to_xy(destination.x, destination.y);
   #endif
 #else
-      do_blocking_move_to_xy(destination);
+    do_blocking_move_to_xy(destination, XY_PROBE_FEEDRATE_MM_S);
 #endif
 
       if (!homeaxis(Z_AXIS)) {
