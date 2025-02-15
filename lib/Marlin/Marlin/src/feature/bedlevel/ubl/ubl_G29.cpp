@@ -967,7 +967,15 @@
             #if HAS_HOTEND_OFFSET
             start_pos -= hotend_currently_applied_offset;
             #endif
-            do_blocking_move_to(start_pos.x, start_pos.y, start_pos.z, NOZZLE_PARK_XY_FEEDRATE);
+            
+            // set max acceleration for probing
+            constexpr xyze_float_t max_accel = DEFAULT_MAX_ACCELERATION;
+            auto s = planner.user_settings;            
+            s.max_acceleration_mm_per_s2[X_AXIS] = max_accel.x;
+            s.max_acceleration_mm_per_s2[Y_AXIS] = max_accel.y;
+            planner.apply_settings(s);
+
+            do_blocking_move_to(start_pos.x, start_pos.y, start_pos.z, MMM_TO_MMS(XY_PROBE_SPEED_INITIAL));
             is_initial_probe = false;
             safe_delay(Z_FIRST_PROBE_DELAY); // dampen the system
           }
