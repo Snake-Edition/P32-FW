@@ -1789,10 +1789,11 @@
    * Use Trinamic's ultra quiet stepping mode.
    * When disabled, Marlin will use spreadCycle stepping mode.
    */
-	#ifdef MINI_I3_MK33
-	#else
-	    #define STEALTHCHOP_XY
-	#endif
+    #ifdef MINI_I3_MK33
+    #elif MINI_COREXY
+    #else
+        #define STEALTHCHOP_XY
+    #endif
     #define STEALTHCHOP_Z
 //  #define STEALTHCHOP_E
 
