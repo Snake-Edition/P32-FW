@@ -8,8 +8,10 @@ file(GLOB ERROR_TEXT_EXTRACTOR ${PROJECT_ROOT_DIR}/utils/extract_error_texts.py)
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/errors.hpp
   DEPENDS ${ERROR_TEXT_EXTRACTOR}
+          ${PROJECT_ROOT_DIR}/lib/Prusa-Error-Codes/yaml/buddy-error-codes.yaml
+          ${PROJECT_ROOT_DIR}/lib/Prusa-Error-Codes/yaml/mmu-error-codes.yaml
   COMMAND
-    ${Python3_EXECUTABLE} ${PROJECT_ROOT_DIR}/utils/extract_error_texts.py
+    ${Python3_EXECUTABLE} ${ERROR_TEXT_EXTRACTOR}
     ${PROJECT_ROOT_DIR}/lib/Prusa-Error-Codes/yaml/buddy-error-codes.yaml
     ${PROJECT_ROOT_DIR}/lib/Prusa-Error-Codes/yaml/mmu-error-codes.yaml
   COMMENT "Extracting error texts for unit testing"
