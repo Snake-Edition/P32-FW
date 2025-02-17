@@ -77,13 +77,7 @@ uint8_t GcodeSuite::axis_relative = (
   | (ar_init.e ? _BV(REL_E) : 0)
 );
 
-#if ENABLED(GCODE_COMPATIBILITY_MK3)
-  GcodeSuite::GcodeCompatibilityMode GcodeSuite::gcode_compatibility_mode = GcodeCompatibilityMode::NONE;
-#endif
-
-#if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-  GcodeSuite::FanCompatibilityMode GcodeSuite::fan_compatibility_mode = FanCompatibilityMode::NONE;
-#endif
+PrinterGCodeCompatibilityReport GcodeSuite::compatibility;
 
 #if ENABLED(HOST_KEEPALIVE_FEATURE)
   GcodeSuite::MarlinBusyState GcodeSuite::busy_state = NOT_BUSY;

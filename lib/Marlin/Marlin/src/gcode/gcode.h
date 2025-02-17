@@ -277,6 +277,9 @@
 
 #include "../inc/MarlinConfig.h"
 #include "parser.h"
+
+#include <common/printer_model.hpp>
+
 #include <option/has_i2c_expander.h>
 #include <option/has_local_accelerometer.h>
 #include <option/has_remote_accelerometer.h>
@@ -325,7 +328,7 @@ public:
   }
   static inline void set_relative_mode(const bool rel) {
     #if ENABLED(GCODE_COMPATIBILITY_MK3)
-        if (gcode_compatibility_mode == GcodeCompatibilityMode::MK3) {
+        if (compatibility.mk3_compatibility_mode) {
             axis_relative = rel ? _BV(REL_X) | _BV(REL_Y) | _BV(REL_Z) : 0;
         } else {
             axis_relative = rel ? _BV(REL_X) | _BV(REL_Y) | _BV(REL_Z) | _BV(REL_E) : 0;
@@ -343,20 +346,7 @@ public:
     SBI(axis_relative, E_MODE_ABS);
   }
 
-  #if ENABLED(GCODE_COMPATIBILITY_MK3)
-    enum class GcodeCompatibilityMode : uint8_t {
-      NONE,
-      MK3,
-    };
-    static GcodeCompatibilityMode gcode_compatibility_mode;
-  #endif
-  #if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-    enum class FanCompatibilityMode : uint8_t {
-        NONE,
-        MK3_TO_MK4_NON_S,
-    };
-    static FanCompatibilityMode fan_compatibility_mode;
-  #endif
+  static PrinterGCodeCompatibilityReport compatibility;
 
   #if ENABLED(CNC_WORKSPACE_PLANES)
     /**

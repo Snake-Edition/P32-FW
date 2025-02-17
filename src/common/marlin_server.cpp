@@ -753,13 +753,9 @@ void static finalize_print(bool finished) {
     tool_mapper.reset();
     spool_join.reset();
 #endif
-#if ENABLED(GCODE_COMPATIBILITY_MK3)
-    GcodeSuite::gcode_compatibility_mode = GcodeSuite::GcodeCompatibilityMode::NONE;
-#endif
 
-#if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-    GcodeSuite::fan_compatibility_mode = GcodeSuite::FanCompatibilityMode::NONE;
-#endif
+    gcode.compatibility = {};
+
 #if HAS_CHAMBER_API()
     buddy::chamber().reset();
 #endif

@@ -15,19 +15,7 @@ static void setup_gcode_compatibility(const PrinterModelInfo *gcode_printer) {
         return;
     }
 
-    [[maybe_unused]] const PrinterGCodeCompatibilityReport compatibility = PrinterModelInfo::current().gcode_compatibility_report(*gcode_printer);
-
-    #if ENABLED(GCODE_COMPATIBILITY_MK3)
-    if (compatibility.mk3_compatibility_mode) {
-        GcodeSuite::gcode_compatibility_mode = GcodeSuite::GcodeCompatibilityMode::MK3;
-    }
-    #endif
-
-    #if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-    if (compatibility.mk4_compatibility_mode) {
-        GcodeSuite::fan_compatibility_mode = GcodeSuite::FanCompatibilityMode::MK3_TO_MK4_NON_S;
-    }
-    #endif
+    gcode.compatibility = PrinterModelInfo::current().gcode_compatibility_report(*gcode_printer);
 }
 
 /** \addtogroup G-Codes
