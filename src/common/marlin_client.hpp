@@ -80,7 +80,6 @@ void set_print_speed(uint16_t val);
 void set_flow_factor(uint16_t val, uint8_t hotend = marlin_server::CURRENT_TOOL);
 void set_z_offset(float val);
 void set_fan_check(bool val);
-void set_fs_autoload(bool val);
 
 void do_babysteps_Z(float offs);
 

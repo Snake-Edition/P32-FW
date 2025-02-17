@@ -914,7 +914,6 @@ static void settings_load() {
 #endif
 
     marlin_vars().fan_check_enabled = config_store().fan_check_enabled.get();
-    marlin_vars().fs_autoload_enabled = config_store().fs_autoload_enabled.get();
 
     planner.set_stealth_mode(config_store().stealth_mode.get());
 
@@ -3140,10 +3139,6 @@ static void _server_set_var(const Request &request) {
     }
     if (variable_identifier == reinterpret_cast<uintptr_t>(&marlin_vars().fan_check_enabled)) {
         marlin_vars().fan_check_enabled = request.set_variable.uint32_value;
-        return;
-    }
-    if (variable_identifier == reinterpret_cast<uintptr_t>(&marlin_vars().fs_autoload_enabled)) {
-        marlin_vars().fs_autoload_enabled = request.set_variable.uint32_value;
         return;
     }
 

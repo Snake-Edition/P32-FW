@@ -222,7 +222,7 @@ void FilamentSensors::process_events() {
             || has_mmu
             || autoload_sent
             || isAutoloadLocked()
-            || !marlin_vars().fs_autoload_enabled
+            || !config_store().fs_autoload_enabled.get()
 #if HAS_SELFTEST()
             // We're accessing screens from the filamentsensors thread here. This looks quite unsafe.
             || Screens::Access()->IsScreenOnStack<ScreenMenuSTSWizard>()

@@ -510,9 +510,6 @@ void set_z_offset(float val) {
 void set_fan_check(bool val) {
     return marlin_set_variable(marlin_vars().fan_check_enabled, static_cast<uint8_t>(val));
 }
-void set_fs_autoload(bool val) {
-    return marlin_set_variable(marlin_vars().fs_autoload_enabled, static_cast<uint8_t>(val));
-}
 
 #if ENABLED(CANCEL_OBJECTS)
 void cancel_object(int object_id) {

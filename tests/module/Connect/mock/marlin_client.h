@@ -76,7 +76,6 @@ typedef struct _marlin_vars_t {
     uint8_t sd_percent_done; // card.percentDone() [%]
     uint8_t media_inserted; // media_is_inserted()
     uint8_t fan_check_enabled; // fan_check [on/off]
-    uint8_t fs_autoload_enabled; // fs_autoload [on/off]
     uint8_t mmu2_active; // 1 if MMU2 is on and works, 0 otherwise - clients may use this variable to change behavior - with/without the MMU
     uint8_t mmu2_finda; // FINDA pressed = 1, FINDA not pressed = 0 - shall be used as the main fsensor in case of mmu2Active
     uint8_t curr_tool; // currently active filament slot/tool (0-4 in case of the MMU or XL, 0xff if there is no filament slot active)

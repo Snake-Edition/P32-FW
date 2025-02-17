@@ -514,11 +514,10 @@ static is_hidden_t get_autoload_hide_state() {
 }
 
 MI_FS_AUTOLOAD::MI_FS_AUTOLOAD()
-    : WI_ICON_SWITCH_OFF_ON_t(bool(marlin_vars().fs_autoload_enabled), _(label), nullptr, is_enabled_t::yes, get_autoload_hide_state()) {}
+    : WI_ICON_SWITCH_OFF_ON_t(config_store().fs_autoload_enabled.get(), _(label), nullptr, is_enabled_t::yes, get_autoload_hide_state()) {}
 
-void MI_FS_AUTOLOAD::OnChange(size_t old_index) {
-    marlin_client::set_fs_autoload(!old_index);
-    config_store().fs_autoload_enabled.set(static_cast<bool>(marlin_vars().fs_autoload_enabled));
+void MI_FS_AUTOLOAD::OnChange(size_t) {
+    config_store().fs_autoload_enabled.set(value());
 }
 
 /*****************************************************************************/

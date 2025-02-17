@@ -371,7 +371,6 @@ public:
     MarlinVariable<uint8_t> sd_percent_done; // card.percentDone() [%]
     MarlinVariable<uint8_t> media_inserted; // media_is_inserted()
     MarlinVariable<uint8_t> fan_check_enabled; // fan_check [on/off]
-    MarlinVariable<uint8_t> fs_autoload_enabled; // fs_autoload [on/off]
     MarlinVariable<uint8_t> mmu2_state; // Corresponds to MMU2::xState
     MarlinVariable<uint8_t> mmu2_finda; // FINDA pressed = 1, FINDA not pressed = 0 - shall be used as the main fsensor in case of mmu2State
     MarlinVariable<uint8_t> active_extruder; // See marlin's active_extruder. It will contain currently selected extruder (tool in case of XL, loaded filament nr in case of MMU2)

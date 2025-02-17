@@ -290,7 +290,6 @@ void MI_MMU_NEXTRUDER_REWORK::OnChange([[maybe_unused]] size_t old_index) {
     // However the request was that the autoload "stays active"
     // So we have to make sure that it's on when you activate the rework
     if (get_index()) {
-        marlin_client::set_fs_autoload(true);
         config_store().fs_autoload_enabled.set(true);
     }
 };
