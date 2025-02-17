@@ -615,11 +615,11 @@ void st7789v_ctrl_set(uint8_t ctrl) {
     st7789v_cmd(CMD_WRCTRLD, &st7789v_config.control, sizeof(st7789v_config.control));
 }
 
-void st7789v_draw_qoi_ex(AbstractByteReader &reader, uint16_t point_x, uint16_t point_y, Color back_color, uint8_t rop) {
+void st7789v_draw_qoi_ex(point_ui16_t pt, AbstractByteReader &reader, Color back_color, uint8_t rop) {
     assert(!st7789v_buff_borrowed && "Buffer lent to someone");
 
     // Current pixel position starts top-left where the image is placed
-    point_i16_t pos = { static_cast<int16_t>(point_x), static_cast<int16_t>(point_y) };
+    point_i16_t pos = { static_cast<int16_t>(pt.x), static_cast<int16_t>(pt.y) };
 
     // Prepare input buffer
     std::span<uint8_t> i_buf(st7789v_buff, 512); ///< Input file buffer

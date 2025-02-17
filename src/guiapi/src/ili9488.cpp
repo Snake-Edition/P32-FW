@@ -597,14 +597,14 @@ void ili9488_draw_from_buffer(uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
     ili9488_set_cs();
 }
 
-void ili9488_draw_qoi_ex(AbstractByteReader &reader, uint16_t point_x, uint16_t point_y, Color back_color, uint8_t rop) {
+void ili9488_draw_qoi_ex(point_ui16_t pt, AbstractByteReader &reader, Color back_color, uint8_t rop) {
     assert(!ili9488_buff_borrowed && "Buffer lent to someone");
 
     // BFW-6328 Some displays possibly problematic with higher baudrate, reduce 40 -> 20 MHz
     SPIBaudRatePrescalerGuard _g(&SPI_HANDLE_FOR(lcd), SPI_BAUDRATEPRESCALER_4, reduce_display_baudrate);
 
     // Current pixel position starts top-left where the image is placed
-    point_i16_t pos = { static_cast<int16_t>(point_x), static_cast<int16_t>(point_y) };
+    point_i16_t pos = { static_cast<int16_t>(pt.x), static_cast<int16_t>(pt.y) };
 
     // Prepare input buffer
     std::span<uint8_t> i_buf(ili9488_buff, 512); ///< Input file buffer
