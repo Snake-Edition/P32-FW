@@ -597,7 +597,7 @@ void ili9488_draw_from_buffer(uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
     ili9488_set_cs();
 }
 
-void ili9488_draw_qoi_ex(AbstractByteReader &reader, uint16_t point_x, uint16_t point_y, Color back_color, uint8_t rop, Rect16 subrect) {
+void ili9488_draw_qoi_ex(AbstractByteReader &reader, uint16_t point_x, uint16_t point_y, Color back_color, uint8_t rop) {
     assert(!ili9488_buff_borrowed && "Buffer lent to someone");
 
     // BFW-6328 Some displays possibly problematic with higher baudrate, reduce 40 -> 20 MHz
@@ -629,14 +629,7 @@ void ili9488_draw_qoi_ex(AbstractByteReader &reader, uint16_t point_x, uint16_t 
     if (header.size() != qoi::Decoder::HEADER_SIZE) {
         return; // Header couldn't be read
     }
-    Rect16 img_rect = Rect16(pos, qoi::Decoder::get_image_size(std::span<uint8_t, qoi::Decoder::HEADER_SIZE>(i_buf)));
-
-    // Recalculate subrect that is going to be drawn
-    if (subrect.IsEmpty()) {
-        subrect = img_rect;
-    } else {
-        subrect.Intersection(img_rect);
-    }
+    Rect16 subrect = Rect16(pos, qoi::Decoder::get_image_size(std::span<uint8_t, qoi::Decoder::HEADER_SIZE>(i_buf)));
     subrect.Intersection(Rect16(0, 0, ILI9488_COLS, ILI9488_ROWS)); // Clip drawn subrect to display size
 
     // Prepare output

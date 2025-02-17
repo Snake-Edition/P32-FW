@@ -615,7 +615,7 @@ void st7789v_ctrl_set(uint8_t ctrl) {
     st7789v_cmd(CMD_WRCTRLD, &st7789v_config.control, sizeof(st7789v_config.control));
 }
 
-void st7789v_draw_qoi_ex(AbstractByteReader &reader, uint16_t point_x, uint16_t point_y, Color back_color, uint8_t rop, Rect16 subrect) {
+void st7789v_draw_qoi_ex(AbstractByteReader &reader, uint16_t point_x, uint16_t point_y, Color back_color, uint8_t rop) {
     assert(!st7789v_buff_borrowed && "Buffer lent to someone");
 
     // Current pixel position starts top-left where the image is placed
@@ -644,14 +644,7 @@ void st7789v_draw_qoi_ex(AbstractByteReader &reader, uint16_t point_x, uint16_t 
     if (header.size() != qoi::Decoder::HEADER_SIZE) {
         return; // Header couldn't be read
     }
-    Rect16 img_rect = Rect16(pos, qoi::Decoder::get_image_size(std::span<uint8_t, qoi::Decoder::HEADER_SIZE>(i_buf)));
-
-    // Recalculate subrect that is going to be drawn
-    if (subrect.IsEmpty()) {
-        subrect = img_rect;
-    } else {
-        subrect.Intersection(img_rect);
-    }
+    Rect16 subrect = Rect16(pos, qoi::Decoder::get_image_size(std::span<uint8_t, qoi::Decoder::HEADER_SIZE>(i_buf)));
     subrect.Intersection(Rect16(0, 0, ST7789V_COLS, ST7789V_ROWS)); // Clip drawn subrect to display size
 
     // Prepare output

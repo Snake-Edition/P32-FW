@@ -14,7 +14,7 @@ void enable_resource_file();
 
 void clear(Color clr);
 void draw_char(point_ui16_t pt, unichar c, const font_t *pf, Color clr_bg, Color clr_fg);
-void draw_img(point_ui16_t pt, const img::Resource &img, Color back_color = COLOR_BLACK, ropfn rop = ropfn(), Rect16 subrect = Rect16());
+void draw_img(point_ui16_t pt, const img::Resource &img, Color back_color, ropfn rop);
 void draw_img(point_ui16_t pt, AbstractByteReader &);
 void draw_line(point_ui16_t pt0, point_ui16_t pt1, Color clr);
 void draw_rect(Rect16 rc, Color clr);
