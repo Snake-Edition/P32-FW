@@ -24,7 +24,7 @@ static void setup_gcode_compatibility(const PrinterModelInfo *gcode_printer) {
     #endif
 
     #if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-    if (compatibility.mk4s_fan_compatibility_mode) {
+    if (compatibility.mk4_compatibility_mode) {
         GcodeSuite::fan_compatibility_mode = GcodeSuite::FanCompatibilityMode::MK3_TO_MK4_NON_S;
     }
     #endif

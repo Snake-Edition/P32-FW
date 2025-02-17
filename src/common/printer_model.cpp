@@ -115,7 +115,7 @@ PrinterGCodeCompatibilityReport PrinterModelInfo::gcode_compatibility_report(con
     // "Raise" MK4 gcode to MK4S gcode by enabling fan compatibility mode
     if (this->compatibility_group == CompatGroup::mk4s && gcode_compat_group == CompatGroup::mk4) {
         gcode_compat_group = CompatGroup::mk4s;
-        result.mk4s_fan_compatibility_mode = true;
+        result.mk4_compatibility_mode = true;
     }
 
     // Finally, determine if the gcode is compatible if we've reached the same compatibility group

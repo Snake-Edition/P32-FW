@@ -365,7 +365,7 @@ void GCodeInfo::parse_m862(GcodeBuffer::String cmd) {
 #endif
 
 #if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-        if (compatibility.mk4s_fan_compatibility_mode) {
+        if (compatibility.mk4_compatibility_mode) {
             valid_printer_settings.fan_compatibility_mode.fail();
         }
 #endif
