@@ -53,15 +53,21 @@ void window_header_t::updateNetwork() {
     const bool shadow = (interface_status != NETDEV_NETIF_UP);
     const img::Resource *net_icon = nullptr;
     if (active_interface == NETDEV_ESP_ID) {
-        // Unknown signal -> show as "full signal" (to have some icon).
-        const int8_t strength = esp_signal_strength().value_or(0);
+        const auto ticks_now = ticks_ms();
+        if (ticks_diff(ticks_now, last_wifi_strength_update_ms_) > 1000) {
+            last_wifi_strength_update_ms_ = ticks_now;
+
+            // Unknown signal -> show as "full signal" (to have some icon).
+            cached_wifi_strength_ = esp_signal_strength().value_or(0);
+        }
+
         // In the shadow mode, we always do a "full" icon.
         //
         // The signal levels are based on random Internet discussions. We may
         // want to tune them further.
-        if (shadow || strength >= -70) {
+        if (shadow || cached_wifi_strength_ >= -70) {
             net_icon = &img::wifi_16x16;
-        } else if (strength >= -80) {
+        } else if (cached_wifi_strength_ >= -80) {
             net_icon = &img::wifi_mid_16x16;
         } else {
             net_icon = &img::wifi_low_16x16;

@@ -57,6 +57,9 @@ struct window_header_t : public window_frame_t {
     void updateConnect(bool iface_up);
 #endif
 
+    int8_t cached_wifi_strength_ = 0;
+    uint32_t last_wifi_strength_update_ms_ = 0;
+
 public:
     window_header_t(window_t *parent, const string_view_utf8 &txt = string_view_utf8::MakeNULLSTR());
 
