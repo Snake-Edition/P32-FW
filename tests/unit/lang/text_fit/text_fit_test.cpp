@@ -47,7 +47,7 @@ void test_error(const ErrorEntry &error) {
             INFO("Lang = " << lang);
             INFO("Original Text = "
                 << "\"" << error.title << "\"\n");
-            ArrayStringBuilder<200> str_build; // In case of buffer too small - throws SIGABRT
+            ArrayStringBuilder<512> str_build; // In case of buffer too small - throws SIGABRT
             str_build.append_string_view(title_str);
             INFO("Translated Text = "
                 << "\"" << str_build.str() << "\"\n");
