@@ -54,14 +54,14 @@ struct PrinterGCodeCompatibilityReport {
 
 public:
     /// Whether the gcode can be run on the printer at all
-    bool is_compatible = false;
+    bool is_compatible : 1 = false;
 
     /// Whether the gcode should be run in MK3 compatibility mode
-    bool mk3_compatibility_mode = false;
+    bool mk3_compatibility_mode : 1 = false;
 
     /// Whether the fans should be run in the non-MK4S compatibility mode
     /// Meaning that this is a MK4S printer, GCode is sliced for a non-S printer, we need to lower the fan speeds due to a stronger fan
-    bool mk4s_fan_compatibility_mode = false;
+    bool mk4s_fan_compatibility_mode : 1 = false;
 
 public:
     constexpr bool operator==(const PrinterGCodeCompatibilityReport &) const = default;
