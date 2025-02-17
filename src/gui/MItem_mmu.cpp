@@ -269,29 +269,37 @@ MI_MMU_GENERAL_FAILS::MI_MMU_GENERAL_FAILS()
 MI_MMU_TOTAL_GENERAL_FAILS::MI_MMU_TOTAL_GENERAL_FAILS()
     : WI_INFO_t(config_store().mmu2_total_fails.get(), _(label), MMU2::mmu2.Enabled() ? is_hidden_t::no : is_hidden_t::yes) {}
 
-static constexpr const char *mmu_rework_items[] = {
+static constexpr std::array mmu_rework_items = std::to_array<const char *>({
     N_("Stock"),
     N_("MMU"),
-};
+});
 
 MI_MMU_NEXTRUDER_REWORK::MI_MMU_NEXTRUDER_REWORK()
-    : MenuItemSwitch(
-        _(HAS_LOADCELL() ? N_("Nextruder") : N_("Extruder")),
-        mmu_rework_items,
-        config_store().is_mmu_rework.get()) {}
+    : MenuItemSelectMenu(_(HAS_LOADCELL() ? N_("Nextruder") : N_("Extruder"))) {
+    set_current_item(config_store().is_mmu_rework.get());
+}
 
-void MI_MMU_NEXTRUDER_REWORK::OnChange([[maybe_unused]] size_t old_index) {
-    if (!flip_mmu_rework(get_index() == 0)) {
-        set_index(old_index); // revert the index change of the toggle in case the user aborted the dialog
-        return;
+int MI_MMU_NEXTRUDER_REWORK::item_count() const {
+    return mmu_rework_items.size();
+}
+
+void MI_MMU_NEXTRUDER_REWORK::build_item_text(int index, const std::span<char> &buffer) const {
+    _(mmu_rework_items[index]).copyToRAM(buffer);
+}
+
+bool MI_MMU_NEXTRUDER_REWORK::on_item_selected([[maybe_unused]] int old_index, int new_index) {
+    if (!flip_mmu_rework(new_index == 0)) {
+        return false;
     }
 
     // Enabling MMU rework hides the FS_Autoload option from the menu - BFW-4290
     // However the request was that the autoload "stays active"
     // So we have to make sure that it's on when you activate the rework
-    if (get_index()) {
+    if (new_index) {
         config_store().fs_autoload_enabled.set(true);
     }
+
+    return true;
 };
 
 /*****************************************************************************/

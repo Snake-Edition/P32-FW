@@ -6,6 +6,7 @@
 #include "WindowItemFormatableLabel.hpp"
 #include "i18n.h"
 #include <option/has_loadcell.h>
+#include <gui/menu_item/menu_item_select_menu.hpp>
 
 class MI_MMU_PRELOAD_ADVANCED : public IWindowMenuItem {
     static constexpr const char *const label = N_("Preload to MMU Advanced");
@@ -264,13 +265,16 @@ public:
 
 /// For Mk4, MMU requires replacement of some parts of the nextruder to work properly
 /// (fsensor has to trigger only after the extruder wheels engage the filament)
-/// This switch gives allows the user to set if the printer has the stock extruder or the MMU reworked one.
-class MI_MMU_NEXTRUDER_REWORK : public MenuItemSwitch {
+/// This select allows the user to set whether the printer has the stock extruder or the MMU reworked one.
+class MI_MMU_NEXTRUDER_REWORK : public MenuItemSelectMenu {
 public:
     MI_MMU_NEXTRUDER_REWORK();
 
+    int item_count() const override;
+    void build_item_text(int index, const std::span<char> &buffer) const override;
+
 protected:
-    virtual void OnChange(size_t old_index) override;
+    bool on_item_selected(int old_index, int new_index) override;
 };
 
 class MI_INFO_FINDA : public MenuItemAutoUpdatingLabel<bool> {
