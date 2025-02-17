@@ -50,7 +50,7 @@ void GcodeSuite::M221() {
 
   if (parser.seenval('S')) {
     int flow_percentage = parser.value_int();
-    #if ENABLED(GCODE_COMPATIBILITY_MK3)
+    #if HAS_GCODE_COMPATIBILITY()
       if (gcode.compatibility.mk3_compatibility_mode) {
         flow_percentage = (float)flow_percentage / 0.95;
       }

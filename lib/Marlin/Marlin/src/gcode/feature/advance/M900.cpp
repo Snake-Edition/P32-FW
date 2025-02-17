@@ -62,7 +62,7 @@ void GcodeSuite::M900() {
   if (parser.seenval('K')) {
     const float newK = parser.value_float();
 
-    #if ENABLED(GCODE_COMPATIBILITY_MK3)
+    #if HAS_GCODE_COMPATIBILITY()
       if (gcode.compatibility.mk3_compatibility_mode && newK >= 3) {
         // Higher K values on MK3 mean LA version 1.0 => we don't support those
         // Lower values on MK3 are very similar to MK4's, so we can use them and expect OK results.

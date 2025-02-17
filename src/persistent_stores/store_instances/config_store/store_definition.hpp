@@ -467,14 +467,10 @@ struct CurrentStore
     StoreItem<HWCheckSeverity, defaults::hw_check_severity, ItemFlag::features, journal::hash("HW Check Nozzle")> hw_check_nozzle;
     StoreItem<HWCheckSeverity, defaults::hw_check_severity, ItemFlag::features, journal::hash("HW Check Model")> hw_check_model;
     StoreItem<HWCheckSeverity, defaults::hw_check_severity, ItemFlag::features, journal::hash("HW Check Firmware")> hw_check_firmware;
-    StoreItem<HWCheckSeverity, defaults::hw_check_severity, ItemFlag::features, journal::hash("HW Check G-code")> hw_check_gcode;
+    StoreItem<HWCheckSeverity, defaults::hw_check_severity, ItemFlag::features, journal::hash("HW Check G-code")> hw_check_gcode_level;
 
-#if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-    StoreItem<HWCheckSeverity, defaults::hw_check_severity, ItemFlag::features, journal::hash("HW Check Fan Compatibility")> hw_check_fan_compatibility;
-#endif
-
-#if ENABLED(GCODE_COMPATIBILITY_MK3)
-    StoreItem<HWCheckSeverity, defaults::hw_check_severity, ItemFlag::features, journal::hash("HW Check Compatibility")> hw_check_compatibility;
+#if HAS_GCODE_COMPATIBILITY()
+    StoreItem<HWCheckSeverity, defaults::hw_check_severity, ItemFlag::features, journal::hash("HW Check Compatibility")> hw_check_gcode_compatibility;
 #endif
 
     template <typename F>
@@ -490,17 +486,12 @@ struct CurrentStore
         case HWCheckType::firmware:
             return visitor(hw_check_firmware);
 
-        case HWCheckType::gcode:
-            return visitor(hw_check_gcode);
+        case HWCheckType::gcode_level:
+            return visitor(hw_check_gcode_level);
 
-#if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-        case HWCheckType::fan_compatibility:
-            return visitor(hw_check_fan_compatibility);
-#endif
-
-#if ENABLED(GCODE_COMPATIBILITY_MK3)
-        case HWCheckType::mk3_compatibility:
-            return visitor(hw_check_compatibility);
+#if HAS_GCODE_COMPATIBILITY()
+        case HWCheckType::gcode_compatibility:
+            return visitor(hw_check_gcode_compatibility);
 #endif
         }
     }
@@ -749,6 +740,8 @@ struct DeprecatedStore
     StoreItem<float, 0, journal::hash("Loadcell Threshold Static")> loadcell_threshold_static;
     StoreItem<float, 0, journal::hash("Loadcell Hysteresis")> loadcell_hysteresis;
     StoreItem<float, 0, journal::hash("Loadcell Threshold Continuous")> loadcell_threshold_continuous;
+
+    StoreItem<HWCheckSeverity, defaults::hw_check_severity, journal::hash("HW Check Fan Compatibility")> hw_check_fan_compatibility;
 };
 
 } // namespace config_store_ns

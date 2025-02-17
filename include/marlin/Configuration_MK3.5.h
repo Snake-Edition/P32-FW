@@ -200,15 +200,6 @@
 #define PRUSA_SPOOL_JOIN
 #endif
 
-
-/**
- *  Compatibility mode with gcode's slided for the MK3
- *
- *  When switched on and the compatibility mode is turned on at runtime,
- *  some gcodes (like G80) can have a different meaning.
- */
-#define GCODE_COMPATIBILITY_MK3
-
 // A dual extruder that uses a single stepper motor
 //#define SWITCHING_EXTRUDER
 #if ENABLED(SWITCHING_EXTRUDER)

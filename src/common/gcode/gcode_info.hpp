@@ -98,16 +98,13 @@ public:
         Feature nozzle_not_hardened { config_store().hw_check_nozzle.get() }; // M862.1 disagree. Can be handled by tools mapping screen
         Feature nozzle_not_high_flow { config_store().hw_check_nozzle.get() }; // M862.1 disagree. Can be handled by tools mapping screen
         Feature wrong_printer_model { config_store().hw_check_model.get() }; // M862.2 or M862.3 or printer_model (from comments) disagree
-        Feature wrong_gcode_level { config_store().hw_check_gcode.get() }; // M862.5 disagree
+        Feature wrong_gcode_level { config_store().hw_check_gcode_level.get() }; // M862.5 disagree
         Feature wrong_firmware { config_store().hw_check_firmware.get() }; // M862.4 Px.yy.z disagrees
 #if HAS_MMU2()
         Feature nozzle_flow_mismatch { config_store().hw_check_nozzle.get() }; // Nozzle flow rate doesn't match flow rate in G-code and printing with MMU enabled
 #endif
-#if ENABLED(GCODE_COMPATIBILITY_MK3)
-        Feature gcode_compatibility_mode { config_store().hw_check_compatibility.get() };
-#endif
-#if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-        Feature fan_compatibility_mode { config_store().hw_check_fan_compatibility.get() };
+#if HAS_GCODE_COMPATIBILITY()
+        Feature gcode_compatibility_mode { config_store().hw_check_gcode_compatibility.get() };
 #endif
         Feature outdated_firmware { config_store().hw_check_firmware.get() }; // M115 Ux.yy.z disagrees (TODO: Separate EEVAR?)
         bool unsupported_features { false };

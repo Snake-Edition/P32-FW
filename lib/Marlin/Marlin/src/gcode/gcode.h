@@ -286,6 +286,7 @@
 #include <option/has_precise_homing_corexy.h>
 #include <option/has_precise_homing.h>
 #include <option/has_phase_stepping.h>
+#include <option/has_gcode_compatibility.h>
 
 #if ENABLED(I2C_POSITION_ENCODERS)
   #include "../feature/I2CPositionEncoder.h"
@@ -327,7 +328,7 @@ public:
     return TEST(axis_relative, a);
   }
   static inline void set_relative_mode(const bool rel) {
-    #if ENABLED(GCODE_COMPATIBILITY_MK3)
+    #if HAS_GCODE_COMPATIBILITY()
         if (compatibility.mk3_compatibility_mode) {
             axis_relative = rel ? _BV(REL_X) | _BV(REL_Y) | _BV(REL_Z) : 0;
         } else {
@@ -522,7 +523,7 @@ private:
     static void G59();
   #endif
 
-  #if ENABLED(GCODE_MOTION_MODES) || ENABLED(GCODE_COMPATIBILITY_MK3)
+  #if ENABLED(GCODE_MOTION_MODES) || HAS_GCODE_COMPATIBILITY()
     static void G80();
   #endif
 

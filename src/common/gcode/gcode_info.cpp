@@ -218,11 +218,8 @@ void GCodeInfo::ValidPrinterSettings::add_unsupported_feature(const char *featur
 
 bool GCodeInfo::ValidPrinterSettings::is_valid(bool is_tools_mapping_possible) const {
     return wrong_printer_model.is_valid() && wrong_gcode_level.is_valid() && wrong_firmware.is_valid()
-#if ENABLED(GCODE_COMPATIBILITY_MK3)
+#if HAS_GCODE_COMPATIBILITY()
         && gcode_compatibility_mode.is_valid()
-#endif
-#if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-        && fan_compatibility_mode.is_valid()
 #endif
 #if HAS_MMU2()
         && nozzle_flow_mismatch.is_valid()
@@ -234,11 +231,8 @@ bool GCodeInfo::ValidPrinterSettings::is_valid(bool is_tools_mapping_possible) c
 
 bool GCodeInfo::ValidPrinterSettings::is_fatal(bool is_tools_mapping_possible) const {
     return wrong_printer_model.is_fatal() || wrong_gcode_level.is_fatal() || wrong_firmware.is_fatal()
-#if ENABLED(GCODE_COMPATIBILITY_MK3)
+#if HAS_GCODE_COMPATIBILITY()
         || gcode_compatibility_mode.is_fatal()
-#endif
-#if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-        || fan_compatibility_mode.is_fatal()
 #endif
 #if HAS_MMU2()
         || nozzle_flow_mismatch.is_fatal()
@@ -356,19 +350,13 @@ void GCodeInfo::parse_m862(GcodeBuffer::String cmd) {
         // If there isn't full compatibility of the gcode, report wrong printer model
         if (compatibility != PrinterGCodeCompatibilityReport { .is_compatible = true }) {
             valid_printer_settings.wrong_printer_model.fail();
-        }
 
-#if ENABLED(GCODE_COMPATIBILITY_MK3)
-        if (compatibility.mk3_compatibility_mode) {
-            valid_printer_settings.gcode_compatibility_mode.fail();
-        }
+#if HAS_GCODE_COMPATIBILITY()
+            if (compatibility.is_compatible) {
+                valid_printer_settings.gcode_compatibility_mode.fail();
+            }
 #endif
-
-#if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-        if (compatibility.mk4_compatibility_mode) {
-            valid_printer_settings.fan_compatibility_mode.fail();
         }
-#endif
     };
 
     // Parse parameters

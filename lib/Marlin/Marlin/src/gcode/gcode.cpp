@@ -64,6 +64,7 @@ GcodeSuite gcode;
 #include <option/has_i2c_expander.h>
 #include <option/has_local_accelerometer.h>
 #include <option/has_remote_accelerometer.h>
+#include <option/has_gcode_compatibility.h>
 #include <marlin_vars.hpp>
 
 millis_t GcodeSuite::previous_move_ms;
@@ -356,7 +357,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 65: G65(); break;
       #endif
 
-      #if ENABLED(GCODE_MOTION_MODES) || ENABLED(GCODE_COMPATIBILITY_MK3)
+      #if ENABLED(GCODE_MOTION_MODES) || HAS_GCODE_COMPATIBILITY()
         case 80: G80(); break;                                    // G80: Reset the current motion mode
       #endif
 

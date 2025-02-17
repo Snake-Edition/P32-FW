@@ -347,6 +347,9 @@ set_feature_for_printers(HAS_HOTEND_TYPE_SUPPORT "MK4" "MK3.5" "iX" "COREONE")
 set_feature_for_printers(HAS_EMERGENCY_STOP "COREONE")
 set_feature_for_printers(HAS_CEILING_CLEARANCE "COREONE")
 
+# Printers that support any form of backwards gcode compatibility modes
+set_feature_for_printers(HAS_GCODE_COMPATIBILITY "MK3.5" "MK4")
+
 # Checks for bed evenness during G29 and if it's too uneven, offers Z alignment calibration
 set_feature_for_printers(HAS_UNEVEN_BED_PROMPT "COREONE")
 

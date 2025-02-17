@@ -8,7 +8,7 @@
 #include <cstdio>
 #include <stdarg.h>
 
-#if ENABLED(GCODE_COMPATIBILITY_MK3)
+#if HAS_GCODE_COMPATIBILITY()
 
 static void run_gcode(const char *fmt, ...) {
     va_list args;
