@@ -4,7 +4,7 @@
 #include <device/hal.h>
 #include "cmsis_os.h"
 #include <random.h>
-#include "leds/side_strip.hpp"
+#include "leds/led_manager.hpp"
 
 CFanCtlEnclosure::CFanCtlEnclosure(const buddy::hw::InputPin &pin_tach,
     uint16_t min_rpm, uint16_t max_rpm)
@@ -27,7 +27,7 @@ void CFanCtlEnclosure::tick() {
             edges = 0;
             ticks = 0;
         } else {
-            leds::side_strip.SetEnclosureFanPwm(0);
+            leds::LEDManager::set_enclosure_fan_pwm(0);
         }
         break;
     case starting:
@@ -35,7 +35,7 @@ void CFanCtlEnclosure::tick() {
         if (ticks > start_timeout) {
             state = error_starting;
         } else {
-            leds::side_strip.SetEnclosureFanPwm(255);
+            leds::LEDManager::set_enclosure_fan_pwm(255);
             edges += edge ? 1 : 0;
             if (edges >= start_edges) {
                 state = rpm_stabilization;
@@ -44,7 +44,7 @@ void CFanCtlEnclosure::tick() {
         }
         break;
     case rpm_stabilization:
-        leds::side_strip.SetEnclosureFanPwm(desired_pwm);
+        leds::LEDManager::set_enclosure_fan_pwm(desired_pwm);
         if (ticks < rpm_delay) {
             ticks++;
         } else {
@@ -52,13 +52,13 @@ void CFanCtlEnclosure::tick() {
         }
         break;
     case running:
-        leds::side_strip.SetEnclosureFanPwm(desired_pwm);
+        leds::LEDManager::set_enclosure_fan_pwm(desired_pwm);
         if (!getRPMIsOk()) {
             state = error_running;
         }
         break;
     default: // error state
-        leds::side_strip.SetEnclosureFanPwm(desired_pwm);
+        leds::LEDManager::set_enclosure_fan_pwm(desired_pwm);
         if (getRPMIsOk()) {
             state = running;
         }

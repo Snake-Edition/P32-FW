@@ -68,10 +68,6 @@
     #include <leds/led_manager.hpp>
 #endif
 
-#include <option/has_side_leds.h>
-#if HAS_SIDE_LEDS()
-    #include <leds/side_strip_control.hpp>
-#endif /*HAS_SIDE_LEDS()*/
 #if HAS_PUPPIES()
     #include "puppies/puppy_task.hpp"
 #endif

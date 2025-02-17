@@ -31,7 +31,7 @@
 
 #include <option/has_side_leds.h>
 #if HAS_SIDE_LEDS() || defined(UNITTESTS)
-    #include <leds/side_strip_control.hpp>
+    #include <leds/side_strip_handler.hpp>
 #endif
 
 using http::HeaderOut;
@@ -1028,8 +1028,8 @@ void Planner::command(const Command &command, const SetValue &params) {
 #endif
 #if HAS_SIDE_LEDS() || defined(UNITTESTS)
     case connect_client::PropertyName::ChamberLedIntensity:
-        leds::side_strip_control.set_max_brightness(static_cast<uint16_t>(get<int8_t>(params.value)) * 255 / 100);
-        leds::side_strip_control.ActivityPing();
+        leds::SideStripHandler::instance().set_max_brightness(static_cast<uint8_t>(get<int8_t>(params.value)) * 255 / 100);
+        leds::SideStripHandler::instance().activity_ping();
         break;
 #endif
     }

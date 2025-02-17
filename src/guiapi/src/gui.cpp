@@ -16,9 +16,6 @@
 #include "sw_timer.hpp"
 #include <logging/log.hpp>
 #include "display_hw_checks.hpp"
-#if XL_ENCLOSURE_SUPPORT()
-    #include "leds/side_strip.hpp"
-#endif
 
 #include <option/has_touch.h>
 
@@ -174,10 +171,6 @@ void gui_bare_loop() {
 void gui_loop(void) {
     ++guiloop_nesting;
     lcd::communication_check();
-#if XL_ENCLOSURE_SUPPORT()
-    // Update XL enclosure fan pwm, it is connected to the same PWM generator as the side LEDs
-    leds::side_strip.Update();
-#endif
     gui_handle_jogwheel();
 
 #if HAS_TOUCH()

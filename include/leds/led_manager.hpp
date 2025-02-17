@@ -27,6 +27,10 @@ public:
      */
     void set_lcd_brightness(uint8_t brightness);
 
+#if XL_ENCLOSURE_SUPPORT()
+    static void set_enclosure_fan_pwm(uint8_t pwm);
+#endif
+
 private:
     freertos::Mutex power_panic_mutex;
     bool power_panic { false };

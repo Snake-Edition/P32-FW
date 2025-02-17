@@ -9,7 +9,7 @@
 #include <option/has_side_leds.h>
 
 #if HAS_SIDE_LEDS()
-    #include <leds/side_strip_control.hpp>
+    #include <leds/side_strip_handler.hpp>
 #endif
 
 using namespace gui::knob;
@@ -72,7 +72,7 @@ bool gui::knob::EventEncoder(int diff) {
     Screens::Access()->ScreenEvent(nullptr, GUI_event_t::ENC_CHANGE, (void *)(intptr_t)diff);
 
 #if HAS_SIDE_LEDS()
-    leds::side_strip_control.ActivityPing();
+    leds::SideStripHandler::instance().activity_ping();
 #endif
 
     if (!capture_ptr) {
@@ -94,7 +94,7 @@ bool gui::knob::EventClick(BtnState_t state) {
     window_t *capture_ptr = Screens::Access()->Get()->GetCapturedWindow();
 
 #if HAS_SIDE_LEDS()
-    leds::side_strip_control.ActivityPing();
+    leds::SideStripHandler::instance().activity_ping();
 #endif
 
     switch (state) {

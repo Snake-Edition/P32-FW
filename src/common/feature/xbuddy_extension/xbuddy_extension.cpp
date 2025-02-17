@@ -9,7 +9,7 @@
 #include <feature/chamber_filtration/chamber_filtration.hpp>
 #include <feature/xbuddy_extension/cooling.hpp>
 #include <marlin_server.hpp>
-#include <leds/side_strip.hpp>
+#include <leds/side_strip_handler.hpp>
 #include <buddy/unreachable.hpp>
 #include <CFanCtl3Wire.hpp> // for FANCTL_START_TIMEOUT
 
@@ -34,7 +34,7 @@ void XBuddyExtension::step() {
     const auto target_temp = chamber().target_temperature();
     const auto filtration_backend = chamber_filtration().backend();
     const auto filtration_pwm = chamber_filtration().output_pwm();
-    const auto chamber_leds_pwm = leds::side_strip.GetColor(0).w;
+    const auto chamber_leds_pwm = leds::SideStripHandler::instance().color().w;
 
     std::lock_guard _lg(mutex_);
 

@@ -58,7 +58,11 @@ struct ColorRGBW {
 
     ColorRGBW fade(float brightness) const;
 
+    ColorRGBW clamp(uint8_t max_level) const;
+
     ColorRGBW cross_fade(const ColorRGBW &c2, float ratio) const;
+
+    ColorRGBW blend(const ColorRGBW &c2, float ratio) const;
 };
 
 } // namespace leds

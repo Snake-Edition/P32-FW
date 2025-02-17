@@ -61,7 +61,7 @@
 #endif
 
 #if HAS_SIDE_LEDS()
-    #include <leds/side_strip_control.hpp>
+    #include <leds/side_strip_handler.hpp>
 #endif
 
 #if BUDDY_ENABLE_CONNECT()
@@ -876,13 +876,13 @@ void MI_LEDS_ENABLE::OnChange(size_t old_index) {
 // MI_SIDE_LEDS_ENABLE
 MI_SIDE_LEDS_ENABLE::MI_SIDE_LEDS_ENABLE()
     : WiSpin(
-        static_cast<float>(config_store().side_leds_max_brightness.get()) * 100 / 255,
+        static_cast<float>(leds::SideStripHandler::instance().get_max_brightness()) * 100 / 255,
         numeric_input_config::percent_with_off,
         _(label)) {
 }
 
 void MI_SIDE_LEDS_ENABLE::OnClick() {
-    leds::side_strip_control.set_max_brightness(static_cast<uint8_t>(value() * 255 / 100));
+    leds::SideStripHandler::instance().set_max_brightness(static_cast<uint8_t>(value()) * 255 / 100);
 }
 #endif
 
@@ -890,11 +890,10 @@ void MI_SIDE_LEDS_ENABLE::OnClick() {
 /**********************************************************************************************/
 // MI_SIDE_LEDS_DIMMING
 MI_SIDE_LEDS_DIMMING::MI_SIDE_LEDS_DIMMING()
-    : WI_ICON_SWITCH_OFF_ON_t(config_store().side_leds_dimming_enabled.get(), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
+    : WI_ICON_SWITCH_OFF_ON_t(leds::SideStripHandler::instance().get_dimming_enabled(), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
 void MI_SIDE_LEDS_DIMMING::OnChange(size_t) {
-    config_store().side_leds_dimming_enabled.set(value());
-    leds::side_strip_control.set_dimming_enabled(value());
+    leds::SideStripHandler::instance().set_dimming_enabled(value());
 }
 #endif
 

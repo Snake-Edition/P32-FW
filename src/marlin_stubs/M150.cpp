@@ -5,7 +5,7 @@
 #include "../../lib/Marlin/Marlin/src/gcode/parser.h"
 #include "leds/status_leds_handler.hpp"
 #if HAS_SIDE_LEDS()
-    #include "leds/side_strip_control.hpp"
+    #include "leds/side_strip_handler.hpp"
 #endif
 #include <optional>
 
@@ -117,7 +117,7 @@ void PrusaGcodeSuite::M151() {
         auto color_val = color.value();
         uint32_t duration = parser.ulongval('D', 400);
         uint32_t transition = parser.ulongval('T', 100);
-        leds::side_strip_control.PresentColor(color_val, duration, transition);
+        leds::SideStripHandler::instance().set_custom_color(color_val, duration, transition);
     }
 }
 

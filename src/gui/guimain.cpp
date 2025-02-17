@@ -40,7 +40,7 @@
 #endif
 
 #if HAS_SIDE_LEDS()
-    #include <leds/side_strip_control.hpp>
+    #include <leds/side_strip_handler.hpp>
 #endif
 
 #include "Jogwheel.hpp"
@@ -222,7 +222,7 @@ void gui_run(void) {
     Sound_Play(eSOUND_TYPE::Start);
 
 #if HAS_SIDE_LEDS()
-    leds::side_strip_control.ActivityPing();
+    leds::SideStripHandler::instance().activity_ping();
 #endif
 
     TaskDeps::provide(TaskDeps::Dependency::gui_ready);

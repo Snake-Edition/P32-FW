@@ -4,7 +4,7 @@
 #include <logging/log.hpp>
 
 #if HAS_SIDE_LEDS()
-    #include <leds/side_strip_control.hpp>
+    #include <leds/side_strip_handler.hpp>
 #endif
 
 LOG_COMPONENT_DEF(Touch, logging::Severity::info);
@@ -46,7 +46,7 @@ TouchscreenEvent Touchscreen_Base::get_event() {
 #if HAS_SIDE_LEDS()
     // We cannot put this into recognize_gesture or such,
     // because those are in the timer interrupt and ActivityPing uses mutex.
-    leds::side_strip_control.ActivityPing();
+    leds::SideStripHandler::instance().activity_ping();
 #endif
 
     is_last_event_consumed_ = true;

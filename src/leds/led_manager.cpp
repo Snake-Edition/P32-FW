@@ -9,7 +9,7 @@
 #include <config_store/store_instance.hpp>
 
 #if HAS_SIDE_LEDS()
-    #include "leds/side_strip_control.hpp"
+    #include "leds/side_strip_handler.hpp"
 #endif
 
 #include <option/has_door_sensor.h>
@@ -31,6 +31,39 @@ static StatusLeds &get_status_leds() {
     return ret;
 }
 
+#if HAS_SIDE_LEDS()
+    #if defined(UNITTESTS)
+        #define HAS_SIDE_LED_DRIVER() 0
+    #elif PRINTER_IS_PRUSA_XL()
+        #define HAS_SIDE_LED_DRIVER() 1
+static constexpr size_t side_led_driver_count = 2;
+    #elif PRINTER_IS_PRUSA_iX()
+        #define HAS_SIDE_LED_DRIVER() 1
+static constexpr size_t side_led_driver_count = 18;
+    #elif PRINTER_IS_PRUSA_COREONE()
+        #define HAS_SIDE_LED_DRIVER() 0
+    #else
+        #error "Not defined for this printer."
+    #endif
+
+    #if HAS_SIDE_LED_DRIVER()
+using SideLeds = neopixel::LedsSPI10M5Hz<side_led_driver_count, SideStripWriter::write>;
+
+static SideLeds &get_side_leds() {
+    static SideLeds ret;
+    return ret;
+}
+
+        #if XL_ENCLOSURE_SUPPORT()
+// Has to be outside of LEDManager, as it's accessed from an interrupt and
+// LEDManager constructs a mutex
+std::atomic<uint8_t> enclosure_fan_pwm { 0 };
+        #endif
+    #endif // HAS_SIDE_LED_DRIVER
+#else
+    #define HAS_SIDE_LED_DRIVER() 0
+#endif // HAS_SIDE_LEDS
+
 namespace leds {
 
 LEDManager &LEDManager::instance() {
@@ -43,10 +76,8 @@ void LEDManager::init() {
     // except the LCD backlight, set that to 100% brightness
     set_lcd_brightness(100);
     get_status_leds().update();
-
-#if HAS_SIDE_LEDS()
-    side_strip_control.set_max_brightness(config_store().side_leds_max_brightness.get());
-    side_strip_control.set_dimming_enabled(config_store().side_leds_dimming_enabled.get());
+#if HAS_SIDE_LED_DRIVER()
+    get_side_leds().update();
 #endif
 }
 
@@ -73,13 +104,42 @@ void LEDManager::update() {
     status_leds.update();
 
 #if HAS_SIDE_LEDS()
+    auto &side_strip_handler = SideStripHandler::instance();
     #if HAS_DOOR_SENSOR()
     if (buddy::door_sensor().state() == buddy::DoorSensor::State::door_open) {
-        side_strip_control.ActivityPing();
+        side_strip_handler.activity_ping();
     }
     #endif
-    side_strip_control.Tick();
-#endif
+
+    side_strip_handler.update();
+
+    #if HAS_SIDE_LED_DRIVER()
+    auto color = side_strip_handler.color();
+    auto &side_leds = get_side_leds();
+    if constexpr (SideStripHandler::has_white_led_and_enclosure_on_second_driver()) {
+        uint8_t second_led_green = 0;
+        #if XL_ENCLOSURE_SUPPORT()
+        second_led_green = enclosure_fan_pwm;
+        #endif
+
+        // On XL, there are two neopixel drivers, the first one controls RGB of
+        // the RGBW LED strip. The second one controls the white color of the
+        // RGBW LED strip on its Green channel and the XL enclosure fan on its
+        // Red channel.
+        //
+        // The channels on these strips are also apparently being GRB, not RGB,
+        // as the Neopixel driver expects.
+        side_leds.set(ColorRGBW(color.g, color.r, color.b).data, 0);
+        side_leds.set(ColorRGBW(second_led_green, color.w, 0).data, 1);
+    } else {
+        for (uint8_t i = 0; i < side_led_driver_count; ++i) {
+            side_leds.set(color.data, i);
+        }
+    }
+
+    side_leds.update();
+    #endif // HAS_SIDE_LED_DRIVER
+#endif // HAS_SIDE_LEDS
 }
 
 void LEDManager::enter_power_panic() {
@@ -92,19 +152,13 @@ void LEDManager::enter_power_panic() {
     // task handling power panic, and we need to turn the leds off quickly. So
     // we'll steal the display's SPI in a hacky way.
 
-    // 1. configure led animations to off, in case gui would want to write them again, this lock mutex, so has to be done before suspending display task
-#if HAS_SIDE_LEDS()
-    side_strip_control.PanicOff();
-#endif
-
-    // 2. Temporary suspend display task, so that it doesn't interfere with turning off leds
+    // Temporary suspend display task, so that it doesn't interfere with turning off leds
     osThreadSuspend(displayTaskHandle);
 
-    // 3. Safe mode for display SPI is enabled (that disables DMA transfers and writes directly to SPI)
+    // Safe mode for display SPI is enabled (that disables DMA transfers and writes directly to SPI)
     display::enable_safe_mode();
 
-    // 4. Reinitialize SPI, so that we terminate any ongoing transfers to display or leds
-    // 5. turn off actual leds
+    // Reinitialize SPI, so that we terminate any ongoing transfers to display or leds
 #if BOARD_IS_XLBUDDY()
     hw_init_spi_side_leds();
 #endif
@@ -114,12 +168,13 @@ void LEDManager::enter_power_panic() {
     status_leds.set_all(0x0);
     status_leds.update();
 
-#if HAS_SIDE_LEDS()
-    side_strip.SetColor(ColorRGBW());
-    side_strip.Update();
+#if HAS_SIDE_LED_DRIVER()
+    auto &side_leds = get_side_leds();
+    side_leds.set_all(0x0);
+    side_leds.update();
 #endif
 
-    // 5. reenable display task
+    // reenable display task
     osThreadResume(displayTaskHandle);
 }
 
@@ -127,5 +182,11 @@ void LEDManager::set_lcd_brightness(uint8_t brightness) {
     // LCD backlight is connected to the green channel of the fourth LED (index 3) on the status strip
     get_status_leds().set(ColorRGBW(0, (std::min<uint8_t>(brightness, 100) * 255) / 100, 0).data, 3);
 }
+
+#if XL_ENCLOSURE_SUPPORT()
+void LEDManager::set_enclosure_fan_pwm(uint8_t pwm) {
+    enclosure_fan_pwm = pwm;
+}
+#endif
 
 } // namespace leds
