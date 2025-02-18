@@ -279,6 +279,10 @@ MI_M600::MI_M600()
 }
 
 void MI_M600::click(IWindowMenu &) {
+    if (MsgBoxQuestion(_("Perform filament change now?"), Responses_YesNo) != Response::Yes) {
+        return;
+    }
+
     marlin_client::inject("M600");
     enqueued = true;
 }
