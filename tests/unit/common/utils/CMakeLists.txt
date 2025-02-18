@@ -20,7 +20,6 @@ add_executable(
                       ${CMAKE_SOURCE_DIR}/src/common/printer_model.cpp
   )
 target_include_directories(
-  printer_model_tests PUBLIC ${CMAKE_SOURCE_DIR}/include
-                             ${CMAKE_CURRENT_SOURCE_DIR}/printer_model_tests_include
+  printer_model_tests PUBLIC ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include
   )
 add_catch_test(printer_model_tests)
