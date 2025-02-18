@@ -546,13 +546,13 @@ void Pause::assist_insertion_process([[maybe_unused]] Response response) {
     const bool unstoppable { is_unstoppable() };
     setPhase(unstoppable ? PhasesLoadUnload::Inserting_unstoppable : PhasesLoadUnload::Inserting_stoppable, 10);
 
-    // Filament is in Extruder autoload assistance si done.
+    // Filament is in Extruder autoload assistance is done.
     if (FSensors_instance().has_filament_surely(LogicalFilamentSensor::extruder)) {
         set(LoadState::load_to_gears);
         return;
     }
 
-    // Moves are planned wait until they aren't before panning more
+    // Moves are planned wait until they aren't before planning more
     if (planner.processing()) {
         return;
     }
