@@ -657,6 +657,7 @@ struct CurrentStore
 
 #if HAS_CHAMBER_FILTRATION_API()
     StoreItem<buddy::ChamberFiltrationBackend, buddy::ChamberFiltrationBackend::none, ItemFlag::hw_config, journal::hash("Chamber filtration backend")> chamber_filtration_backend;
+    StoreItem<bool, true, ItemFlag::features, journal::hash("Chamber filtration post print enable")> chamber_post_print_filtration_enable;
     StoreItem<uint8_t, 10, ItemFlag::features, journal::hash("Chamber filtration post print duration")> chamber_post_print_filtration_duration_min;
     StoreItem<PWM255, 10, ItemFlag::features, journal::hash("Chamber mid print filtration pwm")> chamber_mid_print_filtration_pwm;
     StoreItem<PWM255, 128, ItemFlag::features, journal::hash("Chamber post print filtration pwm")> chamber_post_print_filtration_pwm;
