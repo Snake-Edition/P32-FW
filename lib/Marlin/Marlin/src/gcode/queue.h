@@ -171,7 +171,7 @@ public:
    * Enqueue with Serial Echo (optionally without)
    * Return true on success
    */
-  static bool enqueue_one(const char* cmd, bool echo=true);
+   [[nodiscard]] static bool enqueue_one(const char* cmd, bool echo=true);
 
 private:
   static void gcode_line_error(PGM_P const err, const int8_t port);

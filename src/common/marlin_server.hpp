@@ -54,12 +54,14 @@ void move_axis(float pos, float feedrate, size_t axis);
 // direct call of 'enqueue_and_echo_command'
 // @retval true command enqueued
 // @retval false otherwise
-bool enqueue_gcode(const char *gcode);
+void enqueue_gcode(const char *gcode);
+
+[[nodiscard]] bool try_enqueue_gcode(const char *gcode);
 
 // direct call of 'enqueue_and_echo_command' with formatting
 // @retval true command enqueued
 // @retval false otherwise
-bool __attribute__((format(__printf__, 1, 2)))
+void __attribute__((format(__printf__, 1, 2)))
 enqueue_gcode_printf(const char *gcode, ...);
 
 // direct call of 'inject_action'

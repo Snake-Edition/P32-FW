@@ -868,18 +868,23 @@ void move_xyz_axes_to(xyz_float_t position, float feedrate) {
     line_to_current_position(feedrate);
 }
 
-bool enqueue_gcode(const char *gcode) {
+void enqueue_gcode(const char *gcode) {
+    if (!queue.enqueue_one(gcode)) {
+        bsod("enqueue_gcode failed");
+    }
+}
+
+[[nodiscard]] bool try_enqueue_gcode(const char *gcode) {
     return queue.enqueue_one(gcode);
 }
 
-bool enqueue_gcode_printf(const char *gcode, ...) {
+void enqueue_gcode_printf(const char *gcode, ...) {
     char request[MARLIN_MAX_REQUEST];
     va_list ap;
     va_start(ap, gcode);
-    const int ret = vsnprintf(request, MARLIN_MAX_REQUEST, gcode, ap);
+    vsnprintf(request, MARLIN_MAX_REQUEST, gcode, ap);
     va_end(ap);
     enqueue_gcode(request);
-    return ret;
 }
 
 bool inject(InjectQueueRecord record) {
@@ -1375,7 +1380,9 @@ void media_print_loop() {
 
             print_state.media_restore_info = data.replay_pos.restore_info;
             queue.sdpos = data.replay_pos.offset;
-            queue.enqueue_one(data.gcode.data(), false);
+            if (!queue.enqueue_one(data.gcode.data(), false)) {
+                bsod("enqueue_one failed");
+            }
             log_debug(MarlinServer, "Enqueue: %" PRIu32 " %s", data.replay_pos.offset, data.gcode.data());
 
             // Issue another fetch if the media prefetch buffer is running empty
@@ -2999,7 +3006,7 @@ bool _process_server_valid_request(const Request &request, int client_id) {
     switch (request.type) {
     case Request::Type::Gcode:
         //@TODO return value depending on success of enqueueing gcode
-        return enqueue_gcode(request.gcode);
+        return try_enqueue_gcode(request.gcode);
     case Request::Type::Inject:
         inject(request.inject);
         return true;

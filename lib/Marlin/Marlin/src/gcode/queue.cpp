@@ -153,7 +153,7 @@ bool GCodeQueue::_enqueue(const char* cmd, bool say_ok/*=false*/
  * Enqueue with Serial Echo
  * Return true if the command was consumed
  */
-bool GCodeQueue::enqueue_one(const char* cmd, bool echo/*=true*/) {
+ [[nodiscard]] bool GCodeQueue::enqueue_one(const char* cmd, bool echo/*=true*/) {
 
   //SERIAL_ECHOPGM("enqueue_one(\"");
   //SERIAL_ECHO(cmd);
