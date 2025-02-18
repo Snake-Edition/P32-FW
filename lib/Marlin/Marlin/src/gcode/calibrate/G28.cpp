@@ -338,7 +338,7 @@ void GcodeSuite::G28() {
   #endif
   flags.force_calibrate = parser.seen('C');
   #if ENABLED(MARLIN_DEV_MODE)
-    flags.simulate = parser.seen('S')
+    flags.simulate = parser.seen('S');
   #endif
   #if ENABLED(DETECT_PRINT_SHEET)
     flags.check_sheet = !parser.boolval('P');
@@ -364,15 +364,15 @@ void GcodeSuite::G28() {
 
 bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   #if ENABLED(MARLIN_DEV_MODE)
-    if (S) {
+    if (flags.simulate) {
       planner.synchronize();
       if (planner.draining())
-        return;
+        return false;
       LOOP_NUM_AXES(a) set_axis_is_at_home((AxisEnum)a);
       sync_plan_position();
       SERIAL_ECHOLNPGM("Simulated Homing");
       report_current_position();
-      return;
+      return true;
     }
   #endif
 

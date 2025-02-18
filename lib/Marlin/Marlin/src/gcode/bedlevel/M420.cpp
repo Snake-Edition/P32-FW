@@ -79,10 +79,10 @@ void GcodeSuite::M420() {
           #endif
         }
       SERIAL_ECHOPGM("Simulated " STRINGIFY(GRID_MAX_POINTS_X) "x" STRINGIFY(GRID_MAX_POINTS_Y) " mesh ");
-      SERIAL_ECHOPAIR(" (", x_min);
-      SERIAL_CHAR(','); SERIAL_ECHO(y_min);
-      SERIAL_ECHOPAIR(")-(", x_max);
-      SERIAL_CHAR(','); SERIAL_ECHO(y_max);
+      SERIAL_ECHOPAIR(" (", MESH_MIN_X);
+      SERIAL_CHAR(','); SERIAL_ECHO(MESH_MIN_Y);
+      SERIAL_ECHOPAIR(")-(", MESH_MAX_X);
+      SERIAL_CHAR(','); SERIAL_ECHO(MESH_MAX_Y);
       SERIAL_ECHOLNPGM(")");
     }
   #endif
