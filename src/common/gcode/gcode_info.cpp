@@ -157,18 +157,7 @@ void GCodeInfo::reset_info() {
 }
 
 void GCodeInfo::EvaluateToolsValid() {
-    EXTRUDER_LOOP() { // e == gcode_tool
-        // do not check this nozzle if not used in print
-        if (!per_extruder_info[e].used()) {
-            continue;
-        }
-
-        auto physical_tool = tools_mapping::to_physical_tool(e);
-        if (physical_tool == tools_mapping::no_tool) {
-            // used but nothing prints this, so teeechnically it's ok from the POV of tool/nozzle
-            continue;
-        }
-
+    for_each_used_extruder([this]([[maybe_unused]] uint8_t logical_ix, [[maybe_unused]] uint8_t physical_tool, const GCodeInfo::ExtruderInfo &extruder_info) {
 #if HAS_TOOLCHANGER()
         // tool is used in gcode, but not enabled in printer
         if (!prusa_toolchanger.is_tool_enabled(physical_tool)) {
@@ -180,7 +169,8 @@ void GCodeInfo::EvaluateToolsValid() {
         // Make sure that MMU gcode is sliced with the correct nozzle.
         // Slicing with a non-HF nozzle while HF nozzle is installed results in unsufficient purging.
         // Slicing for a HF nozzle without having it leads to extruder skipping.
-        if (per_extruder_info[e].requires_high_flow_nozzle.has_value() && (config_store().nozzle_is_high_flow.get()[e] != *per_extruder_info[e].requires_high_flow_nozzle)
+        if (extruder_info.requires_high_flow_nozzle.has_value()
+            && (config_store().nozzle_is_high_flow.get()[physical_tool] != extruder_info.requires_high_flow_nozzle)
             && !is_singletool_gcode()
             && MMU2::mmu2.Enabled()) {
             valid_printer_settings.nozzle_flow_mismatch.fail();
@@ -189,8 +179,6 @@ void GCodeInfo::EvaluateToolsValid() {
 
         auto do_nozzle_check = [&](uint8_t hotend) {
             assert(hotend < HOTENDS);
-
-            const auto &extruder_info = per_extruder_info[e];
 
             if (auto dia = extruder_info.nozzle_diameter; dia && std::abs(*dia - config_store().get_nozzle_diameter(hotend)) > 0.001f) {
                 valid_printer_settings.wrong_nozzle_diameter.fail();
@@ -211,7 +199,7 @@ void GCodeInfo::EvaluateToolsValid() {
                 do_nozzle_check(physical); // here should be map to hotend from this extruder but the #if ENABLED(SINGLENOZZLE) should be enough for now
             });
 #endif
-    }
+    });
 }
 
 void GCodeInfo::ValidPrinterSettings::add_unsupported_feature(const char *feature, size_t length) {
@@ -659,4 +647,20 @@ bool GCodeInfo::is_singletool_gcode() const {
     }
 
     return true;
+}
+
+void GCodeInfo::for_each_used_extruder(const stdext::inplace_function<void(uint8_t logical_ix, uint8_t physical_ix, const ExtruderInfo &info)> &callback) {
+    EXTRUDER_LOOP() {
+        const auto &info = get_extruder_info(e);
+        if (!info.used()) {
+            continue;
+        }
+
+        const uint8_t tool_index = tools_mapping::to_physical_tool(e);
+        if (tool_index == tools_mapping::no_tool) {
+            continue;
+        }
+
+        callback(e, tool_index, info);
+    }
 }

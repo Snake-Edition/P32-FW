@@ -96,17 +96,7 @@ void ChamberFiltration::step() {
 void ChamberFiltration::update_needs_filtration() {
     needs_filtration_ = false;
 
-    EXTRUDER_LOOP() {
-        const auto &extruder_info = GCodeInfo::getInstance().get_extruder_info(e);
-        if (!extruder_info.used()) {
-            continue;
-        }
-
-        const uint8_t tool_index = tools_mapping::to_physical_tool(e);
-        if (tool_index == tools_mapping::no_tool) {
-            continue;
-        }
-
+    GCodeInfo::getInstance().for_each_used_extruder([this]([[maybe_unused]] uint8_t logical_ix, uint8_t tool_index, const GCodeInfo::ExtruderInfo &extruder_info) {
         const bool loaded_filament_requires_filtration = config_store().get_filament_type(tool_index).parameters().requires_filtration;
 
         const bool gcode_filament_requires_filtration = //
@@ -114,11 +104,8 @@ void ChamberFiltration::update_needs_filtration() {
             ? FilamentType::from_name(extruder_info.filament_name->data()).parameters().requires_filtration
             : false;
 
-        if (loaded_filament_requires_filtration || gcode_filament_requires_filtration) {
-            needs_filtration_ = true;
-            return;
-        }
-    }
+        needs_filtration_ |= (loaded_filament_requires_filtration || gcode_filament_requires_filtration);
+    });
 }
 
 } // namespace buddy
