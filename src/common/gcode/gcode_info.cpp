@@ -190,7 +190,7 @@ void GCodeInfo::EvaluateToolsValid() {
         auto do_nozzle_check = [&](uint8_t hotend) {
             assert(hotend < HOTENDS);
 
-            const auto &extruder_info = per_extruder_info[hotend];
+            const auto &extruder_info = per_extruder_info[e];
 
             if (auto dia = extruder_info.nozzle_diameter; dia && std::abs(*dia - config_store().get_nozzle_diameter(hotend)) > 0.001f) {
                 valid_printer_settings.wrong_nozzle_diameter.fail();
