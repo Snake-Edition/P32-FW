@@ -62,6 +62,9 @@ public:
     // Compatibility mode for running a MK4(non-S) gcode (or older)
     bool mk4_compatibility_mode : 1 = false;
 
+    /// Compatibility mode for running a non-chamber gcode
+    bool chamber_compatibility_mode : 1 = false;
+
 public:
     constexpr bool operator==(const PrinterGCodeCompatibilityReport &) const = default;
     constexpr bool operator!=(const PrinterGCodeCompatibilityReport &) const = default;
