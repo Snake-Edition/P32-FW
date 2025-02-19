@@ -874,17 +874,19 @@ void enqueue_gcode(const char *gcode) {
     }
 }
 
-[[nodiscard]] bool try_enqueue_gcode(const char *gcode) {
+[[nodiscard]] bool enqueue_gcode_try(const char *gcode) {
     return queue.enqueue_one(gcode);
 }
 
 void enqueue_gcode_printf(const char *gcode, ...) {
-    char request[MARLIN_MAX_REQUEST];
-    va_list ap;
-    va_start(ap, gcode);
-    vsnprintf(request, MARLIN_MAX_REQUEST, gcode, ap);
-    va_end(ap);
-    enqueue_gcode(request);
+    ArrayStringBuilder<MARLIN_MAX_REQUEST> request;
+    {
+        va_list ap;
+        va_start(ap, gcode);
+        request.append_printf(gcode, ap);
+        va_end(ap);
+    }
+    enqueue_gcode(request.str());
 }
 
 bool inject(InjectQueueRecord record) {
@@ -3006,7 +3008,7 @@ bool _process_server_valid_request(const Request &request, int client_id) {
     switch (request.type) {
     case Request::Type::Gcode:
         //@TODO return value depending on success of enqueueing gcode
-        return try_enqueue_gcode(request.gcode);
+        return enqueue_gcode_try(request.gcode);
     case Request::Type::Inject:
         inject(request.inject);
         return true;

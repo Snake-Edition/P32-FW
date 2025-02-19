@@ -56,7 +56,7 @@ void move_axis(float pos, float feedrate, size_t axis);
 // @retval false otherwise
 void enqueue_gcode(const char *gcode);
 
-[[nodiscard]] bool try_enqueue_gcode(const char *gcode);
+[[nodiscard]] bool enqueue_gcode_try(const char *gcode);
 
 // direct call of 'enqueue_and_echo_command' with formatting
 // @retval true command enqueued
