@@ -299,12 +299,6 @@ class unified_bed_leveling {
       return MESH_MIN_Y + i * (MESH_Y_DIST);
     }
 
-    #if UBL_SEGMENTED
-      static bool line_to_destination_segmented(const feedRate_t &scaled_fr_mm_s);
-    #else
-      static void line_to_destination_cartesian(const feedRate_t &scaled_fr_mm_s, const uint8_t e);
-    #endif
-
     static inline bool mesh_is_valid() {
       for (uint8_t x = 0; x < GRID_MAX_POINTS_X; x++)
         for (uint8_t y = 0; y < GRID_MAX_POINTS_Y; y++)
