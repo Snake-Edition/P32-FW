@@ -78,6 +78,17 @@ TEST_CASE("printer_model::compatibilities") {
     CHECK(!compatibility(PrinterModel::mini, PrinterModel::mk3).is_compatible);
     CHECK(!compatibility(PrinterModel::xl, PrinterModel::mk3s).is_compatible);
 
+    // COREONE tests
+    CHECK(compatibility(PrinterModel::coreone, PrinterModel::coreone) == fully_compatible);
+    CHECK(compatibility(PrinterModel::coreone, PrinterModel::mk3) == Compatibility { .is_compatible = true, .mk3_compatibility_mode = true, .mk4_compatibility_mode = true, .chamber_compatibility_mode = true });
+    CHECK(compatibility(PrinterModel::coreone, PrinterModel::mk4) == Compatibility { .is_compatible = true, .mk4_compatibility_mode = true, .chamber_compatibility_mode = true });
+    CHECK(compatibility(PrinterModel::coreone, PrinterModel::mk4s) == Compatibility { .is_compatible = true, .chamber_compatibility_mode = true });
+    CHECK(!compatibility(PrinterModel::coreone, PrinterModel::ix).is_compatible);
+    CHECK(!compatibility(PrinterModel::coreone, PrinterModel::xl).is_compatible);
+    CHECK(!compatibility(PrinterModel::coreone, PrinterModel::mk3_5).is_compatible);
+    CHECK(!compatibility(PrinterModel::mk3_5, PrinterModel::coreone).is_compatible);
+    CHECK(!compatibility(PrinterModel::mk4, PrinterModel::coreone).is_compatible);
+
     CHECK(compatibility(PrinterModel::mk3_5, PrinterModel::mk3) == Compatibility { .is_compatible = true, .mk3_compatibility_mode = true });
     CHECK(compatibility(PrinterModel::mk3_9, PrinterModel::mk3) == Compatibility { .is_compatible = true, .mk3_compatibility_mode = true });
     CHECK(compatibility(PrinterModel::mk4, PrinterModel::mk3) == Compatibility { .is_compatible = true, .mk3_compatibility_mode = true });
