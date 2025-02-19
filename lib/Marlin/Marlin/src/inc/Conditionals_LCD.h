@@ -125,7 +125,6 @@
 #endif
 
 // Aliases for LCD features
-#define HAS_DISPLAY          ENABLED(EXTENSIBLE_UI)
 #define HAS_ADC_BUTTONS      ENABLED(ADC_KEYPAD)
 
 /**

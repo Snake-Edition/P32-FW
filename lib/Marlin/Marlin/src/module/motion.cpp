@@ -61,7 +61,7 @@
   #include "loadcell.hpp"
 #endif
 
-#if HAS_DISPLAY
+#if ENABLED(EXTENSIBLE_UI)
   #include "../lcd/ultralcd.h"
 #endif
 
@@ -1152,7 +1152,7 @@ bool axis_unhomed_error(uint8_t axis_bits/*=0x07*/) {
     );
     SERIAL_ECHO_START();
     SERIAL_ECHOLN(msg);
-    #if HAS_DISPLAY
+    #if ENABLED(EXTENSIBLE_UI)
       ui.set_status(msg);
     #endif
     return true;

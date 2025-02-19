@@ -769,7 +769,7 @@
 
         const int point_num = (GRID_MAX_POINTS) - count + 1;
         SERIAL_ECHOLNPAIR("\nProbing mesh point ", point_num, "/", int(GRID_MAX_POINTS), ".\n");
-        #if HAS_DISPLAY
+        #if ENABLED(EXTENSIBLE_UI)
           ui.status_printf_P(0, PSTR(S_FMT " %i/%i"), GET_TEXT(MSG_PROBING_MESH), point_num, int(GRID_MAX_POINTS));
         #endif
 
@@ -912,7 +912,7 @@
       #ifdef Z_AFTER_PROBING
         move_z_after_probing();
       #endif
-      #ifdef HAS_DISPLAY
+      #if ENABLED(EXTENSIBLE_UI)
         ui.reset_status();
       #endif
 
@@ -1411,7 +1411,7 @@
 
       if (do_3_pt_leveling) {
         SERIAL_ECHOLNPGM("Tilting mesh (1/3)");
-        #if HAS_DISPLAY
+        #if ENABLED(EXTENSIBLE_UI)
           ui.status_printf_P(0, PSTR(S_FMT " 1/3"), GET_TEXT(MSG_LCD_TILTING_MESH));
         #endif
 
@@ -1432,7 +1432,7 @@
 
         if (!abort_flag) {
           SERIAL_ECHOLNPGM("Tilting mesh (2/3)");
-          #if HAS_DISPLAY
+          #if ENABLED(EXTENSIBLE_UI)
             ui.status_printf_P(0, PSTR(S_FMT " 2/3"), GET_TEXT(MSG_LCD_TILTING_MESH));
           #endif
 
@@ -1454,7 +1454,7 @@
 
         if (!abort_flag) {
           SERIAL_ECHOLNPGM("Tilting mesh (3/3)");
-          #if HAS_DISPLAY
+          #if ENABLED(EXTENSIBLE_UI)
             ui.status_printf_P(0, PSTR(S_FMT " 3/3"), GET_TEXT(MSG_LCD_TILTING_MESH));
           #endif
 
@@ -1498,7 +1498,7 @@
 
             if (!abort_flag) {
               SERIAL_ECHOLNPAIR("Tilting mesh point ", point_num, "/", total_points, "\n");
-              #if HAS_DISPLAY
+              #if ENABLED(EXTENSIBLE_UI)
                 ui.status_printf_P(0, PSTR(S_FMT " %i/%i"), GET_TEXT(MSG_LCD_TILTING_MESH), point_num, total_points);
               #endif
 

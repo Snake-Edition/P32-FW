@@ -1344,7 +1344,7 @@ void Pause::filament_change(const pause::Settings &settings_, bool is_filament_s
         print_job_timer.start();
     }
 
-#if HAS_DISPLAY
+#if ENABLED(EXTENSIBLE_UI)
     ui.reset_status();
 #endif
 }

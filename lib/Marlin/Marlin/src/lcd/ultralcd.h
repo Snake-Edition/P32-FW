@@ -260,7 +260,7 @@ private:
 
   static void _synchronize();
 
-  #if HAS_DISPLAY
+  #if ENABLED(EXTENSIBLE_UI)
     static void finish_status(const bool persist);
   #endif
 };
