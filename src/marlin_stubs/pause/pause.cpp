@@ -525,9 +525,9 @@ void Pause::filament_push_ask_process(Response response) {
 void Pause::await_filament_process([[maybe_unused]] Response response) {
     setPhase(is_unstoppable() ? PhasesLoadUnload::Inserting_unstoppable : PhasesLoadUnload::Inserting_stoppable);
     // If EXTRUDER sensor is not assigned or not working, or if the user fails to insert filament in time, show Warning and quit loading.
-    if (!FSensors_instance().is_working(LogicalFilamentSensor::extruder) || ticks_diff(ticks_ms(), start_time_ms) > 10 * 60 * 1000) {
+    if (!FSensors_instance().is_working(LogicalFilamentSensor::extruder) || (!is_unstoppable() && ticks_diff(ticks_ms(), start_time_ms) > 10 * 60 * 1000)) {
         marlin_server::set_warning(WarningType::FilamentLoadingTimeout);
-        set(LoadState::_finished);
+        set(LoadState::stop);
         return;
     }
 
@@ -542,7 +542,8 @@ void Pause::await_filament_process([[maybe_unused]] Response response) {
 }
 
 void Pause::assist_insertion_process([[maybe_unused]] Response response) {
-    setPhase(is_unstoppable() ? PhasesLoadUnload::Inserting_unstoppable : PhasesLoadUnload::Inserting_stoppable, 10);
+    const bool unstoppable { is_unstoppable() };
+    setPhase(unstoppable ? PhasesLoadUnload::Inserting_unstoppable : PhasesLoadUnload::Inserting_stoppable, 10);
 
     // Filament is in Extruder autoload assistance si done.
     if (FSensors_instance().has_filament_surely(LogicalFilamentSensor::extruder)) {
@@ -556,9 +557,15 @@ void Pause::assist_insertion_process([[maybe_unused]] Response response) {
     }
 
     // Load for at least 40 seconds before giving up. Alternatively, if filament is removed altogether, stop too.
-    if (ticks_diff(ticks_ms(), start_time_ms) > 40000 /*Move for at least 40 seconds before giving up*/
+    if ((!unstoppable && ticks_diff(ticks_ms(), start_time_ms) > 40000) /*Move for at least 40 seconds before giving up*/
         || FSensors_instance().no_filament_surely(LogicalFilamentSensor::side)) {
-        set(LoadState::stop);
+        /*
+         * Unstoppable processes should not be stopped. Neither by user, nor printer on itself without any serious failure.
+         * The branch used here ensures the printer remains in an infinite loop, waiting in an alert state until the filament is properly loaded—an expected behavior for the printer.
+         * In all other cases, exiting the process does not harm the print. Instead, the user is notified that the filament change was not fully completed, and the printer resumes idling.
+         */
+
+        set(unstoppable ? LoadState::load_start : LoadState::stop);
         return;
     }
 
