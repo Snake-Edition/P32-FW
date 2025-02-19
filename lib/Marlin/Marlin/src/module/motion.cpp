@@ -99,6 +99,11 @@
 #include <option/has_dwarf.h>
 #include <option/has_emergency_stop.h>
 
+#include <option/has_emergency_stop.h>
+#if HAS_EMERGENCY_STOP()
+#include <feature/emergency_stop/emergency_stop.hpp>
+#endif
+
 #include <option/has_ceiling_clearance.h>
 #if HAS_CEILING_CLEARANCE()
   #include <feature/ceiling_clearance/ceiling_clearance.hpp>
@@ -1144,19 +1149,7 @@ void prepare_move_to_destination(const MoveHints &hints) {
     if (dual_x_carriage_unpark()) return;
   #endif
 
-  if (
-    #if UBL_SEGMENTED
-      #if IS_KINEMATIC // UBL using Kinematic / Cartesian cases as a workaround for now.
-        ubl.line_to_destination_segmented(MMS_SCALED(feedrate_mm_s))
-      #else
-        prepare_move_to_destination_cartesian({.move = hints})
-      #endif
-    #elif IS_KINEMATIC
-      line_to_destination_kinematic()
-    #else
-      prepare_move_to_destination_cartesian({.move = hints})
-    #endif
-  ) return;
+  prepare_move_to(destination, feedrate_mm_s, { .move = hints });
 
   current_position = destination;
 }
@@ -1486,6 +1479,64 @@ uint8_t do_homing_move(const AxisEnum axis, const float distance, const feedRate
 
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("<<< do_homing_move(", axis_codes[axis], ")");
   return trigger_state;
+}
+
+void prepare_move_to(const xyze_pos_t &target, feedRate_t fr_mm_s, PrepareMoveHints hints) {
+  static_assert(sizeof(PrepareMoveHints) <= 4, "Change the parameter to a reference");
+
+  if (!position_is_reachable(target)) {
+      return;
+  }
+
+  if(hints.scale_feedrate) {
+    fr_mm_s = MMS_SCALED(fr_mm_s);
+  }
+
+  const xyze_float_t full_diff = target - current_position;
+  [[maybe_unused]] const float xy_distance = xy_float_t{{{full_diff.x, full_diff.y}}}.magnitude();
+
+  using SegmentCount = uint16_t;
+  SegmentCount segment_count = 1;
+
+  // Segment the move enough for MBL
+  #if ENABLED(AUTO_BED_LEVELING_UBL)
+  if(hints.apply_modifiers && planner.leveling_active && planner.leveling_active_at_z(destination.z)) {
+    segment_count = std::max<SegmentCount>(segment_count, std::round(xy_distance / LEVELED_SEGMENT_LENGTH));
+  }
+  #endif
+
+  // Segment the moves to be able to do emergency stop quickly
+  #if HAS_EMERGENCY_STOP()
+  {
+    // Using xy_distance here is quite approximate, but good enough for our purposes here
+    const float duration = (xy_distance / fr_mm_s);
+
+    segment_count = std::max<SegmentCount>(segment_count, abs(full_diff.z) / buddy::EmergencyStop::max_segment_z_mm);
+    segment_count = std::max<SegmentCount>(segment_count, duration / buddy::EmergencyStop::max_segment_time_s);
+  }
+  #endif
+
+  xyze_pos_t segment_pos = current_position;
+  const xyze_pos_t segment_diff = full_diff / segment_count;
+
+  const PlannerHints planner_hints {
+    .move = hints.move,
+  };
+
+  const auto buffer_move = [&](xyze_pos_t target) {
+    #if HAS_POSITION_MODIFIERS
+    if(hints.apply_modifiers) {
+      planner.apply_modifiers(target, true);
+    }
+    #endif
+    planner.buffer_line(target, fr_mm_s, 0, planner_hints);
+  };
+
+  while (--segment_count) {
+    segment_pos += segment_diff;
+    buffer_move(segment_pos);
+  }
+  buffer_move(destination);
 }
 
 /**
