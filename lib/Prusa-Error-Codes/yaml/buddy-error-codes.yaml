@@ -1346,3 +1346,21 @@ Errors:
     id: "CLOSE_CHAMBER_VENTS"
     type: "CONNECT"
     gui_layout: "warning_dialog"
+
+  - code: "XX839"
+    printers: [COREONE]
+    title: "Chamber Cooling Fan Error"
+    text: "Chamber cooling fan is not spinning. Check it for possible debris, then inspect the wiring."
+    id: "CHAMBER_COOLING_FAN_ERROR"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
+    approved: false
+
+  - code: "XX840"
+    printers: [XL, COREONE]
+    title: "Chamber Filtration Fan Error"
+    text: "Chamber filtration fan is not spinning. Check it for possible debris, then inspect the wiring."
+    id: "CHAMBER_FILTRATION_FAN_ERROR"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
+    approved: false
