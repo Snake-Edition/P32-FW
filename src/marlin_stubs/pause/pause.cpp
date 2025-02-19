@@ -523,7 +523,7 @@ void Pause::filament_push_ask_process(Response response) {
 }
 
 void Pause::await_filament_process([[maybe_unused]] Response response) {
-    setPhase(PhasesLoadUnload::Inserting_stoppable);
+    setPhase(is_unstoppable() ? PhasesLoadUnload::Inserting_unstoppable : PhasesLoadUnload::Inserting_stoppable);
     // If EXTRUDER sensor is not assigned or not working, or if the user fails to insert filament in time, show Warning and quit loading.
     if (!FSensors_instance().is_working(LogicalFilamentSensor::extruder) || ticks_diff(ticks_ms(), start_time_ms) > 10 * 60 * 1000) {
         marlin_server::set_warning(WarningType::FilamentLoadingTimeout);
