@@ -109,19 +109,21 @@ static void set_chamber_temperature(buddy::Temperature target, bool wait_for_hea
             marlin_server::set_warning(WarningType::FailedToReachChamberTemperature);
         }
 
-        switch (marlin_server::get_response_from_phase(warning_type_phase(WarningType::FailedToReachChamberTemperature))) {
+        if (marlin_server::is_warning_active(WarningType::FailedToReachChamberTemperature)) {
+            switch (marlin_server::get_response_from_phase(warning_type_phase(WarningType::FailedToReachChamberTemperature))) {
 
-        case Response::Ok:
-            marlin_server::clear_warning(WarningType::FailedToReachChamberTemperature);
-            warning_timeout_start = now;
-            break;
+            case Response::Ok:
+                marlin_server::clear_warning(WarningType::FailedToReachChamberTemperature);
+                warning_timeout_start = now;
+                break;
 
-        case Response::Skip:
-            skippable_gcode().request_skip();
-            break;
+            case Response::Skip:
+                skippable_gcode().request_skip();
+                break;
 
-        default:
-            break;
+            default:
+                break;
+            }
         }
 
         if (skippable_operation.is_skip_requested()) {
