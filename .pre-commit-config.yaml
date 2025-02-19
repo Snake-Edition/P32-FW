@@ -58,18 +58,18 @@ exclude: |
     ^lib/Catch2/|
     ^lib/CrashCatcher/|
     ^lib/Drivers/|
-    ^lib/Marlin/(?!
-        Marlin/src(/gcode)?/feature/prusa/|
-        Marlin/src(/gcode)?/feature/input_shaper/|
-        Marlin/src(/gcode)?/feature/pressure_advance/|
-        Marlin/src(/gcode)?/feature/precise_stepping/|
-        Marlin/src(/gcode)?/feature/phase_stepping/|
-        Marlin/src/module/prusa/|
-        Marlin/src/module/stepper\.|
-        Marlin/src/gcode/calibrate/M958.cpp
-        Marlin/src/gcode/calibrate/M958.hpp
-        Marlin/src/gcode/temperature/M106_M107.cpp
-        Marlin/src/gcode/bedlevel/ubl/G29.cpp
+    ^lib/Marlin/Marlin/src/(?!
+        (gcode/)?feature/prusa/|
+        (gcode/)?feature/input_shaper/|
+        (gcode/)?feature/pressure_advance/|
+        (gcode/)?feature/precise_stepping/|
+        (gcode/)?feature/phase_stepping/|
+        module/prusa/|
+        module/stepper\.|
+        gcode/calibrate/M958\.|
+        gcode/temperature/M106_M107\.cpp|
+        bedlevel/ubl/G29\.cpp|
+        THIS HAS TO BE THE LAST LINE, DON'T FORGET TO ADD OR AT THE END OF YOURS
       )|
     ^lib/Middlewares/Third_Party/FatFs/|
     ^lib/Middlewares/Third_Party/FreeRTOS/|
