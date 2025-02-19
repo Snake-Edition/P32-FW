@@ -20,14 +20,14 @@
  *
  */
 
-#include "../inc/MarlinConfigPre.h"
+#include "ultralcd.h"
 
 #ifdef LED_BACKLIGHT_TIMEOUT
   #include "../feature/leds/leds.h"
 #endif
 
 // All displays share the MarlinUI class
-#if HAS_DISPLAY
+#if HAS_GUI()
   #include "../gcode/queue.h"
   #include "ultralcd.h"
   MarlinUI ui;
@@ -37,9 +37,7 @@
   #if ENABLED(HOST_ACTION_COMMANDS)
     #include "../feature/host_actions.h"
   #endif
-#endif
 
-#if ENABLED(EXTENSIBLE_UI)
   constexpr uint8_t MAX_MESSAGE_LENGTH = 63;
   uint8_t MarlinUI::alert_level; // = 0
   char MarlinUI::status_message[MAX_MESSAGE_LENGTH + 1];
@@ -65,7 +63,7 @@
   }
 #endif
 
-#if HAS_DISPLAY
+#if HAS_GUI()
 
   #if ENABLED(EXTENSIBLE_UI)
     #include "extensible_ui/ui_api.h"
@@ -270,4 +268,4 @@
 
   #endif
 
-#endif // HAS_DISPLAY
+#endif // HAS_GUI()

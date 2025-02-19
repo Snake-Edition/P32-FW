@@ -22,6 +22,7 @@
 #pragma once
 
 #include "../inc/MarlinConfig.h"
+#include <option/has_gui.h>
 
 #if HAS_BUZZER
   #include "../libs/buzzer.h"
@@ -175,14 +176,14 @@ public:
     static void update_indicators();
   #endif
 
-  // LCD implementations
-  static void clear_lcd();
-  static void init_lcd();
+  static void init();
+  static void update();
+  static void abort_print();
+  static void pause_print();
+  static void resume_print();
 
-  #if HAS_DISPLAY
+  #if HAS_GUI()
 
-    static void init();
-    static void update();
     static void set_alert_status_P(PGM_P const message);
 
     static char status_message[];
@@ -196,10 +197,6 @@ public:
       static void advance_status_scroll();
       static char* status_and_len(uint8_t &len);
     #endif
-
-    static void abort_print();
-    static void pause_print();
-    static void resume_print();
 
     #if HAS_PRINT_PROGRESS
       #if HAS_PRINT_PROGRESS_PERMYRIAD
@@ -234,10 +231,8 @@ public:
     static void status_printf_P(const uint8_t level, PGM_P const fmt, ...);
     static void reset_status();
 
-  #else // No LCD
+  #else // HAS_GUI()
 
-    static inline void init() {}
-    static inline void update() {}
     static inline void refresh() {}
     static inline void return_to_status() {}
     static inline void set_alert_status_P(PGM_P const) {}
@@ -247,6 +242,7 @@ public:
     static inline void reset_status() {}
     static inline void reset_alert_level() {}
     static constexpr bool has_status() { return false; }
+    static constexpr uint8_t get_progress_percent() { return 0; }
 
   #endif
 
