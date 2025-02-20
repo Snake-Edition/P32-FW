@@ -121,7 +121,7 @@ static constexpr int _pwm_analogWrite_max = 255;
 static int _pwm_analogWrite_val[_PWM_CNT] = { 0, 0, 0, 0 };
 
 static float hwio_beeper_vol = 1.0F;
-static uint32_t hwio_beeper_del = 0;
+static uint32_t hwio_beeper_duration_ms = 0;
 
 /*****************************************************************************
  * private function declarations
@@ -310,10 +310,10 @@ void hwio_beeper_set_pwm(uint32_t per, uint32_t pul) {
 }
 #endif
 
-void hwio_beeper_tone(float frq, uint32_t del) {
+void hwio_beeper_tone(float frq, uint32_t duration_ms) {
     uint32_t per;
     uint32_t pul;
-    if (frq && del && hwio_beeper_vol) {
+    if (frq && duration_ms && hwio_beeper_vol) {
         if (frq < 0) {
             frq *= -1;
         }
@@ -323,15 +323,15 @@ void hwio_beeper_tone(float frq, uint32_t del) {
         per = (uint32_t)(84000000.0F / frq);
         pul = (uint32_t)(per * hwio_beeper_vol / 2);
         hwio_beeper_set_pwm(per, pul);
-        hwio_beeper_del = del;
+        hwio_beeper_duration_ms = duration_ms;
     } else {
         hwio_beeper_notone();
     }
 }
 
-void hwio_beeper_tone2(float frq, uint32_t del, float vol) {
+void hwio_beeper_tone2(float frq, uint32_t duration_ms, float vol) {
     hwio_beeper_set_vol(vol);
-    hwio_beeper_tone(frq, del);
+    hwio_beeper_tone(frq, duration_ms);
 }
 
 void hwio_beeper_notone(void) {
@@ -339,7 +339,7 @@ void hwio_beeper_notone(void) {
 }
 
 void hwio_update_1ms(void) {
-    if ((hwio_beeper_del) && ((--hwio_beeper_del) == 0)) {
+    if ((hwio_beeper_duration_ms) && ((--hwio_beeper_duration_ms) == 0)) {
         hwio_beeper_set_pwm(0, 0);
     }
 }
