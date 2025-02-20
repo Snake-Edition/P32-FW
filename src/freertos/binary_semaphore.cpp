@@ -27,13 +27,13 @@ void BinarySemaphore::release() {
     }
 }
 
-long BinarySemaphore::release_from_isr() {
-    long wakeup = 0;
-    if (xSemaphoreGiveFromISR(SemaphoreHandle_t(handle), &wakeup) != pdTRUE) {
+void BinarySemaphore::release_from_isr() {
+    BaseType_t higher_priority_task_woken = pdFALSE;
+    if (xSemaphoreGiveFromISR(SemaphoreHandle_t(handle), &higher_priority_task_woken) != pdTRUE) {
         // Since the semaphore was obtained correctly, this should never happen.
         std::abort();
     }
-    return wakeup;
+    portYIELD_FROM_ISR(higher_priority_task_woken);
 }
 
 void BinarySemaphore::release_blocking() {

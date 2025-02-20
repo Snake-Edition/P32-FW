@@ -85,9 +85,7 @@ static void rx_callback_rs485(UART_HandleTypeDef *huart, uint16_t size) {
         HAL_UARTEx_ReceiveToIdle_IT(huart, (uint8_t *)rx_buf_rs485, sizeof(rx_buf_rs485));
     } else {
         rx_len_rs485 = size;
-        long task_woken = tx_semaphore_rs485.release_from_isr();
-        // TODO We could wake up correct task here, but there is no freertos:: wrapper at the moment
-        (void)task_woken;
+        tx_semaphore_rs485.release_from_isr();
     }
 }
 
@@ -113,8 +111,7 @@ static void tx_callback_rs485(UART_HandleTypeDef *huart) {
 
 static void tx_callback_mmu(UART_HandleTypeDef *huart) {
     (void)huart;
-    // TODO We could wake up correct task here, but there is no freertos:: wrapper at the moment
-    (void)tx_semaphore_mmu.release_from_isr();
+    tx_semaphore_mmu.release_from_isr();
 }
 
 extern "C" void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {

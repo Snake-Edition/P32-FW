@@ -34,9 +34,7 @@ public:
     void release();
 
     /// Just like release, but can be called from an interrupt.
-    ///
-    /// (Note: We cheat about the typedef here a bit to avoid include hell).
-    [[nodiscard]] long release_from_isr();
+    void release_from_isr();
 
     /// Same as \p release, but instead of raising a bsod when there's already
     /// a permit, it blocks for an acquire to consume it first before

@@ -244,8 +244,7 @@ static pbuf_variant tx_pbuf = nullptr; // only valid when tx_waiting == true
 
 void espif_tx_callback() {
     if (auto *semaphore = tx_semaphore_active.exchange(nullptr); semaphore != nullptr) {
-        long woken = semaphore->release_from_isr();
-        portYIELD_FROM_ISR(woken);
+        semaphore->release_from_isr();
     }
 }
 

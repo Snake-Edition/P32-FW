@@ -37,10 +37,12 @@ std::span<std::byte> StreamBufferBase::receive(std::span<std::byte> buffer) {
 
 std::span<std::byte> StreamBufferBase::receive_from_isr(std::span<std::byte> buffer) {
     assert(xPortIsInsideInterrupt());
+    BaseType_t higher_priority_task_woken = pdFALSE;
     size_t count = xStreamBufferReceiveFromISR(StreamBufferHandle_t(handle),
         buffer.data(),
         buffer.size(),
-        nullptr);
+        &higher_priority_task_woken);
+    portYIELD_FROM_ISR(higher_priority_task_woken);
     return { buffer.data(), count };
 }
 
@@ -55,10 +57,12 @@ std::span<const std::byte> StreamBufferBase::send(std::span<const std::byte> buf
 
 std::span<const std::byte> StreamBufferBase::send_from_isr(std::span<const std::byte> buffer) {
     assert(xPortIsInsideInterrupt());
+    BaseType_t higher_priority_task_woken = pdFALSE;
     const size_t count = xStreamBufferSendFromISR(StreamBufferHandle_t(handle),
         buffer.data(),
         buffer.size(),
-        nullptr);
+        &higher_priority_task_woken);
+    portYIELD_FROM_ISR(higher_priority_task_woken);
     return buffer.subspan(count);
 }
 
