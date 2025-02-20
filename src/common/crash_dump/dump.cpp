@@ -385,28 +385,16 @@ void CrashCatcher_DumpStart([[maybe_unused]] const CrashCatcherInfo *pInfo) {
 }
 
 void CrashCatcher_DumpMemory(const void *pvMemory, CrashCatcherElementSizes element_size, size_t elementCount) {
-    if (element_size == CRASH_CATCHER_BYTE) {
-        if (crash_dump::dump_size + elementCount > crash_dump::dump_max_data_size) {
-            crash_dump::dump_failed();
-        }
-
-        w25x_program(crash_dump::dump_data_addr + crash_dump::dump_size, (uint8_t *)pvMemory, elementCount);
-        crash_dump::dump_size += elementCount;
-    } else if (element_size == CRASH_CATCHER_WORD) {
-        if (crash_dump::dump_size + elementCount * sizeof(uint32_t) > crash_dump::dump_max_data_size) {
-            crash_dump::dump_failed();
-        }
-
-        const uint32_t *ptr = reinterpret_cast<const uint32_t *>(pvMemory);
-        while (elementCount) {
-            uint32_t word = *ptr++;
-            w25x_program(crash_dump::dump_data_addr + crash_dump::dump_size, (uint8_t *)ptr, sizeof(word));
-            crash_dump::dump_size += sizeof(word);
-            elementCount--;
-        }
-    } else {
+    static_assert(CRASH_CATCHER_BYTE == 1);
+    static_assert(CRASH_CATCHER_HALFWORD == 2);
+    static_assert(CRASH_CATCHER_WORD == 4);
+    const size_t size_in_bytes = elementCount * element_size;
+    if (crash_dump::dump_size + size_in_bytes > crash_dump::dump_max_data_size) {
         crash_dump::dump_failed();
     }
+
+    w25x_program(crash_dump::dump_data_addr + crash_dump::dump_size, (uint8_t *)pvMemory, size_in_bytes);
+    crash_dump::dump_size += size_in_bytes;
 
     if (w25x_fetch_error()) {
         crash_dump::dump_failed();
