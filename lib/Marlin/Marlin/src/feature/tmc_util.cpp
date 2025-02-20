@@ -1223,16 +1223,17 @@ void initial_test_tmc_connection() {
   static_assert(is_supported(stepperZ));
   static_assert(is_supported(stepperE0));
 
-  const uint32_t x = stepperX.DRV_STATUS();
-  const uint32_t y = stepperY.DRV_STATUS();
-  const uint32_t z = stepperZ.DRV_STATUS();
-  const uint32_t e = stepperE0.DRV_STATUS();
-  const auto nok = [] (uint32_t reg) {
-    return reg == 0xFFFFFFFF || reg == 0;
+  const auto check_error = [] (const char ch, auto &stepper) {
+    const auto reg = stepper.DRV_STATUS();
+    if(reg == 0xFFFFFFFF || reg == 0) {
+      bsod("TMC error %i T%i (0x%08lx)", (int)ch, (int)active_extruder, (unsigned long)reg);
+    }
   };
-  if (nok(x) || nok(y) || nok(z) || nok(e)) {
-    bsod("TMC error (0x%08lx,0x%08lx,0x%08lx,0x%08lx)", x, y, z, e);
-  }
+
+  check_error('X', stepperX);
+  check_error('Y', stepperY);
+  check_error('Z', stepperZ);
+  check_error('E', stepperE0);
 }
 
 #endif // HAS_TRINAMIC
