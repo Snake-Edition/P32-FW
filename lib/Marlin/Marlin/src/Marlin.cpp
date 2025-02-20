@@ -609,7 +609,9 @@ void idle(
 ) {
   endstops.event_handler();
 
-  ui.update();
+  #if ENABLED(EXTENSIBLE_UI)
+    ui.update();
+  #endif
 
   #if ENABLED(HOST_KEEPALIVE_FEATURE)
     gcode.host_keepalive();
@@ -825,8 +827,10 @@ void setup() {
     leds.setup();
   #endif
 
-  ui.init();
-  ui.reset_status();
+  #if ENABLED(EXTENSIBLE_UI)
+    ui.init();
+    ui.reset_status();
+  #endif
 
   // Load data from EEPROM if available (or use defaults)
   // This also updates variables in the planner, elsewhere
