@@ -25,3 +25,5 @@ if(HAS_CEILING_CLEARANCE)
 endif()
 
 add_subdirectory(print_status_message)
+
+add_subdirectory(ramming)
