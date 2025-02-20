@@ -31,9 +31,8 @@
     #error "powerpanic currently supports only UBL"
 #endif
 
-#if ENABLED(CANCEL_OBJECTS)
-    #include "../Marlin/src/feature/cancel_object.h"
-#endif
+#include <feature/cancel_object/cancel_object.hpp>
+
 #if ENABLED(PRUSA_TOOL_MAPPING)
     #include "module/prusa/tool_mapper.hpp"
 #endif
@@ -241,7 +240,7 @@ struct flash_data {
         flash_toolchanger_t toolchanger;
 
 #if ENABLED(CANCEL_OBJECTS)
-        uint32_t canceled_objects;
+        buddy::CancelObject::State cancel_object;
 #endif
 #if ENABLED(PRUSA_TOOL_MAPPING)
         ToolMapper::serialized_state_t tool_mapping;
@@ -589,7 +588,7 @@ void resume_loop() {
 
         // canceled objects
 #if ENABLED(CANCEL_OBJECTS)
-        cancelable.canceled = state_buf.canceled_objects;
+        buddy::cancel_object().set_state(state_buf.cancel_object);
 #endif
 #if ENABLED(PRUSA_TOOL_MAPPING)
         tool_mapper.deserialize(state_buf.tool_mapping);
@@ -946,7 +945,7 @@ void panic_loop() {
         mode_specific(state_buf.progress.stealth_mode, oProgressData.stealth_mode);
 
 #if ENABLED(CANCEL_OBJECTS)
-        state_buf.canceled_objects = cancelable.canceled;
+        state_buf.cancel_object = buddy::cancel_object().state();
 #endif
 #if ENABLED(PRUSA_TOOL_MAPPING)
         tool_mapper.serialize(state_buf.tool_mapping);

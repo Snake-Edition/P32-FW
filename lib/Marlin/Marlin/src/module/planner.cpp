@@ -91,9 +91,7 @@
   #include "../feature/backlash.h"
 #endif
 
-#if ENABLED(CANCEL_OBJECTS)
-  #include "../feature/cancel_object.h"
-#endif
+#include <feature/cancel_object/cancel_object.hpp>
 
 #if ENABLED(CRASH_RECOVERY)
   #include "../feature/prusa/crash_recovery.hpp"
@@ -2180,7 +2178,7 @@ bool Planner::buffer_segment(const abce_pos_t &abce
   #endif
 
   // DRYRUN prevents E moves from taking place
-  if (DEBUGGING(DRYRUN) || TERN0(CANCEL_OBJECTS, cancelable.skipping)) {
+  if (DEBUGGING(DRYRUN) || buddy::cancel_object().is_current_object_cancelled()) {
     position.e = target.e;
     position_float.e = abce.e;
   }

@@ -41,9 +41,7 @@ GcodeSuite gcode;
   #include "../feature/host_actions.h"
 #endif
 
-#if ENABLED(CANCEL_OBJECTS)
-  #include "../feature/cancel_object.h"
-#endif
+#include <feature/cancel_object/cancel_object.hpp>
 
 #if ENABLED(CRASH_RECOVERY)
   #include "../feature/prusa/crash_recovery.hpp"
@@ -159,11 +157,7 @@ int8_t GcodeSuite::get_target_e_stepper_from_command() {
  *  - Set the feedrate, if included
  */
 void GcodeSuite::get_destination_from_command() {
-  #if ENABLED(CANCEL_OBJECTS)
-    const bool &skip_move = cancelable.skipping;
-  #else
-    constexpr bool skip_move = false;
-  #endif
+  const bool skip_move = buddy::cancel_object().is_current_object_cancelled();
 
   xyze_bool_t seen = { false, false, false, false };
   LOOP_XYZE(i) {

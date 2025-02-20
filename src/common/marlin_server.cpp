@@ -65,9 +65,7 @@
     #include "../Marlin/src/feature/prusa/MMU2/mmu2_mk4.h"
 #endif
 
-#if ENABLED(CANCEL_OBJECTS)
-    #include "../Marlin/src/feature/cancel_object.h"
-#endif
+#include <feature/cancel_object/cancel_object.hpp>
 
 #include "hwio.h"
 #include "wdt.hpp"
@@ -1963,12 +1961,10 @@ static void _server_print_loop(void) {
         buddy::reenable_ceiling_clearance_warning();
 #endif
 
-#if ENABLED(CANCEL_OBJECTS)
-        cancelable.reset();
+        buddy::cancel_object().reset();
         for (auto &cancel_object_name : marlin_vars().cancel_object_names) {
             cancel_object_name.set(""); // Erase object names
         }
-#endif
 
 #if HAS_LOADCELL()
         if (!server.print_is_serial) {
@@ -2985,8 +2981,8 @@ static void _server_update_vars() {
     }
 
 #if ENABLED(CANCEL_OBJECTS)
-    marlin_vars().set_cancel_object_mask(cancelable.canceled); // Canceled objects
-    marlin_vars().cancel_object_count = cancelable.object_count; // Total number of objects
+    marlin_vars().set_cancel_object_mask(buddy::cancel_object().cancelled_objects_mask()); // Canceled objects
+    marlin_vars().cancel_object_count = buddy::cancel_object().object_count(); // Total number of objects
 #endif /*ENABLED(CANCEL_OBJECTS)*/
 
     marlin_vars().temp_bed = thermalManager.degBed();
@@ -3103,13 +3099,13 @@ bool _process_server_valid_request(const Request &request, int client_id) {
         return true;
 #if ENABLED(CANCEL_OBJECTS)
     case Request::Type::CancelObjectID:
-        cancelable.cancel_object(request.cancel_object_id);
+        buddy::cancel_object().set_object_cancelled(request.cancel_object_id, true);
         return true;
     case Request::Type::UncancelObjectID:
-        cancelable.uncancel_object(request.uncancel_object_id);
+        buddy::cancel_object().set_object_cancelled(request.uncancel_object_id, false);
         return true;
     case Request::Type::CancelCurrentObject:
-        cancelable.cancel_active_object();
+        buddy::cancel_object().set_object_cancelled(buddy::cancel_object().current_object(), true);
         return true;
 #else
     case Request::Type::CancelObjectID:

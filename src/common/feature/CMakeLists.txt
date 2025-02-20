@@ -1,5 +1,7 @@
 add_subdirectory(factory_reset)
 
+add_subdirectory(cancel_object)
+
 if(HAS_BELT_TUNING)
   add_subdirectory(belt_tuning)
 endif()

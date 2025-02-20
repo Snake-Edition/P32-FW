@@ -30,9 +30,7 @@
 #include "../../module/temperature.h"
 #include "feature/precise_stepping/internal.hpp"
 
-#if ENABLED(CANCEL_OBJECTS)
-  #include <feature/cancel_object.h>
-#endif /*ENABLED(CANCEL_OBJECTS)*/
+#include <feature/cancel_object/cancel_object.hpp>
 
 #if ENABLED(DELTA)
   #include "../../module/delta.h"
@@ -490,7 +488,7 @@ void GcodeSuite::G2_G3(const bool clockwise) {
     if (parser.seenval(bchar)) arc_offset.b = parser.value_linear_units();
   }
 
-  if (TERN0(CANCEL_OBJECTS, cancelable.skipping)) {
+  if (buddy::cancel_object().is_current_object_cancelled()) {
     // Canceling an object, skip arc move
   } else if (arc_offset) {
 

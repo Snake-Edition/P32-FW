@@ -42,7 +42,6 @@ if(BOARD_IS_MASTER_BOARD)
             Marlin/Marlin/src/feature/bedlevel/ubl/ubl.cpp
             Marlin/Marlin/src/feature/bedlevel/ubl/ubl_G29.cpp
             Marlin/Marlin/src/feature/bedlevel/ubl/ubl_motion.cpp
-            Marlin/Marlin/src/feature/cancel_object.cpp
             Marlin/Marlin/src/feature/host_actions.cpp
             Marlin/Marlin/src/feature/input_shaper/input_shaper.cpp
             Marlin/Marlin/src/feature/input_shaper/input_shaper_config.cpp
