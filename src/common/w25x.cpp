@@ -1,4 +1,5 @@
 #include "w25x.h"
+#include "buddy/unreachable.hpp"
 #include "w25x_communication.h"
 #include "timing_precise.hpp"
 #include <logging/log.hpp>
@@ -10,6 +11,8 @@
 #include <stdlib.h>
 
 LOG_COMPONENT_DEF(W25X, logging::Severity::debug);
+
+extern EventGroupHandle_t event_group;
 
 namespace {
 
@@ -156,6 +159,8 @@ osMutexId erase_mutex = NULL;
 
 osMutexDef(communication_mutex_resource);
 osMutexId communication_mutex = NULL;
+
+bool w25x_was_initialized = false;
 
 /**@}*/
 
@@ -374,29 +379,8 @@ int mfrid_devid(uint8_t *devid) {
 
 } // end anonymous namespace
 
-bool w25x_init() {
-    const bool os_running = xTaskGetSchedulerState() == taskSCHEDULER_RUNNING;
-
-    erase_mutex = os_running ? osMutexCreate(osMutex(erase_mutex_resource)) : NULL;
-    communication_mutex = os_running ? osMutexCreate(osMutex(communication_mutex_resource)) : NULL;
-
-    static_assert(!NULL, "All the code expects NULL in condition to evaluate as false.");
-    if (os_running && (!erase_mutex || !communication_mutex)) {
-        return false;
-    }
-
-    OptionalMutex eraseMutex(erase_mutex);
-    OptionalMutex communicationMutex(communication_mutex);
-
-    if (!w25x_communication_abort()) {
-        return false;
-    }
-
+static bool w25x_init_internal() {
     w25x_deselect();
-
-    if (!w25x_communication_init(os_running)) {
-        return false;
-    }
 
     if (!w25x_wait_busy()) {
         return false;
@@ -416,6 +400,57 @@ bool w25x_init() {
     }
 
     return true;
+}
+
+bool w25x_reinit_before_crash_dump() {
+    // BFW-6813
+    // This may potentially leak everything but we are about to reset the MCU anyway
+    // and NULL checks are necessary for other functions in this module to perform
+    // correctly:
+    //  * assigning NULL to mutex means OptionalMutex turns into nop
+    //  * assigning NULL to event group means DMA is turned off
+    // Will be fixed in other commit as part of BFW-6813
+    erase_mutex = NULL;
+    communication_mutex = NULL;
+    event_group = NULL;
+
+    if (w25x_was_initialized) {
+        // abort ongoing transactions if there were any, ignoring errors
+        (void)HAL_SPI_Abort(&SPI_HANDLE_FOR(flash));
+        (void)w25x_fetch_error();
+    } else {
+        SPI_INIT(flash);
+    }
+    return w25x_init_internal();
+}
+
+void w25x_init() {
+    if (w25x_was_initialized) {
+        // must only be called once
+        BUDDY_UNREACHABLE();
+    }
+
+    // BFW-6813
+    // These should be allocated statically.
+    erase_mutex = osMutexCreate(osMutex(erase_mutex_resource));
+    communication_mutex = osMutexCreate(osMutex(communication_mutex_resource));
+    event_group = xEventGroupCreate();
+    if (!(erase_mutex && communication_mutex && event_group)) {
+        // if resource allocation fails, we are severely screwed anyway
+        BUDDY_UNREACHABLE();
+    }
+
+    SPI_INIT(flash);
+    if (w25x_init_internal()) {
+        w25x_was_initialized = true;
+        return;
+    }
+
+    // BFW-6813
+    // Actually, there is no point in calling bsod() here since it writes the message
+    // to the external FLASH to show after the reboot 🫠
+    // I am keeping the original code here, but we should think about it a bit...
+    bsod("failed to initialize ext flash");
 }
 
 uint32_t w25x_get_sector_count() {

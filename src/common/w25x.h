@@ -53,20 +53,18 @@ inline constexpr size_t w25x_pp_size = w25x_fs_start_address - w25x_pp_start_add
 inline constexpr uint32_t w25x_dump_size = w25x_error_start_adress - w25x_dump_start_address;
 #endif // defined(__cplusplus)
 
-/// Initialize the w25x module
+/// Initialize the w25x module while the scheduler is running.
 ///
-/// This has to be called after the underlying SPI has been initialized
-/// and assigned using w25x_spi_assign.
+/// When w25x is initialized using this function, all its
+/// interface function must be called in task context only.
+extern void w25x_init();
+
+/// (Re)initialize the w25x module after the scheduler has been stopped.
 ///
-/// When w25x is initialized when the scheduler is running all its
-/// interface function must be called in task context only. (standard usage)
+/// Call this once to abort ongoing transfers and take over the chip.
+/// This should only be used to write crash dump to external flash.
 ///
-/// When w25x is initialized when the scheduler is NOT running all its
-/// interface function can be called in any context but are not reentrant.
-///
-/// w25x_init can be called repeatedly in different contexts
-/// to switch between those two modes. It can be called only once with
-/// running scheduler as this creates resources which are never released.
+/// All interface functions can be called in any context but are not reentrant.
 /// If w25x is reinitialized during DMA transfer it is aborted. If some
 /// data is already transfered to the chip at that point those data are
 /// written gracefully. If erase operation is ongoing it is completed
@@ -78,7 +76,7 @@ inline constexpr uint32_t w25x_dump_size = w25x_error_start_adress - w25x_dump_s
 ///
 /// @retval true on success
 /// @retval false otherwise.
-extern bool w25x_init(void);
+extern bool w25x_reinit_before_crash_dump();
 
 /// Return the number of available sectors
 extern uint32_t w25x_get_sector_count();
@@ -113,9 +111,6 @@ extern void w25x_chip_erase(void (*wait_callback)() = NULL);
 /// Fetch and clear error of a previous operation.
 /// Returns 0 if there hasn't been any error
 extern int w25x_fetch_error(void);
-
-/// Assign handle of configured and ready-to-use SPI handle
-extern void w25x_spi_assign(SPI_HandleTypeDef *spi_handle);
 
 /// This should be called when the underlying SPI's DMA finishes DMA transfer (send)
 extern void w25x_spi_transfer_complete_callback(void);

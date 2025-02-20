@@ -205,7 +205,7 @@ void save_message(MsgType type, uint16_t error_code, const char *error, const ch
 
     buddy::InterruptDisabler _;
     vTaskEndScheduler();
-    if (!w25x_init()) {
+    if (!w25x_reinit_before_crash_dump()) {
         return;
     }
 
@@ -370,7 +370,7 @@ void CrashCatcher_DumpStart([[maybe_unused]] const CrashCatcherInfo *pInfo) {
 
     crash_dump::before_dump();
 
-    if (!w25x_init()) {
+    if (!w25x_reinit_before_crash_dump()) {
         crash_dump::dump_failed();
     }
 

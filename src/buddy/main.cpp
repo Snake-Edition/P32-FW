@@ -261,12 +261,7 @@ extern "C" void main_cpp(void) {
 
     hw_tim14_init();
 
-    SPI_INIT(flash);
-    // initialize SPI flash
-    w25x_spi_assign(&SPI_HANDLE_FOR(flash));
-    if (!w25x_init()) {
-        bsod("failed to initialize ext flash");
-    }
+    w25x_init();
 
     const bool want_error_screen = (dump_is_valid() && !dump_is_displayed()) || (message_is_valid() && message_get_type() != MsgType::EMPTY && !message_is_displayed());
 

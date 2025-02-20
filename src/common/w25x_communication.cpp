@@ -9,21 +9,18 @@
 
 LOG_COMPONENT_REF(W25X);
 
-/// The SPI used by this module
-static SPI_HandleTypeDef *spi_handle;
-
 /// Timeout for SPI operations
 static const uint32_t TIMEOUT_MS = 1000;
 
 /// Event group used to wake up a thread when SPI operation completes
-static EventGroupHandle_t event_group;
+EventGroupHandle_t event_group = NULL;
 
 /// Buffer located in SRAM (not in core-coupled RAM)
 /// It is used when we user gives us a buffer located in core-coupled RAM, which we can't pass to the DMA.
 static uint8_t block_buffer[128];
 
 /// Pending error from last operation(s)
-static int current_error;
+static int current_error = 0;
 
 /// Check whether there is no pending error
 static inline bool no_error();
@@ -52,35 +49,6 @@ enum {
     EVENT_TX_COMPLETE = (1 << 1),
 };
 
-extern "C" bool w25x_communication_init(bool init_event_group) {
-    // check SPI handle has been assigned using w25x_spi_assign
-    if (spi_handle == NULL) {
-        return false;
-    }
-
-    // clear error
-    current_error = 0;
-
-    // create an eventgroup for ISR DMA events
-    if (init_event_group && event_group == NULL) {
-        event_group = xEventGroupCreate();
-        if (event_group == NULL) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-extern "C" bool w25x_communication_abort() {
-    if (spi_handle == NULL) {
-        return false;
-    }
-
-    (void)HAL_SPI_Abort(spi_handle);
-    return true;
-}
-
 int w25x_fetch_error() {
     int error = current_error;
     current_error = 0;
@@ -106,7 +74,7 @@ extern "C" void w25x_receive(uint8_t *buffer, uint32_t len) {
             }
         }
     } else {
-        HAL_StatusTypeDef status = HAL_SPI_Receive(spi_handle, buffer, len, TIMEOUT_MS);
+        HAL_StatusTypeDef status = HAL_SPI_Receive(&SPI_HANDLE_FOR(flash), buffer, len, TIMEOUT_MS);
         set_error(hal_status_to_error(status));
     }
 }
@@ -131,7 +99,7 @@ extern "C" void w25x_send(const uint8_t *buffer, uint32_t len) {
             }
         }
     } else {
-        HAL_StatusTypeDef status = HAL_SPI_Transmit(spi_handle, (uint8_t *)buffer, len, TIMEOUT_MS);
+        HAL_StatusTypeDef status = HAL_SPI_Transmit(&SPI_HANDLE_FOR(flash), (uint8_t *)buffer, len, TIMEOUT_MS);
         set_error(hal_status_to_error(status));
     }
 }
@@ -165,7 +133,7 @@ static int receive_dma(uint8_t *buffer, uint32_t len) {
 
     // initiate DMA transfer
     assert(can_be_used_by_dma(buffer));
-    HAL_StatusTypeDef status = HAL_SPI_Receive_DMA(spi_handle, buffer, len);
+    HAL_StatusTypeDef status = HAL_SPI_Receive_DMA(&SPI_HANDLE_FOR(flash), buffer, len);
     if (status != HAL_OK) {
         return hal_status_to_error(status);
     }
@@ -179,7 +147,7 @@ static int receive_dma(uint8_t *buffer, uint32_t len) {
     // check we did not timeout
     if ((bits & EVENT_RX_COMPLETE) == 0) {
         log_error(W25X, "DMA read timed out");
-        HAL_SPI_Abort(spi_handle);
+        HAL_SPI_Abort(&SPI_HANDLE_FOR(flash));
         return hal_status_to_error(HAL_TIMEOUT);
     }
 
@@ -191,7 +159,7 @@ static int send_dma(const uint8_t *buffer, uint32_t len) {
 
     // initiate DMA transfer
     assert(can_be_used_by_dma(buffer));
-    HAL_StatusTypeDef status = HAL_SPI_Transmit_DMA(spi_handle, (uint8_t *)buffer, len);
+    HAL_StatusTypeDef status = HAL_SPI_Transmit_DMA(&SPI_HANDLE_FOR(flash), (uint8_t *)buffer, len);
     if (status != HAL_OK) {
         log_error(W25X, "DMA write error %u", status);
         return hal_status_to_error(status);
@@ -206,7 +174,7 @@ static int send_dma(const uint8_t *buffer, uint32_t len) {
     // check we did not timeout
     if ((bits & EVENT_TX_COMPLETE) == 0) {
         log_error(W25X, "DMA write timed out");
-        HAL_SPI_Abort(spi_handle);
+        HAL_SPI_Abort(&SPI_HANDLE_FOR(flash));
         return hal_status_to_error(HAL_TIMEOUT);
     }
 
@@ -223,10 +191,6 @@ static void set_events_from_isr(EventBits_t events) {
         // Switch context after returning from ISR if we have just woken a higher-priority task
         portYIELD_FROM_ISR(higherPriorityTaskWoken);
     }
-}
-
-void w25x_spi_assign(SPI_HandleTypeDef *spi) {
-    spi_handle = spi;
 }
 
 void w25x_spi_transfer_complete_callback(void) {
