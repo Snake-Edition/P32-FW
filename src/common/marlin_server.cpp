@@ -550,7 +550,6 @@ void init(void) {
     // after a reboot.
     fsm_states.init_state_id();
 
-    marlin_vars().init();
 #if HAS_SHEET_PROFILES()
     SteelSheets::CheckIfCurrentValid();
 #endif
