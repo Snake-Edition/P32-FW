@@ -1654,7 +1654,7 @@ void nozzle_timeout_loop() {
 }
 
 // Checking valid behaviour of Heatbreak fan & Print fan of currently active extruder/tool
-bool fan_checks() {
+bool active_extruder_fan_checks() {
     if (marlin_vars().fan_check_enabled
 #if HAS_TOOLCHANGER()
         && prusa_toolchanger.is_any_tool_active() // Nothing to check
@@ -1663,8 +1663,7 @@ bool fan_checks() {
         // Allow fan check only if fan had time to build up RPM (after CFanClt::rpm_stabilization)
         // CFanClt error states are checked in the end of each _server_print_loop()
         auto check_fan = [](CFanCtlCommon &fan, const char *fan_name) {
-            const auto fan_state = fan.getState();
-            if ((fan_state == CFanCtlCommon::FanState::running || fan_state == CFanCtlCommon::FanState::error_running || fan_state == CFanCtlCommon::FanState::error_starting) && !fan.getRPMIsOk()) {
+            if (!fan.is_fan_ok()) {
                 log_error(MarlinServer, "%s FAN RPM is not OK - Actual: %d rpm, PWM: %d",
                     fan_name,
                     (int)fan.getActualRPM(),
@@ -1694,7 +1693,7 @@ static void resuming_reheating() {
         server.print_state = State::Paused;
     }
 
-    if (fan_checks()) {
+    if (active_extruder_fan_checks()) {
         server.print_state = State::Paused;
         return;
     }
@@ -2008,7 +2007,7 @@ static void _server_print_loop(void) {
         resuming_reheating();
         break;
     case State::Resuming_UnparkHead_XY:
-        if (fan_checks()) {
+        if (active_extruder_fan_checks()) {
             abort_resuming = true;
         }
         if (planner.processing()) {
@@ -2018,7 +2017,7 @@ static void _server_print_loop(void) {
         server.print_state = State::Resuming_UnparkHead_ZE;
         break;
     case State::Resuming_UnparkHead_ZE:
-        if (fan_checks()) {
+        if (active_extruder_fan_checks()) {
             abort_resuming = true;
         }
 
