@@ -208,6 +208,7 @@ private:
 #endif
     void load_prime_process(Response response);
     void stop_process(Response response);
+    void runout_during_load();
 
     using StateHandler = void (Pause::*)(Response response);
     static constexpr EnumArray<LoadState, StateHandler, static_cast<int>(LoadState::_finished)> state_handlers {
@@ -265,17 +266,51 @@ private:
 
     bool ensureSafeTemperatureNotifyProgress(uint8_t progress_min, uint8_t progress_max);
 
+    /// Generally a bit mask of conditions which are checked in wait_for_motion_finish_stoppable.
+    /// If any of the conditions occurs during waiting for the planned motion to finish,
+    /// wait_for_motion_finish_stoppable interrupted, motion is discarded (!) and the condition met is returned.
+    enum class StopConditions : uint_least8_t {
+        Accomplished = 0, ///< planned move finished without any interruption - used as a return value when no stop condition occurred
+        UserStopped = 1 << 0, ///< user pressed a stop button on the screen
+        SideFilamentSensorRunout = 1 << 1, ///< filament runout happened
+        Failed = 1 << 2, ///< some failure, currently only used in \ref do_e_move_notify_progress_hotextrude
+        All = UserStopped | SideFilamentSensorRunout
+    };
+
+    /// syntactic sugar to allow bitwise operators on top of StopConditions
+    /// so much boilerplate code just to use then enum as bit masks :(
+    friend constexpr StopConditions operator|(StopConditions lhs, StopConditions rhs) {
+        return static_cast<StopConditions>(std::to_underlying(lhs) | std::to_underlying(rhs));
+    }
+    friend constexpr StopConditions operator&(StopConditions lhs, StopConditions rhs) {
+        return static_cast<StopConditions>(std::to_underlying(lhs) & std::to_underlying(rhs));
+    }
+    friend constexpr bool operator!(StopConditions cond) {
+        return std::to_underlying(cond) == 0;
+    }
+    constexpr bool check4(Pause::StopConditions cf, Pause::StopConditions mask) {
+        return !(!(cf & mask)); // force application of the operator!
+    }
+
     /// Moves the extruder by \p length . Notifies the FSM about progress.
-    void do_e_move_notify_progress(const float &length, const feedRate_t &fr_mm_s, uint8_t progress_min, uint8_t progress_max);
+    /// @returns any of the \ref StopConditions if the move has been interrupted or StopConditions::Accomplished if the move has been successfully finished
+    [[nodiscard]] StopConditions do_e_move_notify_progress(const float &length, const feedRate_t &fr_mm_s, uint8_t progress_min, uint8_t progress_max, StopConditions check_for);
 
     /// Moves the extruder by \p length . Does not mind the hotend being cold. Notifies the FSM about progress.
-    void do_e_move_notify_progress_coldextrude(const float &length, const feedRate_t &fr_mm_s, uint8_t progress_min, uint8_t progress_max);
+    /// @returns any of the \ref StopConditions if the move has been interrupted or StopConditions::Accomplished if the move has been successfully finished
+    [[nodiscard]] StopConditions do_e_move_notify_progress_coldextrude(const float &length, const feedRate_t &fr_mm_s, uint8_t progress_min, uint8_t progress_max, StopConditions check_for);
 
     /// Moves the extruder by \p length . Heats up for the move if necessary. Notifies the FSM about progress.
-    void do_e_move_notify_progress_hotextrude(const float &length, const feedRate_t &fr_mm_s, uint8_t progress_min, uint8_t progress_max);
+    /// @returns any of the \ref StopConditions if the move has been interrupted or StopConditions::Accomplished if the move has been successfully finished
+    [[nodiscard]] StopConditions do_e_move_notify_progress_hotextrude(const float &length, const feedRate_t &fr_mm_s, uint8_t progress_min, uint8_t progress_max, StopConditions check_for);
 
     bool check_user_stop(Response response); //< stops motion and fsm and returns true it user triggered stop
-    bool wait_for_motion_finish_or_user_stop(); //< waits until motion is finished; if stop is triggered then returns true
+
+    /// Waits until motion is finished
+    /// Originally, only user stop was considered, hence the default value of check_for
+    /// @returns see @ref StopConditions for explanation.
+    [[nodiscard]] StopConditions wait_for_motion_finish_stoppable(StopConditions check_for = StopConditions::UserStopped);
+
     void handle_filament_removal(LoadState state_to_set); //<checks if filament is present if not it sets a different state
 
     /// To be called from states that are waiting for some filament sensor input (recovery strategy when FS has problems)
