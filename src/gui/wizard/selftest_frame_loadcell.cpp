@@ -97,7 +97,7 @@ void SelftestFrameLoadcell::change() {
             icon_id = &img::warning_48x48;
 
         } else {
-            txt_phase = N_("We will need your help with this test. You will be asked to tap the nozzle. Don't worry; it is going to be cold.\n ");
+            txt_phase = N_("We will need your help with this test. You will be asked to tap the nozzle. Don't worry; it is going to be cold.");
             icon_id = &img::hand_with_nozzle3_154x100;
         }
         break;
