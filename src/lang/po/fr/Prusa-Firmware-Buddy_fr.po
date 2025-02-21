@@ -7350,9 +7350,7 @@ msgstr ""
 
 #: src/gui/wizard/selftest_frame_loadcell.cpp:95
 msgid ""
-"You did not tap the nozzle or you tapped it too soon. Retry?\n"
-"\n"
-" "
+"You did not tap the nozzle or you tapped it too soon. Retry?"
 msgstr ""
 "Vous n'avez pas appuyé sur la buse ou vous avez appuyé trop tôt. Réessayer ?"
 

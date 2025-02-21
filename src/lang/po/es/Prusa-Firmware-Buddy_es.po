@@ -7388,9 +7388,7 @@ msgstr "Puedes pulsar 'Finalizar' para seguir conectándote en segundo plano."
 
 #: src/gui/wizard/selftest_frame_loadcell.cpp:95
 msgid ""
-"You did not tap the nozzle or you tapped it too soon. Retry?\n"
-"\n"
-" "
+"You did not tap the nozzle or you tapped it too soon. Retry?"
 msgstr ""
 "No has golpeado la boquilla o lo has hecho demasiado pronto. ¿Reintentar?"
 
