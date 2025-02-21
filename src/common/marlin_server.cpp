@@ -888,7 +888,7 @@ void enqueue_gcode_printf(const char *gcode, ...) {
     {
         va_list ap;
         va_start(ap, gcode);
-        request.append_printf(gcode, ap);
+        request.append_vprintf(gcode, ap);
         va_end(ap);
     }
     enqueue_gcode(request.str());
