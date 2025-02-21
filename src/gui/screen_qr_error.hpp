@@ -31,7 +31,4 @@ struct ScreenErrorQR : public ScreenResetError {
 
 public:
     ScreenErrorQR();
-
-protected:
-    virtual void windowEvent(window_t *sender, GUI_event_t event, void *param) override;
 };

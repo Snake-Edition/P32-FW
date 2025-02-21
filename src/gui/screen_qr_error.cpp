@@ -113,11 +113,3 @@ ScreenErrorQR::ScreenErrorQR()
         hide_qr();
     }
 }
-
-void ScreenErrorQR::windowEvent(window_t *sender, GUI_event_t event, void *param) {
-    if ((event == GUI_event_t::CLICK) || (event == GUI_event_t::BTN_DN)) {
-        sys_reset();
-        return;
-    }
-    ScreenResetError::windowEvent(sender, event, param);
-}

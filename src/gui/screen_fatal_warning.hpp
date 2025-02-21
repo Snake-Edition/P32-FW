@@ -25,7 +25,4 @@ class ScreenFatalWarning : public ScreenResetError {
 
 public:
     ScreenFatalWarning();
-
-protected:
-    virtual void windowEvent(window_t *sender, GUI_event_t event, void *param) override;
 };
