@@ -313,6 +313,132 @@ TEST_CASE("validity-bgcode", "[GcodeReader]") {
     REQUIRE(r->stream_getc(c) == IGcodeReader::Result_t::RESULT_OUT_OF_RANGE);
 }
 
+/*
+ * Make sure we are never willing to print past the already downloaded boundary.
+ *
+ * Try each prefix of the file and try to read from it as far as possible and
+ * check we don't read the gargabe from the file or that we don't triger a CRC
+ * error (which would both indicate we access some invalid data).
+ *
+ * To allow running it inside the CI, the test is limited to only some random
+ * subset of the prefixes, it takes a long time otherwise. But it can easily be
+ * enabled and left for few hours to actually run in full (and it was run that
+ * way originally).
+ */
+TEST_CASE("validity-single-increments", "[GcodeReader]") {
+    // Testing both textual and binary gcodes
+    const char *inputs[] = { BINARY_HEATSHRINK_MEATPACK_FILE, PLAIN_TEST_FILE };
+    for (size_t i = 0; i < sizeof inputs / sizeof *inputs; i++) {
+        const char *input = inputs[i];
+        INFO("Testing file " << input);
+        struct stat st = {};
+        REQUIRE(stat(input, &st) == 0);
+        size_t size = st.st_size;
+        // tmpnam is considered deprecated, but we don't know of a portable
+        // replacement. We use the reentrant version (with passing a buffer)
+        // and we are in tests only, so that's not a big deal.
+        char tfile[L_tmpnam + 10];
+        char *tmp_file_name = tmpnam(tfile);
+        if (strcmp(input, PLAIN_TEST_FILE) == 0) {
+            strcat(tmp_file_name, ".gcode");
+        } else {
+            strcat(tmp_file_name, ".bgcode");
+        }
+        INFO("TMP file " << tmp_file_name);
+        struct Deleter {
+            const char *path;
+            ~Deleter() {
+                unlink(path);
+            }
+        };
+        Deleter deleter { tmp_file_name };
+
+        for (size_t j = 0; j < size; j++) {
+            // The test would be taking waaay too long in its full
+            // configuration. Preserving it in somewhat more lightweight form
+            // that skips most of the sizes.
+            if (random() % 2000 != 0 || j == 0) {
+                continue;
+            }
+
+            {
+                unique_file_ptr fin(fopen(input, "rb"));
+                REQUIRE(fin.get() != nullptr);
+
+                unique_file_ptr ftmp(fopen(tmp_file_name, "wb"));
+                REQUIRE(ftmp.get() != nullptr);
+
+                // Put a prefix into the file
+                for (size_t k = 0; k < j; k++) {
+                    int c = fgetc(fin.get());
+                    REQUIRE(c != EOF);
+                    REQUIRE(fputc(c, ftmp.get()) != EOF);
+                }
+
+                // Fill the rest with binary garbage.
+                for (size_t k = j; k < size; k++) {
+                    REQUIRE(fputc(0xFF, ftmp.get()) != EOF);
+                }
+            }
+
+            INFO("Size " << j);
+
+            auto reader = AnyGcodeFormatReader(tmp_file_name);
+
+            if (auto *r = dynamic_cast<PrusaPackGcodeReader *>(reader.get()); r != nullptr) {
+                r->set_validity(State { ValidPart(0, j), nullopt, size });
+            } else if (auto *r = dynamic_cast<PlainGcodeReader *>(reader.get()); r != nullptr) {
+                r->set_validity(State { ValidPart(0, j), nullopt, size });
+            } else {
+                FAIL("Reader not open");
+            }
+
+            auto *r = reader.get();
+
+            auto res = r->stream_gcode_start();
+            INFO("Result " << (int)res);
+            switch (res) {
+            case IGcodeReader::Result_t::RESULT_OUT_OF_RANGE:
+                // Not enough data to even start streaming gcode; that's fine.
+                continue;
+            case IGcodeReader::Result_t::RESULT_OK: {
+                res = IGcodeReader::Result_t::RESULT_OK;
+                while (res == IGcodeReader::Result_t::RESULT_OK) {
+                    char c;
+                    res = r->stream_getc(c);
+                    // Check we are not reading plaintext garbage
+                    // (the bgcode already checks CRCs)
+                    REQUIRE(static_cast<uint8_t>(c) != 0xFF);
+                };
+                bool ok = (res == IGcodeReader::Result_t::RESULT_EOF) || (res == IGcodeReader::Result_t::RESULT_OUT_OF_RANGE);
+                REQUIRE(ok);
+
+                REQUIRE(r->stream_gcode_start() == IGcodeReader::Result_t::RESULT_OK);
+
+                res = IGcodeReader::Result_t::RESULT_OK;
+                while (res == IGcodeReader::Result_t::RESULT_OK) {
+                    GcodeBuffer buffer;
+                    res = r->stream_get_line(buffer, IGcodeReader::Continuations::Discard);
+                    if (res == IGcodeReader::Result_t::RESULT_OK) {
+                        // Check we are not reading plaintext garbage
+                        // (the bgcode already checks CRCs)
+                        REQUIRE(strchr(buffer.line.c_str(), 0xFF) == nullptr);
+                    }
+                };
+                ok = (res == IGcodeReader::Result_t::RESULT_EOF) || (res == IGcodeReader::Result_t::RESULT_OUT_OF_RANGE);
+                REQUIRE(ok);
+                break;
+            }
+            default:
+                FAIL("Invalid start result");
+                break;
+            }
+
+            break;
+        }
+    }
+}
+
 TEST_CASE("gcode-reader-empty-validity", "[GcodeReader]") {
     // Test the "empty validity" (which, implicitly has size = 0, even if the
     // file should be considered bigger) prevents reading from it even though
