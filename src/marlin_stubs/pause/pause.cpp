@@ -1209,11 +1209,7 @@ void Pause::park_nozzle_and_notify() {
             GcodeSuite::G28_no_parser(true, true, false, { .z_raise = 0 });
 
             // We have moved both axes, go to park position if not requested otherwise
-    #ifdef XYZ_NOZZLE_PARK_POINT_M600
             static constexpr xyz_pos_t park = XYZ_NOZZLE_PARK_POINT_M600;
-    #else /*XYZ_NOZZLE_PARK_POINT_M600*/
-            static constexpr xyz_pos_t park = XYZ_NOZZLE_PARK_POINT;
-    #endif /*XYZ_NOZZLE_PARK_POINT_M600*/
             LOOP_XY(axis) {
                 if (isnan(settings.park_pos.pos[axis])) {
                     settings.park_pos.pos[axis] = park[axis];

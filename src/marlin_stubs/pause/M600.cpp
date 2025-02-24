@@ -156,12 +156,7 @@ void M600_manual(const GCodeParser2 &p) {
     auto guard = PrinterStateAnimation::force_printer_state(PrinterState::Warning);
 #endif
 
-    xyz_pos_t park_point =
-#ifdef XYZ_NOZZLE_PARK_POINT_M600
-        XYZ_NOZZLE_PARK_POINT_M600;
-#else
-        XYZ_NOZZLE_PARK_POINT;
-#endif
+    xyz_pos_t park_point = XYZ_NOZZLE_PARK_POINT_M600;
 
     // Lift Z axis
     if (p.store_option('Z', park_point.z)) {
