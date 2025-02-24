@@ -32,7 +32,7 @@ public:
     // time step for regulation loop
     static constexpr float dt_s = 1.0f;
 
-    static constexpr float proportional_constant = 1.5f * dt_s;
+    static constexpr float integration_constant = 1.5f * dt_s;
 
     /// Applies spinup and emergency fan overrides
     [[nodiscard]] FanPWM apply_pwm_overrides(bool already_spinning, FanPWM pwm) const;
