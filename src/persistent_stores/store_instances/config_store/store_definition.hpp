@@ -542,7 +542,7 @@ struct CurrentStore
     StoreItem<float, defaults::axis_z_max_pos_mm, ItemFlag::hw_config | ItemFlag::common_misconfigurations, journal::hash("Axis Z Max Pos MM")> axis_z_max_pos_mm;
 
     // Nozzle Sock has is here for backwards compatibility (should be binary compatible)
-    StoreItem<HotendType, defaults::hotend_type, ItemFlag::hw_config, journal::hash("Nozzle Sock")> hotend_type;
+    StoreItemArray<HotendType, defaults::hotend_type, ItemFlag::hw_config, journal::hash("Hotend Type Per Tool"), 8, HOTENDS> hotend_type;
 
     // If hotend count increases, we need to migrate hotend_type to an array
     static_assert(!HAS_HOTEND_TYPE_SUPPORT() || HOTENDS == 1);
@@ -746,6 +746,7 @@ struct DeprecatedStore
     StoreItem<float, 0, journal::hash("Loadcell Threshold Continuous")> loadcell_threshold_continuous;
 
     StoreItem<HWCheckSeverity, defaults::hw_check_severity, journal::hash("HW Check Fan Compatibility")> hw_check_fan_compatibility;
+    StoreItem<HotendType, defaults::hotend_type, journal::hash("Nozzle Sock")> hotend_type_single_hotend;
 };
 
 } // namespace config_store_ns
