@@ -35,6 +35,7 @@
 #include <tools_mapping.hpp>
 #include <RAII.hpp>
 #include <inject_queue.hpp>
+#include <buddy/unreachable.hpp>
 
 #include "../Marlin/src/lcd/extensible_ui/ui_api.h"
 #include "../Marlin/src/gcode/queue.h"
@@ -133,6 +134,7 @@
 
 #if HAS_MMU2()
     #include <mmu2/mmu2_fsm.hpp>
+    #include <mmu2/maintenance.hpp>
 #endif
 
 #include <config_store/store_instance.hpp>
@@ -215,6 +217,9 @@ namespace {
 #endif // ENABLED(AXIS_MEASURE)
 
         bool was_print_time_saved = false;
+#if HAS_MMU2()
+        bool mmu_maintenance_checked = false;
+#endif
     };
 
     server_t server; // server structure - initialize task to zero
@@ -744,11 +749,29 @@ void static finalize_print(bool finished) {
     print_job_timer.stop();
     _server_update_vars();
     // Check if the stopwatch was NOT stopped to and add the current printime to the statistics.
-    // finalize_print is beeing called multiple times and we don't want to add the time twice.
+    // finalize_print is being called multiple times and we don't want to add the time twice.
     if (!server.was_print_time_saved) {
         Odometer_s::instance().add_time(marlin_vars().print_duration);
         server.was_print_time_saved = true;
     }
+    // print_maintenance();
+#if HAS_MMU2()
+    if (!server.mmu_maintenance_checked) {
+        if (auto reason = MMU2::check_maintenance(); reason.has_value()) {
+            switch (reason.value()) {
+            case MMU2::MaintenanceReason::Changes:
+                set_warning(WarningType::MaintenanceWarningChanges);
+                break;
+            case MMU2::MaintenanceReason::Failures:
+                set_warning(WarningType::MaintenanceWarningFails);
+                break;
+            default:
+                BUDDY_UNREACHABLE();
+            }
+        }
+        server.mmu_maintenance_checked = true;
+    }
+#endif // HAS_MMU2()
 
 #if !PRINTER_IS_PRUSA_iX()
     // On iX, we're not cooling down the bed after the print.
@@ -1861,6 +1884,9 @@ static void _server_print_loop(void) {
     case State::SerialPrintInit:
         server.print_is_serial = (server.print_state == State::SerialPrintInit);
         server.was_print_time_saved = false;
+#if HAS_MMU2()
+        server.mmu_maintenance_checked = false;
+#endif
         planner.max_printed_z = 0;
 
         if (!server.print_is_serial) {
