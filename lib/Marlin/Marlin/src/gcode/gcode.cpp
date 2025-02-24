@@ -520,10 +520,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 155: M155(); break;                                  // M155: Set temperature auto-report interval
       #endif
 
-      #if ENABLED(PARK_HEAD_ON_PAUSE)
-        case 125: M125(); break;                                  // M125: Store current position and move to filament change position
-      #endif
-
       #if ENABLED(BARICUDA)
         // PWM for HEATER_1_PIN
         #if HAS_HEATER_1

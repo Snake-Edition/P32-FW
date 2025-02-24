@@ -226,10 +226,6 @@
     set_status_P(GET_TEXT(MSG_PRINT_ABORTED));
   }
 
-  #if ENABLED(PARK_HEAD_ON_PAUSE)
-    #include "../gcode/queue.h"
-  #endif
-
   void MarlinUI::pause_print() {
     #if ENABLED(HOST_PROMPT_SUPPORT)
       host_prompt_open(PROMPT_PAUSE_RESUME, PSTR("UI Pause"), PSTR("Resume"));
@@ -237,18 +233,13 @@
 
     set_status_P(print_paused);
 
-    #if ENABLED(PARK_HEAD_ON_PAUSE)
-      queue.inject_P(PSTR("M25 P\nM24"));
-    #elif defined(ACTION_ON_PAUSE)
+    #if defined(ACTION_ON_PAUSE)
       host_action_pause();
     #endif
   }
 
   void MarlinUI::resume_print() {
     reset_status();
-    #if ENABLED(PARK_HEAD_ON_PAUSE)
-      wait_for_heatup = wait_for_user = false;
-    #endif
     #ifdef ACTION_ON_RESUME
       host_action_resume();
     #endif
