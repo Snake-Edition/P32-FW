@@ -12,7 +12,6 @@
 #include <optional>
 
 #include "i_selftest_part.hpp"
-#include "algorithm_range.hpp"
 #include "selftest_loadcell_config.hpp"
 #include "selftest_log.hpp"
 

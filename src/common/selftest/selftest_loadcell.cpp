@@ -276,7 +276,7 @@ LoopResult CSelftestPart_Loadcell::stateTapCheck() {
     }
 
     int32_t load = -1 * loadcell.get_tared_z_load(); // Positive when pushing the nozzle up
-    bool pass = IsInClosedRange(load, rConfig.tap_min_load_ok, rConfig.tap_max_load_ok);
+    bool pass = (load >= rConfig.tap_min_load_ok) && (load <= rConfig.tap_max_load_ok);
     if (pass) {
         log_info(Selftest, "%s tap check, load %dg successful in range <%d, %d>",
             rConfig.partname, static_cast<int>(load), static_cast<int>(rConfig.tap_min_load_ok),

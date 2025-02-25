@@ -9,7 +9,6 @@
 
 #include <inttypes.h>
 #include "i_selftest_part.hpp"
-#include "algorithm_range.hpp"
 #include "selftest_fsensor_config.hpp"
 #include "selftest_fsensor_type.hpp"
 #include "filament_sensors_handler.hpp" // FilamentSensorState

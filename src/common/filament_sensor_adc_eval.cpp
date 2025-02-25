@@ -1,5 +1,4 @@
 #include "filament_sensor_adc_eval.hpp"
-#include "algorithm_range.hpp"
 
 namespace FSensorADCEval {
 
@@ -20,13 +19,15 @@ FilamentSensorState evaluate_state(int32_t filtered_value, int32_t fs_ref_nins_v
     if (fs_ref_ins_value == ref_value_not_calibrated) {
         // inserted filament value is not calibrated (older versions of FW didn't save inserted value during calibration).
         // That means polarity of sensor is unknown, so we'll consider inserted as anything that is outside of inserted span (both polarities)
-        return IsInClosedRange(filtered_value, fs_ref_nins_value - fs_value_span, fs_ref_nins_value + fs_value_span) ? FilamentSensorState::NoFilament : FilamentSensorState::HasFilament;
+        return (filtered_value >= fs_ref_nins_value - fs_value_span) && (filtered_value <= fs_ref_nins_value + fs_value_span) ? FilamentSensorState::NoFilament : FilamentSensorState::HasFilament;
+
     } else if (fs_ref_nins_value < fs_ref_ins_value) {
         // Inserted value is higher then not inserted
-        return IsInClosedRange(filtered_value, lower_limit, fs_ref_nins_value + fs_value_span) ? FilamentSensorState::NoFilament : FilamentSensorState::HasFilament;
+        return (filtered_value <= fs_ref_nins_value + fs_value_span) ? FilamentSensorState::NoFilament : FilamentSensorState::HasFilament;
+
     } else if (fs_ref_nins_value > fs_ref_ins_value) {
         // Not inserted value is higher then inserted
-        return IsInClosedRange(filtered_value, fs_ref_nins_value - fs_value_span, upper_limit) ? FilamentSensorState::NoFilament : FilamentSensorState::HasFilament;
+        return (filtered_value >= fs_ref_nins_value - fs_value_span) ? FilamentSensorState::NoFilament : FilamentSensorState::HasFilament;
     }
     return FilamentSensorState::NotCalibrated;
 }

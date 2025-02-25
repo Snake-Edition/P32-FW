@@ -10,7 +10,6 @@
 #include "filament_sensor_adc.hpp"
 #include <logging/log.hpp>
 #include "metric.h"
-#include "algorithm_range.hpp"
 #include "filament_sensor_adc_eval.hpp"
 
 #include <config_store/store_instance.hpp>
@@ -77,7 +76,7 @@ void FSensorADC::CalibrateInserted(int32_t filtered_value) {
 
     // value should be outside of extended span, because if its close to span that is used to evaluate filament sensor, it will not be reliable and trigger randomly
     int32_t extended_span = fs_value_span * fs_selftest_span_multipler;
-    if (IsInClosedRange(filtered_value, fs_ref_nins_value - extended_span, fs_ref_nins_value + extended_span)) {
+    if ((filtered_value >= fs_ref_nins_value - extended_span) && (filtered_value <= fs_ref_nins_value + extended_span)) {
         log_info(FSensor, "Calibrating HasFilament: FAIL value: %d", static_cast<int>(filtered_value));
         invalidate_calibration();
     } else {
