@@ -110,9 +110,19 @@ class screen_printing_data_t : public ScreenPrintingModel {
     };
 
     static constexpr size_t rotation_time_s { 4 }; // time how often there should be a change between what's currently shown
+    size_t valid_count { ftrstd::to_underlying(CurrentlyShowing::_count) }; // how many fields are currently valid
 
     CurrentlyShowing currently_showing { CurrentlyShowing::remaining_time }; // what item is currently shown
     uint32_t last_update_time_s { 0 }; // helper needed to properly rotate
+
+    EnumArray<CurrentlyShowing, std::pair<bool, size_t>, CurrentlyShowing::_count> currently_showing_valid {
+        {
+            { CurrentlyShowing::remaining_time, { true, 0 } },
+            { CurrentlyShowing::end_time, { true, 1 } },
+            { CurrentlyShowing::time_to_change, { true, 2 } },
+            { CurrentlyShowing::time_since_start, { true, 3 } },
+        }
+    };
 #endif
 
     window_text_t message_popup;
@@ -137,7 +147,20 @@ private:
     void set_tune_icon_and_label();
     void set_stop_icon_and_label();
     void change_print_state();
-
+#if HAS_LARGE_DISPLAY()
+    /**
+     * @brief Updates the validity of the time fields
+     *
+     * @return true if any of the fields changed validity
+     */
+    bool update_validities();
+    /**
+     * @brief Reindexes the rotating circles
+     *
+     * @return number of valid fields
+     */
+    size_t reindex_rotating_circles();
+#endif
     virtual void stopAction() override;
     virtual void pauseAction() override;
     virtual void tuneAction() override;

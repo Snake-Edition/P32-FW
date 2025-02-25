@@ -485,6 +485,43 @@ void screen_printing_data_t::hide_time_information() {
 #endif
 }
 
+#if HAS_LARGE_DISPLAY()
+bool screen_printing_data_t::update_validities() {
+    auto time_to_end = marlin_vars().time_to_end.get();
+    auto time_to_change = marlin_vars().time_to_pause.get();
+
+    bool changed = false;
+
+    auto update_validity = [&](CurrentlyShowing item, bool new_validity) {
+        if (currently_showing_valid[item].first != new_validity) {
+            currently_showing_valid[item].first = new_validity;
+            changed = true;
+        }
+    };
+
+    bool new_end_time_valid = (time_to_end != marlin_server::TIME_TO_END_INVALID) && (time_to_end <= 60 * 60 * 24 * 365);
+    bool new_remaining_time_valid = new_end_time_valid;
+    bool new_time_to_change_valid = (time_to_change != marlin_server::TIME_TO_END_INVALID);
+
+    update_validity(CurrentlyShowing::end_time, new_end_time_valid);
+    update_validity(CurrentlyShowing::remaining_time, new_remaining_time_valid);
+    update_validity(CurrentlyShowing::time_to_change, new_time_to_change_valid);
+
+    return changed;
+}
+
+size_t screen_printing_data_t::reindex_rotating_circles() {
+    size_t cnt = 0;
+    for (size_t i = 0; i < ftrstd::to_underlying(CurrentlyShowing::_count); ++i) {
+        if (currently_showing_valid[i].first) {
+            currently_showing_valid[i].second = cnt++;
+        }
+    }
+    return cnt;
+}
+
+#endif
+
 void screen_printing_data_t::updateTimes() {
 #if HAS_MINI_DISPLAY()
     PT_t time_format = print_time.update_loop(time_end_format, &w_etime_value, &w_time_value);
@@ -517,29 +554,41 @@ void screen_printing_data_t::updateTimes() {
     if (auto now = ticks_s(); now - last_update_time_s > rotation_time_s) {
         // do rotation
 
-        currently_showing = static_cast<CurrentlyShowing>(
-            (ftrstd::to_underlying(currently_showing) + 1) % ftrstd::to_underlying(CurrentlyShowing::_count));
+        // Some validity changed, update the indexing of fields
+        if (update_validities()) {
+            valid_count = reindex_rotating_circles();
+            rotating_circles.set_max_circles(valid_count);
+        }
 
-        rotating_circles.set_index(ftrstd::to_underlying(currently_showing));
+        if (valid_count == 0) { // Should never happen since we never invalidate print time, just to make sure
+            this->Hide();
+            return;
+        } else if (!this->IsVisible()) {
+            this->Show();
+        }
+
+        // find next valid item
+        auto curr = this->currently_showing;
+        do {
+            curr = static_cast<CurrentlyShowing>(
+                (ftrstd::to_underlying(curr) + 1) % ftrstd::to_underlying(CurrentlyShowing::_count));
+        } while (!currently_showing_valid[curr].first);
+
+        this->currently_showing = curr;
+
+        rotating_circles.set_index(currently_showing_valid[curr].second);
 
         last_update_time_s = now;
     }
 
-    bool value_available = true;
     auto time_to_end = marlin_vars().time_to_end.get();
     auto time_to_change = marlin_vars().time_to_pause.get();
-
-    if ((currently_showing == CurrentlyShowing::end_time
-            || currently_showing == CurrentlyShowing::remaining_time)
-        && (time_to_end == marlin_server::TIME_TO_END_INVALID || time_to_end > 60 * 60 * 24 * 365)) {
-        value_available = false;
-    }
 
     switch (currently_showing) {
 
     case CurrentlyShowing::end_time:
         w_etime_label.SetText(_(PrintTime::EN_STR_TIMESTAMP));
-        value_available &= PrintTime::print_end_time(time_to_end, w_etime_value_buffer);
+        PrintTime::print_end_time(time_to_end, w_etime_value_buffer);
         break;
 
     case CurrentlyShowing::remaining_time:
@@ -554,11 +603,7 @@ void screen_printing_data_t::updateTimes() {
 
     case CurrentlyShowing::time_to_change:
         w_etime_label.SetText(_("Next change in"));
-        if (time_to_change == marlin_server::TIME_TO_END_INVALID) {
-            value_available = false;
-        } else {
-            PrintTime::print_formatted_duration(time_to_change, w_etime_value_buffer);
-        }
+        PrintTime::print_formatted_duration(time_to_change, w_etime_value_buffer);
         break;
     case CurrentlyShowing::_count:
         assert(false); // invalid value, should never happen
@@ -571,13 +616,8 @@ void screen_printing_data_t::updateTimes() {
         strlcat(w_etime_value_buffer.data(), "?", w_etime_value_buffer.size());
     }
 
-    if (value_available) {
-        w_etime_value.SetText(string_view_utf8::MakeRAM(w_etime_value_buffer.data()));
-        w_etime_value.SetTextColor(GuiDefaults::COLOR_VALUE_VALID);
-    } else {
-        w_etime_value.SetText(_("N/A"));
-        w_etime_value.SetTextColor(GuiDefaults::COLOR_VALUE_INVALID);
-    }
+    w_etime_value.SetText(string_view_utf8::MakeRAM(w_etime_value_buffer.data()));
+    w_etime_value.SetTextColor(GuiDefaults::COLOR_VALUE_VALID);
 
     w_etime_value.Invalidate(); // just to make sure
 

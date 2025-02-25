@@ -56,12 +56,13 @@ public:
     void set_on_color(Color clr);
     void set_off_color(Color clr);
     void set_one_circle_mode(bool new_mode);
+    void set_max_circles(uint8_t new_max_circles);
 
 protected:
     void unconditionalDraw() override;
 
 private:
-    const uint8_t max_circles; // how many circles should be drawn within the rect, must be >0
+    uint8_t max_circles; // how many circles should be drawn within the rect, must be >0
     uint8_t current_index { 0 }; // current progress in range [0, max_circles)
     bool one_circle_mode { false }; // true if only current_index circle should be colored as 'on', false if current_index and also all previous should be colored as 'on'
     Color color_on { COLOR_WHITE }; // color of circle that's ON
