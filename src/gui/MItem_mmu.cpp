@@ -281,7 +281,7 @@ MI_MMU_INVOKE_MAINTENANCE::MI_MMU_INVOKE_MAINTENANCE()
     : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev) {}
 
 void MI_MMU_INVOKE_MAINTENANCE::click(IWindowMenu & /*window_menu*/) {
-    config_store().mmu_fail_bucket.set(MMU2::overflow_limit);
+    config_store().mmu_fail_bucket.set(MMU2::FailLeakyBucket::default_overflow_limit);
 }
 
 MI_MMU_NEXTRUDER_REWORK::MI_MMU_NEXTRUDER_REWORK()

@@ -10,8 +10,6 @@ namespace MMU2 {
 ///
 /// https://en.wikipedia.org/wiki/Leaky_bucket
 
-constexpr uint16_t overflow_limit = 50;
-
 class FailLeakyBucket {
 private:
     // We remove one failure every X loads.
@@ -21,7 +19,10 @@ private:
     uint16_t overflow_limit;
 
 public:
-    FailLeakyBucket(uint32_t leak_every = 1000, uint16_t overflow_limit = MMU2::overflow_limit)
+    // Possibility to set overflow limit in constructor is used in unit tests
+    constexpr static uint16_t default_overflow_limit = 50;
+
+    FailLeakyBucket(uint32_t leak_every = 1000, uint16_t overflow_limit = default_overflow_limit)
         : leak_every(leak_every)
         , overflow_limit(overflow_limit) {}
     /// Add one failure.
