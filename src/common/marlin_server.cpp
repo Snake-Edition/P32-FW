@@ -2696,13 +2696,12 @@ void retract() {
 }
 
 void lift_head() {
-#if ENABLED(NOZZLE_PARK_FEATURE)
     const float distance = std::min<float>(
                                std::max<float>({
                                    Z_NOZZLE_PARK_POINT + current_position.z,
-    #ifdef Z_NOZZLE_PARK_POINT_MIN
+#ifdef Z_NOZZLE_PARK_POINT_MIN
                                    Z_NOZZLE_PARK_POINT_MIN,
-    #endif
+#endif
                                }),
                                Z_MAX_POS)
         - current_position.z;
@@ -2729,11 +2728,9 @@ void lift_head() {
         }
         sync_plan_position();
     }
-#endif // ENABLED(NOZZLE_PARK_FEATURE)
 }
 
 void park_head() {
-#if ENABLED(NOZZLE_PARK_FEATURE)
     if (!all_axes_homed()) {
         return;
     }
@@ -2742,7 +2739,7 @@ void park_head() {
     retract();
     lift_head();
 
-    #if HAS_TOOLCHANGER()
+#if HAS_TOOLCHANGER()
     // Check that we are not in dock
     // Can happen if stopped during toolchanging, toolchange will finish but last move doesn't wait for planner.synchronize();
     if (current_position.y > PrusaToolChanger::SAFE_Y_WITH_TOOL) {
@@ -2750,16 +2747,14 @@ void park_head() {
         line_to_current_position(NOZZLE_PARK_XY_FEEDRATE); // Move to safe Y
         planner.synchronize();
     }
-    #endif /*HAS_TOOLCHANGER()*/
+#endif /*HAS_TOOLCHANGER()*/
 
     xyz_pos_t park = XYZ_NOZZLE_PARK_POINT;
     park.z = current_position.z;
     plan_park_move_to_xyz(park, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE);
-#endif // NOZZLE_PARK_FEATURE
 }
 
 void unpark_head_XY(void) {
-#if ENABLED(NOZZLE_PARK_FEATURE)
     // TODO: double check this condition: when recovering from a crash, Z is not known, but we *can*
     // unpark, so we bypass this check as we need to move back
     if (TERN1(CRASH_RECOVERY, !crash_s.did_trigger()) && !all_axes_homed()) {
@@ -2770,11 +2765,9 @@ void unpark_head_XY(void) {
     current_position.y = server.resume.pos.y;
     NOMORE(current_position.y, Y_BED_SIZE); // Prevent crashing into parked tools
     line_to_current_position(NOZZLE_PARK_XY_FEEDRATE);
-#endif // NOZZLE_PARK_FEATURE
 }
 
 void unpark_head_ZE(void) {
-#if ENABLED(NOZZLE_PARK_FEATURE)
     // TODO: see comment above on unparking: if axes are not known, lift is skipped, but not this
     if (!all_axes_homed()) {
         return;
@@ -2785,11 +2778,10 @@ void unpark_head_ZE(void) {
     destination = current_position;
     prepare_internal_move_to_destination(NOZZLE_PARK_Z_FEEDRATE);
 
-    #if ENABLED(ADVANCED_PAUSE_FEATURE)
+#if ENABLED(ADVANCED_PAUSE_FEATURE)
     // Undo E retract
     plan_move_by(PAUSE_PARK_RETRACT_FEEDRATE, 0, 0, 0, server.resume.pos.e - current_position.e);
-    #endif // ENABLED(ADVANCED_PAUSE_FEATURE)
-#endif // NOZZLE_PARK_FEATURE
+#endif // ENABLED(ADVANCED_PAUSE_FEATURE)
 }
 
 bool all_axes_homed(void) {

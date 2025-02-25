@@ -22,15 +22,14 @@
 
 #include "config_features.h"
 
-#if ENABLED(NOZZLE_PARK_FEATURE)
-    #include "G27.hpp"
+#include "G27.hpp"
 
-    #include <Marlin/src/gcode/gcode.h>
-    #include <Marlin/src/libs/nozzle.h>
-    #include <Marlin/src/module/motion.h>
-    #include <common/gcode/gcode_parser.hpp>
-    #include <common/filament_sensors_handler.hpp>
-    #include <common/mapi/parking.hpp>
+#include <Marlin/src/gcode/gcode.h>
+#include <Marlin/src/libs/nozzle.h>
+#include <Marlin/src/module/motion.h>
+#include <common/gcode/gcode_parser.hpp>
+#include <common/filament_sensors_handler.hpp>
+#include <common/mapi/parking.hpp>
 
 /** \addtogroup G-Codes
  * @{
@@ -99,5 +98,3 @@ void G27_no_parser(const G27Params &params) {
 }
 
 /** @}*/
-
-#endif // NOZZLE_PARK_FEATURE

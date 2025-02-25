@@ -22,8 +22,6 @@
 
 #include "../inc/MarlinConfig.h"
 
-#if EITHER(NOZZLE_CLEAN_FEATURE, NOZZLE_PARK_FEATURE)
-
 #include "nozzle.h"
 
 Nozzle nozzle;
@@ -182,8 +180,6 @@ Nozzle nozzle;
 
 #endif // NOZZLE_CLEAN_FEATURE
 
-#if ENABLED(NOZZLE_PARK_FEATURE)
-
   void Nozzle::park(const uint8_t z_action, const xyz_pos_t &park/*={{XYZ_NOZZLE_PARK_POINT}}*/) {
     static constexpr feedRate_t fr_xy = NOZZLE_PARK_XY_FEEDRATE, fr_z = NOZZLE_PARK_Z_FEEDRATE;
 
@@ -211,7 +207,3 @@ Nozzle nozzle;
     do_blocking_move_around_nozzle_cleaner_to_xy(park, fr_xy);
     report_current_position();
   }
-
-#endif // NOZZLE_PARK_FEATURE
-
-#endif // NOZZLE_CLEAN_FEATURE || NOZZLE_PARK_FEATURE

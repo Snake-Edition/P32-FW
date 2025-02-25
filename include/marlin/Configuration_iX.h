@@ -191,7 +191,6 @@
 /**
  * Prusa Multi-Material Unit v2
  *
- * Requires NOZZLE_PARK_FEATURE to park print head in case MMU unit fails.
  * Requires EXTRUDERS = 5
  *
  * For additional configuration see Configuration_adv.h
@@ -1479,9 +1478,6 @@
  *    P1  Raise the nozzle always to Z-park height.
  *    P2  Raise the nozzle by Z-park amount, limited to Z_MAX_POS.
  */
-#define NOZZLE_PARK_FEATURE
-
-#if ENABLED(NOZZLE_PARK_FEATURE)
     #define X_WASTEBIN_POINT 267.4f
     #define Y_WASTEBIN_POINT 305.0f
     #define Y_V_BLADE_POINT 284.75f
@@ -1519,7 +1515,6 @@
      * When disabled, similar functionality can be still achieved with slicer "End G-code"
      */
     //#define PARK_HEAD_ON_PRINT_FINISH
-#endif
 
 /**
  * Clean Nozzle Feature -- EXPERIMENTAL

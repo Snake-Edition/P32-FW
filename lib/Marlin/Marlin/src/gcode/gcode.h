@@ -56,7 +56,7 @@
  * G19  - Select Plane YZ (Requires CNC_WORKSPACE_PLANES)
  * G20  - Set input units to inches (Requires INCH_MODE_SUPPORT)
  * G21  - Set input units to millimeters (Requires INCH_MODE_SUPPORT)
- * G27  - Park Nozzle (Requires NOZZLE_PARK_FEATURE)
+ * G27  - Park Nozzle
  * G28  - Home one or more axes
  * G29  - Start or continue the bed leveling probe procedure (Requires bed leveling)
  * G30  - Single Z probe, probes bed at X Y location (defaults to current XY location)
@@ -467,9 +467,7 @@ private:
     static void G21();
   #endif
 
-  #if ENABLED(NOZZLE_PARK_FEATURE)
-    static void G27();
-  #endif
+  static void G27();
 
   static void G28();
 

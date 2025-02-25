@@ -299,9 +299,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 21: NOOP; break;                                     // No error on unknown G21
       #endif
 
-      #if ENABLED(NOZZLE_PARK_FEATURE)
         case 27: G27(); break;                                    // G27: Nozzle Park
-      #endif
 
       case 28: G28(); break;                                 // G28: Home all axes, one at a time
 

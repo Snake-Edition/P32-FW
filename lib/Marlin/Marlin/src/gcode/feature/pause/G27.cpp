@@ -23,8 +23,6 @@
 
 #include "../../../inc/MarlinConfig.h"
 
-#if ENABLED(NOZZLE_PARK_FEATURE)
-
 #include "../../gcode.h"
 #include "../../../libs/nozzle.h"
 #include "../../../module/motion.h"
@@ -38,4 +36,3 @@ void GcodeSuite::G27() {
   nozzle.park(parser.ushortval('P'));
 }
 
-#endif // NOZZLE_PARK_FEATURE

@@ -1124,7 +1124,6 @@
  * Adds the GCode M600 for initiating filament change.
  *
  * Requires an LCD display.
- * Requires NOZZLE_PARK_FEATURE.
  * This feature is required for the default FILAMENT_RUNOUT_SCRIPT.
  */
 //#define ADVANCED_PAUSE_FEATURE
