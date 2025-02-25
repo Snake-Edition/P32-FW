@@ -5,6 +5,7 @@
 #include "../motion.h"
 #include "../stepper.h"
 #include "feature/prusa/crash_recovery.hpp"
+#include <lcd/ultralcd.h>
 #include "configuration.hpp"
 #include <feature/print_status_message/print_status_message_mgr.hpp>
 
