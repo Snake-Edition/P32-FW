@@ -50,7 +50,6 @@
  * G5   - Cubic B-spline with XYZE destination and IJPQ offsets
  * G10  - Retract filament according to settings of M207 (Requires FWRETRACT)
  * G11  - Retract recover filament according to settings of M208 (Requires FWRETRACT)
- * G12  - Clean tool (Requires NOZZLE_CLEAN_FEATURE)
  * G17  - Select Plane XY (Requires CNC_WORKSPACE_PLANES)
  * G18  - Select Plane ZX (Requires CNC_WORKSPACE_PLANES)
  * G19  - Select Plane YZ (Requires CNC_WORKSPACE_PLANES)
@@ -450,10 +449,6 @@ private:
   #if ENABLED(FWRETRACT)
     static void G10();
     static void G11();
-  #endif
-
-  #if ENABLED(NOZZLE_CLEAN_FEATURE)
-    static void G12();
   #endif
 
   #if ENABLED(CNC_WORKSPACE_PLANES)

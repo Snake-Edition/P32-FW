@@ -282,10 +282,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 11: G11(); break;                                    // G11: Recover / Swap Recover
       #endif
 
-      #if ENABLED(NOZZLE_CLEAN_FEATURE)
-        case 12: G12(); break;                                    // G12: Nozzle Clean
-      #endif
-
       #if ENABLED(CNC_WORKSPACE_PLANES)
         case 17: G17(); break;                                    // G17: Select Plane XY
         case 18: G18(); break;                                    // G18: Select Plane ZX
