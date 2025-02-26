@@ -118,6 +118,9 @@ extern void w25x_spi_transfer_complete_callback(void);
 /// This should be called when the underlying SPI's DMA finishes DMA transfer (receive)
 extern void w25x_spi_receive_complete_callback(void);
 
+/// This should be called when the underlying SPI's DMA encounters error
+extern void w25x_spi_error_callback(void);
+
 #if defined(__cplusplus)
 }
 #endif // defined(__cplusplus)

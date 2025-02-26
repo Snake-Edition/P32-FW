@@ -3,16 +3,12 @@
 #include "w25x_communication.h"
 #include "timing_precise.hpp"
 #include <logging/log.hpp>
-#include "FreeRTOS.h"
-#include "task.h"
 #include "cmsis_os.h"
 #include "bsod.h"
 #include "hwio_pindef.h"
 #include <stdlib.h>
 
 LOG_COMPONENT_DEF(W25X, logging::Severity::debug);
-
-extern EventGroupHandle_t event_group;
 
 namespace {
 
@@ -406,13 +402,10 @@ bool w25x_reinit_before_crash_dump() {
     // BFW-6813
     // This may potentially leak everything but we are about to reset the MCU anyway
     // and NULL checks are necessary for other functions in this module to perform
-    // correctly:
-    //  * assigning NULL to mutex means OptionalMutex turns into nop
-    //  * assigning NULL to event group means DMA is turned off
+    // correctly; assigning NULL to mutex means OptionalMutex turns into nop.
     // Will be fixed in other commit as part of BFW-6813
     erase_mutex = NULL;
     communication_mutex = NULL;
-    event_group = NULL;
 
     if (w25x_was_initialized) {
         // abort ongoing transactions if there were any, ignoring errors
@@ -434,8 +427,7 @@ void w25x_init() {
     // These should be allocated statically.
     erase_mutex = osMutexCreate(osMutex(erase_mutex_resource));
     communication_mutex = osMutexCreate(osMutex(communication_mutex_resource));
-    event_group = xEventGroupCreate();
-    if (!(erase_mutex && communication_mutex && event_group)) {
+    if (!(erase_mutex && communication_mutex)) {
         // if resource allocation fails, we are severely screwed anyway
         BUDDY_UNREACHABLE();
     }

@@ -560,6 +560,12 @@ void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
     }
 }
 
+void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi) {
+    if (hspi == &SPI_HANDLE_FOR(flash)) {
+        w25x_spi_error_callback();
+    }
+}
+
 void HAL_SPI_TxRxCpltCallback([[maybe_unused]] SPI_HandleTypeDef *hspi) {
 #if HAS_LOCAL_ACCELEROMETER()
     if (hspi == &SPI_HANDLE_FOR(accelerometer)) {

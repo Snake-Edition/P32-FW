@@ -1,4 +1,6 @@
 #include "w25x_communication.h"
+
+#include <freertos/binary_semaphore.hpp>
 #include "w25x.h"
 #include "string.h"
 #include <logging/log.hpp>
@@ -12,9 +14,6 @@ LOG_COMPONENT_REF(W25X);
 /// Timeout for SPI operations
 static const uint32_t TIMEOUT_MS = 1000;
 
-/// Event group used to wake up a thread when SPI operation completes
-EventGroupHandle_t event_group = NULL;
-
 /// Buffer located in SRAM (not in core-coupled RAM)
 /// It is used when we user gives us a buffer located in core-coupled RAM, which we can't pass to the DMA.
 static uint8_t block_buffer[128];
@@ -24,9 +23,6 @@ static int current_error = 0;
 
 /// Check whether there is no pending error
 static inline bool no_error();
-
-/// Convert HAL error to our generic error
-static inline int hal_status_to_error(HAL_StatusTypeDef status);
 
 /// Set current error
 static inline void set_error(int error);
@@ -38,16 +34,42 @@ static inline bool memory_supports_dma_transfer(const void *location);
 /// Check whether we can use the DMA from the current context
 static inline bool dma_is_available();
 
+/// Note that we use the same semaphore for both receive and transmit,
+/// there must only be one operation in flight anyway.
+static freertos::BinarySemaphore dma_semaphore;
+
+/// Status returned from DMA callbacks.
+static volatile HAL_StatusTypeDef dma_status;
+
+/// Setup DMA status and release semaphore
+static void release_dma_from_isr(HAL_StatusTypeDef status) {
+    dma_status = status;
+    dma_semaphore.release_from_isr();
+}
+
 /// Receive data over DMA
-static int receive_dma(uint8_t *buffer, uint32_t len);
+static HAL_StatusTypeDef receive_dma(uint8_t *buffer, uint32_t len) {
+    assert(can_be_used_by_dma(buffer));
+    const HAL_StatusTypeDef status = HAL_SPI_Receive_DMA(&SPI_HANDLE_FOR(flash), buffer, len);
+    if (status == HAL_OK) {
+        dma_semaphore.acquire();
+        return dma_status;
+    } else {
+        return status;
+    }
+}
 
 /// Send data over DMA
-static int send_dma(const uint8_t *buffer, uint32_t len);
-
-enum {
-    EVENT_RX_COMPLETE = (1 << 0),
-    EVENT_TX_COMPLETE = (1 << 1),
-};
+static HAL_StatusTypeDef send_dma(const uint8_t *buffer, uint32_t len) {
+    assert(can_be_used_by_dma(buffer));
+    const HAL_StatusTypeDef status = HAL_SPI_Transmit_DMA(&SPI_HANDLE_FOR(flash), (uint8_t *)buffer, len);
+    if (status == HAL_OK) {
+        dma_semaphore.acquire();
+        return dma_status;
+    } else {
+        return status;
+    }
+}
 
 int w25x_fetch_error() {
     int error = current_error;
@@ -75,7 +97,7 @@ extern "C" void w25x_receive(uint8_t *buffer, uint32_t len) {
         }
     } else {
         HAL_StatusTypeDef status = HAL_SPI_Receive(&SPI_HANDLE_FOR(flash), buffer, len, TIMEOUT_MS);
-        set_error(hal_status_to_error(status));
+        set_error(status);
     }
 }
 
@@ -100,16 +122,12 @@ extern "C" void w25x_send(const uint8_t *buffer, uint32_t len) {
         }
     } else {
         HAL_StatusTypeDef status = HAL_SPI_Transmit(&SPI_HANDLE_FOR(flash), (uint8_t *)buffer, len, TIMEOUT_MS);
-        set_error(hal_status_to_error(status));
+        set_error(status);
     }
 }
 
 extern "C" void w25x_send_byte(uint8_t byte) {
     w25x_send(&byte, sizeof(byte));
-}
-
-static inline int hal_status_to_error(HAL_StatusTypeDef status) {
-    return (int)status;
 }
 
 static inline void set_error(int error) {
@@ -125,80 +143,19 @@ static inline bool memory_supports_dma_transfer(const void *location) {
 }
 
 static inline bool dma_is_available() {
-    return event_group && !xPortIsInsideInterrupt() && xTaskGetSchedulerState() == taskSCHEDULER_RUNNING;
-}
-
-static int receive_dma(uint8_t *buffer, uint32_t len) {
-    xEventGroupClearBits(event_group, EVENT_RX_COMPLETE);
-
-    // initiate DMA transfer
-    assert(can_be_used_by_dma(buffer));
-    HAL_StatusTypeDef status = HAL_SPI_Receive_DMA(&SPI_HANDLE_FOR(flash), buffer, len);
-    if (status != HAL_OK) {
-        return hal_status_to_error(status);
-    }
-
-    // wait for the receive-complete callback
-    EventBits_t bits = xEventGroupWaitBits(event_group, EVENT_RX_COMPLETE,
-        /*xClearOnExit=*/pdTRUE,
-        /*xWaitForAllBits=*/pdTRUE,
-        /*xTicksToWait=*/TIMEOUT_MS / portTICK_PERIOD_MS);
-
-    // check we did not timeout
-    if ((bits & EVENT_RX_COMPLETE) == 0) {
-        log_error(W25X, "DMA read timed out");
-        HAL_SPI_Abort(&SPI_HANDLE_FOR(flash));
-        return hal_status_to_error(HAL_TIMEOUT);
-    }
-
-    return 0;
-}
-
-static int send_dma(const uint8_t *buffer, uint32_t len) {
-    xEventGroupClearBits(event_group, EVENT_TX_COMPLETE);
-
-    // initiate DMA transfer
-    assert(can_be_used_by_dma(buffer));
-    HAL_StatusTypeDef status = HAL_SPI_Transmit_DMA(&SPI_HANDLE_FOR(flash), (uint8_t *)buffer, len);
-    if (status != HAL_OK) {
-        log_error(W25X, "DMA write error %u", status);
-        return hal_status_to_error(status);
-    }
-
-    // wait for the transmit-complete callback
-    EventBits_t bits = xEventGroupWaitBits(event_group, EVENT_TX_COMPLETE,
-        /*xClearOnExit=*/pdTRUE,
-        /*xWaitForAllBits=*/pdTRUE,
-        /*xTicksToWait=*/TIMEOUT_MS / portTICK_PERIOD_MS);
-
-    // check we did not timeout
-    if ((bits & EVENT_TX_COMPLETE) == 0) {
-        log_error(W25X, "DMA write timed out");
-        HAL_SPI_Abort(&SPI_HANDLE_FOR(flash));
-        return hal_status_to_error(HAL_TIMEOUT);
-    }
-
-    return 0;
-}
-
-static void set_events_from_isr(EventBits_t events) {
-    if (event_group == NULL) {
-        return;
-    }
-    BaseType_t higherPriorityTaskWoken = pdFALSE;
-    BaseType_t result = xEventGroupSetBitsFromISR(event_group, events, &higherPriorityTaskWoken);
-    if (result != pdFAIL) {
-        // Switch context after returning from ISR if we have just woken a higher-priority task
-        portYIELD_FROM_ISR(higherPriorityTaskWoken);
-    }
+    return !xPortIsInsideInterrupt() && xTaskGetSchedulerState() == taskSCHEDULER_RUNNING;
 }
 
 void w25x_spi_transfer_complete_callback(void) {
-    set_events_from_isr(EVENT_TX_COMPLETE);
+    release_dma_from_isr(HAL_OK);
 }
 
 void w25x_spi_receive_complete_callback(void) {
-    set_events_from_isr(EVENT_RX_COMPLETE);
+    release_dma_from_isr(HAL_OK);
+}
+
+void w25x_spi_error_callback(void) {
+    release_dma_from_isr(HAL_ERROR);
 }
 
 void w25x_set_error(int error) {
