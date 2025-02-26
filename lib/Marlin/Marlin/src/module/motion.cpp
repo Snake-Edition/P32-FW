@@ -97,6 +97,7 @@
 #include <option/has_nozzle_cleaner.h>
 #include <option/has_wastebin.h>
 #include <option/has_dwarf.h>
+#include <option/has_emergency_stop.h>
 
 #include <option/has_ceiling_clearance.h>
 #if HAS_CEILING_CLEARANCE()
@@ -938,7 +939,8 @@ void restore_feedrate_and_scaling() {
   inline bool prepare_move_to_destination_cartesian(const PlannerHints &hints) {
     const float scaled_fr_mm_s = MMS_SCALED(feedrate_mm_s);
     #if HAS_MESH
-      if (planner.leveling_active && planner.leveling_active_at_z(destination.z)) {
+      // Emergency stop relies on movement segmentation, which is done in line_to_destination_segmented
+      if (HAS_EMERGENCY_STOP() || (planner.leveling_active && planner.leveling_active_at_z(destination.z))) {
         #if ENABLED(AUTO_BED_LEVELING_UBL)
           // UBL's motion routine needs to know about
           // all moves, including Z-only moves.
