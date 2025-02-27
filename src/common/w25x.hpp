@@ -8,14 +8,9 @@
 /// The `w25x.hpp/cpp` handles the high-level operations with the chip (read, erase, write, etc)
 ///
 #pragma once
-#include <inttypes.h>
-#include <stdbool.h>
-#include "stm32f4xx_hal.h"
-#include "printers.h"
 
-#if defined(__cplusplus)
-extern "C" {
-#endif // defined(__cplusplus)
+#include <cstdint>
+#include <device/board.h>
 
 #define W25X_BLOCK_SIZE         4096
 #define W25X_BLOCK64_SIZE       0x10000
@@ -42,7 +37,6 @@ extern "C" {
     #error "Unsupported board type"
 #endif
 
-#if defined(__cplusplus)
 inline constexpr uint32_t w25x_block_size = W25X_BLOCK_SIZE;
 inline constexpr uint32_t w25x_block64_size = W25X_BLOCK64_SIZE;
 inline constexpr uint32_t w25x_dump_start_address = W25X_DUMP_START_ADDRESS;
@@ -51,13 +45,12 @@ inline constexpr uint32_t w25x_pp_start_address = W25X_PP_START_ADDRESS;
 inline constexpr uint32_t w25x_fs_start_address = W25X_FS_START_ADDRESS;
 inline constexpr size_t w25x_pp_size = w25x_fs_start_address - w25x_pp_start_address;
 inline constexpr uint32_t w25x_dump_size = w25x_error_start_adress - w25x_dump_start_address;
-#endif // defined(__cplusplus)
 
 /// Initialize the w25x module while the scheduler is running.
 ///
 /// When w25x is initialized using this function, all its
 /// interface function must be called in task context only.
-extern void w25x_init();
+void w25x_init();
 
 /// (Re)initialize the w25x module after the scheduler has been stopped.
 ///
@@ -76,51 +69,47 @@ extern void w25x_init();
 ///
 /// @retval true on success
 /// @retval false otherwise.
-extern bool w25x_reinit_before_crash_dump();
+bool w25x_reinit_before_crash_dump();
 
 /// Return the number of available sectors
-extern uint32_t w25x_get_sector_count();
+uint32_t w25x_get_sector_count();
 
 /// Read data from the flash.
 /// Errors can be checked (and cleared) using w25x_fetch_error()
-extern void w25x_rd_data(uint32_t addr, uint8_t *data, uint16_t cnt);
+void w25x_rd_data(uint32_t addr, uint8_t *data, uint16_t cnt);
 
 /// Write data to the flash (the sector has to be erased first)
 /// Errors can be checked (and cleared) using w25x_fetch_error()
-extern void w25x_program(uint32_t addr, const uint8_t *data, uint32_t cnt);
+void w25x_program(uint32_t addr, const uint8_t *data, uint32_t cnt);
 
 /// Erase single sector of the flash
 /// Errors can be checked (and cleared) using w25x_fetch_error()
-extern void w25x_sector_erase(uint32_t addr);
+void w25x_sector_erase(uint32_t addr);
 
 /// Erase block of 32 kB of the flash
 /// Errors can be checked (and cleared) using w25x_fetch_error()
-extern void w25x_block32_erase(uint32_t addr);
+void w25x_block32_erase(uint32_t addr);
 
 /// Erase block of 64 kB of the flash
 /// Errors can be checked (and cleared) using w25x_fetch_error()
-extern void w25x_block64_erase(uint32_t addr);
+void w25x_block64_erase(uint32_t addr);
 
 /// Erase the whole flash memory
 ///
 /// This operation can not be suspended, so it can not be used
 /// during print.
 /// Errors can be checked (and cleared) using w25x_fetch_error()
-extern void w25x_chip_erase(void (*wait_callback)() = NULL);
+void w25x_chip_erase(void (*wait_callback)() = NULL);
 
 /// Fetch and clear error of a previous operation.
 /// Returns 0 if there hasn't been any error
-extern int w25x_fetch_error(void);
+int w25x_fetch_error();
 
 /// This should be called when the underlying SPI's DMA finishes DMA transfer (send)
-extern void w25x_spi_transfer_complete_callback(void);
+void w25x_spi_transfer_complete_callback();
 
 /// This should be called when the underlying SPI's DMA finishes DMA transfer (receive)
-extern void w25x_spi_receive_complete_callback(void);
+void w25x_spi_receive_complete_callback();
 
 /// This should be called when the underlying SPI's DMA encounters error
-extern void w25x_spi_error_callback(void);
-
-#if defined(__cplusplus)
-}
-#endif // defined(__cplusplus)
+void w25x_spi_error_callback();

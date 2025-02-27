@@ -77,7 +77,7 @@ int w25x_fetch_error() {
     return error;
 }
 
-extern "C" void w25x_receive(uint8_t *buffer, uint32_t len) {
+void w25x_receive(uint8_t *buffer, uint32_t len) {
     if (!no_error()) {
         return;
     }
@@ -101,13 +101,13 @@ extern "C" void w25x_receive(uint8_t *buffer, uint32_t len) {
     }
 }
 
-extern "C" uint8_t w25x_receive_byte() {
+uint8_t w25x_receive_byte() {
     uint8_t byte;
     w25x_receive(&byte, 1);
     return byte;
 }
 
-extern "C" void w25x_send(const uint8_t *buffer, uint32_t len) {
+void w25x_send(const uint8_t *buffer, uint32_t len) {
     if (len > 1 && dma_is_available()) {
         if (memory_supports_dma_transfer(buffer)) {
             set_error(send_dma(buffer, len));
@@ -126,7 +126,7 @@ extern "C" void w25x_send(const uint8_t *buffer, uint32_t len) {
     }
 }
 
-extern "C" void w25x_send_byte(uint8_t byte) {
+void w25x_send_byte(uint8_t byte) {
     w25x_send(&byte, sizeof(byte));
 }
 
@@ -146,15 +146,15 @@ static inline bool dma_is_available() {
     return !xPortIsInsideInterrupt() && xTaskGetSchedulerState() == taskSCHEDULER_RUNNING;
 }
 
-void w25x_spi_transfer_complete_callback(void) {
+void w25x_spi_transfer_complete_callback() {
     release_dma_from_isr(HAL_OK);
 }
 
-void w25x_spi_receive_complete_callback(void) {
+void w25x_spi_receive_complete_callback() {
     release_dma_from_isr(HAL_OK);
 }
 
-void w25x_spi_error_callback(void) {
+void w25x_spi_error_callback() {
     release_dma_from_isr(HAL_ERROR);
 }
 
