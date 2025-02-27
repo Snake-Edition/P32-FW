@@ -1360,7 +1360,7 @@ void Pause::filament_change(const pause::Settings &settings_, bool is_filament_s
 }
 void Pause::ram_filament() {
     get_ramming_sequence().execute([this] {
-        return check_user_stop(getResponse());
+        return !check_user_stop(getResponse());
     });
 }
 
@@ -1376,7 +1376,7 @@ void Pause::unload_filament() {
 
     // subtract the already performed extruder movement from the total unload length and ensure it is negative
 
-    const float remaining_unload_length = std::max<float>(sequence.retracted_distance() - std::abs(settings.unload_length), 0);
+    const float remaining_unload_length = std::max<float>(std::abs(settings.unload_length) - sequence.retracted_distance(), 0);
     std::ignore = do_e_move_notify_progress_hotextrude(-remaining_unload_length, (FILAMENT_CHANGE_UNLOAD_FEEDRATE), 51, 99, StopConditions::UserStopped);
 
     {
