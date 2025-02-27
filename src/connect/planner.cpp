@@ -747,7 +747,7 @@ void Planner::command(const Command &command, const SendTransferInfo &) {
 }
 
 void Planner::command(const Command &command, const SetPrinterReady &) {
-    auto result = printer.set_ready(true) ? EventType::Finished : EventType::Rejected;
+    auto result = printer.set_ready(true) ? EventType::StateChanged : EventType::Rejected;
     const char *reason = (result == EventType::Rejected) ? "Can't set ready now" : nullptr;
     planned_event = Event { result, command.id, nullopt, nullopt, nullopt, reason };
 }
