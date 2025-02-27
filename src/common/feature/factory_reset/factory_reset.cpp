@@ -1,6 +1,6 @@
 #include "factory_reset.hpp"
 
-#include <w25x.h>
+#include <common/w25x.hpp>
 #include <wdt.hpp>
 #include <sys.h>
 

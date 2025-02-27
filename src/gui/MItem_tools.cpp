@@ -25,7 +25,7 @@
 #include "footer_eeprom.hpp"
 #include <version/version.hpp>
 #include "sys.h"
-#include "w25x.h"
+#include <common/w25x.hpp>
 #include <bootloader/bootloader.hpp>
 #include "config_features.h"
 #include <config_store/store_instance.hpp>

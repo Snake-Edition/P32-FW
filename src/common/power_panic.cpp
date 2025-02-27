@@ -48,7 +48,7 @@
 #include "../lib/Marlin/Marlin/src/feature/pressure_advance/pressure_advance_config.hpp"
 
 #include <logging/log.hpp>
-#include "w25x.h"
+#include <common/w25x.hpp>
 #include "sound.hpp"
 #include "bsod.h"
 #include "sys.h"

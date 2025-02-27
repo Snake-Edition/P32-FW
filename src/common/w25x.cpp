@@ -1,6 +1,7 @@
-#include "w25x.h"
+#include <common/w25x.hpp>
+
 #include "buddy/unreachable.hpp"
-#include "w25x_communication.h"
+#include <common/w25x_communication.hpp>
 #include "timing_precise.hpp"
 #include <logging/log.hpp>
 #include "cmsis_os.h"

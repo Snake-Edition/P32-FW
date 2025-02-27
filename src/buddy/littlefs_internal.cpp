@@ -1,5 +1,5 @@
 #include <buddy/littlefs_internal.h>
-#include "w25x.h"
+#include <common/w25x.hpp>
 
 #define BLOCK_SIZE W25X_BLOCK_SIZE
 

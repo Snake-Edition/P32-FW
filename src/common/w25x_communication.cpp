@@ -1,7 +1,7 @@
-#include "w25x_communication.h"
+#include <common/w25x_communication.hpp>
 
 #include <freertos/binary_semaphore.hpp>
-#include "w25x.h"
+#include <common/w25x.hpp>
 #include "string.h"
 #include <logging/log.hpp>
 #include "FreeRTOS.h"

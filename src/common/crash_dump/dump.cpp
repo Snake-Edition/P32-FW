@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "interrupt_disabler.hpp"
 #include "utility_extensions.hpp"
-#include "w25x.h"
+#include <common/w25x.hpp>
 #include "FreeRTOS.h"
 #include "task.h"
 #include <error_codes.hpp>

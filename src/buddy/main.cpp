@@ -32,7 +32,7 @@
 #include "printers.h"
 #include "MarlinPin.h"
 #include "crc32.h"
-#include "w25x.h"
+#include <common/w25x.hpp>
 #include "timing.h"
 #include <buddy/filesystem.h>
 #include "adc.hpp"

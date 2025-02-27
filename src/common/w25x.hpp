@@ -4,8 +4,8 @@
 /// Driver for the W25xxx family of SPI flash memories.
 ///
 /// The driver is split into two parts.
-/// The `w25x_communication.h/c` handles communication with the chip and this part is considered private to the w25x module.
-/// The `w25x.h/c` handles the high-level operations with the chip (read, erase, write, etc)
+/// The `w25x_communication.hpp/cpp` handles communication with the chip and this part is considered private to the w25x module.
+/// The `w25x.hpp/cpp` handles the high-level operations with the chip (read, erase, write, etc)
 ///
 #pragma once
 #include <inttypes.h>
