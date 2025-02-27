@@ -63,6 +63,8 @@
 #include "../libs/nozzle.h"
 #include "pause.h"
 
+#include <feature/print_status_message/print_status_message_mgr.hpp>
+
 // private:
 
 static xyze_pos_t resume_position;
@@ -485,9 +487,6 @@ void wait_for_confirmation(const bool is_reload/*=false*/, const int8_t max_beep
 
       #if ENABLED(HOST_PROMPT_SUPPORT)
         host_prompt_do(PROMPT_INFO, PSTR("Reheating"));
-      #endif
-      #if ENABLED(EXTENSIBLE_UI)
-        ExtUI::onStatusChanged(PSTR("Reheating..."));
       #endif
 
       // Re-enable the heaters if they timed out
