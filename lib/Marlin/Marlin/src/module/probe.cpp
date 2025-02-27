@@ -283,42 +283,6 @@ inline void do_probe_raise(const float z_raise) {
 }
 
 FORCE_INLINE void probe_specific_action(const bool deploy) {
-  #if ENABLED(PAUSE_BEFORE_DEPLOY_STOW)
-    do {
-      #if ENABLED(PAUSE_PROBE_DEPLOY_WHEN_TRIGGERED)
-        if (deploy == (READ(Z_MIN_PROBE_PIN) == Z_MIN_PROBE_ENDSTOP_INVERTING)) break;
-      #endif
-
-      BUZZ(100, 659);
-      BUZZ(100, 698);
-
-      PGM_P const ds_str = deploy ? GET_TEXT(MSG_MANUAL_DEPLOY) : GET_TEXT(MSG_MANUAL_STOW);
-      ui.return_to_status();       // To display the new status message
-      ui.set_status_P(ds_str, 99);
-      serialprintPGM(ds_str);
-      SERIAL_EOL();
-
-      KEEPALIVE_STATE(PAUSED_FOR_USER);
-      wait_for_user = true;
-      #if ENABLED(HOST_PROMPT_SUPPORT)
-        host_prompt_do(PROMPT_USER_CONTINUE, PSTR("Stow Probe"), PSTR("Continue"));
-      #endif
-      #if ENABLED(EXTENSIBLE_UI)
-        ExtUI::onUserConfirmRequired_P(PSTR("Stow Probe"));
-      #endif
-      while (wait_for_user) idle(true);
-      ui.reset_status();
-
-    } while(
-      #if ENABLED(PAUSE_PROBE_DEPLOY_WHEN_TRIGGERED)
-        true
-      #else
-        false
-      #endif
-    );
-
-  #endif // PAUSE_BEFORE_DEPLOY_STOW
-
   #if ENABLED(NOZZLE_LOAD_CELL)
     if (deploy) {
       // Disable E axis for probing to reduce noise on sensor
@@ -353,11 +317,6 @@ FORCE_INLINE void probe_specific_action(const bool deploy) {
   #elif ENABLED(RACK_AND_PINION_PROBE)
 
     do_blocking_move_to_x(deploy ? Z_PROBE_DEPLOY_X : Z_PROBE_RETRACT_X);
-
-  #elif DISABLED(PAUSE_BEFORE_DEPLOY_STOW)
-
-    UNUSED(deploy);
-
   #endif
 }
 
@@ -373,8 +332,7 @@ bool set_probe_deployed(const bool deploy) {
 
   // Make room for probe to deploy (or stow)
   // Fix-mounted probe should only raise for deploy
-  // unless PAUSE_BEFORE_DEPLOY_STOW is enabled
-  #if ENABLED(FIX_MOUNTED_PROBE) && DISABLED(PAUSE_BEFORE_DEPLOY_STOW)
+  #if ENABLED(FIX_MOUNTED_PROBE)
     const bool deploy_stow_condition = deploy;
   #else
     constexpr bool deploy_stow_condition = true;
@@ -408,39 +366,7 @@ bool set_probe_deployed(const bool deploy) {
   #endif
 
   const xy_pos_t old_xy = current_position;
-
-  #if ENABLED(PROBE_TRIGGERED_WHEN_STOWED_TEST)
-    #if HAS_CUSTOM_PROBE_PIN
-      #define PROBE_STOWED() (READ(Z_MIN_PROBE_PIN) != Z_MIN_PROBE_ENDSTOP_INVERTING)
-    #else
-      #define PROBE_STOWED() (READ(Z_MIN_PIN) != Z_MIN_ENDSTOP_INVERTING)
-    #endif
-  #endif
-
-  #ifdef PROBE_STOWED
-
-    // Only deploy/stow if needed
-    if (PROBE_STOWED() == deploy) {
-      if (!deploy) endstops.enable_z_probe(false); // Switch off triggered when stowed probes early
-                                                   // otherwise an Allen-Key probe can't be stowed.
-      probe_specific_action(deploy);
-    }
-
-    if (PROBE_STOWED() == deploy) {                // Unchanged after deploy/stow action?
-      if (IsRunning()) {
-        SERIAL_ERROR_MSG("Z-Probe failed");
-        LCD_ALERTMESSAGEPGM_P(PSTR("Err: ZPROBE"));
-      }
-      stop();
-      return true;
-    }
-
-  #else
-
-    probe_specific_action(deploy);
-
-  #endif
-
+  probe_specific_action(deploy);
   do_blocking_move_to(old_xy);
   #if DISABLED(NOZZLE_LOAD_CELL)
     endstops.enable_z_probe(deploy);

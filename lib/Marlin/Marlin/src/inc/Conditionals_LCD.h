@@ -670,9 +670,6 @@
   #ifndef Z_PROBE_LOW_POINT
     #define Z_PROBE_LOW_POINT -5
   #endif
-  #if ENABLED(Z_PROBE_ALLEN_KEY)
-    #define PROBE_TRIGGERED_WHEN_STOWED_TEST // Extra test for Allen Key Probe
-  #endif
   #ifdef MULTIPLE_PROBING
     #if EXTRA_PROBING
       #define TOTAL_PROBING (MULTIPLE_PROBING + EXTRA_PROBING)
