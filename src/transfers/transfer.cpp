@@ -418,7 +418,7 @@ Transfer::State Transfer::step(bool is_printing) {
 }
 
 void Transfer::notify_created() {
-    ChangedPath::instance.changed_path(slot.destination(), ChangedPath::Type::File, ChangedPath::Incident::CreatedEarly);
+    ChangedPath::instance.changed_path(slot.destination(), ChangedPath::Type::File, ChangedPath::Incident::Created);
 
     if (HAS_HUMAN_INTERACTIONS() && filename_is_printable(slot.destination()) && printer_state::remote_print_ready(/*preview_only=*/true)) {
         // While it looks a counter-intuitive, this print_begin only shows the
