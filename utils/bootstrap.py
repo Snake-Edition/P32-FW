@@ -22,14 +22,6 @@ import stat
 from argparse import ArgumentParser
 from pathlib import Path
 from urllib.parse import urlparse
-try:
-    import requests
-except ModuleNotFoundError:
-    print(
-        f'Python executable ({sys.executable}) is missing the "requests" package.',
-        file=sys.stderr,
-        flush=True)
-    raise
 
 assert sys.version_info >= (3, 8), 'Python 3.8+ is required.'
 is_windows = platform.system() == 'Windows'
@@ -153,6 +145,7 @@ def find_single_subdir(path: Path):
 
 def download_url(url: str, filename: Path):
     """Download file from url and write it to given filename"""
+    import requests
     with requests.get(url, stream=True) as response:
         response.raise_for_status()
         with open(filename, 'wb') as file:
