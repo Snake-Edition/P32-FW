@@ -42,6 +42,7 @@
 #include <option/has_precise_homing.h>
 #include <option/developer_mode.h>
 #include <option/has_chamber_filtration_api.h>
+#include <option/has_auto_retract.h>
 #include <common/extended_printer_type.hpp>
 #include <common/hw_check.hpp>
 #include <pwm_utils.hpp>
@@ -674,6 +675,13 @@ struct CurrentStore
 
 #if HAS_PRINT_FAN_TYPE()
     StoreItemArray<PrintFanType, PrintFanType::default_value, ItemFlag::hw_config, journal::hash("Print Fan Type Per Tool"), 8, HOTENDS> print_fan_type;
+#endif
+
+#if HAS_AUTO_RETRACT()
+    /// Bitset, one bit for each hotend
+    /// !!! Do not set directly, always use auto_retract().mark_as_retracted
+    StoreItem<uint8_t, 0, ItemFlag::printer_state, journal::hash("Filament auto-retracted")> filament_auto_retracted_bitset;
+    static_assert(HOTENDS <= 8);
 #endif
 
 private:
