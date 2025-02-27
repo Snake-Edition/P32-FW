@@ -411,6 +411,17 @@ Action Planner::next_action(SharedBuffer &buffer, http::Connection *wake_on_read
     }
 
     if (planned_event.has_value()) {
+        // Update local hashes for the events that depend on them, so we don't generate them again unnecessarily.
+        switch (planned_event->type) {
+        case EventType::Info:
+            info_changes.set_hash(printer.info_fingerprint());
+            break;
+        case EventType::StateChanged:
+            state_info.set_hash(printer.params().state_fingerprint());
+            break;
+        default:
+            break;
+        }
         // We don't take it out yet. Only after it's successfuly sent.
         return *planned_event;
     }
