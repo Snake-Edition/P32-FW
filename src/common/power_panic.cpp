@@ -362,7 +362,7 @@ void flash_data::state_t::load() {
 }
 
 void flash_data::erase() {
-    for (uintptr_t addr = 0; addr < FLASH_SIZE; addr += W25X_BLOCK_SIZE) {
+    for (uintptr_t addr = 0; addr < FLASH_SIZE; addr += w25x_block_size) {
         w25x_sector_erase(FLASH_OFFSET + addr);
     }
 }

@@ -1,10 +1,10 @@
 #include <buddy/littlefs_internal.h>
 #include <common/w25x.hpp>
 
-#define BLOCK_SIZE W25X_BLOCK_SIZE
+#define BLOCK_SIZE w25x_block_size
 
 // Address offset to skip area reserved for the dump
-#define ADDR_OFFSET W25X_FS_START_ADDRESS
+#define ADDR_OFFSET w25x_fs_start_address
 
 static lfs_t lfs;
 

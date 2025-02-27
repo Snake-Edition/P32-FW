@@ -12,37 +12,31 @@
 #include <cstdint>
 #include <device/board.h>
 
-#define W25X_BLOCK_SIZE         4096
-#define W25X_BLOCK64_SIZE       0x10000
-#define W25X_DUMP_START_ADDRESS 0
+inline constexpr uint32_t w25x_block_size = 4096;
+inline constexpr uint32_t w25x_block64_size = 0x10000;
+inline constexpr uint32_t w25x_dump_start_address = 0;
 #if BOARD_IS_BUDDY()
-    // Some MINIes have 1MB flash, some have 8M
-    // 49 = 196KiB offset for crash dump
-    #define W25X_ERR_START_ADDRESS (49 * W25X_BLOCK_SIZE)
-    #define W25X_PP_START_ADDRESS  (50 * W25X_BLOCK_SIZE)
-    #define W25X_FS_START_ADDRESS  (51 * W25X_BLOCK_SIZE)
+// Some MINIes have 1MB flash, some have 8M
+// 49 = 196KiB offset for crash dump
+inline constexpr uint32_t w25x_error_start_adress = 49 * w25x_block_size;
+inline constexpr uint32_t w25x_pp_start_address = 50 * w25x_block_size;
+inline constexpr uint32_t w25x_fs_start_address = 51 * w25x_block_size;
 #elif BOARD_IS_XBUDDY()
-    // 8M = 2K of 4K blocks
-    // 65 = 260KiB offset for crash dump
-    #define W25X_ERR_START_ADDRESS (65 * W25X_BLOCK_SIZE)
-    #define W25X_PP_START_ADDRESS  (66 * W25X_BLOCK_SIZE)
-    #define W25X_FS_START_ADDRESS  (67 * W25X_BLOCK_SIZE)
+// 8M = 2K of 4K blocks
+// 65 = 260KiB offset for crash dump
+inline constexpr uint32_t w25x_error_start_adress = 65 * w25x_block_size;
+inline constexpr uint32_t w25x_pp_start_address = 66 * w25x_block_size;
+inline constexpr uint32_t w25x_fs_start_address = 67 * w25x_block_size;
 #elif BOARD_IS_XLBUDDY()
-    // 8M = 2K of 4K blocks
-    // 65 = 260KiB offset for crash dump, which is the total RAM size
-    #define W25X_ERR_START_ADDRESS (65 * W25X_BLOCK_SIZE)
-    #define W25X_PP_START_ADDRESS  (66 * W25X_BLOCK_SIZE)
-    #define W25X_FS_START_ADDRESS  (68 * W25X_BLOCK_SIZE)
+// 8M = 2K of 4K blocks
+// 65 = 260KiB offset for crash dump, which is the total RAM size
+inline constexpr uint32_t w25x_error_start_adress = 65 * w25x_block_size;
+inline constexpr uint32_t w25x_pp_start_address = 66 * w25x_block_size;
+inline constexpr uint32_t w25x_fs_start_address = 68 * w25x_block_size;
 #else
     #error "Unsupported board type"
 #endif
 
-inline constexpr uint32_t w25x_block_size = W25X_BLOCK_SIZE;
-inline constexpr uint32_t w25x_block64_size = W25X_BLOCK64_SIZE;
-inline constexpr uint32_t w25x_dump_start_address = W25X_DUMP_START_ADDRESS;
-inline constexpr uint32_t w25x_error_start_adress = W25X_ERR_START_ADDRESS;
-inline constexpr uint32_t w25x_pp_start_address = W25X_PP_START_ADDRESS;
-inline constexpr uint32_t w25x_fs_start_address = W25X_FS_START_ADDRESS;
 inline constexpr size_t w25x_pp_size = w25x_fs_start_address - w25x_pp_start_address;
 inline constexpr uint32_t w25x_dump_size = w25x_error_start_adress - w25x_dump_start_address;
 
