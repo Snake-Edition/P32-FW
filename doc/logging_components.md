@@ -49,7 +49,6 @@ This file is generated automatically so don't edit it directly
 - Touch: logging::Severity::info, src/hw/touchscreen/touchscreen_common.cpp
 - USBDevice: logging::Severity::info, src/buddy/usb_device.cpp
 - USBHost: logging::Severity::info, src/buddy/usbh_conf.cpp
-- USBMSC: logging::Severity::debug, src/buddy/usb_device_msc.cpp
 - W25X: logging::Severity::debug, src/common/w25x.cpp
 - WUI: logging::Severity::debug, lib/WUI/wui.cpp
 - connect: logging::Severity::debug, src/connect/connect.cpp

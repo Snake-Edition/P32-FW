@@ -588,14 +588,6 @@ public:
     virtual void click(IWindowMenu &) override;
 };
 
-class MI_USB_MSC_ENABLE : public WI_ICON_SWITCH_OFF_ON_t {
-    constexpr static char const *label = "USB MSC";
-
-public:
-    MI_USB_MSC_ENABLE();
-    virtual void OnChange(size_t old_index) override;
-};
-
 #if HAS_LEDS()
 class MI_LEDS_ENABLE : public WI_ICON_SWITCH_OFF_ON_t {
     static constexpr const char *const label = N_("RGB Status Bar");

@@ -220,8 +220,6 @@ struct CurrentStore
     StoreItem<bool, true, ItemFlag::network, journal::hash("PrusaLink Enabled")> prusalink_enabled;
     StoreItem<std::array<char, pl_password_size>, defaults::prusalink_password, ItemFlag::network, journal::hash("PrusaLink Password")> prusalink_password;
 
-    StoreItem<bool, false, ItemFlag::features | ItemFlag::dev_items, journal::hash("USB MSC Enabled")> usb_msc_enabled;
-
     StoreItem<std::array<char, connect_host_size + 1>, defaults::connect_host, ItemFlag::network | ItemFlag::dev_items, journal::hash("Connect Host")> connect_host;
     StoreItem<std::array<char, connect_token_size + 1>, defaults::connect_token, ItemFlag::network, journal::hash("Connect Token")> connect_token;
     StoreItem<uint16_t, defaults::connect_port, ItemFlag::network | ItemFlag::dev_items, journal::hash("Connect Port")> connect_port;
@@ -744,6 +742,8 @@ struct DeprecatedStore
 
     StoreItem<HWCheckSeverity, defaults::hw_check_severity, journal::hash("HW Check Fan Compatibility")> hw_check_fan_compatibility;
     StoreItem<HotendType, defaults::hotend_type, journal::hash("Nozzle Sock")> hotend_type_single_hotend;
+
+    StoreItem<bool, false, journal::hash("USB MSC Enabled")> usb_msc_enabled;
 };
 
 } // namespace config_store_ns

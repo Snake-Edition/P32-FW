@@ -142,11 +142,3 @@ lfs_t *littlefs_internal_init() {
 
     return &lfs;
 }
-
-struct lfs_config *littlefs_internal_config_get() {
-    if (littlefs_config.block_count != 0) {
-        return &littlefs_config;
-    } else {
-        return NULL;
-    }
-}

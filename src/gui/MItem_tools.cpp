@@ -873,14 +873,6 @@ void MI_LOAD_SETTINGS::click(IWindowMenu & /*window_menu*/) {
     MsgBoxInfo(string_view_utf8::MakeRAM((const uint8_t *)msg.data()), Responses_Ok);
 }
 
-/**********************************************************************************************/
-// MI_USB_MSC_ENABLE
-MI_USB_MSC_ENABLE::MI_USB_MSC_ENABLE()
-    : WI_ICON_SWITCH_OFF_ON_t(config_store().usb_msc_enabled.get(), _(label), nullptr, is_enabled_t::yes, is_hidden_t::dev) {}
-
-void MI_USB_MSC_ENABLE::OnChange(size_t old_index) {
-    config_store().usb_msc_enabled.set(!old_index);
-}
 #if HAS_LEDS()
 /**********************************************************************************************/
 // MI_LEDS_ENABLE
