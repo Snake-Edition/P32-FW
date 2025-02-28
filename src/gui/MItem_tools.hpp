@@ -25,24 +25,6 @@
 #include <str_utils.hpp>
 #include <gui/menu_item/menu_item_gcode_action.hpp>
 
-/// \returns tool name for tool menu item purposes
-inline constexpr const char *tool_name(uint8_t tool_index) {
-    switch (tool_index) {
-    case 0:
-        return N_("Tool 1");
-    case 1:
-        return N_("Tool 2");
-    case 2:
-        return N_("Tool 3");
-    case 3:
-        return N_("Tool 4");
-    case 4:
-        return N_("Tool 5");
-    default:
-        return "";
-    }
-}
-
 /// Checks if there is space in the gcode queue for inserting further commands.
 /// If there's not, \returns false and shows a message box
 bool gui_check_space_in_gcode_queue_with_msg();
