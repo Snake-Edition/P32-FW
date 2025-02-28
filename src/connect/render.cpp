@@ -13,6 +13,12 @@
 #include <filament.hpp>
 #include <filament_list.hpp>
 #include <filament_sensor_states.hpp>
+
+#include <option/has_cancel_object.h>
+#if HAS_CANCEL_OBJECT()
+    #include <feature/cancel_object/cancel_object.hpp>
+#endif
+
 #if XL_ENCLOSURE_SUPPORT()
     #include <xl_enclosure.hpp>
 #endif
@@ -567,17 +573,20 @@ namespace {
                 JSON_FIELD_OBJ("data");
                     JSON_FIELD_ARR("objects");
                         state.iter = 0;
-                        while (state.iter <  params.cancel_object_count) {
-                            //Note: It can theoretically happen, that print finishes and new starts as we are sending this (tho really unlikely)
-                            //, but in that case we would just send some inconsistent names, probably empty srings and
-                            //right after we would generate next event with the correct ones, so it is OK.
-                            JSON_OBJ_START;
-                                JSON_FIELD_BOOL("canceled", TEST64(params.cancel_object_mask, state.iter)) JSON_COMMA;
-                                JSON_FIELD_INT("id", state.iter);
-                            JSON_OBJ_END;
-                            if (state.iter != params.cancel_object_count - 1) {
+
+                        // Note: Because we're reading out object_count and is_object_cancelled directly,
+                        // we can end up with inconsistent data being rendered.
+                        // But that is fine, if that happens, cancel_object.revision changes and new render will be issued later, so we will eventually end up being consistent
+
+                        while (static_cast<buddy::CancelObject::ObjectID>(state.iter) < buddy::cancel_object().object_count()) {
+                            if (state.iter != 0) {
                                 JSON_COMMA;
                             }
+                            JSON_OBJ_START;
+                                // is_object_cancelled will work even if i is outside of bounds, so having object_count inconsistent is fine
+                                JSON_FIELD_BOOL("canceled", buddy::cancel_object().is_object_cancelled(state.iter)) JSON_COMMA;
+                                JSON_FIELD_INT("id", state.iter);
+                            JSON_OBJ_END;
                             state.iter++;
                         }
                     JSON_ARR_END;

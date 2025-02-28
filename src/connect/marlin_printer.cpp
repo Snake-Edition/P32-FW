@@ -17,6 +17,11 @@
 #include <state/printer_state.hpp>
 #include <common/unique_file_ptr.hpp>
 
+#include <option/has_cancel_object.h>
+#if HAS_CANCEL_OBJECT()
+    #include <feature/cancel_object/cancel_object.hpp>
+#endif
+
 #if XL_ENCLOSURE_SUPPORT()
     #include <xl_enclosure.hpp>
     #include <fanctl.hpp>
@@ -262,10 +267,7 @@ Printer::Params MarlinPrinter::params() const {
     params.job_id = marlin_vars().job_id;
     params.version = PrinterModelInfo::current().version;
     get_slot_info(params);
-#if HAS_CANCEL_OBJECT()
-    params.cancel_object_count = marlin_vars().cancel_object_count;
-    params.cancel_object_mask = marlin_vars().get_cancel_object_mask();
-#endif
+    
 #if XL_ENCLOSURE_SUPPORT()
     params.enclosure_info = {
         .present = xl_enclosure.isActive(),
@@ -328,8 +330,9 @@ uint32_t MarlinPrinter::cancelable_fingerprint() const {
 #if HAS_CANCEL_OBJECT()
     const auto &parameters = params();
     crc = crc32_calc_ex(crc, reinterpret_cast<const uint8_t *>(&parameters.job_id), sizeof(parameters.job_id));
-    crc = crc32_calc_ex(crc, reinterpret_cast<const uint8_t *>(&parameters.cancel_object_count), sizeof(parameters.cancel_object_count));
-    crc = crc32_calc_ex(crc, reinterpret_cast<const uint8_t *>(&parameters.cancel_object_mask), sizeof(parameters.cancel_object_mask));
+
+    const auto revision = buddy::cancel_object().objects_revision();
+    crc = crc32_calc_ex(crc, reinterpret_cast<const uint8_t *>(&revision), sizeof(revision));
 #endif
     return crc;
 }

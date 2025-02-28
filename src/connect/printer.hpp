@@ -160,10 +160,6 @@ public:
         uint64_t usb_space_free = 0;
         PrinterVersion version = { 0, 0, 0 };
         printer_state::StateWithDialog state = printer_state::DeviceState::Unknown;
-#if HAS_CANCEL_OBJECT()
-        size_t cancel_object_count = 0;
-        uint64_t cancel_object_mask = 0;
-#endif
 
         uint32_t telemetry_fingerprint(bool include_xy_axes) const;
         uint32_t state_fingerprint() const;

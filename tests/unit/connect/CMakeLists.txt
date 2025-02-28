@@ -53,6 +53,7 @@ add_executable(
   buddy_chamber_mock.cpp
   xbuddy_extension_mock.cpp
   side_strip_control_mock.cpp
+  cancel_object_mock.cpp
   ${CMAKE_SOURCE_DIR}/tests/unit/common/printer_state_mock.cpp
   ${CMAKE_SOURCE_DIR}/tests/stubs/jsmn_impl.c
   ${CMAKE_SOURCE_DIR}/tests/stubs/strlcpy.c
