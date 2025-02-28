@@ -7,6 +7,8 @@
 #include "marlin_server.hpp"
 #include "utility_extensions.hpp"
 #include <option/has_mmu2.h>
+#include <feature/cancel_object/cancel_object.hpp>
+
 #if XL_ENCLOSURE_SUPPORT()
     #include "xl_enclosure.hpp"
 #endif
@@ -44,7 +46,7 @@ void ScreenMenuTune::windowEvent(window_t *sender, GUI_event_t event, void *para
 
 #if HAS_CANCEL_OBJECT()
         // Enable cancel object menu
-        Item<MI_CO_CANCEL_OBJECT>().set_enabled(marlin_vars().cancel_object_count > 0);
+        Item<MI_CO_CANCEL_OBJECT>().set_enabled(buddy::cancel_object().object_count() > 0);
 #endif
         break;
     }

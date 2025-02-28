@@ -7,13 +7,16 @@
 #include <img_resources.hpp>
 #include <marlin_vars.hpp>
 #include <marlin_client.hpp>
+#include <feature/cancel_object/cancel_object.hpp>
+
+using namespace buddy;
 
 ScreenMenuCancelObject::ScreenMenuCancelObject()
     : detail::ScreenMenuCancelObject(_(label)) {}
 
 MI_CO_CANCEL_OBJECT::MI_CO_CANCEL_OBJECT()
     : IWindowMenuItem(
-        _(label), nullptr, marlin_vars().cancel_object_count > 0 ? is_enabled_t::yes : is_enabled_t::no,
+        _(label), nullptr, cancel_object().object_count() > 0 ? is_enabled_t::yes : is_enabled_t::no,
         is_hidden_t::no, expands_t::yes) {
 }
 
@@ -35,14 +38,11 @@ MI_CO_OBJECT_N::MI_CO_OBJECT_N(int ObjectId_)
 }
 
 void MI_CO_OBJECT_N::UpdateState() {
-    size_t new_index = (marlin_vars().get_cancel_object_mask() & (static_cast<uint64_t>(1) << ObjectId)) ? 1 : 0;
-    if (get_index() != new_index) {
-        set_index(new_index);
-    }
+    set_index(cancel_object().is_object_cancelled(ObjectId));
 }
 
 void MI_CO_OBJECT_N::UpdateName() {
-    if (marlin_vars().cancel_object_count > ObjectId) {
+    if (cancel_object().object_count() > ObjectId) {
         bool empty; ///< True if object name from G-code is empty
 
         { // Do all things in one lock
@@ -90,7 +90,7 @@ void MI_CO_OBJECT_N::OnChange(size_t old_index) {
 }
 
 MI_CO_CANCEL_CURRENT::MI_CO_CANCEL_CURRENT()
-    : IWindowMenuItem(_(label), &img::arrow_right_10x16, is_enabled_t::yes, marlin_vars().cancel_object_count > 0 ? is_hidden_t::no : is_hidden_t::yes) {}
+    : IWindowMenuItem(_(label), &img::arrow_right_10x16, is_enabled_t::yes, cancel_object().object_count() > 0 ? is_hidden_t::no : is_hidden_t::yes) {}
 
 void MI_CO_CANCEL_CURRENT::click(IWindowMenu & /*window_menu*/) {
     marlin_client::cancel_current_object();
