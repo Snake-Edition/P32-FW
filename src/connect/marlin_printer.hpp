@@ -50,7 +50,7 @@ public:
     virtual void init_connect(const char *token) override;
     virtual uint32_t cancelable_fingerprint() const override;
 #if HAS_CANCEL_OBJECT()
-    virtual void set_object_cancelled(uint8_t id, bool set) override;
+    virtual void set_object_cancelled(uint16_t id, bool set) override;
 #endif
     virtual void reset_printer() override;
     virtual const char *dialog_action(printer_state::DialogId dialog_id, Response response) override;

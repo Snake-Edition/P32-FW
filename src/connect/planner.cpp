@@ -811,7 +811,7 @@ void Planner::handle_transfer_result(const Command &command, Transfer::BeginResu
         result);
 }
 
-void Planner::handle_cancel_object_command(const Command &command, uint8_t object_id, bool set_cancelled) {
+void Planner::handle_cancel_object_command(const Command &command, uint16_t object_id, bool set_cancelled) {
 #if HAS_CANCEL_OBJECT()
     printer.set_object_cancelled(object_id, set_cancelled);
     // Reset the hash to the current (modified) cancel mask.

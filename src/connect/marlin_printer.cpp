@@ -338,7 +338,7 @@ uint32_t MarlinPrinter::cancelable_fingerprint() const {
 }
 
 #if HAS_CANCEL_OBJECT()
-void MarlinPrinter::set_object_cancelled(uint8_t id, bool set) {
+void MarlinPrinter::set_object_cancelled(uint16_t id, bool set) {
     marlin_client::set_object_cancelled(id, set);
 }
 #endif

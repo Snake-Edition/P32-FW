@@ -129,10 +129,10 @@ struct SetValue {
     std::variant<bool, uint32_t, float, int8_t, SharedBorrow> value;
 };
 struct CancelObject {
-    uint8_t id;
+    uint16_t id;
 };
 struct UncancelObject {
-    uint8_t id;
+    uint16_t id;
 };
 
 using CommandData = std::variant<UnknownCommand, BrokenCommand, GcodeTooLarge, ProcessingOtherCommand, ProcessingThisCommand, Gcode, SendInfo, SendJobInfo, SendFileInfo, SendTransferInfo, PausePrint, ResumePrint, StopPrint, StartPrint, SetPrinterReady, CancelPrinterReady, SetPrinterIdle, StartEncryptedDownload, StartInlineDownload, DeleteFile, DeleteFolder, CreateFolder, StopTransfer, SetToken, ResetPrinter, SendStateInfo, DialogAction, SetValue, CancelObject, UncancelObject>;

@@ -183,7 +183,7 @@ private:
     void command(const Command &, const UncancelObject &);
 
     void handle_transfer_result(const Command &command, transfers::Transfer::BeginResult result);
-    void handle_cancel_object_command(const Command &command, uint8_t object_id, bool set_cancelled);
+    void handle_cancel_object_command(const Command &command, uint16_t object_id, bool set_cancelled);
 
     // Tracking if we should resend the INFO message due to some changes.
     Tracked info_changes;
