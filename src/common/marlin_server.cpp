@@ -1274,8 +1274,14 @@ void print_exit(void) {
 void print_pause(void) {
     print_state.resume_pending = false;
 
-    if (server.print_state == State::Printing) {
+    switch (server.print_state) {
+    case State::Printing:
+    case State::Finishing_WaitIdle:
         server.print_state = State::Pausing_Begin;
+        break;
+
+    default:
+        break;
     }
 }
 
