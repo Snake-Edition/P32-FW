@@ -3,9 +3,11 @@
 #include <cstdint>
 #include <bitset>
 
+#include <freertos/mutex.hpp>
+
 namespace buddy {
 
-/// Not thread safe, use only from defaultTask
+/// Thread-safe for reading. Non-const functions should only be called from the marlin thread
 class CancelObject {
 
 public:
@@ -36,32 +38,41 @@ public:
 
     bool is_object_cancelled(ObjectID obj) const;
 
+    /// !!! Only to be called from the marlin thread
     void set_object_cancelled(ObjectID obj, bool set);
 
     ObjectID current_object() const;
 
     bool is_current_object_cancelled() const;
 
+    /// !!! Only to be called from the marlin thread
     void set_current_object(ObjectID obj);
 
     ObjectID object_count() const;
 
     /// Prints cancel object information into the serial line
+    /// !!! Only to be called from the marlin thread
     void report() const;
 
     /// Only for power panic pruposes
     State state() const;
 
     /// Only for power panic pruposes
+    /// !!! Only to be called from the marlin thread
     void set_state(const State &set);
 
     void reset();
 
 private:
+    bool is_object_cancelled_nolock(ObjectID obj) const;
+
+private:
     State state_;
+
+    mutable freertos::Mutex mutex_;
 };
 
-/// Not thread safe, use only from defaultTask
+/// Thread-safe for reading. Non-const functions should only be called from the marlin thread
 CancelObject &cancel_object();
 
 } // namespace buddy
