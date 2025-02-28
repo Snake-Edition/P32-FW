@@ -34,8 +34,6 @@ public:
     };
 
 public:
-    uint64_t cancelled_objects_mask() const;
-
     /// \returns whether the object can be cancelled (the record of cancelling it fits in the internal structures)
     bool is_object_cancellable(ObjectID obj) const;
 

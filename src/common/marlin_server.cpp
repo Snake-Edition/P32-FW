@@ -2972,11 +2972,6 @@ static void _server_update_vars() {
         extruder.heatbreak_fan_rpm = Fans::heat_break(e).getActualRPM();
     }
 
-#if HAS_CANCEL_OBJECT()
-    marlin_vars().set_cancel_object_mask(buddy::cancel_object().cancelled_objects_mask()); // Canceled objects
-    marlin_vars().cancel_object_count = buddy::cancel_object().object_count(); // Total number of objects
-#endif
-
     marlin_vars().temp_bed = thermalManager.degBed();
     marlin_vars().target_bed = thermalManager.degTargetBed();
 #if ENABLED(MODULAR_HEATBED)

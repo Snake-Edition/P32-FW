@@ -12,14 +12,6 @@ CancelObject &buddy::cancel_object() {
     return instance;
 }
 
-uint64_t CancelObject::cancelled_objects_mask() const {
-    std::lock_guard lg(mutex_);
-
-    static_assert(max_object_count <= 64);
-    static_assert(std::is_same_v<uint64_t, unsigned long long>);
-    return state_.cancelled_objects.to_ullong();
-}
-
 bool CancelObject::is_object_cancellable(ObjectID obj) const {
     return (obj >= 0) && (obj <= max_object_count);
 }

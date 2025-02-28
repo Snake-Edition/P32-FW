@@ -341,19 +341,6 @@ public:
     MarlinVariable<marlin_server::Cmd> gcode_command; // Currently executed command, encoded as marlin_server::Cmd
 
 #if HAS_CANCEL_OBJECT()
-    void set_cancel_object_mask(uint64_t mask) {
-        if (osThreadGetId() != marlin_server::server_task) {
-            bsod("set_cancel_object_mask");
-        }
-        auto guard = MarlinVarsLockGuard();
-        cancel_object_mask = mask;
-    }
-    uint64_t get_cancel_object_mask() {
-        auto guard = MarlinVarsLockGuard();
-        return cancel_object_mask;
-    }; ///< Copy of mask of canceled objects
-    MarlinVariable<int8_t> cancel_object_count; ///< Number of objects that can be canceled
-
     static constexpr size_t CANCEL_OBJECT_NAME_LEN = 32; ///< Maximal length of cancel_object_names strings
     static constexpr size_t CANCEL_OBJECTS_NAME_COUNT = 16; ///< Maximal number of cancel objects
     /// Names of cancelable objects
