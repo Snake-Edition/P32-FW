@@ -267,9 +267,6 @@ namespace {
         const auto params = state.printer.params();
         const auto &info = state.printer.printer_info();
         const bool has_extra = (event.type != EventType::Accepted) && (event.type != EventType::Rejected);
-#if ENABLED(CANCEL_OBJECTS)
-        char cancel_object_name[Printer::CANCEL_OBJECT_NAME_LEN];
-#endif
         std::optional<Printer::FinishedJobResult> job_state;
 
         const char *reject_with = nullptr;
@@ -575,14 +572,6 @@ namespace {
                             //, but in that case we would just send some inconsistent names, probably empty srings and
                             //right after we would generate next event with the correct ones, so it is OK.
                             JSON_OBJ_START;
-                                //Note: The name has to be copied inside this call, so that it cannot be skipped, if this does not fit the first time.
-                                //
-                                // Also we store only CANCEL_OBJECT_NAME_COUNT names, but can cancel up to the number of bits in the cancel_object_mask
-                                // objects, for the rest we still want to say, if they are canceled or not.
-                                if (state.iter < Printer::CANCEL_OBJECT_NAME_COUNT) {
-
-                                    JSON_FIELD_STR("name", state.printer.get_cancel_object_name(cancel_object_name, sizeof(cancel_object_name), state.iter)) JSON_COMMA;
-                                }
                                 JSON_FIELD_BOOL("canceled", TEST64(params.cancel_object_mask, state.iter)) JSON_COMMA;
                                 JSON_FIELD_INT("id", state.iter);
                             JSON_OBJ_END;

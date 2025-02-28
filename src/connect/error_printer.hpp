@@ -40,7 +40,6 @@ private:
 #if ENABLED(CANCEL_OBJECTS)
     virtual void cancel_object(uint8_t) override;
     virtual void uncancel_object(uint8_t) override;
-    virtual const char *get_cancel_object_name(char *buffer, size_t size, size_t index) const override;
 #endif
     virtual void reset_printer() override;
     virtual const char *dialog_action(printer_state::DialogId dialog_id, Response response) override;

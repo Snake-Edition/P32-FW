@@ -327,12 +327,6 @@ uint32_t MarlinPrinter::cancelable_fingerprint() const {
     uint32_t crc = 0;
 #if ENABLED(CANCEL_OBJECTS)
     const auto &parameters = params();
-    auto calc_crc = [&](const char *s) {
-        crc = crc32_calc_ex(crc, reinterpret_cast<const uint8_t *>(*s), strlen(s));
-    };
-    for (size_t i = 0; i < marlin_vars_t::CANCEL_OBJECTS_NAME_COUNT; i++) {
-        marlin_vars().cancel_object_names[i].execute_with(calc_crc);
-    }
     crc = crc32_calc_ex(crc, reinterpret_cast<const uint8_t *>(&parameters.job_id), sizeof(parameters.job_id));
     crc = crc32_calc_ex(crc, reinterpret_cast<const uint8_t *>(&parameters.cancel_object_count), sizeof(parameters.cancel_object_count));
     crc = crc32_calc_ex(crc, reinterpret_cast<const uint8_t *>(&parameters.cancel_object_mask), sizeof(parameters.cancel_object_mask));
@@ -347,11 +341,6 @@ void MarlinPrinter::cancel_object(uint8_t id) {
 
 void MarlinPrinter::uncancel_object(uint8_t id) {
     marlin_client::uncancel_object(id);
-}
-
-const char *MarlinPrinter::get_cancel_object_name(char *buffer, size_t size, size_t index) const {
-    marlin_vars().cancel_object_names[index].copy_to(buffer, size);
-    return buffer;
 }
 #endif
 

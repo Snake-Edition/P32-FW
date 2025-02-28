@@ -20,14 +20,6 @@ private:
     //   of belongs to Connect.
     static std::atomic<bool> ready;
 
-#if ENABLED(CANCEL_OBJECTS)
-    // We don't want to include marlin_vars into the printer or render.cpp directly
-    //, because we want to shield unit tests from marlin stuff, but we want to be
-    // sure everything fits.
-    static_assert(marlin_vars_t::CANCEL_OBJECT_NAME_LEN == Printer::CANCEL_OBJECT_NAME_LEN);
-    static_assert(marlin_vars_t::CANCEL_OBJECTS_NAME_COUNT == Printer::CANCEL_OBJECT_NAME_COUNT);
-#endif
-
 protected:
     virtual Config load_config() override;
 
@@ -60,7 +52,6 @@ public:
 #if ENABLED(CANCEL_OBJECTS)
     virtual void cancel_object(uint8_t id) override;
     virtual void uncancel_object(uint8_t id) override;
-    virtual const char *get_cancel_object_name(char *buffer, size_t size, size_t index) const override;
 #endif
     virtual void reset_printer() override;
     virtual const char *dialog_action(printer_state::DialogId dialog_id, Response response) override;

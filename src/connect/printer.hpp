@@ -100,11 +100,6 @@ public:
     static constexpr size_t NUMBER_OF_SLOTS = 1;
 #endif
 
-#if ENABLED(CANCEL_OBJECTS)
-    static constexpr size_t CANCEL_OBJECT_NAME_LEN = 32;
-    static constexpr size_t CANCEL_OBJECT_NAME_COUNT = 16;
-#endif
-
     class Params {
     private:
         // Living in the Printer we come from
@@ -281,7 +276,6 @@ public:
 #if ENABLED(CANCEL_OBJECTS)
     virtual void cancel_object(uint8_t id) = 0;
     virtual void uncancel_object(uint8_t id) = 0;
-    virtual const char *get_cancel_object_name(char *buffer, size_t size, size_t index) const = 0;
 #endif
     // Turn connect on and set the token.
     //
