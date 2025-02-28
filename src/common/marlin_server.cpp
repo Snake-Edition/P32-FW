@@ -205,8 +205,6 @@ namespace {
         resume_state_t resume; // resume data (state before pausing)
         bool enable_nozzle_temp_timeout; // enables nozzle temperature timeout in print pause
         uint32_t last_update; // last update tick count
-        uint32_t knob_click_counter;
-        uint32_t knob_move_counter;
         uint16_t flags; // server flags (MARLIN_SFLG)
 
 #if ENABLED(AXIS_MEASURE)
@@ -221,6 +219,9 @@ namespace {
         bool mmu_maintenance_checked = false;
 #endif
     };
+
+    std::atomic<uint32_t> knob_click_counter = 0; // Hold user knob clicks for safety timer
+    std::atomic<uint32_t> knob_move_counter = 0; // Holds user knob moves for safety timer
 
     server_t server; // server structure - initialize task to zero
 
@@ -2848,12 +2849,20 @@ void set_resume_data(const resume_state_t *data) {
     server.resume = *data;
 }
 
+extern void increment_user_click_count(void) {
+    knob_click_counter++;
+}
+
 extern uint32_t get_user_click_count(void) {
-    return server.knob_click_counter;
+    return knob_click_counter;
+}
+
+extern void increment_user_move_count(void) {
+    knob_move_counter++;
 }
 
 extern uint32_t get_user_move_count(void) {
-    return server.knob_move_counter;
+    return knob_move_counter;
 }
 
 //-----------------------------------------------------------------------------
@@ -3126,12 +3135,6 @@ bool _process_server_valid_request(const Request &request, int client_id) {
         return true;
     case Request::Type::PrintExit:
         print_exit();
-        return true;
-    case Request::Type::KnobMove:
-        ++server.knob_move_counter;
-        return true;
-    case Request::Type::KnobClick:
-        ++server.knob_click_counter;
         return true;
     case Request::Type::SetWarning:
         set_warning(request.warning_type);
