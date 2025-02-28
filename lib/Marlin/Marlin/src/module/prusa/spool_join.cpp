@@ -18,6 +18,7 @@
 #include <config_store/store_instance.hpp>
 #include "mmu2_toolchanger_common.hpp"
 #include <feature/print_status_message/print_status_message_mgr.hpp>
+#include <feature/print_status_message/print_status_message_guard.hpp>
 
 SpoolJoin spool_join;
 
@@ -217,8 +218,8 @@ bool SpoolJoin::do_join(uint8_t current_tool) {
 
     uint8_t new_tool = join_settings.value();
     log_info(Marlin, "Spool join from %d to %d (z=%f)", current_tool, new_tool, planner.get_axis_position_mm(AxisEnum::Z_AXIS));
-
-    ExtUI::onStatusChanged("Joining spool");
+    PrintStatusMessageGuard statusGuard;
+    statusGuard.update<PrintStatusMessage::joining_spool>({});
 
     planner.synchronize();
 

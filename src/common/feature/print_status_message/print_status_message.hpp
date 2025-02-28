@@ -15,7 +15,6 @@ struct PrintStatusMessage {
         recalibrating_home,
         calibrating_axis,
         probing_bed,
-        spool_joined,
 
         dwelling,
 
@@ -24,6 +23,10 @@ struct PrintStatusMessage {
         waiting_for_hotend_temp,
         waiting_for_bed_temp,
 
+#if ENABLED(PRUSA_SPOOL_JOIN)
+        spool_joined,
+        joining_spool,
+#endif
 #if HAS_CHAMBER_API()
         waiting_for_chamber_temp,
 #endif
@@ -69,11 +72,14 @@ struct PrintStatusMessage {
         TypeRecord<Type::recalibrating_home, std::monostate>,
         TypeRecord<Type::calibrating_axis, PrintStatusMessageDataAxisProgress>,
         TypeRecord<Type::probing_bed, PrintStatusMessageDataProgress>,
-        TypeRecord<Type::spool_joined, std::monostate>,
         TypeRecord<Type::dwelling, PrintStatusMessageDataProgress>,
         TypeRecord<Type::absorbing_heat, PrintStatusMessageDataProgress>,
         TypeRecord<Type::waiting_for_hotend_temp, PrintStatusMessageDataProgress>,
         TypeRecord<Type::waiting_for_bed_temp, PrintStatusMessageDataProgress>,
+#if ENABLED(PRUSA_SPOOL_JOIN)
+        TypeRecord<Type::spool_joined, std::monostate>,
+        TypeRecord<Type::joining_spool, std::monostate>,
+#endif
 #if HAS_CHAMBER_API()
         TypeRecord<Type::waiting_for_chamber_temp, PrintStatusMessageDataProgress>,
 #endif
