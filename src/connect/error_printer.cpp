@@ -115,8 +115,7 @@ uint32_t ErrorPrinter::cancelable_fingerprint() const {
 }
 
 #if HAS_CANCEL_OBJECT()
-void ErrorPrinter::cancel_object(uint8_t) {}
-void ErrorPrinter::uncancel_object(uint8_t) {}
+void ErrorPrinter::set_object_cancelled(uint8_t, bool) {}
 #endif
 
 Printer::Config ErrorPrinter::load_config() {

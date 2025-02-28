@@ -84,19 +84,7 @@ void set_fan_check(bool val);
 void do_babysteps_Z(float offs);
 
 #if HAS_CANCEL_OBJECT()
-/**
- * @brief Cancels object with given ID. Preferred over using a GCode to get immediate write-through without having to wait for current gcode (or all in queue) to finish (GCode queue size is limited, so it's better to go around it if it makes sense).
- *
- * @param object_id
- */
-void cancel_object(int object_id);
-
-/**
- * @brief Uncancels object with given ID. See cancel_object fnc why this is preferred over a gcode cancellation.
- *
- * @param object_id
- */
-void uncancel_object(int object_id);
+void set_object_cancelled(int object_id, bool set);
 
 /**
  * @brief Cancel currently printed object. See cancel_object fnc why this is preferred over a gcode cancellation.

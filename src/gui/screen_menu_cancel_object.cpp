@@ -80,12 +80,7 @@ void MI_CO_OBJECT_N::UpdateName() {
 }
 
 void MI_CO_OBJECT_N::OnChange(size_t old_index) {
-    if (old_index == 0) { // is printing
-        marlin_client::cancel_object(ObjectId);
-    } else {
-        marlin_client::uncancel_object(ObjectId);
-    }
-
+    marlin_client::set_object_cancelled(ObjectId, old_index == 0);
     set_index(old_index); // Keep previous index and wait for UpdateState()
 }
 

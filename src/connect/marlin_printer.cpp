@@ -267,7 +267,7 @@ Printer::Params MarlinPrinter::params() const {
     params.job_id = marlin_vars().job_id;
     params.version = PrinterModelInfo::current().version;
     get_slot_info(params);
-    
+
 #if XL_ENCLOSURE_SUPPORT()
     params.enclosure_info = {
         .present = xl_enclosure.isActive(),
@@ -338,12 +338,8 @@ uint32_t MarlinPrinter::cancelable_fingerprint() const {
 }
 
 #if HAS_CANCEL_OBJECT()
-void MarlinPrinter::cancel_object(uint8_t id) {
-    marlin_client::cancel_object(id);
-}
-
-void MarlinPrinter::uncancel_object(uint8_t id) {
-    marlin_client::uncancel_object(id);
+void MarlinPrinter::set_object_cancelled(uint8_t id, bool set) {
+    marlin_client::set_object_cancelled(id, set);
 }
 #endif
 

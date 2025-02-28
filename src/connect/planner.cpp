@@ -811,6 +811,28 @@ void Planner::handle_transfer_result(const Command &command, Transfer::BeginResu
         result);
 }
 
+void Planner::handle_cancel_object_command(const Command &command, uint8_t object_id, bool set_cancelled) {
+#if HAS_CANCEL_OBJECT()
+    printer.set_object_cancelled(object_id, set_cancelled);
+    // Reset the hash to the current (modified) cancel mask.
+    // We don't need to do .renew on the printer, the printer.set_object_cancelled is synchronous (at least for now)
+    cancellable_objects.set_hash(printer.cancelable_fingerprint());
+    // We confirm the command by sending the current cancellable state
+    // (even if it didn't change by this modification - like if it was already canceled, etc)
+    planned_event = Event {
+        EventType::CancelableChanged,
+        command.id,
+    };
+
+#else
+    planned_event = Event {
+        EventType::Rejected,
+        command.id,
+    };
+    planned_event->reason = "Not supported on this printer type";
+#endif
+}
+
 void Planner::command(const Command &command, const StartInlineDownload &download) {
     if (transfer_recovery == TransferRecoveryState::WaitingForUSB) {
         planned_event = Event { EventType::Rejected, command.id, nullopt, nullopt, nullopt, "Not ready" };
@@ -1022,49 +1044,13 @@ void Planner::command(const Command &command, const SetValue &params) {
     }
 }
 
-#if HAS_CANCEL_OBJECT()
 void Planner::command(const Command &command, const CancelObject &params) {
-    printer.cancel_object(params.id);
-    // Reset the hash to the current (modified) cancel mask.
-    // We don't need to do .renew on the printer, the marlin vars are propagated "instantly"
-    cancellable_objects.set_hash(printer.cancelable_fingerprint());
-    // We confirm the command by sending the current cancellable state
-    // (even if it didn't change by this modification - like if it was already canceled, etc)
-    planned_event = Event {
-        EventType::CancelableChanged,
-        command.id,
-    };
+    handle_cancel_object_command(command, params.id, true);
 }
 
 void Planner::command(const Command &command, const UncancelObject &params) {
-    printer.uncancel_object(params.id);
-    // Reset the hash to the current (modified) cancel mask.
-    // We don't need to do .renew on the printer, the marlin vars are propagated "instantly"
-    cancellable_objects.set_hash(printer.cancelable_fingerprint());
-    // We confirm the command by sending the current cancellable state
-    // (even if it didn't change by this modification - like if it was already canceled, etc)
-    planned_event = Event {
-        EventType::CancelableChanged,
-        command.id,
-    };
+    handle_cancel_object_command(command, params.id, false);
 }
-#else
-void Planner::command(const Command &command, const CancelObject &) {
-    planned_event = Event {
-        EventType::Rejected,
-        command.id,
-    };
-    planned_event->reason = "Not supported on this printer type";
-}
-
-void Planner::command(const Command &command, const UncancelObject &) {
-    planned_event = Event {
-        EventType::Rejected,
-        command.id,
-    };
-    planned_event->reason = "Not supported on this printer type";
-}
-#endif
 
 // FIXME: Handle the case when we are resent a command we are already
 // processing for a while. In that case, we want to re-Accept it. Nevertheless,

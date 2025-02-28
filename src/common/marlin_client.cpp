@@ -507,17 +507,10 @@ void set_fan_check(bool val) {
 }
 
 #if HAS_CANCEL_OBJECT()
-void cancel_object(int object_id) {
+void set_object_cancelled(int object_id, bool set) {
     Request request;
-    request.type = Request::Type::CancelObjectID;
+    request.type = (set ? Request::Type::CancelObjectID : Request::Type::UncancelObjectID);
     request.cancel_object_id = object_id;
-    _send_request_to_server_and_wait(request);
-}
-
-void uncancel_object(int object_id) {
-    Request request;
-    request.type = Request::Type::UncancelObjectID;
-    request.uncancel_object_id = object_id;
     _send_request_to_server_and_wait(request);
 }
 

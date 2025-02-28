@@ -3086,10 +3086,8 @@ bool _process_server_valid_request(const Request &request, int client_id) {
         return true;
 #if HAS_CANCEL_OBJECT()
     case Request::Type::CancelObjectID:
-        buddy::cancel_object().set_object_cancelled(request.cancel_object_id, true);
-        return true;
     case Request::Type::UncancelObjectID:
-        buddy::cancel_object().set_object_cancelled(request.uncancel_object_id, false);
+        buddy::cancel_object().set_object_cancelled(request.cancel_object_id, request.type == Request::Type::CancelObjectID);
         return true;
 #else
     case Request::Type::CancelObjectID:

@@ -272,8 +272,7 @@ public:
     virtual bool is_idle() const = 0;
     virtual uint32_t cancelable_fingerprint() const = 0;
 #if HAS_CANCEL_OBJECT()
-    virtual void cancel_object(uint8_t id) = 0;
-    virtual void uncancel_object(uint8_t id) = 0;
+    virtual void set_object_cancelled(uint8_t id, bool set) = 0;
 #endif
     // Turn connect on and set the token.
     //
