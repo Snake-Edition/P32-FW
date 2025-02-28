@@ -364,7 +364,6 @@ uint8_t GCodeQueue::length = 0;
 
 void ExtUI::onStartup() {}
 void ExtUI::onIdle() {}
-void ExtUI::onStatusChanged([[maybe_unused]] const char *const msg) {}
 void ExtUI::onFactoryReset() {}
 
 #include "Marlin/src/feature/pause.h"

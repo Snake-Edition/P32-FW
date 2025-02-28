@@ -3440,17 +3440,6 @@ void onUserConfirmRequired(const char *const msg) {
     log_info(MarlinServer, "ExtUI: onUserConfirmRequired: %s", msg);
 }
 
-void onStatusChanged(const char *const msg) {
-    if (!msg) {
-        return; // ignore errorneous nullptr messages
-    }
-
-    log_info(MarlinServer, "ExtUI: onStatusChanged: %s", msg);
-    if (msg[0] != '\0') {
-        print_status_message().show_temporary<PrintStatusMessage::custom>({ std::shared_ptr<const char[]>(strdup(msg), [](char *str) { free(str); }) });
-    }
-}
-
 void onFactoryReset() {
     log_info(MarlinServer, "ExtUI: onFactoryReset");
 }

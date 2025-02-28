@@ -21,6 +21,7 @@
  */
 
 #include "ultralcd.h"
+#include <feature/print_status_message/print_status_message_mgr.hpp>
 
 #ifdef LED_BACKLIGHT_TIMEOUT
   #include "../feature/leds/leds.h"
@@ -102,7 +103,10 @@
     #endif
 
     #if ENABLED(EXTENSIBLE_UI)
-      ExtUI::onStatusChanged(status_message);
+      if (has_status()) {
+        print_status_message().show_temporary<PrintStatusMessage::custom>({ std::shared_ptr<const char[]>(strdup(status_message), [](char *str) { free(str); }) });
+      }
+
     #endif
   }
 

@@ -247,7 +247,6 @@ namespace ExtUI {
   void onFilamentRunout(const extruder_t extruder);
   void onUserConfirmRequired(const char * const msg);
   void onUserConfirmRequired_P(PGM_P const pstr);
-  void onStatusChanged(const char * const msg);
   void onFactoryReset();
   void onStoreSettings(char *);
   void onLoadSettings(const char *);
