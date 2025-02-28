@@ -22,12 +22,10 @@
 
 #include <inc/MarlinConfig.h>
 
-#if ENABLED(CANCEL_OBJECTS)
+#include <src/gcode/gcode.h>
+#include <feature/cancel_object/cancel_object.hpp>
 
-    #include <src/gcode/gcode.h>
-    #include <feature/cancel_object/cancel_object.hpp>
-
-    #include <marlin_vars.hpp>
+#include <marlin_vars.hpp>
 
 using namespace buddy;
 
@@ -116,5 +114,3 @@ void GcodeSuite::M486() {
 }
 
 /** @}*/
-
-#endif // CANCEL_OBJECTS

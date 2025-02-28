@@ -83,7 +83,7 @@ void set_fan_check(bool val);
 
 void do_babysteps_Z(float offs);
 
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
 /**
  * @brief Cancels object with given ID. Preferred over using a GCode to get immediate write-through without having to wait for current gcode (or all in queue) to finish (GCode queue size is limited, so it's better to go around it if it makes sense).
  *

@@ -49,7 +49,6 @@ target_sources(
           screen_help_fw_update.cpp
           screen_home.cpp
           screen_menu.cpp
-          screen_menu_cancel_object.cpp
           screen_menu_control.cpp
           screen_menu_enclosure.cpp
           screen_menu_error_test.cpp
@@ -101,6 +100,10 @@ target_sources(
           window_print_progress.cpp
           window_thumbnail.cpp
   )
+
+if(HAS_CANCEL_OBJECT)
+  target_sources(firmware PRIVATE screen_menu_cancel_object.cpp)
+endif()
 
 if(HAS_CRASH_DETECTION)
   target_sources(firmware PRIVATE screen_crash_recovery.cpp)

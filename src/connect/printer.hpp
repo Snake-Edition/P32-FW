@@ -25,6 +25,8 @@
     #include <Marlin/src/feature/prusa/MMU2/mmu2_mk4.h>
 #endif
 
+#include <option/has_cancel_object.h>
+
 namespace connect_client {
 
 // NOTE: if you are changing this, change also the one in command.hpp,
@@ -158,7 +160,7 @@ public:
         uint64_t usb_space_free = 0;
         PrinterVersion version = { 0, 0, 0 };
         printer_state::StateWithDialog state = printer_state::DeviceState::Unknown;
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
         size_t cancel_object_count = 0;
         uint64_t cancel_object_mask = 0;
 #endif
@@ -273,7 +275,7 @@ public:
     virtual bool is_in_error() const = 0;
     virtual bool is_idle() const = 0;
     virtual uint32_t cancelable_fingerprint() const = 0;
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
     virtual void cancel_object(uint8_t id) = 0;
     virtual void uncancel_object(uint8_t id) = 0;
 #endif

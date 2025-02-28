@@ -30,7 +30,10 @@
 #include "../../module/temperature.h"
 #include "feature/precise_stepping/internal.hpp"
 
-#include <feature/cancel_object/cancel_object.hpp>
+#include <option/has_cancel_object.h>
+#if HAS_CANCEL_OBJECT()
+  #include <feature/cancel_object/cancel_object.hpp>
+#endif
 
 #if ENABLED(DELTA)
   #include "../../module/delta.h"

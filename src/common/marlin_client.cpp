@@ -511,7 +511,7 @@ void set_fan_check(bool val) {
     return marlin_set_variable(marlin_vars().fan_check_enabled, static_cast<uint8_t>(val));
 }
 
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
 void cancel_object(int object_id) {
     Request request;
     request.type = Request::Type::CancelObjectID;

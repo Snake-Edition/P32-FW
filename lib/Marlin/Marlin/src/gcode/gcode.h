@@ -285,6 +285,7 @@
 #include <option/has_precise_homing.h>
 #include <option/has_phase_stepping.h>
 #include <option/has_gcode_compatibility.h>
+#include <option/has_cancel_object.h>
 
 #if ENABLED(I2C_POSITION_ENCODERS)
   #include "../feature/I2CPositionEncoder.h"
@@ -844,7 +845,7 @@ private:
     static void M428();
   #endif
 
-  #if ENABLED(CANCEL_OBJECTS)
+  #if HAS_CANCEL_OBJECT()
     static void M486();
   #endif
 

@@ -346,6 +346,15 @@ set_feature_for_printers(HAS_SWITCHED_FAN_TEST "MK4" "MK3.5" "COREONE")
 set_feature_for_printers(HAS_HOTEND_TYPE_SUPPORT "MK4" "MK3.5" "iX" "COREONE" "XL")
 set_feature_for_printers(HAS_EMERGENCY_STOP "COREONE")
 set_feature_for_printers(HAS_CEILING_CLEARANCE "COREONE")
+set_feature_for_printers(
+  HAS_CANCEL_OBJECT
+  "MK4"
+  "MK3.5"
+  "iX"
+  "COREONE"
+  "XL"
+  "MINI"
+  )
 
 # Printers that support any form of backwards gcode compatibility modes
 set_feature_for_printers(HAS_GCODE_COMPATIBILITY "MK3.5" "MK4" "COREONE")

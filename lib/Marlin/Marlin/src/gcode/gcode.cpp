@@ -41,7 +41,10 @@ GcodeSuite gcode;
   #include "../feature/host_actions.h"
 #endif
 
-#include <feature/cancel_object/cancel_object.hpp>
+#include <option/has_cancel_object.h>
+#if HAS_CANCEL_OBJECT()
+  #include <feature/cancel_object/cancel_object.hpp>
+#endif
 
 #if ENABLED(CRASH_RECOVERY)
   #include "../feature/prusa/crash_recovery.hpp"
@@ -798,7 +801,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 355: M355(); break;                                  // M355: Set case light brightness
       #endif
 
-      #if ENABLED(CANCEL_OBJECTS)
+      #if HAS_CANCEL_OBJECT()
         case 486: M486(); break;                                  // M486: Identify and cancel objects
       #endif
 

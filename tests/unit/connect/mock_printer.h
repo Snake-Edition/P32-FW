@@ -136,6 +136,11 @@ public:
     }
 
     virtual void set_slot_info(size_t, const SlotInfo &) override {}
+
+#if HAS_CANCEL_OBJECT()
+    virtual void cancel_object(uint8_t) override {}
+    virtual void uncancel_object(uint8_t) override {}
+#endif
 };
 
 } // namespace connect_client

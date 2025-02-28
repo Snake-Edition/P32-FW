@@ -12,7 +12,6 @@ target_sources(
           M300.cpp
           M330.cpp
           M340.cpp
-          M486.cpp
           M591.cpp
           M862_1.cpp
           M862_4.cpp
@@ -28,6 +27,10 @@ target_sources(
           M999.cpp
           skippable_gcode.cpp
   )
+
+if(HAS_CANCEL_OBJECT)
+  target_sources(firmware PRIVATE M486.cpp)
+endif()
 
 if(NOT BOARD STREQUAL "XL_DEV_KIT_XLB")
   target_sources(firmware PRIVATE G26.cpp M862_2_3.cpp M862_5.cpp M862_6.cpp)

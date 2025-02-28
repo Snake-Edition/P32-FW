@@ -42,10 +42,10 @@ void ScreenMenuTune::windowEvent(window_t *sender, GUI_event_t event, void *para
         }
 #endif
 
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
         // Enable cancel object menu
         Item<MI_CO_CANCEL_OBJECT>().set_enabled(marlin_vars().cancel_object_count > 0);
-#endif /* ENABLED(CANCEL_OBJECTS) */
+#endif
         break;
     }
 

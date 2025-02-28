@@ -9,8 +9,6 @@
 #include "MItem_tools.hpp"
 #include <marlin_vars.hpp>
 
-#if ENABLED(CANCEL_OBJECTS)
-
 /**
  * @brief Prototype object that can hide functionality in .cpp.
  */
@@ -94,9 +92,3 @@ public:
 protected:
     void windowEvent(window_t *sender, GUI_event_t event, void *param) override;
 };
-
-#else /* ENABLED(CANCEL_OBJECTS) */
-
-class ScreenMenuCancelObject {};
-
-#endif /* ENABLED(CANCEL_OBJECTS) */

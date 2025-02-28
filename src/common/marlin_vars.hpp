@@ -16,6 +16,8 @@
 #include <marlin_events.h>
 #include <freertos/mutex.hpp>
 
+#include <option/has_cancel_object.h>
+
 #if BOARD_IS_DWARF()
     #error "You're trying to add marlin_vars to Dwarf. Don't!"
 #endif /*BOARD_IS_DWARF()*/
@@ -338,7 +340,7 @@ public:
 
     MarlinVariable<marlin_server::Cmd> gcode_command; // Currently executed command, encoded as marlin_server::Cmd
 
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
     void set_cancel_object_mask(uint64_t mask) {
         if (osThreadGetId() != marlin_server::server_task) {
             bsod("set_cancel_object_mask");
@@ -356,7 +358,7 @@ public:
     static constexpr size_t CANCEL_OBJECTS_NAME_COUNT = 16; ///< Maximal number of cancel objects
     /// Names of cancelable objects
     MarlinVariableString<CANCEL_OBJECT_NAME_LEN> cancel_object_names[CANCEL_OBJECTS_NAME_COUNT];
-#endif /*ENABLED(CANCEL_OBJECTS)*/
+#endif
 
     // 2B base types
     MarlinVariable<uint16_t> print_speed; // printing speed factor [%]
@@ -500,7 +502,7 @@ private:
     std::array<Hotend, HOTENDS> hotends; // array of hotends (use hotend()/active_hotend() getter)
     std::array<std::optional<JobInfo>, 2> job_history;
     fsm::States fsm_states;
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
     uint64_t cancel_object_mask;
 #endif
     // disable copy constructor

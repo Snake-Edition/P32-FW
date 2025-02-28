@@ -31,7 +31,10 @@
     #error "powerpanic currently supports only UBL"
 #endif
 
-#include <feature/cancel_object/cancel_object.hpp>
+#include <option/has_cancel_object.h>
+#if HAS_CANCEL_OBJECT()
+    #include <feature/cancel_object/cancel_object.hpp>
+#endif
 
 #if ENABLED(PRUSA_TOOL_MAPPING)
     #include "module/prusa/tool_mapper.hpp"
@@ -239,7 +242,7 @@ struct flash_data {
         flash_print_t print;
         flash_toolchanger_t toolchanger;
 
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
         buddy::CancelObject::State cancel_object;
 #endif
 #if ENABLED(PRUSA_TOOL_MAPPING)
@@ -587,7 +590,7 @@ void resume_loop() {
         planner.max_printed_z = state_buf.planner.max_printed_z;
 
         // canceled objects
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
         buddy::cancel_object().set_state(state_buf.cancel_object);
 #endif
 #if ENABLED(PRUSA_TOOL_MAPPING)
@@ -944,7 +947,7 @@ void panic_loop() {
         mode_specific(state_buf.progress.standard_mode, oProgressData.standard_mode);
         mode_specific(state_buf.progress.stealth_mode, oProgressData.stealth_mode);
 
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
         state_buf.cancel_object = buddy::cancel_object().state();
 #endif
 #if ENABLED(PRUSA_TOOL_MAPPING)

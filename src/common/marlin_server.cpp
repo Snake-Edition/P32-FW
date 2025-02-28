@@ -65,7 +65,10 @@
     #include "../Marlin/src/feature/prusa/MMU2/mmu2_mk4.h"
 #endif
 
-#include <feature/cancel_object/cancel_object.hpp>
+#include <option/has_cancel_object.h>
+#if HAS_CANCEL_OBJECT()
+    #include <feature/cancel_object/cancel_object.hpp>
+#endif
 
 #include "hwio.h"
 #include "wdt.hpp"
@@ -2980,10 +2983,10 @@ static void _server_update_vars() {
         extruder.heatbreak_fan_rpm = Fans::heat_break(e).getActualRPM();
     }
 
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
     marlin_vars().set_cancel_object_mask(buddy::cancel_object().cancelled_objects_mask()); // Canceled objects
     marlin_vars().cancel_object_count = buddy::cancel_object().object_count(); // Total number of objects
-#endif /*ENABLED(CANCEL_OBJECTS)*/
+#endif
 
     marlin_vars().temp_bed = thermalManager.degBed();
     marlin_vars().target_bed = thermalManager.degTargetBed();
@@ -3097,7 +3100,7 @@ bool _process_server_valid_request(const Request &request, int client_id) {
     case Request::Type::Babystep:
         do_babystep_Z(request.babystep);
         return true;
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
     case Request::Type::CancelObjectID:
         buddy::cancel_object().set_object_cancelled(request.cancel_object_id, true);
         return true;

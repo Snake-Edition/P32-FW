@@ -563,7 +563,7 @@ namespace {
                     JSON_OBJ_END;
                 JSON_OBJ_END JSON_COMMA;
             } else if (event.type == EventType::CancelableChanged) {
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
                 JSON_FIELD_OBJ("data");
                     JSON_FIELD_ARR("objects");
                         state.iter = 0;

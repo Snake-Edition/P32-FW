@@ -1022,7 +1022,7 @@ void Planner::command(const Command &command, const SetValue &params) {
     }
 }
 
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
 void Planner::command(const Command &command, const CancelObject &params) {
     printer.cancel_object(params.id);
     // Reset the hash to the current (modified) cancel mask.

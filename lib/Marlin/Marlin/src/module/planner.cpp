@@ -91,7 +91,10 @@
   #include "../feature/backlash.h"
 #endif
 
-#include <feature/cancel_object/cancel_object.hpp>
+#include <option/has_cancel_object.h>
+#if HAS_CANCEL_OBJECT()
+  #include <feature/cancel_object/cancel_object.hpp>
+#endif
 
 #if ENABLED(CRASH_RECOVERY)
   #include "../feature/prusa/crash_recovery.hpp"

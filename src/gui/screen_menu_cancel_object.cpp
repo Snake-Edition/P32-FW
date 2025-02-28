@@ -8,8 +8,6 @@
 #include <marlin_vars.hpp>
 #include <marlin_client.hpp>
 
-#if ENABLED(CANCEL_OBJECTS)
-
 ScreenMenuCancelObject::ScreenMenuCancelObject()
     : detail::ScreenMenuCancelObject(_(label)) {}
 
@@ -139,4 +137,3 @@ void ScreenMenuCancelObject::windowEvent(window_t *, GUI_event_t event, void *) 
         Item<MI_CO_OBJECT<15>>().UpdateState();
     }
 }
-#endif /* ENABLED(CANCEL_OBJECTS) */
