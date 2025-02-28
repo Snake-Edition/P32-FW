@@ -17,6 +17,7 @@
 #include "lcd/extensible_ui/ui_api.h" // for ExtUI::onStatusChanged to send notification about spool join
 #include <config_store/store_instance.hpp>
 #include "mmu2_toolchanger_common.hpp"
+#include <feature/print_status_message/print_status_message_mgr.hpp>
 
 SpoolJoin spool_join;
 
@@ -263,9 +264,7 @@ bool SpoolJoin::do_join(uint8_t current_tool) {
 #else
     tool_change(new_tool, tool_return_t::purge_and_to_destination /* For MMU unused */);
 #endif
-
-    ExtUI::onStatusChanged("Spool joined");
-
+    print_status_message().show_temporary<PrintStatusMessage::spool_joined>({});
     return true;
 }
 

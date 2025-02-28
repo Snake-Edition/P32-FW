@@ -11,6 +11,7 @@ static constexpr EnumArray<Message::Type, const char *, Message::Type::_cnt> mes
         { Message::Type::recalibrating_home, N_("Recalibrating home. This may take some time.") },
         { Message::Type::calibrating_axis, N_("Calibrating axis") },
         { Message::Type::probing_bed, N_("Probing bed") },
+        { Message::Type::spool_joined, N_("Spool joined") },
         { Message::Type::dwelling, N_("Dwelling") },
         { Message::Type::absorbing_heat, N_("Absorbing heat") },
         { Message::Type::waiting_for_hotend_temp, N_("Waiting for hotend") },
