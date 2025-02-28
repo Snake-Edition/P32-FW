@@ -152,9 +152,6 @@
    *                    shows the nozzle position in the Mesh with (#). You can move the nozzle around and use this
    *                    feature to select the center of the area (or cell) to invalidate.
    *
-   *   J #   Grid       Perform a Grid Based Leveling of the current Mesh using a grid with n points on a side.
-   *                    Not specifying a grid size will invoke the 3-Point leveling function.
-   *
    *   L     Load       Load Mesh from the previously activated location in the EEPROM.
    *
    *   L #   Load       Load Mesh from the specified location in the EEPROM. Set this location as activated
@@ -366,7 +363,7 @@
     }
 
     // Check for commands that require the printer to be homed
-    const bool may_move = g29_phase_value == 1 || g29_phase_value == 2 || g29_phase_value == 4 || parser.seen('J');
+    const bool may_move = g29_phase_value == 1 || g29_phase_value == 2 || g29_phase_value == 4;
     if (may_move) {
       if (axes_need_homing()) {
         gcode.process_subcommands_now_P(PSTR("G28 O"));
@@ -459,26 +456,6 @@
           break;
       }
     }
-
-    #if HAS_BED_PROBE
-
-      if (parser.seen('J')) {
-        if (g29_grid_size) {  // if not 0 it is a normal n x n grid being probed
-          save_ubl_active_state_and_disable();
-          tilt_mesh_based_on_probed_grid(false /* false says to do normal grid probing */ );
-          restore_ubl_active_state_and_leave();
-        }
-        else { // grid_size == 0 : A 3-Point leveling has been requested
-          save_ubl_active_state_and_disable();
-          tilt_mesh_based_on_probed_grid(true /* true says to do 3-Point leveling */ );
-          restore_ubl_active_state_and_leave();
-        }
-        do_blocking_move_to_xy(0.5f * (MESH_MAX_X - (MESH_MIN_X)), 0.5f * (MESH_MAX_Y - (MESH_MIN_Y)));
-        report_current_position();
-        probe_deployed = true;
-      }
-
-    #endif // HAS_BED_PROBE
 
     if (parser.seen('P')) {
       if (WITHIN(g29_phase_value, 0, 1) && storage_slot == -1) {
@@ -899,19 +876,6 @@
         }
     }
 
-    if (parser.seen('J')) {
-      #if HAS_BED_PROBE
-        g29_grid_size = parser.has_value() ? parser.value_int() : 0;
-        if (g29_grid_size && !WITHIN(g29_grid_size, 2, 9)) {
-          SERIAL_ECHOLNPGM("?Invalid grid size (J) specified (2-9).\n");
-          err_flag = true;
-        }
-      #else
-        SERIAL_ECHOLNPGM("G29 J action requires a probe.\n");
-        err_flag = true;
-      #endif
-    }
-
     xy_seen.x = parser.seenval('X');
     float sx = xy_seen.x ? parser.value_float() : current_position.x;
     xy_seen.y = parser.seenval('Y');
@@ -1295,282 +1259,6 @@
       }
     }
   }
-
-  #if HAS_BED_PROBE
-
-    //#define VALIDATE_MESH_TILT
-
-    #include "../../../libs/vector_3.h"
-
-    void unified_bed_leveling::tilt_mesh_based_on_probed_grid(const bool do_3_pt_leveling) {
-      pressure_advance::PressureAdvanceDisabler pa_disabler; // Reduce move delays as we don't extrude
-
-      const float x_min = probe_min_x(), x_max = probe_max_x(),
-                  y_min = probe_min_y(), y_max = probe_max_y(),
-                  dx = (x_max - x_min) / (g29_grid_size - 1),
-                  dy = (y_max - y_min) / (g29_grid_size - 1);
-
-      #if ENABLED(NOZZLE_LOAD_CELL)
-        // Enable loadcell high precision across the entire sequence to prime the noise filters
-        auto loadcellPrecisionEnabler = Loadcell::HighPrecisionEnabler(loadcell);
-      #endif
-
-      const vector_3 points[3] = {
-        #if ENABLED(HAS_FIXED_3POINT)
-          { PROBE_PT_1_X, PROBE_PT_1_Y, 0 },
-          { PROBE_PT_2_X, PROBE_PT_2_Y, 0 },
-          { PROBE_PT_3_X, PROBE_PT_3_Y, 0 }
-        #else
-          { x_min, y_min, 0 },
-          { x_max, y_min, 0 },
-          { (x_max - x_min) / 2, y_max, 0 }
-        #endif
-      };
-
-      float measured_z;
-      bool abort_flag = false;
-
-      #ifdef VALIDATE_MESH_TILT
-        float z1, z2, z3;  // Needed for algorithm validation below
-      #endif
-
-      struct linear_fit_data lsf_results;
-      incremental_LSF_reset(&lsf_results);
-
-      if (do_3_pt_leveling) {
-        SERIAL_ECHOLNPGM("Tilting mesh (1/3)");
-        #if ENABLED(EXTENSIBLE_UI)
-          ui.status_printf_P(0, PSTR(S_FMT " 1/3"), GET_TEXT(MSG_LCD_TILTING_MESH));
-        #endif
-
-        measured_z = probe_at_point(points[0], PROBE_PT_RAISE, g29_verbose_level);
-        if (isnan(measured_z))
-          abort_flag = true;
-        else {
-          measured_z -= get_z_correction(points[0]);
-          #ifdef VALIDATE_MESH_TILT
-            z1 = measured_z;
-          #endif
-          if (g29_verbose_level > 3) {
-            serial_spaces(16);
-            SERIAL_ECHOLNPAIR("Corrected_Z=", measured_z);
-          }
-          incremental_LSF(&lsf_results, points[0], measured_z);
-        }
-
-        if (!abort_flag) {
-          SERIAL_ECHOLNPGM("Tilting mesh (2/3)");
-          #if ENABLED(EXTENSIBLE_UI)
-            ui.status_printf_P(0, PSTR(S_FMT " 2/3"), GET_TEXT(MSG_LCD_TILTING_MESH));
-          #endif
-
-          measured_z = probe_at_point(points[1], PROBE_PT_RAISE, g29_verbose_level);
-          #ifdef VALIDATE_MESH_TILT
-            z2 = measured_z;
-          #endif
-          if (isnan(measured_z))
-            abort_flag = true;
-          else {
-            measured_z -= get_z_correction(points[1]);
-            if (g29_verbose_level > 3) {
-              serial_spaces(16);
-              SERIAL_ECHOLNPAIR("Corrected_Z=", measured_z);
-            }
-            incremental_LSF(&lsf_results, points[1], measured_z);
-          }
-        }
-
-        if (!abort_flag) {
-          SERIAL_ECHOLNPGM("Tilting mesh (3/3)");
-          #if ENABLED(EXTENSIBLE_UI)
-            ui.status_printf_P(0, PSTR(S_FMT " 3/3"), GET_TEXT(MSG_LCD_TILTING_MESH));
-          #endif
-
-          measured_z = probe_at_point(points[2], PROBE_PT_STOW, g29_verbose_level);
-          #ifdef VALIDATE_MESH_TILT
-            z3 = measured_z;
-          #endif
-          if (isnan(measured_z))
-            abort_flag = true;
-          else {
-            measured_z -= get_z_correction(points[2]);
-            if (g29_verbose_level > 3) {
-              serial_spaces(16);
-              SERIAL_ECHOLNPAIR("Corrected_Z=", measured_z);
-            }
-            incremental_LSF(&lsf_results, points[2], measured_z);
-          }
-        }
-
-        STOW_PROBE();
-        #ifdef Z_AFTER_PROBING
-          move_z_after_probing();
-        #endif
-
-        if (abort_flag) {
-          SERIAL_ECHOLNPGM("?Error probing point. Aborting operation.");
-          return;
-        }
-      }
-      else { // !do_3_pt_leveling
-
-        bool zig_zag = false;
-
-        uint16_t total_points = g29_grid_size * g29_grid_size, point_num = 1;
-
-        xy_pos_t rpos;
-        for (uint8_t ix = 0; ix < g29_grid_size; ix++) {
-          rpos.x = x_min + ix * dx;
-          for (int8_t iy = 0; iy < g29_grid_size; iy++) {
-            rpos.y = y_min + dy * (zig_zag ? g29_grid_size - 1 - iy : iy);
-
-            if (!abort_flag) {
-              SERIAL_ECHOLNPAIR("Tilting mesh point ", point_num, "/", total_points, "\n");
-              #if ENABLED(EXTENSIBLE_UI)
-                ui.status_printf_P(0, PSTR(S_FMT " %i/%i"), GET_TEXT(MSG_LCD_TILTING_MESH), point_num, total_points);
-              #endif
-
-              measured_z = probe_at_point(rpos, parser.seen('E') ? PROBE_PT_STOW : PROBE_PT_RAISE, g29_verbose_level); // TODO: Needs error handling
-
-              abort_flag = isnan(measured_z);
-
-              if (DEBUGGING(LEVELING)) {
-                const xy_pos_t lpos = rpos.asLogical();
-                DEBUG_CHAR('(');
-                DEBUG_ECHO_F(rpos.x, 7);
-                DEBUG_CHAR(',');
-                DEBUG_ECHO_F(rpos.y, 7);
-                DEBUG_ECHOPAIR_F(")   logical: (", lpos.x, 7);
-                DEBUG_CHAR(',');
-                DEBUG_ECHO_F(lpos.y, 7);
-                DEBUG_ECHOPAIR_F(")   measured: ", measured_z, 7);
-                DEBUG_ECHOPAIR_F("   correction: ", get_z_correction(rpos), 7);
-                UNUSED(lpos); // make sure lpos won't get reported as unused if DEBUG macros are NOP
-              }
-
-              measured_z -= get_z_correction(rpos) /* + probe_offset.z */ ;
-
-              if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR_F("   final >>>---> ", measured_z, 7);
-
-              if (g29_verbose_level > 3) {
-                serial_spaces(16);
-                SERIAL_ECHOLNPAIR("Corrected_Z=", measured_z);
-              }
-              incremental_LSF(&lsf_results, rpos, measured_z);
-            }
-
-            point_num++;
-          }
-
-          zig_zag ^= true;
-        }
-      }
-      STOW_PROBE();
-      #ifdef Z_AFTER_PROBING
-        move_z_after_probing();
-      #endif
-
-      if (abort_flag || finish_incremental_LSF(&lsf_results)) {
-        SERIAL_ECHOPGM("Could not complete LSF!");
-        return;
-      }
-
-      vector_3 normal = vector_3(lsf_results.A, lsf_results.B, 1).get_normal();
-
-      if (g29_verbose_level > 2) {
-        SERIAL_ECHOPAIR_F("bed plane normal = [", normal.x, 7);
-        SERIAL_CHAR(',');
-        SERIAL_ECHO_F(normal.y, 7);
-        SERIAL_CHAR(',');
-        SERIAL_ECHO_F(normal.z, 7);
-        SERIAL_ECHOLNPGM("]");
-      }
-
-      matrix_3x3 rotation = matrix_3x3::create_look_at(vector_3(lsf_results.A, lsf_results.B, 1));
-
-      for (uint8_t i = 0; i < GRID_MAX_POINTS_X; i++) {
-        for (uint8_t j = 0; j < GRID_MAX_POINTS_Y; j++) {
-          float mx = mesh_index_to_xpos(i),
-                my = mesh_index_to_ypos(j),
-                mz = z_values[i][j];
-
-          if (DEBUGGING(LEVELING)) {
-            DEBUG_ECHOPAIR_F("before rotation = [", mx, 7);
-            DEBUG_CHAR(',');
-            DEBUG_ECHO_F(my, 7);
-            DEBUG_CHAR(',');
-            DEBUG_ECHO_F(mz, 7);
-            DEBUG_ECHOPGM("]   ---> ");
-            DEBUG_DELAY(20);
-          }
-
-          apply_rotation_xyz(rotation, mx, my, mz);
-
-          if (DEBUGGING(LEVELING)) {
-            DEBUG_ECHOPAIR_F("after rotation = [", mx, 7);
-            DEBUG_CHAR(',');
-            DEBUG_ECHO_F(my, 7);
-            DEBUG_CHAR(',');
-            DEBUG_ECHO_F(mz, 7);
-            DEBUG_ECHOLNPGM("]");
-            DEBUG_DELAY(20);
-          }
-
-          z_values[i][j] = mz - lsf_results.D;
-          #if ENABLED(EXTENSIBLE_UI)
-            ExtUI::onMeshUpdate(i, j, z_values[i][j]);
-          #endif
-        }
-      }
-
-      if (DEBUGGING(LEVELING)) {
-        rotation.debug(PSTR("rotation matrix:\n"));
-        DEBUG_ECHOPAIR_F("LSF Results A=", lsf_results.A, 7);
-        DEBUG_ECHOPAIR_F("  B=", lsf_results.B, 7);
-        DEBUG_ECHOLNPAIR_F("  D=", lsf_results.D, 7);
-        DEBUG_DELAY(55);
-
-        DEBUG_ECHOPAIR_F("bed plane normal = [", normal.x, 7);
-        DEBUG_CHAR(',');
-        DEBUG_ECHO_F(normal.y, 7);
-        DEBUG_CHAR(',');
-        DEBUG_ECHO_F(normal.z, 7);
-        DEBUG_ECHOLNPGM("]");
-        DEBUG_EOL();
-
-        /**
-         * Use the code below to check the validity of the mesh tilting algorithm.
-         * 3-Point Mesh Tilt uses the same algorithm as grid-based tilting, but only
-         * three points are used in the calculation. This guarantees that each probed point
-         * has an exact match when get_z_correction() for that location is calculated.
-         * The Z error between the probed point locations and the get_z_correction()
-         * numbers for those locations should be 0.
-         */
-        #ifdef VALIDATE_MESH_TILT
-          auto d_from = []() { DEBUG_ECHOPGM("D from "); };
-          auto normed = [&](const xy_pos_t &pos, const float &zadd) {
-            return normal.x * pos.x + normal.y * pos.y + zadd;
-          };
-          auto debug_pt = [](PGM_P const pre, const xy_pos_t &pos, const float &zadd) {
-            d_from(); serialprintPGM(pre);
-            DEBUG_ECHO_F(normed(pos, zadd), 6);
-            DEBUG_ECHOLNPAIR_F("   Z error: ", zadd - get_z_correction(pos), 6);
-          };
-          debug_pt(PSTR("1st point: "), probe_pt[0], normal.z * z1);
-          debug_pt(PSTR("2nd point: "), probe_pt[1], normal.z * z2);
-          debug_pt(PSTR("3rd point: "), probe_pt[2], normal.z * z3);
-          d_from(); DEBUG_ECHOPGM("safe home with Z=");
-          DEBUG_ECHOLNPAIR_F("0 : ", normed(safe_homing_xy, 0), 6);
-          d_from(); DEBUG_ECHOPGM("safe home with Z=");
-          DEBUG_ECHOLNPAIR_F("mesh value ", normed(safe_homing_xy, get_z_correction(safe_homing_xy)), 6);
-          DEBUG_ECHOPAIR("   Z error: (", Z_SAFE_HOMING_X_POINT, ",", Z_SAFE_HOMING_Y_POINT);
-          DEBUG_ECHOLNPAIR_F(") = ", get_z_correction(safe_homing_xy), 6);
-        #endif
-      } // DEBUGGING(LEVELING)
-
-    }
-
-  #endif // HAS_BED_PROBE
 
   #if ENABLED(UBL_G29_P31)
     void unified_bed_leveling::smart_fill_wlsf(const float &weight_factor) {
