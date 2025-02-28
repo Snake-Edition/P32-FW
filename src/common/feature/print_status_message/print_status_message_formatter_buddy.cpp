@@ -1,6 +1,7 @@
 #include "print_status_message_formatter_buddy.hpp"
 
 #include <buddy/unreachable.hpp>
+#include <option/has_translations.h>
 
 using Message = PrintStatusMessage;
 
@@ -30,7 +31,11 @@ static constexpr EnumArray<Message::Type, const char *, Message::Type::_cnt> mes
 
 void PrintStatusMessageFormatterBuddy::format(StringBuilder &target, const Message &msg) {
     if (auto txt = messages.get_or(msg.type, nullptr)) {
+#if HAS_TRANSLATIONS()
         target.append_string_view(_(txt));
+#else
+        target.append_string(txt);
+#endif
     }
 
     switch (msg.type) {
