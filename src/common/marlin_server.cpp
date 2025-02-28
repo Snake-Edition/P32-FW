@@ -2775,7 +2775,7 @@ void park_head() {
 
     xyz_pos_t park = XYZ_NOZZLE_PARK_POINT_ON_PRINT_END;
     park.z = current_position.z;
-    plan_park_move_to_xyz(park, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE);
+    plan_park_move_to_xyz(park, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE, /*segmented=*/true);
 }
 
 void unpark_head_XY(void) {
