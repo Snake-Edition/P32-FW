@@ -23,6 +23,9 @@ public:
         /// Count of objects that can be skipped
         ObjectID object_count = 0;
 
+        /// Variable whose value changes with each change to object count/cancelled object bitset
+        uint32_t objects_revision = 0;
+
         // ID of the currently printed object
         ObjectID current_object = 0;
 
@@ -49,6 +52,9 @@ public:
     void set_current_object(ObjectID obj);
 
     ObjectID object_count() const;
+
+    /// \returns value that changes each time object count/cancel mask is changed
+    uint32_t objects_revision() const;
 
     /// Prints cancel object information into the serial line
     /// !!! Only to be called from the marlin thread

@@ -39,7 +39,12 @@ void CancelObject::set_object_cancelled(ObjectID obj, bool set) {
     }
 
     std::lock_guard lg(mutex_);
-    
+
+    if (state_.cancelled_objects.test(obj) == set) {
+        return;
+    }
+
+    state_.objects_revision++;
     state_.cancelled_objects.set(obj, set);
 
     if (obj == state_.current_object) {
@@ -61,10 +66,20 @@ CancelObject::ObjectID CancelObject::current_object() const {
 
 void CancelObject::set_current_object(ObjectID obj) {
     std::lock_guard lg(mutex_);
-    
-    state_.object_count = std::max<ObjectID>(state_.object_count, obj + 1);
+
+    if (state_.object_count <= obj) {
+        state_.object_count = obj + 1;
+        state_.objects_revision++;
+    }
+
     state_.current_object = obj;
     state_.current_object_cancelled = is_object_cancelled_nolock(obj);
+}
+
+uint32_t CancelObject::objects_revision() const {
+    std::lock_guard lg(mutex_);
+
+    return state_.objects_revision;
 }
 
 CancelObject::ObjectID CancelObject::object_count() const {
