@@ -48,6 +48,7 @@
 #include <option/resources.h>
 #include <option/bootloader_update.h>
 #include <option/has_side_leds.h>
+#include <option/has_advanced_power.h>
 #include <option/has_phase_stepping.h>
 #include <option/has_burst_stepping.h>
 #include <option/has_xbuddy_extension.h>
@@ -111,6 +112,10 @@
 
 #if HAS_XBUDDY_EXTENSION()
     #include <buddy/mmu_port.hpp>
+#endif
+
+#if HAS_ADVANCED_POWER()
+    #include <advanced_power.hpp>
 #endif
 
 using namespace crash_dump;
@@ -399,6 +404,10 @@ extern "C" void main_cpp(void) {
     if (!running_in_tester_mode()) {
         start_flash_esp_task();
     }
+
+#if HAS_ADVANCED_POWER()
+    advancedpower.ResetOvercurrentFault();
+#endif
 
     MX_USB_HOST_Init();
 
