@@ -14,7 +14,7 @@ public:
     using ObjectID = int16_t;
 
     /// How many objects we are able to track
-    static constexpr ObjectID max_object_count = 64;
+    static constexpr ObjectID max_object_count = 1024;
 
     struct State {
         /// Set of objects that are marked as cancelled
