@@ -184,6 +184,9 @@ Temperature thermalManager;
     uint8_t Temperature::fan_speed_scaler[FAN_COUNT] = ARRAY_N(FAN_COUNT, 128, 128, 128, 128, 128, 128);
   #endif
 
+  uint16_t Temperature::get_fan_speed(const uint8_t target) {
+    return target < FAN_COUNT ? fan_speed[target] : 0;
+  }
   /**
    * Set the print fan speed for a target FAN
    * !!! NOT EXTRUDER !!! THERMAL MANAGER DOES NOT WORK WITH NON-ACTIVE EXTRUDER FANS

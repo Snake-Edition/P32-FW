@@ -328,6 +328,8 @@ private:
         void bindToSafetyTimer();
         void unbindFromSafetyTimer();
         static bool active; // we currently support only 1 instance
+        uint16_t original_print_fan_speed;
+
     public:
         FSM_HolderLoadUnload(Pause &p);
         ~FSM_HolderLoadUnload();
