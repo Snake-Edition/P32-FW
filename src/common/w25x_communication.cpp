@@ -77,6 +77,25 @@ int w25x_fetch_error() {
     return error;
 }
 
+#if 0
+struct Measure {
+    const char *fmt;
+    uint32_t len;
+    uint32_t cyccnt;
+    Measure(const char *fmt_, uint32_t len_)
+        : fmt { fmt_ }
+        , len { len_ }
+        , cyccnt { DWT->CYCCNT } {}
+    ~Measure() {
+        log_info(W25X, fmt, len, DWT->CYCCNT - cyccnt);
+    }
+};
+#else
+struct Measure {
+    Measure(...) {}
+};
+#endif
+
 void w25x_receive(uint8_t *buffer, uint32_t len) {
     if (!no_error()) {
         return;
@@ -84,9 +103,11 @@ void w25x_receive(uint8_t *buffer, uint32_t len) {
 
     if (len > 1 && dma_is_available()) {
         if (memory_supports_dma_transfer(buffer)) {
+            Measure _ { "w25x_recv dma-fast %u %u", len };
             set_error(receive_dma(buffer, len));
             return;
         } else {
+            Measure _ { "w25x_recv dma-slow %u %u", len };
             while (no_error() && len) {
                 uint32_t block_len = len > sizeof(block_buffer) ? sizeof(block_buffer) : len;
                 set_error(receive_dma(block_buffer, block_len));
@@ -96,6 +117,7 @@ void w25x_receive(uint8_t *buffer, uint32_t len) {
             }
         }
     } else {
+        Measure _ { "w25x_recv dma-none %u %u", len };
         HAL_StatusTypeDef status = HAL_SPI_Receive(&SPI_HANDLE_FOR(flash), buffer, len, TIMEOUT_MS);
         set_error(status);
     }
@@ -110,8 +132,10 @@ uint8_t w25x_receive_byte() {
 void w25x_send(const uint8_t *buffer, uint32_t len) {
     if (len > 1 && dma_is_available()) {
         if (memory_supports_dma_transfer(buffer)) {
+            Measure _ { "w25x_send dma-fast %u %u", len };
             set_error(send_dma(buffer, len));
         } else {
+            Measure _ { "w25x_send dma-slow %u %u", len };
             while (no_error() && len) {
                 uint32_t block_len = len > sizeof(block_buffer) ? sizeof(block_buffer) : len;
                 memcpy(block_buffer, buffer, block_len);
@@ -121,6 +145,7 @@ void w25x_send(const uint8_t *buffer, uint32_t len) {
             }
         }
     } else {
+        Measure _ { "w25x_send dma-none %u %u", len };
         HAL_StatusTypeDef status = HAL_SPI_Transmit(&SPI_HANDLE_FOR(flash), (uint8_t *)buffer, len, TIMEOUT_MS);
         set_error(status);
     }
