@@ -19,6 +19,7 @@
 #include <option/has_loadcell.h>
 #include <option/has_mmu2.h>
 #include <option/has_toolchanger.h>
+#include <buddy/unreachable.hpp>
 #if HAS_MMU2()
     #include <feature/prusa/MMU2/mmu2_mk4.h>
     #include <window_msgbox.hpp>
@@ -332,21 +333,40 @@ void screen_printing_data_t::windowEvent(window_t *sender, GUI_event_t event, vo
             }
         }
 
-        if (p_state == printing_state_t::PRINTED || p_state == printing_state_t::STOPPED) {
-#if HAS_LARGE_DISPLAY()
-            if (p_state == printing_state_t::PRINTED) {
-                print_progress.Pause();
-            } else {
-                print_progress.StoppedMode();
-            }
-#endif
-            hide_time_information();
-        } else {
-#if HAS_LARGE_DISPLAY()
-            print_progress.PrintingMode();
-#endif
-            show_time_information();
+        const bool stoppedOrPrinted = (p_state == printing_state_t::STOPPED) || (p_state == printing_state_t::PRINTED);
+        set_remaining_time_visible(!message_popup.IsVisible() && !stoppedOrPrinted);
+#if HAS_MINI_DISPLAY()
+        // Hide time information when popup is visible [BFW-6677]
+        set_print_time_visible(!message_popup.IsVisible() && !stoppedOrPrinted);
+#elif HAS_LARGE_DISPLAY()
+        rotating_circles.set_visible(!stoppedOrPrinted);
+
+        switch (p_state) {
+        case printing_state_t::PRINTED: {
+            print_progress.Pause();
+            break;
         }
+        case printing_state_t::STOPPED: {
+            print_progress.StoppedMode();
+            break;
+        }
+        case printing_state_t::PRINTING:
+        case printing_state_t::PAUSED:
+        case printing_state_t::PAUSING:
+        case printing_state_t::RESUMING:
+        case printing_state_t::REHEATING:
+        case printing_state_t::ABORTING:
+        case printing_state_t::SKIPPABLE_OPERATION:
+        case printing_state_t::INITIAL: {
+            print_progress.PrintingMode();
+            break;
+        }
+        case printing_state_t::COUNT: {
+            BUDDY_UNREACHABLE();
+            break;
+        }
+        }
+#endif
         break;
     }
 
@@ -430,7 +450,7 @@ void screen_printing_data_t::start_showing_end_result() {
     arrow_left.Hide();
     w_progress_txt.Hide();
 
-    hide_time_information(); // OK because currently we never show remaining time at the end
+    set_remaining_time_visible(false); // OK because currently we never show remaining time at the end
 
     // show end result
 
@@ -466,24 +486,19 @@ void screen_printing_data_t::hide_end_result_fields() {
 }
 #endif
 
-void screen_printing_data_t::show_time_information() {
-    w_etime_label.Show();
-    w_etime_value.Show();
-
-#if HAS_LARGE_DISPLAY()
-    rotating_circles.Show();
-#endif
+void screen_printing_data_t::set_remaining_time_visible(bool visible) {
+    w_etime_label.set_visible(visible);
+    w_etime_value.set_visible(visible);
     updateTimes(); // make sure the data is valid
 }
 
-void screen_printing_data_t::hide_time_information() {
-    w_etime_label.Hide();
-    w_etime_value.Hide();
-
-#if HAS_LARGE_DISPLAY()
-    rotating_circles.Hide();
-#endif
+#if HAS_MINI_DISPLAY()
+void screen_printing_data_t::set_print_time_visible(bool visible) {
+    w_time_label.set_visible(visible);
+    w_time_value.set_visible(visible);
+    updateTimes(); // make sure the data is valid
 }
+#endif
 
 #if HAS_LARGE_DISPLAY()
 bool screen_printing_data_t::update_validities() {
@@ -543,11 +558,6 @@ void screen_printing_data_t::updateTimes() {
 #elif HAS_LARGE_DISPLAY()
 
     if (!w_etime_value.HasVisibleFlag() || !w_etime_label.HasVisibleFlag()) {
-        return;
-    }
-
-    // Message popup is rendered over the times -> do not invalidate, do not compute
-    if (message_popup.IsVisible()) {
         return;
     }
 

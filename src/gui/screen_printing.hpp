@@ -74,15 +74,18 @@ class screen_printing_data_t : public ScreenPrintingModel {
     window_text_t w_etime_value;
 
     /**
-     * @brief Shows fields related to time (eg remaining time label + value)
+     * @brief Sets visibility to fields related to remaining time (eg remaining time label + value)
      *
      */
-    void show_time_information();
+    void set_remaining_time_visible(bool visible);
+
+#if HAS_MINI_DISPLAY()
     /**
-     * @brief Hides fields related to time (eg remaining time label + value)
+     * @brief Sets visibility to fields related to end time (eg end time label + value)
      *
      */
-    void hide_time_information();
+    void set_print_time_visible(bool visible);
+#endif
 
     std::array<char, 5> text_filament; // 999m\0 | 1.2m\0
     std::array<char, FILE_NAME_BUFFER_LEN> text_filename;
