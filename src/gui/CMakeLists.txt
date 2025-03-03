@@ -101,10 +101,6 @@ target_sources(
           window_thumbnail.cpp
   )
 
-if(HAS_CANCEL_OBJECT)
-  target_sources(firmware PRIVATE screen_menu_cancel_object.cpp)
-endif()
-
 if(HAS_CRASH_DETECTION)
   target_sources(firmware PRIVATE screen_crash_recovery.cpp)
 endif()

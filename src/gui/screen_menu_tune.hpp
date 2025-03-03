@@ -33,6 +33,11 @@
     #include <gui/menu_item/specific/menu_items_xbuddy_extension.hpp>
 #endif
 
+#include <option/has_cancel_object.h>
+#if HAS_CANCEL_OBJECT()
+    #include <gui/screen/screen_cancel_objects.hpp>
+#endif
+
 /*****************************************************************************/
 // parent alias
 using ScreenMenuTune__ = ScreenMenu<EFooter::On, MI_RETURN,

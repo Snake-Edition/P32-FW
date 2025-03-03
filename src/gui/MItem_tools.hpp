@@ -476,17 +476,6 @@ public:
 protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
-
-class MI_CO_CANCEL_OBJECT : public IWindowMenuItem {
-    static constexpr const char *const label = N_("Cancel Object");
-
-public:
-    MI_CO_CANCEL_OBJECT();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
 class MI_FILAMENT_CHANGE_PREHEAT_ALL : public MenuItemSwitch {
 public:
     MI_FILAMENT_CHANGE_PREHEAT_ALL();
