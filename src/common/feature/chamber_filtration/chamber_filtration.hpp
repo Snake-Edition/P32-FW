@@ -34,6 +34,10 @@ public:
     /// \returns the current backend that should be using the filtration API
     ChamberFiltrationBackend backend() const;
 
+    bool is_enabled() const {
+        return backend() != ChamberFiltrationBackend::none;
+    }
+
     void step();
 
     /// \brief Enables/disables the filtration for the current print

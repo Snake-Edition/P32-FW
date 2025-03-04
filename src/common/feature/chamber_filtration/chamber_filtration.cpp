@@ -66,6 +66,13 @@ void ChamberFiltration::step() {
 
     std::lock_guard _lg(mutex_);
 
+    if (!is_enabled()) {
+        output_pwm_ = {};
+        is_printing_prev_ = false;
+        needs_filtration_ = false;
+        return;
+    }
+
     // Only start filtering after we've extruded first filament
     // We don't want the filtering fans to slow down the chamber heatup
     const bool is_printing = marlin_server::is_printing_state(marlin_vars().print_state.get()) && (planner.max_printed_z > 0);
