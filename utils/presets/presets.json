@@ -18,8 +18,7 @@
             "description": "Original Prusa MINI",
             "cacheVariables": {
                 "PRINTER": "MINI",
-                "BOARD": "BUDDY",
-                "DEVELOPMENT_ITEMS_ENABLED": true
+                "BOARD": "BUDDY"
             }
         },
         {
@@ -28,7 +27,6 @@
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
                 "TRANSLATIONS_LIST": "cs"
             }
         },
@@ -38,7 +36,6 @@
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
                 "TRANSLATIONS_LIST": "de"
             }
         },
@@ -48,7 +45,6 @@
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
                 "TRANSLATIONS_LIST": "es"
             }
         },
@@ -58,7 +54,6 @@
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
                 "TRANSLATIONS_LIST": "fr"
             }
         },
@@ -68,7 +63,6 @@
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
                 "TRANSLATIONS_LIST": "it"
             }
         },
@@ -78,7 +72,6 @@
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
                 "TRANSLATIONS_LIST": "pl"
             }
         },
@@ -89,7 +82,6 @@
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
-                "DEVELOPMENT_ITEMS_ENABLED": true,
                 "TRANSLATIONS_LIST": "ja"
             }
         },
@@ -168,8 +160,7 @@
             "description": "Original Prusa xl_dev_kit",
             "cacheVariables": {
                 "PRINTER": "XL_DEV_KIT",
-                "BOARD": "XL_DEV_KIT_XLB",
-                "DEVELOPMENT_ITEMS_ENABLED": true
+                "BOARD": "XL_DEV_KIT_XLB"
             }
         },
         {
