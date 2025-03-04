@@ -68,10 +68,13 @@ public:
 public:
     /// \returns size of a dynamic section
     template <Item item>
-    size_t section_size() const {
+    constexpr size_t section_size() const {
         static constexpr auto record = item_record<item>();
-        static_assert(record.type == DynamicIndexMappingType::dynamic_section);
-        return dynamic_section_sizes[dynamic_section_count_before<item>()];
+        if constexpr (record.is_dynamic()) {
+            return dynamic_section_sizes[dynamic_section_count_before<item>()];
+        } else {
+            return record.section_size;
+        }
     }
 
     /// Sets size of a dynamic section
@@ -118,7 +121,7 @@ public:
             };
 
             const auto accum_item = [&]<ItemRecord item>() -> bool {
-                const size_t s_size = section_size<item>();
+                const size_t s_size = section_size<item.item>();
                 if (result.pos_in_section < s_size) {
                     result.item = item.item;
                     return true;
@@ -166,16 +169,6 @@ protected:
         static constexpr typename Items::const_iterator end = item_iterator<item>();
         static constexpr size_t result = std::accumulate(items.begin(), end, size_t(0), accum_f);
         return result;
-    }
-
-    /// \returns section size of a provided item
-    template <ItemRecord item>
-    constexpr inline size_t section_size() const {
-        if constexpr (item.is_dynamic()) {
-            return dynamic_section_sizes[dynamic_section_count_before<item.item>()];
-        } else {
-            return item.section_size;
-        }
     }
 
     /// \returns item record of the item
