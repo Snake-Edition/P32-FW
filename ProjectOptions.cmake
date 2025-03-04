@@ -126,12 +126,6 @@ set(DEVELOPMENT_ITEMS_ENABLED
     )
 define_boolean_option(DEVELOPMENT_ITEMS ${DEVELOPMENT_ITEMS_ENABLED})
 
-set(IS_KNOBLET
-    "FALSE"
-    CACHE BOOL "Knoblet version of FW"
-    )
-define_boolean_option(IS_KNOBLET ${IS_KNOBLET})
-
 set(ENABLE_BURST
     "NO"
     CACHE BOOL "Enable BURST stepping on supported printers."
@@ -681,7 +675,7 @@ else()
 endif()
 define_boolean_option(PUPPY_FLASH_FW ${PUPPY_FLASH_FW})
 
-if(${PRINTER} IN_LIST PRINTERS_WITH_SIDE_LEDS AND NOT IS_KNOBLET)
+if(${PRINTER} IN_LIST PRINTERS_WITH_SIDE_LEDS)
   define_boolean_option(HAS_SIDE_LEDS YES)
 else()
   define_boolean_option(HAS_SIDE_LEDS NO)

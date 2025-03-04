@@ -11,7 +11,6 @@
 #include "printers.h"
 #include <utility_extensions.hpp>
 #include <i18n.h>
-#include <option/is_knoblet.h>
 #include <cassert>
 #include <limits>
 #include <numeric>
@@ -202,11 +201,6 @@ CommunicationStatus ModularBed::read_bedlet_data() {
         const auto fault_int { ftrstd::to_underlying(bedlet_data.value.fault_status[i]) };
         if (fault_int > 0) {
             const auto bedlet_number { bedlet_idx_to_board_number(i) };
-            if constexpr (option::is_knoblet) {
-                log_debug(ModularBed, "Bedlet %d: Error %d", bedlet_number, fault_int);
-                break;
-            }
-
             if (fault_int & ftrstd::to_underlying(HeatbedletError::HeaterDisconnected)) {
                 fatal_error(ErrCode::ERR_TEMPERATURE_MB_HEATER_DISCONNECTED, bedlet_number);
             } else if (fault_int & ftrstd::to_underlying(HeatbedletError::HeaterShortCircuit)) {

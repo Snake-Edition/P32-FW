@@ -29,7 +29,6 @@
 #include <option/has_loadcell.h>
 #include <option/has_gui.h>
 #include <option/debug_with_beeps.h>
-#include <option/is_knoblet.h>
 #include "Marlin/src/module/motion.h" // for active_extruder
 #include "puppies/modular_bed.hpp"
 #include "otp.hpp"
@@ -423,11 +422,7 @@ void buddy::hw::hwio_configure_board_revision_changed_pins() {
     auto otp_bom_id = otp_get_bom_id();
 
     if (!otp_bom_id || (board_bom_id = *otp_bom_id) < 4) {
-        if constexpr (option::is_knoblet) {
-            board_bom_id = BOARD_VERSION_MINOR; // Knoblets can be without OTP (buzzer might not work)
-        } else {
-            bsod("Unable to determine board BOM ID");
-        }
+        bsod("Unable to determine board BOM ID");
     }
     log_info(Buddy, "Detected bom ID %d", board_bom_id);
 

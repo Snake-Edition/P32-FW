@@ -8,7 +8,6 @@
     #include "Marlin.h"
     #include <logging/log.hpp>
     #include "timing.h"
-    #include <option/is_knoblet.h>
     #include <puppies/Dwarf.hpp>
 
     #if ENABLED(CRASH_RECOVERY)
@@ -113,11 +112,6 @@ void PrusaToolChangerUtils::autodetect_active_tool() {
                     toolchanger_error("Multiple dwarfs are picked");
                 }
                 active = &dwarf;
-                if constexpr (option::is_knoblet) {
-                    // In knoblet build without cheese board, all dwarfs appear picked.
-                    // So we will act as if only first dwarf is picked, to avoid "Multiple dwarfs are picked" redscreen
-                    break;
-                }
             }
         }
     }

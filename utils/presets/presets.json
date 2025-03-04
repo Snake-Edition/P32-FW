@@ -157,8 +157,7 @@
                 "MODULARBED_BINARY_DIR": {
                     "type": "FILEPATH",
                     "value": "build-vscode-modularbed"
-                },
-                "IS_KNOBLET":"FALSE"
+                }
             }
         },
         {
@@ -176,26 +175,7 @@
                     "type": "FILEPATH",
                     "value": "build-vscode-modularbed"
                 },
-                "ENABLE_BURST":true,
-                "IS_KNOBLET":"FALSE"
-            }
-        },
-        {
-            "name": "xl-knoblet",
-            "description": "Knoblet of Original Prusa XL",
-            "cacheVariables": {
-                "PRINTER": "XL",
-                "BOARD": "XLBUDDY",
-                "BOARD_VERSION": "0.5.0",
-                "DWARF_BINARY_DIR": {
-                    "type": "FILEPATH",
-                    "value": "build-vscode-dwarf"
-                },
-                "MODULARBED_BINARY_DIR": {
-                    "type": "FILEPATH",
-                    "value": "build-vscode-modularbed"
-                },
-                "IS_KNOBLET":"TRUE"
+                "ENABLE_BURST":true
             }
         },
         {

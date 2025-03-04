@@ -10,7 +10,6 @@
     #include <logging/log.hpp>
     #include "timing.h"
     #include "fanctl.hpp"
-    #include <option/is_knoblet.h>
     #include <marlin_server.hpp>
     #include <cmath_ext.h>
     #include <odometer.hpp>
