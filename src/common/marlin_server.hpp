@@ -13,6 +13,7 @@
 #include "marlin_server_extended_fsm_data.hpp"
 #include <stddef.h>
 #include <gcode/inject_queue_actions.hpp>
+#include <marlin_server_shared.h>
 
 #include <serial_printing.hpp>
 
@@ -194,6 +195,9 @@ bool get_media_inserted();
 
 //
 void resuming_begin();
+
+// Thread-safe way to send request that don't require parameters
+void send_request_flag(const RequestFlag request);
 
 const GCodeReaderStreamRestoreInfo &stream_restore_info();
 

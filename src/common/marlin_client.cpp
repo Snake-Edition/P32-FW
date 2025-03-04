@@ -4,6 +4,7 @@
 #include "marlin_server_request.hpp"
 #include "marlin_events.h"
 #include "marlin_server.hpp"
+#include "marlin_server_shared.h"
 #include <cassert>
 #include <freertos/mutex.hpp>
 #include <stdio.h>
@@ -166,10 +167,8 @@ void set_event_notify(uint64_t event_mask) {
     _send_request_to_server_and_wait(request);
 }
 
-void _send_request_id_to_server_and_wait(const Request::Type type) {
-    Request request;
-    request.type = type;
-    _send_request_to_server_and_wait(request);
+void _send_request_flag_to_server(const RequestFlag type) {
+    marlin_server::send_request_flag(type);
 }
 
 namespace {
@@ -278,7 +277,7 @@ void test_start(const uint64_t test_mask) {
 }
 
 void test_abort() {
-    _send_request_id_to_server_and_wait(Request::Type::TestAbort);
+    _send_request_flag_to_server(RequestFlag::TestAbort);
 }
 #endif
 
@@ -354,31 +353,31 @@ bool is_print_exited() {
 }
 
 void marlin_gui_ready_to_print() {
-    _send_request_id_to_server_and_wait(Request::Type::PrintReady);
+    _send_request_flag_to_server(RequestFlag::PrintReady);
 }
 
 void marlin_gui_cant_print() {
-    _send_request_id_to_server_and_wait(Request::Type::GuiCantPrint);
+    _send_request_flag_to_server(RequestFlag::GuiCantPrint);
 }
 
 void print_abort() {
-    _send_request_id_to_server_and_wait(Request::Type::PrintAbort);
+    _send_request_flag_to_server(RequestFlag::PrintAbort);
 }
 
 void print_exit() {
-    _send_request_id_to_server_and_wait(Request::Type::PrintExit);
+    _send_request_flag_to_server(RequestFlag::PrintExit);
 }
 
 void print_pause() {
-    _send_request_id_to_server_and_wait(Request::Type::PrintPause);
+    _send_request_flag_to_server(RequestFlag::PrintPause);
 }
 
 void print_resume() {
-    _send_request_id_to_server_and_wait(Request::Type::PrintResume);
+    _send_request_flag_to_server(RequestFlag::PrintResume);
 }
 
 void try_recover_from_media_error() {
-    _send_request_id_to_server_and_wait(Request::Type::TryRecoverFromMediaError);
+    _send_request_flag_to_server(RequestFlag::TryRecoverFromMediaError);
 }
 
 void notify_server_about_encoder_move() {
@@ -527,7 +526,7 @@ void uncancel_object(int object_id) {
 }
 
 void cancel_current_object() {
-    _send_request_id_to_server_and_wait(Request::Type::CancelCurrentObject);
+    _send_request_flag_to_server(RequestFlag::CancelCurrentObject);
 }
 #endif
 

@@ -221,8 +221,11 @@ namespace {
 #endif
     };
 
+    std::atomic<uint32_t> request_flags = 0;
+
     std::atomic<uint32_t> knob_click_counter = 0; // Hold user knob clicks for safety timer
     std::atomic<uint32_t> knob_move_counter = 0; // Holds user knob moves for safety timer
+    static_assert(std::to_underlying(RequestFlag::_cnt) <= 32, "There are more flags than bits");
 
     server_t server; // server structure - initialize task to zero
 
@@ -530,6 +533,7 @@ static uint8_t _send_notify_event(Event evt_id, uint32_t usr32, uint16_t usr16);
 static void _server_update_vars();
 static bool _process_server_request(const Request &);
 static void _server_set_var(const Request &);
+static void process_request_flags();
 
 static void settings_load();
 
@@ -732,6 +736,8 @@ static void cycle() {
 #if HAS_I2C_EXPANDER()
     io_expander_read_loop();
 #endif // HAS_I2C_EXPANDER()
+
+    process_request_flags();
 
     if (Request request; server_queue.try_receive(request, 0)) {
         _process_server_request(request);
@@ -3107,9 +3113,6 @@ bool _process_server_valid_request(const Request &request, int client_id) {
     case Request::Type::UncancelObjectID:
         buddy::cancel_object().set_object_cancelled(request.uncancel_object_id, false);
         return true;
-    case Request::Type::CancelCurrentObject:
-        buddy::cancel_object().set_object_cancelled(buddy::cancel_object().current_object(), true);
-        return true;
 #else
     case Request::Type::CancelObjectID:
     case Request::Type::UncancelObjectID:
@@ -3118,27 +3121,6 @@ bool _process_server_valid_request(const Request &request, int client_id) {
 #endif
     case Request::Type::PrintStart:
         print_start(request.print_start.filename, GCodeReaderPosition(), request.print_start.skip_preview);
-        return true;
-    case Request::Type::PrintReady:
-        gui_ready_to_print();
-        return true;
-    case Request::Type::GuiCantPrint:
-        gui_cant_print();
-        return true;
-    case Request::Type::PrintAbort:
-        print_abort();
-        return true;
-    case Request::Type::PrintPause:
-        print_pause();
-        return true;
-    case Request::Type::PrintResume:
-        print_resume();
-        return true;
-    case Request::Type::TryRecoverFromMediaError:
-        try_recover_from_media_error();
-        return true;
-    case Request::Type::PrintExit:
-        print_exit();
         return true;
     case Request::Type::SetWarning:
         set_warning(request.warning_type);
@@ -3161,11 +3143,63 @@ bool _process_server_valid_request(const Request &request, int client_id) {
             request.test_start.test_mask,
             selftest::deserialize_test_data_from_int(request.test_start.test_data_index, request.test_start.test_data_data));
         return true;
-    case Request::Type::TestAbort:
-        test_abort();
-        return true;
     }
     bsod("Unknown request %d", ftrstd::to_underlying(request.type));
+}
+
+void send_request_flag(const RequestFlag request) {
+    request_flags |= (0x1 << std::to_underlying(request));
+}
+
+static void process_request_flags() {
+    const uint32_t flags = request_flags.exchange(0);
+    if (flags == 0) {
+        return;
+    }
+
+    for (uint8_t i = 0; i < std::to_underlying(RequestFlag::_cnt); i++) {
+        if (!(flags & (0x1 << i))) {
+            continue;
+        }
+
+        switch (RequestFlag(i)) {
+        case RequestFlag::TestAbort:
+            test_abort();
+            break;
+        case RequestFlag::PrintReady:
+            gui_ready_to_print();
+            break;
+        case RequestFlag::PrintAbort:
+            print_abort();
+            break;
+        case RequestFlag::PrintPause:
+            print_pause();
+            break;
+        case RequestFlag::PrintResume:
+            print_resume();
+            break;
+        case RequestFlag::TryRecoverFromMediaError:
+            try_recover_from_media_error();
+            break;
+        case RequestFlag::PrintExit:
+            print_exit();
+            break;
+        case RequestFlag::KnobMove:
+            increment_user_move_count();
+            break;
+        case RequestFlag::KnobClick:
+            increment_user_click_count();
+            break;
+        case RequestFlag::GuiCantPrint:
+            gui_cant_print();
+            break;
+        case RequestFlag::CancelCurrentObject:
+            buddy::cancel_object().set_object_cancelled(buddy::cancel_object().current_object(), true);
+            break;
+        case RequestFlag::_cnt:
+            break;
+        }
+    }
 }
 
 static bool _process_server_request(const Request &request) {

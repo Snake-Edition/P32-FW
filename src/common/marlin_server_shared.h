@@ -15,4 +15,19 @@ inline constexpr uint8_t CURRENT_TOOL = std::numeric_limits<uint8_t>::max();
 
 extern osThreadId server_task; // task of marlin server
 
+enum class RequestFlag : uint8_t {
+    TestAbort,
+    PrintReady,
+    PrintAbort,
+    PrintPause,
+    PrintResume,
+    TryRecoverFromMediaError,
+    PrintExit,
+    KnobMove,
+    KnobClick,
+    GuiCantPrint,
+    CancelCurrentObject,
+    _cnt
+};
+
 } // namespace marlin_server
