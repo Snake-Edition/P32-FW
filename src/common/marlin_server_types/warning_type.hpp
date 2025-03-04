@@ -1,6 +1,7 @@
 #pragma once
 
 #include "client_response.hpp"
+#include <option/has_manual_chamber_vents.h>
 
 enum class WarningType : uint32_t {
 #if HAS_EMERGENCY_STOP()
@@ -57,7 +58,7 @@ enum class WarningType : uint32_t {
 #if HAS_CHAMBER_API()
     FailedToReachChamberTemperature,
 #endif
-#if PRINTER_IS_PRUSA_COREONE()
+#if HAS_MANUAL_CHAMBER_VENTS()
     OpenChamberVents,
     CloseChamberVents,
 #endif

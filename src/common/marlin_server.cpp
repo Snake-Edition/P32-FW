@@ -2004,7 +2004,7 @@ static void _server_print_loop(void) {
 #if XL_ENCLOSURE_SUPPORT()
         xl_enclosure.checkFilterExpiration();
 #endif
-#if PRINTER_IS_PRUSA_COREONE()
+#if HAS_MANUAL_CHAMBER_VENTS()
         buddy::chamber().check_vent_state();
 #endif
         break;

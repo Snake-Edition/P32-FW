@@ -3,6 +3,7 @@
 #include <fsm_states.hpp>
 #include <client_response.hpp>
 #include <marlin_vars.hpp>
+#include <option/has_manual_chamber_vents.h>
 #include <option/has_gearbox_alignment.h>
 #include <option/has_mmu2.h>
 #include <option/has_dwarf.h>
@@ -11,7 +12,6 @@
 #include <option/has_uneven_bed_prompt.h>
 #include <config_store/store_instance.hpp>
 #include <option/has_chamber_filtration_api.h>
-#include <printers.h>
 
 using namespace marlin_server;
 using namespace printer_state;
@@ -591,7 +591,7 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
         return ErrCode::CONNECT_CHAMBER_COOLING_FAN_ERROR;
 #endif
 
-#if PRINTER_IS_PRUSA_COREONE()
+#if HAS_MANUAL_CHAMBER_VENTS()
     case WarningType::OpenChamberVents:
         return ErrCode::CONNECT_OPEN_CHAMBER_VENTS;
     case WarningType::CloseChamberVents:

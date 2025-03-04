@@ -1,18 +1,14 @@
 #include "chamber.hpp"
 
+#include <buddy/unreachable.hpp>
 #include <cmath>
-
+#include <config_store/store_instance.hpp>
+#include <marlin_server.hpp>
 #include <marlin_server_shared.h>
 #include <option/has_xbuddy_extension.h>
-#include <buddy/unreachable.hpp>
 
 #if XL_ENCLOSURE_SUPPORT()
     #include <hw/xl/xl_enclosure.hpp>
-#endif
-
-#if PRINTER_IS_PRUSA_COREONE()
-    #include <marlin_server.hpp>
-    #include <config_store/store_instance.hpp>
 #endif
 
 #if HAS_XBUDDY_EXTENSION()
@@ -171,7 +167,7 @@ void Chamber::reset() {
 #endif
 }
 
-#if PRINTER_IS_PRUSA_COREONE()
+#if HAS_MANUAL_CHAMBER_VENTS()
 void Chamber::check_vent_state() {
     const auto fil_target = config_store().get_filament_type(0).parameters().chamber_target_temperature;
     constexpr uint8_t temp_limit = 45; // Limit for closed grills is chamber max temperature of PETG
