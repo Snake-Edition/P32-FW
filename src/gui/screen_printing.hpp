@@ -27,7 +27,6 @@ enum class printing_state_t : uint8_t {
     REHEATING,
     STOPPED,
     PRINTED,
-    COUNT // setting this state == forced update
 };
 
 inline constexpr size_t POPUP_MSG_DUR_MS = 5000;
@@ -139,7 +138,6 @@ protected:
     virtual void windowEvent(window_t *sender, GUI_event_t event, void *param) override;
 
 private:
-    void invalidate_print_state();
     void updateTimes();
 
 #if HAS_MINI_DISPLAY()

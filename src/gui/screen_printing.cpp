@@ -43,9 +43,6 @@
 
 using namespace marlin_server;
 
-void screen_printing_data_t::invalidate_print_state() {
-    state__readonly__use_change_print_state = printing_state_t::COUNT;
-}
 printing_state_t screen_printing_data_t::GetState() const {
     return state__readonly__use_change_print_state;
 }
@@ -191,7 +188,7 @@ screen_printing_data_t::screen_printing_data_t()
     , message_timer(0)
     , stop_pressed(false)
     , waiting_for_abort(false)
-    , state__readonly__use_change_print_state(printing_state_t::COUNT)
+    , state__readonly__use_change_print_state(printing_state_t::INITIAL)
 #if HAS_MINI_DISPLAY()
     , time_end_format(PT_t::init)
     , message_popup(this, Rect16::Merge(std::array<Rect16, 4>({ w_time_label.GetRect(), w_time_value.GetRect(), w_etime_label.GetRect(), w_etime_value.GetRect() })), is_multiline::yes)
@@ -340,32 +337,27 @@ void screen_printing_data_t::windowEvent(window_t *sender, GUI_event_t event, vo
         set_print_time_visible(!message_popup.IsVisible() && !stoppedOrPrinted);
 #elif HAS_LARGE_DISPLAY()
         rotating_circles.set_visible(!stoppedOrPrinted);
-
-        switch (p_state) {
-        case printing_state_t::PRINTED: {
-            print_progress.Pause();
-            break;
-        }
-        case printing_state_t::STOPPED: {
-            print_progress.StoppedMode();
-            break;
-        }
-        case printing_state_t::PRINTING:
-        case printing_state_t::PAUSED:
-        case printing_state_t::PAUSING:
-        case printing_state_t::RESUMING:
-        case printing_state_t::REHEATING:
-        case printing_state_t::ABORTING:
-        case printing_state_t::SKIPPABLE_OPERATION:
-        case printing_state_t::INITIAL: {
-            print_progress.PrintingMode();
-            break;
-        }
-        case printing_state_t::COUNT: {
+        [&] {
+            switch (p_state) {
+            case printing_state_t::PRINTED:
+                print_progress.Pause();
+                return;
+            case printing_state_t::STOPPED:
+                print_progress.StoppedMode();
+                return;
+            case printing_state_t::PRINTING:
+            case printing_state_t::PAUSED:
+            case printing_state_t::PAUSING:
+            case printing_state_t::RESUMING:
+            case printing_state_t::REHEATING:
+            case printing_state_t::ABORTING:
+            case printing_state_t::SKIPPABLE_OPERATION:
+            case printing_state_t::INITIAL:
+                print_progress.PrintingMode();
+                return;
+            }
             BUDDY_UNREACHABLE();
-            break;
-        }
-        }
+        }();
 #endif
         break;
     }
@@ -642,10 +634,7 @@ void screen_printing_data_t::screen_printing_reprint() {
 }
 
 void screen_printing_data_t::set_pause_icon_and_label() {
-    // todo it is static, because menu tune is not dialog
-    // switch (state__readonly__use_change_print_state)
     switch (GetState()) {
-    case printing_state_t::COUNT:
     case printing_state_t::INITIAL:
     case printing_state_t::PRINTING:
         EnableButton(BtnSocket::Middle);
@@ -759,93 +748,82 @@ void screen_printing_data_t::set_stop_icon_and_label() {
 }
 
 void screen_printing_data_t::change_print_state() {
-    printing_state_t st = printing_state_t::COUNT;
-
-    switch (marlin_vars().print_state) {
-    case State::Idle:
-    case State::WaitGui:
-    case State::PrintPreviewInit:
-    case State::PrintPreviewImage:
-    case State::PrintPreviewConfirmed:
-    case State::PrintPreviewQuestions:
+    printing_state_t st = [&] {
+        switch (marlin_vars().print_state) {
+        case State::Idle:
+        case State::WaitGui:
+        case State::PrintPreviewInit:
+        case State::PrintPreviewImage:
+        case State::PrintPreviewConfirmed:
+        case State::PrintPreviewQuestions:
 #if HAS_TOOLCHANGER() || HAS_MMU2()
-    case State::PrintPreviewToolsMapping:
+        case State::PrintPreviewToolsMapping:
 #endif
-    case State::PrintInit:
-        st = printing_state_t::INITIAL;
-        break;
-    case State::Printing:
-        st = printing_state_t::PRINTING;
-        break;
-    case State::PowerPanic_AwaitingResume:
-    case State::Paused:
-        // stop_pressed = false;
-        st = printing_state_t::PAUSED;
-        break;
-    case State::Pausing_Begin:
-    case State::Pausing_Failed_Code:
-    case State::Pausing_WaitIdle:
-    case State::Pausing_ParkHead:
-        st = printing_state_t::PAUSING;
+        case State::PrintInit:
+            return printing_state_t::INITIAL;
+        case State::Printing:
+            return printing_state_t::PRINTING;
+        case State::PowerPanic_AwaitingResume:
+        case State::Paused:
+            // stop_pressed = false;
+            return printing_state_t::PAUSED;
+        case State::Pausing_Begin:
+        case State::Pausing_Failed_Code:
+        case State::Pausing_WaitIdle:
+        case State::Pausing_ParkHead:
 // When print is paused, progress screen needs to reinit it's thumbnail file handler
 // because USB removal error crashes file handler access. Progress screen should not be enabled during pause -> reinit on EVERY pause
 #if HAS_LARGE_DISPLAY()
-        print_progress.Pause();
+            print_progress.Pause();
 #endif
-        break;
-    case State::Resuming_Reheating:
-        stop_pressed = false;
-        st = printing_state_t::REHEATING;
-        break;
-    case State::Resuming_Begin:
-    case State::Resuming_UnparkHead_XY:
-    case State::Resuming_UnparkHead_ZE:
-    case State::CrashRecovery_Begin:
-    case State::CrashRecovery_Retracting:
-    case State::CrashRecovery_Lifting:
-    case State::CrashRecovery_ToolchangePowerPanic:
-    case State::CrashRecovery_XY_Measure:
+            return printing_state_t::PAUSING;
+        case State::Resuming_Reheating:
+            stop_pressed = false;
+            return printing_state_t::REHEATING;
+        case State::Resuming_Begin:
+        case State::Resuming_UnparkHead_XY:
+        case State::Resuming_UnparkHead_ZE:
+        case State::CrashRecovery_Begin:
+        case State::CrashRecovery_Retracting:
+        case State::CrashRecovery_Lifting:
+        case State::CrashRecovery_ToolchangePowerPanic:
+        case State::CrashRecovery_XY_Measure:
 #if HAS_TOOLCHANGER()
-    case State::CrashRecovery_Tool_Pickup:
+        case State::CrashRecovery_Tool_Pickup:
 #endif
-    case State::CrashRecovery_XY_HOME:
-    case State::CrashRecovery_HOMEFAIL:
-    case State::CrashRecovery_Axis_NOK:
-    case State::CrashRecovery_Repeated_Crash:
-    case State::PowerPanic_Resume:
-        stop_pressed = false;
-        st = printing_state_t::RESUMING;
+        case State::CrashRecovery_XY_HOME:
+        case State::CrashRecovery_HOMEFAIL:
+        case State::CrashRecovery_Axis_NOK:
+        case State::CrashRecovery_Repeated_Crash:
+        case State::PowerPanic_Resume:
+            stop_pressed = false;
 #if HAS_LARGE_DISPLAY()
-        print_progress.Resume();
+            print_progress.Resume();
 #endif
-        break;
-    case State::Aborting_Begin:
-    case State::Aborting_WaitIdle:
-    case State::Aborting_UnloadFilament:
-    case State::Aborting_ParkHead:
-    case State::Aborting_Preview:
-        stop_pressed = false;
-        st = printing_state_t::ABORTING;
-        break;
-    case State::Finishing_WaitIdle:
-    case State::Finishing_UnloadFilament:
-    case State::Finishing_ParkHead:
-        st = printing_state_t::PRINTING;
-        break;
-    case State::Aborted:
-        stop_pressed = false;
-        st = printing_state_t::STOPPED;
-        break;
-    case State::Finished:
-    case State::Exit:
-        st = printing_state_t::PRINTED;
-        break;
-    case State::PowerPanic_acFault:
-    case State::SerialPrintInit:
-        // this state is never reached
-        __builtin_unreachable();
-        return;
-    }
+            return printing_state_t::RESUMING;
+        case State::Aborting_Begin:
+        case State::Aborting_WaitIdle:
+        case State::Aborting_UnloadFilament:
+        case State::Aborting_ParkHead:
+        case State::Aborting_Preview:
+            stop_pressed = false;
+            return printing_state_t::ABORTING;
+        case State::Finishing_WaitIdle:
+        case State::Finishing_UnloadFilament:
+        case State::Finishing_ParkHead:
+            return printing_state_t::PRINTING;
+        case State::Aborted:
+            stop_pressed = false;
+            return printing_state_t::STOPPED;
+        case State::Finished:
+        case State::Exit:
+            return printing_state_t::PRINTED;
+        case State::PowerPanic_acFault:
+        case State::SerialPrintInit:
+            break;
+        }
+        BUDDY_UNREACHABLE();
+    }();
     if (stop_pressed) {
         st = printing_state_t::ABORTING;
     }
