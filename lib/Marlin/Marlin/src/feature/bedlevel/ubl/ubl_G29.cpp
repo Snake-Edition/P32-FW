@@ -501,7 +501,9 @@
             //
             // Invalidate Entire Mesh and Automatically Probe Mesh in areas that can be reached by the probe
             //
-            if (!parser.seen('C')) {
+            const bool extend_mesh = parser.seen('C');
+
+            if (!extend_mesh) {
               invalidate();
               SERIAL_ECHOLNPGM("Mesh invalidated. Probing mesh.");
             }
@@ -512,12 +514,12 @@
             #endif
 
             if (xy_seen && g29_size_seen) {
-              probe_major_points(g29_pos, g29_pos + g29_size, parser.seen('T'), parser.seen('E'));
+              probe_major_points(g29_pos, g29_pos + g29_size, parser.seen('T'), parser.seen('E'), extend_mesh);
             } else {
               /// probe area is print area enlarged by one major point
               auto probe_area = print_area.get_bounding_rect().inset(-MESH_X_DIST * GRID_MAJOR_STEP,
                                                                      -MESH_Y_DIST * GRID_MAJOR_STEP);
-              probe_major_points(probe_area.a, probe_area.b, parser.seen('T'), parser.seen('E'));
+              probe_major_points(probe_area.a, probe_area.b, parser.seen('T'), parser.seen('E'), extend_mesh);
             }
 
             report_current_position();
@@ -716,7 +718,7 @@
   }
 
 #if HAS_BED_PROBE
-    void unified_bed_leveling::probe_major_points(const xy_pos_t area_a, const xy_pos_t area_b, const bool do_ubl_mesh_map, const bool stow_probe) {
+  void unified_bed_leveling::probe_major_points(const xy_pos_t area_a, const xy_pos_t area_b, const bool do_ubl_mesh_map, const bool stow_probe, const bool extend_mesh) {
       save_ubl_active_state_and_disable();  // No bed level correction so only raw data is obtained
       pressure_advance::PressureAdvanceDisabler pa_disabler; // Reduce move delays as we don't extrude
 
@@ -792,8 +794,13 @@
             is_initial_probe = false;
           }
 
-          num_of_probed_points ++;
+      num_of_probed_points++;
+      // Display different status messages depending on whether we are extending the mesh (used for probing the purge area) or not (print area probing)
+      if (extend_mesh) {
+        statusGuard.update<PrintStatusMessage::additional_probing>({.current = (float) num_of_probed_points, .target = (float) num_of_points_to_probe});
+      } else {
           statusGuard.update<PrintStatusMessage::probing_bed>({.current = (float) num_of_probed_points, .target = (float) num_of_points_to_probe});
+      }
 
           // and finally, probe
           const float measured_z = probe_at_point(

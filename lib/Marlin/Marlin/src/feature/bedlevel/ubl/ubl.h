@@ -65,7 +65,10 @@ class unified_bed_leveling {
     static int count_points_to_probe();
     static bool g29_parameter_parsing() __O0;
     static void shift_mesh_height();
-    static void probe_major_points(const xy_pos_t area_a, const xy_pos_t area_b, const bool do_ubl_mesh_map, const bool stow_probe);
+    /**
+      * @param extendMesh Whether this probe extends the existing mesh or not -> determines the message to be displayed.
+      */
+    static void probe_major_points(const xy_pos_t area_a, const xy_pos_t area_b, const bool do_ubl_mesh_map, const bool stow_probe, const bool extend_mesh);
     static void tilt_mesh_based_on_3pts(const float &z1, const float &z2, const float &z3);
     static void tilt_mesh_based_on_probed_grid(const bool do_ubl_mesh_map);
     static bool smart_fill_one(const uint8_t x, const uint8_t y, const int8_t xdir, const int8_t ydir);
