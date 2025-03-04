@@ -270,7 +270,7 @@ void GcodeSuite::G29() {
 
     #if HAS_BED_PROBE
         if (ubl.g29_probing_failed) {
-            plan_park_move_to_xyz({ { XYZ_NOZZLE_PARK_POINT } }, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE, /*segmented=*/true);
+            plan_park_move_to_xyz({ { XYZ_NOZZLE_PARK_POINT } }, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE, Segmented::yes);
 
             if (marlin_server::prompt_warning(WarningType::ProbingFailed) != Response::Yes) {
                 marlin_server::print_abort();
@@ -288,7 +288,7 @@ void GcodeSuite::G29() {
             // filament, we want the nozzle to park at an accessible place to
             // have it cleaned and the M600 position happens to be just what we
             // need.
-            plan_park_move_to_xyz({ { XYZ_NOZZLE_PARK_POINT_M600 } }, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE, /*segmented=*/true);
+            plan_park_move_to_xyz({ { XYZ_NOZZLE_PARK_POINT_M600 } }, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE, Segmented::yes);
 
             const auto response = marlin_server::prompt_warning(WarningType::NozzleCleaningFailed);
             if (response == Response::Ignore) {

@@ -1157,7 +1157,7 @@ void Pause::park_nozzle_and_notify() {
         } else {
             PauseFsmNotifier N(*this, current_position.z, target_Z, 0, parkMoveZPercent(Z_len, XY_len), marlin_vars().native_pos[MARLIN_VAR_INDEX_Z]);
             log_info(MarlinServer, "Parking");
-            plan_park_move_to(current_position.x, current_position.y, target_Z, NOZZLE_PARK_XY_FEEDRATE, Z_feedrate, /*segmented=*/true);
+            plan_park_move_to(current_position.x, current_position.y, target_Z, NOZZLE_PARK_XY_FEEDRATE, Z_feedrate, Segmented::yes);
             log_info(MarlinServer, "Park done");
             if (wait_for_motion_finish_stoppable() == StopConditions::UserStopped) {
                 return;
@@ -1205,13 +1205,13 @@ void Pause::park_nozzle_and_notify() {
 
         if (x_greater_than_y) {
             PauseFsmNotifier N(*this, begin_pos, end_pos, parkMoveZPercent(Z_len, XY_len), 100, marlin_vars().native_pos[MARLIN_VAR_INDEX_X]); // from Z% to 100%
-            plan_park_move_to_xyz(settings.park_pos, NOZZLE_PARK_XY_FEEDRATE, Z_feedrate, /*segmented=*/true);
+            plan_park_move_to_xyz(settings.park_pos, NOZZLE_PARK_XY_FEEDRATE, Z_feedrate, Segmented::yes);
             if (wait_for_motion_finish_stoppable() == StopConditions::UserStopped) {
                 return;
             }
         } else {
             PauseFsmNotifier N(*this, begin_pos, end_pos, parkMoveZPercent(Z_len, XY_len), 100, marlin_vars().native_pos[MARLIN_VAR_INDEX_Y]); // from Z% to 100%
-            plan_park_move_to_xyz(settings.park_pos, NOZZLE_PARK_XY_FEEDRATE, Z_feedrate, /*segmented=*/true);
+            plan_park_move_to_xyz(settings.park_pos, NOZZLE_PARK_XY_FEEDRATE, Z_feedrate, Segmented::yes);
             if (wait_for_motion_finish_stoppable() == StopConditions::UserStopped) {
                 return;
             }
@@ -1264,7 +1264,7 @@ void Pause::unpark_nozzle_and_notify() {
 
         PauseFsmNotifier N(*this, current_position.z, resume_pos_adj.z, parkMoveXYPercent(Z_len, XY_len), 100, marlin_vars().native_pos[MARLIN_VAR_INDEX_Z]); // from XY% to 100%
         // FIXME: use a beter movement api when available
-        do_blocking_move_to_z(resume_pos_adj.z, feedRate_t(NOZZLE_PARK_Z_FEEDRATE), /*segmented=*/true);
+        do_blocking_move_to_z(resume_pos_adj.z, feedRate_t(NOZZLE_PARK_Z_FEEDRATE), Segmented::yes);
         // But since the plan_park_move_to overrides the current position values (which are by default in
         // native (without MBL) coordinates and we apply MBL to them) we need to reset the z height to
         // make all the future moves correct.
