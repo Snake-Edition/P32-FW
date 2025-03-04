@@ -79,7 +79,6 @@
             "name": "mini-en-ja",
             "description": "Original Prusa MINI (EN & JA translation)",
             "cacheVariables": {
-                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "TRANSLATIONS_LIST": "ja"

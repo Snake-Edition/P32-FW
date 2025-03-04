@@ -1631,10 +1631,6 @@
                     "type": "FILEPATH",
                     "value": "${sourceDir}/.dependencies/ninja-1.10.2/ninja"
                 },
-                "CMAKE_EXPORT_COMPILE_COMMANDS": {
-                    "type": "STRING",
-                    "value": "ON"
-                },
                 "PRINTER": {
                     "type": "STRING",
                     "value": "MINI"
@@ -1685,10 +1681,6 @@
                 "CMAKE_MAKE_PROGRAM": {
                     "type": "FILEPATH",
                     "value": "${sourceDir}/.dependencies/ninja-1.10.2/ninja"
-                },
-                "CMAKE_EXPORT_COMPILE_COMMANDS": {
-                    "type": "STRING",
-                    "value": "ON"
                 },
                 "PRINTER": {
                     "type": "STRING",
@@ -1741,10 +1733,6 @@
                     "type": "FILEPATH",
                     "value": "${sourceDir}/.dependencies/ninja-1.10.2/ninja"
                 },
-                "CMAKE_EXPORT_COMPILE_COMMANDS": {
-                    "type": "STRING",
-                    "value": "ON"
-                },
                 "PRINTER": {
                     "type": "STRING",
                     "value": "MINI"
@@ -1795,10 +1783,6 @@
                 "CMAKE_MAKE_PROGRAM": {
                     "type": "FILEPATH",
                     "value": "${sourceDir}/.dependencies/ninja-1.10.2/ninja"
-                },
-                "CMAKE_EXPORT_COMPILE_COMMANDS": {
-                    "type": "STRING",
-                    "value": "ON"
                 },
                 "PRINTER": {
                     "type": "STRING",
