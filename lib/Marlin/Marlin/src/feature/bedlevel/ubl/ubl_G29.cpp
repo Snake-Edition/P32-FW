@@ -719,25 +719,25 @@
 
 #if HAS_BED_PROBE
   void unified_bed_leveling::probe_major_points(const xy_pos_t area_a, const xy_pos_t area_b, const bool do_ubl_mesh_map, const bool stow_probe, const bool extend_mesh) {
-      save_ubl_active_state_and_disable();  // No bed level correction so only raw data is obtained
-      pressure_advance::PressureAdvanceDisabler pa_disabler; // Reduce move delays as we don't extrude
+    save_ubl_active_state_and_disable();  // No bed level correction so only raw data is obtained
+    pressure_advance::PressureAdvanceDisabler pa_disabler; // Reduce move delays as we don't extrude
 
-      #if ENABLED(NOZZLE_LOAD_CELL)
-        // Enable loadcell high precision across the entire sequence to prime the noise filters
-        auto loadcellPrecisionEnabler = Loadcell::HighPrecisionEnabler(loadcell);
-      #endif
+    #if ENABLED(NOZZLE_LOAD_CELL)
+      // Enable loadcell high precision across the entire sequence to prime the noise filters
+      auto loadcellPrecisionEnabler = Loadcell::HighPrecisionEnabler(loadcell);
+    #endif
 
-      #if UBL_TRAVEL_ACCELERATION
-        auto saved_acceleration = planner.settings.travel_acceleration;
-        {
-          auto s = planner.user_settings;
-          s.travel_acceleration = UBL_TRAVEL_ACCELERATION;
-          planner.apply_settings(s);
-        }
-      #endif
+    #if UBL_TRAVEL_ACCELERATION
+      auto saved_acceleration = planner.settings.travel_acceleration;
+      {
+        auto s = planner.user_settings;
+        s.travel_acceleration = UBL_TRAVEL_ACCELERATION;
+        planner.apply_settings(s);
+      }
+    #endif
 
-      PrintArea::rect_t probe_area(area_a, area_b);
-      PrintStatusMessageGuard statusGuard;
+    PrintArea::rect_t probe_area(area_a, area_b);
+    PrintStatusMessageGuard statusGuard;
 
     /**
       * Enumerate over points in the grid.
@@ -755,11 +755,11 @@
 
           // skip points the probe can't reach
           if (!position_is_reachable_by_probe(pos.x, pos.y))
-            continue;
+              continue;
 
           // skip points outside print area
           if (!probe_area.contains(pos))
-            continue;
+              continue;
 
           func(pos, x, y);
         }
@@ -778,81 +778,81 @@
       if (z_values[x][y] != 0 && !std::isnan(z_values[x][y])) 
         return;
 
-          // print UBL map if we were told to do so
-          if (do_ubl_mesh_map)
-            display_map(g29_map_type);
+      // print UBL map if we were told to do so
+      if (do_ubl_mesh_map)
+        display_map(g29_map_type);
 
-          // make initial move manually (has a different speed)
-          if (is_initial_probe) {
-            xyz_pos_t start_pos = pos;
-            start_pos -= probe_offset;
-            start_pos.z = Z_CLEARANCE_BEFORE_PROBING;
-            #if HAS_HOTEND_OFFSET
-            start_pos -= hotend_currently_applied_offset;
-            #endif
-            do_blocking_move_to(start_pos.x, start_pos.y, start_pos.z);
-            is_initial_probe = false;
-          }
+      // make initial move manually (has a different speed)
+      if (is_initial_probe) {
+        xyz_pos_t start_pos = pos;
+        start_pos -= probe_offset;
+        start_pos.z = Z_CLEARANCE_BEFORE_PROBING;
+        #if HAS_HOTEND_OFFSET
+        start_pos -= hotend_currently_applied_offset;
+        #endif
+        do_blocking_move_to(start_pos.x, start_pos.y, start_pos.z);
+        is_initial_probe = false;
+      }
 
       num_of_probed_points++;
       // Display different status messages depending on whether we are extending the mesh (used for probing the purge area) or not (print area probing)
       if (extend_mesh) {
         statusGuard.update<PrintStatusMessage::additional_probing>({.current = (float) num_of_probed_points, .target = (float) num_of_points_to_probe});
       } else {
-          statusGuard.update<PrintStatusMessage::probing_bed>({.current = (float) num_of_probed_points, .target = (float) num_of_points_to_probe});
+        statusGuard.update<PrintStatusMessage::probing_bed>({.current = (float) num_of_probed_points, .target = (float) num_of_points_to_probe});
       }
 
-          // and finally, probe
-          const float measured_z = probe_at_point(
-                        pos,
+      // and finally, probe
+      const float measured_z = probe_at_point(
+        pos, 
         stow_probe ? PROBE_PT_STOW : PROBE_PT_RAISE, 
         g29_verbose_level
-                      );
+      );
 
       if (std::isnan(measured_z)) {
-            ubl.g29_probing_failed = true;
-            STOW_PROBE();
-            return;
-          }
-          z_values[x][y] = measured_z;
+        ubl.g29_probing_failed = true;
+        STOW_PROBE();
+        return;
+      }
+      z_values[x][y] = measured_z;
 
-          const auto prev_measured_z = g29_min_max_measured_z.value_or(MeasuredZ{measured_z, measured_z});
-          g29_min_max_measured_z = { std::min(prev_measured_z.min, measured_z), std::max(prev_measured_z.max, measured_z) };
-          log_info(Marlin, "Measured z: %f", (double) measured_z);
-          
-          #if PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_MINI()
-            //apply bed level correction on each probed point
-            apply_bed_level_correction(x,y);
-          #endif 
+      const auto prev_measured_z = g29_min_max_measured_z.value_or(MeasuredZ{measured_z, measured_z});
+      g29_min_max_measured_z = { std::min(prev_measured_z.min, measured_z), std::max(prev_measured_z.max, measured_z) };
+      log_info(Marlin, "Measured z: %f", (double) measured_z);
 
-          #if ENABLED(EXTENSIBLE_UI)
-            ExtUI::onMeshUpdate(x, y, measured_z);
-          #endif
+      #if PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_MINI()
+        //apply bed level correction on each probed point
+        apply_bed_level_correction(x,y);
+      #endif
+
+      #if ENABLED(EXTENSIBLE_UI)
+        ExtUI::onMeshUpdate(x, y, measured_z);
+      #endif
     });
 
-      // make sure the probe is stowed when finished no matter the `stow_probe` argument
-      STOW_PROBE();
+    // make sure the probe is stowed when finished no matter the `stow_probe` argument
+    STOW_PROBE();
 
-      #ifdef Z_AFTER_PROBING
-        move_z_after_probing();
-      #endif
-      #if ENABLED(EXTENSIBLE_UI)
-        ui.reset_status();
-      #endif
+    #ifdef Z_AFTER_PROBING
+      move_z_after_probing();
+    #endif
+    #if ENABLED(EXTENSIBLE_UI)
+      ui.reset_status();
+    #endif
 
-      #if UBL_TRAVEL_ACCELERATION
-        {
-          auto s = planner.user_settings;
-          s.travel_acceleration = saved_acceleration;
-          planner.apply_settings(s);
-        }
-      #endif
+    #if UBL_TRAVEL_ACCELERATION
+      {
+        auto s = planner.user_settings;
+        s.travel_acceleration = saved_acceleration;
+        planner.apply_settings(s);
+      }
+    #endif
 
-      restore_ubl_active_state_and_leave();
-    }
+    restore_ubl_active_state_and_leave();
+  }  
 
 
-  #endif // HAS_BED_PROBE
+#endif // HAS_BED_PROBE
 
   bool unified_bed_leveling::g29_parameter_parsing() {
     bool err_flag = false;
