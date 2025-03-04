@@ -6,7 +6,8 @@
 #include "../stepper.h"
 #include "feature/prusa/crash_recovery.hpp"
 #include "configuration.hpp"
-#include <feature/print_status_message/print_status_message_guard.hpp>
+#include <feature/print_status_message/print_status_message_mgr.hpp>
+
 #include <marlin_server.hpp>
 
 inline constexpr float HOMING_BUMP_DIVISOR_STEP = 1.03f;
@@ -416,7 +417,7 @@ float home_axis_precise(AxisEnum axis, int axis_home_dir, bool can_calibrate, fl
         if ((probe_offset < axis_home_min_diff(axis))
             || (probe_offset > axis_home_max_diff(axis))) {
             SERIAL_ECHOLN("failed.");
-            ui.status_printf_P(0, "%c axis homing failed, retrying", axis_codes[axis]);
+            status_guard.update<PrintStatusMessage::homing_retrying>({ .axis = axis });
             homing_failed_update_divisor(axis);
         } else if (std::abs(calibration_offset) <= perfect_offset) {
             SERIAL_ECHOLN("perfect.");
@@ -429,16 +430,16 @@ float home_axis_precise(AxisEnum axis, int axis_home_dir, bool can_calibrate, fl
                 return probe_offset;
             }
             if (first_acceptable) {
-                ui.status_printf_P(0, "Updating precise home point %c axis", axis_codes[axis]);
+                status_guard.update<PrintStatusMessage::homing_refining>({ .axis = axis });
                 homing_failed_update_divisor(axis);
             }
             first_acceptable = true;
         } else {
             SERIAL_ECHOLN("bad.");
             if (can_calibrate) {
-                ui.status_printf_P(0, "Updating precise home point %c axis", axis_codes[axis]);
+                status_guard.update<PrintStatusMessage::homing_refining>({ .axis = axis });
             } else {
-                ui.status_printf_P(0, "%c axis homing failed,retrying", axis_codes[axis]);
+                status_guard.update<PrintStatusMessage::homing_retrying>({ .axis = axis });
             }
         }
     }

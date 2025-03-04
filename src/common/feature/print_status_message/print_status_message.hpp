@@ -12,6 +12,8 @@ struct PrintStatusMessage {
         custom,
 
         homing,
+        homing_retrying,
+        homing_refining,
         recalibrating_home,
         calibrating_axis,
         probing_bed,
@@ -70,6 +72,8 @@ struct PrintStatusMessage {
     using type_record_list = TypeRecordList<
         TypeRecord<Type::custom, PrintStatusMessageDataCustom>,
         TypeRecord<Type::homing, std::monostate>,
+        TypeRecord<Type::homing_retrying, PrintStatusMessageDataAxisProgress>,
+        TypeRecord<Type::homing_refining, PrintStatusMessageDataAxisProgress>,
         TypeRecord<Type::recalibrating_home, std::monostate>,
         TypeRecord<Type::calibrating_axis, PrintStatusMessageDataAxisProgress>,
         TypeRecord<Type::probing_bed, PrintStatusMessageDataProgress>,

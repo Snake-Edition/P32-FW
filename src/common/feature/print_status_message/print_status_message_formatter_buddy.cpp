@@ -8,6 +8,8 @@ static constexpr EnumArray<Message::Type, const char *, Message::Type::_cnt> mes
     { Message::Type::none, nullptr },
         { Message::Type::custom, nullptr },
         { Message::Type::homing, N_("Homing") },
+        { Message::Type::homing_retrying, ("Homing failed, retrying") },
+        { Message::Type::homing_refining, ("Updating precise home point") },
         { Message::Type::recalibrating_home, N_("Recalibrating home. This may take some time.") },
         { Message::Type::calibrating_axis, N_("Calibrating axis") },
         { Message::Type::probing_bed, N_("Probing bed") },
@@ -16,6 +18,7 @@ static constexpr EnumArray<Message::Type, const char *, Message::Type::_cnt> mes
         { Message::Type::absorbing_heat, N_("Absorbing heat") },
         { Message::Type::waiting_for_hotend_temp, N_("Waiting for hotend") },
         { Message::Type::waiting_for_bed_temp, N_("Waiting for bed") },
+
 #if ENABLED(PRUSA_SPOOL_JOIN)
         { Message::Type::spool_joined, N_("Spool joined") },
         { Message::Type::joining_spool, N_("Joining spool") },
@@ -38,6 +41,8 @@ void PrintStatusMessageFormatterBuddy::format(StringBuilder &target, const Messa
         break;
     }
 
+    case Message::Type::homing_retrying:
+    case Message::Type::homing_refining:
     case Message::Type::calibrating_axis: {
         const auto d = std::get<PrintStatusMessageDataAxisProgress>(msg.data);
         target.append_printf(" (%c)", axis_codes[d.axis]);
