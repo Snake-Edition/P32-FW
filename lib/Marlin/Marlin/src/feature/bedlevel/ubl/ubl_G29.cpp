@@ -714,29 +714,6 @@
           #endif
         }
   }
-  int unified_bed_leveling::count_points_to_probe(){
-
-/// probe area is print area enlarged by one major point
-    auto probe_area = print_area.get_bounding_rect().inset(-MESH_X_DIST * GRID_MAJOR_STEP,
-                                                           -MESH_Y_DIST * GRID_MAJOR_STEP);
-// count points that are reachable to be probed
-    int num_of_points_to_probe = 0;
-    for (int y = GRID_MAX_POINTS_Y - GRID_BORDER - 1; y >= GRID_BORDER; y -= GRID_MAJOR_STEP) {
-      int y_idx = (y - GRID_BORDER) / GRID_MAJOR_STEP;
-      bool is_odd_y_position = y_idx % 2 == 1;
-      int x0 = is_odd_y_position ? GRID_BORDER : GRID_MAX_POINTS_X - 1 - GRID_BORDER;
-      int xStep = is_odd_y_position ? GRID_MAJOR_STEP : -GRID_MAJOR_STEP;
-
-      for (int x = x0; GRID_BORDER <= x && x < GRID_MAX_POINTS_X - GRID_BORDER; x += xStep) {
-        xy_pos_t pos = {mesh_index_to_xpos(x), mesh_index_to_ypos(y)};
-
-        if (probe_area.contains(pos))
-          num_of_points_to_probe ++;
-
-      }
-    }
-    return num_of_points_to_probe;
-  }
 
 #if HAS_BED_PROBE
     void unified_bed_leveling::probe_major_points(const xy_pos_t area_a, const xy_pos_t area_b, const bool do_ubl_mesh_map, const bool stow_probe) {
@@ -760,10 +737,11 @@
       PrintArea::rect_t probe_area(area_a, area_b);
       PrintStatusMessageGuard statusGuard;
 
-      bool is_initial_probe = true;
-      const int  num_of_points_to_probe = count_points_to_probe();
-      int num_of_probed_points = 0;
-       // enumerate over all major points
+    /**
+      * Enumerate over points in the grid.
+      * @param func Function to be called for each grid point.
+      */  
+    auto for_each_grid_point = [&](auto&& func) {
       for (int y = GRID_MAX_POINTS_Y - GRID_BORDER - 1; y >= GRID_BORDER; y -= GRID_MAJOR_STEP) {
         int y_idx = (y - GRID_BORDER) / GRID_MAJOR_STEP;
         bool is_odd_y_position = y_idx % 2 == 1;
@@ -781,12 +759,22 @@
           if (!probe_area.contains(pos))
             continue;
 
-          // skip points having meaningful value already
-          // note: zero might be meaningful and we don't skip it; that is just to be conservative
-          // because bedlevel.reset() and others simetimes sets everything to zero instead setting it to NAN
-          if (z_values[x][y] != 0 && !isnan(z_values[x][y])) {
-            continue;
-          }
+          func(pos, x, y);
+        }
+      }
+    };
+
+    int num_of_points_to_probe = 0;
+    for_each_grid_point([&](const xy_pos_t& pos, int x, int y) {
+      num_of_points_to_probe++;
+    });
+
+    bool is_initial_probe = true;
+    int num_of_probed_points = 0;
+    for_each_grid_point([&](const xy_pos_t& pos, int x, int y) {
+      // skip points having meaningful value already
+      if (z_values[x][y] != 0 && !std::isnan(z_values[x][y])) 
+        return;
 
           // print UBL map if we were told to do so
           if (do_ubl_mesh_map)
@@ -810,9 +798,11 @@
           // and finally, probe
           const float measured_z = probe_at_point(
                         pos,
-                        stow_probe ? PROBE_PT_STOW : PROBE_PT_RAISE, g29_verbose_level
+        stow_probe ? PROBE_PT_STOW : PROBE_PT_RAISE, 
+        g29_verbose_level
                       );
-          if(std::isnan(measured_z)){
+
+      if (std::isnan(measured_z)) {
             ubl.g29_probing_failed = true;
             STOW_PROBE();
             return;
@@ -831,8 +821,7 @@
           #if ENABLED(EXTENSIBLE_UI)
             ExtUI::onMeshUpdate(x, y, measured_z);
           #endif
-        }
-      }
+    });
 
       // make sure the probe is stowed when finished no matter the `stow_probe` argument
       STOW_PROBE();
