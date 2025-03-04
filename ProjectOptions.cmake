@@ -50,10 +50,6 @@ set(BOARD
       STRING
       "Select the board for which you want to compile the project (valid values are ${BOARD_VALID_OPTS})."
     )
-set(BOARD_VERSION
-    "<invalid>"
-    CACHE STRING "Specify the version of the board to comiple the project for (e.g. 1.2.3)"
-    )
 set(MCU
     "<default>"
     CACHE
@@ -194,12 +190,6 @@ else()
 endif()
 define_boolean_option(BUDDY_ENABLE_CONNECT ${CONNECT})
 
-# parse board version into its components
-string(REGEX MATCH "^([0-9]+)\\.([0-9]+)\\.([0-9]+)" BOARD_VERSION_MATCH ${BOARD_VERSION})
-set(BOARD_VERSION_MAJOR ${CMAKE_MATCH_1})
-set(BOARD_VERSION_MINOR ${CMAKE_MATCH_2})
-set(BOARD_VERSION_PATCH ${CMAKE_MATCH_3})
-
 # Resolve BUILD_NUMBER and PROJECT_VERSION_* variables
 resolve_version_variables()
 
@@ -213,9 +203,6 @@ message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}.")
 message(STATUS "Bootloader: ${BOOTLOADER}")
 message(STATUS "Printer: ${PRINTER}")
 message(STATUS "Board: ${BOARD}")
-message(
-  STATUS "Board Version: ${BOARD_VERSION_MAJOR}.${BOARD_VERSION_MINOR}.${BOARD_VERSION_PATCH}"
-  )
 message(STATUS "MCU: ${MCU}")
 message(STATUS "Custom Compile Options (C/C++ flags): ${CUSTOM_COMPILE_OPTIONS}")
 message(STATUS "Web User Interface: ${WUI}")

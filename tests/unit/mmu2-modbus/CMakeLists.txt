@@ -7,12 +7,7 @@ add_executable(
 
 add_compile_definitions(UNITTEST)
 
-set_target_properties(
-  mmu2-modbus_tests
-  PROPERTIES COMPILE_DEFINITIONS_OVERRIDE "PRINTER_MODEL=\"COREONE\""
-             "BOARD=\"XBUDDY\"" "BOARD_VERSION_MAJOR=0"
-             "BOARD_VERSION_MINOR=3" "BOARD_VERSION_PATCH=7"
-  )
+target_compile_definitions(mmu2-modbus_tests PRIVATE "PRINTER_MODEL=\"COREONE\"" "BOARD=\"XBUDDY\"")
 
 target_include_directories(
   mmu2-modbus_tests

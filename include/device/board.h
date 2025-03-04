@@ -17,10 +17,8 @@
 ///
 ///    #if BOARD_IS_BUDDY()
 ///       ... code ...
-///    #elif BOARD_IS_XBUDDY() && BOARD_VER_LOWER_OR_EQUAL_TO(0, 2, 0)
-///       ... code for xBuddy 0.2.0 and lower
 ///    #elif BOARD_IS_XBUDDY()
-///       ... code for the latest xBuddy
+///       ... code ...
 ///    #else
 ///       #error Unsupported board
 ///    #endif
@@ -31,9 +29,6 @@
 /// USE the macros defined below instead.
 ///
 /// BOARD (e.g. BUDDY_BOARD)
-/// BOARD_VERSION_MAJOR
-/// BOARD_VERSION_MINOR
-/// BOARD_VERSION_PATCH
 ///
 
 #define BOARD_BUDDY            1
@@ -97,13 +92,3 @@
 #ifndef BOARD_IS_XBUDDY_EXTENSION
     #define BOARD_IS_XBUDDY_EXTENSION() 0
 #endif
-
-#if !defined(BOARD_VERSION_MAJOR) || !defined(BOARD_VERSION_MINOR) || !defined(BOARD_VERSION_PATCH)
-    #error Please define the BOARD_VERSION_MAJOR/MINOR/PATCH macros
-#endif
-
-#define BOARD_VER_HIGHER_THAN(major, minor, patch)        ((BOARD_VERSION_MAJOR > (major)) || (BOARD_VERSION_MAJOR == (major) && BOARD_VERSION_MINOR > (minor)) || (BOARD_VERSION_MAJOR == (major) && BOARD_VERSION_MINOR == (minor) && BOARD_VERSION_PATCH > (patch)))
-#define BOARD_VER_LOWER_THAN(major, minor, patch)         ((BOARD_VERSION_MAJOR < (major)) || (BOARD_VERSION_MAJOR == (major) && BOARD_VERSION_MINOR < (minor)) || (BOARD_VERSION_MAJOR == (major) && BOARD_VERSION_MINOR == (minor) && BOARD_VERSION_PATCH < (patch)))
-#define BOARD_VER_EQUAL_TO(major, minor, patch)           (BOARD_VERSION_MAJOR == (major) && BOARD_VERSION_MINOR == (minor) && BOARD_VERSION_PATCH == (patch))
-#define BOARD_VER_HIGHER_OR_EQUAL_TO(major, minor, patch) (BOARD_VER_HIGHER_THAN(major, minor, patch) || BOARD_VER_EQUAL_TO(major, minor, patch))
-#define BOARD_VER_LOWER_OR_EQUAL_TO(major, minor, patch)  (BOARD_VER_LOWER_THAN(major, minor, patch) || BOARD_VER_EQUAL_TO(major, minor, patch))
