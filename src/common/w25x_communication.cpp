@@ -101,7 +101,7 @@ void w25x_receive(uint8_t *buffer, uint32_t len) {
         return;
     }
 
-    if (len > 1 && dma_is_available()) {
+    if (len > 4 && dma_is_available()) {
         if (memory_supports_dma_transfer(buffer)) {
             Measure _ { "w25x_recv dma-fast %u %u", len };
             set_error(receive_dma(buffer, len));
@@ -130,7 +130,7 @@ uint8_t w25x_receive_byte() {
 }
 
 void w25x_send(const uint8_t *buffer, uint32_t len) {
-    if (len > 1 && dma_is_available()) {
+    if (len > 4 && dma_is_available()) {
         if (memory_supports_dma_transfer(buffer)) {
             Measure _ { "w25x_send dma-fast %u %u", len };
             set_error(send_dma(buffer, len));
