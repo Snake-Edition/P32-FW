@@ -586,10 +586,13 @@ static void pub_init() {
         .Alternate = 0,
     };
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+    // Initialize CAN to off state
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_SET);
 }
 
 static void pub_enable() {
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_SET);
+    // CAN enable is inverted
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_RESET);
 }
 
 static void filament_sensor_pins_init() {
