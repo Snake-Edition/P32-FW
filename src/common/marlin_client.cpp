@@ -381,11 +381,11 @@ void try_recover_from_media_error() {
 }
 
 void notify_server_about_encoder_move() {
-    marlin_server::increment_user_move_count();
+    _send_request_flag_to_server(RequestFlag::KnobMove);
 }
 
 void notify_server_about_knob_click() {
-    marlin_server::increment_user_click_count();
+    _send_request_flag_to_server(RequestFlag::KnobClick);
 }
 
 void set_warning(WarningType type) {

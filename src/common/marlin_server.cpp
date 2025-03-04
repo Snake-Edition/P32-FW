@@ -207,6 +207,8 @@ namespace {
         bool enable_nozzle_temp_timeout; // enables nozzle temperature timeout in print pause
         uint32_t last_update; // last update tick count
         uint16_t flags; // server flags (MARLIN_SFLG)
+        uint32_t knob_click_counter = 0; // Hold user knob clicks for safety timer
+        uint32_t knob_move_counter = 0; // Holds user knob moves for safety timer
 
 #if ENABLED(AXIS_MEASURE)
         /// length of axes measured after crash
@@ -222,9 +224,6 @@ namespace {
     };
 
     std::atomic<uint32_t> request_flags = 0;
-
-    std::atomic<uint32_t> knob_click_counter = 0; // Hold user knob clicks for safety timer
-    std::atomic<uint32_t> knob_move_counter = 0; // Holds user knob moves for safety timer
     static_assert(std::to_underlying(RequestFlag::_cnt) <= 32, "There are more flags than bits");
 
     server_t server; // server structure - initialize task to zero
@@ -2859,20 +2858,12 @@ void set_resume_data(const resume_state_t *data) {
     server.resume = *data;
 }
 
-extern void increment_user_click_count(void) {
-    knob_click_counter++;
-}
-
 extern uint32_t get_user_click_count(void) {
-    return knob_click_counter;
-}
-
-extern void increment_user_move_count(void) {
-    knob_move_counter++;
+    return server.knob_click_counter;
 }
 
 extern uint32_t get_user_move_count(void) {
-    return knob_move_counter;
+    return server.knob_move_counter;
 }
 
 //-----------------------------------------------------------------------------
@@ -3185,10 +3176,10 @@ static void process_request_flags() {
             print_exit();
             break;
         case RequestFlag::KnobMove:
-            increment_user_move_count();
+            server.knob_move_counter++;
             break;
         case RequestFlag::KnobClick:
-            increment_user_click_count();
+            server.knob_click_counter++;
             break;
         case RequestFlag::GuiCantPrint:
             gui_cant_print();
