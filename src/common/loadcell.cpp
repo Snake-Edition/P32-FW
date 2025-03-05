@@ -176,11 +176,10 @@ void Loadcell::ProcessSample(int32_t loadcellRaw, uint32_t time_us) {
 
     // sample timestamp
     int32_t ticks_us_from_now = ticks_diff(time_us, ticks_us());
-    uint32_t timestamp_us = ticks_us() + ticks_us_from_now;
-    last_sample_time_us = timestamp_us;
+    last_sample_time_us = time_us;
 
-    metric_record_custom_at_time(&metric_loadcell, timestamp_us, " r=%" PRId32 "i,o=%" PRId32 "i,s=%0.4f", loadcellRaw, offset, (double)scale);
-    metric_record_integer_at_time(&metric_loadcell_age, timestamp_us, ticks_us_from_now);
+    metric_record_custom_at_time(&metric_loadcell, time_us, " r=%" PRId32 "i,o=%" PRId32 "i,s=%0.4f", loadcellRaw, offset, (double)scale);
+    metric_record_integer_at_time(&metric_loadcell_age, time_us, ticks_us_from_now);
 
     // filtered loads
     const float tared_z_load = get_tared_z_load();
@@ -191,10 +190,10 @@ void Loadcell::ProcessSample(int32_t loadcellRaw, uint32_t time_us) {
     }
 
     const float filtered_z_load = get_filtered_z_load();
-    metric_record_float_at_time(&metric_loadcell_hp, timestamp_us, filtered_z_load);
+    metric_record_float_at_time(&metric_loadcell_hp, time_us, filtered_z_load);
 
     const float filtered_xy_load = get_filtered_xy();
-    metric_record_float_at_time(&metric_loadcell_xy, timestamp_us, filtered_xy_load);
+    metric_record_float_at_time(&metric_loadcell_xy, time_us, filtered_xy_load);
 
     if (tareCount != 0) {
         // Undergoing tare process, only use valid samples
