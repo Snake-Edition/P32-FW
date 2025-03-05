@@ -469,6 +469,12 @@ namespace {
             break;
 #endif
 
+#if HAS_CHAMBER_FILTRATION_API()
+        case PhasesWarning::EnclosureFilterExpiration:
+            buddy::chamber_filtration().handle_filter_expiration_warning(consume_response());
+            break;
+#endif
+
         default:
             // Most warnings are handled somewhere else and we shouldn't consume and process the responses
             break;
@@ -822,6 +828,9 @@ void static finalize_print(bool finished) {
 
 #if XL_ENCLOSURE_SUPPORT()
     xl_enclosure.checkFilterExpiration();
+#endif
+#if HAS_CHAMBER_FILTRATION_API()
+    buddy::chamber_filtration().check_filter_expiration();
 #endif
 
     if (config_store().show_fsensors_disabled_warning_after_print.get()) {
@@ -2010,6 +2019,9 @@ static void _server_print_loop(void) {
 #endif
 #if HAS_MANUAL_CHAMBER_VENTS()
         buddy::chamber().check_vent_state();
+#endif
+#if HAS_CHAMBER_FILTRATION_API()
+        buddy::chamber_filtration().check_filter_expiration();
 #endif
         break;
 

@@ -33,6 +33,7 @@
 #include <option/has_toolchanger.h>
 #include <option/xl_enclosure_support.h>
 #include <option/has_chamber_api.h>
+#include <option/has_chamber_filtration_api.h>
 #include <option/has_xbuddy_extension.h>
 #include <option/has_uneven_bed_prompt.h>
 #include <option/has_ceiling_clearance.h>
@@ -395,7 +396,7 @@ enum class PhasesWarning : PhaseUnderlyingType {
     Warning,
 
 // These have some actual buttons that need to be handled.
-#if XL_ENCLOSURE_SUPPORT()
+#if XL_ENCLOSURE_SUPPORT() || HAS_CHAMBER_FILTRATION_API()
     EnclosureFilterExpiration,
 #endif
 
@@ -864,7 +865,7 @@ class ClientResponses {
         { PhasesWarning::DoorOpen, {} },
 #endif
             { PhasesWarning::Warning, { Response::Continue } },
-#if XL_ENCLOSURE_SUPPORT()
+#if XL_ENCLOSURE_SUPPORT() || HAS_CHAMBER_FILTRATION_API()
             { PhasesWarning::EnclosureFilterExpiration, { Response::Ignore, Response::Postpone5Days, Response::Done } },
 #endif
             { PhasesWarning::ProbingFailed, { Response::Yes, Response::No } },

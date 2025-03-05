@@ -538,11 +538,13 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
 #if XL_ENCLOSURE_SUPPORT()
     case WarningType::EnclosureFanError:
         return ErrCode::CONNECT_ENCLOSURE_FAN_ERROR;
+#endif
+#if XL_ENCLOSURE_SUPPORT() || HAS_CHAMBER_FILTRATION_API()
     case WarningType::EnclosureFilterExpirWarning:
         return ErrCode::CONNECT_ENCLOSURE_FILTER_EXPIRATION_WARNING;
     case WarningType::EnclosureFilterExpiration:
         return ErrCode::CONNECT_ENCLOSURE_FILTER_EXPIRATION;
-#endif // XL_ENCLOSURE_SUPPORT
+#endif
 
 #if ENABLED(DETECT_PRINT_SHEET)
     case WarningType::SteelSheetNotDetected:

@@ -664,6 +664,12 @@ struct CurrentStore
 
     /// How long the filter has been used for (= fan is blowing through the filter), in seconds. Resets on filter change.
     StoreItem<uint32_t, 0, ItemFlag::stats, journal::hash("Chamber filter time used ")> chamber_filter_time_used_s;
+
+    StoreItem<bool, false, ItemFlag::stats, journal::hash("Chamber filter early expiration warning shown")> chamber_filter_early_expiration_warning_shown;
+
+    /// If set, shown next chamber warning only after the specified timestamp.
+    /// The unix timestamp has been divided by 1024 to fit into int32 even after year 2038
+    StoreItem<int32_t, 0, ItemFlag::stats, journal::hash("Chamber filter expiration postpone timestamp")> chamber_filter_expiration_postpone_timestamp_1024;
 #endif
 
 #if HAS_PRINT_FAN_TYPE()

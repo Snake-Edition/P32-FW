@@ -33,7 +33,7 @@ constexpr PhasesWarning warning_type_phase_constexpr(WarningType warning) {
         return PhasesWarning::BedUnevenAlignmentPrompt;
 #endif
 
-#if XL_ENCLOSURE_SUPPORT()
+#if XL_ENCLOSURE_SUPPORT() || HAS_CHAMBER_FILTRATION_API()
     case WarningType::EnclosureFilterExpiration:
         return PhasesWarning::EnclosureFilterExpiration;
 #endif

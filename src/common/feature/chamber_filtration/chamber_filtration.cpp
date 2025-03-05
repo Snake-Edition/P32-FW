@@ -5,6 +5,7 @@
 #include <gcode_info.hpp>
 #include <tools_mapping.hpp>
 #include <config_store/store_definition.hpp>
+#include <buddy/unreachable.hpp>
 
 #include <option/has_xbuddy_extension.h>
 #if HAS_XBUDDY_EXTENSION()
@@ -129,6 +130,88 @@ void ChamberFiltration::step() {
     } else {
         // Reduce eeprom writes - update filter usage in certain intervals
         commit_unaccounted_filter_usage(60);
+    }
+}
+
+uint32_t ChamberFiltration::filter_lifetime_s() const {
+    switch (backend()) {
+
+    case Backend::none:
+        return 0;
+
+#if HAS_XBUDDY_EXTENSION()
+    case Backend::xbe_official_filter:
+        return 600 * 3600;
+
+    case Backend::xbe_filter_on_cooling_fans:
+        // DIY solution, unknown rated life. Let's say that it's the same as the official filter
+        return 600 * 3600;
+#endif
+    }
+
+    BUDDY_UNREACHABLE();
+}
+
+void ChamberFiltration::check_filter_expiration() {
+    /// How much in advance (in filter time usage seconds) we should warn that the filter is about to expire
+    static constexpr auto expiration_early_warning_s = 100 * 3600;
+
+    const auto filter_lifetime_s = this->filter_lifetime_s();
+    if (!filter_lifetime_s) {
+        return;
+    }
+
+    const auto filter_time_used_s = config_store().chamber_filter_time_used_s.get();
+
+    if (filter_time_used_s < filter_lifetime_s - expiration_early_warning_s) {
+        // All is well, reset any warnings and postpones
+        config_store().chamber_filter_expiration_postpone_timestamp_1024.set_to_default();
+        config_store().chamber_filter_early_expiration_warning_shown.set_to_default();
+
+    } else if (filter_time_used_s < filter_lifetime_s) {
+        if (!config_store().chamber_filter_early_expiration_warning_shown.get()) {
+            marlin_server::set_warning(WarningType::EnclosureFilterExpirWarning);
+            config_store().chamber_filter_early_expiration_warning_shown.set(true);
+        }
+
+    } else {
+        const auto current_time = time(nullptr);
+        const auto postpone_time = config_store().chamber_filter_expiration_postpone_timestamp_1024.get();
+        if (current_time / 1024 >= postpone_time) {
+            marlin_server::set_warning(WarningType::EnclosureFilterExpiration);
+        }
+    }
+}
+
+void ChamberFiltration::change_filter() {
+    config_store().chamber_filter_time_used_s.set(0);
+    // Postpones and such get cleared in the next check_filter_expiration call
+}
+
+void ChamberFiltration::handle_filter_expiration_warning(Response response) {
+    switch (response) {
+
+    case Response::_none:
+        break;
+
+    case Response::Ignore:
+        // Do nothing, show warning on next occasion
+        break;
+
+    case Response::Postpone5Days: {
+        if (const auto current_time = time(nullptr); current_time > 0) {
+            // Do nothing if the RTC clock is not set up
+            config_store().chamber_filter_expiration_postpone_timestamp_1024.set((current_time + 5 * 24 * 3600) / 1024);
+        }
+        break;
+    }
+
+    case Response::Done:
+        change_filter();
+        break;
+
+    default:
+        BUDDY_UNREACHABLE();
     }
 }
 

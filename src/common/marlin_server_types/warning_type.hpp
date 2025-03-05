@@ -3,6 +3,8 @@
 #include "client_response.hpp"
 #include <option/has_manual_chamber_vents.h>
 
+#include <option/has_chamber_filtration_api.h>
+
 enum class WarningType : uint32_t {
 #if HAS_EMERGENCY_STOP()
     DoorOpen,
@@ -43,9 +45,11 @@ enum class WarningType : uint32_t {
 #if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
     NozzleCleaningFailed,
 #endif
-#if XL_ENCLOSURE_SUPPORT()
+#if XL_ENCLOSURE_SUPPORT() || HAS_CHAMBER_FILTRATION_API()
     EnclosureFilterExpirWarning,
     EnclosureFilterExpiration,
+#endif
+#if XL_ENCLOSURE_SUPPORT()
     EnclosureFanError,
 #endif
 #if ENABLED(DETECT_PRINT_SHEET)

@@ -136,5 +136,5 @@ void MI_CHAMBER_CHANGE_FILTER::click(IWindowMenu &) {
         return;
     }
 
-    config_store().chamber_filter_time_used_s.set(0);
+    chamber_filtration().change_filter();
 }
