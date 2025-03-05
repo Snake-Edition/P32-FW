@@ -191,7 +191,7 @@ public:
 
 public:
     /// Append current Z coordinate and load to the window for later analysis
-    void StoreSample(float currentZ, float currentLoad);
+    void StoreSample(uint32_t time_us, float currentZ, float currentLoad);
 
     /// Run the analysis and return its result
     Result Analyse();

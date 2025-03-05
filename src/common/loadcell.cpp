@@ -174,7 +174,7 @@ void Loadcell::ProcessSample(int32_t loadcellRaw, uint32_t time_us) {
         xy_filter.filter(this->loadcellRaw);
     }
 
-    // sample timestamp
+    // save sample timestamp/age
     int32_t ticks_us_from_now = ticks_diff(time_us, ticks_us());
     last_sample_time_us = time_us;
 
@@ -255,7 +255,7 @@ void Loadcell::ProcessSample(int32_t loadcellRaw, uint32_t time_us) {
     // push sample for analysis
     float z_pos = buddy::probePositionLookback.get_position_at(time_us, []() { return planner.get_axis_position_mm(AxisEnum::Z_AXIS); });
     if (!std::isnan(z_pos)) {
-        analysis.StoreSample(z_pos, tared_z_load);
+        analysis.StoreSample(time_us, z_pos, tared_z_load);
     } else {
         // Temporary disabled as this causes positive feedback loop by blocking the calling thread if the logs are
         // being uploaded to a remote server. This does not solve the problem entirely. There are other logs that

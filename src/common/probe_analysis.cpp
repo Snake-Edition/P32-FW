@@ -13,11 +13,11 @@ void ProbeAnalysisBase::SetSamplingIntervalMs(float interval) {
     samplingInterval = interval / 1000;
 }
 
-void ProbeAnalysisBase::StoreSample(float currentZ, float currentLoad) {
+void ProbeAnalysisBase::StoreSample(uint32_t time_us, float currentZ, float currentLoad) {
     if (analysisInProgress) {
         return;
     }
-    window.push_back({ ticks_us(), currentZ, currentLoad });
+    window.push_back({ time_us, currentZ, currentLoad });
 
 #if !defined(UNITTESTS)
     lastSampleTimestamp = ticks_us();
