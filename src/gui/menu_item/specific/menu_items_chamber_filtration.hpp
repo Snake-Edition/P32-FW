@@ -63,3 +63,20 @@ public:
 protected:
     void OnChange(size_t) override;
 };
+
+class MI_CHAMBER_FILTER_TIME_USED : public WiSpin {
+public:
+    MI_CHAMBER_FILTER_TIME_USED();
+
+protected:
+    void OnClick() override;
+    void Loop() override;
+};
+
+class MI_CHAMBER_CHANGE_FILTER : public IWindowMenuItem {
+public:
+    MI_CHAMBER_CHANGE_FILTER();
+
+protected:
+    virtual void click(IWindowMenu &) override;
+};

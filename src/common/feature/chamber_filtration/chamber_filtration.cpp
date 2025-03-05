@@ -84,19 +84,48 @@ void ChamberFiltration::step() {
         update_needs_filtration();
     }
 
+    const auto now_s = ticks_s();
+
+    // Determine output PWM of the fans
     if (!needs_filtration_.value_or(false)) {
         output_pwm_ = {};
 
     } else if (is_printing) {
         output_pwm_ = config_store().chamber_mid_print_filtration_pwm.get();
-        last_print_s_ = ticks_s();
+        last_print_s_ = now_s;
 
-    } else if (config_store().chamber_post_print_filtration_enable.get() && ticks_diff(ticks_s(), last_print_s_) <= config_store().chamber_post_print_filtration_duration_min.get() * 60) {
+    } else if (config_store().chamber_post_print_filtration_enable.get() && ticks_diff(now_s, last_print_s_) <= config_store().chamber_post_print_filtration_duration_min.get() * 60) {
         output_pwm_ = config_store().chamber_post_print_filtration_pwm.get();
 
     } else {
         output_pwm_ = {};
         needs_filtration_ = std::nullopt; // Reset the flag after the print is done so that it doesn't affect the next print
+    }
+
+    const auto commit_unaccounted_filter_usage = [&](int min_s = 1) {
+        const auto unnacounted_usage_s = ticks_diff(now_s, unaccounted_filter_time_used_start_s_);
+        if (unnacounted_usage_s < min_s) {
+            return;
+        }
+
+        config_store().chamber_filter_time_used_s.apply([&](auto &val) { val += unnacounted_usage_s; });
+        unaccounted_filter_time_used_start_s_ = now_s;
+    };
+
+    // If output_pwm > 0, track filter usage
+    if (output_pwm_.value == 0) {
+        if (unaccounted_filter_time_used_start_s_) {
+            // Commit any remaining unaccounted time
+            commit_unaccounted_filter_usage();
+            unaccounted_filter_time_used_start_s_ = 0;
+        }
+
+    } else if (unaccounted_filter_time_used_start_s_ == 0) {
+        unaccounted_filter_time_used_start_s_ = now_s;
+
+    } else {
+        // Reduce eeprom writes - update filter usage in certain intervals
+        commit_unaccounted_filter_usage(60);
     }
 }
 

@@ -661,6 +661,9 @@ struct CurrentStore
     StoreItem<PWM255, 10, ItemFlag::features, journal::hash("Chamber mid print filtration pwm")> chamber_mid_print_filtration_pwm;
     StoreItem<PWM255, 128, ItemFlag::features, journal::hash("Chamber post print filtration pwm")> chamber_post_print_filtration_pwm;
     StoreItem<bool, false, ItemFlag::features, journal::hash("Chamber filtration always on")> chamber_filtration_always_on;
+
+    /// How long the filter has been used for (= fan is blowing through the filter), in seconds. Resets on filter change.
+    StoreItem<uint32_t, 0, ItemFlag::stats, journal::hash("Chamber filter time used ")> chamber_filter_time_used_s;
 #endif
 
 #if HAS_PRINT_FAN_TYPE()

@@ -54,6 +54,9 @@ private:
     bool is_printing_prev_ = false;
     std::optional<bool> needs_filtration_;
     uint32_t last_print_s_ = 0;
+
+    /// ticks_s() of the start of filter usage (output_pwm > 0) that has not yet been emitted in the config_store
+    uint32_t unaccounted_filter_time_used_start_s_ = 0;
 };
 
 ChamberFiltration &chamber_filtration();

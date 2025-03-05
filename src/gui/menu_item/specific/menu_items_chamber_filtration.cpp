@@ -102,3 +102,39 @@ MI_CHAMBER_ALWAYS_FILTER::MI_CHAMBER_ALWAYS_FILTER()
 void MI_CHAMBER_ALWAYS_FILTER::OnChange(size_t) {
     config_store().chamber_filtration_always_on.set(value());
 }
+
+// MI_CHAMBER_FILTER_TIME_USED
+// ============================================
+static constexpr NumericInputConfig filter_usage_numeric_config {
+    .min_value = 0,
+    .max_value = 9999,
+    .unit = Unit::hour,
+};
+
+MI_CHAMBER_FILTER_TIME_USED::MI_CHAMBER_FILTER_TIME_USED()
+    : WiSpin(0, filter_usage_numeric_config, _("Filter Usage")) {}
+
+void MI_CHAMBER_FILTER_TIME_USED::OnClick() {
+    // Allow the user to change this value. It is informative for the user comfort and there is no reason to disallow adjusting if it the user decides so
+    // At the very least, this will be handy for testing purposes
+    config_store().chamber_filter_time_used_s.set(value() * 3600);
+}
+
+void MI_CHAMBER_FILTER_TIME_USED::Loop() {
+    if (!is_focused()) {
+        set_value(config_store().chamber_filter_time_used_s.get() / 3600);
+    }
+}
+
+// MI_CHAMBER_CHANGE_FILTER
+// ============================================
+MI_CHAMBER_CHANGE_FILTER::MI_CHAMBER_CHANGE_FILTER()
+    : IWindowMenuItem(_("Change Filter")) {}
+
+void MI_CHAMBER_CHANGE_FILTER::click(IWindowMenu &) {
+    if (MsgBoxQuestion(_("Reset filter usage?"), Responses_YesNo) != Response::Yes) {
+        return;
+    }
+
+    config_store().chamber_filter_time_used_s.set(0);
+}
