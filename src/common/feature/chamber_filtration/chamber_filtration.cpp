@@ -6,7 +6,10 @@
 #include <tools_mapping.hpp>
 #include <config_store/store_definition.hpp>
 
-#include <feature/xbuddy_extension/xbuddy_extension.hpp>
+#include <option/has_xbuddy_extension.h>
+#if HAS_XBUDDY_EXTENSION()
+    #include <feature/xbuddy_extension/xbuddy_extension.hpp>
+#endif
 
 namespace buddy {
 
