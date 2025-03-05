@@ -95,9 +95,6 @@ void serial_print_finalize();
 void set_command(uint32_t command);
 
 //
-void test_abort();
-
-//
 void print_abort();
 
 //

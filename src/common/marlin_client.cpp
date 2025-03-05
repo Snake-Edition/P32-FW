@@ -275,10 +275,6 @@ void test_start_with_data(const uint64_t test_mask, const ::selftest::TestData t
 void test_start(const uint64_t test_mask) {
     test_start_with_data(test_mask, ::selftest::TestData {});
 }
-
-void test_abort() {
-    _send_request_flag_to_server(RequestFlag::TestAbort);
-}
 #endif
 
 void print_start(const char *filename, marlin_server::PreviewSkipIfAble skip_preview) {

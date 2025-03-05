@@ -110,7 +110,6 @@ void cancel_current_object();
 #if HAS_SELFTEST()
 void test_start_with_data(const uint64_t test_mask, const selftest::TestData test_data);
 void test_start(const uint64_t test_mask);
-void test_abort();
 #endif
 
 void print_start(const char *filename, marlin_server::PreviewSkipIfAble skip_preview);

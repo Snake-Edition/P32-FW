@@ -995,14 +995,6 @@ void test_start([[maybe_unused]] const uint64_t test_mask, [[maybe_unused]] cons
 #endif
 }
 
-void test_abort(void) {
-#if HAS_SELFTEST()
-    if (SelftestInstance().IsInProgress()) {
-        SelftestInstance().Abort();
-    }
-#endif
-}
-
 void quick_stop() {
 #if HAS_TOOLCHANGER()
     prusa_toolchanger.quick_stop();
@@ -3169,9 +3161,6 @@ static void process_request_flags() {
         }
 
         switch (RequestFlag(i)) {
-        case RequestFlag::TestAbort:
-            test_abort();
-            break;
         case RequestFlag::PrintReady:
             gui_ready_to_print();
             break;
