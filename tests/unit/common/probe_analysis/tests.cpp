@@ -65,8 +65,8 @@ SCENARIO("Analysis properly handles its sample window", "[probe_analysis]") {
         }
 
         WHEN("receives just a few samples") {
-            analysis.StoreSample(0, 0);
-            analysis.StoreSample(0, 0);
+            analysis.StoreSample(0, 0, 0);
+            analysis.StoreSample(0, 0, 0);
 
             THEN("the internal counter increases") {
                 REQUIRE(analysis.window.size() == 2);
@@ -82,13 +82,13 @@ SCENARIO("Analysis properly handles its sample window", "[probe_analysis]") {
         WHEN("receives just about enough samples") {
             analysis.SetSamplingIntervalMs(1000);
             for (int i = 0; i < 4; i++) {
-                analysis.StoreSample(0, 0);
+                analysis.StoreSample(0, 0, 0);
             }
             for (int i = 0; i < 4; i++) {
-                analysis.StoreSample(-1, 0);
+                analysis.StoreSample(0, -1, 0);
             }
             for (int i = 0; i < 4; i++) {
-                analysis.StoreSample(0, 0);
+                analysis.StoreSample(0, 0, 0);
             }
 
             THEN("it is ready for analysis") {
@@ -100,13 +100,13 @@ SCENARIO("Analysis properly handles its sample window", "[probe_analysis]") {
         WHEN("filled up with a U shape Z samples and U shape load without delay") {
             float load = 100;
             for (int i = 0; i < 4; i++) {
-                analysis.StoreSample(/*current_z=*/0, /*current_load=*/load++);
+                analysis.StoreSample(/*time_us=*/0, /*current_z=*/0, /*current_load=*/load++);
             }
             for (int i = 0; i < 4; i++) {
-                analysis.StoreSample(/*current_z=*/-10, /*current_load=*/load++);
+                analysis.StoreSample(/*time_us=*/0, /*current_z=*/-10, /*current_load=*/load++);
             }
             for (int i = 0; i < 4; i++) {
-                analysis.StoreSample(/*current_z=*/0, /*current_load=*/load++);
+                analysis.StoreSample(/*time_us=*/0, /*current_z=*/0, /*current_load=*/load++);
             }
 
             THEN("the analysis calculates proper halt_start and halt_end times") {
@@ -139,7 +139,7 @@ SCENARIO("Analysis properly handles its sample window", "[probe_analysis]") {
 
         WHEN("filled up with rising Z samples") {
             for (int i = 0; i < 12; i++) {
-                analysis.StoreSample(/*current_z=*/100 + i * 2, /*current_load=*/0);
+                analysis.StoreSample(/*time_us=*/0, /*current_z=*/100 + i * 2, /*current_load=*/0);
             }
 
             THEN("compensation for system delay fills missing Z coordinates") {
@@ -155,7 +155,7 @@ SCENARIO("Analysis properly handles its sample window", "[probe_analysis]") {
     GIVEN("An instance ready for processing") {
         ProbeAnalysis<12> analysis;
         for (int i = 0; i < 12; i++) {
-            analysis.StoreSample(0, 0);
+            analysis.StoreSample(0, 0, 0);
         }
 
         WHEN("Reset() is called") {
@@ -180,11 +180,11 @@ SCENARIO("analysis properly calculates probe features", "[probe_analysis]") {
         ProbeAnalysisT analysis;
         analysis.SetSamplingIntervalMs(1000);
 
-        analysis.StoreSample(0, 0);
-        analysis.StoreSample(0, 1);
-        analysis.StoreSample(0, 3);
-        analysis.StoreSample(0, 1);
-        analysis.StoreSample(0, 0);
+        analysis.StoreSample(0, 0, 0);
+        analysis.StoreSample(0, 0, 1);
+        analysis.StoreSample(0, 0, 3);
+        analysis.StoreSample(0, 0, 1);
+        analysis.StoreSample(0, 0, 0);
 
         WHEN("load is being approximated using two specific lines") {
             auto result = analysis.CalculateErrorWhenLoadRepresentedAsLines(
@@ -207,13 +207,13 @@ SCENARIO("analysis properly calculates probe features", "[probe_analysis]") {
         using ProbeAnalysisT = ProbeAnalysis<12>;
         ProbeAnalysisT analysis;
         for (int i = 0; i < 4; i++) {
-            analysis.StoreSample(/*current_z=*/0, /*current_load=*/-10);
+            analysis.StoreSample(/*time_us=*/0, /*current_z=*/0, /*current_load=*/-10);
         }
         for (int i = 0; i < 4; i++) {
-            analysis.StoreSample(/*current_z=*/-10, /*current_load=*/-20);
+            analysis.StoreSample(/*time_us=*/0, /*current_z=*/-10, /*current_load=*/-20);
         }
         for (int i = 0; i < 4; i++) {
-            analysis.StoreSample(/*current_z=*/0, /*current_load=*/-10);
+            analysis.StoreSample(/*time_us=*/0, /*current_z=*/0, /*current_load=*/-10);
         }
 
         WHEN("z is being interpolated over the Z = 0 part") {
@@ -273,19 +273,19 @@ SCENARIO("analysis properly calculates probe features", "[probe_analysis]") {
         float load = 100;
         float z = -1;
         for (int i = 0; i < 3; i++) {
-            analysis.StoreSample(/*current_z=*/z--, /*current_load=*/load);
+            analysis.StoreSample(/*time_us=*/0, /*current_z=*/z--, /*current_load=*/load);
         }
         for (int i = 0; i < 2; i++) {
-            analysis.StoreSample(/*current_z=*/z--, /*current_load=*/load--);
+            analysis.StoreSample(/*time_us=*/0, /*current_z=*/z--, /*current_load=*/load--);
         }
         for (int i = 0; i < 2; i++) {
-            analysis.StoreSample(/*current_z=*/z, /*current_load=*/load);
+            analysis.StoreSample(/*time_us=*/0, /*current_z=*/z, /*current_load=*/load);
         }
         for (int i = 0; i < 2; i++) {
-            analysis.StoreSample(/*current_z=*/++z, /*current_load=*/++load);
+            analysis.StoreSample(/*time_us=*/0, /*current_z=*/++z, /*current_load=*/++load);
         }
         for (int i = 0; i < 3; i++) {
-            analysis.StoreSample(/*current_z=*/++z, /*current_load=*/load);
+            analysis.StoreSample(/*time_us=*/0, /*current_z=*/++z, /*current_load=*/load);
         }
 
         /*
