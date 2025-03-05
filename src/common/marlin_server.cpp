@@ -3139,7 +3139,22 @@ bool _process_server_valid_request(const Request &request, int client_id) {
 }
 
 void send_request_flag(const RequestFlag request) {
-    request_flags |= (0x1 << std::to_underlying(request));
+
+    // These requests shouldn't be called at once (in single step of marlin_server's cycle)
+    static constexpr uint32_t exclusive_print_request_mask = (0x1 << std::to_underlying(RequestFlag::PrintResume)) | (0x1 << std::to_underlying(RequestFlag::PrintPause)) | (0x1 << std::to_underlying(RequestFlag::PrintAbort));
+    const uint32_t curr_request_flag = 0x1 << std::to_underlying(request);
+
+    uint32_t flags = request_flags.load();
+    uint32_t new_flags;
+
+    do {
+        new_flags = flags;
+        // Clear exclusive print flags if set
+        if (curr_request_flag & exclusive_print_request_mask) {
+            new_flags &= ~exclusive_print_request_mask;
+        }
+        new_flags |= curr_request_flag;
+    } while (!request_flags.compare_exchange_strong(flags, new_flags));
 }
 
 static void process_request_flags() {
