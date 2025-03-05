@@ -14,22 +14,6 @@ extern "C" uint32_t ticks_us() {
     return 0;
 }
 
-template <typename AnalysisType>
-void StoreSamples(AnalysisType &analysis, int simulate_delay, std::initializer_list<std::tuple<float, float>> samples) {
-    std::size_t idx = 0;
-    for (auto &tup : samples) {
-        float load = std::get<0>(tup);
-        float z;
-        if (idx + simulate_delay < samples.size()) {
-            z = std::get<1>(*(samples.begin() + idx + simulate_delay));
-        } else {
-            z = std::get<1>(*(samples.end() - 1));
-        }
-        analysis.StoreSample(z, load);
-        idx++;
-    }
-}
-
 template <typename It>
 class IteratorDistance : public Catch::MatcherBase<int> {
     It a;
