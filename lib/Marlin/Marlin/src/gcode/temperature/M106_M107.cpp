@@ -113,7 +113,7 @@ void GcodeSuite::M106() {
         uint16_t d = parser.seen('A') ? thermalManager.fan_speed[0] : 255;
         uint16_t s = parser.ushortval('S', d);
         NOMORE(s, 255U);
-    #if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
+    #if HAS_GCODE_COMPATIBILITY()
         if (gcode.compatibility.mk4_compatibility_mode) {
             s = (s * 7) / 10; // Converts speed to 70% of its values
         }
