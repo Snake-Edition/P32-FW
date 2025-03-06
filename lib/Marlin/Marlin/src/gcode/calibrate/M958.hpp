@@ -7,8 +7,8 @@
 #include <option/has_local_accelerometer.h>
 #include <option/has_remote_accelerometer.h>
 #include "Marlin/src/core/types.h"
-#include "Marlin/src/module/stepper/trinamic.h"
 #include "Marlin/src/module/prusa/accelerometer.h"
+#include "Marlin/src/feature/precise_stepping/common.hpp"
 #include "Marlin/src/feature/input_shaper/input_shaper_config.hpp"
 #include <inplace_function.hpp>
 #include <freertos/critical_section.hpp>
