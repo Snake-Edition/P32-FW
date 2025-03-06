@@ -1892,7 +1892,7 @@
 // packaged with Marlin. Source code for the user interface will need to
 // be placed in "src/lcd/extensible_ui/lib"
 //
-//#define EXTENSIBLE_UI
+#define EXTENSIBLE_UI
 
 //=============================================================================
 //=============================== Graphical TFTs ==============================
