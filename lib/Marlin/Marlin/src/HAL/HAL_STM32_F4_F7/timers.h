@@ -25,6 +25,8 @@
   #include "STM32F4/timers.h"
 #elif STM32G0
   #include "STM32G0/timers.h"
-#else
+#elif STM32F7
   #include "STM32F7/timers.h"
+#else
+  #error "Unknown MCU"
 #endif

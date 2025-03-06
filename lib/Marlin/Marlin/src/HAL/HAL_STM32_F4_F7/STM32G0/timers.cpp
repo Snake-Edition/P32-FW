@@ -30,9 +30,7 @@
 // Local defines
 // ------------------------
 
-#define NUM_HARDWARE_TIMERS 3
-#define STEP_TIMER_IRQ_ID TIM1_CC_IRQn
-#define MOVE_TIMER_IRQ_ID TIM6_IRQn
+#define NUM_HARDWARE_TIMERS 1
 #define TEMP_TIMER_IRQ_ID TIM7_IRQn
 
 // ------------------------
@@ -53,33 +51,8 @@ void HAL_timer_start(const uint8_t timer_num, const uint32_t frequency) {
   }
 
   if (!timers_initialized[timer_num]) {
-    constexpr uint32_t step_prescaler = STEPPER_TIMER_PRESCALE - 1,
-                       move_prescaler = MOVE_TIMER_PRESCALE - 1,
-                       temp_prescaler = TEMP_TIMER_PRESCALE - 1;
+    constexpr uint32_t temp_prescaler = TEMP_TIMER_PRESCALE - 1;
     switch (timer_num) {
-      case STEP_TIMER_NUM:
-        __HAL_RCC_TIM1_CLK_ENABLE();
-        TimerHandle[timer_num].handle.Instance               = TIM1;
-        TimerHandle[timer_num].handle.Init.Period            = 65535;
-        TimerHandle[timer_num].handle.Init.Prescaler         = step_prescaler; // Frequency of timer ticks should be 1MHz, based on 168000000 / (167 + 1).
-        TimerHandle[timer_num].handle.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;
-        TimerHandle[timer_num].handle.Init.CounterMode       = TIM_COUNTERMODE_UP;
-        TimerHandle[timer_num].handle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-        TimerHandle[timer_num].callback = (uint32_t)TC1_Handler;
-        HAL_NVIC_SetPriority(STEP_TIMER_IRQ_ID,  ISR_PRIORITY_STEP_TIMER, 0);
-        break;
-
-      case MOVE_TIMER_NUM:
-        // MOVE TIMER TIM6 - any available 16bit Timer
-        __HAL_RCC_TIM6_CLK_ENABLE();
-        TimerHandle[timer_num].handle.Instance            = TIM6;
-        TimerHandle[timer_num].handle.Init.Prescaler      = move_prescaler;
-        TimerHandle[timer_num].handle.Init.CounterMode    = TIM_COUNTERMODE_UP;
-        TimerHandle[timer_num].handle.Init.ClockDivision  = TIM_CLOCKDIVISION_DIV1;
-        TimerHandle[timer_num].callback = (uint32_t)TC6_Handler;
-        HAL_NVIC_SetPriority(STEP_TIMER_IRQ_ID, ISR_PRIORITY_MOVE_TIMER, 0);
-        break;
-
       case TEMP_TIMER_NUM:
         // TEMP TIMER TIM7 - any available 16bit Timer (1 already used for PWM)
         __HAL_RCC_TIM7_CLK_ENABLE();
@@ -95,24 +68,6 @@ void HAL_timer_start(const uint8_t timer_num, const uint32_t frequency) {
   }
 
   switch (timer_num) {
-    case STEP_TIMER_NUM:
-      if (HAL_TIM_OC_Init(&TimerHandle[timer_num].handle) == HAL_OK) {
-        TIM_OC_InitTypeDef sConfig = {0};
-        sConfig.OCMode     = TIM_OCMODE_TIMING;
-        sConfig.Pulse      = (STEPPER_TIMER_RATE / 1000); // The first call of the stepper routine will be after 1ms.
-
-        if (HAL_TIM_OC_ConfigChannel(&TimerHandle[timer_num].handle, &sConfig, TIM_CHANNEL_1) == HAL_OK) {
-          if (HAL_TIM_OC_Start_IT(&TimerHandle[timer_num].handle, TIM_CHANNEL_1) != HAL_OK)
-            fatal_error("HAL_TIM_OC_Start_IT - Failed", "HAL_timer_start");
-        } else {
-          fatal_error("HAL_TIM_OC_ConfigChannel - Failed", "HAL_timer_start");
-        }
-      } else {
-        fatal_error("HAL_TIM_OC_Init - Failed", "HAL_timer_start");
-      }
-      break;
-
-  case MOVE_TIMER_NUM:
   case TEMP_TIMER_NUM:
       TimerHandle[timer_num].handle.Init.Period = (((HAL_TIMER_RATE) / TimerHandle[timer_num].handle.Init.Prescaler) / frequency) - 1;
       if (HAL_TIM_Base_Init(&TimerHandle[timer_num].handle) == HAL_OK)
@@ -121,28 +76,18 @@ void HAL_timer_start(const uint8_t timer_num, const uint32_t frequency) {
   }
 }
 
-extern "C" void TIM1_CC_IRQHandler() {
-  ((void(*)())TimerHandle[STEP_TIMER_NUM].callback)();
-}
 extern "C" void TIM7_IRQHandler() {
   ((void(*)())TimerHandle[TEMP_TIMER_NUM].callback)();
-}
-extern "C" void TIM6_IRQHandler() {
-  ((void(*)())TimerHandle[MOVE_TIMER_NUM].callback)();
 }
 
 void HAL_timer_enable_interrupt(const uint8_t timer_num) {
   switch (timer_num) {
-    case STEP_TIMER_NUM: HAL_NVIC_EnableIRQ(STEP_TIMER_IRQ_ID); break;
-    case MOVE_TIMER_NUM: HAL_NVIC_EnableIRQ(MOVE_TIMER_IRQ_ID); break;
     case TEMP_TIMER_NUM: HAL_NVIC_EnableIRQ(TEMP_TIMER_IRQ_ID); break;
   }
 }
 
 void HAL_timer_disable_interrupt(const uint8_t timer_num) {
   switch (timer_num) {
-    case STEP_TIMER_NUM: HAL_NVIC_DisableIRQ(STEP_TIMER_IRQ_ID); break;
-    case MOVE_TIMER_NUM: HAL_NVIC_DisableIRQ(MOVE_TIMER_IRQ_ID); break;
     case TEMP_TIMER_NUM: HAL_NVIC_DisableIRQ(TEMP_TIMER_IRQ_ID); break;
   }
   // We NEED memory barriers to ensure Interrupts are actually disabled!
@@ -153,8 +98,6 @@ void HAL_timer_disable_interrupt(const uint8_t timer_num) {
 
 bool HAL_timer_interrupt_enabled(const uint8_t timer_num) {
   switch (timer_num) {
-    case STEP_TIMER_NUM: return NVIC_GetEnableIRQ(STEP_TIMER_IRQ_ID);
-    case MOVE_TIMER_NUM: return NVIC_GetEnableIRQ(MOVE_TIMER_IRQ_ID);
     case TEMP_TIMER_NUM: return NVIC_GetEnableIRQ(TEMP_TIMER_IRQ_ID);
   }
   return false;
