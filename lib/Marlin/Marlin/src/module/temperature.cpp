@@ -32,7 +32,6 @@
 
 #include "../Marlin.h"
 #include "../lcd/ultralcd.h"
-#include "planner.h"
 #include "../core/language.h"
 #include "../HAL/shared/Delay.h"
 #include "bsod.h"
@@ -43,6 +42,12 @@
 #include "printers.h"
 #include "MarlinPin.h"
 #include "../../../../src/common/adc.hpp"
+
+#include <option/has_planner.h>
+#if HAS_PLANNER()
+  #include "planner.h"
+#endif
+
 #include <feature/print_status_message/print_status_message_guard.hpp>
 #include <i18n.h>
 #include <option/has_chamber_api.h>
@@ -3751,11 +3756,13 @@ void Temperature::isr() {
     babystep.task();
   #endif
 
-  // Poll endstops state, if required
-  endstops.poll();
+  #if HAS_PLANNER()
+    // Poll endstops state, if required
+    endstops.poll();
 
-  // Periodically call the planner timer
-  planner.tick();
+    // Periodically call the planner timer
+    planner.tick();
+  #endif /* HAS_PLANNER() */
 }
 
 #if HAS_TEMP_SENSOR
@@ -3981,8 +3988,10 @@ void Temperature::isr() {
       PrintStatusMessageGuard statusGuard;
 
       do {
-        // Check if we're aborting
-        if (planner.draining()) break;
+        #if HAS_PLANNER()
+          // Check if we're aborting
+          if (planner.draining()) break;
+        #endif
 
         // Target temperature might be changed during the loop
         if (target_temp != degTargetHotend(target_extruder)) {

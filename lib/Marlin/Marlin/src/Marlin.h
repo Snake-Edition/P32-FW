@@ -23,6 +23,11 @@
 
 #include "inc/MarlinConfig.h"
 
+#include <option/has_planner.h>
+#if HAS_PLANNER()
+  #include <module/motion.h>
+#endif
+
 #ifdef DEBUG_GCODE_PARSER
   #include "gcode/parser.h"
 #endif
@@ -63,7 +68,7 @@ void manage_inactivity(const bool ignore_stepper_queue=false);
 #endif
 
 #define  enable_X() do{ X_enable; X2_enable; }while(0)
-#define disable_X() do{ X_disable; X2_disable; CBI(axis_known_position, X_AXIS); }while(0)
+#define disable_X() do{ X_disable; X2_disable; TERN_(HAS_PLANNER_ENABLED, CBI(axis_known_position, X_AXIS)); }while(0)
 
 #if HAS_Y_ENABLE
   #define Y_enable  Y_ENABLE_WRITE( Y_ENABLE_ON)
@@ -83,12 +88,12 @@ void manage_inactivity(const bool ignore_stepper_queue=false);
 
 #if DISABLED(XY_LINKED_ENABLE)
 #define  enable_Y() do{ Y_enable; Y2_enable; }while(0)
-#define disable_Y() do{ Y_disable; Y2_disable; CBI(axis_known_position, Y_AXIS); }while(0)
+#define disable_Y() do{ Y_disable; Y2_disable; TERN_(HAS_PLANNER_ENABLED, CBI(axis_known_position, Y_AXIS)); }while(0)
 #endif
 
 #if ENABLED(XY_LINKED_ENABLE)
   #define  enable_XY() enable_X()
-  #define disable_XY() []{ disable_X(); CBI(axis_known_position, Y_AXIS); }()
+  #define disable_XY() []{ disable_X(); TERN_(HAS_PLANNER_ENABLED, CBI(axis_known_position, Y_AXIS)); }()
 #else
   #define  enable_XY() do{enable_X(); enable_Y(); }while(0)
   #define disable_XY() do{disable_X(); disable_Y(); }while(0)
@@ -119,7 +124,7 @@ void manage_inactivity(const bool ignore_stepper_queue=false);
 #endif
 
 #define  enable_Z() do{ Z_enable; Z2_enable; Z3_enable; }while(0)
-#define disable_Z() do{ Z_disable; Z2_disable; Z3_disable; CBI(axis_known_position, Z_AXIS); }while(0)
+#define disable_Z() do{ Z_disable; Z2_disable; Z3_disable; TERN_(HAS_PLANNER_ENABLED, CBI(axis_known_position, Z_AXIS)); }while(0)
 
 //
 // Extruder Stepper enable / disable

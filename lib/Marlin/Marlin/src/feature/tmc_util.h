@@ -30,7 +30,11 @@
 #if HAS_TRINAMIC
 
 #include <TMCStepper.h>
-#include "../module/planner.h"
+
+#include <option/has_planner.h>
+#if HAS_PLANNER() && ENABLED(HYBRID_THRESHOLD)
+  #include "../module/planner.h"
+#endif
 
 #define TMC_X_LABEL 'X', '0'
 #define TMC_Y_LABEL 'Y', '0'

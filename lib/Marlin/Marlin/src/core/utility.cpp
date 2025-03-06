@@ -24,18 +24,26 @@
 
 #include "../Marlin.h"
 #include "../module/temperature.h"
-#include "../module/planner.h"
+
+#include <option/has_planner.h>
+#if HAS_PLANNER()
+  #include "../module/planner.h"
+#endif
 
 void safe_delay(millis_t ms) {
   while (ms > 50) {
-    if (planner.draining())
-      return;
+    #if HAS_PLANNER()
+      if (planner.draining())
+        return;
+    #endif
     ms -= 50;
     delay(50);
     thermalManager.manage_heater();
   }
+  #if HAS_PLANNER()
   if (planner.draining())
     return;
+  #endif
   delay(ms);
   thermalManager.manage_heater(); // This keeps us safe if too many small safe_delay() calls are made
 }

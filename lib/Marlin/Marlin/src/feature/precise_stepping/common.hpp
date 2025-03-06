@@ -146,6 +146,7 @@ struct step_event_u16_t {
     StepEventFlag_t flags;
 };
 
+#if HAS_PLANNER()
 // Circular queue for move segments.
 // head == tail              : the queue is empty
 // head != tail              : moves segments are in the queue
@@ -166,6 +167,7 @@ typedef struct step_event_queue_t {
     volatile uint16_t tail = 0;
     volatile uint16_t head = 0;
 } step_event_queue_t;
+#endif
 
 enum StepGeneratorType : uint8_t {
     CLASSIC_STEP_GENERATOR_X = 0,

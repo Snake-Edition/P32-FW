@@ -501,6 +501,13 @@ endif()
 message(STATUS "Graphical User Interface: ${GUI}")
 define_boolean_option(HAS_GUI ${GUI})
 
+if(BOARD_IS_MASTER_BOARD)
+  set(HAS_PLANNER true)
+else()
+  set(HAS_PLANNER false)
+endif()
+define_boolean_option(HAS_PLANNER ${HAS_PLANNER})
+
 if(ENABLE_BURST
    AND ${PRINTER} IN_LIST PRINTERS_WITH_BURST_STEPPING
    AND BOARD_IS_MASTER_BOARD

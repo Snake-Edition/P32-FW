@@ -30,9 +30,6 @@
 
 #include "Marlin.h"
 
-#include "feature/input_shaper/input_shaper_config.hpp"
-#include "feature/pressure_advance/pressure_advance_config.hpp"
-
 #include <option/has_phase_stepping.h>
 #if HAS_PHASE_STEPPING()
   #include "feature/phase_stepping/phase_stepping.hpp"
@@ -45,10 +42,17 @@
 
 #include "core/utility.h"
 #include "lcd/ultralcd.h"
-#include "module/motion.h"
-#include "module/planner.h"
-#include "module/stepper.h"
-#include "module/endstops.h"
+
+#include <option/has_planner.h>
+#if HAS_PLANNER()
+  #include "module/motion.h"
+  #include "module/planner.h"
+  #include "module/stepper.h"
+  #include "module/endstops.h"
+  #include "feature/input_shaper/input_shaper_config.hpp"
+  #include "feature/pressure_advance/pressure_advance_config.hpp"
+#endif
+
 #include "module/probe.h"
 #include "module/temperature.h"
 #include "module/configuration_store.h"
@@ -244,12 +248,14 @@ void protected_pin_err() {
   SERIAL_ERROR_MSG(MSG_ERR_PROTECTED_PIN);
 }
 
-void quickstop_stepper() {
-  planner.quick_stop();
-  planner.synchronize();
-  set_current_from_steppers_for_axis(ALL_AXES_ENUM);
-  sync_plan_position();
-}
+#if HAS_PLANNER()
+  void quickstop_stepper() {
+    planner.quick_stop();
+    planner.synchronize();
+    set_current_from_steppers_for_axis(ALL_AXES_ENUM);
+    sync_plan_position();
+  }
+#endif /* HAS_PLANNER() */
 
 void enable_e_steppers() {
   enable_E0(); enable_E1(); enable_E2(); enable_E3(); enable_E4(); enable_E5();
@@ -386,46 +392,48 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
     #define MOVE_AWAY_TEST true
   #endif
 
-  if (stepper_inactive_time) {
-    static bool already_shutdown_steppers; // = false
-    if (planner.processing())
-      gcode.reset_stepper_timeout();
-    else if (MOVE_AWAY_TEST && !ignore_stepper_queue && ELAPSED(ms, gcode.previous_move_ms + stepper_inactive_time)) {
-      if (!already_shutdown_steppers) {
-        already_shutdown_steppers = true;  // L6470 SPI will consume 99% of free time without this
+  #if HAS_PLANNER()
+    if (stepper_inactive_time) {
+      static bool already_shutdown_steppers; // = false
+      if (planner.processing())
+        gcode.reset_stepper_timeout();
+      else if (MOVE_AWAY_TEST && !ignore_stepper_queue && ELAPSED(ms, gcode.previous_move_ms + stepper_inactive_time)) {
+        if (!already_shutdown_steppers) {
+          already_shutdown_steppers = true;  // L6470 SPI will consume 99% of free time without this
 
-        #if _DEBUG && !BOARD_IS_DWARF()
-        // Report steppers being disabled to the user
-        // Skip if position not trusted to avoid warnings when position is not important
-        if(axis_known_position) {
-          /// @note Hacky link from marlin_server which cannot be included here.
-          /// @todo Remove when stepper timeout screen is solved properly.
-          extern void marlin_server_steppers_timeout_warning();
-          marlin_server_steppers_timeout_warning();
+          #if _DEBUG && !BOARD_IS_DWARF()
+          // Report steppers being disabled to the user
+          // Skip if position not trusted to avoid warnings when position is not important
+          if(axis_known_position) {
+            /// @note Hacky link from marlin_server which cannot be included here.
+            /// @todo Remove when stepper timeout screen is solved properly.
+            extern void marlin_server_steppers_timeout_warning();
+            marlin_server_steppers_timeout_warning();
+          }
+          #endif
+
+          #if (ENABLED(XY_LINKED_ENABLE) && (ENABLED(DISABLE_INACTIVE_X) || ENABLED(DISABLE_INACTIVE_Y)))
+            disable_XY();
+          #else
+            #if ENABLED(DISABLE_INACTIVE_X)
+              disable_X();
+            #endif
+            #if ENABLED(DISABLE_INACTIVE_Y)
+              disable_Y();
+            #endif
+          #endif
+          #if ENABLED(DISABLE_INACTIVE_Z)
+            disable_Z();
+          #endif
+          #if ENABLED(DISABLE_INACTIVE_E)
+            disable_e_steppers();
+          #endif
         }
-        #endif
-
-        #if (ENABLED(XY_LINKED_ENABLE) && (ENABLED(DISABLE_INACTIVE_X) || ENABLED(DISABLE_INACTIVE_Y)))
-          disable_XY();
-        #else
-          #if ENABLED(DISABLE_INACTIVE_X)
-            disable_X();
-          #endif
-          #if ENABLED(DISABLE_INACTIVE_Y)
-            disable_Y();
-          #endif
-        #endif
-        #if ENABLED(DISABLE_INACTIVE_Z)
-          disable_Z();
-        #endif
-        #if ENABLED(DISABLE_INACTIVE_E)
-          disable_e_steppers();
-        #endif
       }
+      else
+        already_shutdown_steppers = false;
     }
-    else
-      already_shutdown_steppers = false;
-  }
+  #endif /* HAS_PLANNER() */
 
   #if PIN_EXISTS(CHDK) // Check if pin should be set to LOW (after M240 set it HIGH)
     if (chdk_timeout && ELAPSED(ms, chdk_timeout)) {
@@ -575,12 +583,17 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
     monitor_tmc_driver();
   #endif
 
-  // Limit check_axes_activity frequency to 10Hz
-  static millis_t next_check_axes_ms = 0;
-  if (ELAPSED(ms, next_check_axes_ms)) {
-    planner.check_axes_activity();
-    next_check_axes_ms = ms + 100UL;
-  }
+  #if HAS_PLANNER()
+    // Limit check_axes_activity frequency to 10Hz
+    static millis_t next_check_axes_ms = 0;
+    if (ELAPSED(ms, next_check_axes_ms)) {
+      planner.check_axes_activity();
+      next_check_axes_ms = ms + 100UL;
+    }
+  #else /* HAS_PLANNER() */
+    // Apply fan speeds manually, because it is done in the planner.check_axes_activity()
+    thermalManager.applyScaledFanSpeed();
+  #endif /* HAS_PLANNER() */
 
   #if PIN_EXISTS(FET_SAFETY)
     static millis_t FET_next;
@@ -607,7 +620,9 @@ void idle(
     , bool no_stepper_sleep/*=false*/
   #endif
 ) {
-  endstops.event_handler();
+  #if HAS_PLANNER()
+    endstops.event_handler();
+  #endif
 
   #if ENABLED(EXTENSIBLE_UI)
     ui.update();
@@ -664,7 +679,9 @@ void idle(
     MMU2::mmu2.mmu_loop();
   #endif
 
-  PreciseStepping::loop();
+  #if HAS_PLANNER()
+    PreciseStepping::loop();
+  #endif /* HAS_PLANNER() */
 
   #if ENABLED(NOZZLE_LOAD_CELL)
     if( EMotorStallDetector::Instance().Evaluate(stepper.axis_is_moving(E_AXIS), ! stepper.motor_direction(E_AXIS))){
@@ -816,8 +833,10 @@ void setup() {
     SERIAL_ECHO_MSG("Compiled: " __DATE__);
   #endif
 
-  SERIAL_ECHO_START();
-  SERIAL_ECHOLNPAIR(MSG_FREE_MEMORY, freeMemory(), MSG_PLANNER_BUFFER_BYTES, (int)sizeof(block_t) * (BLOCK_BUFFER_SIZE));
+  #if HAS_PLANNER()
+    SERIAL_ECHO_START();
+    SERIAL_ECHOLNPAIR(MSG_FREE_MEMORY, freeMemory(), MSG_PLANNER_BUFFER_BYTES, (int)sizeof(block_t) * (BLOCK_BUFFER_SIZE));
+  #endif
 
   // UI must be initialized before EEPROM
   // (because EEPROM code calls the UI).
@@ -841,27 +860,31 @@ void setup() {
     current_position += home_offset;
   #endif
 
-  // Vital to init stepper/planner equivalent for current_position
-  sync_plan_position();
+  #if HAS_PLANNER()
+    // Vital to init stepper/planner equivalent for current_position
+    sync_plan_position();
+  #endif
 
   thermalManager.init();    // Initialize temperature loop
 
   print_job_timer.init();   // Initial setup of print job timer
 
-  endstops.init();          // Init endstops and pullups
+  #if HAS_PLANNER()
+    endstops.init();        // Init endstops and pullups
 
-  // Init the motion system (order is relevant!)
-  // NOTE: this enables (timer) interrupts!
-  planner.init();
-  stepper.init();
-#if HAS_PHASE_STEPPING()
-  phase_stepping::init();
-#endif
-  PreciseStepping::init();
-#ifdef ADVANCED_STEP_GENERATORS
-  input_shaper::init();
-  pressure_advance::init();
-#endif
+    // Init the motion system (order is relevant!)
+    // NOTE: this enables (timer) interrupts!
+    planner.init();
+    stepper.init();
+    #if HAS_PHASE_STEPPING()
+      phase_stepping::init();
+    #endif
+    PreciseStepping::init();
+    #ifdef ADVANCED_STEP_GENERATORS
+      input_shaper::init();
+      pressure_advance::init();
+    #endif
+  #endif /* HAS_PLANNER() */
 
   #if HAS_SERVOS
     servo_init();
@@ -914,9 +937,9 @@ void setup() {
     SET_INPUT_PULLUP(HOME_PIN);
   #endif
 
-  #ifdef Z_ALWAYS_ON  
-    enable_Z();  
-  #endif    
+  #ifdef Z_ALWAYS_ON
+    enable_Z();
+  #endif
 
   #if PIN_EXISTS(STAT_LED_RED)
     OUT_WRITE(STAT_LED_RED_PIN, LOW); // OFF

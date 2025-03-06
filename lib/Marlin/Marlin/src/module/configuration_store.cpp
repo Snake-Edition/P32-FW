@@ -42,9 +42,13 @@
 
 #include "configuration_store.h"
 
-#include "endstops.h"
-#include "planner.h"
-#include "stepper.h"
+#include <option/has_planner.h>
+#if HAS_PLANNER()
+  #include "endstops.h"
+  #include "planner.h"
+  #include "stepper.h"
+#endif
+
 #include "temperature.h"
 #include "../lcd/ultralcd.h"
 #include "../core/language.h"
@@ -152,53 +156,55 @@ MarlinSettings settings;
 #endif
 
 void MarlinSettings::postprocess() {
-  xyze_pos_t oldpos = current_position;
+  #if HAS_PLANNER()
+    xyze_pos_t oldpos = current_position;
 
-  // steps per s2 needs to be updated to agree with units per s2
-  planner.refresh_acceleration_rates();
+    // steps per s2 needs to be updated to agree with units per s2
+    planner.refresh_acceleration_rates();
 
-  // Make sure delta kinematics are updated before refreshing the
-  // planner position so the stepper counts will be set correctly.
-  #if ENABLED(DELTA)
-    recalc_delta_settings();
-  #endif
+    // Make sure delta kinematics are updated before refreshing the
+    // planner position so the stepper counts will be set correctly.
+    #if ENABLED(DELTA)
+      recalc_delta_settings();
+    #endif
 
-  #if ENABLED(PIDTEMP)
-    thermalManager.updatePID();
-  #endif
+    #if ENABLED(PIDTEMP)
+      thermalManager.updatePID();
+    #endif
 
-  #if DISABLED(NO_VOLUMETRICS)
-    planner.calculate_volumetric_multipliers();
-  #elif EXTRUDERS
-    for (uint8_t i = COUNT(planner.e_factor); i--;)
-      planner.refresh_e_factor(i);
-  #endif
+    #if DISABLED(NO_VOLUMETRICS)
+      planner.calculate_volumetric_multipliers();
+    #elif EXTRUDERS
+      for (uint8_t i = COUNT(planner.e_factor); i--;)
+        planner.refresh_e_factor(i);
+    #endif
 
-  // Software endstops depend on home_offset
-  LOOP_XYZ(i) {
-    update_workspace_offset((AxisEnum)i);
-    update_software_endstops((AxisEnum)i);
-  }
+    // Software endstops depend on home_offset
+    LOOP_XYZ(i) {
+      update_workspace_offset((AxisEnum)i);
+      update_software_endstops((AxisEnum)i);
+    }
 
-  #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
-    set_z_fade_height(new_z_fade_height, false); // false = no report
-  #endif
+    #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
+      set_z_fade_height(new_z_fade_height, false); // false = no report
+    #endif
 
-  #if ENABLED(FWRETRACT)
-    fwretract.refresh_autoretract();
-  #endif
+    #if ENABLED(FWRETRACT)
+      fwretract.refresh_autoretract();
+    #endif
 
-  #if HAS_LINEAR_E_JERK
-    planner.recalculate_max_e_jerk();
-  #endif
+    #if HAS_LINEAR_E_JERK
+      planner.recalculate_max_e_jerk();
+    #endif
 
-  // Refresh mm_per_step, mm_per_half_step and mm_per_mstep with the reciprocal of axis_steps_per_mm and axis_msteps_per_mm
-  // and init stepper.count[], planner.position[] with current_position
-  planner.refresh_positioning();
+    // Refresh mm_per_step, mm_per_half_step and mm_per_mstep with the reciprocal of axis_steps_per_mm and axis_msteps_per_mm
+    // and init stepper.count[], planner.position[] with current_position
+    planner.refresh_positioning();
 
-  // Various factors can change the current position
-  if (oldpos != current_position)
-    report_current_position();
+    // Various factors can change the current position
+    if (oldpos != current_position)
+      report_current_position();
+  #endif /* HAS_PLANNER() */
 }
 
 #define DEBUG_OUT ENABLED(EEPROM_CHITCHAT)
@@ -214,50 +220,54 @@ bool MarlinSettings::save() {
  * @param no_limits When true, do not apply any mode limit
  */
 void MarlinSettings::reset_motion(const bool no_limits) {
-  auto s = planner.user_settings;
+  #if HAS_PLANNER()
+    auto s = planner.user_settings;
 
-  LOOP_XYZE_N(i) {
-    s.max_acceleration_mm_per_s2[i] = pgm_read_dword(&_DMA[ALIM(i, _DMA)]);
-    s.axis_steps_per_mm[i]          = get_steps_per_unit(i);
-    s.axis_msteps_per_mm[i]         = get_steps_per_unit(i) * PLANNER_STEPS_MULTIPLIER;
-    s.max_feedrate_mm_s[i]          = pgm_read_float(&_DMF[ALIM(i, _DMF)]);
-  }
+    LOOP_XYZE_N(i) {
+      s.max_acceleration_mm_per_s2[i] = pgm_read_dword(&_DMA[ALIM(i, _DMA)]);
+      s.axis_steps_per_mm[i]          = get_steps_per_unit(i);
+      s.axis_msteps_per_mm[i]         = get_steps_per_unit(i) * PLANNER_STEPS_MULTIPLIER;
+      s.max_feedrate_mm_s[i]          = pgm_read_float(&_DMF[ALIM(i, _DMF)]);
+    }
 
-  s.min_segment_time_us = DEFAULT_MINSEGMENTTIME;
-  s.acceleration = DEFAULT_ACCELERATION;
-  s.retract_acceleration = DEFAULT_RETRACT_ACCELERATION;
-  s.travel_acceleration = DEFAULT_TRAVEL_ACCELERATION;
-  s.min_feedrate_mm_s = feedRate_t(DEFAULT_MINIMUMFEEDRATE);
-  s.min_travel_feedrate_mm_s = feedRate_t(DEFAULT_MINTRAVELFEEDRATE);
+    s.min_segment_time_us = DEFAULT_MINSEGMENTTIME;
+    s.acceleration = DEFAULT_ACCELERATION;
+    s.retract_acceleration = DEFAULT_RETRACT_ACCELERATION;
+    s.travel_acceleration = DEFAULT_TRAVEL_ACCELERATION;
+    s.min_feedrate_mm_s = feedRate_t(DEFAULT_MINIMUMFEEDRATE);
+    s.min_travel_feedrate_mm_s = feedRate_t(DEFAULT_MINTRAVELFEEDRATE);
 
-  #if HAS_CLASSIC_JERK
-    #ifndef DEFAULT_XJERK
-      #define DEFAULT_XJERK 0
+    #if HAS_CLASSIC_JERK
+      #ifndef DEFAULT_XJERK
+        #define DEFAULT_XJERK 0
+      #endif
+      #ifndef DEFAULT_YJERK
+        #define DEFAULT_YJERK 0
+      #endif
+      #ifndef DEFAULT_ZJERK
+        #define DEFAULT_ZJERK 0
+      #endif
+      s.max_jerk.set(DEFAULT_XJERK, DEFAULT_YJERK, DEFAULT_ZJERK);
+      #if HAS_CLASSIC_E_JERK
+        s.max_jerk.e = DEFAULT_EJERK;
+      #endif
     #endif
-    #ifndef DEFAULT_YJERK
-      #define DEFAULT_YJERK 0
-    #endif
-    #ifndef DEFAULT_ZJERK
-      #define DEFAULT_ZJERK 0
-    #endif
-    s.max_jerk.set(DEFAULT_XJERK, DEFAULT_YJERK, DEFAULT_ZJERK);
-    #if HAS_CLASSIC_E_JERK
-      s.max_jerk.e = DEFAULT_EJERK;
-    #endif
-  #endif
 
-  #if DISABLED(CLASSIC_JERK)
-    planner.junction_deviation_mm = float(JUNCTION_DEVIATION_MM);
-  #endif
+    #if DISABLED(CLASSIC_JERK)
+      planner.junction_deviation_mm = float(JUNCTION_DEVIATION_MM);
+    #endif
 
-  planner.apply_settings(s, no_limits);
+    planner.apply_settings(s, no_limits);
+  #endif /* HAS_PLANNER() */
 }
 
 /**
  * M502 - Reset Configuration
  */
 void MarlinSettings::reset() {
-  reset_motion();
+  #if HAS_PLANNER()
+    reset_motion();
+  #endif
 
   #if HAS_SCARA_OFFSET
     scara_home_offset.reset();
@@ -496,13 +506,15 @@ void MarlinSettings::reset() {
 
   #endif
 
-  endstops.enable_globally(
-    #if ENABLED(ENDSTOPS_ALWAYS_ON_DEFAULT)
-      true
-    #else
-      false
-    #endif
-  );
+  #if HAS_PLANNER()
+    endstops.enable_globally(
+      #if ENABLED(ENDSTOPS_ALWAYS_ON_DEFAULT)
+        true
+      #else
+        false
+      #endif
+    );
+  #endif /* HAS_PLANNER() */
 
   reset_stepper_drivers();
 
@@ -653,87 +665,89 @@ void MarlinSettings::reset() {
 
     #endif // !NO_VOLUMETRICS
 
-    CONFIG_ECHO_HEADING("Steps per unit:");
-    report_M92(!forReplay);
+    #if HAS_PLANNER()
+      CONFIG_ECHO_HEADING("Steps per unit:");
+      report_M92(!forReplay);
 
-    CONFIG_ECHO_HEADING("Maximum feedrates (units/s):");
-    CONFIG_ECHO_START();
-    SERIAL_ECHOLNPAIR(
-        "  M203 X", LINEAR_UNIT(planner.settings.max_feedrate_mm_s[X_AXIS])
-      , " Y", LINEAR_UNIT(planner.settings.max_feedrate_mm_s[Y_AXIS])
-      , " Z", LINEAR_UNIT(planner.settings.max_feedrate_mm_s[Z_AXIS])
-      #if DISABLED(DISTINCT_E_FACTORS)
-        , " E", VOLUMETRIC_UNIT(planner.settings.max_feedrate_mm_s[E_AXIS])
-      #endif
-    );
-    #if ENABLED(DISTINCT_E_FACTORS)
+      CONFIG_ECHO_HEADING("Maximum feedrates (units/s):");
       CONFIG_ECHO_START();
-      for (uint8_t i = 0; i < E_STEPPERS; i++) {
-        SERIAL_ECHOLNPAIR(
-            "  M203 T", (int)i
-          , " E", VOLUMETRIC_UNIT(planner.settings.max_feedrate_mm_s[E_AXIS_N(i)])
-        );
+      SERIAL_ECHOLNPAIR(
+          "  M203 X", LINEAR_UNIT(planner.settings.max_feedrate_mm_s[X_AXIS])
+        , " Y", LINEAR_UNIT(planner.settings.max_feedrate_mm_s[Y_AXIS])
+        , " Z", LINEAR_UNIT(planner.settings.max_feedrate_mm_s[Z_AXIS])
+        #if DISABLED(DISTINCT_E_FACTORS)
+          , " E", VOLUMETRIC_UNIT(planner.settings.max_feedrate_mm_s[E_AXIS])
+        #endif
+      );
+      #if ENABLED(DISTINCT_E_FACTORS)
+        CONFIG_ECHO_START();
+        for (uint8_t i = 0; i < E_STEPPERS; i++) {
+          SERIAL_ECHOLNPAIR(
+              "  M203 T", (int)i
+            , " E", VOLUMETRIC_UNIT(planner.settings.max_feedrate_mm_s[E_AXIS_N(i)])
+          );
+        }
+      #endif
+
+      CONFIG_ECHO_HEADING("Maximum Acceleration (units/s2):");
+      CONFIG_ECHO_START();
+      SERIAL_ECHOLNPAIR(
+          "  M201 X", LINEAR_UNIT(planner.settings.max_acceleration_mm_per_s2[X_AXIS])
+        , " Y", LINEAR_UNIT(planner.settings.max_acceleration_mm_per_s2[Y_AXIS])
+        , " Z", LINEAR_UNIT(planner.settings.max_acceleration_mm_per_s2[Z_AXIS])
+        #if DISABLED(DISTINCT_E_FACTORS)
+          , " E", VOLUMETRIC_UNIT(planner.settings.max_acceleration_mm_per_s2[E_AXIS])
+        #endif
+      );
+      #if ENABLED(DISTINCT_E_FACTORS)
+        CONFIG_ECHO_START();
+        for (uint8_t i = 0; i < E_STEPPERS; i++)
+          SERIAL_ECHOLNPAIR(
+              "  M201 T", (int)i
+            , " E", VOLUMETRIC_UNIT(planner.settings.max_acceleration_mm_per_s2[E_AXIS_N(i)])
+          );
+      #endif
+
+      CONFIG_ECHO_HEADING("Acceleration (units/s2): P<print_accel> R<retract_accel> T<travel_accel>");
+      CONFIG_ECHO_START();
+      SERIAL_ECHOLNPAIR(
+          "  M204 P", LINEAR_UNIT(planner.settings.acceleration)
+        , " R", LINEAR_UNIT(planner.settings.retract_acceleration)
+        , " T", LINEAR_UNIT(planner.settings.travel_acceleration)
+      );
+
+      if (!forReplay) {
+        CONFIG_ECHO_START();
+        SERIAL_ECHOPGM("Advanced: B<min_segment_time_us> S<min_feedrate> T<min_travel_feedrate>");
+        #if DISABLED(CLASSIC_JERK)
+          SERIAL_ECHOPGM(" J<junc_dev>");
+        #endif
+        #if HAS_CLASSIC_JERK
+          SERIAL_ECHOPGM(" X<max_x_jerk> Y<max_y_jerk> Z<max_z_jerk>");
+          #if HAS_CLASSIC_E_JERK
+            SERIAL_ECHOPGM(" E<max_e_jerk>");
+          #endif
+        #endif
+        SERIAL_EOL();
       }
-    #endif
-
-    CONFIG_ECHO_HEADING("Maximum Acceleration (units/s2):");
-    CONFIG_ECHO_START();
-    SERIAL_ECHOLNPAIR(
-        "  M201 X", LINEAR_UNIT(planner.settings.max_acceleration_mm_per_s2[X_AXIS])
-      , " Y", LINEAR_UNIT(planner.settings.max_acceleration_mm_per_s2[Y_AXIS])
-      , " Z", LINEAR_UNIT(planner.settings.max_acceleration_mm_per_s2[Z_AXIS])
-      #if DISABLED(DISTINCT_E_FACTORS)
-        , " E", VOLUMETRIC_UNIT(planner.settings.max_acceleration_mm_per_s2[E_AXIS])
-      #endif
-    );
-    #if ENABLED(DISTINCT_E_FACTORS)
       CONFIG_ECHO_START();
-      for (uint8_t i = 0; i < E_STEPPERS; i++)
-        SERIAL_ECHOLNPAIR(
-            "  M201 T", (int)i
-          , " E", VOLUMETRIC_UNIT(planner.settings.max_acceleration_mm_per_s2[E_AXIS_N(i)])
-        );
-    #endif
-
-    CONFIG_ECHO_HEADING("Acceleration (units/s2): P<print_accel> R<retract_accel> T<travel_accel>");
-    CONFIG_ECHO_START();
-    SERIAL_ECHOLNPAIR(
-        "  M204 P", LINEAR_UNIT(planner.settings.acceleration)
-      , " R", LINEAR_UNIT(planner.settings.retract_acceleration)
-      , " T", LINEAR_UNIT(planner.settings.travel_acceleration)
-    );
-
-    if (!forReplay) {
-      CONFIG_ECHO_START();
-      SERIAL_ECHOPGM("Advanced: B<min_segment_time_us> S<min_feedrate> T<min_travel_feedrate>");
-      #if DISABLED(CLASSIC_JERK)
-        SERIAL_ECHOPGM(" J<junc_dev>");
-      #endif
-      #if HAS_CLASSIC_JERK
-        SERIAL_ECHOPGM(" X<max_x_jerk> Y<max_y_jerk> Z<max_z_jerk>");
-        #if HAS_CLASSIC_E_JERK
-          SERIAL_ECHOPGM(" E<max_e_jerk>");
+      SERIAL_ECHOLNPAIR(
+          "  M205 B", LINEAR_UNIT(planner.settings.min_segment_time_us)
+        , " S", LINEAR_UNIT(planner.settings.min_feedrate_mm_s)
+        , " T", LINEAR_UNIT(planner.settings.min_travel_feedrate_mm_s)
+        #if DISABLED(CLASSIC_JERK)
+          , " J", LINEAR_UNIT(planner.junction_deviation_mm)
         #endif
-      #endif
-      SERIAL_EOL();
-    }
-    CONFIG_ECHO_START();
-    SERIAL_ECHOLNPAIR(
-        "  M205 B", LINEAR_UNIT(planner.settings.min_segment_time_us)
-      , " S", LINEAR_UNIT(planner.settings.min_feedrate_mm_s)
-      , " T", LINEAR_UNIT(planner.settings.min_travel_feedrate_mm_s)
-      #if DISABLED(CLASSIC_JERK)
-        , " J", LINEAR_UNIT(planner.junction_deviation_mm)
-      #endif
-      #if HAS_CLASSIC_JERK
-        , " X", LINEAR_UNIT(planner.settings.max_jerk.x)
-        , " Y", LINEAR_UNIT(planner.settings.max_jerk.y)
-        , " Z", LINEAR_UNIT(planner.settings.max_jerk.z)
-        #if HAS_CLASSIC_E_JERK
-          , " E", LINEAR_UNIT(planner.settings.max_jerk.e)
+        #if HAS_CLASSIC_JERK
+          , " X", LINEAR_UNIT(planner.settings.max_jerk.x)
+          , " Y", LINEAR_UNIT(planner.settings.max_jerk.y)
+          , " Z", LINEAR_UNIT(planner.settings.max_jerk.z)
+          #if HAS_CLASSIC_E_JERK
+            , " E", LINEAR_UNIT(planner.settings.max_jerk.e)
+          #endif
         #endif
-      #endif
-    );
+      );
+    #endif /* HAS_PLANNER() */
 
     #if HAS_M206_COMMAND
       CONFIG_ECHO_HEADING("Home offset:");

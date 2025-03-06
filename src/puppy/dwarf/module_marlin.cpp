@@ -7,7 +7,6 @@
 #include <PuppyConfig.hpp>
 #include "wiring_analog.h"
 #include "wiring_digital.h"
-#include "Marlin/src/module/planner.h"
 #include <logging/log.hpp>
 #include "gpio.h"
 #include "modbus/ModbusInit.hpp" //for modbus::modbus_control
@@ -20,6 +19,12 @@
 #include "task_startup.h"
 #include <hal/HAL_MultiWatchdog.hpp>
 #include <advanced_power.hpp>
+#include <bsod.h>
+
+#include <option/has_planner.h>
+#if HAS_PLANNER()
+    #include <module/planner.h>
+#endif
 
 LOG_COMPONENT_REF(Marlin);
 
@@ -127,7 +132,9 @@ void stop_marlin() {
     // stop marlin loop
     marlin_kill = true;
 
+#if HAS_PLANNER()
     planner.quick_stop();
+#endif
     DISABLE_TEMPERATURE_INTERRUPT();
     dwarf_init_done = false;
     hwio_safe_state();

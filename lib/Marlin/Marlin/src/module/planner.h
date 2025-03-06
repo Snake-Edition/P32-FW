@@ -32,6 +32,11 @@
 
 #include "../Marlin.h"
 
+#include <option/has_planner.h>
+#if !HAS_PLANNER()
+  #error "Incorrectly including planner on a board without planner support!"
+#endif
+
 #include "motion.h"
 #include "../gcode/queue.h"
 #include "../feature/precise_stepping/precise_stepping.hpp"

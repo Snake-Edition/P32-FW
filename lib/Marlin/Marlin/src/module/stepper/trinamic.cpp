@@ -30,8 +30,13 @@
 #if HAS_TRINAMIC
 
 #include "trinamic.h"
-#include "../stepper.h"
 #include "bsod.h"
+
+#include <option/has_planner.h>
+#if HAS_PLANNER()
+  #include "../planner.h"
+  #include "../stepper.h"
+#endif
 
 #if ENABLED(USE_PRUSA_EEPROM_AS_SOURCE_OF_DEFAULT_VALUES)
     #include <config_store/store_instance.hpp>
@@ -793,7 +798,9 @@ tmc_init(stepperE0, get_default_rms_current_ma_e(), get_microsteps_e(), E0_HYBRI
     TMC_ADV()
   #endif
 
-  stepper.set_directions();
+  #if HAS_PLANNER()
+    stepper.set_directions();
+  #endif
 }
 
 TMCStepperType &stepper_axis(const AxisEnum axis)
@@ -886,7 +893,7 @@ bool stepper_wait_for_standstill(uint8_t axis_mask, millis_t max_delay) {
         if (stst) {
           break;
         }
-        if (millis() > timeout || planner.draining()) {
+        if (millis() > timeout || TERN0(HAS_PLANNER_ENABLED, planner.draining())) {
             return false;
         }
         safe_delay(10);

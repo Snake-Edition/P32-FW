@@ -7,9 +7,7 @@ add_library(
   Marlin
   Marlin/Marlin/src/core/serial.cpp
   Marlin/Marlin/src/core/utility.cpp
-  Marlin/Marlin/src/feature/precise_stepping/precise_stepping.cpp
   Marlin/Marlin/src/feature/tmc_util.cpp
-  Marlin/Marlin/src/gcode/config/M92.cpp
   Marlin/Marlin/src/gcode/parser.cpp
   Marlin/Marlin/src/HAL/HAL_STM32_F4_F7/HAL.cpp
   Marlin/Marlin/src/HAL/HAL_STM32_F4_F7/STM32F4/timers.cpp
@@ -20,14 +18,22 @@ add_library(
   Marlin/Marlin/src/libs/stopwatch.cpp
   Marlin/Marlin/src/Marlin.cpp
   Marlin/Marlin/src/module/configuration_store.cpp
-  Marlin/Marlin/src/module/endstops.cpp
-  Marlin/Marlin/src/module/motion.cpp
-  Marlin/Marlin/src/module/planner.cpp
-  Marlin/Marlin/src/module/stepper.cpp
   Marlin/Marlin/src/module/stepper/indirection.cpp
   Marlin/Marlin/src/module/stepper/trinamic.cpp
   Marlin/Marlin/src/module/temperature.cpp
   )
+
+if(HAS_PLANNER)
+  target_sources(
+    Marlin
+    PRIVATE Marlin/Marlin/src/feature/precise_stepping/precise_stepping.cpp
+            Marlin/Marlin/src/gcode/config/M92.cpp
+            Marlin/Marlin/src/module/endstops.cpp
+            Marlin/Marlin/src/module/motion.cpp
+            Marlin/Marlin/src/module/planner.cpp
+            Marlin/Marlin/src/module/stepper.cpp
+    )
+endif()
 
 target_compile_options(Marlin PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-psabi>)
 

@@ -24,6 +24,7 @@
 #include <option/has_remote_accelerometer.h>
 #include <option/has_toolchanger.h>
 #include <option/has_gcode_compatibility.h>
+#include <option/has_planner.h>
 
 /**
  * SanityCheck.h
@@ -2109,8 +2110,14 @@ static_assert(   _ARR_TEST(3,0) && _ARR_TEST(3,1) && _ARR_TEST(3,2)
   #error "CNC_COORDINATE_SYSTEMS is incompatible with NO_WORKSPACE_OFFSETS."
 #endif
 
-#if !BLOCK_BUFFER_SIZE || !IS_POWER_OF_2(BLOCK_BUFFER_SIZE)
-  #error "BLOCK_BUFFER_SIZE must be a power of 2."
+#if HAS_PLANNER()
+  #if !BLOCK_BUFFER_SIZE || !IS_POWER_OF_2(BLOCK_BUFFER_SIZE)
+    #error "BLOCK_BUFFER_SIZE must be a power of 2."
+  #endif
+#else
+  #ifdef BLOCK_BUFFER_SIZE
+    #error "BLOCK_BUFFER_SIZE should not be defined without a planner"
+  #endif
 #endif
 
 #if ENABLED(LED_CONTROL_MENU)
