@@ -341,7 +341,7 @@
 #define TEMP_SENSOR_3 0
 #define TEMP_SENSOR_4 0
 #define TEMP_SENSOR_5 0
-#define TEMP_SENSOR_BED 1
+//#define TEMP_SENSOR_BED 0
 #define TEMP_SENSOR_HEATBREAK 2008 // 100K NTC, 33K divider, B=4267
 
 #define TEMP_SENSOR_BOARD 2000
@@ -466,7 +466,7 @@
  * heater. If your configuration is significantly different than this and you don't understand
  * the issues involved, don't use bed PID until someone else verifies that your hardware works.
  */
-#define PIDTEMPBED
+//#define PIDTEMPBED
 
 //#define BED_LIMIT_SWITCHING
 
@@ -550,7 +550,7 @@
  */
 
 #define THERMAL_PROTECTION_HOTENDS // Enable thermal protection for all extruders
-#define THERMAL_PROTECTION_BED // Enable thermal protection for the heated bed
+//#define THERMAL_PROTECTION_BED // Enable thermal protection for the heated bed
 //#define THERMAL_PROTECTION_CHAMBER // Enable thermal protection for the heated chamber
 
 //===========================================================================
