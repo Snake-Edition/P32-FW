@@ -1226,7 +1226,7 @@ void initial_test_tmc_connection() {
   const auto check_error = [] (const char ch, auto &stepper) {
     const auto reg = stepper.DRV_STATUS();
     if(reg == 0xFFFFFFFF || reg == 0) {
-      bsod("TMC error %i T%i (0x%08lx)", (int)ch, (int)active_extruder, (unsigned long)reg);
+      bsod("TMC error %i (0x%08lx)", (int)ch, (unsigned long)reg);
     }
   };
 
