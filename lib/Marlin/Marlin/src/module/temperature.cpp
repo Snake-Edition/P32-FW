@@ -1783,8 +1783,14 @@ void Temperature::manage_heater() {
 
   UNUSED(ms);
   #if ENABLED(HW_PWM_HEATERS)
-    analogWrite(HEATER_0_PIN, temp_hotend[0].soft_pwm_amount);
-    analogWrite(HEATER_BED_PIN, temp_bed.soft_pwm_amount);
+    #if HOTENDS == 1
+      analogWrite(HEATER_0_PIN, temp_hotend[0].soft_pwm_amount);
+    #elif HOTENDS
+      #error "This is made for one hotend!"
+    #endif /* HOTENDS */
+    #if HAS_HEATED_BED
+      analogWrite(HEATER_BED_PIN, temp_bed.soft_pwm_amount);
+    #endif /* HAS_HEATED_BED */
   #endif
 
   //
@@ -2122,10 +2128,10 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
     return 0;
   }
 #endif // HOTENDS
-float scan_thermistor_table_bed(const int raw){
-    SCAN_THERMISTOR_TABLE(BED_TEMPTABLE,BED_TEMPTABLE_LEN);
-}
 #if HAS_HEATED_BED
+  float scan_thermistor_table_bed(const int raw){
+      SCAN_THERMISTOR_TABLE(BED_TEMPTABLE,BED_TEMPTABLE_LEN);
+  }
   // Derived from RepRap FiveD extruder::getTemperature()
   // For bed temperature measurement.
   float Temperature::analog_to_celsius_bed(const int raw) {
