@@ -157,7 +157,8 @@ Temperature thermalManager;
 
 #if FAN_COUNT > 0
 
-  uint8_t Temperature::fan_speed[FAN_COUNT]; // = { 0 }
+  uint8_t Temperature::fan_speed[FAN_COUNT] = {};
+  uint8_t Temperature::applied_fan_speed[FAN_COUNT] = {};
 
   #if ENABLED(EXTRA_FAN_SPEED)
     uint8_t Temperature::old_fan_speed[FAN_COUNT], Temperature::new_fan_speed[FAN_COUNT];
@@ -192,6 +193,8 @@ Temperature thermalManager;
     return target < FAN_COUNT ? fan_speed[target] : 0;
   }
   /**
+   * Set the print fan speed for a target extruder
+   * @note You need to call applyScaledFanSpeed() either from planner or elsewhere to actually use the configured fan speed.
    * Set the print fan speed for a target FAN
    * !!! NOT EXTRUDER !!! THERMAL MANAGER DOES NOT WORK WITH NON-ACTIVE EXTRUDER FANS
    * See BFW-6365
@@ -1484,6 +1487,7 @@ void Temperature::min_temp_error(const heater_ind_t heater) {
  *  - Manage extruder auto-fan
  *  - Apply filament width to the extrusion rate (may move)
  *  - Update the heated bed PID output value
+ *  - Kickstart fans
  */
 void Temperature::manage_heater() {
 
@@ -1777,6 +1781,53 @@ void Temperature::manage_heater() {
     analogWrite(HEATER_0_PIN, temp_hotend[0].soft_pwm_amount);
     analogWrite(HEATER_BED_PIN, temp_bed.soft_pwm_amount);
   #endif
+
+  //
+  // Update Fan speeds
+  //
+  #if FAN_COUNT > 0
+
+    #if FAN_KICKSTART_TIME > 0
+      static millis_t fan_kick_end[FAN_COUNT] = { 0 };
+      #define KICKSTART_FAN(f)                         \
+        if (applied_fan_speed[f]) {                    \
+          millis_t ms = millis();                      \
+          if (fan_kick_end[f] == 0) {                  \
+            fan_kick_end[f] = ms + FAN_KICKSTART_TIME; \
+            applied_fan_speed[f] = 255;                \
+          } else if (PENDING(ms, fan_kick_end[f]))     \
+            applied_fan_speed[f] = 255;                \
+        } else fan_kick_end[f] = 0
+    #else
+      #define KICKSTART_FAN(f) NOOP
+    #endif
+
+    #if FAN_MIN_PWM != 0 || FAN_MAX_PWM != 255
+      #define CALC_FAN_SPEED(f) (applied_fan_speed[f] ? map(applied_fan_speed[f], 1, 255, FAN_MIN_PWM, FAN_MAX_PWM) : 0)
+    #else
+      #define CALC_FAN_SPEED(f) applied_fan_speed[f]
+    #endif
+
+    #if ENABLED(FAN_SOFT_PWM)
+      #define _FAN_SET(F) thermalManager.soft_pwm_amount_fan[F] = CALC_FAN_SPEED(F);
+    #elif ENABLED(FAST_PWM_FAN)
+      #define _FAN_SET(F) set_pwm_duty(FAN##F##_PIN, CALC_FAN_SPEED(F));
+    #else
+      #define _FAN_SET(F) analogWrite(pin_t(FAN##F##_PIN), CALC_FAN_SPEED(F));
+    #endif
+    #define FAN_SET(F) do{ KICKSTART_FAN(F); _FAN_SET(F); }while(0)
+
+    #if HAS_FAN0
+      FAN_SET(0);
+    #endif
+    #if HAS_FAN1
+      FAN_SET(1);
+    #endif
+    #if HAS_FAN2
+      FAN_SET(2);
+    #endif
+
+  #endif // FAN_COUNT > 0
 }
 
 static bool temperatures_ready_state = false;

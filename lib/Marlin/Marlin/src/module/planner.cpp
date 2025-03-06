@@ -815,16 +815,11 @@ void Planner::check_axes_activity() {
     xyze_bool_t axis_active = { false };
   #endif
 
-  #if FAN_COUNT > 0
-    uint8_t tail_fan_speed[FAN_COUNT];
-  #endif
-
   // In the current implementation of PreciseStepping, a sync position block can spend some time at the top of the block queue in contrast with the original Marlin.
   // So we have to ignore sync position blocks because they always have zero fan speeds.
   if (const block_t *block = get_first_move_block(); block != nullptr) {
     #if FAN_COUNT > 0
-      FANS_LOOP(i)
-        tail_fan_speed[i] = thermalManager.scaledFanSpeed(i, block->fan_speed[i]);
+      thermalManager.applyScaledFanSpeed(block->fan_speed);
     #endif
 
     #if ANY(DISABLE_X, DISABLE_Y, DISABLE_Z, DISABLE_E)
@@ -837,8 +832,7 @@ void Planner::check_axes_activity() {
   else {
 
     #if FAN_COUNT > 0
-      FANS_LOOP(i)
-        tail_fan_speed[i] = thermalManager.scaledFanSpeed(i);
+      thermalManager.applyScaledFanSpeed();
     #endif
   }
 
@@ -861,53 +855,6 @@ void Planner::check_axes_activity() {
   #if ENABLED(DISABLE_E)
     if (!axis_active.e) disable_e_steppers();
   #endif
-
-  //
-  // Update Fan speeds
-  //
-  #if FAN_COUNT > 0
-
-    #if FAN_KICKSTART_TIME > 0
-      static millis_t fan_kick_end[FAN_COUNT] = { 0 };
-      #define KICKSTART_FAN(f)                         \
-        if (tail_fan_speed[f]) {                       \
-          millis_t ms = millis();                      \
-          if (fan_kick_end[f] == 0) {                  \
-            fan_kick_end[f] = ms + FAN_KICKSTART_TIME; \
-            tail_fan_speed[f] = 255;                   \
-          } else if (PENDING(ms, fan_kick_end[f]))     \
-            tail_fan_speed[f] = 255;                   \
-        } else fan_kick_end[f] = 0
-    #else
-      #define KICKSTART_FAN(f) NOOP
-    #endif
-
-    #if FAN_MIN_PWM != 0 || FAN_MAX_PWM != 255
-      #define CALC_FAN_SPEED(f) (tail_fan_speed[f] ? map(tail_fan_speed[f], 1, 255, FAN_MIN_PWM, FAN_MAX_PWM) : 0)
-    #else
-      #define CALC_FAN_SPEED(f) tail_fan_speed[f]
-    #endif
-
-    #if ENABLED(FAN_SOFT_PWM)
-      #define _FAN_SET(F) thermalManager.soft_pwm_amount_fan[F] = CALC_FAN_SPEED(F);
-    #elif ENABLED(FAST_PWM_FAN)
-      #define _FAN_SET(F) set_pwm_duty(FAN##F##_PIN, CALC_FAN_SPEED(F));
-    #else
-      #define _FAN_SET(F) analogWrite(pin_t(FAN##F##_PIN), CALC_FAN_SPEED(F));
-    #endif
-    #define FAN_SET(F) do{ KICKSTART_FAN(F); _FAN_SET(F); }while(0)
-
-    #if HAS_FAN0
-      FAN_SET(0);
-    #endif
-    #if HAS_FAN1
-      FAN_SET(1);
-    #endif
-    #if HAS_FAN2
-      FAN_SET(2);
-    #endif
-
-  #endif // FAN_COUNT > 0
 
   #if ENABLED(AUTOTEMP)
     getHighESpeed();
