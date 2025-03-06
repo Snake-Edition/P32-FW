@@ -79,6 +79,7 @@
         :                 // input:
         : "cc"            // clobbers:
       );
+      #undef EXTRA_NOP_CYCLES
     }
 
     // Delay in cycles
