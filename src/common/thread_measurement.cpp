@@ -3,7 +3,7 @@
 
 #include <common/filament_sensors_handler.hpp>
 #include <common/metric.h>
-#include <common/trinamic.h>
+#include <common/tmc.h>
 #include <freertos/timing.hpp>
 #include <option/has_burst_stepping.h>
 #include <option/has_phase_stepping.h>

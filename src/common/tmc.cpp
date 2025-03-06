@@ -1,6 +1,6 @@
 // trinamic.cpp
 #include "cmsis_os.h"
-#include "trinamic.h"
+#include "tmc.h"
 #include "config.h"
 #include "gpio.h"
 #include "hwio_pindef.h"

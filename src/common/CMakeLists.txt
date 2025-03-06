@@ -72,8 +72,8 @@ if(BOARD IN_LIST BUDDY_BOARDS)
             sys.cpp
             sys_time.cpp
             tasks.cpp
+            tmc.cpp
             tools_mapping.cpp
-            trinamic.cpp
             w25x.cpp
             w25x_communication.cpp
             wdt.cpp

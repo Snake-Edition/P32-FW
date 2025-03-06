@@ -16,7 +16,7 @@
 #include <module/motion.h>
 #include <module/stepper.h>
 #include <module/stepper/trinamic.h>
-#include <trinamic.h>
+#include <tmc.h>
 #include <TMCStepper.h>
 
 #include <Pin.hpp>

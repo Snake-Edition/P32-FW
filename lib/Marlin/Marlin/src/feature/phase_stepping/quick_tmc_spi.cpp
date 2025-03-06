@@ -1,6 +1,6 @@
 #include "quick_tmc_spi.hpp"
 
-#include <trinamic.h>
+#include <tmc.h>
 #include <TMCStepper.h>
 
 #include <device/peripherals.h>

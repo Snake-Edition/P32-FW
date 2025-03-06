@@ -6,7 +6,7 @@
 #include "../../Marlin/src/module/endstops.h"
 #include "../../Marlin/src/module/motion.h"
 #include "../../Marlin/src/module/prusa/homing_utils.hpp"
-#include "trinamic.h"
+#include "tmc.h"
 #include "selftest_log.hpp"
 #include "i_selftest.hpp"
 #include "algorithm_scale.hpp"
