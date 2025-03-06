@@ -92,6 +92,9 @@ TestResult get_test_result(Action action, Tool tool) {
         }
     case Action::PhaseSteppingCalibration:
         return evaluate_results(config_store().selftest_result_phase_stepping.get());
+    case Action::Gears:
+        return evaluate_results(sr.gears);
+        // TODO: See how to evaluate gears when there are multiple gears (see Action::DockCalibration)
     case Action::_count:
         break;
     }
@@ -134,6 +137,8 @@ uint64_t get_test_mask(Action action) {
         return stmHeaters_bed;
     case Action::NozzleHeaters:
         return stmHeaters_noz;
+    case Action::Gears:
+        bsod("This should be gcode");
     case Action::FilamentSensorCalibration:
         return stmFSensor;
     case Action::Loadcell:

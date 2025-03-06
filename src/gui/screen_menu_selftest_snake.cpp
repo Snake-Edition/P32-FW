@@ -153,7 +153,7 @@ void do_snake(Action action, Tool tool = Tool::_first) {
             break;
 #if HAS_GEARBOX_ALIGNMENT()
         case Action::Gears:
-            marlin_client::gcode("M1979");
+            marlin_client::gcode_printf("M1979 T%d", static_cast<int>(tool));
             break;
 #endif
         default:

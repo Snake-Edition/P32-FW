@@ -33,7 +33,7 @@
 #endif
 
 #if HAS_GEARBOX_ALIGNMENT()
-    #include "gcode_gearbox_alignment.hpp"
+    #include <feature/gearbox_alignment/gcode_gearbox_alignment.hpp>
 #endif
 
 #include <logging/log.hpp>

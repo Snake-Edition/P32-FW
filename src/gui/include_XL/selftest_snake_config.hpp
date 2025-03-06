@@ -37,6 +37,7 @@ enum class Action {
     ZCheck,
     Heaters,
     NozzleHeaters,
+    Gears,
     FilamentSensorCalibration,
     ToolOffsetsCalibration,
     BedHeaters,
@@ -47,13 +48,14 @@ enum class Action {
 };
 
 template <Action action>
-concept SubmenuActionC = action == Action::DockCalibration || action == Action::Loadcell || action == Action::FilamentSensorCalibration;
+concept SubmenuActionC = action == Action::DockCalibration || action == Action::Loadcell || action == Action::FilamentSensorCalibration || action == Action::Gears;
 
 constexpr bool has_submenu(Action action) {
     switch (action) {
     case Action::DockCalibration:
     case Action::Loadcell:
     case Action::FilamentSensorCalibration:
+    case Action::Gears:
         return true;
     default:
         return false;
@@ -94,6 +96,12 @@ consteval auto get_submenu_label(Tool tool, Action action) -> const char * {
         { Tool::Tool3, Action::FilamentSensorCalibration, N_("Tool 3 Filament Sensor Calibration") },
         { Tool::Tool4, Action::FilamentSensorCalibration, N_("Tool 4 Filament Sensor Calibration") },
         { Tool::Tool5, Action::FilamentSensorCalibration, N_("Tool 5 Filament Sensor Calibration") },
+        { Tool::Tool1, Action::Gears, N_("Tool 1 Gearbox alignment") },
+        { Tool::Tool2, Action::Gears, N_("Tool 2 Gearbox alignment") },
+        { Tool::Tool3, Action::Gears, N_("Tool 3 Gearbox alignment") },
+        { Tool::Tool4, Action::Gears, N_("Tool 4 Gearbox alignment") },
+        { Tool::Tool5, Action::Gears, N_("Tool 5 Gearbox alignment") },
+
     };
 
     if (auto it = std::ranges::find_if(tooltexts, [&](const auto &elem) {
@@ -127,6 +135,7 @@ inline constexpr MenuItemText blank_item_texts[] {
     { Action::BedHeaters, N_("%d Bed Heater Test") },
     { Action::NozzleHeaters, N_("%d Nozzle Heaters Test") },
     { Action::PhaseSteppingCalibration, N_("%d Phase Stepping Calibration") },
+    { Action::Gears, N_("%d Gearbox Alignment") },
 };
 
 TestResult get_test_result(Action action, Tool tool);

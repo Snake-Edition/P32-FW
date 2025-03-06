@@ -55,7 +55,7 @@ using SerialPrint = ScreenDialogDoesNotExist;
 #endif
 
 #if HAS_GEARBOX_ALIGNMENT()
-    #include "screen_gearbox_alignment.hpp"
+    #include "feature/gearbox_alignment/screen_gearbox_alignment.hpp"
 #endif
 
 alignas(std::max_align_t) static std::array<uint8_t, 2560> mem_space;

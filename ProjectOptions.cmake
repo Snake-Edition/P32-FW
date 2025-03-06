@@ -379,7 +379,7 @@ set_feature_for_printers(HAS_BELT_TUNING "XL" "iX")
 set_feature_for_printers_master_board(HAS_I2C_EXPANDER "MK3.5" "MK4" "COREONE")
 set_feature_for_printers(HAS_WASTEBIN "iX")
 set_feature_for_printers(HAS_PRINT_FAN_TYPE "XL")
-set_feature_for_printers_master_board(HAS_GEARBOX_ALIGNMENT "MK4" "COREONE")
+set_feature_for_printers_master_board(HAS_GEARBOX_ALIGNMENT "MK4" "COREONE" "XL")
 set_feature_for_printers_master_board(HAS_MANUAL_CHAMBER_VENTS "COREONE")
 
 # Set printer board

@@ -10,6 +10,8 @@ void open_submenu(Action action) {
         Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuLoadcellTest>);
     } else if (action == Action::FilamentSensorCalibration) {
         Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuFilamentSensorsCalibration>);
+    } else if (action == Action::Gears) {
+        Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuGearsTest>);
     } else {
         assert(false && "Not a multitool action");
     }
@@ -51,6 +53,19 @@ void ScreenMenuFilamentSensorsCalibration::draw() {
 }
 
 void ScreenMenuFilamentSensorsCalibration::windowEvent(window_t *sender, GUI_event_t event, void *param) {
+    do_menu_event(this, sender, event, param, action, true);
+}
+
+ScreenMenuGearsTest::ScreenMenuGearsTest()
+    : detail::ScreenMenuGearsTest(_(label)) {}
+
+void ScreenMenuGearsTest::draw() {
+    if (is_menu_draw_enabled(this)) {
+        window_frame_t::draw();
+    }
+}
+
+void ScreenMenuGearsTest::windowEvent(window_t *sender, GUI_event_t event, void *param) {
     do_menu_event(this, sender, event, param, action, true);
 }
 
