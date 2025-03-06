@@ -2,13 +2,12 @@
 #include "ModbusRegisters.hpp"
 #include <cstring>
 #include <logging/log.hpp>
-#include <bitset>
+#include "Marlin.h"
 #include "Marlin/src/module/temperature.h"
 #include "Marlin/src/module/stepper/trinamic.h"
 #include "../loadcell.hpp"
 #include "Pin.hpp"
 #include "Cheese.hpp"
-#include "module_marlin.hpp"
 #include "tool_filament_sensor.hpp"
 #include "timing.h"
 #include "ModbusFIFOHandlers.hpp"
