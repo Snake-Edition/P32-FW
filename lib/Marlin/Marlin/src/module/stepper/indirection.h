@@ -102,7 +102,11 @@ void reset_stepper_drivers();    // Called by settings.load / settings.reset
 
 // Y Stepper
 #ifndef Y_ENABLE_INIT
-  #define Y_ENABLE_INIT SET_OUTPUT(Y_ENABLE_PIN)
+  #if DISABLED(XY_LINKED_ENABLE)
+    #define Y_ENABLE_INIT SET_OUTPUT(Y_ENABLE_PIN)
+  #else
+    #define Y_ENABLE_INIT NOOP
+  #endif
   #define Y_ENABLE_WRITE(STATE) WRITE(Y_ENABLE_PIN,STATE)
   #define Y_ENABLE_READ() READ(Y_ENABLE_PIN)
 #endif

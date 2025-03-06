@@ -246,16 +246,18 @@ void Stepper::init() {
     }
     #endif
 #endif
-#if HAS_Y_ENABLE
+#if DISABLED(XY_LINKED_ENABLE)
+    #if HAS_Y_ENABLE
     Y_ENABLE_INIT;
     if (!Y_ENABLE_ON) {
         Y_ENABLE_WRITE(HIGH);
     }
-    #if ENABLED(Y_DUAL_STEPPER_DRIVERS) && HAS_Y2_ENABLE
+        #if ENABLED(Y_DUAL_STEPPER_DRIVERS) && HAS_Y2_ENABLE
     Y2_ENABLE_INIT;
     if (!Y_ENABLE_ON) {
         Y2_ENABLE_WRITE(HIGH);
     }
+        #endif
     #endif
 #endif
 #if HAS_Z_ENABLE
