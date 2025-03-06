@@ -30,7 +30,7 @@
  * Copyright (c) 2015 Dominik Wenger
  */
 
-#include "../../inc/MarlinConfig.h"
+#include "../../inc/MarlinConfigPre.h"
 
 #if HAS_DRIVER(TMC26X)
   #include "TMC26X.h"
@@ -40,8 +40,190 @@
   #include "trinamic.h"
 #endif
 
-void restore_stepper_drivers();  // Called by PSU_ON
-void reset_stepper_drivers();    // Called by settings.load / settings.reset
+//
+// X, Y, Z Stepper enable / disable
+//
+
+#include <option/has_planner.h>
+#if HAS_PLANNER()
+  #include <module/motion.h>
+#endif
+
+#if HAS_X_ENABLE
+  #define X_enable  X_ENABLE_WRITE( X_ENABLE_ON)
+  #define X_disable X_ENABLE_WRITE(!X_ENABLE_ON)
+#else
+  #define X_enable  NOOP
+  #define X_disable NOOP
+#endif
+
+#if HAS_X2_ENABLE
+  #define X2_enable  X2_ENABLE_WRITE( X_ENABLE_ON)
+  #define X2_disable X2_ENABLE_WRITE(!X_ENABLE_ON)
+#else
+  #define X2_enable  NOOP
+  #define X2_disable NOOP
+#endif
+
+#define  enable_X() do{ X_enable; X2_enable; }while(0)
+#define disable_X() do{ X_disable; X2_disable; TERN_(HAS_PLANNER_ENABLED, CBI(axis_known_position, X_AXIS)); }while(0)
+
+#if HAS_Y_ENABLE
+  #define Y_enable  Y_ENABLE_WRITE( Y_ENABLE_ON)
+  #define Y_disable Y_ENABLE_WRITE(!Y_ENABLE_ON)
+#else
+  #define Y_enable  NOOP
+  #define Y_disable NOOP
+#endif
+
+#if HAS_Y2_ENABLE
+  #define Y2_enable  Y2_ENABLE_WRITE( Y_ENABLE_ON)
+  #define Y2_disable Y2_ENABLE_WRITE(!Y_ENABLE_ON)
+#else
+  #define Y2_enable  NOOP
+  #define Y2_disable NOOP
+#endif
+
+#if DISABLED(XY_LINKED_ENABLE)
+#define  enable_Y() do{ Y_enable; Y2_enable; }while(0)
+#define disable_Y() do{ Y_disable; Y2_disable; TERN_(HAS_PLANNER_ENABLED, CBI(axis_known_position, Y_AXIS)); }while(0)
+#endif
+
+#if ENABLED(XY_LINKED_ENABLE)
+  #define  enable_XY() enable_X()
+  #define disable_XY() []{ disable_X(); TERN_(HAS_PLANNER_ENABLED, CBI(axis_known_position, Y_AXIS)); }()
+#else
+  #define  enable_XY() do{enable_X(); enable_Y(); }while(0)
+  #define disable_XY() do{disable_X(); disable_Y(); }while(0)
+#endif
+
+#if HAS_Z_ENABLE
+  #define Z_enable  Z_ENABLE_WRITE( Z_ENABLE_ON)
+  #define Z_disable Z_ENABLE_WRITE(!Z_ENABLE_ON)
+#else
+  #define Z_enable  NOOP
+  #define Z_disable NOOP
+#endif
+
+#if HAS_Z2_ENABLE
+  #define Z2_enable  Z2_ENABLE_WRITE( Z_ENABLE_ON)
+  #define Z2_disable Z2_ENABLE_WRITE(!Z_ENABLE_ON)
+#else
+  #define Z2_enable  NOOP
+  #define Z2_disable NOOP
+#endif
+
+#if HAS_Z3_ENABLE
+  #define Z3_enable  Z3_ENABLE_WRITE( Z_ENABLE_ON)
+  #define Z3_disable Z3_ENABLE_WRITE(!Z_ENABLE_ON)
+#else
+  #define Z3_enable  NOOP
+  #define Z3_disable NOOP
+#endif
+
+#define  enable_Z() do{ Z_enable; Z2_enable; Z3_enable; }while(0)
+#define disable_Z() do{ Z_disable; Z2_disable; Z3_disable; TERN_(HAS_PLANNER_ENABLED, CBI(axis_known_position, Z_AXIS)); }while(0)
+
+//
+// Extruder Stepper enable / disable
+//
+
+// define the individual enables/disables
+#if HAS_E0_ENABLE
+  #define  E0_enable E0_ENABLE_WRITE( E_ENABLE_ON)
+  #define E0_disable E0_ENABLE_WRITE(!E_ENABLE_ON)
+#else
+  #define  E0_enable NOOP
+  #define E0_disable NOOP
+#endif
+
+#if (E_STEPPERS > 1 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E1_ENABLE
+  #define  E1_enable E1_ENABLE_WRITE( E_ENABLE_ON)
+  #define E1_disable E1_ENABLE_WRITE(!E_ENABLE_ON)
+#else
+  #define  E1_enable NOOP
+  #define E1_disable NOOP
+#endif
+
+#if (E_STEPPERS > 2 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E2_ENABLE
+  #define  E2_enable E2_ENABLE_WRITE( E_ENABLE_ON)
+  #define E2_disable E2_ENABLE_WRITE(!E_ENABLE_ON)
+#else
+  #define  E2_enable NOOP
+  #define E2_disable NOOP
+#endif
+
+#if (E_STEPPERS > 3 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E3_ENABLE
+  #define  E3_enable E3_ENABLE_WRITE( E_ENABLE_ON)
+  #define E3_disable E3_ENABLE_WRITE(!E_ENABLE_ON)
+#else
+  #define  E3_enable NOOP
+  #define E3_disable NOOP
+#endif
+
+#if (E_STEPPERS > 4 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E4_ENABLE
+  #define  E4_enable E4_ENABLE_WRITE( E_ENABLE_ON)
+  #define E4_disable E4_ENABLE_WRITE(!E_ENABLE_ON)
+#else
+  #define  E4_enable NOOP
+  #define E4_disable NOOP
+#endif
+
+#if (E_STEPPERS > 5 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E5_ENABLE
+  #define  E5_enable E5_ENABLE_WRITE( E_ENABLE_ON)
+  #define E5_disable E5_ENABLE_WRITE(!E_ENABLE_ON)
+#else
+  #define  E5_enable NOOP
+  #define E5_disable NOOP
+#endif
+
+#if HAS_E0_ENABLE
+  #define  enable_E0() E0_enable
+  #define disable_E0() E0_disable
+#else
+  #define  enable_E0() NOOP
+  #define disable_E0() NOOP
+#endif
+
+#if (E_STEPPERS > 1 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E1_ENABLE
+  #define  enable_E1() E1_enable
+  #define disable_E1() E1_disable
+#else
+  #define  enable_E1() NOOP
+  #define disable_E1() NOOP
+#endif
+
+#if (E_STEPPERS > 2 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E2_ENABLE
+  #define  enable_E2() E2_enable
+  #define disable_E2() E2_disable
+#else
+  #define  enable_E2() NOOP
+  #define disable_E2() NOOP
+#endif
+
+#if (E_STEPPERS > 3 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E3_ENABLE
+  #define  enable_E3() E3_enable
+  #define disable_E3() E3_disable
+#else
+  #define  enable_E3() NOOP
+  #define disable_E3() NOOP
+#endif
+
+#if (E_STEPPERS > 4 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E4_ENABLE
+  #define  enable_E4() E4_enable
+  #define disable_E4() E4_disable
+#else
+  #define  enable_E4() NOOP
+  #define disable_E4() NOOP
+#endif
+
+#if (E_STEPPERS > 5 || ENABLED(PRUSA_TOOLCHANGER)) && HAS_E5_ENABLE
+  #define  enable_E5() E5_enable
+  #define disable_E5() E5_disable
+#else
+  #define  enable_E5() NOOP
+  #define disable_E5() NOOP
+#endif
 
 #if BOARD_IS_DWARF()
     #define X_APPLY_DIR(v) X_DIR_WRITE(v)
@@ -437,3 +619,6 @@ void reset_stepper_drivers();    // Called by settings.load / settings.reset
   #define    REV_E_DIR(E)   NOOP
 
 #endif
+
+void restore_stepper_drivers();  // Called by PSU_ON
+void reset_stepper_drivers();    // Called by settings.load / settings.reset
