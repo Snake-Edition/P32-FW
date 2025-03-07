@@ -20,11 +20,6 @@ BufferedConnection::BufferedConnection(Connection *connection, const uint8_t *bu
     }
 }
 
-optional<Error> BufferedConnection::connection(const char *, uint16_t) {
-    assert(0); // This one is used to wrap another connection after connecting.
-    return Error::InternalError;
-}
-
 variant<size_t, Error> BufferedConnection::rx(uint8_t *buffer, size_t len, bool nonblock) {
     if (read_buffer) {
         size_t to_read = min(len, static_cast<size_t>(read_buffer->size));

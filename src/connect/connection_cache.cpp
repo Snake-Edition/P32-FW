@@ -8,6 +8,7 @@ using http::socket_con;
 using std::get;
 using std::holds_alternative;
 using std::monostate;
+using std::nullopt;
 using std::optional;
 
 LOG_COMPONENT_REF(connect);
@@ -46,18 +47,18 @@ void CachedFactory::invalidate() {
 void CachedFactory::refresh(const Printer::Config &config) {
     hostname = config.host;
     if (holds_alternative<monostate>(cache)) {
-        Connection *connection;
+        optional<Error> result = nullopt;
 
         if (config.tls) {
             log_debug(connect, "Creating TLS");
             cache.emplace<tls>(SOCKET_TIMEOUT_SEC, config.custom_cert);
-            connection = &get<tls>(cache);
+            result = get<tls>(cache).connection(config.host, config.port);
         } else {
             log_debug(connect, "Creating plain");
             cache.emplace<socket_con>(SOCKET_TIMEOUT_SEC);
-            connection = &get<socket_con>(cache);
+            result = get<socket_con>(cache).connection(config.host, config.port);
         }
-        if (const optional<Error> result = connection->connection(config.host, config.port); result.has_value()) {
+        if (result.has_value()) {
             log_info(connect, "Creating of connection failed: %s", http::to_str(result.value()));
             cache = *result;
         }

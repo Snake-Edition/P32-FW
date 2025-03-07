@@ -29,7 +29,6 @@ private:
 
 public:
     BufferedConnection(Connection *connection, const uint8_t *buff, size_t len);
-    virtual std::optional<Error> connection(const char *, uint16_t) override;
     virtual std::variant<size_t, Error> rx(uint8_t *buffer, size_t len, bool nonblock) override;
     virtual std::variant<size_t, Error> tx(const uint8_t *buffer, size_t len) override;
     virtual bool poll_readable(uint32_t timeout) override;
