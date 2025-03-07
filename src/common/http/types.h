@@ -13,6 +13,7 @@ enum Method {
     Post,
     Put,
     Delete,
+    Connect,
     UnknownMethod,
 };
 
@@ -28,6 +29,8 @@ constexpr const char *to_str(Method method) {
         return "PUT";
     case Delete:
         return "DELETE";
+    case Connect:
+        return "CONNECT";
     default:
         assert(0);
     case UnknownMethod:
@@ -43,6 +46,7 @@ constexpr bool has_body(Method method) {
     case Get:
     case Head:
     case Delete:
+    case Connect:
         return false;
     default:
     case UnknownMethod:

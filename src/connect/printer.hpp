@@ -195,6 +195,9 @@ public:
         bool loaded = false;
 
         uint32_t crc() const;
+        bool has_proxy() const {
+            return proxy_host[0] != '\0' && proxy_port != 0;
+        }
     };
 
     enum class Iface {

@@ -19,6 +19,8 @@ enum class Error {
     // „Unreacheable“ handling. Should not happen (and may be covered by some
     // assert(0) somewhere and this being only a production filler).
     InternalError,
+    // Proxy won't let us do what we want to.
+    Proxy,
 };
 
 const char *to_str(Error error);
