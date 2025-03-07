@@ -94,6 +94,13 @@ namespace {
             } else {
                 return 0;
             }
+        } else if (ini_string_match(section, INI_SECTION, name, "proxy_hostname")) {
+            if (len <= config_store_ns::connect_host_size) {
+                strlcpy(config->proxy_host, value, sizeof config->proxy_host);
+                config->loaded = true;
+            } else {
+                return 0;
+            }
         } else if (ini_string_match(section, INI_SECTION, name, "token")) {
             if (len <= config_store_ns::connect_token_size) {
                 strlcpy(config->token, value, sizeof config->token);
@@ -106,6 +113,15 @@ namespace {
             long tmp = strtol(value, &endptr, 10);
             if (*endptr == '\0' && tmp >= 0 && tmp <= 65535) {
                 config->port = (uint16_t)tmp;
+                config->loaded = true;
+            } else {
+                return 0;
+            }
+        } else if (ini_string_match(section, INI_SECTION, name, "proxy_port")) {
+            char *endptr;
+            long tmp = strtol(value, &endptr, 10);
+            if (*endptr == '\0' && tmp >= 0 && tmp <= 65535) {
+                config->proxy_port = (uint16_t)tmp;
                 config->loaded = true;
             } else {
                 return 0;
@@ -376,6 +392,8 @@ bool MarlinPrinter::load_cfg_from_ini() {
         store.connect_port.set(config.port);
         store.connect_tls.set(config.tls);
         store.connect_custom_tls_cert.set(config.custom_cert);
+        store.connect_proxy_host.set(config.proxy_host);
+        store.connect_proxy_port.set(config.proxy_port);
         // Note: enabled is controlled in the GUI
     }
     return ok;

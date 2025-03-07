@@ -184,8 +184,10 @@ public:
         static constexpr size_t CONNECT_TOKEN_BUF_LEN = (CONNECT_TOKEN_LEN + 1);
 
         char host[CONNECT_URL_BUF_LEN] = "";
+        char proxy_host[CONNECT_URL_BUF_LEN] = "";
         char token[CONNECT_TOKEN_BUF_LEN] = "";
         uint16_t port = 0;
+        uint16_t proxy_port = 0;
         bool tls = true;
         bool enabled = false;
         bool custom_cert = false;

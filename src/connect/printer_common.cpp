@@ -15,8 +15,10 @@ Printer::Config load_eeprom_config() {
     strlcpy(configuration.host, config_store().connect_host.get().data(), sizeof(configuration.host));
     decompress_host(configuration.host, sizeof(configuration.host));
     strlcpy(configuration.token, config_store().connect_token.get().data(), sizeof(configuration.token));
+    strlcpy(configuration.proxy_host, config_store().connect_proxy_host.get().data(), sizeof(configuration.proxy_host));
     configuration.tls = config_store().connect_tls.get();
     configuration.port = config_store().connect_port.get();
+    configuration.proxy_port = config_store().connect_proxy_port.get();
     configuration.custom_cert = config_store().connect_custom_tls_cert.get();
 
     return configuration;

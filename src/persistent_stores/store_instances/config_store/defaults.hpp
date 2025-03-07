@@ -125,6 +125,7 @@ namespace defaults {
 
     inline constexpr std::array<char, connect_host_size + 1> connect_host { "buddy-a.\x01\x01" }; // "Compressed" - this means buddy-a.connect.prusa3d.com.
     inline constexpr std::array<char, connect_token_size + 1> connect_token { "" };
+    inline constexpr std::array<char, connect_host_size + 1> connect_proxy_host { "" };
     inline constexpr uint16_t connect_port { 443 };
 
     // Defaults for metrics
