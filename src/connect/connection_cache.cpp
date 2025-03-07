@@ -52,7 +52,13 @@ void CachedFactory::refresh(const Printer::Config &config) {
         if (config.tls) {
             log_debug(connect, "Creating TLS");
             cache.emplace<tls>(SOCKET_TIMEOUT_SEC, config.custom_cert);
-            result = get<tls>(cache).connection(config.host, config.port);
+            const char *connection_host = config.host;
+            uint16_t connection_port = config.port;
+            if (config.has_proxy()) {
+                connection_host = config.proxy_host;
+                connection_port = config.proxy_port;
+            }
+            result = get<tls>(cache).connection(connection_host, connection_port, config.host, config.port);
         } else {
             log_debug(connect, "Creating plain");
             cache.emplace<socket_con>(SOCKET_TIMEOUT_SEC);

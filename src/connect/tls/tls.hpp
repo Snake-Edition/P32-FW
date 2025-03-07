@@ -31,7 +31,16 @@ public:
     tls &operator=(const tls &other) = delete;
     tls &operator=(tls &&other) = delete;
 
-    std::optional<http::Error> connection(const char *host, uint16_t port);
+    /*
+     * Make the connection.
+     *
+     * The connection variables are for where we physically connect, the
+     * destination ones are the host we want to talk to. They are different in
+     * case of proxy.
+     *
+     * In case no proxy, pass the same pointers / ports there.
+     */
+    std::optional<http::Error> connection(const char *connection_host, uint16_t connection_port, const char *destination_host, uint16_t destination_port);
     virtual std::variant<size_t, http::Error> tx(const uint8_t *buffer, size_t data_len) override;
     virtual std::variant<size_t, http::Error> rx(uint8_t *buffer, size_t buffer_len, bool nonblock) override;
     virtual bool poll_readable(uint32_t timeout) override;
