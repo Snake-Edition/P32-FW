@@ -45,12 +45,12 @@ void menu_set_toolhead(Container &container, Toolhead toolhead) {
 bool msgbox_confirm_change(Toolhead toolhead, bool &confirmed_before);
 
 /// Curiously recurring parent for all menu items that are per toolhead
-template <typename Child, typename Parent>
-class MI_TOOLHEAD_SPECIFIC : public Parent {
+template <typename Parent>
+class MI_TOOLHEAD_SPECIFIC_BASE : public Parent {
 
 public:
     template <typename... Args>
-    inline MI_TOOLHEAD_SPECIFIC(Toolhead toolhead, Args &&...args)
+    inline MI_TOOLHEAD_SPECIFIC_BASE(Toolhead toolhead, Args &&...args)
         : Parent(std::forward<Args>(args)...)
         , toolhead_(toolhead) {}
 
@@ -63,28 +63,38 @@ public:
             return;
         }
         toolhead_ = set;
-        if constexpr (UpdatableMenuItem<Child>) {
-            static_cast<Child *>(this)->update();
-        }
+        update();
     }
+
+    virtual void update() = 0;
+
+private:
+    Toolhead toolhead_;
+};
+
+/// Curiously recurring parent for all menu items that are per toolhead
+template <typename Value_, typename Parent>
+class MI_TOOLHEAD_SPECIFIC : public MI_TOOLHEAD_SPECIFIC_BASE<Parent> {
+
+public:
+    // Inherit parent constructors
+    using MI_TOOLHEAD_SPECIFIC_BASE<Parent>::MI_TOOLHEAD_SPECIFIC_BASE;
+
+    using Value = Value_;
 
 protected:
     /// \returns \p Child::read_value_impl(toolhead())
     /// If \p toolhead is \p all_toolheads, returns the value only if all toolheads have the same value. Otherwise returns \p nullopt.
-    template <typename = void>
-    auto read_value() {
-        using Value = std::remove_cvref_t<decltype(std::declval<Child *>()->read_value_impl(0))>;
-        using Result = std::optional<Value>;
-
+    std::optional<Value> read_value() {
 #if HAS_TOOLCHANGER()
-        if (toolhead_ == all_toolheads) {
-            Result result;
+        if (this->toolhead() == all_toolheads) {
+            std::optional<Value> result;
 
             for (ToolheadIndex i = 0; i < toolhead_count; i++) {
                 if (prusa_toolchanger.is_tool_enabled(i)) {
-                    const auto val = static_cast<Child *>(this)->read_value_impl(i);
+                    const auto val = read_value_impl(i);
                     if (result.has_value() && *result != val) {
-                        return Result(std::nullopt);
+                        return std::nullopt;
                     }
                     result = val;
                 }
@@ -94,74 +104,71 @@ protected:
         } else
 #endif
         {
-            return Result(static_cast<Child *>(this)->read_value_impl(std::get<ToolheadIndex>(toolhead_)));
+            return read_value_impl(std::get<ToolheadIndex>(this->toolhead()));
         }
     }
 
     /// Stores the value in the config store. If \p toolhead is \p all_toolheads, sets value for all toolheads
     /// Expects \p Child to have \p store_value_impl(ToolheadIndex)
-    template <typename T>
-    void store_value(const T &value) {
+    void store_value(Value value) {
 #if HAS_TOOLCHANGER()
-        if (toolhead_ == all_toolheads) {
+        if (this->toolhead() == all_toolheads) {
             for (ToolheadIndex i = 0; i < toolhead_count; i++) {
-                static_cast<Child *>(this)->store_value_impl(i, value);
+                store_value_impl(i, value);
             }
         } else
 #endif
         {
-            static_cast<Child *>(this)->store_value_impl(std::get<ToolheadIndex>(toolhead_), value);
+            store_value_impl(std::get<ToolheadIndex>(this->toolhead()), value);
         }
     }
+
+    virtual Value read_value_impl(ToolheadIndex toolhead) = 0;
+    virtual void store_value_impl(ToolheadIndex index, Value value) = 0;
 
 protected:
     /// Stores whether the user has previously confirmed msgbox_confirm_change for this item, to prevent repeating the confirmation on subsequent changes
     bool user_already_confirmed_changes_ = false;
-
-private:
-    Toolhead toolhead_;
 };
 
-template <typename Child>
-class MI_TOOLHEAD_SPECIFIC_SPIN : public MI_TOOLHEAD_SPECIFIC<Child, WiSpin> {
+class MI_TOOLHEAD_SPECIFIC_SPIN : public MI_TOOLHEAD_SPECIFIC<float, WiSpin> {
 public:
     // Inherit parent constructor
-    using MI_TOOLHEAD_SPECIFIC<Child, WiSpin>::MI_TOOLHEAD_SPECIFIC;
+    using MI_TOOLHEAD_SPECIFIC<float, WiSpin>::MI_TOOLHEAD_SPECIFIC;
 
-    void update() {
-        this->set_value(this->template read_value().value_or(*this->config().special_value));
+    void update() final {
+        set_value(read_value().value_or(*config().special_value));
     }
 
     void OnClick() final {
-        if (this->value() == this->config().special_value) {
+        if (value() == config().special_value) {
             return;
         }
 
-        if (msgbox_confirm_change(this->toolhead(), this->user_already_confirmed_changes_)) {
-            this->template store_value(this->value());
+        if (msgbox_confirm_change(toolhead(), user_already_confirmed_changes_)) {
+            store_value(value());
         } else {
             update();
         }
     }
 };
 
-template <typename Child>
-class MI_TOOLHEAD_SPECIFIC_TOGGLE : public MI_TOOLHEAD_SPECIFIC<Child, MenuItemToggleSwitch> {
+class MI_TOOLHEAD_SPECIFIC_TOGGLE : public MI_TOOLHEAD_SPECIFIC<bool, MenuItemToggleSwitch> {
 public:
     // Inherit parent constructor
-    using MI_TOOLHEAD_SPECIFIC<Child, MenuItemToggleSwitch>::MI_TOOLHEAD_SPECIFIC;
+    using MI_TOOLHEAD_SPECIFIC<bool, MenuItemToggleSwitch>::MI_TOOLHEAD_SPECIFIC;
 
-    void update() {
-        this->set_value(this->template read_value().transform(Tristate::from_bool).value_or(Tristate::other), false);
+    void update() final {
+        set_value(read_value().transform(Tristate::from_bool).value_or(Tristate::other), false);
     }
 
     void toggled(Tristate) final {
-        if (this->value() == Tristate::other) {
+        if (value() == Tristate::other) {
             return;
         }
 
-        if (msgbox_confirm_change(this->toolhead(), this->user_already_confirmed_changes_)) {
-            this->template store_value(this->value());
+        if (msgbox_confirm_change(toolhead(), user_already_confirmed_changes_)) {
+            store_value(value());
         } else {
             update();
         }

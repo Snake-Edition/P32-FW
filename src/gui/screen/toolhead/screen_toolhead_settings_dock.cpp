@@ -48,7 +48,7 @@ void MI_DOCK_Y::store_value_impl(ToolheadIndex ix, float set) {
 #if HAS_SELFTEST()
 // * MI_DOCK_CALIBRATE
 MI_DOCK_CALIBRATE::MI_DOCK_CALIBRATE(Toolhead toolhead)
-    : MI_TOOLHEAD_SPECIFIC(toolhead, _("Calibrate Dock Position")) {
+    : MI_TOOLHEAD_SPECIFIC_BASE(toolhead, _("Calibrate Dock Position")) {
 }
 
 void MI_DOCK_CALIBRATE::click(IWindowMenu &) {

@@ -6,33 +6,33 @@
 
 namespace screen_toolhead_settings {
 
-class MI_FS_SPAN : public MI_TOOLHEAD_SPECIFIC_SPIN<MI_FS_SPAN> {
+class MI_FS_SPAN : public MI_TOOLHEAD_SPECIFIC_SPIN {
 public:
     MI_FS_SPAN(Toolhead toolhead = default_toolhead);
-    static float read_value_impl(ToolheadIndex ix);
-    static void store_value_impl(ToolheadIndex ix, float set);
+    float read_value_impl(ToolheadIndex ix) final;
+    void store_value_impl(ToolheadIndex ix, float set) final;
 };
 
-class MI_FS_REF : public MI_TOOLHEAD_SPECIFIC_SPIN<MI_FS_REF> {
+class MI_FS_REF : public MI_TOOLHEAD_SPECIFIC_SPIN {
 public:
     MI_FS_REF(Toolhead toolhead = default_toolhead);
-    static float read_value_impl(ToolheadIndex ix);
-    static void store_value_impl(ToolheadIndex ix, float set);
+    float read_value_impl(ToolheadIndex ix) final;
+    void store_value_impl(ToolheadIndex ix, float set) final;
 };
 
 #if HAS_ADC_SIDE_FSENSOR()
-class MI_SIDE_FS_SPAN : public MI_TOOLHEAD_SPECIFIC_SPIN<MI_SIDE_FS_SPAN> {
+class MI_SIDE_FS_SPAN : public MI_TOOLHEAD_SPECIFIC_SPIN {
 public:
     MI_SIDE_FS_SPAN(Toolhead toolhead = default_toolhead);
-    static float read_value_impl(ToolheadIndex ix);
-    static void store_value_impl(ToolheadIndex ix, float set);
+    float read_value_impl(ToolheadIndex ix) final;
+    void store_value_impl(ToolheadIndex ix, float set) final;
 };
 
-class MI_SIDE_FS_REF : public MI_TOOLHEAD_SPECIFIC_SPIN<MI_SIDE_FS_REF> {
+class MI_SIDE_FS_REF : public MI_TOOLHEAD_SPECIFIC_SPIN {
 public:
     MI_SIDE_FS_REF(Toolhead toolhead = default_toolhead);
-    static float read_value_impl(ToolheadIndex ix);
-    static void store_value_impl(ToolheadIndex ix, float set);
+    float read_value_impl(ToolheadIndex ix) final;
+    void store_value_impl(ToolheadIndex ix, float set) final;
 };
 #endif
 

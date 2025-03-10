@@ -15,11 +15,11 @@
 
 namespace screen_toolhead_settings {
 
-class MI_NOZZLE_DIAMETER final : public MI_TOOLHEAD_SPECIFIC_SPIN<MI_NOZZLE_DIAMETER> {
+class MI_NOZZLE_DIAMETER final : public MI_TOOLHEAD_SPECIFIC_SPIN {
 public:
     MI_NOZZLE_DIAMETER(Toolhead toolhead = default_toolhead);
-    static float read_value_impl(ToolheadIndex ix);
-    static void store_value_impl(ToolheadIndex ix, float set);
+    float read_value_impl(ToolheadIndex ix) final;
+    void store_value_impl(ToolheadIndex ix, float set) final;
 };
 
 class MI_NOZZLE_DIAMETER_HELP : public IWindowMenuItem {
@@ -29,7 +29,7 @@ public:
 };
 
 #if HAS_HOTEND_TYPE_SUPPORT()
-class MI_HOTEND_TYPE : public MI_TOOLHEAD_SPECIFIC<MI_HOTEND_TYPE, MenuItemSelectMenu> {
+class MI_HOTEND_TYPE : public MI_TOOLHEAD_SPECIFIC<HotendType, MenuItemSelectMenu> {
 public:
     MI_HOTEND_TYPE(Toolhead toolhead = default_toolhead);
 
@@ -38,8 +38,8 @@ public:
 
     void update();
 
-    static HotendType read_value_impl(ToolheadIndex ix);
-    static void store_value_impl(ToolheadIndex ix, HotendType set);
+    HotendType read_value_impl(ToolheadIndex ix) final;
+    void store_value_impl(ToolheadIndex ix, HotendType set) final;
 
 protected:
     bool on_item_selected(int old_index, int new_index) override;
@@ -48,42 +48,43 @@ private:
     bool has_varying_values_;
 };
 
-class MI_NOZZLE_SOCK : public MI_TOOLHEAD_SPECIFIC_TOGGLE<MI_NOZZLE_SOCK> {
+class MI_NOZZLE_SOCK : public MI_TOOLHEAD_SPECIFIC_TOGGLE {
 public:
     MI_NOZZLE_SOCK(Toolhead toolhead = default_toolhead);
 
-    static bool read_value_impl(ToolheadIndex ix);
-    static void store_value_impl(ToolheadIndex ix, bool set);
+    bool read_value_impl(ToolheadIndex ix) final;
+    void store_value_impl(ToolheadIndex ix, bool set) final;
 };
 
 using MI_HOTEND_SOCK_OR_TYPE = std::conditional_t<hotend_type_only_sock, MI_NOZZLE_SOCK, MI_HOTEND_TYPE>;
 #endif
 
-class MI_NOZZLE_HARDENED : public MI_TOOLHEAD_SPECIFIC_TOGGLE<MI_NOZZLE_HARDENED> {
+class MI_NOZZLE_HARDENED : public MI_TOOLHEAD_SPECIFIC_TOGGLE {
 public:
     MI_NOZZLE_HARDENED(Toolhead toolhead = default_toolhead);
-    static bool read_value_impl(ToolheadIndex ix);
-    static void store_value_impl(ToolheadIndex ix, bool set);
+    bool read_value_impl(ToolheadIndex ix) final;
+    void store_value_impl(ToolheadIndex ix, bool set) final;
 };
 
-class MI_NOZZLE_HIGH_FLOW : public MI_TOOLHEAD_SPECIFIC_TOGGLE<MI_NOZZLE_HIGH_FLOW> {
+class MI_NOZZLE_HIGH_FLOW : public MI_TOOLHEAD_SPECIFIC_TOGGLE {
 public:
     MI_NOZZLE_HIGH_FLOW(Toolhead toolhead = default_toolhead);
-    static bool read_value_impl(ToolheadIndex ix);
-    static void store_value_impl(ToolheadIndex ix, bool set);
+    bool read_value_impl(ToolheadIndex ix) final;
+    void store_value_impl(ToolheadIndex ix, bool set) final;
 };
 
 #if HAS_TOOLCHANGER()
-class MI_DOCK : public MI_TOOLHEAD_SPECIFIC<MI_DOCK, IWindowMenuItem> {
+class MI_DOCK : public MI_TOOLHEAD_SPECIFIC_BASE<IWindowMenuItem> {
 public:
     MI_DOCK(Toolhead toolhead = default_toolhead);
     void click(IWindowMenu &) override;
+    void update() final {}
 };
 
-class MI_PICK_PARK : public MI_TOOLHEAD_SPECIFIC<MI_PICK_PARK, IWindowMenuItem> {
+class MI_PICK_PARK : public MI_TOOLHEAD_SPECIFIC_BASE<IWindowMenuItem> {
 public:
     MI_PICK_PARK(Toolhead toolhead = default_toolhead);
-    void update(bool update_value = true);
+    void update() final;
     void click(IWindowMenu &) override;
 
 private:
@@ -91,29 +92,31 @@ private:
 };
 #endif
 
-class MI_FILAMENT_SENSORS : public MI_TOOLHEAD_SPECIFIC<MI_FILAMENT_SENSORS, IWindowMenuItem> {
+class MI_FILAMENT_SENSORS : public MI_TOOLHEAD_SPECIFIC_BASE<IWindowMenuItem> {
 public:
     MI_FILAMENT_SENSORS(Toolhead toolhead = default_toolhead);
     void click(IWindowMenu &) override;
+    void update() final {}
 };
 
 #if HAS_SELFTEST() && FILAMENT_SENSOR_IS_ADC()
-class MI_CALIBRATE_FILAMENT_SENSORS : public MI_TOOLHEAD_SPECIFIC<MI_CALIBRATE_FILAMENT_SENSORS, IWindowMenuItem> {
+class MI_CALIBRATE_FILAMENT_SENSORS : public MI_TOOLHEAD_SPECIFIC_BASE<IWindowMenuItem> {
 public:
     MI_CALIBRATE_FILAMENT_SENSORS(Toolhead toolhead = default_toolhead);
-    void update();
+    void update() final;
     void click(IWindowMenu &) override;
 };
 #endif
 
-class MI_NOZZLE_OFFSET : public MI_TOOLHEAD_SPECIFIC<MI_NOZZLE_OFFSET, IWindowMenuItem> {
+class MI_NOZZLE_OFFSET : public MI_TOOLHEAD_SPECIFIC_BASE<IWindowMenuItem> {
 public:
     MI_NOZZLE_OFFSET(Toolhead toolhead = default_toolhead);
     void click(IWindowMenu &) override;
+    void update() final {}
 };
 
 #if HAS_PRINT_FAN_TYPE()
-class MI_PRINT_FAN_TYPE : public MI_TOOLHEAD_SPECIFIC<MI_PRINT_FAN_TYPE, MenuItemSelectMenu> {
+class MI_PRINT_FAN_TYPE : public MI_TOOLHEAD_SPECIFIC<PrintFanType, MenuItemSelectMenu> {
 public:
     MI_PRINT_FAN_TYPE(Toolhead toolhead = default_toolhead);
 
@@ -122,8 +125,8 @@ public:
 
     void update();
 
-    static PrintFanType read_value_impl(ToolheadIndex ix);
-    static void store_value_impl(ToolheadIndex ix, PrintFanType set);
+    PrintFanType read_value_impl(ToolheadIndex ix) final;
+    void store_value_impl(ToolheadIndex ix, PrintFanType set) final;
 
 protected:
     bool on_item_selected(int old_index, int new_index) override;
