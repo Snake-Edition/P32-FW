@@ -393,6 +393,7 @@ namespace phase_stepping {
  * be in progress.
  **/
 static void enable_phase_stepping(AxisEnum axis_num) {
+    assert(PreciseStepping::initialized());
     assert(axis_num < SUPPORTED_AXIS_COUNT);
     assert(!axis_states[axis_num].enabled);
     if (!planner.draining()) {
