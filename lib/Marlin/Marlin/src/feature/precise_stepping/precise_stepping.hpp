@@ -157,7 +157,11 @@ public:
 
     PreciseStepping() = default;
 
+    // Initialize
     static void init();
+
+    // Return PreciseStepping initialization state
+    static bool initialized() { return initialized_; }
 
     // Reset the motion/stepper generator state from halt
     static void reset_from_halt(bool preserve_step_fraction = true);
@@ -411,6 +415,7 @@ private:
 
     static void step_generator_state_init(const move_t &move);
 
+    static bool initialized_;
     static std::atomic<bool> busy;
     static std::atomic<bool> stop_pending;
     static void reset_queues();

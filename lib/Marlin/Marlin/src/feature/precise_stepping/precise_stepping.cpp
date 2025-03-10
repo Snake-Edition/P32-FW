@@ -47,6 +47,7 @@ PreciseSteppingFlag_t PreciseStepping::flags = 0;
 uint32_t PreciseStepping::waiting_before_delivering_start_time = 0;
 uint32_t PreciseStepping::last_step_isr_delay = 0;
 
+bool PreciseStepping::initialized_ = false;
 std::atomic<bool> PreciseStepping::stop_pending = false;
 std::atomic<bool> PreciseStepping::busy = false;
 volatile uint8_t PreciseStepping::step_dl_miss = 0;
@@ -540,6 +541,8 @@ void PreciseStepping::init() {
 
     HAL_timer_start(MOVE_TIMER_NUM, MOVE_TIMER_FREQUENCY);
     MoveIsrDisabler::setGlobalTimerState(true);
+
+    initialized_ = true;
 }
 
 void PreciseStepping::reset_from_halt(bool preserve_step_fraction) {
