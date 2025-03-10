@@ -77,7 +77,7 @@ void ChamberFiltration::step() {
         update_needs_filtration();
     }
 
-    if (!needs_filtration_) {
+    if (!needs_filtration_.value_or(false)) {
         output_pwm_ = {};
 
     } else if (is_printing) {
@@ -89,13 +89,16 @@ void ChamberFiltration::step() {
 
     } else {
         output_pwm_ = {};
-        needs_filtration_ = false;
+        needs_filtration_ = std::nullopt; // Reset the flag after the print is done so that it doesn't affect the next print
     }
 }
 
 void ChamberFiltration::update_needs_filtration() {
+    // Prioritize overridden value by M147 or M148 [BFW-6828]
+    if (needs_filtration_.has_value()) {
+        return;
+    }
     needs_filtration_ = false;
-
     GCodeInfo::getInstance().for_each_used_extruder([this]([[maybe_unused]] uint8_t logical_ix, uint8_t tool_index, const GCodeInfo::ExtruderInfo &extruder_info) {
         const bool loaded_filament_requires_filtration = config_store().get_filament_type(tool_index).parameters().requires_filtration;
 
@@ -104,8 +107,15 @@ void ChamberFiltration::update_needs_filtration() {
             ? FilamentType::from_name(extruder_info.filament_name->data()).parameters().requires_filtration
             : false;
 
-        needs_filtration_ |= (loaded_filament_requires_filtration || gcode_filament_requires_filtration);
+        if (loaded_filament_requires_filtration || gcode_filament_requires_filtration) {
+            needs_filtration_ = true;
+        }
     });
+}
+
+void ChamberFiltration::set_needs_filtration(bool needs_filtration) {
+    std::lock_guard _lg(mutex_);
+    needs_filtration_ = needs_filtration;
 }
 
 } // namespace buddy

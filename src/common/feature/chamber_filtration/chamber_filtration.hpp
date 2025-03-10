@@ -36,6 +36,10 @@ public:
 
     void step();
 
+    /// \brief Enables/disables the filtration for the current print
+    /// \param needs_filtration true if the filtration should be forced on (ignore filament needs), false if it should be forced off
+    void set_needs_filtration(bool needs_filtration);
+
 private:
     void update_needs_filtration();
 
@@ -44,7 +48,7 @@ private:
 
     PWM255 output_pwm_;
     bool is_printing_prev_ = false;
-    bool needs_filtration_ = false;
+    std::optional<bool> needs_filtration_;
     uint32_t last_print_s_ = 0;
 };
 
