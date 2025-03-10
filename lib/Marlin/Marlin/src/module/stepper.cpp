@@ -512,6 +512,7 @@ void Stepper::report_positions() {
 // No other ISR should ever interrupt this!
 void Stepper::babystep(const AxisEnum axis, const bool direction) {
     buddy::InterruptDisabler _;
+    assert(!phase_stepping::is_enabled(axis));
 
     switch (axis) {
 
