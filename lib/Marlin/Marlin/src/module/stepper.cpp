@@ -187,9 +187,6 @@ bool Stepper::is_axis_inverted(AxisEnum axis) {
     }
 }
 
-#define _APPLY_STEP(AXIS)      AXIS##_STEP_WRITE
-#define _INVERT_STEP_PIN(AXIS) INVERT_##AXIS##_STEP_PIN
-
 void Stepper::init() {
 
 // Init Dir Pins
@@ -318,6 +315,7 @@ void Stepper::init() {
 #define _STEP_INIT(AXIS)           AXIS##_STEP_INIT
 #define _WRITE_STEP(AXIS, HIGHLOW) AXIS##_STEP_WRITE(HIGHLOW)
 #define _DISABLE(AXIS)             disable_##AXIS()
+#define _INVERT_STEP_PIN(AXIS)     INVERT_##AXIS##_STEP_PIN
 
 #define AXIS_INIT(AXIS, PIN) \
     _STEP_INIT(AXIS);        \
@@ -456,7 +454,9 @@ void Stepper::report_positions() {
 
 #if ENABLED(BABYSTEPPING)
 
-    #if MINIMUM_STEPPER_PULSE
+    #if ENABLED(SQUARE_WAVE_STEPPING) && (MINIMUM_STEPPER_PRE_DIR_DELAY > 0) && (MINIMUM_STEPPER_POST_DIR_DELAY > 0)
+        #define STEP_PULSE_CYCLES 0 // minimum step time is ensured due to required direction change delays
+    #elif MINIMUM_STEPPER_PULSE
         #define STEP_PULSE_CYCLES ((MINIMUM_STEPPER_PULSE)*CYCLES_PER_MICROSECOND)
     #else
         #define STEP_PULSE_CYCLES 0
@@ -500,12 +500,12 @@ void Stepper::report_positions() {
             _APPLY_DIR(AXIS, _INVERT_DIR(AXIS) ^ DIR ^ INVERT); \
             delay_ns_precise<MINIMUM_STEPPER_POST_DIR_DELAY>(); \
             _SAVE_START;                                        \
-            _APPLY_STEP(AXIS)                                   \
-            (!_INVERT_STEP_PIN(AXIS));                          \
+            AXIS##_STEP_SET();                                  \
             _PULSE_WAIT;                                        \
-            _APPLY_STEP(AXIS)                                   \
-            (_INVERT_STEP_PIN(AXIS));                           \
+            AXIS##_STEP_RESET();                                \
+            delay_ns_precise<MINIMUM_STEPPER_PRE_DIR_DELAY>();  \
             _APPLY_DIR(AXIS, old_dir);                          \
+            delay_ns_precise<MINIMUM_STEPPER_POST_DIR_DELAY>(); \
         }
 
 // MUST ONLY BE CALLED BY AN ISR,
