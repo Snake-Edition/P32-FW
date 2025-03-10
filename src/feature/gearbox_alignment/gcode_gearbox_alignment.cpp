@@ -32,8 +32,8 @@ private:
     marlin_server::FSM_Holder holder;
     PhaseGearboxAlignment curr_phase = first_phase;
 
-    PhaseGearboxAlignment get_next_phase(const PhaseGearboxAlignment phase) {
-        switch (phase) {
+    void do_phase_and_set_next() {
+        switch (curr_phase) {
         case PhaseGearboxAlignment::intro:
             return intro();
         case PhaseGearboxAlignment::filament_loaded_ask_unload:
@@ -54,17 +54,17 @@ private:
         BUDDY_UNREACHABLE();
     }
 
-    PhaseGearboxAlignment fsm_change(PhaseGearboxAlignment phase) {
+    void fsm_change(PhaseGearboxAlignment phase) {
         curr_phase = phase;
         marlin_server::fsm_change(phase);
-        return phase;
     }
 
-    PhaseGearboxAlignment finish(TestResult test_result) {
+    void finish(TestResult test_result) {
         SelftestTool selftest_tool = config_store().get_selftest_result_tool(tool);
         selftest_tool.gears = test_result;
         config_store().set_selftest_result_tool(tool, selftest_tool);
-        return fsm_change(PhaseGearboxAlignment::finish);
+        fsm_change(PhaseGearboxAlignment::finish);
+        return;
     }
 
     void move_gear() {
@@ -74,13 +74,15 @@ private:
         mapi::extruder_schedule_turning(feedrate, -0.6);
     }
 
-    PhaseGearboxAlignment filament_check() {
+    void filament_check() {
         if (IFSensor *sensor = GetExtruderFSensor(tool)) {
             switch (sensor->get_state()) {
             case FilamentSensorState::HasFilament:
-                return fsm_change(PhaseGearboxAlignment::filament_loaded_ask_unload);
+                fsm_change(PhaseGearboxAlignment::filament_loaded_ask_unload);
+                return;
             case FilamentSensorState::NoFilament:
-                return fsm_change(PhaseGearboxAlignment::loosen_screws);
+                fsm_change(PhaseGearboxAlignment::loosen_screws);
+                return;
             case FilamentSensorState::NotInitialized:
             case FilamentSensorState::NotCalibrated:
             case FilamentSensorState::NotConnected:
@@ -88,10 +90,11 @@ private:
                 break;
             }
         }
-        return fsm_change(PhaseGearboxAlignment::filament_unknown_ask_unload);
+        fsm_change(PhaseGearboxAlignment::filament_unknown_ask_unload);
+        return;
     }
 
-    PhaseGearboxAlignment filament_unload() {
+    void filament_unload() {
         const uint8_t target_extruder = active_extruder;
 
         filament_gcodes::M702_no_parser(std::nullopt, Z_AXIS_LOAD_POS, RetAndCool_t::Return, target_extruder, false);
@@ -100,75 +103,87 @@ private:
         if (PreheatStatus::ConsumeResult() == PreheatStatus::Result::DoneNoFilament) {
             Temperature::setTargetHotend(0, target_extruder);
             Temperature::setTargetBed(0);
-            return fsm_change(PhaseGearboxAlignment::loosen_screws);
+            fsm_change(PhaseGearboxAlignment::loosen_screws);
         } else {
-            return filament_check();
+            filament_check();
         }
     }
 
-    PhaseGearboxAlignment intro() {
+    void intro() {
         switch (marlin_server::wait_for_response(PhaseGearboxAlignment::intro)) {
         case Response::Skip:
             // Skipped gearvox alignment is considered passed;
             // this is meant for users with prebuilt printer.
-            return finish(TestResult_Passed);
+            finish(TestResult_Passed);
+            return;
         case Response::Continue:
+#if HAS_TOOLCHANGER()
             tool_change(tool);
-            return filament_check();
+#endif
+            filament_check();
+            return;
         default:
             break;
         }
         BUDDY_UNREACHABLE();
     }
 
-    PhaseGearboxAlignment filament_loaded_ask_unload() {
+    void filament_loaded_ask_unload() {
         switch (marlin_server::wait_for_response(PhaseGearboxAlignment::filament_loaded_ask_unload)) {
         case Response::Abort:
-            return finish(TestResult_Skipped);
+            finish(TestResult_Skipped);
+            return;
         case Response::Unload:
-            return filament_unload();
+            filament_unload();
+            return;
         default:
             break;
         }
         BUDDY_UNREACHABLE();
     }
 
-    PhaseGearboxAlignment filament_unknown_ask_unload() {
+    void filament_unknown_ask_unload() {
         switch (marlin_server::wait_for_response(PhaseGearboxAlignment::filament_unknown_ask_unload)) {
         case Response::Abort:
-            return finish(TestResult_Skipped);
+            finish(TestResult_Skipped);
+            return;
         case Response::Unload:
-            return filament_unload();
+            filament_unload();
+            return;
         case Response::Continue:
-            return fsm_change(PhaseGearboxAlignment::loosen_screws);
+            fsm_change(PhaseGearboxAlignment::loosen_screws);
+            return;
         default:
             break;
         }
         BUDDY_UNREACHABLE();
     }
 
-    PhaseGearboxAlignment loosen_screws() {
+    void loosen_screws() {
         switch (marlin_server::wait_for_response(PhaseGearboxAlignment::loosen_screws)) {
         case Response::Continue:
-            return fsm_change(PhaseGearboxAlignment::alignment);
+            fsm_change(PhaseGearboxAlignment::alignment);
+            return;
         case Response::Skip:
-            return finish(TestResult_Skipped);
+            finish(TestResult_Skipped);
+            return;
         default:
             break;
         }
         BUDDY_UNREACHABLE();
     }
 
-    PhaseGearboxAlignment alignment() {
+    void alignment() {
         uint32_t ticks = ticks_ms();
         while (ticks_ms() - ticks < 20'000) {
             move_gear();
             idle(true);
         }
-        return fsm_change(PhaseGearboxAlignment::tighten_screws);
+        fsm_change(PhaseGearboxAlignment::tighten_screws);
+        return;
     }
 
-    PhaseGearboxAlignment tighten_screws() {
+    void tighten_screws() {
         for (;;) {
             switch (marlin_server::get_response_from_phase(PhaseGearboxAlignment::tighten_screws)) {
             case Response::_none:
@@ -176,17 +191,19 @@ private:
                 idle(true);
                 continue;
             case Response::Continue:
-                return fsm_change(PhaseGearboxAlignment::done);
+                fsm_change(PhaseGearboxAlignment::done);
+                return;
             default:
                 continue;
             }
         }
     }
 
-    PhaseGearboxAlignment done() {
+    void done() {
         switch (marlin_server::wait_for_response(PhaseGearboxAlignment::done)) {
         case Response::Continue:
-            return finish(TestResult_Passed);
+            finish(TestResult_Passed);
+            return;
         default:
             break;
         }
