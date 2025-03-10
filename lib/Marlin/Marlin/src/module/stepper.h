@@ -181,8 +181,10 @@ public:
 
         if (speed > 0) {
             last_direction_bits |= axis_mask;
+            count_direction[a] = -1;
         } else {
             last_direction_bits &= ~axis_mask;
+            count_direction[a] = 1;
         }
     }
 
