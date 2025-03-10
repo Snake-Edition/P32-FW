@@ -175,16 +175,7 @@ float Stepper::segment_progress() {
 }
 
 bool Stepper::is_axis_inverted(AxisEnum axis) {
-    switch (axis) {
-    case X_AXIS:
-        return INVERT_X_DIR;
-    case Y_AXIS:
-        return INVERT_Y_DIR;
-    case Z_AXIS:
-        return INVERT_Z_DIR;
-    default:
-        return false; // other axes cannot be inverted
-    }
+    return !(PreciseStepping::inverted_dirs & (STEP_EVENT_FLAG_X_DIR << axis));
 }
 
 void Stepper::init() {
@@ -471,7 +462,7 @@ void Stepper::report_positions() {
 
     #define _ENABLE(AXIS)            enable_##AXIS()
     #define _READ_DIR(AXIS)          AXIS##_DIR_READ()
-    #define _INVERT_DIR(AXIS)        INVERT_##AXIS##_DIR
+    #define _INVERT_DIR(AXIS)        is_axis_inverted(_AXIS(AXIS))
     #define _APPLY_DIR(AXIS, INVERT) AXIS##_APPLY_DIR(INVERT)
 
     #if EXTRA_CYCLES_BABYSTEP > 20
