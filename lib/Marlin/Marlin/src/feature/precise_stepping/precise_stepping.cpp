@@ -506,14 +506,19 @@ void PreciseStepping::init() {
         | (!INVERT_E0_DIR ? STEP_EVENT_FLAG_E_DIR : 0);
 
     // Reset initial direction state
-    X_APPLY_DIR((Stepper::last_direction_bits ^ inverted_dirs) & STEP_EVENT_FLAG_X_DIR);
-    Y_APPLY_DIR((Stepper::last_direction_bits ^ inverted_dirs) & STEP_EVENT_FLAG_Y_DIR);
-    Z_APPLY_DIR((Stepper::last_direction_bits ^ inverted_dirs) & STEP_EVENT_FLAG_Z_DIR);
-    E_APPLY_DIR((Stepper::last_direction_bits ^ inverted_dirs) & STEP_EVENT_FLAG_E_DIR);
-    Stepper::count_direction.x = (Stepper::last_direction_bits & STEP_EVENT_FLAG_X_DIR) ? -1 : 1;
-    Stepper::count_direction.y = (Stepper::last_direction_bits & STEP_EVENT_FLAG_Y_DIR) ? -1 : 1;
-    Stepper::count_direction.z = (Stepper::last_direction_bits & STEP_EVENT_FLAG_Z_DIR) ? -1 : 1;
-    Stepper::count_direction.e = (Stepper::last_direction_bits & STEP_EVENT_FLAG_E_DIR) ? -1 : 1;
+    const StepEventFlag_t step_dir = ((Stepper::last_direction_bits << STEP_EVENT_FLAG_DIR_SHIFT) & STEP_EVENT_FLAG_DIR_MASK);
+    const StepEventFlag_t step_dir_inv = (step_dir ^ PreciseStepping::inverted_dirs);
+
+    X_APPLY_DIR(step_dir_inv & STEP_EVENT_FLAG_X_DIR);
+    Y_APPLY_DIR(step_dir_inv & STEP_EVENT_FLAG_Y_DIR);
+    Z_APPLY_DIR(step_dir_inv & STEP_EVENT_FLAG_Z_DIR);
+    E_APPLY_DIR(step_dir_inv & STEP_EVENT_FLAG_E_DIR);
+
+    Stepper::count_direction.x = (step_dir & STEP_EVENT_FLAG_X_DIR) ? -1 : 1;
+    Stepper::count_direction.y = (step_dir & STEP_EVENT_FLAG_Y_DIR) ? -1 : 1;
+    Stepper::count_direction.z = (step_dir & STEP_EVENT_FLAG_Z_DIR) ? -1 : 1;
+    Stepper::count_direction.e = (step_dir & STEP_EVENT_FLAG_E_DIR) ? -1 : 1;
+
 #if HAS_PHASE_STEPPING()
     for (std::size_t i = 0; i != phase_stepping::opts::SUPPORTED_AXIS_COUNT; ++i) {
         PreciseStepping::step_generators_pool.classic_step_generator[i].phase_step_state = &phase_stepping::axis_states[i];
