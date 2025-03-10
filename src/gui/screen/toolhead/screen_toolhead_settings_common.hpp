@@ -136,21 +136,9 @@ public:
     // Inherit parent constructor
     using MI_TOOLHEAD_SPECIFIC<float, WiSpin>::MI_TOOLHEAD_SPECIFIC;
 
-    void update() final {
-        set_value(read_value().value_or(*config().special_value));
-    }
+    void update() final;
 
-    void OnClick() final {
-        if (value() == config().special_value) {
-            return;
-        }
-
-        if (msgbox_confirm_change(toolhead(), user_already_confirmed_changes_)) {
-            store_value(value());
-        } else {
-            update();
-        }
-    }
+    void OnClick() final;
 };
 
 class MI_TOOLHEAD_SPECIFIC_TOGGLE : public MI_TOOLHEAD_SPECIFIC<bool, MenuItemToggleSwitch> {
@@ -158,21 +146,9 @@ public:
     // Inherit parent constructor
     using MI_TOOLHEAD_SPECIFIC<bool, MenuItemToggleSwitch>::MI_TOOLHEAD_SPECIFIC;
 
-    void update() final {
-        set_value(read_value().transform(Tristate::from_bool).value_or(Tristate::other), false);
-    }
+    void update() final;
 
-    void toggled(Tristate) final {
-        if (value() == Tristate::other) {
-            return;
-        }
-
-        if (msgbox_confirm_change(toolhead(), user_already_confirmed_changes_)) {
-            store_value(value());
-        } else {
-            update();
-        }
-    }
+    void toggled(Tristate) final;
 };
 
 } // namespace screen_toolhead_settings
