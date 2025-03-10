@@ -48,6 +48,10 @@ void M123(); //< Fan speed reporting
 void M141(); ///< Set chamber temperature
 #endif
 
+#if HAS_CHAMBER_FILTRATION_API()
+void M147_148(); //< Enable/disable filtration
+#endif
+
 void M150();
 
 #if HAS_SIDE_LEDS()

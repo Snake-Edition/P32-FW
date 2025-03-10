@@ -80,6 +80,13 @@ bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
             break;
 #endif
 
+#if HAS_CHAMBER_FILTRATION_API()
+        case 147:
+        case 148:
+            PrusaGcodeSuite::M147_148();
+            break;
+#endif
+
 #if HAS_LEDS()
         case 150:
             PrusaGcodeSuite::M150();

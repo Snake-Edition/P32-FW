@@ -81,3 +81,7 @@ endif()
 if(CONNECT)
   target_sources(firmware PRIVATE M1200.cpp)
 endif()
+
+if(HAS_CHAMBER_FILTRATION_API)
+  target_sources(firmware PRIVATE M147_148.cpp)
+endif()
