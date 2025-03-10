@@ -350,7 +350,8 @@ step_event_info_t classic_step_generator_next_step_event(classic_step_generator_
     const float half_step_dist = Planner::mm_per_half_step[step_generator.axis];
     const float next_target = float(step_generator_state.current_distance[step_generator.axis] + (step_generator.step_dir ? 0 : -1)) * Planner::mm_per_step[step_generator.axis] + half_step_dist;
     const float next_distance = next_target - step_generator.start_pos;
-    const float step_time = calc_time_for_distance(step_generator, next_distance);
+    const float next_distance_clamped = step_generator.step_dir ? std::max(next_distance, 0.f) : std::min(next_distance, 0.f);
+    const float step_time = calc_time_for_distance(step_generator, next_distance_clamped);
 
     // When step_time is infinity, it means that next_distance will never be reached.
     // This happens when next_target exceeds end_position, and deceleration decelerates velocity to zero or negative value.
