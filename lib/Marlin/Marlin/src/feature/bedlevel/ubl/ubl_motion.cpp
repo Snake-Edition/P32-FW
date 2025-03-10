@@ -450,8 +450,11 @@
       xy_pos_t cell = in_mesh - pos;
 
       // Check if the position is really within the cell
-      assert(cell.x <= MESH_X_DIST);
-      assert(cell.y <= MESH_Y_DIST);
+      // (0.05 as a margin for foat rounding errors)
+      assert(cell.x >= -0.05);
+      assert(cell.y >= -0.05);
+      assert(cell.x <= MESH_X_DIST + 0.05);
+      assert(cell.y <= MESH_Y_DIST + 0.05);
 
       const float z_xmy0 = (z_x1y0 - z_x0y0) * RECIPROCAL(MESH_X_DIST),   // z slope per x along y0 (lower left to lower right)
                   z_xmy1 = (z_x1y1 - z_x0y1) * RECIPROCAL(MESH_X_DIST);   // z slope per x along y1 (upper left to upper right)
