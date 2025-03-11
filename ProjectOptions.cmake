@@ -244,15 +244,6 @@ set(PRINTERS_WITH_FILAMENT_SENSOR_BINARY "MINI" "MK3.5")
 set(PRINTERS_WITH_FILAMENT_SENSOR_ADC "MK4" "XL" "iX" "XL_DEV_KIT" "COREONE")
 
 set_feature_for_printers(
-  INIT_TRINAMIC_FROM_MARLIN_ONLY
-  "MINI"
-  "MK4"
-  "MK3.5"
-  "XL"
-  "iX"
-  "COREONE"
-  )
-set_feature_for_printers(
   HAS_PAUSE
   "MINI"
   "MK4"

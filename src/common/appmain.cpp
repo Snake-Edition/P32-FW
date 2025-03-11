@@ -82,7 +82,6 @@ LOG_COMPONENT_REF(Marlin);
 
 #include "probe_position_lookback.hpp"
 #include <config_store/store_instance.hpp>
-#include <option/init_trinamic_from_marlin_only.h>
 
 LOG_COMPONENT_DEF(Buddy, logging::Severity::debug);
 LOG_COMPONENT_DEF(Core, logging::Severity::info);
@@ -163,12 +162,6 @@ static void app_startup() {
 
 static void app_setup(void) {
     metric_record_event(&metric_app_start);
-
-    if constexpr (!INIT_TRINAMIC_FROM_MARLIN_ONLY()) {
-        init_tmc();
-    } else {
-        init_tmc_bare_minimum();
-    }
 
 #if HAS_LOADCELL()
     if (config_store().stuck_filament_detection.get()) {

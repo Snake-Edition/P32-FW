@@ -80,6 +80,9 @@ void motor_driver_init() {
     SET_CS_PIN(E5);
     #endif
 #endif
+#if HAS_TRINAMIC
+    init_tmc();
+#endif
 }
 
 void monitor_motor_drivers() {

@@ -797,6 +797,7 @@ void setup() {
   SERIAL_ECHOLNPGM("start");
   SERIAL_ECHO_START();
 
+  motor_serial_lock_init();
   motor_driver_init();
 
   #ifdef BOARD_INIT
