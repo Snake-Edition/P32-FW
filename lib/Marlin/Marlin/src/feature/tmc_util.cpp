@@ -1158,28 +1158,25 @@ void test_tmc_connection(const bool test_x, const bool test_y, const bool test_z
   }
 }
 
-template<class T>
-constexpr bool is_supported(T& stepper) {
-  return false
-    || std::is_same_v<T, TMCMarlin<TMC2130Stepper>>
-    || std::is_same_v<T, TMCMarlin<TMC2209Stepper>>;
+static void initial_test_tmc_connection(AxisEnum axis) {
+  auto& stepper = stepper_axis(axis);
+  const auto reg = stepper.DRV_STATUS();
+  if(reg == 0xFFFFFFFF || reg == 0) {
+    bsod("TMC error %i (0x%08lx)", (int)axis, (unsigned long)reg);
+  }
 }
 
 void initial_test_tmc_connection() {
-  static_assert(is_supported(stepperX));
-  static_assert(is_supported(stepperY));
-  static_assert(is_supported(stepperZ));
-  static_assert(is_supported(stepperE0));
-
-  const auto check_error = [] (const char ch, auto &stepper) {
-    const auto reg = stepper.DRV_STATUS();
-    if(reg == 0xFFFFFFFF || reg == 0) {
-      bsod("TMC error %i (0x%08lx)", (int)ch, (unsigned long)reg);
-    }
-  };
-
-  check_error('X', stepperX);
-  check_error('Y', stepperY);
-  check_error('Z', stepperZ);
-  check_error('E', stepperE0);
+  #if AXIS_IS_TMC(X)
+  initial_test_tmc_connection(X_AXIS);
+  #endif
+  #if AXIS_IS_TMC(Y)
+  initial_test_tmc_connection(Y_AXIS);
+  #endif
+  #if AXIS_IS_TMC(Z)
+  initial_test_tmc_connection(Z_AXIS);
+  #endif
+  #if AXIS_IS_TMC(E0)
+  initial_test_tmc_connection(E0_AXIS);
+  #endif
 }
