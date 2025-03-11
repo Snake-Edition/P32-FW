@@ -3,7 +3,7 @@
 
 #include <bitset>
 
-#include <common/hotend_type.hpp>
+#include <hotend_type.hpp>
 #include "constants.hpp"
 #include "defaults.hpp"
 #include <option/has_config_store_wo_backend.h>

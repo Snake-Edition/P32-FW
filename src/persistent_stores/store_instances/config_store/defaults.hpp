@@ -17,7 +17,7 @@
 #include <filament_eeprom.hpp>
 
 #include "constants.hpp"
-#include <common/hotend_type.hpp>
+#include <hotend_type.hpp>
 
 #include <option/has_sheet_support.h>
 #include <option/has_loadcell.h>

@@ -25,6 +25,7 @@ if(BOARD IN_LIST BUDDY_BOARDS)
             hardware_serial.cpp
             heap.cpp
             homing_reporter.cpp
+            hotend_type.cpp
             hwio_pindef_check.cpp
             i2c.cpp
             ini_handler.cpp

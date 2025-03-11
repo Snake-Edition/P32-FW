@@ -2,12 +2,10 @@
 
 #include <stdint.h>
 
-#include <enum_array.hpp>
 #include <i18n.h>
 
 #include <option/has_hotend_type_support.h>
 #include <printers.h>
-#include <buddy/unreachable.hpp>
 
 /// Shared for all printers.
 /// !!! Never change order, never remove items - this is used in config store
@@ -23,24 +21,7 @@ enum class HotendType : uint8_t {
     _cnt,
 };
 
-const char *hotend_type_name(HotendType t) {
-    switch (t) {
-
-    case HotendType::stock:
-        return N_("Stock");
-
-    case HotendType::stock_with_sock:
-        return N_("With sock");
-
-    case HotendType::e3d_revo:
-        return N_("E3D Revo");
-
-    case HotendType::_cnt:
-        break;
-    }
-
-    BUDDY_UNREACHABLE();
-};
+const char *hotend_type_name(HotendType t);
 
 /// Filtered and ordered list of hotend types, for UI purposes
 static constexpr std::array hotend_type_list {
