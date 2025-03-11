@@ -1011,11 +1011,7 @@ void setup() {
   #endif
 
   #if HAS_TRINAMIC && DISABLED(PS_DEFAULT_OFF)
-    #if ENABLED(PRUSA_DWARF)
-      test_tmc_connection(false, false, false, true); // we have the extruder only
-    #else
-      initial_test_tmc_connection();
-    #endif
+    initial_test_tmc_connection();
   #endif
 
   #if HAS_TEMP_HEATBREAK_CONTROL
