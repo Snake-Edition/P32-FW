@@ -283,7 +283,7 @@
 
 #endif // Z_SAFE_HOMING
 
-#if HAS_TRINAMIC
+#if HAS_TRINAMIC && defined(HAS_TMC_WAVETABLE)
 static void reenable_wavetable(AxisEnum axis)
 {
     tmc_enable_wavetable(axis == X_AXIS, axis == Y_AXIS, false);
@@ -663,18 +663,16 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   // Diagonal move first if both are homing
   TERN_(QUICK_HOME, if (!failed && doX && doY) quick_home_xy());
 
-#if HAS_TRINAMIC
+#if HAS_TRINAMIC && defined(HAS_TMC_WAVETABLE)
   // Only allow wavetable change if homing performs a backoff. This backoff is made in the way that it ends on stepper zero-position, so that re-enabling wavetable is safe.
   bool wavetable_off_X = false, wavetable_off_Y = false;
-  #ifdef HAS_TMC_WAVETABLE
-    #if HAS_PRECISE_HOMING_COREXY()
-      #error "wavetable switching currently not compatible with HAS_PRECISE_HOMING_COREXY()"
-    #endif
-    #ifdef HOMING_BACKOFF_POST_MM
-      constexpr xyz_float_t homing_backoff = HOMING_BACKOFF_POST_MM;
-      wavetable_off_X = (homing_backoff[X] > 0.0f) && doX;
-      wavetable_off_Y = (homing_backoff[Y] > 0.0f) && doY;
-    #endif
+  #if HAS_PRECISE_HOMING_COREXY()
+    #error "wavetable switching currently not compatible with HAS_PRECISE_HOMING_COREXY()"
+  #endif
+  #ifdef HOMING_BACKOFF_POST_MM
+    constexpr xyz_float_t homing_backoff = HOMING_BACKOFF_POST_MM;
+    wavetable_off_X = (homing_backoff[X] > 0.0f) && doX;
+    wavetable_off_Y = (homing_backoff[Y] > 0.0f) && doY;
   #endif
   void (*reenable_wt_X)(AxisEnum) = wavetable_off_X ? reenable_wavetable : NULL;
   void (*reenable_wt_Y)(AxisEnum) = wavetable_off_Y ? reenable_wavetable : NULL;

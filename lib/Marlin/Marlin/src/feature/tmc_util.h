@@ -343,8 +343,10 @@ void tmc_get_tstep();
   uint16_t tmc_sg_result(uint8_t axis);
 #endif
 
-void tmc_enable_wavetable(bool X, bool Y, bool Z);
-void tmc_disable_wavetable(bool X, bool Y, bool Z);
+#ifdef HAS_TMC_WAVETABLE
+  void tmc_enable_wavetable(bool X, bool Y, bool Z);
+  void tmc_disable_wavetable(bool X, bool Y, bool Z);
+#endif // HAS_TMC_WAVETABLE
 
 /**
  * \brief Check stepper coils for open/short circuit

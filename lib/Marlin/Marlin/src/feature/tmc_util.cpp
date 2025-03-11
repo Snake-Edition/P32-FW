@@ -1263,8 +1263,8 @@ tmc_reg_t tmc_reg_map[] = {
     { NULL, 0x00, false, false },
 };
 
-void tmc_enable_wavetable([[maybe_unused]] bool X, [[maybe_unused]] bool Y, [[maybe_unused]] bool Z) {
 #ifdef HAS_TMC_WAVETABLE
+void tmc_enable_wavetable([[maybe_unused]] bool X, [[maybe_unused]] bool Y, [[maybe_unused]] bool Z) {
     if (Y) {
         pStep[Y_AXIS]->write(0x69, 0x00f80000);
         pStep[Y_AXIS]->write(0x60, 0x56ad6b6a);
@@ -1301,11 +1301,9 @@ void tmc_enable_wavetable([[maybe_unused]] bool X, [[maybe_unused]] bool Y, [[ma
         pStep[Z_AXIS]->write(0x67, 0x0102224a);
         pStep[Z_AXIS]->write(0x68, 0xff760159);
     }
-#endif // HAS_TMC_WAVETABLE
 }
 
 void tmc_disable_wavetable([[maybe_unused]] bool X, [[maybe_unused]] bool Y, [[maybe_unused]] bool Z) {
-#ifdef HAS_TMC_WAVETABLE
     if (Y) {
         pStep[Y_AXIS]->write(0x69, 0x00F70000);
         pStep[Y_AXIS]->write(0x60, 0xAAAAB554);
@@ -1342,8 +1340,8 @@ void tmc_disable_wavetable([[maybe_unused]] bool X, [[maybe_unused]] bool Y, [[m
         pStep[Z_AXIS]->write(0x67, 0x00404222);
         pStep[Z_AXIS]->write(0x68, 0xFFFF8056);
     }
-#endif // HAS_TMC_WAVETABLE
 }
+#endif // HAS_TMC_WAVETABLE
 
 void init_tmc() {
     tmc_serial_lock_init();
