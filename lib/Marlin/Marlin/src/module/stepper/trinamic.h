@@ -248,7 +248,9 @@ void reset_trinamic_drivers();
 #endif
 
 // Common type for all stepper types
-using TMCStepperType = TMC_CLASS(X, X);
+#define __TMCMARLIN_CLASS(DRIVER_TYPE) TMCMarlin<DRIVER_TYPE##Stepper>
+#define _TMCMARLIN_CLASS(DRIVER_TYPE) __TMCMARLIN_CLASS(DRIVER_TYPE)
+using TMCStepperType = _TMCMARLIN_CLASS(TMC_DRIVER_TYPE);
 
 // Return the stepper instance of an axis
 TMCStepperType &stepper_axis(const AxisEnum axis);
