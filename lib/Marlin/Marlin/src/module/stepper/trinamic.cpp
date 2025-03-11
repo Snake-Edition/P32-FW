@@ -798,6 +798,10 @@ tmc_init(stepperE0, get_default_rms_current_ma_e(), get_microsteps_e(), E0_HYBRI
     TMC_ADV()
   #endif
 
+  #ifdef HAS_TMC_WAVETABLE
+    config_store().tmc_wavetable_enabled.get() ? tmc_enable_wavetable(true, true, true) : tmc_disable_wavetable(true, true, true);
+  #endif
+
   #if HAS_PLANNER()
     stepper.set_directions();
   #endif

@@ -1371,10 +1371,6 @@ void init_tmc() {
     pStep[Z_AXIS]->SLAVECONF(0x300);
     pStep[E_AXIS]->SLAVECONF(0x300);
 #endif
-
-#ifdef HAS_TMC_WAVETABLE
-    config_store().tmc_wavetable_enabled.get() ? tmc_enable_wavetable(true, true, true) : tmc_disable_wavetable(true, true, true);
-#endif
 }
 
 #if !BOARD_IS_DWARF()
