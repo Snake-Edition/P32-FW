@@ -24,9 +24,6 @@ public:
     string send_data;
     MockConnection()
         : Connection(42) {}
-    virtual optional<Error> connection(const char *, uint16_t) override {
-        return nullopt;
-    }
     virtual variant<size_t, Error> rx(uint8_t *buffer, size_t size, bool) override {
         size_t amt = min(recv_data.size(), size);
         memcpy(buffer, recv_data.c_str(), size);

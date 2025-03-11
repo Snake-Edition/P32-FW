@@ -222,7 +222,9 @@ struct CurrentStore
 
     StoreItem<std::array<char, connect_host_size + 1>, defaults::connect_host, ItemFlag::network | ItemFlag::dev_items, journal::hash("Connect Host")> connect_host;
     StoreItem<std::array<char, connect_token_size + 1>, defaults::connect_token, ItemFlag::network, journal::hash("Connect Token")> connect_token;
+    StoreItem<std::array<char, connect_proxy_size + 1>, defaults::connect_proxy_host, ItemFlag::network | ItemFlag::dev_items, journal::hash("Connect Proxy Host")> connect_proxy_host;
     StoreItem<uint16_t, defaults::connect_port, ItemFlag::network | ItemFlag::dev_items, journal::hash("Connect Port")> connect_port;
+    StoreItem<uint16_t, 0, ItemFlag::network | ItemFlag::dev_items, journal::hash("Connect proxy port")> connect_proxy_port;
     StoreItem<bool, true, ItemFlag::network | ItemFlag::dev_items, journal::hash("Connect TLS")> connect_tls;
     StoreItem<bool, false, ItemFlag::network, journal::hash("Connect Enabled")> connect_enabled;
     StoreItem<bool, false, ItemFlag::network | ItemFlag::dev_items, journal::hash("Connect custom TLS certificate")> connect_custom_tls_cert;
