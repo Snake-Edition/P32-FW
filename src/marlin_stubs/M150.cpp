@@ -57,7 +57,7 @@ std::optional<leds::ColorRGBW> parse_color() {
  * Effect
  * - `A` - Animation type
  *   - `0` - Solid color
- *   - `1` - Fading
+ *   - `1` - Pulsing
  * - `S` - Printer state
  *   - `0` - Idle
  *   - `1` - Printing
@@ -68,7 +68,7 @@ std::optional<leds::ColorRGBW> parse_color() {
  *   - `6` - Warning
  *   - `7` - PowerPanic
  *
- * - `P` - Period
+ * - `P` - Period in ms
  */
 void PrusaGcodeSuite::M150() {
     if (parser.seen('S')) {
@@ -77,6 +77,16 @@ void PrusaGcodeSuite::M150() {
             return;
         }
         leds::StatusLedsHandler::instance().set_animation(static_cast<leds::StateAnimation>(state));
+    } else if (parser.seen('A')) {
+        uint8_t animation = parser.byteval('A');
+        if (animation > static_cast<uint8_t>(leds::AnimationType::_last)) {
+            return;
+        }
+        auto color = parse_color();
+        if (color) {
+            uint16_t period = parser.ushortval('P', 0);
+            leds::StatusLedsHandler::instance().set_custom_animation(*color, static_cast<leds::AnimationType>(animation), period);
+        }
     }
 }
 

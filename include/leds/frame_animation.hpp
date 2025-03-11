@@ -27,9 +27,9 @@ public:
     // All times are in ms.
     struct Params {
         ColorRGBW color;
-        uint32_t frame_length;
-        uint32_t frame_delay;
-        uint32_t blend_time;
+        uint32_t frame_length { 1000 };
+        uint32_t frame_delay { 0 };
+        uint32_t blend_time { 300 };
         std::span<const Frame> frames;
     };
 
@@ -90,6 +90,7 @@ public:
 
 private:
     static constexpr uint8_t black_frame[count] = { 0 };
+    static constexpr uint8_t solid_frame[count] = { 100 };
 
     uint32_t start_time { 0 };
     const Params *params;

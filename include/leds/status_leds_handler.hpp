@@ -15,7 +15,14 @@ enum class StateAnimation : uint8_t {
     PowerPanic,
     PowerUp,
     Error,
-    _last = Error,
+    Custom,
+    _last = Custom,
+};
+
+enum class AnimationType : uint8_t {
+    Solid,
+    Pulsing,
+    _last = Pulsing,
 };
 
 class StatusLedsHandler {
@@ -33,6 +40,11 @@ public:
      * @brief Sets current animation, lasting until the next state change.
      */
     void set_animation(StateAnimation state);
+
+    /**
+     * @brief Sets a custom animation, lasting until the next state change.
+     */
+    void set_custom_animation(const ColorRGBW &color, AnimationType type, uint16_t period_ms);
 
     bool get_active();
     void set_active(bool val);

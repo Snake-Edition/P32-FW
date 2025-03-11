@@ -100,12 +100,13 @@ namespace {
         { StateAnimation::PowerPanic, { { 0, 0, 0 }, 1000, 0, 400, solid } },
         { StateAnimation::PowerUp, { { 0, 255, 0 }, 1500, 0, 1500, pulsing } },
         { StateAnimation::Error, { { 255, 0, 0 }, 500, 0, 500, pulsing } },
+        { StateAnimation::Custom, { { 0, 0, 0 }, 1000, 0, 300, solid } },
     };
 
 } // namespace
 
 StateAnimationController &controller_instance() {
-    static StateAnimationController instance { animations, StateAnimation::Idle };
+    static StateAnimationController instance { animations, StateAnimation::Idle, StateAnimation::Custom };
     return instance;
 }
 
@@ -127,6 +128,32 @@ void StatusLedsHandler::set_animation(StateAnimation state) {
 bool StatusLedsHandler::get_active() {
     std::lock_guard lock(mutex);
     return active;
+}
+
+void StatusLedsHandler::set_custom_animation(const ColorRGBW &color, AnimationType type, uint16_t period_ms) {
+    std::lock_guard lock(mutex);
+    auto &controller = controller_instance();
+    auto &custom_params = controller.get_custom_params();
+
+    custom_params.color = color;
+    switch (type) {
+    case AnimationType::Solid:
+        custom_params.frames = solid;
+        break;
+    case AnimationType::Pulsing:
+        custom_params.frames = pulsing;
+        break;
+    }
+
+    if (period_ms > 0) {
+        custom_params.frame_length = period_ms / custom_params.frames.size();
+        custom_params.blend_time = custom_params.frame_length / 4;
+    } else {
+        custom_params.frame_length = 1000;
+        custom_params.blend_time = 300;
+    }
+
+    controller.set(StateAnimation::Custom);
 }
 
 void StatusLedsHandler::set_active(bool val) {

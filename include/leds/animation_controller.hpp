@@ -17,6 +17,11 @@ public:
         , prev_animation { startup_type, anim_mapping[startup_type] } {
     }
 
+    AnimationController(const Mapping &anim_mapping, AnimationEnum startup_type, AnimationEnum custom_type_)
+        : AnimationController(anim_mapping, startup_type) {
+        custom_type = custom_type_;
+    }
+
     void update() {
         uint32_t time_ms = ticks_ms();
 
@@ -35,8 +40,20 @@ public:
         if (type != current_animation.first) {
             prev_animation = current_animation;
             current_animation.first = type;
-            current_animation.second.start(animation_mapping[type]);
+            if (type == custom_type) {
+                current_animation.second.start(custom_params);
+            } else {
+                current_animation.second.start(animation_mapping[type]);
+            }
         }
+    }
+
+    AnimationType<count>::Params &get_custom_params() {
+        return custom_params;
+    }
+
+    void set_custom(const AnimationType<count>::Params &params) {
+        custom_params = params;
     }
 
     std::span<const ColorRGBW, count> data() const {
@@ -51,6 +68,9 @@ private:
     const Mapping &animation_mapping;
     AnimationPair current_animation;
     AnimationPair prev_animation;
+
+    std::optional<AnimationEnum> custom_type;
+    AnimationType<count>::Params custom_params;
 
     std::array<ColorRGBW, count> data_;
 };
