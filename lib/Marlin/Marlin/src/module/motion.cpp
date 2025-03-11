@@ -1211,12 +1211,12 @@ feedRate_t get_homing_bump_feedrate(const AxisEnum axis) {
               crash_s.start_sensorless_homing_per_axis(axis);
             #endif
 
-            stealth_states.x = enable_crash_detection(stepperX);
-            TERN_(X2_SENSORLESS, stealth_states.x2 = enable_crash_detection(stepperX2));
+            stealth_states.x = enable_crash_detection(X_AXIS);
+            TERN_(X2_SENSORLESS, stealth_states.x2 = enable_crash_detection(X2_AXIS));
             #if ANY(CORE_IS_XY, MARKFORGED_XY, MARKFORGED_YX) && Y_SENSORLESS
-              stealth_states.y = enable_crash_detection(stepperY);
+              stealth_states.y = enable_crash_detection(Y_AXIS);
             #elif CORE_IS_XZ && Z_SENSORLESS
-              stealth_states.z = enable_crash_detection(stepperZ);
+              stealth_states.z = enable_crash_detection(Z_AXIS);
             #endif
             break;
         #endif
@@ -1226,45 +1226,45 @@ feedRate_t get_homing_bump_feedrate(const AxisEnum axis) {
               crash_s.start_sensorless_homing_per_axis(axis);
             #endif
 
-            stealth_states.y = enable_crash_detection(stepperY);
-            TERN_(Y2_SENSORLESS, stealth_states.y2 = enable_crash_detection(stepperY2));
+            stealth_states.y = enable_crash_detection(Y_AXIS);
+            TERN_(Y2_SENSORLESS, stealth_states.y2 = enable_crash_detection(Y2_AXIS));
             #if ANY(CORE_IS_XY, MARKFORGED_XY, MARKFORGED_YX) && X_SENSORLESS
-              stealth_states.x = enable_crash_detection(stepperX);
+              stealth_states.x = enable_crash_detection(X_AXIS);
             #elif CORE_IS_YZ && Z_SENSORLESS
-              stealth_states.z = enable_crash_detection(stepperZ);
+              stealth_states.z = enable_crash_detection(Z_AXIS);
             #endif
             break;
         #endif
         #if Z_SENSORLESS
           case Z_AXIS:
-            stealth_states.z = enable_crash_detection(stepperZ);
-            TERN_(Z2_SENSORLESS, stealth_states.z2 = enable_crash_detection(stepperZ2));
-            TERN_(Z3_SENSORLESS, stealth_states.z3 = enable_crash_detection(stepperZ3));
-            TERN_(Z4_SENSORLESS, stealth_states.z4 = enable_crash_detection(stepperZ4));
+            stealth_states.z = enable_crash_detection(Z_AXIS);
+            TERN_(Z2_SENSORLESS, stealth_states.z2 = enable_crash_detection(Z2_AXIS));
+            TERN_(Z3_SENSORLESS, stealth_states.z3 = enable_crash_detection(Z3_AXIS));
+            TERN_(Z4_SENSORLESS, stealth_states.z4 = enable_crash_detection(Z4_AXIS));
             #if CORE_IS_XZ && X_SENSORLESS
-              stealth_states.x = enable_crash_detection(stepperX);
+              stealth_states.x = enable_crash_detection(X_AXIS);
             #elif CORE_IS_YZ && Y_SENSORLESS
-              stealth_states.y = enable_crash_detection(stepperY);
+              stealth_states.y = enable_crash_detection(Y_AXIS);
             #endif
             break;
         #endif
         #if I_SENSORLESS
-          case I_AXIS: stealth_states.i = enable_crash_detection(stepperI); break;
+          case I_AXIS: stealth_states.i = enable_crash_detection(I_AXIS); break;
         #endif
         #if J_SENSORLESS
-          case J_AXIS: stealth_states.j = enable_crash_detection(stepperJ); break;
+          case J_AXIS: stealth_states.j = enable_crash_detection(J_AXIS); break;
         #endif
         #if K_SENSORLESS
-          case K_AXIS: stealth_states.k = enable_crash_detection(stepperK); break;
+          case K_AXIS: stealth_states.k = enable_crash_detection(K_AXIS); break;
         #endif
         #if U_SENSORLESS
-          case U_AXIS: stealth_states.u = enable_crash_detection(stepperU); break;
+          case U_AXIS: stealth_states.u = enable_crash_detection(U_AXIS); break;
         #endif
         #if V_SENSORLESS
-          case V_AXIS: stealth_states.v = enable_crash_detection(stepperV); break;
+          case V_AXIS: stealth_states.v = enable_crash_detection(V_AXIS); break;
         #endif
         #if W_SENSORLESS
-          case W_AXIS: stealth_states.w = enable_crash_detection(stepperW); break;
+          case W_AXIS: stealth_states.w = enable_crash_detection(W_AXIS); break;
         #endif
       }
 
@@ -1283,12 +1283,12 @@ feedRate_t get_homing_bump_feedrate(const AxisEnum axis) {
             #if ENABLED(CRASH_RECOVERY)
               crash_s.end_sensorless_homing_per_axis(axis, enable_stealth.x);
             #else
-              disable_crash_detection(stepperX, enable_stealth.x);
-              TERN_(X2_SENSORLESS, disable_crash_detection(stepperX2, enable_stealth.x2));
+              disable_crash_detection(X_AXIS, enable_stealth.x);
+              TERN_(X2_SENSORLESS, disable_crash_detection(X2_AXIS, enable_stealth.x2));
               #if ANY(CORE_IS_XY, MARKFORGED_XY, MARKFORGED_YX) && Y_SENSORLESS
-                disable_crash_detection(stepperY, enable_stealth.y);
+                disable_crash_detection(Y_AXIS, enable_stealth.y);
               #elif CORE_IS_XZ && Z_SENSORLESS
-                disable_crash_detection(stepperZ, enable_stealth.z);
+                disable_crash_detection(Z_AXIS, enable_stealth.z);
               #endif
             #endif // ENABLED(CRASH_RECOVERY)
           break;
@@ -1298,46 +1298,46 @@ feedRate_t get_homing_bump_feedrate(const AxisEnum axis) {
             #if ENABLED(CRASH_RECOVERY)
               crash_s.end_sensorless_homing_per_axis(axis, enable_stealth.y);
             #else
-              disable_crash_detection(stepperY, enable_stealth.y);
-              TERN_(Y2_SENSORLESS, disable_crash_detection(stepperY2, enable_stealth.y2));
+              disable_crash_detection(Y_AXIS, enable_stealth.y);
+              TERN_(Y2_SENSORLESS, disable_crash_detection(Y2_AXIS, enable_stealth.y2));
               #if ANY(CORE_IS_XY, MARKFORGED_XY, MARKFORGED_YX) && X_SENSORLESS
-                disable_crash_detection(stepperX, enable_stealth.x);
+                disable_crash_detection(X_AXIS, enable_stealth.x);
               #elif CORE_IS_YZ && Z_SENSORLESS
-                disable_crash_detection(stepperZ, enable_stealth.z);
+                disable_crash_detection(Z_AXIS, enable_stealth.z);
               #endif
             #endif // ENABLED(CRASH_RECOVERY)
           break;
         #endif
         #if Z_SENSORLESS
           case Z_AXIS:
-            disable_crash_detection(stepperZ, enable_stealth.z);
-            TERN_(Z2_SENSORLESS, disable_crash_detection(stepperZ2, enable_stealth.z2));
-            TERN_(Z3_SENSORLESS, disable_crash_detection(stepperZ3, enable_stealth.z3));
-            TERN_(Z4_SENSORLESS, disable_crash_detection(stepperZ4, enable_stealth.z4));
+            disable_crash_detection(Z_AXIS, enable_stealth.z);
+            TERN_(Z2_SENSORLESS, disable_crash_detection(Z2_AXIS, enable_stealth.z2));
+            TERN_(Z3_SENSORLESS, disable_crash_detection(Z3_AXIS, enable_stealth.z3));
+            TERN_(Z4_SENSORLESS, disable_crash_detection(Z4_AXIS, enable_stealth.z4));
             #if CORE_IS_XZ && X_SENSORLESS
-              disable_crash_detection(stepperX, enable_stealth.x);
+              disable_crash_detection(X_AXIS, enable_stealth.x);
             #elif CORE_IS_YZ && Y_SENSORLESS
-              disable_crash_detection(stepperY, enable_stealth.y);
+              disable_crash_detection(Y_AXIS, enable_stealth.y);
             #endif
             break;
         #endif
         #if I_SENSORLESS
-          case I_AXIS: disable_crash_detection(stepperI, enable_stealth.i); break;
+          case I_AXIS: disable_crash_detection(I_AXIS, enable_stealth.i); break;
         #endif
         #if J_SENSORLESS
-          case J_AXIS: disable_crash_detection(stepperJ, enable_stealth.j); break;
+          case J_AXIS: disable_crash_detection(J_AXIS, enable_stealth.j); break;
         #endif
         #if K_SENSORLESS
-          case K_AXIS: disable_crash_detection(stepperK, enable_stealth.k); break;
+          case K_AXIS: disable_crash_detection(K_AXIS, enable_stealth.k); break;
         #endif
         #if U_SENSORLESS
-          case U_AXIS: disable_crash_detection(stepperU, enable_stealth.u); break;
+          case U_AXIS: disable_crash_detection(U_AXIS, enable_stealth.u); break;
         #endif
         #if V_SENSORLESS
-          case V_AXIS: disable_crash_detection(stepperV, enable_stealth.v); break;
+          case V_AXIS: disable_crash_detection(V_AXIS, enable_stealth.v); break;
         #endif
         #if W_SENSORLESS
-          case W_AXIS: disable_crash_detection(stepperW, enable_stealth.w); break;
+          case W_AXIS: disable_crash_detection(W_AXIS, enable_stealth.w); break;
         #endif
       }
     }

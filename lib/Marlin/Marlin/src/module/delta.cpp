@@ -222,9 +222,9 @@ void home_delta() {
   // Disable stealthChop if used. Enable diag1 pin on driver.
   #if ENABLED(SENSORLESS_HOMING)
     sensorless_t stealth_states {
-      enable_crash_detection(stepperX),
-      enable_crash_detection(stepperY),
-      enable_crash_detection(stepperZ)
+      enable_crash_detection(X_AXIS),
+      enable_crash_detection(Y_AXIS),
+      enable_crash_detection(Z_AXIS)
     };
   #endif
 
@@ -239,9 +239,9 @@ void home_delta() {
 
   // Re-enable stealthChop if used. Disable diag1 pin on driver.
   #if ENABLED(SENSORLESS_HOMING)
-    disable_crash_detection(stepperX, stealth_states.x);
-    disable_crash_detection(stepperY, stealth_states.y);
-    disable_crash_detection(stepperZ, stealth_states.z);
+    disable_crash_detection(X_AXIS, stealth_states.x);
+    disable_crash_detection(Y_AXIS, stealth_states.y);
+    disable_crash_detection(Z_AXIS, stealth_states.z);
   #endif
 
   endstops.validate_homing_move();

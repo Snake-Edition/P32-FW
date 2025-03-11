@@ -287,7 +287,7 @@ void Crash_s::update_machine() {
             stepperX.stall_sensitivity(crash_s.sensitivity.x);
             stepperX.stall_max_period(crash_s.max_period.x);
         } else {
-            disable_crash_detection(stepperX, m_enable_stealth[0]);
+            disable_crash_detection(X_AXIS, m_enable_stealth[0]);
         }
     }
     if (!m_axis_is_homing[1] && TERN1(CORE_IS_XY, !m_axis_is_homing[0])) {
@@ -300,7 +300,7 @@ void Crash_s::update_machine() {
             stepperY.stall_sensitivity(crash_s.sensitivity.y);
             stepperY.stall_max_period(crash_s.max_period.y);
         } else {
-            disable_crash_detection(stepperY, m_enable_stealth[1]);
+            disable_crash_detection(Y_AXIS, m_enable_stealth[1]);
         }
     }
 }

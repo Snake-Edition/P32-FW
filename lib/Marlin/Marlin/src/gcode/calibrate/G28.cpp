@@ -135,12 +135,12 @@
 
       sensorless_t stealth_states {
         NUM_AXIS_LIST(
-          TERN0(X_SENSORLESS, enable_crash_detection(stepperX)),
-          TERN0(Y_SENSORLESS, enable_crash_detection(stepperY)),
+          TERN0(X_SENSORLESS, enable_crash_detection(X_AXIS)),
+          TERN0(Y_SENSORLESS, enable_crash_detection(Y_AXIS)),
           false, false, false, false
         )
-        , TERN0(X2_SENSORLESS, enable_crash_detection(stepperX2))
-        , TERN0(Y2_SENSORLESS, enable_crash_detection(stepperY2))
+        , TERN0(X2_SENSORLESS, enable_crash_detection(X2_AXIS))
+        , TERN0(Y2_SENSORLESS, enable_crash_detection(Y2_AXIS))
       };
 
       #if ENABLED(CRASH_RECOVERY)
@@ -162,10 +162,10 @@
       #if ANY(ENDSTOPS_ALWAYS_ON_DEFAULT, CRASH_RECOVERY)
         UNUSED(stealth_states);
       #else
-        TERN_(X_SENSORLESS, disable_crash_detection(stepperX, stealth_states.x));
-        TERN_(X2_SENSORLESS, disable_crash_detection(stepperX2, stealth_states.x2));
-        TERN_(Y_SENSORLESS, disable_crash_detection(stepperY, stealth_states.y));
-        TERN_(Y2_SENSORLESS, disable_crash_detection(stepperY2, stealth_states.y2));
+        TERN_(X_SENSORLESS, disable_crash_detection(X_AXIS, stealth_states.x));
+        TERN_(X2_SENSORLESS, disable_crash_detection(X2_AXIS, stealth_states.x2));
+        TERN_(Y_SENSORLESS, disable_crash_detection(Y_AXIS, stealth_states.y));
+        TERN_(Y2_SENSORLESS, disable_crash_detection(Y2_AXIS, stealth_states.y2));
       #endif
     #endif
   }

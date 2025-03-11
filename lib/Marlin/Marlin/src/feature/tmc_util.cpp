@@ -26,6 +26,10 @@
 #include <module/motion.h>
 #include <bsod.h>
 
+#if ENABLED(STOP_ON_ERROR)
+  #include <Marlin.h>
+#endif
+
 #if ENABLED(TMC_DEBUG)
   #include "../libs/hex_print_routines.h"
   #if ENABLED(MONITOR_DRIVER_STATUS)

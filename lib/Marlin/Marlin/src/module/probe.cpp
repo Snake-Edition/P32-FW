@@ -421,10 +421,10 @@ static bool do_probe_move(const float z, const feedRate_t fr_mm_s) {
   #if ENABLED(SENSORLESS_PROBING)
     sensorless_t stealth_states { false };
     #if ENABLED(DELTA)
-      stealth_states.x = enable_crash_detection(stepperX);
-      stealth_states.y = enable_crash_detection(stepperY);
+      stealth_states.x = enable_crash_detection(X_AXIS);
+      stealth_states.y = enable_crash_detection(Y_AXIS);
     #endif
-    stealth_states.z = enable_crash_detection(stepperZ);
+    stealth_states.z = enable_crash_detection(Z_AXIS);
     endstops.enable(true);
   #endif
 
@@ -467,10 +467,10 @@ static bool do_probe_move(const float z, const feedRate_t fr_mm_s) {
     endstops.not_homing();
     #if NEITHER(ENDSTOPS_ALWAYS_ON_DEFAULT, CRASH_RECOVERY)
       #if ENABLED(DELTA)
-        disable_crash_detection(stepperX, stealth_states.x);
-        disable_crash_detection(stepperY, stealth_states.y);
+        disable_crash_detection(X_AXIS, stealth_states.x);
+        disable_crash_detection(Y_AXIS, stealth_states.y);
       #endif
-      disable_crash_detection(stepperZ, stealth_states.z);
+      disable_crash_detection(Z_AXIS, stealth_states.z);
     #endif
   #endif
 

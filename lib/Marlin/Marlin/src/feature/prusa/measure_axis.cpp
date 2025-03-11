@@ -77,17 +77,17 @@ void Measure_axis::quick_home_start() {
 
         #if ENABLED(SENSORLESS_HOMING)
     stealth_states = {
-        enable_crash_detection(stepperX),
-        enable_crash_detection(stepperY),
+        enable_crash_detection(X_AXIS),
+        enable_crash_detection(Y_AXIS),
         false,
         false
             #if AXIS_HAS_STALLGUARD(X2)
-            || enable_crash_detection(stepperX2)
+            || enable_crash_detection(X2_AXIS)
             #endif
             ,
         false
             #if AXIS_HAS_STALLGUARD(Y2)
-            || enable_crash_detection(stepperY2)
+            || enable_crash_detection(Y2_AXIS)
             #endif
     };
 

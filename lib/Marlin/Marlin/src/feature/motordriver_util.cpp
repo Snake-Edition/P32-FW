@@ -2,8 +2,16 @@
 
 #include <atomic>
 #include <timing.h>
-#include <tmc.h>
-#include <SPI.h>
+
+#if HAS_TRINAMIC
+    #include <module/stepper/trinamic.h>
+    #include <feature/tmc_util.h>
+    #include <tmc.h>
+#endif
+
+#if TMC_HAS_SPI
+    #include <SPI.h>
+#endif
 
 #include <option/has_planner.h>
 #if HAS_PLANNER()

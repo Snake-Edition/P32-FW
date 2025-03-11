@@ -50,10 +50,6 @@ constexpr const int PLANNER_STEPS_MULTIPLIER = 4;
   #include "../feature/fwretract.h"
 #endif
 
-// from stepper/trinamic.h , avoiding include loop
-extern uint16_t stepper_microsteps(const AxisEnum axis, uint16_t new_microsteps);
-extern uint16_t stepper_mscnt(const AxisEnum axis);
-
 // Feedrate for manual moves
 #ifdef MANUAL_FEEDRATE
   constexpr xyze_feedrate_t manual_feedrate_mm_m = MANUAL_FEEDRATE;

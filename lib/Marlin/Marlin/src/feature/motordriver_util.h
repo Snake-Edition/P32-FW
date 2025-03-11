@@ -7,33 +7,24 @@
 #pragma once
 
 #include "../inc/MarlinConfig.h"
-#include <module/stepper/trinamic.h>
-#include <type_traits>
 #include <bsod.h>
 #include <optional>
 
-template <typename AxisDriver>
-bool enable_crash_detection(AxisDriver &st) {
-    if constexpr (std::is_base_of_v<TMC2130Stepper, AxisDriver> || std::is_base_of_v<TMC2209Stepper, AxisDriver>) {
-        return tmc_enable_stallguard(st);
-    } else {
-        bsod("Unsupported driver");
-    }
-}
+#if USE_SENSORLESS
+/**
+ * Disable creash detection
+ * @param axis Physical axis
+ * @param restore_stealth will set stealth mode (quiet mode)
+ */
+bool enable_crash_detection(AxisEnum axis);
 
 /**
  * Disable creash detection
- * @param st stepper
+ * @param axis Physical axis
  * @param restore_stealth will set stealth mode (quiet mode)
  */
-template <typename AxisDriver>
-void disable_crash_detection(AxisDriver &st, bool restore_stealth) {
-    if constexpr (std::is_base_of_v<TMC2130Stepper, AxisDriver> || std::is_base_of_v<TMC2209Stepper, AxisDriver>) {
-        tmc_disable_stallguard(st, restore_stealth);
-    } else {
-        bsod("Unsupported driver");
-    }
-}
+void disable_crash_detection(AxisEnum axis, bool restore_stealth);
+#endif
 
 // Track enabled status of stealthChop and only re-enable where applicable
 struct sensorless_t {
