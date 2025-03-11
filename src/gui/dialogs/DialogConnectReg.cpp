@@ -133,6 +133,7 @@ void DialogConnectRegister::windowEvent(window_t *sender, GUI_event_t event, voi
             }
             case ConnectionStatus::RegistrationDone: {
                 hideDetails();
+                text_state.SetRect(Positioner::textRectState());
                 text_state.SetText(_("Registration successful, continue at connect.prusa3d.com"));
                 connect_client::leave_registration();
                 left_registration = true;
