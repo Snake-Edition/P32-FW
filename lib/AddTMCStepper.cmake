@@ -11,7 +11,6 @@ add_library(
   TMCStepper/src/source/TMC2130Stepper.cpp
   TMCStepper/src/source/TMC2208Stepper.cpp
   TMCStepper/src/source/TMC2209Stepper.cpp
-  TMCStepper/src/source/TMC_lock.cpp
   TMCStepper/src/source/TMCStepper.cpp
   )
 

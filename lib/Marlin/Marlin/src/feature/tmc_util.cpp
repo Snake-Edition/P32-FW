@@ -20,24 +20,13 @@
  *
  */
 
-#include "../inc/MarlinConfig.h"
-#include "bsod.h"
-
-#if HAS_TRINAMIC
-
 #include "tmc_util.h"
-#include "../Marlin.h"
-
-#include "../module/stepper/indirection.h"
-#include "../module/printcounter.h"
-#include "../libs/duration_t.h"
-#include "../gcode/gcode.h"
-
-#include "printers.h"
-#include "bsod.h"
+#include <module/printcounter.h>
+#include <module/stepper/indirection.h>
+#include <module/motion.h>
+#include <bsod.h>
 
 #if ENABLED(TMC_DEBUG)
-  #include "../module/planner.h"
   #include "../libs/hex_print_routines.h"
   #if ENABLED(MONITOR_DRIVER_STATUS)
     static uint16_t report_tmc_status_interval; // = 0
@@ -1084,51 +1073,6 @@ uint32_t tmc_feedrate_to_period(AxisEnum axis_id, uint16_t msteps, const float f
 
 #endif // USE_SENSORLESS
 
-#if TMC_HAS_SPI
-  #define SET_CS_PIN(st) OUT_WRITE(st##_CS_PIN, HIGH)
-  void tmc_init_cs_pins() {
-    #if AXIS_HAS_SPI(X)
-      SET_CS_PIN(X);
-    #endif
-    #if AXIS_HAS_SPI(Y)
-      SET_CS_PIN(Y);
-    #endif
-    #if AXIS_HAS_SPI(Z)
-      SET_CS_PIN(Z);
-    #endif
-    #if AXIS_HAS_SPI(X2)
-      SET_CS_PIN(X2);
-    #endif
-    #if AXIS_HAS_SPI(Y2)
-      SET_CS_PIN(Y2);
-    #endif
-    #if AXIS_HAS_SPI(Z2)
-      SET_CS_PIN(Z2);
-    #endif
-    #if AXIS_HAS_SPI(Z3)
-      SET_CS_PIN(Z3);
-    #endif
-    #if AXIS_HAS_SPI(E0)
-      SET_CS_PIN(E0);
-    #endif
-    #if AXIS_HAS_SPI(E1)
-      SET_CS_PIN(E1);
-    #endif
-    #if AXIS_HAS_SPI(E2)
-      SET_CS_PIN(E2);
-    #endif
-    #if AXIS_HAS_SPI(E3)
-      SET_CS_PIN(E3);
-    #endif
-    #if AXIS_HAS_SPI(E4)
-      SET_CS_PIN(E4);
-    #endif
-    #if AXIS_HAS_SPI(E5)
-      SET_CS_PIN(E5);
-    #endif
-  }
-#endif // TMC_HAS_SPI
-
 template<typename TMC>
 static bool test_connection(TMC &st) {
   SERIAL_ECHOPGM("Testing ");
@@ -1235,5 +1179,3 @@ void initial_test_tmc_connection() {
   check_error('Z', stepperZ);
   check_error('E', stepperE0);
 }
-
-#endif // HAS_TRINAMIC

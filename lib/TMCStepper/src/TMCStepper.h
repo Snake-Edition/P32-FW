@@ -53,6 +53,7 @@
 
 #define TMCSTEPPER_VERSION 0x000501 // v0.5.1
 
+extern "C" void tmc_serial_lock_init();
 extern "C" bool tmc_serial_lock_acquire();
 extern "C" void tmc_serial_lock_release();
 extern "C" void tmc_communication_error();

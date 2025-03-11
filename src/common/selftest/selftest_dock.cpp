@@ -8,6 +8,10 @@
 #include "bsod.h"
 #include "marlin_server.hpp"
 
+#if ENABLED(SENSORLESS_HOMING)
+    #include <feature/motordriver_util.h>
+#endif
+
 using buddy::puppies::Dwarf;
 using buddy::puppies::dwarfs;
 using namespace selftest;

@@ -26,12 +26,7 @@
  * Stepper driver indirection for Trinamic
  */
 
-#include <TMCStepper.h>
-#if TMCSTEPPER_VERSION < 0x000500
-  #error "Update TMCStepper library to 0.5.0 or newer."
-#endif
-
-#include "../../inc/MarlinConfig.h"
+#include "../../inc/MarlinConfigPre.h"
 #include "../../feature/tmc_util.h"
 
 #define ____TMC_CLASS(MODEL, A, I, E) TMCMarlin<TMC##MODEL##Stepper>
@@ -257,12 +252,3 @@ using TMCStepperType = TMC_CLASS(X, X);
 
 // Return the stepper instance of an axis
 TMCStepperType &stepper_axis(const AxisEnum axis);
-
-// Set the microstep resolution of an axis, returning the previous
-uint16_t stepper_microsteps(const AxisEnum axis, uint16_t new_microsteps = 0);
-
-// Return the current MSCNT register of an axis
-uint16_t stepper_mscnt(const AxisEnum axis);
-
-// Wait for motor standstill on multiple axis
-bool stepper_wait_for_standstill(uint8_t axis_mask, millis_t max_delay = 150);

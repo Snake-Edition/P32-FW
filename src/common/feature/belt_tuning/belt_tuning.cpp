@@ -2,12 +2,12 @@
 #include "printer_belt_parameters.hpp"
 
 #include <Marlin/src/gcode/calibrate/M958.hpp>
-#include <Marlin/src/module/motion.h>
-#include <Marlin/src/module/stepper/trinamic.h>
-#include <Marlin/src/feature/phase_stepping/phase_stepping.hpp>
 #include <Marlin/src/gcode/gcode.h>
 #include <logging/log.hpp>
 #include <option/has_toolchanger.h>
+#include <feature/motordriver_util.h>
+#include <feature/phase_stepping/phase_stepping.hpp>
+#include <module/motion.h>
 
 #if HAS_TOOLCHANGER()
     #include <Marlin/src/module/prusa/toolchanger.h>

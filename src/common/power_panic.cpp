@@ -20,7 +20,7 @@
 #include "../lib/Marlin/Marlin/src/module/endstops.h"
 #include "../lib/Marlin/Marlin/src/module/temperature.h"
 #include "../lib/Marlin/Marlin/src/module/stepper.h"
-#include "../lib/Marlin/Marlin/src/module/stepper/trinamic.h"
+#include "../lib/Marlin/Marlin/src/feature/motordriver_util.h"
 #include "../lib/Marlin/Marlin/src/gcode/gcode.h"
 
 #include "../lib/Marlin/Marlin/src/feature/print_area.h"

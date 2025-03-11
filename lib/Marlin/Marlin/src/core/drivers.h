@@ -21,6 +21,7 @@
  */
 #pragma once
 
+#define _NONE               0xFFFFFFFF // needs to be non-zero
 #define _A4988              0x001
 #define _A5984              0x002
 #define _DRV8825            0x003
@@ -63,6 +64,7 @@
 #define AXIS_DRIVER_TYPE_E5(T) (E_STEPPERS > 5 && _AXIS_DRIVER_TYPE(E5,T))
 
 #define AXIS_DRIVER_TYPE(A,T) AXIS_DRIVER_TYPE_##A(T)
+#define SAME_DRIVER_ID(A,B) (_DRIVER_ID(A) == _DRIVER_ID(B))
 
 #define HAS_E_DRIVER(T) (  AXIS_DRIVER_TYPE_E0(T) || AXIS_DRIVER_TYPE_E1(T) \
                         || AXIS_DRIVER_TYPE_E2(T) || AXIS_DRIVER_TYPE_E3(T) \

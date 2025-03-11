@@ -45,7 +45,7 @@
 #endif
 
 #if ENABLED(SENSORLESS_HOMING)
-  #include "../../feature/tmc_util.h"
+  #include "../../feature/motordriver_util.h"
 #endif
 
 #if ENABLED(CRASH_RECOVERY)
@@ -87,7 +87,8 @@
 #define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
 #include "../../core/debug_out.h"
 
-#include "../../../../../../src/common/tmc.h" // for disabling Wave Table during homing
+#include <tmc.h> // for disabling Wave Table during homing
+
 #include <feature/phase_stepping/phase_stepping.hpp> // for disabling phase stepping during homing
 #include <feature/pressure_advance/pressure_advance_config.hpp> // for disabling PA during homing
 
@@ -134,12 +135,12 @@
 
       sensorless_t stealth_states {
         NUM_AXIS_LIST(
-          TERN0(X_SENSORLESS, tmc_enable_stallguard(stepperX)),
-          TERN0(Y_SENSORLESS, tmc_enable_stallguard(stepperY)),
+          TERN0(X_SENSORLESS, enable_crash_detection(stepperX)),
+          TERN0(Y_SENSORLESS, enable_crash_detection(stepperY)),
           false, false, false, false
         )
-        , TERN0(X2_SENSORLESS, tmc_enable_stallguard(stepperX2))
-        , TERN0(Y2_SENSORLESS, tmc_enable_stallguard(stepperY2))
+        , TERN0(X2_SENSORLESS, enable_crash_detection(stepperX2))
+        , TERN0(Y2_SENSORLESS, enable_crash_detection(stepperY2))
       };
 
       #if ENABLED(CRASH_RECOVERY)
@@ -161,10 +162,10 @@
       #if ANY(ENDSTOPS_ALWAYS_ON_DEFAULT, CRASH_RECOVERY)
         UNUSED(stealth_states);
       #else
-        TERN_(X_SENSORLESS, tmc_disable_stallguard(stepperX, stealth_states.x));
-        TERN_(X2_SENSORLESS, tmc_disable_stallguard(stepperX2, stealth_states.x2));
-        TERN_(Y_SENSORLESS, tmc_disable_stallguard(stepperY, stealth_states.y));
-        TERN_(Y2_SENSORLESS, tmc_disable_stallguard(stepperY2, stealth_states.y2));
+        TERN_(X_SENSORLESS, disable_crash_detection(stepperX, stealth_states.x));
+        TERN_(X2_SENSORLESS, disable_crash_detection(stepperX2, stealth_states.x2));
+        TERN_(Y_SENSORLESS, disable_crash_detection(stepperY, stealth_states.y));
+        TERN_(Y2_SENSORLESS, disable_crash_detection(stepperY2, stealth_states.y2));
       #endif
     #endif
   }
@@ -282,10 +283,13 @@
 
 #endif // Z_SAFE_HOMING
 
+#if HAS_TRINAMIC
 static void reenable_wavetable(AxisEnum axis)
 {
     tmc_enable_wavetable(axis == X_AXIS, axis == Y_AXIS, false);
 }
+#endif
+
 
 /** \addtogroup G-Codes
  * @{
@@ -659,6 +663,7 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   // Diagonal move first if both are homing
   TERN_(QUICK_HOME, if (!failed && doX && doY) quick_home_xy());
 
+#if HAS_TRINAMIC
   // Only allow wavetable change if homing performs a backoff. This backoff is made in the way that it ends on stepper zero-position, so that re-enabling wavetable is safe.
   bool wavetable_off_X = false, wavetable_off_Y = false;
   #ifdef HAS_TMC_WAVETABLE
@@ -681,6 +686,10 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   if (!failed) {
     tmc_disable_wavetable(wavetable_off_X, wavetable_off_Y, false);
   }
+#else
+  void (*reenable_wt_X)(AxisEnum) = NULL;
+  void (*reenable_wt_Y)(AxisEnum) = NULL;
+#endif
 
   #if ENABLED(PRUSA_TOOLCHANGER)
   if (!failed && doX && doY) {

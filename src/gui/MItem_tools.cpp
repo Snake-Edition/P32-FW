@@ -75,6 +75,10 @@
     #include <puppies/xbuddy_extension.hpp>
 #endif
 
+#ifdef HAS_TMC_WAVETABLE
+    #include <common/tmc.h>
+#endif
+
 namespace {
 void MsgBoxNonBlockInfo(const string_view_utf8 &txt) {
     constexpr static const char *title = N_("Information");

@@ -7,6 +7,7 @@ add_library(
   Marlin
   Marlin/Marlin/src/core/serial.cpp
   Marlin/Marlin/src/core/utility.cpp
+  Marlin/Marlin/src/feature/motordriver_util.cpp
   Marlin/Marlin/src/feature/tmc_util.cpp
   Marlin/Marlin/src/gcode/parser.cpp
   Marlin/Marlin/src/HAL/HAL_STM32_F4_F7/HAL.cpp

@@ -6,6 +6,7 @@
 #include "homing_corexy.hpp"
 
 // sanity checks
+#include <option/has_precise_homing.h>
 #if HAS_PRECISE_HOMING()
     #error "HAS_PRECISE_HOMING_COREXY() is mutually exclusive with HAS_PRECISE_HOMING()"
 #endif
@@ -18,6 +19,9 @@
 #include "../planner.h"
 #include "../stepper.h"
 #include "../endstops.h"
+
+#include <feature/motordriver_util.h>
+#include <lcd/ultralcd.h>
 
 #if ENABLED(CRASH_RECOVERY)
     #include "feature/prusa/crash_recovery.hpp"

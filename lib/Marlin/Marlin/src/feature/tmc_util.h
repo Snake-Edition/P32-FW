@@ -22,8 +22,7 @@
 
 #pragma once
 
-#include "../inc/MarlinConfig.h"
-#include "../lcd/ultralcd.h"
+#include "../inc/MarlinConfigPre.h"
 
 #if !HAS_TRINAMIC
   #error "Do not include this file on printers without TMC drivers"
@@ -31,6 +30,7 @@
 
 #include <option/has_puppies.h>
 
+#include <core/serial.h>
 #include <TMCStepper.h>
 
 #include <option/has_planner.h>
@@ -173,7 +173,7 @@ class TMCMarlinBase : public TMC, public TMCStorage {
       inline void refresh_stepping_mode() { this->en_pwm_mode(this->stored.stealthChop_enabled); }
       inline bool get_stealthChop_status() { return this->en_pwm_mode(); }
     #endif
-    #if ENABLED(HYBRID_THRESHOLD)
+    #if HAS_PLANNER() && ENABLED(HYBRID_THRESHOLD)
       uint32_t get_pwm_thrs() {
         return tmc_feedrate_to_period(axis_id, this->microsteps(), this->TPWMTHRS(), planner.settings.axis_steps_per_mm[axis_id]);
       }
@@ -310,9 +310,6 @@ void initial_test_tmc_connection();
  */
 #if USE_SENSORLESS
 
-  // Track enabled status of stealthChop and only re-enable where applicable
-  struct sensorless_t { bool x, y, z, x2, y2, z2, z3; };
-
   #if ENABLED(IMPROVE_HOMING_RELIABILITY) && HOMING_SG_GUARD_DURATION > 0
     extern millis_t sg_guard_period;
     constexpr uint16_t default_sg_guard_duration = HOMING_SG_GUARD_DURATION;
@@ -328,7 +325,3 @@ void initial_test_tmc_connection();
   void tmc_disable_stallguard(TMCMarlin<TMC2660Stepper>, const bool);
 
 #endif // USE_SENSORLESS
-
-#if TMC_HAS_SPI
-  void tmc_init_cs_pins();
-#endif

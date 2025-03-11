@@ -6,7 +6,7 @@
 #include "../../Marlin/src/module/endstops.h"
 #include "../../Marlin/src/module/motion.h"
 #include "../../Marlin/src/module/prusa/homing_utils.hpp"
-#include "tmc.h"
+#include "../../Marlin/src/feature/motordriver_util.h"
 #include "selftest_log.hpp"
 #include "i_selftest.hpp"
 #include "algorithm_scale.hpp"
@@ -284,11 +284,11 @@ void CSelftestPart_Axis::check_coils() {
 #endif
 
     if (check_ab) {
-        if (tmc_check_coils(A_AXIS) && tmc_check_coils(B_AXIS)) {
+        if (motor_check_coils(A_AXIS) && motor_check_coils(B_AXIS)) {
             coils_ok = true;
         }
     } else {
-        if (tmc_check_coils(config.axis)) {
+        if (motor_check_coils(config.axis)) {
             coils_ok = true;
         }
     }

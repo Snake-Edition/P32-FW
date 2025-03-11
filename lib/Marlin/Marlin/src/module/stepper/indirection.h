@@ -620,5 +620,9 @@
 
 #endif
 
-void restore_stepper_drivers();  // Called by PSU_ON
-void reset_stepper_drivers();    // Called by settings.load / settings.reset
+// Enable/disable stepper by axis
+void stepper_enable(AxisEnum axis, bool enabled=true);
+static inline void stepper_disable(AxisEnum axis) { stepper_enable(axis, false); }
+
+// Return stepper enabled status
+[[nodiscard]] bool stepper_enabled(AxisEnum axis);

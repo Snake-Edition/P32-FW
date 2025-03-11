@@ -11,9 +11,8 @@
 #include "loadcell.hpp"
 #include <sound.hpp>
 #include <module/temperature.h>
-#include <module/planner.h>
-#include <module/stepper.h>
 #include <module/endstops.h>
+#include <feature/motordriver_util.h>
 #include <gcode/gcode.h>
 #include "i_selftest.hpp"
 #include "algorithm_scale.hpp"

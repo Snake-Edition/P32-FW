@@ -14,7 +14,7 @@
 #include "../gcode.h"
 #include "../../module/planner.h"
 #include "../../Marlin.h"
-#include "../../module/stepper/trinamic.h"
+#include <feature/motordriver_util.h>
 #include "../../module/prusa/accelerometer.h"
 #include "../../module/prusa/fourier_series.h"
 #include "../../feature/input_shaper/input_shaper.hpp"

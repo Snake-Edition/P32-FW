@@ -77,8 +77,7 @@ xyz_pos_t probe_offset; // Initialized by settings.load()
 #endif
 
 #if ENABLED(SENSORLESS_PROBING)
-  #include "stepper.h"
-  #include "../feature/tmc_util.h"
+  #include "../feature/motordriver_util.h"
 #endif
 
 #if QUIET_PROBING
@@ -422,10 +421,10 @@ static bool do_probe_move(const float z, const feedRate_t fr_mm_s) {
   #if ENABLED(SENSORLESS_PROBING)
     sensorless_t stealth_states { false };
     #if ENABLED(DELTA)
-      stealth_states.x = tmc_enable_stallguard(stepperX);
-      stealth_states.y = tmc_enable_stallguard(stepperY);
+      stealth_states.x = enable_crash_detection(stepperX);
+      stealth_states.y = enable_crash_detection(stepperY);
     #endif
-    stealth_states.z = tmc_enable_stallguard(stepperZ);
+    stealth_states.z = enable_crash_detection(stepperZ);
     endstops.enable(true);
   #endif
 
@@ -468,10 +467,10 @@ static bool do_probe_move(const float z, const feedRate_t fr_mm_s) {
     endstops.not_homing();
     #if NEITHER(ENDSTOPS_ALWAYS_ON_DEFAULT, CRASH_RECOVERY)
       #if ENABLED(DELTA)
-        tmc_disable_stallguard(stepperX, stealth_states.x);
-        tmc_disable_stallguard(stepperY, stealth_states.y);
+        disable_crash_detection(stepperX, stealth_states.x);
+        disable_crash_detection(stepperY, stealth_states.y);
       #endif
-      tmc_disable_stallguard(stepperZ, stealth_states.z);
+      disable_crash_detection(stepperZ, stealth_states.z);
     #endif
   #endif
 

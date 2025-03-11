@@ -72,6 +72,7 @@
 #include "../lcd/ultralcd.h"
 #include "../core/language.h"
 #include "../gcode/parser.h"
+#include "../feature/motordriver_util.h"
 
 #include "../Marlin.h"
 
@@ -1454,6 +1455,14 @@ bool Planner::_populate_block(block_t * const block,
     #endif
   #endif
 
+  // Perform XYZ pre-move hooks
+  if (block->msteps.x || block->msteps.y) {
+    motor_prepare_move_xy();
+  }
+  if (block->msteps.z) {
+    motor_prepare_move_z();
+  }
+
   // Enable extruder(s)
   #if EXTRUDERS
     if (e_msteps) {
@@ -1578,6 +1587,9 @@ bool Planner::_populate_block(block_t * const block,
         enable_E4();
         enable_E5();
       #endif
+
+      // Perform E pre-move hooks
+      motor_prepare_move_e();
     }
   #endif // EXTRUDERS
 

@@ -87,25 +87,6 @@ tmc_reg_t tmc_reg_map[] = {
     { NULL, 0x00, false, false },
 };
 
-// With phase stepping, mutex is not an ideal synchronization mechanism as
-// high-priority ISR cannot safely take it. Since phase-stepping doesn't mind
-// missing transfers much, we can use atomic variable for storing the current
-// owner. As phase stepping holds the but all the time, we also have a flag that
-// marks that a task wants to access the bus.
-
-osMutexDef(tmc_mutex);
-osMutexId tmc_mutex_id;
-
-enum class BusOwner {
-    NOBODY = 0,
-    TASK = 1,
-    ISR = 2
-};
-
-std::atomic<BusOwner> tmc_bus_owner = BusOwner::NOBODY;
-std::atomic<bool> tmc_bus_requested = false;
-std::atomic<bool> tmc_bus_isr_starved = false;
-
 extern "C" {
 
 void tmc_enable_wavetable([[maybe_unused]] bool X, [[maybe_unused]] bool Y, [[maybe_unused]] bool Z) {
@@ -211,8 +192,7 @@ void init_tmc(void) {
 }
 
 void init_tmc_bare_minimum(void) {
-    tmc_mutex_id = osMutexCreate(osMutex(tmc_mutex));
-
+    tmc_serial_lock_init();
     // pointers to TMCStepper instances
     pStep[X_AXIS] = &stepperX;
     pStep[Y_AXIS] = &stepperY;
@@ -228,95 +208,6 @@ void init_tmc_bare_minimum(void) {
 #ifdef HAS_TMC_WAVETABLE
     config_store().tmc_wavetable_enabled.get() ? tmc_enable_wavetable(true, true, true) : tmc_disable_wavetable(true, true, true);
 #endif
-}
-
-static void tmc_serial_lock_let_isr_run() {
-    int repetition = 0;
-    while (tmc_bus_isr_starved.load()) {
-        if (repetition++ > 100) {
-            bsod("phstep starved");
-        }
-        delay_us(2);
-    }
-}
-
-/// Acquire lock for mutual exclusive access to the trinamic's serial port
-///
-/// This implements a weak symbol declared within the TMCStepper library
-bool tmc_serial_lock_acquire(void) {
-    auto res = osMutexWait(tmc_mutex_id, osWaitForever) == osOK;
-
-    // If there is a problem in RTOS due to memory corruption, the code will early return and the
-    // CommunicationGuard which is calling it will do an abort -> we know something broke hard in memory.
-    if (!res) {
-        return false;
-    }
-
-    uint32_t start = ticks_ms();
-    // We have taken the mutex, now let's try to take over the lock from ISR in
-    // busy waiting. First, we do not want to starve the ISR, so we will wait
-    // for it catch up from any hiccup caused by a previous lock acquisition in
-    // a task. This shouldn't take longer than a number of axis ISR periods (~50
-    // µs):
-    tmc_serial_lock_let_isr_run();
-
-    // Then, we will try to atomically take the lock:
-    BusOwner owner = BusOwner::NOBODY;
-    tmc_bus_requested = true;
-    while (!tmc_bus_owner.compare_exchange_weak(owner, BusOwner::TASK,
-        std::memory_order_relaxed,
-        std::memory_order_relaxed)) {
-        if (ticks_diff(ticks_ms(), start) > 100) {
-            bsod("Couldn't acquire TMC bus within 100ms");
-        }
-        // When the SPI bus cannot be taken for some reason, the owner will remain in the owner variable
-        // and we'll know if it was the ISR or another task. Therefore, owner is reset after the potential BSOD call above
-        owner = BusOwner::NOBODY;
-    }
-    return true;
-}
-
-/// Release lock for mutual exclusive access to the trinamic's serial port
-///
-/// This implements a weak symbol declared within the TMCStepper library
-void tmc_serial_lock_release(void) {
-    tmc_bus_owner.store(BusOwner::NOBODY);
-    tmc_bus_requested = false;
-    osMutexRelease(tmc_mutex_id);
-}
-
-bool tmc_serial_lock_acquire_isr(void) {
-    BusOwner owner = BusOwner::NOBODY;
-    return tmc_bus_owner.compare_exchange_weak(owner, BusOwner::ISR,
-        std::memory_order_relaxed,
-        std::memory_order_relaxed);
-}
-
-void tmc_serial_lock_release_isr(void) {
-    tmc_bus_owner.store(BusOwner::NOBODY);
-}
-
-bool tmc_serial_lock_held_by_isr(void) {
-    return tmc_bus_owner.load() == BusOwner::ISR;
-}
-
-bool tmc_serial_lock_requested_by_task(void) {
-    return tmc_bus_requested;
-}
-
-void tmc_serial_lock_mark_isr_starved(void) {
-    tmc_bus_isr_starved.store(true);
-}
-
-void tmc_serial_lock_clear_isr_starved(void) {
-    tmc_bus_isr_starved.store(false);
-}
-
-/// Called when an error occurs when communicating with the TMC over serial
-///
-/// This implements a weak symbol declared within the TMCStepper library
-void tmc_communication_error(void) {
-    bsod("trinamic communication error");
 }
 
 static char tmc_slave_addr_to_axis_character([[maybe_unused]] uint8_t slave_addr) {

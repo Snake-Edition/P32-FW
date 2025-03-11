@@ -863,42 +863,4 @@ TMCStepperType &stepper_axis(const AxisEnum axis)
   }
 }
 
-uint16_t stepper_microsteps(const AxisEnum axis, uint16_t new_microsteps)
-{
-    assert(!phase_stepping::is_enabled(axis));
-    uint16_t cur_microsteps = stepper_axis(axis).microsteps();
-    if (new_microsteps) {
-        stepper_axis(axis).microsteps(new_microsteps);
-    }
-    return cur_microsteps;
-}
-
-uint16_t stepper_mscnt(const AxisEnum axis)
-{
-    return stepper_axis(axis).MSCNT();
-}
-
-bool stepper_wait_for_standstill(uint8_t axis_mask, millis_t max_delay) {
-    millis_t timeout = millis() + max_delay;
-    for (;;) {
-        bool stst = true;
-        LOOP_L_N(i, XYZE_N) {
-            if (TEST(axis_mask, i)) {
-                if (!stepper_axis((AxisEnum)i).stst()) {
-                    stst = false;
-                    break;
-                }
-            }
-        }
-        if (stst) {
-          break;
-        }
-        if (millis() > timeout || TERN0(HAS_PLANNER_ENABLED, planner.draining())) {
-            return false;
-        }
-        safe_delay(10);
-    }
-    return true;
-}
-
 #endif // HAS_TRINAMIC

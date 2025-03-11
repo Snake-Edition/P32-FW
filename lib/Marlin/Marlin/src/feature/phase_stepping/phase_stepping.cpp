@@ -15,9 +15,7 @@
 #include <device/peripherals.h>
 #include <module/motion.h>
 #include <module/stepper.h>
-#include <module/stepper/trinamic.h>
-#include <tmc.h>
-#include <TMCStepper.h>
+#include <feature/motordriver_util.h>
 
 #include <Pin.hpp>
 #include <logging/log.hpp>
@@ -523,7 +521,7 @@ static void disable_phase_stepping(AxisEnum axis_num) {
     auto &axis_state = axis_states[axis_num];
 
     axis_state.active = false;
-    tmc_serial_lock_clear_isr_starved();
+    motor_serial_lock_clear_isr_starved();
     auto enable_mask = PHASE_STEPPING_GENERATOR_X << axis_num;
     PreciseStepping::physical_axis_step_generator_types &= ~enable_mask;
 
@@ -667,7 +665,7 @@ static FORCE_INLINE FORCE_OFAST void refresh_axis(
         // If the ISR handler was delayed, we don't have enough time to process
         // the update. Abort the update so we can catch up.
         mark_missed_transaction(axis_state);
-        tmc_serial_lock_mark_isr_starved();
+        motor_serial_lock_mark_isr_starved();
         return;
     }
 
@@ -805,7 +803,7 @@ FORCE_OFAST void phase_stepping::handle_periodic_refresh() {
             return !(state.enabled && state.active) || state.missed_tx_cnt == 0;
         })) {
         // Only if all axes have refreshed, we can let tasks to run
-        tmc_serial_lock_clear_isr_starved();
+        motor_serial_lock_clear_isr_starved();
     }
 #endif
 }

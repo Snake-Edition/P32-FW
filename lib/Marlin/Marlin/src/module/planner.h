@@ -41,6 +41,7 @@
 #include "../gcode/queue.h"
 #include "../feature/precise_stepping/precise_stepping.hpp"
 #include "../feature/phase_stepping/phase_stepping.hpp"
+#include "../feature/motordriver_util.h"
 
 // Value by which steps are multiplied to increase the precision of the Planner.
 constexpr const int PLANNER_STEPS_MULTIPLIER = 4;

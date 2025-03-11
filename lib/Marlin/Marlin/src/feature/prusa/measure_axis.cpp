@@ -11,6 +11,8 @@
  */
 
 #include "measure_axis.h"
+#include "../motordriver_util.h"
+
 #if ENABLED(AXIS_MEASURE)
 
     #include "crash_recovery.hpp"
@@ -75,17 +77,17 @@ void Measure_axis::quick_home_start() {
 
         #if ENABLED(SENSORLESS_HOMING)
     stealth_states = {
-        tmc_enable_stallguard(stepperX),
-        tmc_enable_stallguard(stepperY),
+        enable_crash_detection(stepperX),
+        enable_crash_detection(stepperY),
         false,
         false
             #if AXIS_HAS_STALLGUARD(X2)
-            || tmc_enable_stallguard(stepperX2)
+            || enable_crash_detection(stepperX2)
             #endif
             ,
         false
             #if AXIS_HAS_STALLGUARD(Y2)
-            || tmc_enable_stallguard(stepperY2)
+            || enable_crash_detection(stepperY2)
             #endif
     };
 

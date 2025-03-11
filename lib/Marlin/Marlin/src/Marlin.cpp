@@ -67,6 +67,7 @@
 #include "HAL/shared/Delay.h"
 
 #include "module/stepper/indirection.h"
+#include "feature/motordriver_util.h"
 
 #include <math.h>
 #include "libs/nozzle.h"
@@ -110,10 +111,6 @@
 
 #if ENABLED(I2C_POSITION_ENCODERS)
   #include "feature/I2CPositionEncoder.h"
-#endif
-
-#if HAS_TRINAMIC && DISABLED(PS_DEFAULT_OFF)
-  #include "feature/tmc_util.h"
 #endif
 
 #if HAS_CUTTER
@@ -580,7 +577,7 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
   #endif
 
   #if ENABLED(MONITOR_DRIVER_STATUS)
-    monitor_tmc_driver();
+    monitor_motor_drivers();
   #endif
 
   #if HAS_PLANNER()
@@ -682,6 +679,7 @@ void idle(
   #if HAS_PLANNER()
     PreciseStepping::loop();
   #endif /* HAS_PLANNER() */
+  motor_driver_loop();
 
   #if ENABLED(NOZZLE_LOAD_CELL)
     if( EMotorStallDetector::Instance().Evaluate(stepper.axis_is_moving(E_AXIS), ! stepper.motor_direction(E_AXIS))){
@@ -799,12 +797,7 @@ void setup() {
   SERIAL_ECHOLNPGM("start");
   SERIAL_ECHO_START();
 
-  #if TMC_HAS_SPI
-    #if DISABLED(TMC_USE_SW_SPI)
-      SPI.begin();
-    #endif
-    tmc_init_cs_pins();
-  #endif
+  motor_driver_init();
 
   #ifdef BOARD_INIT
     BOARD_INIT();
