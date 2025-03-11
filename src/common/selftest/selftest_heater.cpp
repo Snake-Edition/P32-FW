@@ -250,9 +250,12 @@ LoopResult CSelftestPart_Heater::stateMeasure() {
 
     // Adapt test to HW differences
     int16_t hw_diff = 0;
+
+#if HAS_HOTEND_TYPE_SUPPORT()
     if (m_config.type == heater_type_t::Nozzle) {
         hw_diff += hotend_type_heater_selftest_offset(config_store().hotend_type.get(m_config.tool_nr));
     }
+#endif
 
     if (hw_diff) {
         log_info(Selftest, "%s heat range offseted by %d degrees Celsius due to HW differences", m_config.partname, hw_diff);

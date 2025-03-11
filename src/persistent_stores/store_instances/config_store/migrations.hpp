@@ -59,9 +59,11 @@ namespace deprecated_ids {
         decltype(DeprecatedStore::side_leds_enabled)::hashed_id,
     };
 #endif
+#if HAS_HOTEND_TYPE_SUPPORT()
     inline constexpr uint16_t hotend_type_single_hotend[] {
         decltype(DeprecatedStore::hotend_type_single_hotend)::hashed_id,
     };
+#endif
 } // namespace deprecated_ids
 
 namespace migrations {
@@ -115,7 +117,9 @@ inline constexpr journal::Backend::MigrationFunction migration_functions[] {
 #if HAS_SIDE_LEDS()
         { migrations::side_leds_enable, deprecated_ids::side_leds_enable },
 #endif
+#if HAS_HOTEND_TYPE_SUPPORT()
         { migrations::hotend_type, deprecated_ids::hotend_type_single_hotend },
+#endif
 };
 
 // Span of migration versions to simplify passing it around

@@ -36,7 +36,12 @@
 #include <option/has_xbuddy_extension.h>
 #include <option/has_uneven_bed_prompt.h>
 #include <option/has_ceiling_clearance.h>
-#include <hotend_type.hpp>
+
+#include <option/has_hotend_type_support.h>
+#if HAS_HOTEND_TYPE_SUPPORT()
+    #include <hotend_type.hpp>
+#endif
+
 #include <device/board.h>
 
 /// number of bits used to encode response

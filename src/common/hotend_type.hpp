@@ -4,8 +4,12 @@
 
 #include <i18n.h>
 
-#include <option/has_hotend_type_support.h>
 #include <printers.h>
+
+#include <option/has_hotend_type_support.h>
+#if !HAS_HOTEND_TYPE_SUPPORT()
+    #error This header should only be included if HAS_HOTEND_TYPE_SUPPORT()
+#endif
 
 /// Shared for all printers.
 /// !!! Never change order, never remove items - this is used in config store

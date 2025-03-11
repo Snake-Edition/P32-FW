@@ -17,7 +17,11 @@
 #include <filament_eeprom.hpp>
 
 #include "constants.hpp"
-#include <hotend_type.hpp>
+
+#include <option/has_hotend_type_support.h>
+#if HAS_HOTEND_TYPE_SUPPORT()
+    #include <hotend_type.hpp>
+#endif
 
 #include <option/has_sheet_support.h>
 #include <option/has_loadcell.h>
@@ -274,13 +278,15 @@ namespace defaults {
     inline constexpr int16_t homing_sens_x { stallguard_sensitivity_unset };
     inline constexpr int16_t homing_sens_y { stallguard_sensitivity_unset };
 
+#if HAS_HOTEND_TYPE_SUPPORT()
     inline constexpr HotendType hotend_type {
-#if PRINTER_IS_PRUSA_iX() || PRINTER_IS_PRUSA_COREONE()
+    #if PRINTER_IS_PRUSA_iX() || PRINTER_IS_PRUSA_COREONE()
         HotendType::stock_with_sock
-#else
+    #else
         HotendType::stock
-#endif
+    #endif
     };
+#endif
     inline constexpr uint8_t uint8_percentage_80 { 80 };
     inline constexpr int64_t int64_zero { 0 };
 

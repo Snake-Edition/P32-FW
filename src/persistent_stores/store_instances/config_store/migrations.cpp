@@ -230,6 +230,7 @@ namespace migrations {
     }
 #endif
 
+#if HAS_HOTEND_TYPE_SUPPORT()
     void hotend_type(journal::Backend &backend) {
         using NewItem = decltype(CurrentStore::hotend_type);
         using OldItem = decltype(DeprecatedStore::hotend_type_single_hotend);
@@ -247,5 +248,6 @@ namespace migrations {
             backend.save_migration_item<NewItem::value_type>(NewItem::hashed_id_first + i, saved_hotend_type);
         }
     }
+#endif
 } // namespace migrations
 } // namespace config_store_ns
