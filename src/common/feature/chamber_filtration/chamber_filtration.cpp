@@ -94,7 +94,12 @@ void ChamberFiltration::step() {
 }
 
 void ChamberFiltration::update_needs_filtration() {
-    // Prioritize overridden value by M147 or M148 [BFW-6828]
+    // Chack the always on flag (aplies to all prints) [BFW-6829]
+    if (config_store().chamber_filtration_always_on.get()) {
+        needs_filtration_ = true;
+        return;
+    }
+    // Check if special gcode M147 or M148 overrides the setting (current print only) [BFW-6828]
     if (needs_filtration_.has_value()) {
         return;
     }

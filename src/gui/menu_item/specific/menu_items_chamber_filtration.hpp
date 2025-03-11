@@ -55,3 +55,11 @@ protected:
     void OnClick() override;
     void Loop() override;
 };
+
+class MI_CHAMBER_ALWAYS_FILTER : public WI_ICON_SWITCH_OFF_ON_t {
+public:
+    MI_CHAMBER_ALWAYS_FILTER();
+
+protected:
+    void OnChange(size_t) override;
+};
