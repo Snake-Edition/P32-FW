@@ -112,6 +112,9 @@
   void M970_report(bool eeprom);
 #endif
 
+#define DEBUG_OUT ENABLED(EEPROM_CHITCHAT)
+#include "../core/debug_out.h"
+
 #pragma pack(push, 1) // No padding between variables
 
 typedef struct { uint16_t X, Y, Z, X2, Y2, Z2, Z3, E0, E1, E2, E3, E4, E5; } tmc_stepper_current_t;
@@ -206,9 +209,6 @@ void MarlinSettings::postprocess() {
       report_current_position();
   #endif /* HAS_PLANNER() */
 }
-
-#define DEBUG_OUT ENABLED(EEPROM_CHITCHAT)
-#include "../core/debug_out.h"
 
 bool MarlinSettings::save() {
   DEBUG_ERROR_MSG("EEPROM disabled");
