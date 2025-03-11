@@ -1010,10 +1010,6 @@ void setup() {
     host_action_prompt_end();
   #endif
 
-  #if HAS_TRINAMIC && DISABLED(PS_DEFAULT_OFF)
-    initial_test_tmc_connection();
-  #endif
-
   #if HAS_TEMP_HEATBREAK_CONTROL
     HOTEND_LOOP(){
       thermalManager.setTargetHeatbreak(DEFAULT_HEATBREAK_TEMPERATURE, e);
