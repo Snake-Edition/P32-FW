@@ -25,9 +25,11 @@
 #include "../inc/MarlinConfig.h"
 #include "../lcd/ultralcd.h"
 
-#include <option/has_puppies.h>
+#if !HAS_TRINAMIC
+  #error "Do not include this file on printers without TMC drivers"
+#endif
 
-#if HAS_TRINAMIC
+#include <option/has_puppies.h>
 
 #include <TMCStepper.h>
 
@@ -330,5 +332,3 @@ void initial_test_tmc_connection();
 #if TMC_HAS_SPI
   void tmc_init_cs_pins();
 #endif
-
-#endif // HAS_TRINAMIC
