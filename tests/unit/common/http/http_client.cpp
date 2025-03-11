@@ -87,6 +87,8 @@ public:
 constexpr const char *expected_req = "POST /index.html HTTP/1.1\r\n"
                                      "Host: example.com\r\n"
                                      "Connection: keep-alive\r\n"
+                                     "User-Agent-Printer: Buddy tests\r\n"
+                                     "User-Agent-Version: 1.0.0\r\n"
                                      "Transfer-Encoding: chunked\r\n"
                                      "Content-Type: application/json\r\n"
                                      "\r\n"

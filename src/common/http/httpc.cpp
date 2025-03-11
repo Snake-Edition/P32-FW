@@ -9,6 +9,7 @@
 #include "chunked.h"
 #include "debug.h"
 #include <common/utils/overloaded_visitor.hpp>
+#include <version/version.hpp>
 
 using automata::ExecutionControl;
 using http::ConnectionHandling;
@@ -213,6 +214,8 @@ optional<Error> HttpClient::send_request(const char *host, Connection *conn, Req
     CHECKED(buffer.write_fmt("%s %s HTTP/1.1\r\n", to_str(method), request.url()));
     CHECKED(buffer.header("Host", host, nullopt));
     CHECKED(buffer.header("Connection", request.connection(), nullopt));
+    CHECKED(buffer.header("User-Agent-Printer", version::project_firmware_name, std::nullopt));
+    CHECKED(buffer.header("User-Agent-Version", version::project_version_full, std::nullopt));
     if (has_body(method)) {
         CHECKED(buffer.header("Transfer-Encoding", "chunked", nullopt));
         CHECKED(buffer.header("Content-Type", to_str(request.content_type()), nullopt));
@@ -221,6 +224,7 @@ optional<Error> HttpClient::send_request(const char *host, Connection *conn, Req
     static const constexpr HeaderOut term = { nullptr, nullptr, nullopt };
     static constexpr size_t buff_size { 16 }; // 4294967295 (10 digits) is the max number that fits into size_t
     char buff[buff_size];
+
     for (const HeaderOut *extra_hdrs = request.extra_headers() ?: &term; extra_hdrs->name; extra_hdrs++) {
         CHECKED(std::visit(Overloaded {
                                [&](const char *val) {

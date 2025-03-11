@@ -5,7 +5,6 @@
 #include "json_out.hpp"
 #include "sleep.hpp"
 #include "printer_type.hpp"
-#include "user_agent.hpp"
 
 #include <http/httpc.hpp>
 #include <http/types.h>
@@ -74,7 +73,6 @@ namespace {
 
     class PostRequest final : public JsonPostRequest {
     private:
-        array<HeaderOut, 3> headers;
         PostRenderer renderer_impl;
 
     protected:
@@ -87,26 +85,19 @@ namespace {
             return REGISTER_URL;
         }
         virtual const HeaderOut *extra_headers() const override {
-            return headers.data();
+            return nullptr;
         }
         PostRequest(const Printer::PrinterInfo &info)
-            : headers {
-                user_agent_printer,
-                user_agent_version,
-                { nullptr, nullptr, nullopt }
-            }
-            , renderer_impl(info) {}
+            : renderer_impl(info) {}
     };
 
     class PollRequest final : public Request {
     private:
-        array<HeaderOut, 4> headers;
+        array<HeaderOut, 2> headers;
 
     public:
         PollRequest(const char *code)
             : headers({ { "Code", code, nullopt },
-                user_agent_printer,
-                user_agent_version,
                 { nullptr, nullptr, nullopt } }) {}
         virtual const char *url() const override {
             return REGISTER_URL;
