@@ -46,7 +46,13 @@ TestResult get_test_result(Action action, Tool tool) {
             return evaluate_results(sr.tools[std::to_underlying(tool)].fsensor);
         }
     case Action::Gears:
-        return evaluate_results(sr.gears);
+        if (tool == Tool::_all_tools) {
+            return merge_hotends_evaluations([&](int8_t e) {
+                return evaluate_results(sr.tools[e].gears);
+            });
+        } else {
+            return evaluate_results(sr.tools[std::to_underlying(tool)].gears);
+        }
     case Action::_count:
         break;
     }

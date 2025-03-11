@@ -110,6 +110,17 @@ void CurrentStore::perform_config_migrations() {
     }
 #endif
 
+#if PRINTER_IS_PRUSA_MK4() || PRINTER_IS_PRUSA_COREONE()
+    if (should_migrate<2>()) {
+        // We've introduced a gearbox alignment for XL, this means that gear alignment test must exist for every toolhead available
+        // This created a need for gear test refactoring
+        // [[ BFW-5785 ]]
+
+        SelftestTool st = get_selftest_result_tool(0);
+        st.gears = selftest_result.get().deprecated_gears;
+        set_selftest_result_tool(0, st);
+    }
+#endif
     // To add a migration:
     // - increment newest_config_version
     // - add if(should_migrate<X>) { your migration code } at the END of this function

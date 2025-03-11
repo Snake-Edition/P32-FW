@@ -93,8 +93,13 @@ TestResult get_test_result(Action action, Tool tool) {
     case Action::PhaseSteppingCalibration:
         return evaluate_results(config_store().selftest_result_phase_stepping.get());
     case Action::Gears:
-        return evaluate_results(sr.gears);
-        // TODO: See how to evaluate gears when there are multiple gears (see Action::DockCalibration)
+        if (tool == Tool::_all_tools) {
+            return merge_hotends_evaluations([&](int8_t e) {
+                return evaluate_results(sr.tools[e].gears);
+            });
+        } else {
+            return evaluate_results(sr.tools[std::to_underlying(tool)].gears);
+        }
     case Action::_count:
         break;
     }

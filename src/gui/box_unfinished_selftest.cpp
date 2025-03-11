@@ -47,6 +47,14 @@ bool selftest_warning_selftest_finished() {
     }
 #endif /* HAS_SWITCHHED_FAN_TEST() */
 
+#if HAS_GEARBOX_ALIGNMENT()
+    for (int8_t e = 0; e < HOTENDS; e++) {
+        if (sr.tools[e].gears == TestResult_Failed) {
+            return false;
+        }
+    }
+#endif /* HAS_GEARBOX_ALIGNMENT */
+
 #if (PRINTER_IS_PRUSA_XL())
     if (!all_passed(config_store().selftest_result_phase_stepping.get())) {
         return false;
@@ -68,30 +76,22 @@ bool selftest_warning_selftest_finished() {
 
     return true;
 #elif (PRINTER_IS_PRUSA_MK4())
-    if (sr.gears == TestResult_Failed) { // skipped/unknown gears are also OK
-        return false;
+    for (int8_t e = 0; e < HOTENDS; e++) {
+        if (!all_passed(sr.tools[e].printFan, sr.tools[e].heatBreakFan, sr.tools[e].nozzle, sr.tools[e].fsensor, sr.tools[e].loadcell, sr.tools[e].gears)) {
+            return false;
+        }
     }
-
-    HOTEND_LOOP()
-    if (!all_passed(sr.tools[e].printFan, sr.tools[e].heatBreakFan, sr.tools[e].nozzle, sr.tools[e].fsensor, sr.tools[e].loadcell)) {
-        return false;
-    }
-
     return true;
 #elif (PRINTER_IS_PRUSA_COREONE())
     if (!all_passed(sr.xaxis, sr.yaxis, sr.zaxis, sr.bed)) {
         return false;
     }
 
-    if (sr.gears == TestResult_Failed) { // skipped/unknown gears are also OK
-        return false;
+    for (int8_t e = 0; e < HOTENDS; e++) {
+        if (!all_passed(sr.tools[e].printFan, sr.tools[e].heatBreakFan, sr.tools[e].nozzle, sr.tools[e].fsensor, sr.tools[e].loadcell, sr.tools[e].fansSwitched)) {
+            return false;
+        }
     }
-
-    HOTEND_LOOP()
-    if (!all_passed(sr.tools[e].printFan, sr.tools[e].heatBreakFan, sr.tools[e].nozzle, sr.tools[e].fsensor, sr.tools[e].loadcell, sr.tools[e].fansSwitched)) {
-        return false;
-    }
-
     return true;
 #elif PRINTER_IS_PRUSA_iX()
 

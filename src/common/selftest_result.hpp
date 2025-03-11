@@ -72,11 +72,13 @@ struct SelftestTool {
     TestResult sideFsensor : 2;
     TestResult dockoffset : 2;
     TestResult tooloffset : 2;
+    TestResult gears : 2;
 
     bool has_heatbreak_fan_passed();
     TestResult evaluate_fans();
     void reset_fan_tests();
 };
+static_assert(sizeof(SelftestTool) == 3);
 
 bool operator==(SelftestTool lhs, SelftestTool rhs);
 
@@ -125,10 +127,13 @@ struct SelftestResult {
     TestResultNet eth : 3 {};
     TestResultNet wifi : 3 {};
     TestResult zalign : 2 {};
-    TestResult gears : 2 {};
+    // This member is no longer used and is kept to allow backwards compatibility with config store
+    // It was replaced by a result supporting more than one toolhead, that can
+    // be found in SelftTool class
+    TestResult deprecated_gears : 2 {};
     SelftestTool tools[config_store_ns::max_tool_count] {};
-};
 
-bool operator==(SelftestResult lhs, SelftestResult rhs);
+    bool operator==(const SelftestResult &) const;
+};
 
 #pragma pack(pop)

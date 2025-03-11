@@ -127,7 +127,7 @@ SelftestResult::SelftestResult(const SelftestResult_pre_gears &sr_pre_gears)
     , eth(sr_pre_gears.eth)
     , wifi(sr_pre_gears.wifi)
     , zalign(sr_pre_gears.zalign)
-    , gears(TestResult::TestResult_Unknown) {
+    , deprecated_gears(TestResult::TestResult_Unknown) {
     for (size_t i = 0; i < std::size(tools); ++i) {
         tools[i].printFan = sr_pre_gears.tools[i].printFan;
         tools[i].heatBreakFan = sr_pre_gears.tools[i].heatBreakFan;
@@ -140,21 +140,8 @@ SelftestResult::SelftestResult(const SelftestResult_pre_gears &sr_pre_gears)
         tools[i].sideFsensor = sr_pre_gears.tools[i].sideFsensor;
         tools[i].dockoffset = sr_pre_gears.tools[i].dockoffset;
         tools[i].tooloffset = sr_pre_gears.tools[i].tooloffset;
+        tools[i].gears = TestResult::TestResult_Unknown;
     }
 }
 
-bool operator==(SelftestResult lhs, SelftestResult rhs) {
-    for (size_t i = 0; i < std::size(lhs.tools); ++i) {
-        if (lhs.tools[i] != rhs.tools[i]) {
-            return false;
-        }
-    }
-    return lhs.bed == rhs.bed
-        && lhs.eth == rhs.eth
-        && lhs.wifi == rhs.wifi
-        && lhs.xaxis == rhs.xaxis
-        && lhs.yaxis == rhs.yaxis
-        && lhs.zaxis == rhs.zaxis
-        && lhs.zalign == rhs.zalign
-        && lhs.gears == rhs.gears;
-}
+bool SelftestResult::operator==(const SelftestResult &) const = default;
