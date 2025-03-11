@@ -31,7 +31,6 @@
 #include <crash_dump/dump.hpp>
 #include "hwio_pindef.h"
 #include <Arduino.h>
-#include "tmc.h"
 #include "../Marlin/src/module/configuration_store.h"
 #include <buddy/main.h>
 #include <stdint.h>

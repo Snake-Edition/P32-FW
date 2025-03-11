@@ -87,7 +87,7 @@
 #define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
 #include "../../core/debug_out.h"
 
-#include <tmc.h> // for disabling Wave Table during homing
+#include <feature/tmc_util.h> // for disabling Wave Table during homing
 
 #include <feature/phase_stepping/phase_stepping.hpp> // for disabling phase stepping during homing
 #include <feature/pressure_advance/pressure_advance_config.hpp> // for disabling PA during homing

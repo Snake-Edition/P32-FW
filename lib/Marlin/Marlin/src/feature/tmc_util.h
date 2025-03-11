@@ -325,3 +325,33 @@ void initial_test_tmc_connection();
   void tmc_disable_stallguard(TMCMarlin<TMC2660Stepper>, const bool);
 
 #endif // USE_SENSORLESS
+
+typedef struct {
+    const char *cmd_name;
+    uint8_t reg_adr;
+    bool write;
+    bool read;
+} tmc_reg_t;
+
+extern tmc_reg_t tmc_reg_map[]; //< Null terminated array of known registers
+
+void init_tmc();
+void tmc_get_sgt();
+void tmc_get_TPWMTHRS();
+void tmc_get_tstep();
+#if HAS_PLANNER()
+  uint16_t tmc_sg_result(uint8_t axis);
+#endif
+
+void tmc_enable_wavetable(bool X, bool Y, bool Z);
+void tmc_disable_wavetable(bool X, bool Y, bool Z);
+
+/**
+ * \brief Check stepper coils for open/short circuit
+ *
+ * This reports false errors when not moving or moving too fast.
+ *
+ * \param axis axis to check
+ * \return true if all coils are ok, false otherwise
+ */
+bool tmc_check_coils(uint8_t axis);

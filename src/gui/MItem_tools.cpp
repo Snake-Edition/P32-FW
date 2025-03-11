@@ -76,7 +76,7 @@
 #endif
 
 #ifdef HAS_TMC_WAVETABLE
-    #include <common/tmc.h>
+    #include <feature/tmc_util.h>
 #endif
 
 namespace {
