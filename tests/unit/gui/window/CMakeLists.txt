@@ -58,7 +58,6 @@ target_include_directories(
          ${CMAKE_BINARY_DIR}/include
          ${CMAKE_SOURCE_DIR}/src/common/utils
          ${CMAKE_SOURCE_DIR}/src/lang
-         ${CMAKE_CURRENT_SOURCE_DIR}/stub
   )
 
 target_include_directories(
@@ -76,8 +75,15 @@ target_include_directories(
          ${CMAKE_BINARY_DIR}/include
          ${CMAKE_SOURCE_DIR}/include
          ${CMAKE_SOURCE_DIR}/src/lang
-         ${CMAKE_CURRENT_SOURCE_DIR}/stub
   )
+
+target_link_libraries(window_tests SG14)
+
+target_link_libraries(layout_tests SG14)
+
+target_link_libraries(window_tests SG14)
+
+target_link_libraries(layout_tests SG14)
 
 target_link_libraries(window_tests SG14)
 
