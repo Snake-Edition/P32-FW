@@ -1,6 +1,7 @@
 #pragma once
 #include <inc/Conditionals_LCD.h>
 #include <option/has_toolchanger.h>
+#include <selftest_snake_config.hpp>
 #if HAS_TOOLCHANGER()
     #include <module/prusa/toolchanger.h>
 #endif
@@ -33,4 +34,11 @@ constexpr TestResult merge_hotends_evaluations(std::invocable<int8_t> auto evalu
     return res;
 };
 
-} // namespace SelftestSnake
+constexpr TestResult merge_hotends(Tool tool, stdext::inplace_function<TestResult(int8_t)> evaluate) {
+    if (tool == Tool::_all_tools) {
+        return merge_hotends_evaluations(evaluate);
+    } else {
+        return evaluate(std::to_underlying(tool));
+    }
+}
+}; // namespace SelftestSnake

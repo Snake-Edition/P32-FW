@@ -22,14 +22,9 @@ TestResult get_test_result(Action action, Tool tool) {
     case Action::XYCheck:
         return evaluate_results(sr.xaxis, sr.yaxis);
     case Action::Loadcell:
-        if (tool == Tool::_all_tools) {
-            return merge_hotends_evaluations(
-                [&](int8_t e) {
-                    return evaluate_results(sr.tools[e].loadcell);
-                });
-        } else {
-            return evaluate_results(sr.tools[std::to_underlying(tool)].loadcell);
-        }
+        return merge_hotends(tool, [&](const int8_t e) {
+            return evaluate_results(sr.tools[e].loadcell);
+        });
     case Action::ZCheck:
         return evaluate_results(sr.zaxis);
     case Action::Heaters:
@@ -37,22 +32,13 @@ TestResult get_test_result(Action action, Tool tool) {
             return evaluate_results(sr.tools[e].nozzle);
         }));
     case Action::FilamentSensorCalibration:
-        if (tool == Tool::_all_tools) {
-            return merge_hotends_evaluations(
-                [&](int8_t e) {
-                    return evaluate_results(sr.tools[e].fsensor);
-                });
-        } else {
-            return evaluate_results(sr.tools[std::to_underlying(tool)].fsensor);
-        }
+        return merge_hotends(tool, [&](const int8_t e) {
+            return evaluate_results(sr.tools[e].fsensor);
+        });
     case Action::Gears:
-        if (tool == Tool::_all_tools) {
-            return merge_hotends_evaluations([&](int8_t e) {
-                return evaluate_results(sr.tools[e].gears);
-            });
-        } else {
-            return evaluate_results(sr.tools[std::to_underlying(tool)].gears);
-        }
+        return merge_hotends(tool, [&](const int8_t e) {
+            return evaluate_results(sr.tools[e].gears);
+        });
     case Action::_count:
         break;
     }

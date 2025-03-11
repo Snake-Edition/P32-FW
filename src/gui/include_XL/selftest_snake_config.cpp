@@ -47,23 +47,13 @@ TestResult get_test_result(Action action, Tool tool) {
     case Action::XCheck:
         return evaluate_results(sr.xaxis);
     case Action::DockCalibration:
-        if (tool == Tool::_all_tools) {
-            return merge_hotends_evaluations(
-                [&](int8_t e) {
-                    return evaluate_results(sr.tools[e].dockoffset);
-                });
-        } else {
-            return evaluate_results(sr.tools[std::to_underlying(tool)].dockoffset);
-        }
+        return merge_hotends(tool, [&](const int8_t e) {
+            return evaluate_results(sr.tools[e].dockoffset);
+        });
     case Action::Loadcell:
-        if (tool == Tool::_all_tools) {
-            return merge_hotends_evaluations(
-                [&](int8_t e) {
-                    return evaluate_results(sr.tools[e].loadcell);
-                });
-        } else {
-            return evaluate_results(sr.tools[std::to_underlying(tool)].loadcell);
-        }
+        return merge_hotends(tool, [&](const int8_t e) {
+            return evaluate_results(sr.tools[e].loadcell);
+        });
     case Action::ToolOffsetsCalibration:
         return merge_hotends_evaluations(
             [&](int8_t e) {
@@ -82,24 +72,15 @@ TestResult get_test_result(Action action, Tool tool) {
             return evaluate_results(sr.tools[e].nozzle);
         }));
     case Action::FilamentSensorCalibration:
-        if (tool == Tool::_all_tools) {
-            return merge_hotends_evaluations(
-                [&](int8_t e) {
-                    return evaluate_results(sr.tools[e].fsensor);
-                });
-        } else {
-            return evaluate_results(sr.tools[std::to_underlying(tool)].fsensor);
-        }
+        return merge_hotends(tool, [&](const int8_t e) {
+            return evaluate_results(sr.tools[e].fsensor);
+        });
     case Action::PhaseSteppingCalibration:
         return evaluate_results(config_store().selftest_result_phase_stepping.get());
     case Action::Gears:
-        if (tool == Tool::_all_tools) {
-            return merge_hotends_evaluations([&](int8_t e) {
-                return evaluate_results(sr.tools[e].gears);
-            });
-        } else {
-            return evaluate_results(sr.tools[std::to_underlying(tool)].gears);
-        }
+        return merge_hotends(tool, [&](const int8_t e) {
+            return evaluate_results(sr.tools[e].gears);
+        });
     case Action::_count:
         break;
     }
