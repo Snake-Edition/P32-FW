@@ -55,14 +55,14 @@ MI_HOTEND_TYPE::MI_HOTEND_TYPE(Toolhead toolhead)
 }
 
 int MI_HOTEND_TYPE::item_count() const {
-    // If has varying values, the 0th item is "-" (for differint values)
+    // If has varying values, the 0th item is "-" (for different values)
     return hotend_type_list.size() + (has_varying_values_ ? 1 : 0);
 }
 
 void MI_HOTEND_TYPE::build_item_text(int index, const std::span<char> &buffer) const {
     StringBuilder sb(buffer);
 
-    // If has varying values, the 0th item is "-" (for differint values)
+    // If has varying values, the 0th item is "-" (for different values)
     if (has_varying_values_ && index == 0) {
         sb.append_string("-");
     } else {
@@ -87,7 +87,7 @@ void MI_HOTEND_TYPE::update() {
     const auto val = this->template read_value();
     has_varying_values_ = !val.has_value();
 
-    // If has varying values, the 0th item is "-" (for differint values)
+    // If has varying values, the 0th item is "-" (for different values)
     // Force set - we might be changing item texts here
     force_set_current_item(has_varying_values_ ? 0 : stdext::index_of(hotend_type_list, *val));
 }
