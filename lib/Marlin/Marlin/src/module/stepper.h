@@ -46,6 +46,8 @@
 #include "planner.h"
 #include "stepper/indirection.h"
 
+class PreciseStepping;
+
 //
 // Stepper class definition
 //

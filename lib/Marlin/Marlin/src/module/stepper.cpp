@@ -82,6 +82,7 @@
 Stepper stepper; // Singleton
 
 #include "planner.h"
+#include <feature/precise_stepping/precise_stepping.hpp>
 #include <timing_precise.hpp>
 
 // public:
