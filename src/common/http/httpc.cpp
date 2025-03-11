@@ -8,6 +8,7 @@
 #include <cstdarg>
 #include "chunked.h"
 #include "debug.h"
+#include <common/printer_model.hpp>
 #include <common/utils/overloaded_visitor.hpp>
 #include <version/version.hpp>
 
@@ -214,7 +215,7 @@ optional<Error> HttpClient::send_request(const char *host, Connection *conn, Req
     CHECKED(buffer.write_fmt("%s %s HTTP/1.1\r\n", to_str(method), request.url()));
     CHECKED(buffer.header("Host", host, nullopt));
     CHECKED(buffer.header("Connection", request.connection(), nullopt));
-    CHECKED(buffer.header("User-Agent-Printer", version::project_firmware_name, std::nullopt));
+    CHECKED(buffer.header("User-Agent-Printer", PrinterModelInfo::current().id_str, std::nullopt));
     CHECKED(buffer.header("User-Agent-Version", version::project_version_full, std::nullopt));
     if (has_body(method)) {
         CHECKED(buffer.header("Transfer-Encoding", "chunked", nullopt));

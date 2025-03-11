@@ -9,7 +9,6 @@
 #include <option/enable_translation_it.h>
 #include <option/enable_translation_ja.h>
 #include <option/enable_translation_pl.h>
-#include <printers.h>
 
 #define _STR(x) #x
 #define STR(x)  _STR(x)
@@ -29,22 +28,6 @@ const char project_version_suffix[] = STR(FW_VERSION_SUFFIX);
 const char project_version_suffix_short[] = STR(FW_VERSION_SUFFIX_SHORT);
 
 const int project_build_number = FW_BUILD_NUMBER;
-
-#if PRINTER_IS_PRUSA_MINI()
-const char project_firmware_name[] = "Buddy_MINI";
-#elif PRINTER_IS_PRUSA_XL()
-const char project_firmware_name[] = "Buddy_XL";
-#elif PRINTER_IS_PRUSA_MK4()
-const char project_firmware_name[] = "Buddy_MK4";
-#elif PRINTER_IS_PRUSA_MK3_5()
-const char project_firmware_name[] = "Buddy_MK3_5";
-#elif PRINTER_IS_PRUSA_iX()
-const char project_firmware_name[] = "Buddy_iX";
-#elif PRINTER_IS_PRUSA_COREONE()
-const char project_firmware_name[] = "Buddy_CORE_ONE";
-#else
-    #error "Unknown PRINTER_TYPE."
-#endif
 
 const BuildIdentification project_build_identification {
     .commit_hash = STR(FW_COMMIT_HASH),
