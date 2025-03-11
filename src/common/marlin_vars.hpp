@@ -14,7 +14,6 @@
 #include <assert.h>
 #include <tuple>
 #include <marlin_events.h>
-#include <freertos/mutex.hpp>
 
 #include <option/has_cancel_object.h>
 
@@ -299,6 +298,8 @@ private:
     friend marlin_vars_t &marlin_vars();
 
 public:
+    void init();
+
     /**
      * @brief Printer position.
      * @note Not using structures to not lock Marlin too often.
@@ -485,7 +486,9 @@ public:
     void unlock();
 
 private:
-    mutable freertos::Mutex mutex;
+    osMutexDef(mutex); // Declare mutex
+    osMutexId mutex_id; // Mutex ID
+    std::atomic<osThreadId> current_mutex_owner; // current mutex owner -> to check for recursive locking
     std::array<Hotend, HOTENDS> hotends; // array of hotends (use hotend()/active_hotend() getter)
     std::array<std::optional<JobInfo>, 2> job_history;
     fsm::States fsm_states;
