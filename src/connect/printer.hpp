@@ -182,9 +182,11 @@ public:
         static constexpr size_t CONNECT_URL_BUF_LEN = (CONNECT_URL_LEN + 1);
         static constexpr size_t CONNECT_TOKEN_LEN = 20;
         static constexpr size_t CONNECT_TOKEN_BUF_LEN = (CONNECT_TOKEN_LEN + 1);
+        static constexpr size_t CONNECT_PROXY_SIZE = 30;
+        static constexpr size_t CONNECT_PROXY_BUF_LEN = CONNECT_PROXY_SIZE + 1;
 
         char host[CONNECT_URL_BUF_LEN] = "";
-        char proxy_host[CONNECT_URL_BUF_LEN] = "";
+        char proxy_host[CONNECT_PROXY_BUF_LEN] = "";
         char token[CONNECT_TOKEN_BUF_LEN] = "";
         uint16_t port = 0;
         uint16_t proxy_port = 0;

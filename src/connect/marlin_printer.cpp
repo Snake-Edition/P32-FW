@@ -95,7 +95,7 @@ namespace {
                 return 0;
             }
         } else if (ini_string_match(section, INI_SECTION, name, "proxy_hostname")) {
-            if (len <= config_store_ns::connect_host_size) {
+            if (len <= config_store_ns::connect_proxy_size) {
                 strlcpy(config->proxy_host, value, sizeof config->proxy_host);
                 config->loaded = true;
             } else {
