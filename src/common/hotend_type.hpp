@@ -25,8 +25,6 @@ enum class HotendType : uint8_t {
     /// E3D Revo (MK3.5 only)
     e3d_revo = 2,
 #endif
-
-    _cnt,
 };
 
 const char *hotend_type_name(HotendType t);

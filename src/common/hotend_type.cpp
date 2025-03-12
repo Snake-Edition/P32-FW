@@ -19,9 +19,6 @@ const char *hotend_type_name(HotendType t) {
     case HotendType::e3d_revo:
         return N_("E3D Revo");
 #endif
-
-    case HotendType::_cnt:
-        break;
     }
 
     // This shouldn't happen, but if it does, let the firmware continue.
@@ -48,9 +45,6 @@ int8_t hotend_type_heater_selftest_offset(HotendType t) {
     case HotendType::e3d_revo:
         return 40;
 #endif
-
-    case HotendType::_cnt:
-        break;
     }
 
     // This shouldn't happen, but if it does, let the firmware continue.
