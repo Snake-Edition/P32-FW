@@ -1125,12 +1125,21 @@ FORCE_INLINE split_step_event_t split_buffered_step(const step_generator_state_t
 FORCE_INLINE void trigger_first_step_event_after_specified_ticks(const uint32_t ticks) {
     assert(ticks <= STEP_TIMER_MAX_TICKS_LIMIT);
 
-    StepIsrDisabler step_guard;
-    PreciseStepping::left_ticks_to_next_step_event = 0;
-    PreciseStepping::last_step_isr_delay = 0;
-    const uint16_t counter = __HAL_TIM_GET_COUNTER(&TimerHandle[STEP_TIMER_NUM].handle);
-    const uint16_t deadline = counter + ticks;
-    __HAL_TIM_SET_COMPARE(&TimerHandle[STEP_TIMER_NUM].handle, TIM_CHANNEL_1, deadline);
+    uint16_t isr_ticks = std::min<uint16_t>(ticks, STEPPER_ISR_MAX_TICKS);
+    uint16_t left_ticks = ticks - isr_ticks;
+
+    {
+        StepIsrDisabler step_guard;
+        const uint16_t deadline = PreciseStepping::step_generator_state.initial_counter + isr_ticks;
+        __HAL_TIM_SET_COMPARE(&TimerHandle[STEP_TIMER_NUM].handle, TIM_CHANNEL_1, deadline);
+        PreciseStepping::left_ticks_to_next_step_event = left_ticks;
+        PreciseStepping::last_step_isr_delay = 0;
+    }
+
+    // Ensure we didn't overshoot the first step event, which should be always far away enough into
+    // the future to account for scheduling overhead. This is normally ensured by the length of the
+    // initial empty move.
+    assert(ticks_diff(ticks_us(), PreciseStepping::step_generator_state.initial_time) < static_cast<int32_t>(ticks));
 }
 
 FORCE_INLINE void append_split_step_event(const split_step_event_t &split_step_event, step_event_u16_t *&next_step_event, uint16_t &next_step_event_queue_head) {
@@ -1364,7 +1373,15 @@ void PreciseStepping::step_generator_state_init(const move_t &move) {
     step_generator_state.current_distance = stepper.count_position_from_startup;
     step_generator_state.current_distance.e = 0;
     step_generator_state.left_insert_start_of_move_segment = 0;
-    step_generator_state.initial_time = ticks_us();
+
+    // Setup the absolute initial time
+    int64_t initial_time;
+    {
+        buddy::InterruptDisabler _irq_guard;
+        initial_time = get_timestamp_us();
+        step_generator_state.initial_counter = __HAL_TIM_GET_COUNTER(&TimerHandle[STEP_TIMER_NUM].handle);
+    }
+    step_generator_state.initial_time = initial_time;
 
     // Reset step events and index
     for (step_index_t i = 0; i != step_generator_state.step_event_index.size(); ++i) {
