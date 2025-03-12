@@ -39,6 +39,7 @@ step_generators_pool_t PreciseStepping::step_generators_pool;
 uint8_t PreciseStepping::physical_axis_step_generator_types = CLASSIC_STEP_GENERATOR_X | CLASSIC_STEP_GENERATOR_Y | CLASSIC_STEP_GENERATOR_Z | CLASSIC_STEP_GENERATOR_E;
 double PreciseStepping::max_lookback_time = 0.;
 
+std::atomic<MoveFlag_t> PreciseStepping::current_move_flags = 0;
 uint16_t PreciseStepping::inverted_dirs = 0;
 double PreciseStepping::total_print_time = 0.;
 xyze_double_t PreciseStepping::total_start_pos = { 0., 0., 0., 0. };
@@ -645,6 +646,11 @@ uint16_t PreciseStepping::process_one_step_event_from_queue() {
                 Stepper::count_position_last_block = Stepper::count_position;
             }
             discard_current_move_segment();
+
+            // refresh current move flags
+            if (const move_t *current_move = get_current_move_segment(); current_move) {
+                current_move_flags = current_move->flags;
+            }
         }
 
         discard_current_step_event();
@@ -1375,6 +1381,7 @@ void PreciseStepping::step_generator_state_init(const move_t &move) {
         bsod("Max lookback time exceeds the length of the beginning empty move segment.");
     }
 
+    current_move_flags = 0;
     step_generator_state.previous_step_time = 0.;
     step_generator_state.previous_step_time_ticks = 0;
     step_generator_state.buffered_step.flags = 0;
@@ -1478,6 +1485,7 @@ void PreciseStepping::reset_queues() {
     step_ev_miss = 0;
     left_ticks_to_next_step_event = 0;
     last_step_isr_delay = 0;
+    current_move_flags = 0;
     Stepper::axis_did_move = 0;
     stop_pending = false;
     busy = false;

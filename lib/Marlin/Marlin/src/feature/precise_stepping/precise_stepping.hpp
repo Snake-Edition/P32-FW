@@ -132,6 +132,10 @@ public:
     // Accumulated delay in the last ISR call
     static uint32_t last_step_isr_delay;
 
+    // Active (step-synchronized) current move flags
+    static std::atomic<MoveFlag_t> current_move_flags;
+    static_assert(decltype(current_move_flags)::is_always_lock_free);
+
     // Indicate which direction bits are inverted.
     static uint16_t inverted_dirs;
 
@@ -396,6 +400,56 @@ public:
     static volatile uint8_t step_dl_miss; // stepper deadline misses
     static volatile uint8_t step_ev_miss; // stepper event misses
     static volatile uint32_t time_last_block_us; // time of last block discarding event
+
+    // Return true whether the specified (logical) axis is moving
+    FORCE_INLINE static bool is_axis_moving(const AxisEnum logical_axis) {
+        assert(logical_axis < PS_AXIS_COUNT);
+        return (current_move_flags & (MOVE_FLAG_X_ACTIVE << (MoveFlag_t)logical_axis));
+    }
+
+    // Return true whether the specified physical axis is moving given a logical one
+    FORCE_INLINE static bool is_physical_axis_moving(const AxisEnum logical_axis) {
+        assert(logical_axis < PS_AXIS_COUNT);
+        bool moving = false;
+#ifdef COREXY
+        if ((logical_axis == A_AXIS || logical_axis == B_AXIS)) {
+            moving = (current_move_flags & (MOVE_FLAG_X_ACTIVE | MOVE_FLAG_Y_ACTIVE));
+        } else {
+#endif
+            moving = (current_move_flags & (MOVE_FLAG_X_ACTIVE << (MoveFlag_t)logical_axis));
+#ifdef COREXY
+        }
+#endif
+        return moving;
+    }
+
+    // Return true whether the specified (logical) axis is moving at cruising speed
+    FORCE_INLINE static bool is_axis_cruising(const AxisEnum logical_axis) {
+        assert(logical_axis < PS_AXIS_COUNT);
+        MoveFlag_t active_mask = (MOVE_FLAG_X_ACTIVE << (MoveFlag_t)logical_axis);
+        MoveFlag_t move_flags = current_move_flags; // take a snapshot to perform both checks
+        return (move_flags & active_mask) && (move_flags & MOVE_FLAG_CRUISE_PHASE);
+    }
+
+    // Return true whether the physical axis/es are moving at cruising speed given a logical one
+    // NOTE: this does not imply that all required physical axes are actually moving. If required,
+    //       each axis needs to be checked independently to check whether it's used after kinematic
+    //       translation via Stepper::axis_is_moving()
+    FORCE_INLINE static bool is_physical_axis_cruising(const AxisEnum logical_axis) {
+        assert(logical_axis < PS_AXIS_COUNT);
+        MoveFlag_t active_mask;
+#ifdef COREXY
+        if ((logical_axis == A_AXIS || logical_axis == B_AXIS)) {
+            active_mask = (MOVE_FLAG_X_ACTIVE | MOVE_FLAG_Y_ACTIVE);
+        } else {
+#endif
+            active_mask = (MOVE_FLAG_X_ACTIVE << (MoveFlag_t)logical_axis);
+#ifdef COREXY
+        }
+#endif
+        MoveFlag_t move_flags = current_move_flags; // take a snapshot to perform both checks
+        return (move_flags & active_mask) && (move_flags & MOVE_FLAG_CRUISE_PHASE);
+    }
 
 private:
     static uint32_t waiting_before_delivering_start_time;
