@@ -132,8 +132,6 @@ void hwio_beeper_set_pwm(uint32_t per, uint32_t pul) {
 }
 
 void hwio_beeper_tone(float frq, uint32_t duration_ms) {
-    uint32_t per;
-    uint32_t pul;
     if (frq && duration_ms && hwio_beeper_vol) {
         if (frq < 0) {
             frq *= -1;
@@ -143,9 +141,9 @@ void hwio_beeper_tone(float frq, uint32_t duration_ms) {
         }
 
         if (board_revisions_9_and_higher()) {
-            per = (uint32_t)(84000000.0F / frq);
-            pul = (uint32_t)(per * hwio_beeper_vol / 2);
 #if HAS_GUI() && (DEBUG_WITH_BEEPS() || !_DEBUG)
+            uint32_t per = (uint32_t)(84000000.0F / frq);
+            uint32_t pul = (uint32_t)(per * hwio_beeper_vol / 2);
             hwio_beeper_set_pwm(per, pul);
 #endif
             hwio_beeper_duration_ms = duration_ms;
