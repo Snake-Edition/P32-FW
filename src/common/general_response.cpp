@@ -1,11 +1,13 @@
 #include "general_response.hpp"
 
 #include <cstring>
+#include <enum_array.hpp>
 
 #define R(NAME) \
-    std::make_pair(Response::NAME, #NAME)
+    { Response::NAME, #NAME }
 
-constexpr std::pair<Response, const char *> response_str[] = {
+static constexpr EnumArray<Response, const char *, Response::_count> response_str {
+    { Response::_none, "" },
     R(Abort),
     R(Abort_invalidate_test),
     R(Adjust),
@@ -58,23 +60,18 @@ constexpr std::pair<Response, const char *> response_str[] = {
     R(Tool4),
     R(Tool5),
 };
-// NOTE: -1 is to exclude the _count itself
-static_assert(static_cast<uint32_t>(Response::_count) - 1 == std::size(response_str), "Handle all responses!");
+
+#undef R
 
 Response from_str(std::string_view str) {
-    for (auto pair : response_str) {
-        if (str.length() == strlen(pair.second) && strncmp(str.data(), pair.second, str.length()) == 0) {
-            return pair.first;
+    for (int i = 0; i < static_cast<int>(Response::_count); i++) {
+        if (str == response_str[i]) {
+            return static_cast<Response>(i);
         }
     }
     return Response::_none;
 }
 
 const char *to_str(const Response response) {
-    for (auto pair : response_str) {
-        if (pair.first == response) {
-            return pair.second;
-        }
-    }
-    return "";
+    return response_str.get_fallback(response, Response::_none);
 }
