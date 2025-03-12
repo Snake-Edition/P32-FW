@@ -37,6 +37,8 @@ void monitor_motor_drivers();
 void motor_driver_loop();
 /// Initialize drivers, including necessary pin setup
 void motor_driver_init();
+/// Check connection status to the drivers
+void motor_driver_check_connections();
 /// Check of motor coils, mainly for selftest purposes
 bool motor_check_coils(uint8_t axis);
 /// Setup an (idle) stepper which is about to move

@@ -799,6 +799,7 @@ void setup() {
 
   motor_serial_lock_init();
   motor_driver_init();
+  motor_driver_check_connections();
 
   #ifdef BOARD_INIT
     BOARD_INIT();

@@ -81,6 +81,11 @@ void motor_driver_init() {
 #endif
 #if HAS_TRINAMIC
     init_tmc();
+#endif
+}
+
+void motor_driver_check_connections() {
+#if HAS_TRINAMIC
     initial_test_tmc_connection();
 #endif
 }
