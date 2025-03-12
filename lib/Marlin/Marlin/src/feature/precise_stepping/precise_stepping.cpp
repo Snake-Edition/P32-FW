@@ -31,6 +31,7 @@ move_segment_queue_t PreciseStepping::move_segment_queue;
 step_event_queue_t PreciseStepping::step_event_queue;
 
 uint16_t PreciseStepping::left_ticks_to_next_step_event = 0;
+uint32_t PreciseStepping::last_step_isr_delay = 0;
 
 step_generator_state_t PreciseStepping::step_generator_state;
 step_generators_pool_t PreciseStepping::step_generators_pool;
@@ -45,7 +46,6 @@ xyze_long_t PreciseStepping::total_start_pos_msteps = { 0, 0, 0, 0 };
 PreciseSteppingFlag_t PreciseStepping::flags = 0;
 
 uint32_t PreciseStepping::waiting_before_delivering_start_time = 0;
-uint32_t PreciseStepping::last_step_isr_delay = 0;
 
 bool PreciseStepping::initialized_ = false;
 std::atomic<bool> PreciseStepping::stop_pending = false;
