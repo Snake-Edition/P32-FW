@@ -16,6 +16,10 @@
 #include "sw_timer.hpp"
 #include <logging/log.hpp>
 #include "display_hw_checks.hpp"
+#include <option/has_leds.h>
+#if HAS_LEDS()
+    #include <leds/led_manager.hpp>
+#endif
 
 #include <option/has_touch.h>
 
@@ -172,6 +176,10 @@ void gui_loop(void) {
     ++guiloop_nesting;
     lcd::communication_check();
     gui_handle_jogwheel();
+
+#if HAS_LEDS()
+    leds::LEDManager::instance().update();
+#endif
 
 #if HAS_TOUCH()
     gui_handle_touch();
