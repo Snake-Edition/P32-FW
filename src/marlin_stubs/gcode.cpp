@@ -5,7 +5,6 @@
 
 #include "M330.h"
 #include "M340.h"
-#include "M919-M920.h"
 #include <stdint.h>
 #include <device/board.h>
 #include "printers.h"
@@ -23,6 +22,10 @@
 
 #if HAS_LOADCELL()
     #include "loadcell.hpp"
+#endif
+
+#if HAS_TRINAMIC
+    #include "M919-M920.h"
 #endif
 
 #if HAS_PHASE_STEPPING()
@@ -215,12 +218,14 @@ bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
             PrusaGcodeSuite::M865();
             break;
 
+#if HAS_TRINAMIC
         case 919:
             PrusaGcodeSuite::M919();
             break;
         case 920:
             PrusaGcodeSuite::M920();
             break;
+#endif
 #if HAS_BELT_TUNING()
         case 960:
             PrusaGcodeSuite::M960();

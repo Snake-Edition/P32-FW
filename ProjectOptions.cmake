@@ -254,6 +254,16 @@ set_feature_for_printers(
   "COREONE"
   )
 set_feature_for_printers(
+  HAS_TRINAMIC
+  "MINI"
+  "MK4"
+  "MK3.5"
+  "iX"
+  "XL"
+  "XL_DEV_KIT"
+  "COREONE"
+  )
+set_feature_for_printers(
   HAS_CRASH_DETECTION
   "MINI"
   "MK4"
