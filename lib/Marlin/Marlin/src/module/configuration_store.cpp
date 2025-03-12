@@ -115,8 +115,6 @@
 #define DEBUG_OUT ENABLED(EEPROM_CHITCHAT)
 #include "../core/debug_out.h"
 
-#pragma pack(push, 1) // No padding between variables
-
 // Limit an index to an array size
 #define ALIM(I,ARR) _MIN(I, COUNT(ARR) - 1)
 
@@ -1321,5 +1319,3 @@ void MarlinSettings::reset() {
   }
 
 #endif // !DISABLE_M503
-
-#pragma pack(pop)
