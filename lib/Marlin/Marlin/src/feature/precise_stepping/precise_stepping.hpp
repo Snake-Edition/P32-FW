@@ -360,12 +360,7 @@ public:
 
     static void update_maximum_lookback_time();
 
-    static double get_first_move_delay() {
-        // For now, the epsilon o 1ms is applied to ensure that even with big rounding errors,
-        // move_time will be much bigger than max_lookback_time.
-        return max_lookback_time + 0.001;
-    }
-
+    static double get_first_move_delay();
     static uint32_t get_first_move_delay_us() {
         return get_first_move_delay() * 1e6;
     }

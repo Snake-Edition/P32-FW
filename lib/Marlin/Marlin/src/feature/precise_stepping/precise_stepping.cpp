@@ -1361,6 +1361,14 @@ void PreciseStepping::update_maximum_lookback_time() {
 #endif
 }
 
+double PreciseStepping::get_first_move_delay() {
+    // For now, the epsilon o 1ms is applied to ensure that even with big rounding errors,
+    // move_time will be much bigger than max_lookback_time.
+    double move_time = max_lookback_time + 0.001;
+
+    return move_time;
+}
+
 void PreciseStepping::step_generator_state_init(const move_t &move) {
     assert(is_beginning_empty_move(move));
     if (max_lookback_time > move.move_time) {
