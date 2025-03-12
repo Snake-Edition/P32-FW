@@ -382,18 +382,7 @@ public:
     // Reset the step/move queue
     static void quick_stop() {
         bool expected = false;
-#if !MCU_IS_STM32G0()
         stop_pending.compare_exchange_weak(expected, true);
-#else
-        {
-            buddy::InterruptDisabler _;
-            if (!stop_pending) {
-                stop_pending = true;
-            } else {
-                expected = true;
-            }
-        }
-#endif
         if (!expected) {
             // only update on first trigger
             time_last_block_us = ticks_us();
