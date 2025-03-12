@@ -734,7 +734,6 @@ void PreciseStepping::step_isr() {
     constexpr uint32_t min_delay = 11; // fuse isr for steps below this threshold (us)
 #endif
     constexpr uint16_t min_reserve = 5; // minimum interval for isr re-entry (us)
-    constexpr uint16_t max_ticks = (UINT16_MAX / 4); // maximum isr interval for skip detection (us)
 
 #ifdef ISR_DEADLINE_TRACKING
     // in addition to checking for forward misses, check for past ones
@@ -763,7 +762,9 @@ void PreciseStepping::step_isr() {
 
         // limit the interval to avoid a counter overflow or runout
         uint16_t ticks_to_next_step_event = left_ticks_to_next_step_event;
-        NOMORE(ticks_to_next_step_event, max_ticks);
+        if (ticks_to_next_step_event > STEPPER_ISR_MAX_TICKS) {
+            ticks_to_next_step_event = STEPPER_ISR_MAX_TICKS;
+        }
 
         // Compute the time remaining until the next step event.
         left_ticks_to_next_step_event -= ticks_to_next_step_event;
@@ -802,7 +803,7 @@ void PreciseStepping::step_isr() {
     // We should miss the next deadline just by a couple of ticks. When the value of 'diff'
     // is a big negative number, the difference between 'adjusted_next' and 'tim_counter'
     // is bigger than (UINT16_MAX / 2), or something interrupts the stepper routine for a very long time.
-    assert(diff >= 0 || diff >= -max_ticks);
+    assert(diff >= 0 || diff >= -STEPPER_ISR_MAX_TICKS);
     if (diff < min_reserve) {
         adjusted_next = tim_counter + min_reserve;
     }

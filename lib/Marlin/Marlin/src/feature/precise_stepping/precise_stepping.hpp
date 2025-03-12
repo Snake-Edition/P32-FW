@@ -33,6 +33,9 @@ constexpr const int32_t STEP_TIMER_MAX_TICKS_LIMIT = int32_t(std::numeric_limits
 // Precomputed period of calling PreciseStepping::isr() when there is no queued step event (1ms).
 constexpr const uint16_t STEPPER_ISR_PERIOD_IN_TICKS = (STEPPER_TIMER_RATE / 1000);
 
+// Maximum isr interval for skip detection
+constexpr const uint16_t STEPPER_ISR_MAX_TICKS = UINT16_MAX / 4;
+
 // Precomputed conversion rate from seconds to timer ticks.
 constexpr const double STEPPER_TICKS_PER_SEC = double(STEPPER_TIMER_RATE);
 
