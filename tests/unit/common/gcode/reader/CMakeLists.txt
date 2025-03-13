@@ -24,9 +24,9 @@ target_include_directories(
           ${CMAKE_SOURCE_DIR}/tests/stubs
           ${CMAKE_SOURCE_DIR}/include
           ${CMAKE_SOURCE_DIR}/include/usb_host
-          ${CMAKE_SOURCE_DIR}/lib/SG14
   )
 
+target_link_libraries(gcode_reader_test SG14)
 target_link_libraries(gcode_reader_test mbedTLS bgcode_core freertos_tests)
 
 file(
