@@ -31,7 +31,6 @@ namespace detail {
 
 class ScreenMenuDockCalibration : public detail::ScreenMenuDockCalibration {
 public:
-    static constexpr const char *label { "Dock Calibration" };
     static constexpr Action action { Action::DockCalibration };
     ScreenMenuDockCalibration();
 
@@ -41,7 +40,6 @@ public:
 
 class ScreenMenuLoadcellTest : public detail::ScreenMenuLoadcellTest {
 public:
-    static constexpr const char *label { "Loadcell Test" };
     static constexpr Action action { Action::Loadcell };
     ScreenMenuLoadcellTest();
 
@@ -51,7 +49,6 @@ public:
 
 class ScreenMenuFilamentSensorsCalibration : public detail::ScreenMenuFilamentSensorsCalibration {
 public:
-    static constexpr const char *label { "Filament Sensor Calibration" };
     static constexpr Action action { Action::FilamentSensorCalibration };
     ScreenMenuFilamentSensorsCalibration();
 
@@ -61,7 +58,6 @@ public:
 
 class ScreenMenuGearsTest : public detail::ScreenMenuGearsTest {
 public:
-    static constexpr const char *label { "Gear Alignment" };
     static constexpr Action action { Action::Gears };
     ScreenMenuGearsTest();
 

@@ -18,7 +18,7 @@ void open_submenu(Action action) {
 }
 
 ScreenMenuDockCalibration::ScreenMenuDockCalibration()
-    : detail::ScreenMenuDockCalibration(_(label)) {}
+    : detail::ScreenMenuDockCalibration(_("DOCK CALIBRATION")) {}
 
 void ScreenMenuDockCalibration::draw() {
     if (is_menu_draw_enabled(this)) {
@@ -31,7 +31,7 @@ void ScreenMenuDockCalibration::windowEvent(window_t *sender, GUI_event_t event,
 }
 
 ScreenMenuLoadcellTest::ScreenMenuLoadcellTest()
-    : detail::ScreenMenuLoadcellTest(_(label)) {}
+    : detail::ScreenMenuLoadcellTest(_("LOADCELL TEST")) {}
 
 void ScreenMenuLoadcellTest::draw() {
     if (is_menu_draw_enabled(this)) {
@@ -44,7 +44,7 @@ void ScreenMenuLoadcellTest::windowEvent(window_t *sender, GUI_event_t event, vo
 }
 
 ScreenMenuFilamentSensorsCalibration::ScreenMenuFilamentSensorsCalibration()
-    : detail::ScreenMenuFilamentSensorsCalibration(_(label)) {}
+    : detail::ScreenMenuFilamentSensorsCalibration(_("FILAMENT SENSOR CALIBRATION")) {}
 
 void ScreenMenuFilamentSensorsCalibration::draw() {
     if (is_menu_draw_enabled(this)) {
@@ -57,7 +57,7 @@ void ScreenMenuFilamentSensorsCalibration::windowEvent(window_t *sender, GUI_eve
 }
 
 ScreenMenuGearsTest::ScreenMenuGearsTest()
-    : detail::ScreenMenuGearsTest(_(label)) {}
+    : detail::ScreenMenuGearsTest(_("GEAR ALIGNMENT")) {}
 
 void ScreenMenuGearsTest::draw() {
     if (is_menu_draw_enabled(this)) {
