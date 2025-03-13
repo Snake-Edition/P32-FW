@@ -31,6 +31,8 @@ include(ProjectOptions.cmake)
 if(NOT DEFINED DISABLE_LTO
    AND NOT DEVELOPER_MODE
    AND NOT BOARD STREQUAL DWARF
+   AND CMAKE_CROSSCOMPILING # This will not force LTO for unittests and png2font, because those are
+                            # build natively
    )
   set(COMPILE_WITH_LTO ON)
   set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
