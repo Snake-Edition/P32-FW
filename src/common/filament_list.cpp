@@ -1,4 +1,26 @@
 #include "filament_list.hpp"
+#include "encoded_filament.hpp"
+
+constinit const FilamentListStorage all_filament_types = [] {
+    FilamentListStorage r;
+
+    size_t index = 0;
+
+    // Preset filaments first
+    for (size_t i = 0; i < static_cast<size_t>(PresetFilamentType::_count); i++) {
+        r[index++] = static_cast<PresetFilamentType>(i);
+    }
+
+    for (uint8_t i = 0; i < user_filament_type_count; i++) {
+        r[index++] = UserFilamentType { i };
+    }
+
+    if (index != r.size()) {
+        std::abort();
+    }
+
+    return r;
+}();
 
 const GenerateFilamentListConfig management_generate_filament_list_config {
     .visible_only = false,
@@ -6,6 +28,7 @@ const GenerateFilamentListConfig management_generate_filament_list_config {
     .user_ordering = true,
 };
 
+#ifndef UNITTESTS
 size_t generate_filament_list(FilamentListStorage &storage, const GenerateFilamentListConfig &config) {
     std::bitset<256> is_filament_visible_bitset;
     static_assert(std::is_same_v<decltype(EncodedFilamentType::data), uint8_t>);
@@ -86,3 +109,4 @@ size_t generate_filament_list(FilamentListStorage &storage, const GenerateFilame
 
     return cnt;
 }
+#endif
