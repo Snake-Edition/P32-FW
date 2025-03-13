@@ -31,7 +31,6 @@
 #include <cstring>
 #include <initializer_list>
 #include <memory>
-#include <new>
 #include <type_traits>
 
 #if __cplusplus >= 202002L
@@ -435,15 +434,15 @@ public:
     // [inplace.vector.modifiers]
 
     template <class... Args>
-    value_type &unchecked_emplace_back(Args &&...args) {
+    constexpr value_type &unchecked_emplace_back(Args &&...args) {
         // Precondition: (size_ < N)
         value_type *p = data() + size_;
-        p = ::new (p) value_type(static_cast<Args &&>(args)...);
+        p = std::construct_at<value_type>(p, std::forward<Args>(args)...);
         set_size_(size_ + 1);
         return *p;
     }
-    value_type &unchecked_push_back(const value_type &value) { return unchecked_emplace_back(value); }
-    value_type &unchecked_push_back(value_type &&value) { return unchecked_emplace_back(static_cast<value_type &&>(value)); }
+    constexpr value_type &unchecked_push_back(const value_type &value) { return unchecked_emplace_back(value); }
+    constexpr value_type &unchecked_push_back(value_type &&value) { return unchecked_emplace_back(static_cast<value_type &&>(value)); }
 
     template <class... Args>
     constexpr value_type *try_emplace_back(Args &&...args) {
@@ -456,14 +455,14 @@ public:
     constexpr value_type *try_push_back(value_type &&value) { return try_emplace_back(static_cast<value_type &&>(value)); }
 
     template <class... Args>
-    value_type &emplace_back(Args &&...args) {
+    constexpr value_type &emplace_back(Args &&...args) {
         if (size_ == N) {
             SG14_INPLACE_VECTOR_THROW(std::bad_alloc());
         }
         return unchecked_emplace_back(static_cast<Args &&>(args)...);
     }
-    value_type &push_back(const value_type &value) { return emplace_back(value); }
-    value_type &push_back(value_type &&value) { return emplace_back(static_cast<value_type &&>(value)); }
+    constexpr value_type &push_back(const value_type &value) { return emplace_back(value); }
+    constexpr value_type &push_back(value_type &&value) { return emplace_back(static_cast<value_type &&>(value)); }
 
 #if __cpp_lib_ranges >= 201911L && __cpp_lib_ranges_to_container >= 202202L
     template <std::ranges::input_range R>
@@ -475,22 +474,22 @@ public:
     }
 #endif // __cpp_lib_ranges >= 201911L && __cpp_lib_ranges_to_container >= 202202L
 
-    void pop_back() {
+    constexpr void pop_back() {
         std::destroy_at(data() + size_ - 1);
         set_size_(size_ - 1);
     }
 
     template <class... Args>
-    iterator emplace(const_iterator pos, Args &&...args) {
+    constexpr iterator emplace(const_iterator pos, Args &&...args) {
         auto it = iterator(pos);
         emplace_back(static_cast<Args &&>(args)...);
         std::rotate(it, end() - 1, end());
         return it;
     }
-    iterator insert(const_iterator pos, const value_type &value) { return emplace(pos, value); }
-    iterator insert(const_iterator pos, value_type &&value) { return emplace(pos, static_cast<value_type &&>(value)); }
+    constexpr iterator insert(const_iterator pos, const value_type &value) { return emplace(pos, value); }
+    constexpr iterator insert(const_iterator pos, value_type &&value) { return emplace(pos, static_cast<value_type &&>(value)); }
 
-    iterator insert(const_iterator pos, size_type n, const value_type &value) {
+    constexpr iterator insert(const_iterator pos, size_type n, const value_type &value) {
         if (N - size_ < n) {
             SG14_INPLACE_VECTOR_THROW(std::bad_alloc());
         }
@@ -518,7 +517,7 @@ public:
     }
 
     template <class It, std::enable_if_t<std::is_base_of_v<std::input_iterator_tag, typename std::iterator_traits<It>::iterator_category>, int> = 0>
-    iterator insert(const_iterator pos, It first, It last) {
+    constexpr iterator insert(const_iterator pos, It first, It last) {
         auto it = iterator(pos);
         auto oldend = end();
         if constexpr (std::is_base_of_v<std::random_access_iterator_tag, typename std::iterator_traits<It>::iterator_category>) {
@@ -556,7 +555,7 @@ public:
 #if __cpp_lib_ranges >= 201911L && __cpp_lib_ranges_to_container >= 202202L
     template <std::ranges::input_range R>
         requires std::convertible_to<std::ranges::range_reference_t<R>, value_type>
-    iterator insert_range(const_iterator pos, R &&rg) {
+    constexpr iterator insert_range(const_iterator pos, R &&rg) {
         auto it = iterator(pos);
         auto oldend = end();
         if constexpr (std::ranges::sized_range<R>) {
@@ -596,9 +595,9 @@ public:
     }
 #endif // __cpp_lib_ranges >= 201911L && __cpp_lib_ranges_to_container >= 202202L
 
-    iterator insert(const_iterator pos, std::initializer_list<value_type> il) { return insert(pos, il.begin(), il.end()); }
+    constexpr iterator insert(const_iterator pos, std::initializer_list<value_type> il) { return insert(pos, il.begin(), il.end()); }
 
-    iterator erase(const_iterator pos) {
+    constexpr iterator erase(const_iterator pos) {
         auto it = iterator(pos);
         auto oldend = end();
 #if defined(__cpp_lib_trivially_relocatable)
@@ -615,7 +614,7 @@ public:
         return it;
     }
 
-    iterator erase(const_iterator first, const_iterator last) {
+    constexpr iterator erase(const_iterator first, const_iterator last) {
         auto ifirst = iterator(first);
         auto ilast = iterator(last);
         auto n = ilast - ifirst;

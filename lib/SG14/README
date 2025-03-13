@@ -5,3 +5,4 @@ Modified the SG14_INPLACE_FUNCTION_THROW.
 # inplace_vector
 Exported from https://github.com/Quuxplusone/SG14/blob/master/include/sg14/inplace_vector.h as of commit id b4485d7866875b2b4c0bd0dc7a9ad61199f65c02
 Modified the SG14_INPLACE_FUNCTION_THROW
+Extended constexpr support
