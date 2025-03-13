@@ -1,14 +1,14 @@
 #pragma once
 
-#include <array>
+#include <inplace_vector.hpp>
 
 #include "filament.hpp"
 
-using FilamentListStorage = std::array<FilamentType, total_filament_type_count>;
+using FilamentList = stdext::inplace_vector<FilamentType, total_filament_type_count>;
 
 /// List of all filaments, in the order that makes kind of sense to the user
 /// !!! Order of items in the list can change between builds. Do not rely on it.
-extern constinit const FilamentListStorage all_filament_types;
+extern constinit const FilamentList all_filament_types;
 
 struct GenerateFilamentListConfig {
     /// If set, only outputs visible filaments
@@ -29,6 +29,6 @@ struct GenerateFilamentListConfig {
 extern const GenerateFilamentListConfig management_generate_filament_list_config;
 
 /// Generates a filament list based on the provided \p config.
-/// The result is stored in \p storage. (But some slots might be unused).
+/// The result is stored in \p list. (But some slots might be unused).
 /// \returns generated list size
-size_t generate_filament_list(FilamentListStorage &storage, const GenerateFilamentListConfig &config);
+void generate_filament_list(FilamentList &list, const GenerateFilamentListConfig &config);

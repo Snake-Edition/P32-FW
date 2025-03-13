@@ -39,7 +39,7 @@ private:
 
     StringViewUtf8Parameters<2> label_params;
     DynamicIndexMapping<items> index_mapping;
-    FilamentListStorage filament_list;
+    FilamentList filament_list;
 };
 
 class MI_ApplyChanges : public IWindowMenuItem {

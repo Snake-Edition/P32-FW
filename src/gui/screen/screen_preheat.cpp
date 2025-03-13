@@ -78,8 +78,8 @@ void WindowMenuPreheat::update_list() {
         .visible_only = !show_all_filaments_,
         .visible_first = true,
     };
-    const auto count = generate_filament_list(filament_list_storage, config);
-    index_mapping.set_section_size<Item::filament_section>(count);
+    generate_filament_list(filament_list, config);
+    index_mapping.set_section_size<Item::filament_section>(filament_list.size());
     index_mapping.set_item_enabled<Item::show_all>(!show_all_filaments_);
     setup_items();
 }
@@ -114,7 +114,7 @@ void WindowMenuPreheat::setup_item(ItemVariant &variant, int index) {
     }
 
     case Item::filament_section:
-        variant.emplace<MI_FILAMENT>(filament_list_storage[mapping.pos_in_section], preheat_data.extruder);
+        variant.emplace<MI_FILAMENT>(filament_list[mapping.pos_in_section], preheat_data.extruder);
         break;
 
     case Item::adhoc_filament: {

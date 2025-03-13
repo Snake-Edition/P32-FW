@@ -46,7 +46,7 @@ private:
     void load_list();
 
 private:
-    FilamentListStorage filament_list;
+    FilamentList filament_list;
 
     /// Filament type that is currently moved
     std::optional<FilamentType> moved_filament;

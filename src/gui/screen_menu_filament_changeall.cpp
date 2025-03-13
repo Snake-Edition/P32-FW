@@ -32,8 +32,8 @@ MI_ActionSelect::MI_ActionSelect(uint8_t tool_ix)
 
 void MI_ActionSelect::set_config(const ConfigItem &set) {
     // By using enforce_first_item, we make sure the target filament is in the list (it might be hidden otherwise) and that it's on the first place (which is a welcome bonus)
-    const size_t filament_list_size = generate_filament_list(filament_list, { .enforce_first_item = set.new_filament });
-    index_mapping.set_section_size<Action::change>(filament_list_size);
+    generate_filament_list(filament_list, { .enforce_first_item = set.new_filament });
+    index_mapping.set_section_size<Action::change>(filament_list.size());
 
     color = set.color;
     set_current_item([&] -> size_t {
@@ -45,7 +45,7 @@ void MI_ActionSelect::set_config(const ConfigItem &set) {
             return index_mapping.to_index<Action::unload>();
 
         case Action::change:
-            return index_mapping.to_index<Action::change>(std::find(filament_list.begin(), filament_list.begin() + filament_list_size, set.new_filament) - filament_list.begin());
+            return index_mapping.to_index<Action::change>(stdext::index_of(filament_list, set.new_filament));
         }
 
         std::abort();

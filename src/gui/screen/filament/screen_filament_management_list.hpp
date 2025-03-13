@@ -31,7 +31,7 @@ protected:
     void setup_item(ItemVariant &variant, int index) final;
 
 private:
-    FilamentListStorage filament_list;
+    FilamentList filament_list;
 };
 
 } // namespace screen_filament_management_list

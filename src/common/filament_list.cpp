@@ -1,21 +1,19 @@
 #include "filament_list.hpp"
 #include "encoded_filament.hpp"
 
-constinit const FilamentListStorage all_filament_types = [] {
-    FilamentListStorage r;
-
-    size_t index = 0;
+constinit const FilamentList all_filament_types = [] {
+    FilamentList r;
 
     // Preset filaments first
     for (size_t i = 0; i < static_cast<size_t>(PresetFilamentType::_count); i++) {
-        r[index++] = static_cast<PresetFilamentType>(i);
+        r.push_back(static_cast<PresetFilamentType>(i));
     }
 
     for (uint8_t i = 0; i < user_filament_type_count; i++) {
-        r[index++] = UserFilamentType { i };
+        r.push_back(UserFilamentType { i });
     }
 
-    if (index != r.size()) {
+    if (r.size() != total_filament_type_count) {
         std::abort();
     }
 
@@ -29,7 +27,9 @@ const GenerateFilamentListConfig management_generate_filament_list_config {
 };
 
 #ifndef UNITTESTS
-size_t generate_filament_list(FilamentListStorage &storage, const GenerateFilamentListConfig &config) {
+void generate_filament_list(FilamentList &list, const GenerateFilamentListConfig &config) {
+    list.clear();
+
     std::bitset<256> is_filament_visible_bitset;
     static_assert(std::is_same_v<decltype(EncodedFilamentType::data), uint8_t>);
 
@@ -54,7 +54,6 @@ size_t generate_filament_list(FilamentListStorage &storage, const GenerateFilame
         return is_filament_visible_bitset.test(EncodedFilamentType(ft).data);
     };
 
-    size_t cnt = 0;
     std::bitset<256> is_filament_in_list_bitset;
 
     /// Appends filament to the list, if it is not already there
@@ -64,7 +63,7 @@ size_t generate_filament_list(FilamentListStorage &storage, const GenerateFilame
             return;
         }
 
-        storage[cnt++] = ft;
+        list.push_back(ft);
         is_filament_in_list_bitset.set(ix);
     };
 
@@ -105,8 +104,6 @@ size_t generate_filament_list(FilamentListStorage &storage, const GenerateFilame
     });
 
     // Unless we're listing only visible filaments, we should always end up returning all the filaments
-    assert(cnt == all_filament_types.size() || config.visible_only);
-
-    return cnt;
+    assert(list.size() == all_filament_types.size() || config.visible_only);
 }
 #endif
