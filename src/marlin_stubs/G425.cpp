@@ -337,7 +337,7 @@ xy_pos_t probe_xy(const xyz_pos_t center, const float angle, const uint8_t tool,
         &metric_xy_raw_hit,
         ",t=%u,p=%u,a=%.3f x=%.3f,y=%.3f",
         tool,
-        ftrstd::to_underlying(phase),
+        std::to_underlying(phase),
         static_cast<double>(angle),
         static_cast<double>(hit_mm.x),
         static_cast<double>(hit_mm.y));
@@ -392,7 +392,7 @@ xy_pos_t probe_xy_verify(const xyz_pos_t center, const float angle, const float 
             &metric_xy_hit,
             ",t=%u,p=%u,a=%.3f x=%.3f,y=%.3f",
             tool,
-            ftrstd::to_underlying(phase),
+            std::to_underlying(phase),
             static_cast<double>(angle),
             static_cast<double>(pos.x),
             static_cast<double>(pos.y));
@@ -444,7 +444,7 @@ float probe_z(const xyz_pos_t position, float uncertainty, const int num_measure
             &metric_z_raw_hit,
             ",t=%u,p=%u x=%.3f,y=%.3f,z=%.3f",
             tool,
-            ftrstd::to_underlying(phase),
+            std::to_underlying(phase),
             static_cast<double>(current_position.x),
             static_cast<double>(current_position.y),
             static_cast<double>(measurement));
@@ -495,21 +495,21 @@ void check_deviation(const xy_pos_t &center, std::span<const xy_pos_t> points) {
 }
 
 const xyz_pos_t get_single_xyz_center(const xyz_pos_t initial, const uint8_t tool, const Phase phase) {
-    static constexpr uint8_t PHASE_XY_HITS[ftrstd::to_underlying(Phase::_count)] = { 3, 3, 12 };
-    static constexpr uint8_t PHASE_Z_HITS[ftrstd::to_underlying(Phase::_count)] = { 1, 0, NUM_Z_MEASUREMENTS };
-    static constexpr float PHASE_Z_UNCERTAINTY[ftrstd::to_underlying(Phase::_count)] = { PROBE_XY_UNCERTAIN_DIST_MM, PROBE_Z_UNCERTAIN_DIST_MM, PROBE_Z_CERTAIN_DIST_MM };
+    static constexpr uint8_t PHASE_XY_HITS[std::to_underlying(Phase::_count)] = { 3, 3, 12 };
+    static constexpr uint8_t PHASE_Z_HITS[std::to_underlying(Phase::_count)] = { 1, 0, NUM_Z_MEASUREMENTS };
+    static constexpr float PHASE_Z_UNCERTAINTY[std::to_underlying(Phase::_count)] = { PROBE_XY_UNCERTAIN_DIST_MM, PROBE_Z_UNCERTAIN_DIST_MM, PROBE_Z_CERTAIN_DIST_MM };
     xyz_pos_t start = initial;
 
     // Get Z
-    if (PHASE_Z_HITS[ftrstd::to_underlying(phase)]) {
-        start.z = probe_z(initial, PHASE_Z_UNCERTAINTY[ftrstd::to_underlying(phase)], PHASE_Z_HITS[ftrstd::to_underlying(phase)], tool, phase);
+    if (PHASE_Z_HITS[std::to_underlying(phase)]) {
+        start.z = probe_z(initial, PHASE_Z_UNCERTAINTY[std::to_underlying(phase)], PHASE_Z_HITS[std::to_underlying(phase)], tool, phase);
     }
 
     // Get XY
     AccelerationLimiter al(XY_ACCELERATION_MMSS);
     static constexpr uint8_t MAX_HITS = *std::max_element(std::begin(PHASE_XY_HITS), std::end(PHASE_XY_HITS));
     std::array<xy_pos_t, MAX_HITS> max_hits;
-    std::span<xy_pos_t> hits(max_hits.begin(), PHASE_XY_HITS[ftrstd::to_underlying(phase)]);
+    std::span<xy_pos_t> hits(max_hits.begin(), PHASE_XY_HITS[std::to_underlying(phase)]);
     for (uint hit_no = 0; xy_pos_t & hit : hits) {
         hit = probe_xy_verify(start, 2 * PI / hits.size() * hit_no++, PROBE_XY_UNCERTAIN_DIST_MM, tool, phase);
     }
@@ -529,7 +529,7 @@ const xyz_pos_t get_xyz_center(const uint8_t tool) {
     auto loadcellPrecisionEnabler = Loadcell::HighPrecisionEnabler(loadcell);
 
     xyz_pos_t center = true_top_center;
-    for (Phase phase = Phase::first; phase != Phase::_count; phase = Phase(ftrstd::to_underlying(phase) + 1)) {
+    for (Phase phase = Phase::first; phase != Phase::_count; phase = Phase(std::to_underlying(phase) + 1)) {
         center = get_single_xyz_center(center, tool, phase);
     }
 

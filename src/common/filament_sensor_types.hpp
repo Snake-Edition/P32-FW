@@ -31,10 +31,10 @@ struct LogicalFilamentSensors {
     std::array<std::atomic<IFSensor *>, logical_filament_sensor_count> array = { nullptr };
 
     inline auto &operator[](LogicalFilamentSensor fs) {
-        return array.at(ftrstd::to_underlying(fs));
+        return array.at(std::to_underlying(fs));
     }
     inline IFSensor *operator[](LogicalFilamentSensor fs) const {
-        return array.at(ftrstd::to_underlying(fs));
+        return array.at(std::to_underlying(fs));
     }
 };
 
@@ -45,9 +45,9 @@ struct LogicalFilamentSensorStates {
     std::array<State, logical_filament_sensor_count> array = { init_val };
 
     inline auto &operator[](LogicalFilamentSensor fs) {
-        return array.at(ftrstd::to_underlying(fs));
+        return array.at(std::to_underlying(fs));
     }
     inline const auto &operator[](LogicalFilamentSensor fs) const {
-        return array.at(ftrstd::to_underlying(fs));
+        return array.at(std::to_underlying(fs));
     }
 };

@@ -201,7 +201,7 @@ void visit_display_config(ClientFSM fsm, auto f) {
 };
 
 static constexpr size_t fsm_display_config_size = []<class... T>(FSMDisplayConfigDef<T...>) { return sizeof...(T); }(FSMDisplayConfig());
-static_assert(fsm_display_config_size == ftrstd::to_underlying(ClientFSM::_count) + 1);
+static_assert(fsm_display_config_size == std::to_underlying(ClientFSM::_count) + 1);
 
 //*****************************************************************************
 // method definitions

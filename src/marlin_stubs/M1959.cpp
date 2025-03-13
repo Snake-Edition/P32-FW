@@ -435,7 +435,7 @@ static PhasesInputShaperCalibration computing(Context &context) {
 
         fsm::PhaseData data {
             static_cast<uint8_t>(255 * progress),
-            ftrstd::to_underlying(type),
+            std::to_underlying(type),
             logicalAxis,
             0,
         };

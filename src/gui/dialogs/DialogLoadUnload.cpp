@@ -412,7 +412,7 @@ void DialogLoadUnload::Change(fsm::BaseData base_data) {
 
             notice_radio_button.set_fixed_width_buttons_count(3);
             notice_radio_button.ChangePhase(phase, responses);
-            notice_update(ftrstd::to_underlying(ptr_desc->err_code), ptr_desc->err_title, ptr_desc->err_text, ptr_desc->type);
+            notice_update(std::to_underlying(ptr_desc->err_code), ptr_desc->err_title, ptr_desc->err_text, ptr_desc->type);
         }
     #endif
     #if HAS_LOADCELL()
@@ -424,7 +424,7 @@ void DialogLoadUnload::Change(fsm::BaseData base_data) {
 
             notice_radio_button.set_fixed_width_buttons_count(0);
             notice_radio_button.ChangePhase(phase, { Response::Unload });
-            notice_update(ftrstd::to_underlying(err_desc.err_code), err_desc.err_title, err_desc.err_text, ErrType::WARNING);
+            notice_update(std::to_underlying(err_desc.err_code), err_desc.err_title, err_desc.err_text, ErrType::WARNING);
         }
     #endif
         current_phase = phase;

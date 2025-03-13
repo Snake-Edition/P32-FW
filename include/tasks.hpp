@@ -33,7 +33,7 @@ enum class Dependency : size_t {
 };
 
 // Check dependency mask fits into the dependency_t integer
-static_assert(ftrstd::to_underlying(Dependency::_count) <= sizeof(dependency_t) * 8);
+static_assert(std::to_underlying(Dependency::_count) <= sizeof(dependency_t) * 8);
 
 // Create dependency mask from the dependencies enum
 constexpr dependency_t make(std::same_as<Dependency> auto... dependencies) {
@@ -41,7 +41,7 @@ constexpr dependency_t make(std::same_as<Dependency> auto... dependencies) {
 #if HAS_PUPPIES()
     static_assert(sizeof...(dependencies) > 0, "No dependencies, is this intended?");
 #endif
-    return ((1 << ftrstd::to_underlying(dependencies)) | ... | 0);
+    return ((1 << std::to_underlying(dependencies)) | ... | 0);
 }
 
 /// Definitions of dependencies for different tasks/components
@@ -104,7 +104,7 @@ inline void wait(dependency_t dependencies) {
  * Mark particular dependency as satisfied
  */
 inline void provide(Dependency dependency) {
-    xEventGroupSetBits(components_ready, 1 << ftrstd::to_underlying(dependency));
+    xEventGroupSetBits(components_ready, 1 << std::to_underlying(dependency));
 }
 
 } // namespace TaskDeps

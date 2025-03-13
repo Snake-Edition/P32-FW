@@ -9,7 +9,7 @@
 
 #include <common/utils/algorithm_extensions.hpp>
 
-static_assert(ftrstd::to_underlying(footer::Item::none) == 0, "Current implementation relies on none being 0");
+static_assert(std::to_underlying(footer::Item::none) == 0, "Current implementation relies on none being 0");
 
 I_MI_FOOTER::I_MI_FOOTER(int item)
     : MenuItemSelectMenu({})

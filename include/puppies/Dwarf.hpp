@@ -32,23 +32,23 @@ public:
     using SystemHoldingRegister = dwarf_shared::registers::SystemHoldingRegister;
     using SystemFIFO = dwarf_shared::registers::SystemFIFO;
 
-    static constexpr uint16_t GENERAL_DISCRETE_INPUTS_ADDR { ftrstd::to_underlying(SystemDiscreteInput::is_picked) };
+    static constexpr uint16_t GENERAL_DISCRETE_INPUTS_ADDR { std::to_underlying(SystemDiscreteInput::is_picked) };
 
-    static constexpr uint16_t TMC_ENABLE_ADDR { ftrstd::to_underlying(SystemCoil::tmc_enable) };
-    static constexpr uint16_t IS_SELECTED { ftrstd::to_underlying(SystemCoil::is_selected) };
-    static constexpr uint16_t LOADCELL_ENABLE { ftrstd::to_underlying(SystemCoil::loadcell_enable) };
-    static constexpr uint16_t ACCELEROMETER_ENABLE { ftrstd::to_underlying(SystemCoil::accelerometer_enable) };
+    static constexpr uint16_t TMC_ENABLE_ADDR { std::to_underlying(SystemCoil::tmc_enable) };
+    static constexpr uint16_t IS_SELECTED { std::to_underlying(SystemCoil::is_selected) };
+    static constexpr uint16_t LOADCELL_ENABLE { std::to_underlying(SystemCoil::loadcell_enable) };
+    static constexpr uint16_t ACCELEROMETER_ENABLE { std::to_underlying(SystemCoil::accelerometer_enable) };
 
-    static constexpr uint16_t HW_BOM_ID_ADDR { ftrstd::to_underlying(SystemInputRegister::hw_bom_id) };
-    static constexpr uint16_t TMC_READ_RESPONSE_ADDRESS { ftrstd::to_underlying(SystemInputRegister::tmc_read_response_1) };
-    static constexpr uint16_t FAULT_STATUS_ADDR { ftrstd::to_underlying(SystemInputRegister::fault_status) };
-    static constexpr uint16_t TIME_SYNC_ADDR { ftrstd::to_underlying(SystemInputRegister::time_sync_lo) };
-    static constexpr uint16_t MARLIN_ERROR_COMPONENT_START { ftrstd::to_underlying(SystemInputRegister::marlin_error_component_start) };
+    static constexpr uint16_t HW_BOM_ID_ADDR { std::to_underlying(SystemInputRegister::hw_bom_id) };
+    static constexpr uint16_t TMC_READ_RESPONSE_ADDRESS { std::to_underlying(SystemInputRegister::tmc_read_response_1) };
+    static constexpr uint16_t FAULT_STATUS_ADDR { std::to_underlying(SystemInputRegister::fault_status) };
+    static constexpr uint16_t TIME_SYNC_ADDR { std::to_underlying(SystemInputRegister::time_sync_lo) };
+    static constexpr uint16_t MARLIN_ERROR_COMPONENT_START { std::to_underlying(SystemInputRegister::marlin_error_component_start) };
 
-    static constexpr uint16_t GENERAL_WRITE_REQUEST { ftrstd::to_underlying(SystemHoldingRegister::nozzle_target_temperature) };
-    static constexpr uint16_t TMC_READ_REQUEST_ADDRESS { ftrstd::to_underlying(SystemHoldingRegister::tmc_read_request) };
-    static constexpr uint16_t TMC_WRITE_REQUEST_ADDRESS { ftrstd::to_underlying(SystemHoldingRegister::tmc_write_request_address) };
-    static constexpr uint16_t ENCODED_FIFO_ADDRESS { ftrstd::to_underlying(SystemFIFO::encoded_stream) };
+    static constexpr uint16_t GENERAL_WRITE_REQUEST { std::to_underlying(SystemHoldingRegister::nozzle_target_temperature) };
+    static constexpr uint16_t TMC_READ_REQUEST_ADDRESS { std::to_underlying(SystemHoldingRegister::tmc_read_request) };
+    static constexpr uint16_t TMC_WRITE_REQUEST_ADDRESS { std::to_underlying(SystemHoldingRegister::tmc_write_request_address) };
+    static constexpr uint16_t ENCODED_FIFO_ADDRESS { std::to_underlying(SystemFIFO::encoded_stream) };
 
     static constexpr uint32_t DWARF_READ_PERIOD = 200; ///< Read registers this often [ms]
     static constexpr uint32_t DWARF_FIFO_PULL_PERIOD = 200; ///< Pull fifo of unselected dwarf this often [ms]

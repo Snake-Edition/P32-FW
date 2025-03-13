@@ -26,7 +26,7 @@ enum class Type : uint8_t {
     cnt
 };
 
-static constexpr EnumArray<Type, const char *, ftrstd::to_underlying(Type::cnt)> filter_names {
+static constexpr EnumArray<Type, const char *, std::to_underlying(Type::cnt)> filter_names {
     { Type::zv, "ZV" },
     { Type::zvd, "ZVD" },
     { Type::mzv, "MZV" },
@@ -37,7 +37,7 @@ static constexpr EnumArray<Type, const char *, ftrstd::to_underlying(Type::cnt)>
 
 };
 
-static constexpr EnumArray<Type, const char *, ftrstd::to_underlying(Type::cnt)> filter_short_names {
+static constexpr EnumArray<Type, const char *, std::to_underlying(Type::cnt)> filter_short_names {
     { Type::zv, "ZV" },
     { Type::zvd, "ZVD" },
     { Type::mzv, "MZV" },

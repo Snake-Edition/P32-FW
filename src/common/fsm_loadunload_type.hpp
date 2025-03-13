@@ -24,7 +24,7 @@ struct ProgressSerializerLoadUnload {
     }
 
     constexpr fsm::PhaseData Serialize() const {
-        fsm::PhaseData ret = { { ftrstd::to_underlying(mode), progress } };
+        fsm::PhaseData ret = { { std::to_underlying(mode), progress } };
         return ret;
     }
 

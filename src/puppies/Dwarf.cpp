@@ -137,8 +137,8 @@ CommunicationStatus Dwarf::initial_scan() {
     DWARF_LOG(logging::Severity::info, "HwOtpTimestsamp: %" PRIu32, GeneralStatic.value.HwOtpTimestsamp);
 
     serial_nr_t sn = {}; // Last byte has to be '\0'
-    static constexpr uint16_t raw_datamatrix_regsize = ftrstd::to_underlying(SystemInputRegister::hw_raw_datamatrix_last)
-        - ftrstd::to_underlying(SystemInputRegister::hw_raw_datamatrix_first) + 1;
+    static constexpr uint16_t raw_datamatrix_regsize = std::to_underlying(SystemInputRegister::hw_raw_datamatrix_last)
+        - std::to_underlying(SystemInputRegister::hw_raw_datamatrix_first) + 1;
     // Check size of text -1 as the terminating \0 is not sent
     static_assert((raw_datamatrix_regsize * sizeof(uint16_t)) == (sn.size() - 1), "Size of raw datamatrix doesn't fit modbus registers");
 
@@ -613,10 +613,10 @@ void Dwarf::handle_dwarf_fault() {
     // fault is expected when this method is called
     assert(RegisterGeneralStatus.value.FaultStatus != dwarf_shared::errors::FaultStatusMask::NO_FAULT);
 
-    const auto fault_int { ftrstd::to_underlying(RegisterGeneralStatus.value.FaultStatus) };
+    const auto fault_int { std::to_underlying(RegisterGeneralStatus.value.FaultStatus) };
     DWARF_LOG(logging::Severity::error, "Fault status: %d", fault_int);
 
-    if (fault_int & ftrstd::to_underlying(dwarf_shared::errors::FaultStatusMask::MARLIN_KILLED)) {
+    if (fault_int & std::to_underlying(dwarf_shared::errors::FaultStatusMask::MARLIN_KILLED)) {
         // read error string from dwarf
         std::span<char> title_span(reinterpret_cast<char *>(&MarlinErrorString.value.title[0]), sizeof(MarlinErrorString.value.title));
         std::span<char> message_span(reinterpret_cast<char *>(&MarlinErrorString.value.message[0]), sizeof(MarlinErrorString.value.message));
@@ -638,7 +638,7 @@ void Dwarf::handle_dwarf_fault() {
         // this calls generic fatal error
         // any marlin fault on dwarf will be decoded based on error string and converted to propper ErrCode, or displayed as-is if no error code matches
         fatal_error(message_span.data(), module);
-    } else if (fault_int & ftrstd::to_underlying(dwarf_shared::errors::FaultStatusMask::TMC_FAULT)) {
+    } else if (fault_int & std::to_underlying(dwarf_shared::errors::FaultStatusMask::TMC_FAULT)) {
         fatal_error(ErrCode::ERR_SYSTEM_DWARF_TMC, dwarf_nr);
     } else {
         fatal_error(ErrCode::ERR_SYSTEM_DWARF_UNKNOWN_ERR, dwarf_nr);

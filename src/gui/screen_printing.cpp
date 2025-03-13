@@ -56,7 +56,7 @@ static bool is_waiting_for_connect_set_ready() {
 }
 
 void screen_printing_data_t::tuneAction() {
-    if (buttons[ftrstd::to_underlying(BtnSocket::Left)].IsShadowed()) {
+    if (buttons[std::to_underlying(BtnSocket::Left)].IsShadowed()) {
         return;
     }
     switch (GetState()) {
@@ -78,7 +78,7 @@ void screen_printing_data_t::tuneAction() {
 }
 
 void screen_printing_data_t::pauseAction() {
-    if (buttons[ftrstd::to_underlying(BtnSocket::Middle)].IsShadowed()) {
+    if (buttons[std::to_underlying(BtnSocket::Middle)].IsShadowed()) {
         return;
     }
     switch (GetState()) {
@@ -105,7 +105,7 @@ void screen_printing_data_t::pauseAction() {
 }
 
 void screen_printing_data_t::stopAction() {
-    if (buttons[ftrstd::to_underlying(BtnSocket::Right)].IsShadowed()) {
+    if (buttons[std::to_underlying(BtnSocket::Right)].IsShadowed()) {
         return;
     }
     switch (GetState()) {
@@ -168,7 +168,7 @@ screen_printing_data_t::screen_printing_data_t()
 #if (HAS_LARGE_DISPLAY())
     , print_progress(this)
     , arrow_left(this, arrow_left_rect, arrow_left_res)
-    , rotating_circles(this, rotating_circles_rect, ftrstd::to_underlying(CurrentlyShowing::_count))
+    , rotating_circles(this, rotating_circles_rect, std::to_underlying(CurrentlyShowing::_count))
 #endif
 #if HAS_MINI_DISPLAY()
     , w_filename(this, Rect16(10, 33, 220, 29))
@@ -519,7 +519,7 @@ bool screen_printing_data_t::update_validities() {
 
 size_t screen_printing_data_t::reindex_rotating_circles() {
     size_t cnt = 0;
-    for (size_t i = 0; i < ftrstd::to_underlying(CurrentlyShowing::_count); ++i) {
+    for (size_t i = 0; i < std::to_underlying(CurrentlyShowing::_count); ++i) {
         if (currently_showing_valid[i].first) {
             currently_showing_valid[i].second = cnt++;
         }
@@ -573,7 +573,7 @@ void screen_printing_data_t::updateTimes() {
         auto curr = this->currently_showing;
         do {
             curr = static_cast<CurrentlyShowing>(
-                (ftrstd::to_underlying(curr) + 1) % ftrstd::to_underlying(CurrentlyShowing::_count));
+                (std::to_underlying(curr) + 1) % std::to_underlying(CurrentlyShowing::_count));
         } while (!currently_showing_valid[curr].first);
 
         this->currently_showing = curr;

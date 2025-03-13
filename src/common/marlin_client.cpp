@@ -232,7 +232,7 @@ void inject(InjectQueueRecord record) {
 int event(Event evt_id) {
     int ret = 0;
     marlin_client_t *client = _client_ptr();
-    uint64_t msk = (uint64_t)1 << ftrstd::to_underlying(evt_id);
+    uint64_t msk = (uint64_t)1 << std::to_underlying(evt_id);
     if (client) {
         ret = (client->events & msk) ? 1 : 0;
     }
@@ -242,7 +242,7 @@ int event(Event evt_id) {
 int event_clr(Event evt_id) {
     int ret = 0;
     marlin_client_t *client = _client_ptr();
-    uint64_t msk = (uint64_t)1 << ftrstd::to_underlying(evt_id);
+    uint64_t msk = (uint64_t)1 << std::to_underlying(evt_id);
     if (client) {
         ret = (client->events & msk) ? 1 : 0;
         client->events &= ~msk;

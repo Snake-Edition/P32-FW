@@ -117,7 +117,7 @@ typedef tskTCB TCB_t;
 extern PRIVILEGED_DATA TCB_t *volatile pxCurrentTCB;
 
 [[noreturn]] void raise_redscreen(ErrCode error_code, const char *error, const char *module) {
-    crash_dump::save_message(crash_dump::MsgType::RSOD, ftrstd::to_underlying(error_code), error, module);
+    crash_dump::save_message(crash_dump::MsgType::RSOD, std::to_underlying(error_code), error, module);
     sys_reset();
 }
 
@@ -260,7 +260,7 @@ void _bsod(const char *fmt, const char *file_name, int line_number, ...) {
     va_end(args);
 
     // Save file, line and meessage
-    crash_dump::save_message(crash_dump::MsgType::BSOD, ftrstd::to_underlying(ErrCode::ERR_UNDEF), msg, title);
+    crash_dump::save_message(crash_dump::MsgType::BSOD, std::to_underlying(ErrCode::ERR_UNDEF), msg, title);
 
     crash_dump::trigger_crash_dump();
 }

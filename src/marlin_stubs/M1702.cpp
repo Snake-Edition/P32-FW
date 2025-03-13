@@ -104,7 +104,7 @@ namespace {
         case Response::Tool3:
         case Response::Tool4:
         case Response::Tool5:
-            selected_tool = ftrstd::to_underlying(r) - ftrstd::to_underlying(Response::Tool1);
+            selected_tool = std::to_underlying(r) - std::to_underlying(Response::Tool1);
             return PhasesColdPull::pick_tool;
         case Response::Continue:
             selected_tool = active_extruder;

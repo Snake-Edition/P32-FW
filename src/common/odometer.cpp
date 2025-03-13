@@ -77,12 +77,12 @@ void Odometer_s::add_axis(axis_t axis, float value) {
     // marlin. We need the atomics mostly to read them at the same time, while
     // printing.
     assert(axis < axis_t::count_);
-    trip_xyz[ftrstd::to_underlying(axis)] += std::abs(value);
+    trip_xyz[std::to_underlying(axis)] += std::abs(value);
 }
 
 float Odometer_s::get_axis(axis_t axis) {
     assert(axis <= axis_t::count_);
-    return config_store().get_odometer_axis(ftrstd::to_underlying(axis)) + trip_xyz[ftrstd::to_underlying(axis)].load();
+    return config_store().get_odometer_axis(std::to_underlying(axis)) + trip_xyz[std::to_underlying(axis)].load();
 }
 
 void Odometer_s::add_extruded(uint8_t extruder, float value) {

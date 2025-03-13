@@ -65,21 +65,21 @@ namespace detail {
     // Primary template, should never be actually instanciated.
     // The specializations build a screen menu with MI_STS items instanciated by all Actions, in the order <_first, _last>.
     template <EFooter FOOTER, MenuType menu_type,
-        typename IS = decltype(std::make_index_sequence<ftrstd::to_underlying(Action::_count)>())>
+        typename IS = decltype(std::make_index_sequence<std::to_underlying(Action::_count)>())>
     struct menu_builder;
 
     // Partial specialization for when building Calibrations menu
     template <EFooter FOOTER, std::size_t... I>
     struct menu_builder<FOOTER, MenuType::Calibrations, std::index_sequence<I...>> {
         using type = ScreenMenu<FOOTER, MI_RETURN,
-            MI_STS<static_cast<Action>(I + ftrstd::to_underlying(Action::_first))>...>;
+            MI_STS<static_cast<Action>(I + std::to_underlying(Action::_first))>...>;
     };
 
     // Partial specialization for when building Wizard menu
     template <EFooter FOOTER, std::size_t... I>
     struct menu_builder<FOOTER, MenuType::Wizard, std::index_sequence<I...>> {
         using type = ScreenMenu<FOOTER,
-            MI_STS<static_cast<Action>(I + ftrstd::to_underlying(Action::_first))>...,
+            MI_STS<static_cast<Action>(I + std::to_underlying(Action::_first))>...,
             MI_EXIT>;
     };
 

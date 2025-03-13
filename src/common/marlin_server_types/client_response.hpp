@@ -1033,7 +1033,7 @@ class ClientResponses {
 
 public:
     static constexpr const PhaseResponses &get_fsm_responses(ClientFSM fsm_type, PhaseUnderlyingType phase) {
-        if (ftrstd::to_underlying(fsm_type) >= fsm_phase_responses.size()) {
+        if (std::to_underlying(fsm_type) >= fsm_phase_responses.size()) {
             return empty_phase_responses;
         }
 

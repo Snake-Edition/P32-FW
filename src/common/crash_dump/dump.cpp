@@ -198,7 +198,7 @@ bool save_dump_to_usb(const char *fn) {
 }
 
 void save_message(MsgType type, uint16_t error_code, const char *error, const char *title) {
-    static_assert(ftrstd::to_underlying(ErrCode::ERR_UNDEF) == 0, "This uses 0 as undefined error");
+    static_assert(std::to_underlying(ErrCode::ERR_UNDEF) == 0, "This uses 0 as undefined error");
 
     // break in case debugger is attached and avoid saving message to eeprom
     crash_dump::before_dump();
@@ -213,7 +213,7 @@ void save_message(MsgType type, uint16_t error_code, const char *error, const ch
 }
 
 void force_save_message_without_dump(MsgType type, uint16_t error_code, const char *error, const char *title) {
-    static_assert(ftrstd::to_underlying(ErrCode::ERR_UNDEF) == 0, "This uses 0 as undefined error");
+    static_assert(std::to_underlying(ErrCode::ERR_UNDEF) == 0, "This uses 0 as undefined error");
 
     assert(error != nullptr);
 
@@ -303,7 +303,7 @@ uint16_t load_message_error_code() {
         reinterpret_cast<uint8_t *>(&error_code),
         sizeof(message_t::error_code));
     if (w25x_fetch_error()) {
-        return ftrstd::to_underlying(ErrCode::ERR_UNDEF);
+        return std::to_underlying(ErrCode::ERR_UNDEF);
     }
     return error_code;
 }

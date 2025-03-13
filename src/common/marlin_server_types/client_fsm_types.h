@@ -63,7 +63,7 @@ enum class ClientFSM : uint8_t {
 };
 
 // We have only 5 bits for it in the serialization of data sent between server and client
-static_assert(ftrstd::to_underlying(ClientFSM::_count) < 32);
+static_assert(std::to_underlying(ClientFSM::_count) < 32);
 
 enum class LoadUnloadMode : uint8_t {
     Change,

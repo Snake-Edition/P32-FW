@@ -41,13 +41,13 @@ enum class GUI_event_t : uint8_t {
     _count
 };
 
-static constexpr int GUI_event_t_count = ftrstd::to_underlying(GUI_event_t::_count);
+static constexpr int GUI_event_t_count = std::to_underlying(GUI_event_t::_count);
 using GUI_event_t_bitset = std::bitset<GUI_event_t_count>;
 
 template <typename... Args>
 constexpr GUI_event_t_bitset gui_event_t_bitset(Args... args) {
     uint64_t result = 0;
-    ((result |= static_cast<uint64_t>(1) << ftrstd::to_underlying(args)), ...);
+    ((result |= static_cast<uint64_t>(1) << std::to_underlying(args)), ...);
     return GUI_event_t_bitset(result);
 }
 
@@ -58,7 +58,7 @@ static constexpr std::bitset<GUI_event_t_count> GUI_event_IsKnob_data = gui_even
 
 // lower lever knob events
 constexpr bool GUI_event_IsKnob(GUI_event_t event) {
-    return GUI_event_IsKnob_data[ftrstd::to_underlying(event)];
+    return GUI_event_IsKnob_data[std::to_underlying(event)];
 }
 
 static constexpr std::bitset<GUI_event_t_count> GUI_event_IsCaptureEv_data = gui_event_t_bitset(
@@ -69,7 +69,7 @@ static constexpr std::bitset<GUI_event_t_count> GUI_event_IsCaptureEv_data = gui
     GUI_event_t::TOUCH_CLICK);
 
 constexpr bool GUI_event_IsCaptureEv(GUI_event_t event) {
-    return GUI_event_IsCaptureEv_data[ftrstd::to_underlying(event)];
+    return GUI_event_IsCaptureEv_data[std::to_underlying(event)];
 }
 
 static constexpr std::bitset<GUI_event_t_count> GUI_event_IsWindowKnobReaction_data = gui_event_t_bitset(
@@ -81,7 +81,7 @@ static constexpr std::bitset<GUI_event_t_count> GUI_event_IsWindowKnobReaction_d
     GUI_event_t::HOLD);
 
 constexpr bool GUI_event_IsWindowKnobReaction(GUI_event_t event) {
-    return GUI_event_IsWindowKnobReaction_data[ftrstd::to_underlying(event)];
+    return GUI_event_IsWindowKnobReaction_data[std::to_underlying(event)];
 }
 
 static constexpr std::bitset<GUI_event_t_count> GUI_event_is_input_event_data = gui_event_t_bitset(

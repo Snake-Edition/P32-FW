@@ -53,7 +53,7 @@ TestResult get_test_result(Action action, Tool tool) {
                     return evaluate_results(sr.tools[e].dockoffset);
                 });
         } else {
-            return evaluate_results(sr.tools[ftrstd::to_underlying(tool)].dockoffset);
+            return evaluate_results(sr.tools[std::to_underlying(tool)].dockoffset);
         }
     case Action::Loadcell:
         if (tool == Tool::_all_tools) {
@@ -62,7 +62,7 @@ TestResult get_test_result(Action action, Tool tool) {
                     return evaluate_results(sr.tools[e].loadcell);
                 });
         } else {
-            return evaluate_results(sr.tools[ftrstd::to_underlying(tool)].loadcell);
+            return evaluate_results(sr.tools[std::to_underlying(tool)].loadcell);
         }
     case Action::ToolOffsetsCalibration:
         return merge_hotends_evaluations(
@@ -88,7 +88,7 @@ TestResult get_test_result(Action action, Tool tool) {
                     return evaluate_results(sr.tools[e].fsensor);
                 });
         } else {
-            return evaluate_results(sr.tools[ftrstd::to_underlying(tool)].fsensor);
+            return evaluate_results(sr.tools[std::to_underlying(tool)].fsensor);
         }
     case Action::PhaseSteppingCalibration:
         return evaluate_results(config_store().selftest_result_phase_stepping.get());
@@ -184,7 +184,7 @@ Tool get_next_tool(Tool tool) {
     assert(tool != get_last_enabled_tool() && "Unhandled edge case");
     do {
         tool = tool + 1;
-    } while (!prusa_toolchanger.is_tool_enabled(ftrstd::to_underlying(tool)));
+    } while (!prusa_toolchanger.is_tool_enabled(std::to_underlying(tool)));
 #endif /*HAS_TOOLCHANGER()*/
     return tool;
 }

@@ -112,7 +112,7 @@ class screen_printing_data_t : public ScreenPrintingModel {
     };
 
     static constexpr size_t rotation_time_s { 4 }; // time how often there should be a change between what's currently shown
-    size_t valid_count { ftrstd::to_underlying(CurrentlyShowing::_count) }; // how many fields are currently valid
+    size_t valid_count { std::to_underlying(CurrentlyShowing::_count) }; // how many fields are currently valid
 
     CurrentlyShowing currently_showing { CurrentlyShowing::remaining_time }; // what item is currently shown
     uint32_t last_update_time_s { 0 }; // helper needed to properly rotate

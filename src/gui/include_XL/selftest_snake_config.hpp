@@ -17,13 +17,13 @@ enum class Tool {
 };
 
 constexpr Tool operator-(Tool tool, int i) {
-    assert(ftrstd::to_underlying(tool) - i >= ftrstd::to_underlying(Tool::_first));
-    return static_cast<Tool>(ftrstd::to_underlying(tool) - i);
+    assert(std::to_underlying(tool) - i >= std::to_underlying(Tool::_first));
+    return static_cast<Tool>(std::to_underlying(tool) - i);
 }
 
 constexpr Tool operator+(Tool tool, int i) {
-    assert(ftrstd::to_underlying(tool) + i <= ftrstd::to_underlying(Tool::_last));
-    return static_cast<Tool>(ftrstd::to_underlying(tool) + i);
+    assert(std::to_underlying(tool) + i <= std::to_underlying(Tool::_last));
+    return static_cast<Tool>(std::to_underlying(tool) + i);
 }
 
 // Order matters, snake and will be run in the same order, as well as menu items (with indices) will be

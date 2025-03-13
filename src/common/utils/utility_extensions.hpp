@@ -9,12 +9,6 @@
 
 namespace ftrstd { // future std - simple to refactor out once our c++ standard increases
 
-// (since C++23)
-template <class Enum>
-constexpr std::underlying_type_t<Enum> to_underlying(Enum e) noexcept {
-    return static_cast<std::underlying_type_t<Enum>>(e);
-}
-
 // Stolen from cppreference.com
 template <class To, class From>
 std::enable_if_t<sizeof(From) == sizeof(To) && std::is_trivially_copyable_v<From> && std::is_trivially_copyable_v<To>, To>

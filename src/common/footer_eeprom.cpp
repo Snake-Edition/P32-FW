@@ -108,7 +108,7 @@ Record decode_from_old_eeprom_v22(uint32_t encoded) {
 
     for (size_t i = 0; i < config_store_ns::old_eeprom::v22::count; ++i) {
         uint32_t decoded = encoded & mask;
-        if (decoded >= ftrstd::to_underlying(config_store_ns::old_eeprom::v22::FooterItems::_count)) {
+        if (decoded >= std::to_underlying(config_store_ns::old_eeprom::v22::FooterItems::_count)) {
             return footer::default_items; // data corrupted, return default setting
         }
 
@@ -185,34 +185,34 @@ Record decode_from_old_eeprom_v22(uint32_t encoded) {
 #endif
 
 /// This is just a check to make it harder to corrupt eeprom
-static_assert(ftrstd::to_underlying(Item::none) == 0
-        && ftrstd::to_underlying(Item::nozzle) == 1
-        && ftrstd::to_underlying(Item::bed) == 2
-        && ftrstd::to_underlying(Item::filament) == 3
-        && ftrstd::to_underlying(Item::f_s_value) == 4
-        && ftrstd::to_underlying(Item::f_sensor) == 5
-        && ftrstd::to_underlying(Item::speed) == 6
-        && ftrstd::to_underlying(Item::axis_x) == 7
-        && ftrstd::to_underlying(Item::axis_y) == 8
-        && ftrstd::to_underlying(Item::axis_z) == 9
-        && ftrstd::to_underlying(Item::z_height) == 10
-        && ftrstd::to_underlying(Item::print_fan) == 11
-        && ftrstd::to_underlying(Item::heatbreak_fan) == 12
-        && ftrstd::to_underlying(Item::input_shaper_x) == 13
-        && ftrstd::to_underlying(Item::input_shaper_y) == 14
-        && ftrstd::to_underlying(Item::live_z) == 15
-        && ftrstd::to_underlying(Item::heatbreak_temp) == 16
-        && ftrstd::to_underlying(Item::sheets) == 17
-        && ftrstd::to_underlying(Item::finda) == 18
-        && ftrstd::to_underlying(Item::current_tool) == 19
-        && ftrstd::to_underlying(Item::all_nozzles) == 20
-        && ftrstd::to_underlying(Item::f_sensor_side) == 21
-        && ftrstd::to_underlying(Item::nozzle_diameter) == 22
-        && ftrstd::to_underlying(Item::nozzle_pwm) == 23
-        && ftrstd::to_underlying(Item::chamber_temp) == 24
+static_assert(std::to_underlying(Item::none) == 0
+        && std::to_underlying(Item::nozzle) == 1
+        && std::to_underlying(Item::bed) == 2
+        && std::to_underlying(Item::filament) == 3
+        && std::to_underlying(Item::f_s_value) == 4
+        && std::to_underlying(Item::f_sensor) == 5
+        && std::to_underlying(Item::speed) == 6
+        && std::to_underlying(Item::axis_x) == 7
+        && std::to_underlying(Item::axis_y) == 8
+        && std::to_underlying(Item::axis_z) == 9
+        && std::to_underlying(Item::z_height) == 10
+        && std::to_underlying(Item::print_fan) == 11
+        && std::to_underlying(Item::heatbreak_fan) == 12
+        && std::to_underlying(Item::input_shaper_x) == 13
+        && std::to_underlying(Item::input_shaper_y) == 14
+        && std::to_underlying(Item::live_z) == 15
+        && std::to_underlying(Item::heatbreak_temp) == 16
+        && std::to_underlying(Item::sheets) == 17
+        && std::to_underlying(Item::finda) == 18
+        && std::to_underlying(Item::current_tool) == 19
+        && std::to_underlying(Item::all_nozzles) == 20
+        && std::to_underlying(Item::f_sensor_side) == 21
+        && std::to_underlying(Item::nozzle_diameter) == 22
+        && std::to_underlying(Item::nozzle_pwm) == 23
+        && std::to_underlying(Item::chamber_temp) == 24
         && true, // So that we don't have to move the ',' around
     "Numbers assigned to items should never change and always be available (not ifdefed)!!");
 
-static_assert(ftrstd::to_underlying(Item::_count) == 25, "When adding a new item, increment this counter and add it to the static_assert above");
+static_assert(std::to_underlying(Item::_count) == 25, "When adding a new item, increment this counter and add it to the static_assert above");
 
 } // namespace footer::eeprom

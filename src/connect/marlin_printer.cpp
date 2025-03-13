@@ -210,7 +210,7 @@ namespace {
 #if HAS_MMU2()
         params.progress_code = MMU2::Fsm::Instance().reporter.GetProgressCode();
         params.command_code = MMU2::Fsm::Instance().reporter.GetCommandInProgress();
-        const bool mmu_enabled = config_store().mmu2_enabled.get() && marlin_vars().mmu2_state == ftrstd::to_underlying(MMU2::xState::Active);
+        const bool mmu_enabled = config_store().mmu2_enabled.get() && marlin_vars().mmu2_state == std::to_underlying(MMU2::xState::Active);
         params.slot_mask = mmu_enabled ? 0b00011111 : 1;
         params.mmu_version = MMU2::mmu2.GetMMUFWVersion();
         // Note: 0 means no active tool, indexing from 1

@@ -551,7 +551,7 @@ window_aligned_t *DialogNumericInput::UI::button_window(ButtonType bt) {
     case ButtonType::n7:
     case ButtonType::n8:
     case ButtonType::n9:
-        return &btn_number[ftrstd::to_underlying(bt) - ftrstd::to_underlying(ButtonType::n0)];
+        return &btn_number[std::to_underlying(bt) - std::to_underlying(ButtonType::n0)];
 
     case ButtonType::decimal_point:
         return &btn_decimal;

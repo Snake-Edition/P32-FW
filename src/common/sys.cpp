@@ -89,15 +89,15 @@ int sys_calc_flash_latency(int freq) {
 }
 
 int sys_fw_update_is_enabled(void) {
-    return (ftrstd::to_underlying(FwAutoUpdate::on) == st25dv64k_user_read(FW_UPDATE_FLAG_ADDRESS)) ? 1 : 0;
+    return (std::to_underlying(FwAutoUpdate::on) == st25dv64k_user_read(FW_UPDATE_FLAG_ADDRESS)) ? 1 : 0;
 }
 
 void sys_fw_update_enable(void) {
-    st25dv64k_user_write(FW_UPDATE_FLAG_ADDRESS, ftrstd::to_underlying(FwAutoUpdate::on));
+    st25dv64k_user_write(FW_UPDATE_FLAG_ADDRESS, std::to_underlying(FwAutoUpdate::on));
 }
 
 void sys_fw_update_disable(void) {
-    st25dv64k_user_write(FW_UPDATE_FLAG_ADDRESS, ftrstd::to_underlying(FwAutoUpdate::off));
+    st25dv64k_user_write(FW_UPDATE_FLAG_ADDRESS, std::to_underlying(FwAutoUpdate::off));
 }
 
 bool version_less_than(const version_t *a, const uint8_t major, const uint8_t minor, const uint8_t patch) {

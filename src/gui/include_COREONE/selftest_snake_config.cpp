@@ -59,7 +59,7 @@ TestResult get_test_result(Action action, [[maybe_unused]] Tool tool) {
                     return evaluate_results(sr.tools[e].loadcell);
                 });
         } else {
-            return evaluate_results(sr.tools[ftrstd::to_underlying(tool)].loadcell);
+            return evaluate_results(sr.tools[std::to_underlying(tool)].loadcell);
         }
     case Action::ZCheck:
         return evaluate_results(sr.zaxis);
@@ -76,7 +76,7 @@ TestResult get_test_result(Action action, [[maybe_unused]] Tool tool) {
                     return evaluate_results(sr.tools[e].fsensor);
                 });
         } else {
-            return evaluate_results(sr.tools[ftrstd::to_underlying(tool)].fsensor);
+            return evaluate_results(sr.tools[std::to_underlying(tool)].fsensor);
         }
     case Action::_count:
         break;

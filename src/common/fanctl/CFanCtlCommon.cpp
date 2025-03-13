@@ -27,7 +27,7 @@ void record_fanctl_metrics() {
     static constexpr uint32_t UPDATE_PERIOD = 987;
 
     auto record = [](const auto &fanctl, const char *fan_name) {
-        const int8_t state = ftrstd::to_underlying(fanctl.getState());
+        const int8_t state = std::to_underlying(fanctl.getState());
         const float pwm = fanctl.getPWM() * 100.f / fanctl.getMaxPWM();
         const float measured = fanctl.getActualRPM() * 100.f / fanctl.getMaxRPM();
 

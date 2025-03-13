@@ -31,14 +31,14 @@ constexpr const char *label_resources[] = {
 ScreenPrintingModel::ScreenPrintingModel(const string_view_utf8 &caption)
     : IScreenPrinting(caption)
     , buttons {
-        { this, GetButtonRect(0), &icon_resources[ftrstd::to_underlying(BtnRes::Settings)], [this](window_t &) { TuneAction(); } },
-        { this, GetButtonRect(1), &icon_resources[ftrstd::to_underlying(BtnRes::Pause)], [this](window_t &) { PauseAction(); } },
-        { this, GetButtonRect(2), &icon_resources[ftrstd::to_underlying(BtnRes::Stop)], [this](window_t &) { StopAction(); } },
+        { this, GetButtonRect(0), &icon_resources[std::to_underlying(BtnRes::Settings)], [this](window_t &) { TuneAction(); } },
+        { this, GetButtonRect(1), &icon_resources[std::to_underlying(BtnRes::Pause)], [this](window_t &) { PauseAction(); } },
+        { this, GetButtonRect(2), &icon_resources[std::to_underlying(BtnRes::Stop)], [this](window_t &) { StopAction(); } },
     }
     , labels {
-        { this, GetButtonLabelRect(0), is_multiline::no, is_closed_on_click_t::no, _(label_resources[ftrstd::to_underlying(LabelRes::Settings)]) },
-        { this, GetButtonLabelRect(1), is_multiline::no, is_closed_on_click_t::no, _(label_resources[ftrstd::to_underlying(LabelRes::Pause)]) },
-        { this, GetButtonLabelRect(2), is_multiline::no, is_closed_on_click_t::no, _(label_resources[ftrstd::to_underlying(LabelRes::Stop)]) },
+        { this, GetButtonLabelRect(0), is_multiline::no, is_closed_on_click_t::no, _(label_resources[std::to_underlying(LabelRes::Settings)]) },
+        { this, GetButtonLabelRect(1), is_multiline::no, is_closed_on_click_t::no, _(label_resources[std::to_underlying(LabelRes::Pause)]) },
+        { this, GetButtonLabelRect(2), is_multiline::no, is_closed_on_click_t::no, _(label_resources[std::to_underlying(LabelRes::Stop)]) },
     } {
     for (uint8_t i = 0; i < socket_count; i++) {
         labels[i].set_font(Font::small);
@@ -46,8 +46,8 @@ ScreenPrintingModel::ScreenPrintingModel(const string_view_utf8 &caption)
         labels[i].SetAlignment(Align_t::Center());
     }
 
-    static_assert(std::size(label_resources) == ftrstd::to_underlying(LabelRes::_count), "Size mismatch");
-    static_assert(std::size(icon_resources) == ftrstd::to_underlying(BtnRes::_count), "Size mismatch");
+    static_assert(std::size(label_resources) == std::to_underlying(LabelRes::_count), "Size mismatch");
+    static_assert(std::size(icon_resources) == std::to_underlying(BtnRes::_count), "Size mismatch");
 }
 
 Rect16 ScreenPrintingModel::GetButtonRect(uint8_t idx) {
@@ -67,18 +67,18 @@ void ScreenPrintingModel::SetButtonIcon(BtnSocket idx, BtnRes ico_res) {
     if (idx > BtnSocket::_last || ico_res > BtnRes::_last) {
         return;
     }
-    buttons[ftrstd::to_underlying(idx)].SetRes(&icon_resources[ftrstd::to_underlying(ico_res)]);
+    buttons[std::to_underlying(idx)].SetRes(&icon_resources[std::to_underlying(ico_res)]);
 }
 
 void ScreenPrintingModel::SetButtonLabel(BtnSocket idx, LabelRes txt_res) {
     if (idx > BtnSocket::_last || txt_res > LabelRes::_last) {
         return;
     }
-    labels[ftrstd::to_underlying(idx)].SetText(_(label_resources[ftrstd::to_underlying(txt_res)]));
+    labels[std::to_underlying(idx)].SetText(_(label_resources[std::to_underlying(txt_res)]));
 }
 
 void ScreenPrintingModel::DisableButton(BtnSocket idx) {
-    const size_t btn_idx = ftrstd::to_underlying(idx);
+    const size_t btn_idx = std::to_underlying(idx);
     if (idx > BtnSocket::_last || buttons[btn_idx].IsShadowed()) {
         return;
     }
@@ -99,7 +99,7 @@ void ScreenPrintingModel::DisableButton(BtnSocket idx) {
 }
 
 void ScreenPrintingModel::EnableButton(BtnSocket idx) {
-    const size_t btn_idx = ftrstd::to_underlying(idx);
+    const size_t btn_idx = std::to_underlying(idx);
     if (idx > BtnSocket::_last || !buttons[btn_idx].IsShadowed()) {
         return;
     }

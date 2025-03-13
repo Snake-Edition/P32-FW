@@ -10,8 +10,8 @@ namespace dwarf_shared {
  */
 struct StatusLed {
     /// Size of raw data in modbus registers
-    static constexpr size_t REG_SIZE = (ftrstd::to_underlying(registers::SystemHoldingRegister::status_color_end)
-        - ftrstd::to_underlying(registers::SystemHoldingRegister::status_color_start) + 1);
+    static constexpr size_t REG_SIZE = (std::to_underlying(registers::SystemHoldingRegister::status_color_end)
+        - std::to_underlying(registers::SystemHoldingRegister::status_color_start) + 1);
     static_assert(REG_SIZE >= 2, "Needs 2 modbus registers");
 
     /// Mode of the Dwarf status LED
@@ -60,7 +60,7 @@ struct StatusLed {
         if (i == 0) {
             return r | (g << 8);
         } else {
-            return b | (ftrstd::to_underlying(mode) << 8);
+            return b | (std::to_underlying(mode) << 8);
         }
     }
 
@@ -73,7 +73,7 @@ struct StatusLed {
         if (i == 0) {
             return registers::SystemHoldingRegister::status_color_start;
         } else {
-            return static_cast<registers::SystemHoldingRegister>(ftrstd::to_underlying(registers::SystemHoldingRegister::status_color_start) + 1);
+            return static_cast<registers::SystemHoldingRegister>(std::to_underlying(registers::SystemHoldingRegister::status_color_start) + 1);
         }
     }
 };

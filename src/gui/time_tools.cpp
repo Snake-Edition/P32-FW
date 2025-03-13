@@ -27,8 +27,8 @@ int32_t calculate_total_timezone_offset_minutes() {
     const int8_t timezone = config_store().timezone.get();
     const TimezoneOffsetMinutes timezone_minutes = config_store().timezone_minutes.get();
 
-    static_assert(ftrstd::to_underlying(TimezoneOffsetSummerTime::no_summertime) == 0);
-    static_assert(ftrstd::to_underlying(TimezoneOffsetSummerTime::summertime) == 1);
+    static_assert(std::to_underlying(TimezoneOffsetSummerTime::no_summertime) == 0);
+    static_assert(std::to_underlying(TimezoneOffsetSummerTime::summertime) == 1);
 
     return //
         static_cast<int32_t>(timezone) * 60

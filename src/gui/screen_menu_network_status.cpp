@@ -14,7 +14,7 @@ using namespace menu_network_status;
 
 ScreenMenuNetworkStatus::ScreenMenuNetworkStatus()
     : MenuBase(_(label))
-    , ping_manager_(ftrstd::to_underlying(StatSlot::_cnt)) {
+    , ping_manager_(std::to_underlying(StatSlot::_cnt)) {
 
     Item<MI_WIFI_STATUS_t>().set_is_hidden(netdev_get_active_id() != NETDEV_ESP_ID);
     Item<MI_WIFI_SIGNAL_t>().set_is_hidden(netdev_get_active_id() != NETDEV_ESP_ID);
@@ -48,13 +48,13 @@ void ScreenMenuNetworkStatus::update() {
     {
         lan_t ethconfig = {};
         netdev_get_ipv4_addresses(device_id, &ethconfig);
-        ping_manager_.set_ip(ftrstd::to_underlying(StatSlot::gateway), ethconfig.gw_ip4);
+        ping_manager_.set_ip(std::to_underlying(StatSlot::gateway), ethconfig.gw_ip4);
 
         // FIXME: This directly reads the global variable. It's unclear which
         // thread actually "owns" this global variable. Hopefully it's not really a
         // problem, since this is changed only in reconfigure and user would need
         // to be in a different menu to access that?
-        ping_manager_.set_ip(ftrstd::to_underlying(StatSlot::dns), *dns_getserver(0));
+        ping_manager_.set_ip(std::to_underlying(StatSlot::dns), *dns_getserver(0));
 
 #if BUDDY_ENABLE_CONNECT()
         // Setup Connect ping hostname - wait until we're connected, because the DNS resolution is attempted only once
@@ -62,13 +62,13 @@ void ScreenMenuNetworkStatus::update() {
             std::array<char, connect_client::max_host_buf_len> hostname;
             strlcpy(hostname.data(), config_store().connect_host.get_c_str(), hostname.size());
             connect_client::decompress_host(hostname.data(), hostname.size());
-            ping_manager_.set_host(ftrstd::to_underlying(StatSlot::connect), hostname.data());
+            ping_manager_.set_host(std::to_underlying(StatSlot::connect), hostname.data());
             connect_host_set_ = true;
         }
 #endif
     }
 
-    EnumArray<StatSlot, PingManager::Stat, ftrstd::to_underlying(StatSlot::_cnt)> stats;
+    EnumArray<StatSlot, PingManager::Stat, std::to_underlying(StatSlot::_cnt)> stats;
     ping_manager_.get_stats(stats.data());
 
 #if BUDDY_ENABLE_CONNECT()

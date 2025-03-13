@@ -16,7 +16,7 @@ public:
         Z,
         count_
     };
-    static constexpr size_t axis_count = ftrstd::to_underlying(axis_t::count_);
+    static constexpr size_t axis_count = std::to_underlying(axis_t::count_);
 
 private:
     /// stores value changes from the last save

@@ -2881,7 +2881,7 @@ static uint64_t _send_notify_events_to_client(int client_id, ClientQueue &queue,
     }
     uint64_t sent = 0;
     uint64_t msk = 1;
-    for (uint8_t evt_int = 0; evt_int <= ftrstd::to_underlying(Event::_last); evt_int++) {
+    for (uint8_t evt_int = 0; evt_int <= std::to_underlying(Event::_last); evt_int++) {
         Event evt_id = Event(evt_int);
         if (msk & evt_msk) {
             switch (Event(evt_id)) {
@@ -2920,9 +2920,9 @@ static uint64_t _send_notify_events_to_client(int client_id, ClientQueue &queue,
 static uint8_t _send_notify_event(Event evt_id, uint32_t usr32, uint16_t usr16) {
     uint8_t client_msk = 0;
     for (int client_id = 0; client_id < MARLIN_MAX_CLIENTS; client_id++) {
-        if (server.notify_events[client_id] & ((uint64_t)1 << ftrstd::to_underlying(evt_id))) {
+        if (server.notify_events[client_id] & ((uint64_t)1 << std::to_underlying(evt_id))) {
             if (_send_notify_event_to_client(client_id, marlin_client::marlin_client_queue[client_id], evt_id, usr32, usr16) == 0) {
-                server.client_events[client_id] |= ((uint64_t)1 << ftrstd::to_underlying(evt_id)); // event not sent, set bit
+                server.client_events[client_id] |= ((uint64_t)1 << std::to_underlying(evt_id)); // event not sent, set bit
             } else {
                 // event sent, clear flag
                 client_msk |= (1 << client_id);
@@ -3121,7 +3121,7 @@ bool _process_server_valid_request(const Request &request, int client_id) {
             selftest::deserialize_test_data_from_int(request.test_start.test_data_index, request.test_start.test_data_data));
         return true;
     }
-    bsod("Unknown request %d", ftrstd::to_underlying(request.type));
+    bsod("Unknown request %d", std::to_underlying(request.type));
 }
 
 void send_request_flag(const RequestFlag request) {
@@ -3296,7 +3296,7 @@ static void update_warning_fsm() {
 
 void set_warning(WarningType type) {
     log_warning(MarlinServer, "Warning type %d set", (int)type);
-    log_info(MarlinServer, "WARNING: %" PRIu32, ftrstd::to_underlying(type));
+    log_info(MarlinServer, "WARNING: %" PRIu32, std::to_underlying(type));
 
     warning_flags.set(std::to_underlying(type));
     update_warning_fsm();

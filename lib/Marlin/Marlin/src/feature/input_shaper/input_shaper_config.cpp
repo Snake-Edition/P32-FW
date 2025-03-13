@@ -198,16 +198,16 @@ void set_axis_y_weight_adjust(std::optional<WeightAdjustConfig> wa_config) {
 }
 
 const char *to_string(Type type) {
-    auto type_idx = ftrstd::to_underlying(type);
-    if (type_idx > ftrstd::to_underlying(Type::last)) {
+    auto type_idx = std::to_underlying(type);
+    if (type_idx > std::to_underlying(Type::last)) {
         return "Unknown";
     }
     return filter_names[type_idx];
 }
 
 const char *to_short_string(Type type) {
-    auto type_idx = ftrstd::to_underlying(type);
-    if (type_idx > ftrstd::to_underlying(Type::last)) {
+    auto type_idx = std::to_underlying(type);
+    if (type_idx > std::to_underlying(Type::last)) {
         return "UNK";
     }
     return filter_short_names[type_idx];

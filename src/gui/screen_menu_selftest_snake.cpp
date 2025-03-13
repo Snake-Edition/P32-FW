@@ -30,11 +30,11 @@ Action _get_valid_action(Action start_action, int step) {
     assert(step == 1 || step == -1); // other values would cause weird behaviour (endless loop / go beyond array)
     if (is_multitool()) {
         while (is_singletool_only_action(start_action)) {
-            start_action = static_cast<Action>(ftrstd::to_underlying(start_action) + step);
+            start_action = static_cast<Action>(std::to_underlying(start_action) + step);
         }
     } else { // singletool
         while (is_multitool_only_action(start_action)) {
-            start_action = static_cast<Action>(ftrstd::to_underlying(start_action) + step);
+            start_action = static_cast<Action>(std::to_underlying(start_action) + step);
         }
     }
     return start_action;
@@ -51,13 +51,13 @@ Action get_last_action() {
 // Can't (shouldn't) be called with last action
 Action get_next_action(Action action) {
     assert(get_last_action() != action && "Unhandled edge case");
-    return _get_valid_action(static_cast<Action>(ftrstd::to_underlying(action) + 1), 1);
+    return _get_valid_action(static_cast<Action>(std::to_underlying(action) + 1), 1);
 }
 
 // Can't (shouldn't) be called with first action
 Action get_previous_action(Action action) {
     assert(get_first_action() != action && "Unhandled edge case");
-    return _get_valid_action(static_cast<Action>(ftrstd::to_underlying(action) - 1), -1);
+    return _get_valid_action(static_cast<Action>(std::to_underlying(action) - 1), -1);
 }
 
 bool are_previous_completed(Action action) {
@@ -228,7 +228,7 @@ void continue_snake() {
 
 is_hidden_t get_subitem_hidden_state(Tool tool) {
 #if HAS_TOOLCHANGER()
-    const auto idx { ftrstd::to_underlying(tool) };
+    const auto idx { std::to_underlying(tool) };
     return prusa_toolchanger.is_tool_enabled(idx) ? is_hidden_t::no : is_hidden_t::yes;
 #else
     return tool == Tool::Tool1 ? is_hidden_t::no : is_hidden_t::yes;
@@ -270,13 +270,13 @@ constexpr IWindowMenuItem::ColorScheme not_yet_ready_scheme {
 // returns the parameter, filled
 string_view_utf8 I_MI_STS::get_filled_menu_item_label(Action action) {
     // holds menu indices, indexed by Action
-    static const std::array<size_t, ftrstd::to_underlying(Action::_count)> action_indices {
+    static const std::array<size_t, std::to_underlying(Action::_count)> action_indices {
         []() {
-            std::array<size_t, ftrstd::to_underlying(Action::_count)> indices { { {} } };
+            std::array<size_t, std::to_underlying(Action::_count)> indices { { {} } };
 
             int idx { 1 }; // start number
             for (Action act = get_first_action();; act = get_next_action(act)) {
-                indices[ftrstd::to_underlying(act)] = idx++;
+                indices[std::to_underlying(act)] = idx++;
                 if (act == get_last_action()) { // explicitly done this way to avoid getting next action of the last action
                     break;
                 }
@@ -292,7 +292,7 @@ string_view_utf8 I_MI_STS::get_filled_menu_item_label(Action action) {
 
         char buffer[max_label_len];
         _(it->label).copyToRAM(buffer, max_label_len);
-        snprintf(label_buffer, max_label_len, buffer, action_indices[ftrstd::to_underlying(action)]);
+        snprintf(label_buffer, max_label_len, buffer, action_indices[std::to_underlying(action)]);
     } else {
         assert(false && "Unable to find a label for this combination");
     }
