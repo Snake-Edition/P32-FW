@@ -153,7 +153,7 @@ public:
         }
 #endif
         change_phase(PhasesFansSelftest::test_40_percent);
-        set_benevolent_fan_range(); // Test only if fan is spinning
+        set_low_speed_fan_range();
         set_up_measurement(0);
         wait(wait_rpm_0_percent_delay);
         set_up_measurement(pwm_40_percent);
@@ -304,9 +304,9 @@ private:
 #endif /* HAS_CHAMBER_API() */
     }
 
-    void set_benevolent_fan_range() {
+    void set_low_speed_fan_range() {
         for (auto *fan : fans) {
-            fan->set_range(benevolent_fan_range);
+            fan->set_low_range();
         }
     }
 
@@ -384,7 +384,7 @@ void M1978() {
 
     auto print_fans = [&]<size_t... ix>(std::index_sequence<ix...>) {
         return std::array {
-            CommonFanHandler(FanType::print, ix, print_fan_range, &Fans::print(ix))...
+            CommonFanHandler(FanType::print, ix, print_fan_range, &Fans::print(ix), print_low_fan_range)...
         };
     }(std::make_index_sequence<HOTENDS>());
 

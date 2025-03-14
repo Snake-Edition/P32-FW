@@ -42,8 +42,8 @@ TestResult FanHandler::test_result() const {
     return is_failed() ? TestResult_Failed : TestResult_Passed;
 }
 
-CommonFanHandler::CommonFanHandler(const FanType type, uint8_t tool_nr, FanRPMRange fan_range, CFanCtlCommon *fan_control)
-    : FanHandler(type, fan_range, tool_nr)
+CommonFanHandler::CommonFanHandler(const FanType type, uint8_t tool_nr, FanRPMRange fan_range, CFanCtlCommon *fan_control, FanRPMRange low_fan_range)
+    : FanHandler(type, fan_range, tool_nr, low_fan_range)
     , fan(fan_control) {
     fan->enterSelftestMode();
 }
@@ -66,7 +66,7 @@ void CommonFanHandler::record_sample() {
 static_assert(puppies::XBuddyExtension::FAN_CNT == XBEFanTestResults::fan_count, "Adjust the fan result structure in EEPROM (xbuddy_expansion_fan_result.hpp)");
 
 XBEFanHandler::XBEFanHandler(const FanType type, uint8_t desc_num, FanRPMRange fan_range)
-    : FanHandler(type, fan_range, desc_num) {
+    : FanHandler(type, fan_range, desc_num, benevolent_fan_range) {
     original_pwm = xbuddy_extension().fan_target_pwm(static_cast<XBuddyExtension::Fan>(desc_num));
 }
 
