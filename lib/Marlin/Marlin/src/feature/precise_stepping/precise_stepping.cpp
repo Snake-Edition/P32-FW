@@ -803,18 +803,20 @@ void PreciseStepping::step_isr() {
     // will be incorrect.
     const auto timer_handle_ptr = &TimerHandle[STEP_TIMER_NUM].handle;
     uint32_t adjusted_next = next - last_step_isr_delay;
-    __disable_irq();
-    int32_t tim_counter = __HAL_TIM_GET_COUNTER(timer_handle_ptr);
-    int32_t diff = counter_signed_diff(adjusted_next, tim_counter);
-    // We should miss the next deadline just by a couple of ticks. When the value of 'diff'
-    // is a big negative number, the difference between 'adjusted_next' and 'tim_counter'
-    // is bigger than (UINT16_MAX / 2), or something interrupts the stepper routine for a very long time.
-    assert(diff >= 0 || diff >= -STEPPER_ISR_MAX_TICKS);
-    if (diff < min_reserve) {
-        adjusted_next = tim_counter + min_reserve;
+    int32_t diff;
+    {
+        buddy::InterruptDisabler _;
+        int32_t tim_counter = __HAL_TIM_GET_COUNTER(timer_handle_ptr);
+        diff = counter_signed_diff(adjusted_next, tim_counter);
+        // We should miss the next deadline just by a couple of ticks. When the value of 'diff'
+        // is a big negative number, the difference between 'adjusted_next' and 'tim_counter'
+        // is bigger than (UINT16_MAX / 2), or something interrupts the stepper routine for a very long time.
+        assert(diff >= 0 || diff >= -STEPPER_ISR_MAX_TICKS);
+        if (diff < min_reserve) {
+            adjusted_next = tim_counter + min_reserve;
+        }
+        __HAL_TIM_SET_COMPARE(timer_handle_ptr, TIM_CHANNEL_1, adjusted_next);
     }
-    __HAL_TIM_SET_COMPARE(timer_handle_ptr, TIM_CHANNEL_1, adjusted_next);
-    __enable_irq();
 
     if (diff < min_delay) {
         last_step_isr_delay = -diff + min_reserve;
