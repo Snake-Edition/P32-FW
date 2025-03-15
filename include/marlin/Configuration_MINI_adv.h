@@ -539,6 +539,9 @@
 	#define HOMING_BACKOFF_POST_MM { 2, 2, 0 }
 #else
 	//#define QUICK_HOME                     // If homing includes X and Y, do a diagonal move initially
+
+	// Move away from the endstops after homing
+	#define HOMING_BACKOFF_POST_MM { 20, 0, 2 }
 #endif
 
 // When G28 is called, this option will make Y home before X
@@ -1932,7 +1935,7 @@
             #ifdef MINI_I3_MK33
                 #define X_STALL_SENSITIVITY 145
             #elif MINI_COREXY
-                #define X_STALL_SENSITIVITY 110
+                #define X_STALL_SENSITIVITY 112
             #else
                 #define X_STALL_SENSITIVITY 130
             #endif
