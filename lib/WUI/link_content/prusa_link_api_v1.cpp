@@ -195,6 +195,10 @@ Selector::Accepted PrusaLinkApiV1::accept(const RequestParser &parser, handler::
                 GcodeUpload::PutParams putParams;
                 putParams.overwrite = parser.overwrite_file;
                 putParams.print_after_upload = parser.print_after_upload;
+                if (strlen(filename) + 1 > sizeof(putParams.filepath)) {
+                    out.next = StatusPage(Status::UriTooLong, parser);
+                    return Accepted::Accepted;
+                }
                 strlcpy(putParams.filepath.data(), filename, sizeof(putParams.filepath));
                 auto upload = GcodeUpload::start(parser, wui_uploaded_gcode, parser.accepts_json, std::move(putParams));
                 std::visit([&](auto upload) { out.next = std::move(upload); }, std::move(upload));
