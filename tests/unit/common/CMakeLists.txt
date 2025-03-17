@@ -104,6 +104,9 @@ target_include_directories(
          ${CMAKE_SOURCE_DIR}/src/common/marlin_server_types ${CMAKE_SOURCE_DIR}/tests/stubs
   )
 
+add_executable(exponential_backoff_tests ${CMAKE_CURRENT_SOURCE_DIR}/exponential_backoff_tests.cpp)
+target_include_directories(exponential_backoff_tests PUBLIC ${CMAKE_SOURCE_DIR}/src/common)
+
 add_catch_test(support_utils_tests)
 add_catch_test(str_utils_tests)
 add_catch_test(timing_tests)
@@ -117,3 +120,4 @@ add_catch_test(url_decode_tests)
 add_catch_test(json_tests)
 add_catch_test(path_utils_tests)
 add_catch_test(selftest_test_data_serialization_tests)
+add_catch_test(exponential_backoff_tests)

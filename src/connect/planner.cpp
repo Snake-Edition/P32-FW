@@ -76,10 +76,6 @@ namespace {
     //
     // All timestamps and durations are in milliseconds.
 
-    // First retry after 100 ms.
-    const constexpr Duration COOLDOWN_BASE = 100;
-    // Don't do retries less often than once a minute.
-    const constexpr Duration COOLDOWN_MAX = 1000 * 60;
     // Don't send telemetry more often than this even if things change.
     const constexpr Duration TELEMETRY_INTERVAL_MIN = 750;
 #if WEBSOCKET()
@@ -323,7 +319,7 @@ void Planner::reset() {
     cancellable_objects.mark_clean();
     last_telemetry = nullopt;
     telemetry_changes.mark_dirty();
-    cooldown = nullopt;
+    cooldown.reset();
     perform_cooldown = false;
     failed_attempts = 0;
 }
@@ -406,8 +402,8 @@ Action Planner::next_action(SharedBuffer &buffer, http::Connection *wake_on_read
 
     if (perform_cooldown) {
         perform_cooldown = false;
-        assert(cooldown.has_value());
-        return sleep(*cooldown, nullptr, true);
+        assert(cooldown.get().has_value());
+        return sleep(*cooldown.get(), nullptr, true);
     }
 
     if (planned_event.has_value()) {
@@ -585,13 +581,13 @@ void Planner::action_done(ActionResult result) {
         }
 
         // Failed to talk to the server. Retry after a while (with a back-off), but otherwise keep stuff the same.
-        cooldown = min(COOLDOWN_MAX, cooldown.value_or(COOLDOWN_BASE / 2) * 2);
+        cooldown.fail();
         perform_cooldown = true;
     };
 
     auto reset_backoff = [&]() {
         perform_cooldown = false;
-        cooldown = nullopt;
+        cooldown.reset();
     };
 
     auto cleanups = [&]() {
