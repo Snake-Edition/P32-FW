@@ -77,10 +77,10 @@ struct SelftestTool {
     bool has_heatbreak_fan_passed();
     TestResult evaluate_fans();
     void reset_fan_tests();
+
+    bool operator==(const SelftestTool &rhs) const = default;
 };
 static_assert(sizeof(SelftestTool) == 3);
-
-bool operator==(SelftestTool lhs, SelftestTool rhs);
 
 /**
  * @brief Test results compacted in eeprom. This struct cannot have constructors because it's part of old eeprom implementation.
@@ -133,7 +133,7 @@ struct SelftestResult {
     TestResult deprecated_gears : 2 {};
     SelftestTool tools[config_store_ns::max_tool_count] {};
 
-    bool operator==(const SelftestResult &) const;
+    bool operator==(const SelftestResult &) const = default;
 };
 
 #pragma pack(pop)

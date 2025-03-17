@@ -90,20 +90,6 @@ void SelftestTool::reset_fan_tests() {
     fansSwitched = TestResult_Unknown;
 }
 
-bool operator==(SelftestTool lhs, SelftestTool rhs) {
-    return lhs.dockoffset == rhs.dockoffset
-        && lhs.fsensor == rhs.fsensor
-        && lhs.sideFsensor == rhs.sideFsensor
-        && lhs.heatBreakFan == rhs.heatBreakFan
-#if HAS_SWITCHED_FAN_TEST()
-        && lhs.fansSwitched == rhs.fansSwitched
-#endif /* HAS_SWITCHED_FAN_TEST() */
-        && lhs.printFan == rhs.printFan
-        && lhs.loadcell == rhs.loadcell
-        && lhs.nozzle == rhs.nozzle
-        && lhs.tooloffset == rhs.tooloffset;
-}
-
 bool operator==(SelftestResult_pre_gears lhs, SelftestResult_pre_gears rhs) {
     for (size_t i = 0; i < std::size(lhs.tools); ++i) {
         if (lhs.tools[i] != rhs.tools[i]) {
@@ -143,5 +129,3 @@ SelftestResult::SelftestResult(const SelftestResult_pre_gears &sr_pre_gears)
         tools[i].gears = TestResult::TestResult_Unknown;
     }
 }
-
-bool SelftestResult::operator==(const SelftestResult &) const = default;
