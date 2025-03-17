@@ -38,9 +38,9 @@ struct SelftestTool_pre_23 {
     TestResult sideFsensor : 2;
     TestResult dockoffset : 2;
     TestResult tooloffset : 2;
-};
 
-bool operator==(SelftestTool_pre_23 lhs, SelftestTool_pre_23 rhs);
+    bool operator==(const SelftestTool_pre_23 &rhs) const = default;
+};
 
 /**
  * @brief Test results compacted in eeprom.
@@ -55,9 +55,9 @@ struct SelftestResult_pre_23 {
     TestResultNet wifi : 3;
     TestResult zalign : 2;
     SelftestTool_pre_23 tools[config_store_ns::old_eeprom::EEPROM_MAX_TOOL_COUNT];
-};
 
-bool operator==(SelftestResult_pre_23 lhs, SelftestResult_pre_23 rhs);
+    bool operator==(const SelftestResult_pre_23 &rhs) const = default;
+};
 
 /**
  * @brief Results for selftests of one tool.
@@ -94,6 +94,8 @@ struct SelftestResultV23 {
     TestResultNet wifi : 3;
     TestResult zalign : 2;
     SelftestTool tools[config_store_ns::old_eeprom::EEPROM_MAX_TOOL_COUNT];
+
+    bool operator==(const SelftestResultV23 &rhs) const = default;
 };
 
 /**
@@ -110,9 +112,9 @@ struct SelftestResult_pre_gears {
     TestResultNet wifi : 3 {};
     TestResult zalign : 2 {};
     SelftestTool tools[config_store_ns::max_tool_count] {};
-};
 
-bool operator==(SelftestResult_pre_gears lhs, SelftestResult_pre_gears rhs);
+    bool operator==(const SelftestResult_pre_gears &rhs) const = default;
+};
 
 /**
  * @brief Test results compacted in eeprom. Added gearbox alignment result to eeprom for snake selftest compatibility
