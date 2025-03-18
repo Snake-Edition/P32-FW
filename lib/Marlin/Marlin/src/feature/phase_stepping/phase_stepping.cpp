@@ -93,12 +93,6 @@ void phase_stepping::init() {
     initialized = true;
 }
 
-void phase_stepping::load() {
-    assert_initialized();
-    load_from_persistent_storage(AxisEnum::X_AXIS);
-    load_from_persistent_storage(AxisEnum::Y_AXIS);
-}
-
 FORCE_INLINE uint64_t convert_absolute_time_to_ticks(const double time) {
     return uint64_t(time * TICK_FREQ);
 }
@@ -386,7 +380,6 @@ void phase_stepping::set_phase_origin(AxisEnum axis, float pos) {
 }
 
 namespace phase_stepping {
-
 /**
  * Enables phase stepping for axis. Reconfigures the motor driver. It is not
  * safe to invoke this procedure within interrupt context. No movement shall be
@@ -888,16 +881,20 @@ FORCE_OFAST std::tuple<float, float> phase_stepping::axis_position(const AxisSta
 }
 
 namespace phase_stepping {
-namespace {
-    /**
-     * @brief Used for saving correction to/from a file
-     *
-     */
-    struct CorrectionSaveFormat {
-        uint8_t reserve[32] {}; // 32 zeroed out bytes to have some room in the future for potential versioning etc (head)
-        MotorPhaseCorrection correction;
-    };
-} // namespace
+void load() {
+    assert_initialized();
+    load_from_persistent_storage(AxisEnum::X_AXIS);
+    load_from_persistent_storage(AxisEnum::Y_AXIS);
+}
+
+/**
+ * @brief Used for saving correction to/from a file
+ *
+ */
+struct CorrectionSaveFormat {
+    uint8_t reserve[32] {}; // 32 zeroed out bytes to have some room in the future for potential versioning etc (head)
+    MotorPhaseCorrection correction;
+};
 
 void save_correction_to_file(const CorrectedCurrentLut &lut, const char *file_path) {
     FILE *save_file = fopen(file_path, "wb");

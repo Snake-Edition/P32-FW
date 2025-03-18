@@ -132,11 +132,6 @@ struct AxisState {
 void init();
 
 /**
- * Load and enable previous settings, if any.
- **/
-void load();
-
-/**
  * Set the axis phase origin for a single axis
  */
 void set_phase_origin(AxisEnum axis_num, float pos);
@@ -239,6 +234,11 @@ int logical_ustep(AxisEnum axis);
  * A simple wrapper around planner.synchronize() to avoid recursive planner inclusion
  */
 void synchronize();
+
+/**
+ * Return if some processing is still pending.
+ */
+bool processing();
 
 /**
  * Check phase stepping internal state
@@ -412,6 +412,11 @@ enum class CorrectionType {
     backward,
 };
 
+/**
+ * Load and enable previous settings, if any.
+ **/
+void load();
+
 constexpr const char *get_correction_file_path(AxisEnum axis, CorrectionType lut_type) {
     switch (axis) {
     case AxisEnum::X_AXIS:
@@ -480,11 +485,6 @@ void remove_from_persistent_storage(AxisEnum axis);
 
 /// Removes all LUTS from the persistent media
 void remove_from_persistent_storage();
-
-/**
- * Return if some processing is still pending.
- */
-bool processing();
 
 } // namespace phase_stepping
 
