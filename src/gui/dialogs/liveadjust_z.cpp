@@ -25,13 +25,16 @@
 
 WindowScale::WindowScale(window_t *parent, point_i16_t pt)
     : window_frame_t(parent, Rect16(pt, 10, 100))
-    , scaleNum0(parent, getNumRect(pt), z_offset_max, "% f")
-    , scaleNum1(parent, getNumRect(pt), (z_offset_max + z_offset_min) / 2, "% f")
-    , scaleNum2(parent, getNumRect(pt), z_offset_min, "% f") {
+    , scaleNum0(parent, getNumRect(pt), z_offset_max, "% d")
+    , scaleNum1(parent, getNumRect(pt), (z_offset_max + z_offset_min) / 2, "% d")
+    , scaleNum2(parent, getNumRect(pt), z_offset_min, "% d") {
 
     scaleNum0 -= Rect16::Top_t(8);
     scaleNum1 += Rect16::Top_t((Height() / 2) - 8);
     scaleNum2 += Rect16::Top_t(Height() - 8);
+    scaleNum0.PrintAsInt32();
+    scaleNum1.PrintAsInt32();
+    scaleNum2.PrintAsInt32();
 }
 
 Rect16 WindowScale::getNumRect(point_i16_t pt) const {
