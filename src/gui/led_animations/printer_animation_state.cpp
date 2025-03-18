@@ -52,6 +52,7 @@ PrinterState leds::mpsToAnimationState(marlin_server::State state) {
     case State::Paused:
         return PrinterState::Pausing;
 
+    case State::Resuming_BufferData:
     case State::Resuming_Begin:
     case State::Resuming_Reheating:
     case State::Resuming_UnparkHead_XY:

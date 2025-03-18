@@ -83,6 +83,7 @@ JsonResult get_printer(size_t resume_point, JsonOutput &output) {
         ready = operational = false;
         link_state_str = "PAUSED";
         break;
+    case State::Resuming_BufferData:
     case State::Resuming_Begin:
     case State::Resuming_Reheating:
     case State::Resuming_UnparkHead_XY:
@@ -288,6 +289,7 @@ JsonResult get_job_octoprint(size_t resume_point, JsonOutput &output) {
         has_job = true;
         state = "Paused";
         break;
+    case State::Resuming_BufferData:
     case State::Resuming_Begin:
     case State::Resuming_Reheating:
     case State::Resuming_UnparkHead_XY:

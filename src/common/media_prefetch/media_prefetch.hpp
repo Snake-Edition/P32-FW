@@ -114,6 +114,9 @@ public:
         /// The prefetch can possibly recover from the error states by itself.
         /// !!! To be used only for early warnings, for all other purposes, check result of read() !!!
         Status tail_status;
+
+        /// Is there an active fetch running?
+        bool is_fetching;
     };
 
     /// \returns various metrics regarding the media prefetch

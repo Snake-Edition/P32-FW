@@ -1110,6 +1110,7 @@ bool printer_paused_extended() {
     case State::Pausing_Failed_Code:
     case State::Pausing_WaitIdle:
     case State::Pausing_ParkHead:
+    case State::Resuming_BufferData:
     case State::Resuming_Begin:
     case State::Resuming_Reheating:
     case State::Resuming_UnparkHead_XY:
@@ -1256,6 +1257,7 @@ void print_abort(void) {
 #endif
     case State::Printing:
     case State::Paused:
+    case State::Resuming_BufferData:
     case State::Resuming_Reheating:
     case State::Finishing_WaitIdle:
 #if HAS_TOOLCHANGER()
@@ -1419,6 +1421,12 @@ void media_prefetch_start() {
     media_prefetch.issue_fetch();
 }
 
+void schedule_media_retry() {
+    const auto backoff_time = print_state.recover_media_error_backoff.fail();
+    print_state.recover_media_error_at = ticks_s() + backoff_time;
+    log_info(MarlinServer, "Scheduled media retry at %" PRIu32 ", backoff %" PRIu32, *print_state.recover_media_error_at, backoff_time);
+}
+
 void media_print_loop() {
     /// Size of the gcode queue
     METRIC_DEF(metric_gcode_queue_size, "gcd_que_sz", METRIC_VALUE_INTEGER, 100, METRIC_ENABLED);
@@ -1446,7 +1454,6 @@ void media_print_loop() {
         METRIC_DEF(metric_prefetch_buffer_commands, "ftch_cmds", METRIC_VALUE_INTEGER, 100, METRIC_ENABLED);
         metric_record_integer(&metric_prefetch_buffer_commands, metrics.commands_in_buffer);
 
-        // To-do: automatic unpause when paused if the condition fixes itself?
         const auto media_error = [status](WarningType warning_type) {
             // There's still a fetch running, this isn't completely final ‒ the
             // fetch itself can recover from the error (and sometimes it does,
@@ -1455,9 +1462,7 @@ void media_print_loop() {
                 return;
             }
             set_warning(warning_type);
-            print_state.recover_media_error_backoff.fail();
-            print_state.recover_media_error_at = ticks_s() + *print_state.recover_media_error_backoff.get();
-            log_info(MarlinServer, "Fail, scheduled at %" PRIu32 ", backoff %" PRIu32, *print_state.recover_media_error_at, *print_state.recover_media_error_backoff.get());
+            schedule_media_retry();
             print_pause();
         };
 
@@ -1580,7 +1585,12 @@ void print_resume(void) {
     if (server.print_state == State::Paused) {
         update_sfn();
 
-        server.print_state = State::Resuming_Begin;
+        if (server.print_is_serial) {
+            server.print_state = State::Resuming_Begin;
+        } else {
+            server.print_state = State::Resuming_BufferData;
+            media_prefetch_start();
+        }
 
         // pause queuing commands from serial, until resume sequence is finished.
         GCodeQueue::pause_serial_commands = true;
@@ -2092,6 +2102,24 @@ static void _server_print_loop(void) {
         }
 
         break;
+    case State::Resuming_BufferData: {
+        const auto metrics = media_prefetch.get_metrics();
+
+        if (!metrics.is_fetching) {
+            // Fetching done.
+            if (MediaPrefetchManager::is_error(metrics.tail_status)) {
+                // Still failing.
+                schedule_media_retry();
+                media_prefetch.stop();
+                // Go back to Paused (the only state where we could come from).
+                server.print_state = State::Paused;
+            } else {
+                // Let's continue with resuming!
+                server.print_state = State::Resuming_Begin;
+            }
+        } // Else -> keep waiting for more data.
+        break;
+    }
     case State::Resuming_Begin:
 #if ENABLED(CRASH_RECOVERY)
     #if ENABLED(AXIS_MEASURE)

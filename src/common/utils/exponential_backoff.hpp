@@ -15,12 +15,13 @@ public:
     std::optional<T> get() const {
         return value;
     }
-    void fail() {
+    T fail() {
         if (value.has_value()) {
             value = std::min(max, *value * 2);
         } else {
             value = base;
         }
+        return *value;
     }
     void reset() {
         value.reset();

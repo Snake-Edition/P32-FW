@@ -235,6 +235,7 @@ static bool isResuming(marlin_server::State state) {
     }
 
     switch (state) {
+    case marlin_server::State::Resuming_BufferData:
     case marlin_server::State::Resuming_Begin:
     case marlin_server::State::Resuming_Reheating:
     case marlin_server::State::Resuming_UnparkHead_XY:

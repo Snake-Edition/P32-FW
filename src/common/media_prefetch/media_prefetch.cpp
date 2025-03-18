@@ -247,6 +247,7 @@ MediaPrefetchManager::Metrics MediaPrefetchManager::get_metrics() const {
         .stream_size_estimate = s.stream_size_estimate,
         .buffer_occupancy_percent = static_cast<uint8_t>(((s.read_tail.buffer_pos - s.read_head.buffer_pos + buffer_size) % buffer_size * 100) / buffer_size),
         .tail_status = s.read_tail.status,
+        .is_fetching = worker_job.is_active(),
     };
 }
 

@@ -23,6 +23,7 @@ enum class State {
     Pausing_WaitIdle,
     Pausing_ParkHead,
     Paused,
+    Resuming_BufferData, ///< Buffering data before we even try to unpause
     Resuming_Begin,
     Resuming_Reheating,
     Resuming_UnparkHead_XY,
@@ -69,7 +70,7 @@ inline bool is_pausing_state(State state) {
 }
 
 inline bool is_resuming_state(State state) {
-    return (state == State::Resuming_Begin) || (state == State::Resuming_Reheating) || (state == State::Resuming_UnparkHead_XY) || (state == State::Resuming_UnparkHead_ZE);
+    return (state == State::Resuming_BufferData) || (state == State::Resuming_Begin) || (state == State::Resuming_Reheating) || (state == State::Resuming_UnparkHead_XY) || (state == State::Resuming_UnparkHead_ZE);
 }
 
 } // namespace marlin_server

@@ -780,6 +780,7 @@ void screen_printing_data_t::change_print_state() {
         case State::Resuming_Reheating:
             stop_pressed = false;
             return printing_state_t::REHEATING;
+        case State::Resuming_BufferData:
         case State::Resuming_Begin:
         case State::Resuming_UnparkHead_XY:
         case State::Resuming_UnparkHead_ZE:
