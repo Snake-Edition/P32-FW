@@ -1081,11 +1081,18 @@ Errors:
     approved: true
 
   - code: "XX701"
-    printers: [MK4, COREONE]
+    printers: [COREONE]
     title: "Firmware Update Required"
-    text: "Insert the bundled USB drive, restart the printer and click the knob once during the boot. This will install the MK3.5 firmware."
+    text: "Insert the bundled USB drive, restart the printer and click the knob once during the boot. This will install the MK4 firmware."
     id: "DIFFERENT_FW_REQUIRED"
-    approved: true
+    approved: false
+
+  - code: "XX701"
+    printers: [MK4]
+    title: "Firmware Update Required"
+    text: "Insert the bundled USB drive, restart the printer and click the knob once during the boot. This will install the correct firmware for your hardware."
+    id: "DIFFERENT_FW_REQUIRED"
+    approved: false
 
   - code: "XX701"
     printers: [MK3.5]
