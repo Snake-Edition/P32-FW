@@ -15,6 +15,7 @@
 #include "adc.hpp"
 #include "marlin_events.h"
 #include "marlin_print_preview.hpp"
+#include "utils/exponential_backoff.hpp"
 #include "bsod.h"
 #include "module/prusa/tool_mapper.hpp"
 #include "module/prusa/spool_join.hpp"
@@ -240,7 +241,15 @@ namespace {
         /// This flag stores that we have a resume pending and we should start executing it when we can.
         bool resume_pending = false;
 
-        bool paused_due_to_media_error = false;
+        // In case we were paused due to media error, we schedule an attempt to recover
+        // (using the recover_media_error_backoff mechanism).
+        //
+        // We still allow an earlier attempt if called externally by try_recover_from_media_error.
+        std::optional<uint32_t> recover_media_error_at;
+        // Tracking exponential backoff for media error recovery retries.
+        //
+        // In seconds.
+        buddy::ExponentialBackoff<uint32_t, 30, 300> recover_media_error_backoff;
 
         /// Position the media should be resumed to
         GCodeReaderStreamRestoreInfo media_restore_info;
@@ -1446,16 +1455,19 @@ void media_print_loop() {
                 return;
             }
             set_warning(warning_type);
-            print_state.paused_due_to_media_error = true;
+            print_state.recover_media_error_backoff.fail();
+            print_state.recover_media_error_at = ticks_s() + *print_state.recover_media_error_backoff.get();
+            log_info(MarlinServer, "Fail, scheduled at %" PRIu32 ", backoff %" PRIu32, *print_state.recover_media_error_at, *print_state.recover_media_error_backoff.get());
             print_pause();
         };
 
         const auto clear_media_error = [] {
-            if (!print_state.paused_due_to_media_error) {
+            if (!print_state.recover_media_error_at.has_value()) {
                 return;
             }
 
-            print_state.paused_due_to_media_error = false;
+            print_state.recover_media_error_at.reset();
+            print_state.recover_media_error_backoff.reset();
 
             clear_warning(WarningType::USBFlashDiskError);
             clear_warning(WarningType::GcodeCorruption);
@@ -1594,9 +1606,9 @@ void try_recover_from_media_error() {
         // If we're printing, simply try issuing a fetch to make sure everything's fine
         media_prefetch.issue_fetch();
 
-    } else if (print_state.paused_due_to_media_error) {
+    } else if (print_state.recover_media_error_at.has_value()) {
         // Do NOT reset - will be reset if the resume is successful
-        // print_state.paused_due_to_media_error = false;
+        // print_state.recover_media_error_at.reset();
         print_resume();
     }
 }
@@ -2074,7 +2086,11 @@ static void _server_print_loop(void) {
         if (print_state.resume_pending) {
             print_state.resume_pending = false;
             print_resume();
+        } else if (print_state.recover_media_error_at.has_value() && ticks_diff(*print_state.recover_media_error_at, ticks_s()) <= 0) {
+            log_info(MarlinServer, "Try recover from media error");
+            try_recover_from_media_error();
         }
+
         break;
     case State::Resuming_Begin:
 #if ENABLED(CRASH_RECOVERY)
