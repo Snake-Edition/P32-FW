@@ -6,12 +6,13 @@
 #include <selftest_types.hpp>
 #include <RAII.hpp>
 #include <option/has_phase_stepping_selftest.h>
+#include <option/has_door_sensor_calibration.h>
 #include <option/has_toolchanger.h>
-#include "queue.h"
-#include "Marlin/src/gcode/queue.h"
 #if HAS_TOOLCHANGER()
     #include <module/prusa/toolchanger.h>
 #endif
+#include "queue.h"
+#include "Marlin/src/gcode/queue.h"
 #include "selftest/i_selftest.hpp"
 
 using namespace SelftestSnake;
@@ -154,6 +155,11 @@ void do_snake(Action action, Tool tool = Tool::_first) {
 #if HAS_GEARBOX_ALIGNMENT()
         case Action::Gears:
             marlin_client::gcode_printf("M1979 T%d", static_cast<int>(tool));
+            break;
+#endif
+#if HAS_DOOR_SENSOR_CALIBRATION()
+        case Action::DoorSensor:
+            marlin_client::gcode("M1980");
             break;
 #endif
         default:

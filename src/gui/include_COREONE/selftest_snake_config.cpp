@@ -66,6 +66,8 @@ TestResult get_test_result(Action action, [[maybe_unused]] Tool tool) {
         return merge_hotends(tool, [&](const int8_t e) {
             return evaluate_results(sr.tools[e].gears);
         });
+    case Action::DoorSensor:
+        return evaluate_results(config_store().selftest_result_door_sensor.get());
     case Action::FilamentSensorCalibration:
         return merge_hotends(tool, [&](const int8_t e) {
             return evaluate_results(sr.tools[e].fsensor);
@@ -84,6 +86,7 @@ uint64_t get_test_mask(Action action) {
     switch (action) {
     case Action::Fans:
     case Action::Gears:
+    case Action::DoorSensor:
         bsod("This should be gcode");
     case Action::YCheck:
         return stmYAxis;
