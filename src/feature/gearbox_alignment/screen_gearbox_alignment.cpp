@@ -1,47 +1,15 @@
 /// @file
 #include "screen_gearbox_alignment.hpp"
 
-#include "frame_calibration_common.hpp"
-#include "i18n.h"
-#include "img_resources.hpp"
-#include "window_icon.hpp"
-#include <gui/selftest_frame.hpp>
+#include <frame_calibration_common.hpp>
+#include <i18n.h>
+#include <img_resources.hpp>
 #include <guiconfig/wizard_config.hpp>
 
 static ScreenGearboxAlignment *instance = nullptr;
 
 static const char *text_header = N_("GEARBOX ALIGNMENT");
-
-static constexpr const img::Resource &right_icon = img::transmission_loose_187x175;
-
 static constexpr size_t content_top_y = WizardDefaults::row_1 + WizardDefaults::progress_row_h;
-static constexpr size_t text_icon_space = 14;
-static constexpr size_t text_left_width = WizardDefaults::X_space - right_icon.w - text_icon_space;
-
-class FrameText {
-protected:
-    FrameText(window_t *parent, string_view_utf8 txt)
-        : text(parent, Rect16(WizardDefaults::col_0, content_top_y, WizardDefaults::RectSelftestFrame.Width() - WizardDefaults::MarginRight - WizardDefaults::MarginLeft, right_icon.h), is_multiline::yes) {
-        text.SetText(txt);
-    }
-
-private:
-    window_text_t text;
-};
-
-class FrameTextAndImage {
-protected:
-    FrameTextAndImage(window_t *parent, string_view_utf8 txt, const img::Resource *res)
-        : text(parent, Rect16(WizardDefaults::col_0, content_top_y, text_left_width, right_icon.h), is_multiline::yes)
-        , icon(parent, &right_icon, point_i16_t(WizardDefaults::RectSelftestFrame.Width() - WizardDefaults::MarginRight - right_icon.w, content_top_y)) {
-        text.SetText(txt);
-        icon.SetRes(res);
-    }
-
-private:
-    window_text_t text;
-    window_icon_t icon;
-};
 
 class FrameIntro final : public FrameText {
 public:
@@ -49,6 +17,7 @@ public:
         : FrameText {
             parent,
             _("The gearbox alignment is only necessary for user-assembled or serviced gearboxes. In all other cases, you can skip this step."),
+            content_top_y,
         } {}
 };
 
@@ -58,6 +27,7 @@ public:
         : FrameText {
             parent,
             _("We need to start without the filament in the extruder. Please unload it."),
+            content_top_y,
         } {}
 };
 
@@ -67,46 +37,55 @@ public:
         : FrameText {
             parent,
             _("Before you proceed, make sure filament is unloaded from the Nextruder."),
+            content_top_y,
         } {}
 };
 
-class FrameLoosenScrews final : public FrameTextAndImage {
+class FrameLoosenScrews final : public FrameTextWithImage {
 public:
     FrameLoosenScrews(window_t *parent)
-        : FrameTextAndImage {
+        : FrameTextWithImage {
             parent,
             _("Rotate each screw counter-clockwise by 1.5 turns. The screw heads should be flush with the cover. Unlock and open the idler."),
+            content_top_y,
             &img::transmission_loose_187x175,
+            187,
         } {}
 };
 
-class FrameAlignment final : public FrameTextAndImage {
+class FrameAlignment final : public FrameTextWithImage {
 public:
     FrameAlignment(window_t *parent)
-        : FrameTextAndImage {
+        : FrameTextWithImage {
             parent,
             _("Gearbox alignment in progress, please wait (approx. 20 seconds)"),
+            content_top_y,
             &img::transmission_gears_187x175,
+            187,
         } {}
 };
 
-class FrameTightenScrews final : public FrameTextAndImage {
+class FrameTightenScrews final : public FrameTextWithImage {
 public:
     FrameTightenScrews(window_t *parent)
-        : FrameTextAndImage {
+        : FrameTextWithImage {
             parent,
             _("Tighten the M3 screws firmly in the correct order, they should be slightly below the surface. Do not over-tighten."),
+            content_top_y,
             &img::transmission_tight_187x175,
+            187,
         } {}
 };
 
-class FrameDone final : public FrameTextAndImage {
+class FrameDone final : public FrameTextWithImage {
 public:
     FrameDone(window_t *parent)
-        : FrameTextAndImage {
+        : FrameTextWithImage {
             parent,
             _("Close the idler door and secure it with the swivel. The calibration is done!"),
+            content_top_y,
             &img::transmission_close_187x175,
+            187,
         } {}
 };
 
