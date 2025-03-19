@@ -1427,6 +1427,19 @@ void schedule_media_retry() {
     log_info(MarlinServer, "Scheduled media retry at %" PRIu32 ", backoff %" PRIu32, *print_state.recover_media_error_at, backoff_time);
 }
 
+void clear_media_error() {
+    if (!print_state.recover_media_error_at.has_value()) {
+        return;
+    }
+
+    print_state.recover_media_error_at.reset();
+    print_state.recover_media_error_backoff.reset();
+
+    clear_warning(WarningType::USBFlashDiskError);
+    clear_warning(WarningType::GcodeCorruption);
+    clear_warning(WarningType::NotDownloaded);
+}
+
 void media_print_loop() {
     /// Size of the gcode queue
     METRIC_DEF(metric_gcode_queue_size, "gcd_que_sz", METRIC_VALUE_INTEGER, 100, METRIC_ENABLED);
@@ -1464,19 +1477,6 @@ void media_print_loop() {
             set_warning(warning_type);
             schedule_media_retry();
             print_pause();
-        };
-
-        const auto clear_media_error = [] {
-            if (!print_state.recover_media_error_at.has_value()) {
-                return;
-            }
-
-            print_state.recover_media_error_at.reset();
-            print_state.recover_media_error_backoff.reset();
-
-            clear_warning(WarningType::USBFlashDiskError);
-            clear_warning(WarningType::GcodeCorruption);
-            clear_warning(WarningType::NotDownloaded);
         };
 
         if (!print_state.file_open_reported && metrics.stream_size_estimate) {
@@ -2116,6 +2116,7 @@ static void _server_print_loop(void) {
             } else {
                 // Let's continue with resuming!
                 server.print_state = State::Resuming_Begin;
+                clear_media_error();
             }
         } // Else -> keep waiting for more data.
         break;
