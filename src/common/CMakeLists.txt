@@ -177,7 +177,9 @@ endif()
 
 if(BOARD_IS_MASTER_BOARD)
   if(PRINTER STREQUAL "iX")
-    target_sources(firmware PRIVATE filament_sensor_ix_side.cpp filament_sensors_handler_iX.cpp)
+    target_sources(
+      firmware PRIVATE filament_sensor_ix_side.cpp filament_sensors_handler_default.cpp
+      )
   elseif(PRINTER STREQUAL "XL")
     target_sources(
       firmware PRIVATE filament_sensors_handler_XL.cpp filament_sensors_handler_XL_remap.cpp
