@@ -15,6 +15,7 @@
 #include <option/xl_enclosure_support.h>
 #include <option/has_chamber_api.h>
 #include <option/has_uneven_bed_prompt.h>
+#include <option/has_door_sensor_calibration.h>
 
 #include <inc/MarlinConfigPre.h>
 
@@ -56,6 +57,9 @@ enum class ClientFSM : uint8_t {
     #endif
     #if HAS_GEARBOX_ALIGNMENT()
     GearboxAlignment,
+    #endif
+    #if HAS_DOOR_SENSOR_CALIBRATION()
+    DoorSensorCalibration,
     #endif
     Wait, ///< FSM that only blocks the screen with a "please wait" text
     _none, // cannot be created, must have same index as _count
