@@ -1,5 +1,6 @@
 #include "DialogLoadUnload.hpp"
 
+#include <buddy/unreachable.hpp>
 #include "gui.hpp" //resource_font
 #include "sound.hpp"
 #include "i18n.h"
@@ -492,9 +493,7 @@ string_view_utf8 DialogLoadUnload::get_name(LoadUnloadMode mode) {
     case LoadUnloadMode::Eject:
         return _("Ejecting filament");
     }
-
-    // In case we get some invalid data
-    return string_view_utf8::MakeCPUFLASH("Index error");
+    BUDDY_UNREACHABLE();
 }
 
 float DialogLoadUnload::deserialize_progress(fsm::PhaseData data) const {
