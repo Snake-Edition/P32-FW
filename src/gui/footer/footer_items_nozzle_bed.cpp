@@ -302,5 +302,5 @@ string_view_utf8 FooterItemAllNozzles::static_makeView(int value) {
             buff[printed_chars] = ' ';
         }
     }
-    return string_view_utf8::MakeRAM((const uint8_t *)buff.data());
+    return string_view_utf8::MakeRAM(buff.data());
 }

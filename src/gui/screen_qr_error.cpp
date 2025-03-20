@@ -81,7 +81,7 @@ ScreenErrorQR::ScreenErrorQR()
         if (config_store().devhash_in_qr.get()) {
             static char p_code[PRINTER_CODE_SIZE + 1];
             printerCode(p_code);
-            qr_code_txt.SetText(string_view_utf8::MakeRAM((const uint8_t *)p_code));
+            qr_code_txt.SetText(string_view_utf8::MakeRAM(p_code));
         } else {
             qr_code_txt.Hide();
         }

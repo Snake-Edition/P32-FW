@@ -479,7 +479,7 @@ MI_INFO_FW::MI_INFO_FW()
 void MI_INFO_FW::click([[maybe_unused]] IWindowMenu &window_menu) {
     // If we have development tools shown, click will print whole fw version string in info messagebox
     if constexpr (GuiDefaults::ShowDevelopmentTools) {
-        MsgBoxInfo(string_view_utf8::MakeRAM((const uint8_t *)version::project_version_full), Responses_Ok);
+        MsgBoxInfo(string_view_utf8::MakeRAM(version::project_version_full), Responses_Ok);
     }
 }
 
@@ -870,7 +870,7 @@ void MI_LOAD_SETTINGS::click(IWindowMenu & /*window_menu*/) {
     build_message(msg_builder, _("Connect"), connect_client::MarlinPrinter::load_cfg_from_ini());
 #endif
 
-    MsgBoxInfo(string_view_utf8::MakeRAM((const uint8_t *)msg.data()), Responses_Ok);
+    MsgBoxInfo(string_view_utf8::MakeRAM(msg.data()), Responses_Ok);
 }
 
 #if HAS_LEDS()

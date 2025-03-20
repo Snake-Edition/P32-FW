@@ -8,7 +8,7 @@
 #include <guiconfig/GuiDefaults.hpp>
 
 ScreenDoesNotExist::ScreenDoesNotExist()
-    : txt(window_text_t(this, GetRect(), is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH((const uint8_t *)"Screen does not exist"))) {
+    : txt(window_text_t(this, GetRect(), is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH("Screen does not exist"))) {
 
     ClrMenuTimeoutClose(); // don't close on menu timeout
     SetRedLayout();
@@ -17,5 +17,5 @@ ScreenDoesNotExist::ScreenDoesNotExist()
 }
 
 ScreenDialogDoesNotExist::ScreenDialogDoesNotExist() {
-    txt.SetText(string_view_utf8::MakeCPUFLASH((const uint8_t *)"Dialog does not exist"));
+    txt.SetText(string_view_utf8::MakeCPUFLASH("Dialog does not exist"));
 }

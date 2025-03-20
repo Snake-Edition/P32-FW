@@ -130,7 +130,7 @@ string_view_utf8 ScreenSelftest::getCaption(SelftestParts part) {
     case SelftestParts::_none:
         break;
     }
-    return string_view_utf8::MakeCPUFLASH((uint8_t *)error);
+    return string_view_utf8::MakeCPUFLASH(error);
 }
 
 const img::Resource *ScreenSelftest::getIconId(SelftestParts part) {

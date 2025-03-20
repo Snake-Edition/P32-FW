@@ -29,7 +29,7 @@ DialogQuickPause::DialogQuickPause(fsm::BaseData data)
     const char *msg;
     memcpy(&msg, (uint32_t *)data.GetData().data(), sizeof(uint32_t));
     if (msg) {
-        text.SetText(string_view_utf8::MakeRAM((const uint8_t *)msg));
+        text.SetText(string_view_utf8::MakeRAM(msg));
     }
 
     CaptureNormalWindow(radio);

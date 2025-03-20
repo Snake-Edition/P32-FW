@@ -139,7 +139,7 @@ TEST_CASE("Window layout tests", "[window]") {
         // default padding
         window_text_t txt(nullptr,
             Rect16(0, 0, 1 + GuiDefaults::Padding.left + GuiDefaults::Padding.right, 1 + GuiDefaults::Padding.top + GuiDefaults::Padding.bottom),
-            is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH((const uint8_t *)("1")));
+            is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH("1"));
         txt.Draw();
         TestRectDiffColor(DispRect(), Rect16(GuiDefaults::Padding.left, GuiDefaults::Padding.top, 1, 1), GuiDefaults::ColorBack, GuiDefaults::ColorText);
 
@@ -202,7 +202,7 @@ TEST_CASE("Window layout tests", "[window]") {
         MockDisplay::Bind(MockDisp8x4);
         MockDisplay::Instance().clear(COLOR_RED); // all display must be rewritten, no red pixel can remain
         TestRectColor(DispRect(), COLOR_RED);
-        window_text_t txt(nullptr, DispRect(), is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH((const uint8_t *)("1101")));
+        window_text_t txt(nullptr, DispRect(), is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH("1101"));
         txt.SetPadding({ 0, 0, 0, 0 });
 
         txt.SetAlignment(Align_t::LeftTop());
@@ -221,7 +221,7 @@ TEST_CASE("Window layout tests", "[window]") {
         MockDisplay::Bind(MockDisp5x5);
         MockDisplay::Instance().clear(COLOR_RED); // all display must be rewritten, no red pixel can remain
         TestRectColor(DispRect(), COLOR_RED);
-        window_text_t txt(nullptr, DispRect(), is_multiline::yes, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH((const uint8_t *)("1\n0\n1")));
+        window_text_t txt(nullptr, DispRect(), is_multiline::yes, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH("1\n0\n1"));
         txt.SetPadding({ 0, 0, 0, 0 });
 
         txt.SetAlignment(Align_t::LeftTop());
@@ -235,7 +235,7 @@ TEST_CASE("Window layout tests", "[window]") {
         mask = { { { 0, 0, 0, 0, 0 }, { 0, 0, 1, 0, 0 }, { 0, 0, 0, 0, 0 }, { 0, 0, 1, 0, 0 }, { 0, 0, 0, 0, 0 } } };
         TestPixelMask(mask, GuiDefaults::ColorBack, GuiDefaults::ColorText);
 
-        txt.SetText(string_view_utf8::MakeCPUFLASH((const uint8_t *)("111\n101\n10001")));
+        txt.SetText(string_view_utf8::MakeCPUFLASH("111\n101\n10001"));
         MockDisplay::Instance().clear(COLOR_RED); // all display must be rewritten, no red pixel can remain
         txt.SetAlignment(Align_t::Center());
         txt.Draw();
@@ -248,7 +248,7 @@ TEST_CASE("Window layout tests", "[window]") {
         MockDisplay::Bind(MockDisp8x8);
         MockDisplay::Instance().clear(COLOR_RED); // all display must be rewritten, no red pixel can remain
         TestRectColor(DispRect(), COLOR_RED);
-        window_text_t txt(nullptr, DispRect(), is_multiline::yes, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH((const uint8_t *)("1\n0\n1")));
+        window_text_t txt(nullptr, DispRect(), is_multiline::yes, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH("1\n0\n1"));
         txt.SetPadding({ 0, 0, 0, 0 });
 
         txt.SetAlignment(Align_t::LeftTop());
@@ -270,7 +270,7 @@ TEST_CASE("Window layout tests", "[window]") {
         mask = { { { 0, 0, 0, 0, 0 }, { 0, 0, 1, 0, 0 }, { 0, 0, 0, 0, 0 }, { 0, 0, 1, 0, 0 }, { 0, 0, 0, 0, 0 } } };
         TestPixelMask(mask, GuiDefaults::ColorBack, GuiDefaults::ColorText);
 
-        txt.SetText(string_view_utf8::MakeCPUFLASH((const uint8_t *)("111\n101\n10001")));
+        txt.SetText(string_view_utf8::MakeCPUFLASH("111\n101\n10001"));
         MockDisplay::Instance().clear(COLOR_RED); // all display must be rewritten, no red pixel can remain
         txt.SetAlignment(Align_t::Center());
         txt.Draw();

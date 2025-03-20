@@ -81,5 +81,5 @@ TEST_CASE("providerFILE::bad files test", "[translator]") {
     static const char *key = "Language";
     set<unichar> chars;
     // the file is short and should return key string
-    REQUIRE(CompareStringViews(shortFile.GetText(key), string_view_utf8::MakeRAM((uint8_t *)key), chars, "ts"));
+    REQUIRE(CompareStringViews(shortFile.GetText(key), string_view_utf8::MakeRAM(key), chars, "ts"));
 }

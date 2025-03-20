@@ -200,7 +200,7 @@ TEST_CASE("string_view_utf8::Copy to RAM", "[string_view_utf8]") {
     static const char fmt2Translate[] = "Nozzle: %.1f\177C";
     char fmt[21];
 
-    const auto orig = string_view_utf8::MakeRAM((const uint8_t *)fmt2Translate);
+    const auto orig = string_view_utf8::MakeRAM(fmt2Translate);
     string_view_utf8 sf = orig;
     size_t copied_bytes = sf.copyToRAM(fmt, 1);
     REQUIRE_THAT(fmt, Equals(""));
@@ -228,7 +228,7 @@ TEST_CASE("string_view_utf8::CopyToRAM dst buffer too small + multibyte chars", 
     static const char src[] = "%d インプットシェーパーキャリブレーション";
     static const char ref[] = "%d インプットシェーパーキャリ";
 
-    static auto orig = string_view_utf8::MakeRAM((const uint8_t *)src);
+    static auto orig = string_view_utf8::MakeRAM(src);
     size_t copied_bytes = orig.copyToRAM(dst, sizeof(dst));
     REQUIRE_THAT(dst, Equals(ref));
     REQUIRE(copied_bytes == sizeof(ref) - 1); // -1 because we don't count copying null at the end

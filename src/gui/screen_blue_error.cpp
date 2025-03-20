@@ -16,8 +16,8 @@ static const constexpr Rect16 title_rect = GuiDefaults::EnableDialogBigLayout ? 
 ScreenBlueError::ScreenBlueError()
     : ScreenResetError(fw_version_rect)
     ///@note No translations on blue screens.
-    , header(this, header_rect, is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH(reinterpret_cast<const uint8_t *>("UNKNOWN ERROR")))
-    , title(this, title_rect, is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH(reinterpret_cast<const uint8_t *>("Unable to show details")))
+    , header(this, header_rect, is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH("UNKNOWN ERROR"))
+    , title(this, title_rect, is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH("Unable to show details"))
     , description(this, description_rect, is_multiline::yes)
 #if HAS_LEDS()
     , anim(Animator_LCD_leds().start_animations(Fading(leds::ColorRGBW(0, 0, 255), 500), 10))

@@ -25,7 +25,7 @@
 /// Untranslated text (wrapping normal const char * into a string view):
 ///
 ///     static const char some_EN_text[] = "this is a text";
-///     string_view_utf8 untranslatedText = string_view_utf8::MakeCPUFLASH((const uint8_t *)some_EN_text); // this text will NOT be translated
+///     string_view_utf8 untranslatedText = string_view_utf8::MakeCPUFLASH(some_EN_text); // this text will NOT be translated
 ///
 /// Using translated text in snprintf:
 ///
@@ -38,7 +38,7 @@
 ///
 ///     char buf[256];
 ///     // ... write something into the buffer
-///     string_view_utf8 sv = string_view_utf8::MakeRAM((const uint8_t *)buf); // one must MAKE SURE, that buf exists as long as the string view does!
+///     string_view_utf8 sv = string_view_utf8::MakeRAM(buf); // one must MAKE SURE, that buf exists as long as the string view does!
 ///     function(sv);
 ///
 /// Using string view to hold empty strings or nullptr:

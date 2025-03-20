@@ -41,7 +41,7 @@ void description_line_t::update(bool has_preview_thumbnail, size_t row, const st
     title.SetTextColor(COLOR_GRAY);
 
     make_value({ value_buffer, sizeof(value_buffer) });
-    value.SetText(string_view_utf8::MakeRAM((uint8_t *)value_buffer));
+    value.SetText(string_view_utf8::MakeRAM(value_buffer));
     value.SetAlignment(Align_t::RightBottom());
     value.SetPadding({ 0, 0, 0, 0 });
     value.set_font(Font::small);

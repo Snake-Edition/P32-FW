@@ -494,7 +494,7 @@ string_view_utf8 DialogLoadUnload::get_name(LoadUnloadMode mode) {
     }
 
     // In case we get some invalid data
-    return string_view_utf8::MakeCPUFLASH((const uint8_t *)"Index error");
+    return string_view_utf8::MakeCPUFLASH("Index error");
 }
 
 float DialogLoadUnload::deserialize_progress(fsm::PhaseData data) const {

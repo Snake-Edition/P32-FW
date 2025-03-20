@@ -72,7 +72,7 @@ screen_splash_data_t::screen_splash_data_t()
     text_progress.SetTextColor(COLOR_GRAY);
 
     snprintf(text_progress_buffer, sizeof(text_progress_buffer), "Firmware %s", version::project_version_full);
-    text_progress.SetText(string_view_utf8::MakeRAM((uint8_t *)text_progress_buffer));
+    text_progress.SetText(string_view_utf8::MakeRAM(text_progress_buffer));
     progress.SetProgressPercent(0);
 
 #if ENABLED(POWER_PANIC)
@@ -224,10 +224,10 @@ void screen_splash_data_t::draw() {
 #ifdef _DEBUG
     static const char dbg[] = "DEBUG";
     #if HAS_MINI_DISPLAY()
-    display::draw_text(Rect16(180, 91, 60, 16), string_view_utf8::MakeCPUFLASH((const uint8_t *)dbg), Font::small, COLOR_BLACK, COLOR_RED);
+    display::draw_text(Rect16(180, 91, 60, 16), string_view_utf8::MakeCPUFLASH(dbg), Font::small, COLOR_BLACK, COLOR_RED);
     #endif
     #if HAS_LARGE_DISPLAY()
-    display::draw_text(Rect16(340, 130, 60, 16), string_view_utf8::MakeCPUFLASH((const uint8_t *)dbg), Font::small, COLOR_BLACK, COLOR_RED);
+    display::draw_text(Rect16(340, 130, 60, 16), string_view_utf8::MakeCPUFLASH(dbg), Font::small, COLOR_BLACK, COLOR_RED);
     #endif
 #endif //_DEBUG
 }
@@ -264,13 +264,13 @@ void screen_splash_data_t::windowEvent([[maybe_unused]] window_t *sender, GUI_ev
         // If such a process description is not available (e.g: fw_gui_splash_progress()) - draw FW version (only once to avoid flickering)
         if (un.pGUIStartupProgress->bootstrap_description.has_value()) {
             strlcpy(text_progress_buffer, un.pGUIStartupProgress->bootstrap_description.value(), sizeof(text_progress_buffer));
-            text_progress.SetText(string_view_utf8::MakeRAM((uint8_t *)text_progress_buffer));
+            text_progress.SetText(string_view_utf8::MakeRAM(text_progress_buffer));
             text_progress.Invalidate();
             version_displayed = false;
         } else {
             if (!version_displayed) {
                 snprintf(text_progress_buffer, sizeof(text_progress_buffer), "Firmware %s", version::project_version_full);
-                text_progress.SetText(string_view_utf8::MakeRAM((uint8_t *)text_progress_buffer));
+                text_progress.SetText(string_view_utf8::MakeRAM(text_progress_buffer));
                 text_progress.Invalidate();
                 version_displayed = true;
             }

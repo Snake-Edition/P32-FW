@@ -31,7 +31,7 @@ ScreenPrintPreview::ScreenPrintPreview()
     ClrMenuTimeoutClose();
 
     //  this MakeRAM is safe - gcode_file_name is set to vars->media_LFN, which is statically allocated in RAM
-    title_text.SetText(string_view_utf8::MakeRAM((const uint8_t *)gcode.GetGcodeFilename()));
+    title_text.SetText(string_view_utf8::MakeRAM(gcode.GetGcodeFilename()));
 
     CaptureNormalWindow(radio);
 }
@@ -85,7 +85,7 @@ void ScreenPrintPreview::Change(fsm::BaseData data) {
 
     case PhasesPrintPreview::new_firmware_available: {
         const auto version = GCodeInfo::getInstance().get_valid_printer_settings().latest_fw_version;
-        pMsgbox = makeMsgBox(_(txt_new_fw_available), string_view_utf8::MakeRAM(reinterpret_cast<const uint8_t *>(version)));
+        pMsgbox = makeMsgBox(_(txt_new_fw_available), string_view_utf8::MakeRAM(version));
         break;
     }
 

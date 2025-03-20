@@ -16,7 +16,7 @@ FILETranslationProvider::FILETranslationProvider(const char *path)
 string_view_utf8 FILETranslationProvider::GetText(const char *key) const {
     // check if file is valid, if not try to open it again
     if (!EnsureFile()) {
-        return string_view_utf8::MakeCPUFLASH((const uint8_t *)key);
+        return string_view_utf8::MakeCPUFLASH(key);
     }
 
     // find translation for key, if not found return the original string
@@ -27,7 +27,7 @@ string_view_utf8 FILETranslationProvider::GetText(const char *key) const {
         m_File = nullptr;
         [[fallthrough]];
     case gettext_hash_table::TranslationNotFound:
-        return string_view_utf8::MakeCPUFLASH((const uint8_t *)key);
+        return string_view_utf8::MakeCPUFLASH(key);
     default:
         return string_view_utf8::MakeFILE(m_File, offset);
     }

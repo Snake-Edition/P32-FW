@@ -41,7 +41,7 @@ int FooterItemHeatBreak::static_readValue() {
 string_view_utf8 FooterItemHeatBreak::static_makeView(int value) {
     // Show --- if no tool is picked
     if (value == no_tool_value) {
-        return string_view_utf8::MakeCPUFLASH(reinterpret_cast<const uint8_t *>(no_tool_str));
+        return string_view_utf8::MakeCPUFLASH(no_tool_str);
     }
 
     static constexpr bool print_tenths = false; // change if needed better precision
@@ -56,5 +56,5 @@ string_view_utf8 FooterItemHeatBreak::static_makeView(int value) {
     } else {
         snprintf(buff, sizeof(buff), str, value_to_print);
     }
-    return string_view_utf8::MakeRAM((const uint8_t *)buff);
+    return string_view_utf8::MakeRAM(buff);
 }

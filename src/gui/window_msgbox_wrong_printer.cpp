@@ -87,7 +87,7 @@ MsgBoxInvalidPrinter::MsgBoxInvalidPrinter(Rect16 rect, const string_view_utf8 &
         unsupported_features.text.SetRect(text_rect);
         text_rect += Rect16::Top_t(item_h);
         text_rect += Rect16::Left_t(10);
-        unsupported_features_text.SetText(string_view_utf8::MakeRAM((uint8_t *)valid_printer_settings.unsupported_features_text));
+        unsupported_features_text.SetText(string_view_utf8::MakeRAM(valid_printer_settings.unsupported_features_text));
         unsupported_features_text.SetRect(text_rect);
     } else {
         unsupported_features_text.Hide();

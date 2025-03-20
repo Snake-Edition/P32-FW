@@ -19,14 +19,14 @@ IFooterItemFan::buffer_t FooterItemHeatBreakFan::buffer;
 string_view_utf8 IFooterItemFan::static_makeViewIntoBuff(int value, buffer_t &buff) {
     // Show --- if no tool is picked
     if (value == no_tool_value) {
-        return string_view_utf8::MakeCPUFLASH(reinterpret_cast<const uint8_t *>(no_tool_str));
+        return string_view_utf8::MakeCPUFLASH(no_tool_str);
     }
 
     buff.fill('\0');
     uint value_clamped = std::clamp(value, 0, max_rpm);
     snprintf(buff.data(), buff.size(), "%urpm", value_clamped);
 
-    return string_view_utf8::MakeRAM((const uint8_t *)buff.data());
+    return string_view_utf8::MakeRAM(buff.data());
 }
 
 IFooterItemFan::IFooterItemFan(window_t *parent, const img::Resource *icon, view_maker_cb view_maker, reader_cb value_reader)

@@ -32,7 +32,7 @@ string_view_utf8 FooterItemAxisPos<AXIS>::static_makeViewIntoBuff(float value) {
     if (printed_chars < 1) {
         buff[0] = '\0';
     }
-    return string_view_utf8::MakeRAM((const uint8_t *)buff.data());
+    return string_view_utf8::MakeRAM(buff.data());
 }
 
 template <size_t AXIS>
@@ -64,7 +64,7 @@ string_view_utf8 FooterItemAxisCurrPos<AXIS>::static_makeViewIntoBuff(float valu
     if (printed_chars < 1) {
         buff[0] = '\0';
     }
-    return string_view_utf8::MakeRAM((const uint8_t *)buff.data());
+    return string_view_utf8::MakeRAM(buff.data());
 }
 template <size_t AXIS>
 float FooterItemAxisCurrPos<AXIS>::static_readValue() {

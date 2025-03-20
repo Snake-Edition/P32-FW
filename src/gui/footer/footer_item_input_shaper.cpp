@@ -29,7 +29,7 @@ string_view_utf8 FooterItemInputShaperX::static_makeViewIntoBuff(int value) {
         if (printed_chars < 1) {
             buff[0] = '\0';
         }
-        return string_view_utf8::MakeRAM((const uint8_t *)buff.data());
+        return string_view_utf8::MakeRAM(buff.data());
     } else {
         return _(str_disabled);
     }
@@ -57,7 +57,7 @@ string_view_utf8 FooterItemInputShaperY::static_makeViewIntoBuff(int value) {
         if (printed_chars < 1) {
             buff[0] = '\0';
         }
-        return string_view_utf8::MakeRAM((const uint8_t *)buff.data());
+        return string_view_utf8::MakeRAM(buff.data());
     } else {
         return _(str_disabled);
     }

@@ -126,7 +126,7 @@ namespace frame {
     public:
         explicit Introduction(window_t *parent)
             : text { parent, FrameQRLayout::text_rect(), is_multiline::yes, is_closed_on_click_t::no, _(txt_learn_more) }
-            , link { parent, FrameQRLayout::link_rect(), is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH(reinterpret_cast<const uint8_t *>(ADDR_IN_TEXT)) }
+            , link { parent, FrameQRLayout::link_rect(), is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH(ADDR_IN_TEXT) }
             , icon_phone { parent, FrameQRLayout::phone_icon_rect(), &img::hand_qr_59x72 }
             , qr { parent, FrameQRLayout::qrcode_rect(), Align_t::Center(), QR_ADDR } {
         }

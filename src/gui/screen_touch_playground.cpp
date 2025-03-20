@@ -9,7 +9,7 @@ ScreenTouchPlayground::ScreenTouchPlayground()
     , touch_rect(this, {}) {
 
     text.set_font(Font::normal);
-    text.SetText(string_view_utf8::MakeRAM(reinterpret_cast<const uint8_t *>(text_content.data())));
+    text.SetText(string_view_utf8::MakeRAM(text_content.data()));
 }
 
 void ScreenTouchPlayground::windowEvent(window_t *sender, GUI_event_t event, void *param) {

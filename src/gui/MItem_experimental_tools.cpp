@@ -10,7 +10,7 @@
 #include "img_resources.hpp"
 #include <gui/menu_vars.h>
 
-#define NOTRAN(x) string_view_utf8::MakeCPUFLASH((const uint8_t *)x)
+#define NOTRAN(x) string_view_utf8::MakeCPUFLASH(x)
 
 #if PRINTER_IS_PRUSA_MK3_5()
 /*****************************************************************************/

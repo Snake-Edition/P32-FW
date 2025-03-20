@@ -82,7 +82,7 @@ void SelftestFrameLoadcell::change() {
         } else {
             snprintf(txt_big_buffer, std::size(txt_big_buffer), "%u \xC2\xB0\x43", static_cast<unsigned int>(temperature));
         }
-        txt_big = string_view_utf8::MakeRAM(reinterpret_cast<uint8_t *>(txt_big_buffer));
+        txt_big = string_view_utf8::MakeRAM(txt_big_buffer);
         txt_big_blink = true;
 
         break;
@@ -105,7 +105,7 @@ void SelftestFrameLoadcell::change() {
         icon_id = &img::hand_with_nozzle1_154x100;
 
         snprintf(txt_big_buffer, std::size(txt_big_buffer), "%u s", static_cast<unsigned int>(std::clamp<uint8_t>(dt.countdown, 0, 5)));
-        txt_big = string_view_utf8::MakeRAM(reinterpret_cast<uint8_t *>(txt_big_buffer));
+        txt_big = string_view_utf8::MakeRAM(txt_big_buffer);
         txt_phase = N_("Tap the nozzle on beep");
 
         break;

@@ -81,7 +81,7 @@ string_view_utf8 FooterItemHeater::static_makeViewIntoBuff(int value, buffer_t &
             buff[printed_chars] = ' ';
         }
     }
-    return string_view_utf8::MakeRAM((const uint8_t *)buff.data());
+    return string_view_utf8::MakeRAM(buff.data());
 }
 
 FooterItemHeater::HeatState FooterItemHeater::getState(int current, int target, int display, int cold) {

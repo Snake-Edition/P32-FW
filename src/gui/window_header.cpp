@@ -161,7 +161,7 @@ void window_header_t::updateTransfer() {
     }
     if (transfer_progress && transfer_val_on && (transfer_progress != last_transfer_progress || transfer_has_issue != last_transfer_has_issue)) {
         snprintf(transfer_str, sizeof(transfer_str), "%d%%", transfer_progress.value());
-        transfer_val.SetText(string_view_utf8::MakeRAM((const uint8_t *)transfer_str));
+        transfer_val.SetText(string_view_utf8::MakeRAM(transfer_str));
         transfer_val.SetTextColor(transfer_has_issue ? COLOR_ORANGE : COLOR_WHITE);
         transfer_val.Invalidate();
     }
@@ -213,7 +213,7 @@ void window_header_t::update_bed_info() {
     }
 
     snprintf(bed_str, sizeof(bed_str), "%d\xC2\xB0\x43", static_cast<int>(marlin_vars().temp_bed.get()));
-    bed_text.SetText(string_view_utf8::MakeRAM((const uint8_t *)bed_str));
+    bed_text.SetText(string_view_utf8::MakeRAM(bed_str));
     bed_text.Invalidate();
 }
 
@@ -333,7 +333,7 @@ window_header_t::window_header_t(window_t *parent, const string_view_utf8 &txt)
     time_val.set_font(GuiDefaults::HeaderTextFont);
     time_val.SetAlignment(Align_t::RightCenter());
     time_tools::update_time();
-    time_val.SetText(string_view_utf8::MakeRAM((const uint8_t *)time_tools::get_time()));
+    time_val.SetText(string_view_utf8::MakeRAM(time_tools::get_time()));
 
     icon_metrics.SetAlignment(Align_t::LeftCenter());
 #endif /* !HAS_MINI_DISPLAY() */
