@@ -12,14 +12,13 @@
 
 #if USE_SENSORLESS
 /**
- * Disable creash detection
+ * Enable crash detection
  * @param axis Physical axis
- * @param restore_stealth will set stealth mode (quiet mode)
  */
 bool enable_crash_detection(AxisEnum axis);
 
 /**
- * Disable creash detection
+ * Disable crash detection
  * @param axis Physical axis
  * @param restore_stealth will set stealth mode (quiet mode)
  */
