@@ -165,6 +165,7 @@ constexpr EnumArray<PresetFilamentType, FilamentTypeParameters, PresetFilamentTy
             .chamber_target_temperature = 25,
             .requires_filtration = true,
 #endif
+            .is_flexible = true,
         },
     },
     {
@@ -295,6 +296,7 @@ FilamentTypeParameters FilamentType::parameters() const {
             .requires_filtration = e1.requires_filtration,
 #endif
             .is_abrasive = e1.is_abrasive,
+            .is_flexible = e1.is_flexible,
         };
     };
 
@@ -346,6 +348,7 @@ void FilamentType::set_parameters(const FilamentTypeParameters &set) const {
         .requires_filtration = set.requires_filtration,
 #endif
         .is_abrasive = set.is_abrasive,
+        .is_flexible = set.is_flexible,
     };
 #if HAS_CHAMBER_API()
     const FilamentTypeParameters_EEPROM2 e2 {
