@@ -63,9 +63,10 @@ exclude: |
        (gcode/)?feature/pressure_advance/|
        (gcode/)?feature/precise_stepping/|
        (gcode/)?feature/phase_stepping/|
-       module/prusa/|
-       module/stepper\.|
        gcode/calibrate/M958\.|
+       module/prusa/|
+       module/stepper/indirection\.cpp$|
+       module/stepper\.|
        gcode/temperature/M106_M107\.cpp$|
        bedlevel/ubl/G29\.cpp$|
        $ # LAST LINE OF THE GROUP, DON'T FORGET TO ADD "OR" AT THE END OF YOURS
