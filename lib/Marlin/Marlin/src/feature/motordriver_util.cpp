@@ -254,9 +254,9 @@ enum class BusOwner {
     ISR = 2
 };
 
-std::atomic<BusOwner> motor_bus_owner = BusOwner::NOBODY;
-std::atomic<bool> motor_bus_requested = false;
-std::atomic<bool> motor_bus_isr_starved = false;
+static std::atomic<BusOwner> motor_bus_owner = BusOwner::NOBODY;
+static std::atomic<bool> motor_bus_requested = false;
+static std::atomic<bool> motor_bus_isr_starved = false;
 
 /// Acquire lock for mutual exclusive access to the motor's serial port
 static inline bool motor_serial_lock_acquire_impl() {
