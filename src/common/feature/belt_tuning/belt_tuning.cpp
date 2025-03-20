@@ -1,6 +1,7 @@
 #include "belt_tuning.hpp"
 #include "printer_belt_parameters.hpp"
 
+#include <Marlin/src/Marlin.h>
 #include <Marlin/src/gcode/calibrate/M958.hpp>
 #include <Marlin/src/gcode/gcode.h>
 #include <logging/log.hpp>
