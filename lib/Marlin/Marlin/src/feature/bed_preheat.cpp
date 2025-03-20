@@ -4,7 +4,7 @@
 #include "../../module/temperature.h"
 #include "../../gcode/gcode.h"
 #include "../../lcd/ultralcd.h"
-#include "../../../marlin_stubs/skippable_gcode.hpp"
+#include "../marlin_stubs/skippable_gcode.hpp"
 
 #include <feature/print_status_message/print_status_message_guard.hpp>
 
