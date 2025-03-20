@@ -352,7 +352,8 @@ set_feature_for_printers(HAS_AUTO_RETRACT "COREONE")
 # Printers that support any form of backwards gcode compatibility modes
 set_feature_for_printers(HAS_GCODE_COMPATIBILITY "MK3.5" "MK4" "COREONE")
 
-# Checks for bed evenness during G29 and if it's too uneven, offers Z alignment calibration
+# Checks for bed evenness during G29 and if it's too uneven, offers Z alignment calibration.
+# Requires SELFTEST to work
 set_feature_for_printers(HAS_UNEVEN_BED_PROMPT "COREONE")
 
 set_feature_for_printers(HAS_DOOR_SENSOR_CALIBRATION "COREONE")
@@ -389,10 +390,12 @@ set_feature_for_printers(HAS_SHEET_SUPPORT "MINI" "MK3.5")
 set_feature_for_printers(HAS_NFC "MK3.5" "MK4" "COREONE")
 
 set_feature_for_printers(HAS_NOZZLE_CLEANER "iX")
+# BELT_TUNING requires SELFTEST
 set_feature_for_printers(HAS_BELT_TUNING "XL" "iX")
 set_feature_for_printers_master_board(HAS_I2C_EXPANDER "MK3.5" "MK4" "COREONE")
 set_feature_for_printers(HAS_WASTEBIN "iX")
 set_feature_for_printers_master_board(HAS_PRINT_FAN_TYPE "XL")
+# GEARBOX_ALIGNMENT requires SELFTEST
 set_feature_for_printers_master_board(HAS_GEARBOX_ALIGNMENT "MK4" "COREONE" "XL")
 set_feature_for_printers_master_board(HAS_MANUAL_CHAMBER_VENTS "COREONE")
 
