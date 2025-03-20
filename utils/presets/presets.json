@@ -155,6 +155,26 @@
             }
         },
         {
+            "name": "xl-minimal",
+            "description": "Original Prusa XL with optional features removed",
+            "cacheVariables": {
+                "PRINTER": "XL",
+                "BOARD": "XLBUDDY",
+                "DWARF_BINARY_DIR": {
+                    "type": "FILEPATH",
+                    "value": "build-vscode-dwarf"
+                },
+                "MODULARBED_BINARY_DIR": {
+                    "type": "FILEPATH",
+                    "value": "build-vscode-modularbed"
+                },
+                "HAS_BELT_TUNING":false,
+                "HAS_GEARBOX_ALIGNMENT":false,
+                "HAS_INPUT_SHAPER_CALIBRATION":false,
+                "HAS_SELFTEST":false
+            }
+        },
+        {
             "name": "xl_dev_kit",
             "description": "Original Prusa xl_dev_kit",
             "cacheVariables": {
