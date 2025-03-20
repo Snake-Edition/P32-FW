@@ -28,19 +28,11 @@
 
 #if ENABLED(CRASH_RECOVERY)
     #include "screen_crash_recovery.hpp"
-using CrashRecovery = ScreenCrashRecovery;
-#else
-    #include "screen_dialog_does_not_exist.hpp"
-using CrashRecovery = ScreenDialogDoesNotExist;
 #endif
 
 #include <option/has_serial_print.h>
 #if HAS_SERIAL_PRINT()
     #include "screen_printing_serial.hpp"
-using SerialPrint = screen_printing_serial_data_t;
-#else
-    #include "screen_dialog_does_not_exist.hpp"
-using SerialPrint = ScreenDialogDoesNotExist;
 #endif
 
 #if HAS_PHASE_STEPPING()
@@ -130,7 +122,7 @@ struct FSMPrintDef {
 
         if constexpr (fsm == ClientFSM::Serial_printing) {
             Screens::Access()->ClosePrinting();
-            Screens::Access()->Open(ScreenFactory::Screen<SerialPrint>);
+            Screens::Access()->Open(ScreenFactory::Screen<screen_printing_serial_data_t>);
 
         } else if constexpr (fsm == ClientFSM::Printing) {
             Screens::Access()->CloseAll();

@@ -43,7 +43,6 @@ target_sources(
           screen_blue_error.cpp
           screen_bsod.cpp
           screen_change_filter.cpp
-          screen_dialog_does_not_exist.cpp
           screen_filebrowser.cpp
           screen_hardfault.cpp
           screen_help_fw_update.cpp
