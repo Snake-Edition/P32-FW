@@ -263,7 +263,18 @@ set_feature_for_printers(
   "XL_DEV_KIT"
   "COREONE"
   )
-set_feature_for_printers(
+set_feature_for_printers_master_board(
+  HAS_PAUSE
+  "MINI"
+  "MK4"
+  "MK3.5"
+  "iX"
+  "XL"
+  "XL_DEV_KIT"
+  "COREONE"
+  )
+# CRASH_DETECTION requires SELFTEST to work
+set_feature_for_printers_master_board(
   HAS_CRASH_DETECTION
   "MINI"
   "MK4"
@@ -271,10 +282,9 @@ set_feature_for_printers(
   "iX"
   "XL"
   "COREONE"
-  ) # this does require
-# selftest to work
-set_feature_for_printers(HAS_POWER_PANIC "MK4" "MK3.5" "iX" "XL" "COREONE") # this does require
-# selftest and crash detection to work
+  )
+# POWER_PANIC requires SELFTEST and CRASH_DETECTION to work
+set_feature_for_printers_master_board(HAS_POWER_PANIC "MK4" "MK3.5" "iX" "XL" "COREONE")
 set_feature_for_printers(HAS_PRECISE_HOMING "MK4" "MK3.5")
 set_feature_for_printers(HAS_PRECISE_HOMING_COREXY "iX" "XL" "XL_DEV_KIT" "COREONE")
 set_feature_for_printers_master_board(HAS_PHASE_STEPPING "XL" "iX" "COREONE" "MK4")

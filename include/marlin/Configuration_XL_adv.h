@@ -25,6 +25,9 @@
 
 #include <buddy/filename_defs.h>
 #include <option/has_burst_stepping.h>
+#include <option/has_crash_detection.h>
+#include <option/has_pause.h>
+#include <option/has_power_panic.h>
 
 /**
  * Configuration_adv.h
@@ -1106,7 +1109,7 @@
  * Requires an LCD display.
  * This feature is required for the default FILAMENT_RUNOUT_SCRIPT.
  */
-#define ADVANCED_PAUSE_FEATURE
+#define ADVANCED_PAUSE_FEATURE HAS_PAUSE()
 #if ENABLED(ADVANCED_PAUSE_FEATURE)
    #define FILAMENT_UNLOAD_RAMMING_SEQUENCE \
             { \
@@ -1466,9 +1469,8 @@
  * Recovery from power failure. This is a distinct implementation from
  * POWER_LOSS_RECOVERY specific to Prusa printers.
  */
-#define POWER_PANIC
-
-#ifdef POWER_PANIC
+#define POWER_PANIC HAS_POWER_PANIC()
+#if ENABLED(POWER_PANIC)
     #define POWER_PANIC_Z_LIFT_CYCLES 4 // 4xFullStep cycles = ~0.64mm
     #define POWER_PANIC_MAX_BED_DIFF 10 // Maximum bed temperature (C) difference for auto-recovery
 
@@ -1543,8 +1545,8 @@
      * Provides crash detection during printing and proper crash recovery.
      * Sensorless homing must be turned on and sensitivities set accordingly.
      */
-    #define CRASH_RECOVERY
-    #ifdef CRASH_RECOVERY
+    #define CRASH_RECOVERY HAS_CRASH_DETECTION()
+    #if ENABLED(CRASH_RECOVERY)
         #define CRASH_STALL_GUARD { 2, 2 } // internal value representing sensitivity
         #define CRASH_MAX_PERIOD { STALL_THRESHOLD_TMC2130, STALL_THRESHOLD_TMC2130 }
         #define CRASH_FILTER (false)       // Stallguard filtering for crash detection

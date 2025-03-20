@@ -22,6 +22,7 @@
 #pragma once
 
 #include <cmath>
+#include <option/has_pause.h>
 
 // clang-format off
 
@@ -1126,7 +1127,7 @@
  * Requires an LCD display.
  * This feature is required for the default FILAMENT_RUNOUT_SCRIPT.
  */
-//#define ADVANCED_PAUSE_FEATURE
+#define ADVANCED_PAUSE_FEATURE HAS_PAUSE()
 #if ENABLED(ADVANCED_PAUSE_FEATURE)
     #define FILAMENT_UNLOAD_RAMMING_SEQUENCE \
         { \
