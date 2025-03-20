@@ -41,11 +41,13 @@ void CurrentStore::perform_config_check() {
     /// Whether this is the first run of the printer after assembly/factory reset
     [[maybe_unused]] const bool is_first_run = (config_store_init_result() == InitResult::cold_start);
 
+#if HAS_SELFTEST()
     // Do not show pritner setup screen if the user has run any selftests
     // This is for backwards compatibility - we don't want to show the screen after the firmware update introducing it for already configured printers
     if (selftest_result.get() != selftest_result.default_val) {
         printer_setup_done.set(true);
     }
+#endif
 
     // We cannot change a default value of config store items for backwards compatibility reasons.
     // So this is a place to instead set them to something for new installations
@@ -115,7 +117,7 @@ void CurrentStore::perform_config_migrations() {
     }
 #endif
 
-#if PRINTER_IS_PRUSA_MK4() || PRINTER_IS_PRUSA_COREONE()
+#if HAS_SELFTEST() && (PRINTER_IS_PRUSA_MK4() || PRINTER_IS_PRUSA_COREONE())
     if (should_migrate<2>()) {
         // We've introduced a gearbox alignment for XL, this means that gear alignment test must exist for every toolhead available
         // This created a need for gear test refactoring

@@ -97,7 +97,7 @@ public:
     void click(IWindowMenu &) override;
 };
 
-#if FILAMENT_SENSOR_IS_ADC()
+#if HAS_SELFTEST() && FILAMENT_SENSOR_IS_ADC()
 class MI_CALIBRATE_FILAMENT_SENSORS : public MI_TOOLHEAD_SPECIFIC<MI_CALIBRATE_FILAMENT_SENSORS, IWindowMenuItem> {
 public:
     MI_CALIBRATE_FILAMENT_SENSORS(Toolhead toolhead = default_toolhead);
@@ -159,7 +159,7 @@ using ScreenToolheadDetail_ = ScreenMenu<EFooter::Off,
     #endif
 
 #endif
-#if FILAMENT_SENSOR_IS_ADC()
+#if HAS_SELFTEST() && FILAMENT_SENSOR_IS_ADC()
     MI_CALIBRATE_FILAMENT_SENSORS,
 #endif
     MI_FILAMENT_SENSORS>;

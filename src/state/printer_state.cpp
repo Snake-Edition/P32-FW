@@ -191,8 +191,10 @@ DeviceState get_state(bool ready) {
 #endif
     case ClientFSM::QuickPause:
         return DeviceState::Paused;
+#if HAS_SELFTEST()
     case ClientFSM::Selftest:
     case ClientFSM::FansSelftest:
+#endif
     case ClientFSM::NetworkSetup:
 #if HAS_COLDPULL()
     case ClientFSM::ColdPull:
@@ -385,8 +387,10 @@ StateWithDialog get_state_with_dialog(bool ready) {
     case ClientFSM::Serial_printing:
         break;
 
+#if HAS_SELFTEST()
     case ClientFSM::Selftest:
     case ClientFSM::FansSelftest:
+#endif
     case ClientFSM::NetworkSetup:
 #if HAS_COLDPULL()
     case ClientFSM::ColdPull:

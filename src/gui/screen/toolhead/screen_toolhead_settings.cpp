@@ -254,7 +254,7 @@ void MI_FILAMENT_SENSORS::click(IWindowMenu &) {
     Screens::Access()->Open(ScreenFactory::ScreenWithArg<ScreenToolheadDetailFS>(toolhead()));
 }
 
-#if FILAMENT_SENSOR_IS_ADC()
+#if HAS_SELFTEST() && FILAMENT_SENSOR_IS_ADC()
 // * MI_CALIBRATE_FILAMENT_SENSORS
 MI_CALIBRATE_FILAMENT_SENSORS::MI_CALIBRATE_FILAMENT_SENSORS(Toolhead toolhead)
     : MI_TOOLHEAD_SPECIFIC(toolhead, string_view_utf8()) {
@@ -309,7 +309,7 @@ ScreenToolheadDetail::ScreenToolheadDetail(Toolhead toolhead)
         container.Item<MI_NOZZLE_OFFSET>().set_is_hidden();
         container.Item<MI_PICK_PARK>().set_is_hidden();
 #endif
-#if FILAMENT_SENSOR_IS_ADC()
+#if HAS_SELFTEST() && FILAMENT_SENSOR_IS_ADC()
         container.Item<MI_CALIBRATE_FILAMENT_SENSORS>().set_is_hidden();
 #endif
     }

@@ -8,7 +8,6 @@ target_sources(
           M123.cpp
           M1702.cpp
           M1703.cpp
-          M1978.cpp
           M300.cpp
           M330.cpp
           M340.cpp
@@ -54,7 +53,7 @@ if(HAS_NOZZLE_CLEANER)
 endif()
 
 if(HAS_SELFTEST)
-  target_sources(firmware PRIVATE G162.cpp G163.cpp)
+  target_sources(firmware PRIVATE G162.cpp G163.cpp M1978.cpp)
 endif()
 
 if(HAS_LEDS)

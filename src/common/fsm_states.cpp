@@ -19,8 +19,10 @@ static constexpr uint32_t score(ClientFSM fsm_type) {
 
     case ClientFSM::Serial_printing:
     case ClientFSM::Printing:
+#if HAS_SELFTEST()
     case ClientFSM::Selftest:
     case ClientFSM::FansSelftest:
+#endif
 #if HAS_GEARBOX_ALIGNMENT()
     case ClientFSM::GearboxAlignment:
 #endif

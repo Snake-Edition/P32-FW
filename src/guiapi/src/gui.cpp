@@ -14,7 +14,6 @@
 #include "knob_event.hpp"
 #include "marlin_client.hpp"
 #include "sw_timer.hpp"
-#include <gui/screen_menu_selftest_snake.hpp>
 #include <logging/log.hpp>
 #include "display_hw_checks.hpp"
 #if XL_ENCLOSURE_SUPPORT()
@@ -32,6 +31,10 @@
 
 #if HAS_MINI_DISPLAY()
     #include "st7789v.hpp"
+#endif
+
+#if HAS_SELFTEST()
+    #include <gui/screen_menu_selftest_snake.hpp>
 #endif
 
 LOG_COMPONENT_REF(GUI);
@@ -197,8 +200,10 @@ void gui_loop(void) {
     gui_redraw();
     marlin_client::loop();
     GuiMediaEventsHandler::Tick();
+#if HAS_SELFTEST()
     if (marlin_client::event_clr(marlin_server::Event::RequestCalibrationsScreen)) {
         Screens::Access()->Open<ScreenMenuSTSCalibrations>();
     }
+#endif
     --guiloop_nesting;
 }

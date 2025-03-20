@@ -12,7 +12,6 @@ endif()
 target_sources(
   firmware
   PRIVATE auto_layout.cpp
-          box_unfinished_selftest.cpp
           file_sort.cpp
           fonts.cpp
           frame_calibration_common.cpp
@@ -137,8 +136,8 @@ endif()
 if(HAS_SELFTEST)
   add_subdirectory(wizard)
   target_sources(
-    firmware PRIVATE MItem_basic_selftest.cpp screen_menu_selftest_snake.cpp ScreenSelftest.cpp
-                     selftest_frame.cpp
+    firmware PRIVATE box_unfinished_selftest.cpp MItem_basic_selftest.cpp
+                     screen_menu_selftest_snake.cpp ScreenSelftest.cpp selftest_frame.cpp
     )
 endif()
 

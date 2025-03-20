@@ -124,7 +124,7 @@ screen_splash_data_t::screen_splash_data_t()
 
             return true;
         }();
-#else
+#elif HAS_SELFTEST()
     const bool run_wizard = false;
 #endif
 

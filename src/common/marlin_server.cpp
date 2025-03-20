@@ -113,6 +113,7 @@
 #if HAS_SELFTEST()
     #include "printer_selftest.hpp"
     #include "i_selftest.hpp"
+    #include "selftest_axis.h"
 #endif
 
 #if HAS_SHEET_PROFILES()
@@ -122,7 +123,6 @@
 #if ENABLED(CRASH_RECOVERY)
     #include "../Marlin/src/feature/prusa/crash_recovery.hpp"
     #include "crash_recovery_type.hpp"
-    #include "selftest_axis.h"
 #endif
 
 #if ENABLED(POWER_PANIC)
@@ -3146,10 +3146,14 @@ bool _process_server_valid_request(const Request &request, int client_id) {
         }
         return true;
     case Request::Type::TestStart:
+#if HAS_SELFTEST()
         marlin_server::test_start(
             request.test_start.test_mask,
             selftest::deserialize_test_data_from_int(request.test_start.test_data_index, request.test_start.test_data_data));
         return true;
+#else
+        return false;
+#endif
     }
     bsod("Unknown request %d", std::to_underlying(request.type));
 }

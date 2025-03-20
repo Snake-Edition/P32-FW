@@ -484,8 +484,12 @@ PrintPreview::Result PrintPreview::Loop() {
             break;
         }
 
+#if HAS_SELFTEST()
         // We're ready to print now
         ChangeState((skip_if_able > marlin_server::PreviewSkipIfAble::no) ? stateFromSelftestCheck() : State::preview_wait_user);
+#else
+        ChangeState(State::preview_wait_user);
+#endif
         break;
     }
 
@@ -789,11 +793,12 @@ void PrintPreview::Init() {
 }
 
 IPrintPreview::State PrintPreview::stateFromSelftestCheck() {
+#if HAS_SELFTEST()
     if (!selftest_warning_selftest_finished()) {
         return State::unfinished_selftest_wait_user;
-    } else {
-        return stateFromUpdateCheck();
     }
+#endif
+    return stateFromUpdateCheck();
 }
 
 IPrintPreview::State PrintPreview::stateFromUpdateCheck() {

@@ -33,8 +33,8 @@ enum class ClientFSM : uint8_t {
     Preheat,
     #if HAS_SELFTEST()
     Selftest,
-    #endif
     FansSelftest,
+    #endif
     NetworkSetup,
     Printing, // not a dialog
     #if ENABLED(CRASH_RECOVERY)

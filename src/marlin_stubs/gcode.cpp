@@ -278,9 +278,11 @@ bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
             PrusaGcodeSuite::M1977();
             break;
 #endif
+#if HAS_SELFTEST()
         case 1978:
             PrusaGcodeSuite::M1978();
             break;
+#endif
 #if HAS_GEARBOX_ALIGNMENT()
         case 1979:
             PrusaGcodeSuite::M1979();
@@ -330,12 +332,14 @@ bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
         case 64:
             PrusaGcodeSuite::G64();
             break;
+#if HAS_SELFTEST()
         case 162:
             PrusaGcodeSuite::G162();
             break;
         case 163:
             PrusaGcodeSuite::G163();
             break;
+#endif
         default:
             processed = false;
             break;

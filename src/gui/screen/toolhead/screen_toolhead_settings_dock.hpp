@@ -18,17 +18,22 @@ public:
     static void store_value_impl(ToolheadIndex ix, float set);
 };
 
+#if HAS_SELFTEST()
 class MI_DOCK_CALIBRATE : public MI_TOOLHEAD_SPECIFIC<MI_DOCK_CALIBRATE, IWindowMenuItem> {
 public:
     MI_DOCK_CALIBRATE(Toolhead toolhead = default_toolhead);
     void click(IWindowMenu &);
 };
+#endif
 
 using ScreenToolheadDetailDock_ = ScreenMenu<EFooter::Off,
     MI_RETURN,
     MI_DOCK_X,
-    MI_DOCK_Y,
-    MI_DOCK_CALIBRATE //
+    MI_DOCK_Y //
+#if HAS_SELFTEST()
+    ,
+    MI_DOCK_CALIBRATE
+#endif
     >;
 
 class ScreenToolheadDetailDock : public ScreenToolheadDetailDock_ {

@@ -4,9 +4,12 @@
 #include "marlin_client.hpp"
 #include "WindowMenuSpin.hpp"
 #include "window_msgbox.hpp"
-#include "ScreenSelftest.hpp"
 #include <filament_sensors_handler.hpp>
 #include <mmu2/fail_bucket.hpp>
+
+#if HAS_SELFTEST()
+    #include "ScreenSelftest.hpp"
+#endif
 
 #include "screen_menu_mmu_preload_to_mmu.hpp"
 #include "screen_menu_mmu_load_test_filament.hpp"
@@ -176,8 +179,8 @@ static bool flip_mmu_rework([[maybe_unused]] bool flip_mmu_at_the_end) {
 
     config_store().is_mmu_rework.set(set_mmu_rework);
 
-// The FS is not calibrated on MK3.5
-#if !PRINTER_IS_PRUSA_MK3_5()
+    // The FS is not calibrated on MK3.5
+#if HAS_SELFTEST() && !PRINTER_IS_PRUSA_MK3_5()
     const auto fsstate = GetExtruderFSensor(0)->get_state();
     GetExtruderFSensor(0)->SetInvalidateCalibrationFlag();
 

@@ -315,11 +315,13 @@ void screen_home_data_t::on_enter() {
     }
     first_event = false;
 
+#if HAS_SELFTEST()
     static bool first_time_check_st { true };
     if (first_time_check_st) {
         first_time_check_st = false;
         warn_unfinished_selftest_msgbox();
     }
+#endif
 
 #if !DEVELOPER_MODE()
     handle_crash_dump();
