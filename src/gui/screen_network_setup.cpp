@@ -151,7 +151,7 @@ public:
         , wifi_index_(wifi_index)
         , needs_password_(needs_password) {
         strlcpy(ssid_.data(), ssid, ssid_.size());
-        SetLabel(string_view_utf8::MakeCPUFLASH(ssid_.data()));
+        SetLabel(string_view_utf8::MakeRAM(ssid_.data()));
     }
 
     inline int wifi_index() const {

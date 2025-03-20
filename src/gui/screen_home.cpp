@@ -201,7 +201,7 @@ screen_home_data_t::screen_home_data_t()
 #ifdef _DEBUG
         sb.append_string(" DBG");
 #endif
-        header.SetText(string_view_utf8::MakeCPUFLASH(header_text.data()));
+        header.SetText(string_view_utf8::MakeRAM(header_text.data()));
     }
 
     for (uint8_t row = 0; row < 2; row++) {
