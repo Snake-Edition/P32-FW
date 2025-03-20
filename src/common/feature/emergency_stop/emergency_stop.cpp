@@ -66,14 +66,18 @@ void EmergencyStop::invoke_emergency() {
             set_all_unhomed();
         }
 
-    } else if (!power_panic::ac_fault_triggered) {
+    }
+#if ENABLED(POWER_PANIC)
+    else if (!power_panic::ac_fault_triggered) {
         log_info(EmergencyStop, "PP");
         // Do a "synthetic" power panic. Should stop _right now_ and reboot, then we'll deal with the consequences.
         // Do not beep - BFW-6472
         power_panic::should_beep = false;
         buddy::hw::acFault.triggerIT();
 
-    } else {
+    }
+#endif
+    else {
         log_info(EmergencyStop, "Out of options");
     }
 }
