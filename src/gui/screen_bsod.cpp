@@ -11,8 +11,7 @@ ScreenBsod::ScreenBsod()
     : ScreenBlueError() {
     ///@note No translations on blue screens.
 
-    static const char txt_header[] = "BSOD";
-    header.SetText(string_view_utf8::MakeCPUFLASH(txt_header));
+    header.SetText(string_view_utf8::MakeCPUFLASH("BSOD"));
 
     char *buffer = txt_err_description;
     size_t buffer_remaining = std::size(txt_err_description);

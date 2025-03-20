@@ -12,8 +12,7 @@ ScreenWatchdog::ScreenWatchdog()
     : ScreenBlueError() {
     ///@note No translations on blue screens.
 
-    static const char txt_header[] = "WATCHDOG RESET";
-    header.SetText(string_view_utf8::MakeCPUFLASH(txt_header));
+    header.SetText(string_view_utf8::MakeCPUFLASH("WATCHDOG RESET"));
 
     char *buffer;
 

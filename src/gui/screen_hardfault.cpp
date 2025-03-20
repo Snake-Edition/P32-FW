@@ -11,8 +11,7 @@ ScreenHardfault::ScreenHardfault()
     : ScreenBlueError() {
     ///@note No translations on blue screens.
 
-    static const char txt_header[] = "HARDFAULT";
-    header.SetText(string_view_utf8::MakeCPUFLASH(txt_header));
+    header.SetText(string_view_utf8::MakeCPUFLASH("HARDFAULT"));
 
     // Show reason of hardfault as title
     title.SetText(string_view_utf8::MakeCPUFLASH(get_hardfault_reason()));

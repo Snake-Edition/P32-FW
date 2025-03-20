@@ -222,12 +222,11 @@ void screen_splash_data_t::draw() {
     text_progress.Invalidate();
     screen_t::draw(); // We want to draw over bootloader's screen without flickering/redrawing
 #ifdef _DEBUG
-    static const char dbg[] = "DEBUG";
     #if HAS_MINI_DISPLAY()
-    display::draw_text(Rect16(180, 91, 60, 16), string_view_utf8::MakeCPUFLASH(dbg), Font::small, COLOR_BLACK, COLOR_RED);
+    display::draw_text(Rect16(180, 91, 60, 16), string_view_utf8::MakeCPUFLASH("DEBUG"), Font::small, COLOR_BLACK, COLOR_RED);
     #endif
     #if HAS_LARGE_DISPLAY()
-    display::draw_text(Rect16(340, 130, 60, 16), string_view_utf8::MakeCPUFLASH(dbg), Font::small, COLOR_BLACK, COLOR_RED);
+    display::draw_text(Rect16(340, 130, 60, 16), string_view_utf8::MakeCPUFLASH("DEBUG"), Font::small, COLOR_BLACK, COLOR_RED);
     #endif
 #endif //_DEBUG
 }

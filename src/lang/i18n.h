@@ -24,8 +24,7 @@
 ///
 /// Untranslated text (wrapping normal const char * into a string view):
 ///
-///     static const char some_EN_text[] = "this is a text";
-///     string_view_utf8 untranslatedText = string_view_utf8::MakeCPUFLASH(some_EN_text); // this text will NOT be translated
+///     string_view_utf8 untranslatedText = string_view_utf8::MakeCPUFLASH("this is a text"); // this text will NOT be translated
 ///
 /// Using translated text in snprintf:
 ///

@@ -13,8 +13,7 @@ ScreenStackOverflow::ScreenStackOverflow()
     : ScreenBlueError() {
     ///@note No translations on blue screens.
 
-    static const char txt_header[] = "STACK OVERFLOW";
-    header.SetText(string_view_utf8::MakeCPUFLASH(txt_header));
+    header.SetText(string_view_utf8::MakeCPUFLASH("STACK OVERFLOW"));
 
     char *buffer;
 
