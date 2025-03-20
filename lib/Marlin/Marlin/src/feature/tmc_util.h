@@ -193,7 +193,7 @@ class TMCMarlinBase : public TMC, public TMCStorage {
       }
       void stall_max_period(uint32_t max_period){
         max_period = (uint32_t)constrain(max_period, 0, 1048575);
-        TMC2130Stepper::TCOOLTHRS(max_period);
+        TMC::TCOOLTHRS(max_period);
       }
     #endif
 };
