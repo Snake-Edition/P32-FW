@@ -9,10 +9,8 @@
 #include <option/enable_translation_pl.h>
 #include <option/enable_translation_ja.h>
 
-extern "C" size_t strlcpy(char *dst, const char *src, size_t dsize);
-
-FILETranslationProvider::FILETranslationProvider(const char *path) {
-    strlcpy(m_Path, path, sizeof(m_Path));
+FILETranslationProvider::FILETranslationProvider(const char *path)
+    : m_Path { path } {
 }
 
 string_view_utf8 FILETranslationProvider::GetText(const char *key) const {
