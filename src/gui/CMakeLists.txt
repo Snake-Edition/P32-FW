@@ -25,6 +25,7 @@ target_sources(
           lazyfilelist.cpp
           logger.cpp
           menu_vars.cpp
+          MItem_basic_selftest.cpp
           MItem_crash.cpp
           MItem_experimental_tools.cpp
           MItem_filament.cpp
@@ -136,8 +137,8 @@ endif()
 if(HAS_SELFTEST)
   add_subdirectory(wizard)
   target_sources(
-    firmware PRIVATE box_unfinished_selftest.cpp MItem_basic_selftest.cpp
-                     screen_menu_selftest_snake.cpp ScreenSelftest.cpp selftest_frame.cpp
+    firmware PRIVATE box_unfinished_selftest.cpp screen_menu_selftest_snake.cpp ScreenSelftest.cpp
+                     selftest_frame.cpp
     )
 endif()
 
