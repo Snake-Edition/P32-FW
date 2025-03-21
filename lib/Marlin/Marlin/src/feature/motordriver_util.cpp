@@ -299,7 +299,7 @@ extern "C" bool tmc_serial_lock_acquire() {
 
 /// Release lock for mutual exclusive access to the motor's serial port
 static inline void motor_serial_lock_release_impl() {
-    motor_bus_owner.store(BusOwner::NOBODY);
+    motor_bus_owner.store(BusOwner::NOBODY, std::memory_order_relaxed);
     motor_bus_requested = false;
     osMutexRelease(motor_mutex_id);
 }
@@ -316,12 +316,12 @@ extern "C" void tmc_serial_lock_release() {
 bool motor_serial_lock_acquire_isr() {
     BusOwner owner = BusOwner::NOBODY;
     return motor_bus_owner.compare_exchange_weak(owner, BusOwner::ISR,
-        std::memory_order_relaxed,
+        std::memory_order_acquire,
         std::memory_order_relaxed);
 }
 
 void motor_serial_lock_release_isr() {
-    motor_bus_owner.store(BusOwner::NOBODY);
+    motor_bus_owner.store(BusOwner::NOBODY, std::memory_order_release);
 }
 
 bool motor_serial_lock_held_by_isr() {
