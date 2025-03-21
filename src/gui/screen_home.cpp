@@ -141,7 +141,39 @@ const char *labels[] = {
 bool screen_home_data_t::usbWasAlreadyInserted = false;
 bool screen_home_data_t::need_check_wifi_credentials = true;
 
-static bool find_latest_gcode(char *fpath, int fpath_len);
+[[maybe_unused]] static bool find_latest_gcode(char *fpath, int fpath_len) {
+    auto sb = StringBuilder::from_ptr(fpath, fpath_len);
+    sb.append_string("/usb/");
+
+    F_DIR_RAII_Iterator dir(fpath);
+    if (dir.result == ResType::NOK) {
+        return false;
+    }
+
+    // prepare the item at the zeroth position according to sort policy
+    FileSort::Entry entry;
+
+    while (dir.FindNext()) {
+        const FileSort::EntryRef curr(*dir.fno, fpath);
+
+        if (curr.type != FileSort::EntryType::FILE) {
+            continue;
+        }
+
+        if (entry.is_valid() && !FileSort::less_by_time(curr, entry)) {
+            continue;
+        }
+
+        entry.CopyFrom(curr);
+    }
+
+    if (!entry.is_valid()) {
+        return false;
+    }
+
+    sb.append_string(entry.sfn);
+    return sb.is_ok();
+}
 
 static void FilamentBtn_cb(window_t &) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuFilament>);
@@ -492,40 +524,6 @@ void screen_home_data_t::windowEvent(window_t *sender, GUI_event_t event, void *
     // instead of replacing it, leaving NFC enabled.
     update_nfc_state();
 #endif
-}
-
-static bool find_latest_gcode(char *fpath, int fpath_len) {
-    auto sb = StringBuilder::from_ptr(fpath, fpath_len);
-    sb.append_string("/usb/");
-
-    F_DIR_RAII_Iterator dir(fpath);
-    if (dir.result == ResType::NOK) {
-        return false;
-    }
-
-    // prepare the item at the zeroth position according to sort policy
-    FileSort::Entry entry;
-
-    while (dir.FindNext()) {
-        const FileSort::EntryRef curr(*dir.fno, fpath);
-
-        if (curr.type != FileSort::EntryType::FILE) {
-            continue;
-        }
-
-        if (entry.is_valid() && !FileSort::less_by_time(curr, entry)) {
-            continue;
-        }
-
-        entry.CopyFrom(curr);
-    }
-
-    if (!entry.is_valid()) {
-        return false;
-    }
-
-    sb.append_string(entry.sfn);
-    return sb.is_ok();
 }
 
 void screen_home_data_t::printBtnEna() {
