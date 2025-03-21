@@ -3091,6 +3091,14 @@
                     "type": "FILEPATH",
                     "value": "${sourceDir}/build-vscode-modularbed"
                 },
+                "CONNECT": {
+                    "type": "BOOL",
+                    "value": "NO"
+                },
+                "MDNS": {
+                    "type": "BOOL",
+                    "value": "NO"
+                },
                 "HAS_BELT_TUNING": {
                     "type": "BOOL",
                     "value": "NO"
@@ -3161,6 +3169,14 @@
                 "MODULARBED_BINARY_DIR": {
                     "type": "FILEPATH",
                     "value": "${sourceDir}/build-vscode-modularbed"
+                },
+                "CONNECT": {
+                    "type": "BOOL",
+                    "value": "NO"
+                },
+                "MDNS": {
+                    "type": "BOOL",
+                    "value": "NO"
                 },
                 "HAS_BELT_TUNING": {
                     "type": "BOOL",
@@ -3233,6 +3249,14 @@
                     "type": "FILEPATH",
                     "value": "${sourceDir}/build-vscode-modularbed"
                 },
+                "CONNECT": {
+                    "type": "BOOL",
+                    "value": "NO"
+                },
+                "MDNS": {
+                    "type": "BOOL",
+                    "value": "NO"
+                },
                 "HAS_BELT_TUNING": {
                     "type": "BOOL",
                     "value": "NO"
@@ -3303,6 +3327,14 @@
                 "MODULARBED_BINARY_DIR": {
                     "type": "FILEPATH",
                     "value": "${sourceDir}/build-vscode-modularbed"
+                },
+                "CONNECT": {
+                    "type": "BOOL",
+                    "value": "NO"
+                },
+                "MDNS": {
+                    "type": "BOOL",
+                    "value": "NO"
                 },
                 "HAS_BELT_TUNING": {
                     "type": "BOOL",

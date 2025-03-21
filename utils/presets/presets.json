@@ -168,6 +168,8 @@
                     "type": "FILEPATH",
                     "value": "build-vscode-modularbed"
                 },
+                "CONNECT":false,
+                "MDNS":false,
                 "HAS_BELT_TUNING":false,
                 "HAS_GEARBOX_ALIGNMENT":false,
                 "HAS_INPUT_SHAPER_CALIBRATION":false,
