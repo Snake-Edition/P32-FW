@@ -455,6 +455,13 @@ void Download::AsyncDeleter::operator()(Async *a) {
     }
 }
 
+void Download::Request::set_transfer_id(TransferId id) {
+    if (auto *in = get_if<Inline>(&data); in != nullptr) {
+        in->transfer_id = id;
+    }
+    // else -> these don't need nor store the ID, so just ignore it in this case.
+}
+
 Download::Download(const Request &request, PartialFile::Ptr destination, uint32_t start_range, optional<uint32_t> end_range) {
     if (const auto *encrypted = get_if<Request::Encrypted>(&request.data); encrypted) {
         assert(encrypted->encryption);
@@ -477,6 +484,7 @@ Download::Download(const Request &request, PartialFile::Ptr destination, uint32_
             // the protocol anyway). The chance of accidentally hitting the
             // same ID being 1:2^32 is good enough.
             rand_u(),
+            in.transfer_id,
             start_range,
             end_range.value_or(in.orig_size - 1 /* End is inclusive */),
             0,
@@ -533,6 +541,7 @@ optional<Download::InlineRequest> Download::inline_request() {
         // We send the extended info only on the first request in the given download.
         if (!in->started) {
             request.details = InlineRequestDetails {
+                in->transfer_id,
                 in->team_id,
                 in->hash,
             };

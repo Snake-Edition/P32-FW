@@ -107,6 +107,7 @@ namespace {
             if (request.details.has_value()) {
                 JSON_FIELD_STR("hash", request.details->hash) JSON_COMMA;
                 JSON_FIELD_INT("team_id", request.details->team_id) JSON_COMMA;
+                JSON_FIELD_INT("transfer_id", request.details->transfer_id.to_uint32_t()) JSON_COMMA;
             }
             // Relates both to size of the FS block.
             JSON_FIELD_INT("chunk", 4096) JSON_COMMA;

@@ -88,7 +88,7 @@ size_t Transfer::GenericFileDownloadOrder::get_next_offset(const PartialFile &fi
     return head ? head->end : 0;
 }
 
-Transfer::BeginResult Transfer::begin(const char *destination_path, const Download::Request &request) {
+Transfer::BeginResult Transfer::begin(const char *destination_path, Download::Request request) {
     log_info(transfers, "Starting transfer of %s", destination_path);
 
     // allocate slot for the download
@@ -97,6 +97,8 @@ Transfer::BeginResult Transfer::begin(const char *destination_path, const Downlo
         log_error(transfers, "Failed to allocate slot for %s", destination_path);
         return NoTransferSlot {};
     }
+
+    request.set_transfer_id(slot->id());
 
     // check the destination path does not exist
     struct stat st;

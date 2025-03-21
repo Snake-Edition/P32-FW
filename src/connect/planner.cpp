@@ -203,7 +203,7 @@ namespace {
 
         auto request = Download::Request(download.hash, download.team_id, download.orig_size);
 
-        return Transfer::begin(dpath, request);
+        return Transfer::begin(dpath, std::move(request));
     }
 
     Transfer::BeginResult init_transfer(const Printer::Config &config, const StartEncryptedDownload &download) {
@@ -227,7 +227,7 @@ namespace {
 
         auto request = Download::Request(host, port, path, std::move(encryption));
 
-        return Transfer::begin(dpath, request);
+        return Transfer::begin(dpath, std::move(request));
     }
 
     bool command_is_error_whitelisted(const Command &command) {
