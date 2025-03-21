@@ -14,6 +14,7 @@
 #include <guiconfig/guiconfig.h>
 #include <config_store/store_instance.hpp>
 #include <Configuration.h>
+#include <common/aggregate_arity.hpp>
 
 // !!! If these value change, you need to inspect usages and possibly write up some config store migrations
 static_assert(filament_name_buffer_size == 8);
@@ -317,6 +318,7 @@ FilamentTypeParameters FilamentType::parameters() const {
             .is_abrasive = e1.is_abrasive,
             .is_flexible = e1.is_flexible,
         };
+        static_assert(aggregate_arity<FilamentTypeParameters>() == 6 + HAS_FILAMENT_HEATBREAK_PARAM() * 1 + HAS_CHAMBER_API() * 4, "Revise the initializer");
     };
 
     return std::visit([]<typename T>(const T &v) -> FilamentTypeParameters {
@@ -369,17 +371,24 @@ void FilamentType::set_parameters(const FilamentTypeParameters &set) const {
         .is_abrasive = set.is_abrasive,
         .is_flexible = set.is_flexible,
     };
+    // Note - even though we're not setting requires_filtration without HAS_CHAMBER_API, it is still in the EEPROM struct to provide binary compatibility
+    static_assert(aggregate_arity<FilamentTypeParameters_EEPROM1>() == 7 + 1 /* _unused */, "Revise the initializer");
+    static_assert(requires { FilamentTypeParameters_EEPROM1::_unused; });
+
 #if HAS_CHAMBER_API()
     const FilamentTypeParameters_EEPROM2 e2 {
         .chamber_min_temperature = e2.encode_chamber_temp(set.chamber_min_temperature),
         .chamber_max_temperature = e2.encode_chamber_temp(set.chamber_max_temperature),
         .chamber_target_temperature = e2.encode_chamber_temp(set.chamber_target_temperature),
     };
+    static_assert(aggregate_arity<FilamentTypeParameters_EEPROM2>() == 3, "Revise the initializer");
 #endif
+
 #if HAS_FILAMENT_HEATBREAK_PARAM()
     const FilamentTypeParameters_EEPROM3 e3 {
         .heatbreak_temperature = set.heatbreak_temperature,
     };
+    static_assert(aggregate_arity<FilamentTypeParameters_EEPROM3>() == 1, "Revise the initializer");
 #endif
 
     std::visit([&]<typename T>(const T &v) {
