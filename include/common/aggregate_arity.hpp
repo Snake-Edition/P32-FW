@@ -5,19 +5,34 @@
 
 namespace detail {
 
-// helper type that is convertible to anything
-struct UniversalType {
-    template <typename T>
-    operator T() {}
+template <typename T, typename... Args>
+consteval bool is_brace_constructible() {
+    return requires { T { std::declval<Args>()... }; };
 };
 
-// helper type that is convertible to anything that isn't a base class of Derived
-template <typename Derived>
-struct NoBaseUniversalType {
-    template <typename NotBaseT>
-    operator NotBaseT()
-        requires(not std::is_base_of_v<NotBaseT, Derived>)
-    {}
+template <typename Derived = void>
+struct UniversalType {
+    template <typename T>
+    operator T &&() const
+        requires(!std::is_base_of_v<T, Derived> && std::is_move_constructible_v<T>)
+    {
+        return *reinterpret_cast<T *>(0);
+    }
+
+    template <typename T>
+    operator T &() const
+        requires(!std::is_base_of_v<T, Derived> && std::is_copy_constructible_v<T>)
+    {
+        return *reinterpret_cast<T *>(0);
+    }
+
+    template <typename T>
+    operator T() const
+        requires(!std::is_base_of_v<T, Derived> && !std::is_copy_constructible_v<T> && !std::is_move_constructible_v<T>)
+    {
+    }
+
+    static constexpr bool is_no_base = !std::is_same_v<Derived, void>;
 };
 
 /**
@@ -25,16 +40,21 @@ struct NoBaseUniversalType {
  *
  * @tparam T Struct to be counted
  */
-template <typename T>
-consteval auto number_of_members(auto... members) {
-    if constexpr (not requires { T { members... }; }) { // end recursion when can't build anymore
-        return (0 + ... + std::same_as<NoBaseUniversalType<T>, decltype(members)>); // count how many non-base types are used in construction
+template <typename T, typename... Member>
+consteval size_t number_of_members() {
+    // First try converting to a type that is not convertible to a base class of T - exclude parent initializers
+    // If that fails, allow converting to a base class, but do not count it to the result
+
+    // We cannot allow both at the same time, that would error at ambiguous constructor
+
+    if constexpr (is_brace_constructible<T, Member..., UniversalType<T>>()) {
+        return number_of_members<T, Member..., UniversalType<T>>();
+
+    } else if constexpr (is_brace_constructible<T, Member..., UniversalType<void>>()) {
+        return number_of_members<T, Member..., UniversalType<void>>();
+
     } else {
-        if constexpr (requires { T { members..., NoBaseUniversalType<T> {} }; }) { // if can be built with previous args + one that cannot be a base class
-            return number_of_members<T>(members..., NoBaseUniversalType<T> {}); // 'save' the arg as 'not a base class one'
-        } else {
-            return number_of_members<T>(members..., UniversalType {}); // 'save' the arg as 'anything' (including base class arg)
-        }
+        return (0 + ... + Member::is_no_base);
     }
 }
 } // namespace detail
