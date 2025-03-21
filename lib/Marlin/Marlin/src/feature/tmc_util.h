@@ -28,7 +28,8 @@
   #error "Do not include this file on printers without TMC drivers"
 #endif
 
-#include <option/has_puppies.h>
+#include <option/has_dwarf.h>
+#include <option/has_toolchanger.h>
 
 #include <core/serial.h>
 #include <TMCStepper.h>
@@ -123,7 +124,7 @@ class TMCMarlinBase : public TMC, public TMCStorage {
     const char driver_id;
     const AxisEnum axis_id;
 
-    #if HAS_PUPPIES() && HAS_TOOLCHANGER()
+    #if HAS_DWARF() && HAS_TOOLCHANGER()
     TMCMarlinBase(char axis_letter, char driver_id, AxisEnum axis_id, const TMC2130Stepper::Connection connection, const float RS)
       : TMC(connection, RS)
       , axis_letter(axis_letter), driver_id(driver_id), axis_id(axis_id)

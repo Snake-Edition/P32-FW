@@ -3,9 +3,9 @@
 #include "SPI.h"
 #include <logging/log.hpp>
 
-#include <option/has_puppies.h>
+#include <option/has_dwarf.h>
 #include <option/has_toolchanger.h>
-#if HAS_PUPPIES() && HAS_TOOLCHANGER()
+#if HAS_DWARF() && HAS_TOOLCHANGER()
   #include "module/prusa/toolchanger.h"
 #endif
 #include <feature/phase_stepping/phase_stepping.hpp>
@@ -14,7 +14,7 @@ int8_t TMC2130Stepper::chain_length = 0;
 uint32_t TMC2130Stepper::spi_speed = 16000000/8;
 
 
-#if HAS_PUPPIES() && HAS_TOOLCHANGER()
+#if HAS_DWARF() && HAS_TOOLCHANGER()
 TMC2130Stepper::TMC2130Stepper(Connection connection, float RS) :
   TMCStepper(RS),
   _pinCS(0),
@@ -90,7 +90,7 @@ void TMC2130Stepper::switchCSpin(bool state) {
 
 uint32_t TMC2130Stepper::read(uint8_t addressByte) {
 
-#if HAS_PUPPIES() && HAS_TOOLCHANGER()
+#if HAS_DWARF() && HAS_TOOLCHANGER()
   const bool localConnection = (connection != Connection::Remote);
 #else
   const bool localConnection = true;
@@ -138,7 +138,7 @@ uint32_t TMC2130Stepper::read(uint8_t addressByte) {
 
     switchCSpin(HIGH);
   }
-  #if HAS_PUPPIES() && HAS_TOOLCHANGER()
+  #if HAS_DWARF() && HAS_TOOLCHANGER()
   else if (connection == Connection::Remote) {
      out = prusa_toolchanger.getActiveToolOrFirst().tmc_read(addressByte);
   }
@@ -191,7 +191,7 @@ uint32_t TMC2130Stepper::read(uint8_t addressByte) {
 
 void TMC2130Stepper::write(uint8_t addressByte, uint32_t config) {
 
-#if HAS_PUPPIES() && HAS_TOOLCHANGER()
+#if HAS_DWARF() && HAS_TOOLCHANGER()
   const bool localConnection = (connection != Connection::Remote);
 #else
   const bool localConnection = true;
@@ -217,7 +217,7 @@ void TMC2130Stepper::write(uint8_t addressByte, uint32_t config) {
     }
     switchCSpin(HIGH);
   }
-  #if HAS_PUPPIES() && HAS_TOOLCHANGER()
+  #if HAS_DWARF() && HAS_TOOLCHANGER()
   else if (connection == Connection::Remote) {
     prusa_toolchanger.getActiveToolOrFirst().tmc_write(addressByte, config);
   }
@@ -246,7 +246,7 @@ void TMC2130Stepper::write(uint8_t addressByte, uint32_t config) {
 
 void TMC2130Stepper::begin() {
   //set pins
-  #if HAS_PUPPIES() && HAS_TOOLCHANGER()
+  #if HAS_DWARF() && HAS_TOOLCHANGER()
   if (connection == Connection::Direct)
   #endif
   {
@@ -277,7 +277,7 @@ void TMC2130Stepper::push() {
 #if HAS_PHASE_STEPPING() && _DEBUG
   // This functions can lock the SPI bus for a long time, preventing the phase stepping ISR to run
   // frequently enough: ensure it's not called on an active axis
-#if HAS_PUPPIES() && HAS_TOOLCHANGER()
+#if HAS_DWARF() && HAS_TOOLCHANGER()
   const bool localConnection = (connection != Connection::Remote);
 #else
   const bool localConnection = true;
