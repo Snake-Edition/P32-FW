@@ -213,7 +213,11 @@ message(STATUS "Resources: ${RESOURCES}")
 function(set_feature_for_printers FEATURE_NAME)
   set(FEATURE_PRINTER_LIST ${ARGV})
   list(REMOVE_AT FEATURE_PRINTER_LIST 0) # First argument is the feature name
-  if(${PRINTER} IN_LIST FEATURE_PRINTER_LIST)
+  if(DEFINED ${FEATURE_NAME})
+    # override from manual configuration
+    set(FEATURE_VALUE ${${FEATURE_NAME}})
+  elseif(${PRINTER} IN_LIST FEATURE_PRINTER_LIST)
+    # set from feature list
     set(FEATURE_VALUE YES)
   else()
     set(FEATURE_VALUE NO)
@@ -228,8 +232,16 @@ endfunction()
 function(set_feature_for_printers_master_board FEATURE_NAME)
   set(FEATURE_PRINTER_LIST ${ARGV})
   list(REMOVE_AT FEATURE_PRINTER_LIST 0) # First argument is the feature name
-  if(BOARD_IS_MASTER_BOARD AND ${PRINTER} IN_LIST FEATURE_PRINTER_LIST)
-    set(FEATURE_VALUE YES)
+  if(BOARD_IS_MASTER_BOARD)
+    if(DEFINED ${FEATURE_NAME})
+      # override from manual configuration
+      set(FEATURE_VALUE ${${FEATURE_NAME}})
+    elseif(${PRINTER} IN_LIST FEATURE_PRINTER_LIST)
+      # set from feature list
+      set(FEATURE_VALUE YES)
+    else()
+      set(FEATURE_VALUE NO)
+    endif()
   else()
     set(FEATURE_VALUE NO)
   endif()
