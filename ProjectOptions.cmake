@@ -551,6 +551,13 @@ else()
 endif()
 message(STATUS "XLCD_TOUCH_DRIVER: ${HAS_XLCD_TOUCH_DRIVER}")
 
+if(${PRINTER} IN_LIST PRINTERS_WITH_DWARF AND BOARD_IS_MASTER_BOARD)
+  set(HAS_DWARF YES)
+else()
+  set(HAS_DWARF NO)
+endif()
+define_boolean_option(HAS_DWARF ${HAS_DWARF})
+
 if(HAS_DWARF
    OR HAS_MODULARBED
    OR HAS_XBUDDY_EXTENSION
@@ -560,13 +567,6 @@ else()
   set(HAS_PUPPIES NO)
 endif()
 define_boolean_option(HAS_PUPPIES ${HAS_PUPPIES})
-
-if(${PRINTER} IN_LIST PRINTERS_WITH_DWARF AND BOARD_IS_MASTER_BOARD)
-  set(HAS_DWARF YES)
-else()
-  set(HAS_DWARF NO)
-endif()
-define_boolean_option(HAS_DWARF ${HAS_DWARF})
 
 if(${BOARD} STREQUAL "XBUDDY" AND HAS_MMU2)
   # for XBUDDY based printers, UART6 is being used either for puppies/MODBUS or directly for the MMU
