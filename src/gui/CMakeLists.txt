@@ -98,6 +98,7 @@ target_sources(
           window_msgbox_wrong_printer.cpp
           window_print_progress.cpp
           window_thumbnail.cpp
+          window_wizard_icon.cpp
   )
 
 if(HAS_CRASH_DETECTION)

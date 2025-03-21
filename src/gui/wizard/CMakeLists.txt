@@ -19,7 +19,6 @@ target_sources(
           selftest_view_item.cpp
           selftest_view_item_separator.cpp
           selftest_view_item_text.cpp
-          window_wizard_icon.cpp
   )
 
 if(NOT (${PRINTER} STREQUAL "MINI"))
