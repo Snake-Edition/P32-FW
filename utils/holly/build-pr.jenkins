@@ -180,6 +180,7 @@ pipeline {
                                     preset: config_components[1],
                                     build_type: config_components[2],
                                     bootloader: config_components[3]]
+                                def stash_name = config_components[1..-1].join(',')
                                 def pr_type = (env.CHANGE_ID ? 'pr' : 'main')
 
                                 // Skip based on branch type by returning early. This is a
@@ -230,7 +231,7 @@ pipeline {
                                         """
                                     }
                                     // stash the build artifacts for use by the integration tests
-                                    stash(name: configuration, includes: "build/*boot/firmware*")
+                                    stash(name: stash_name, includes: "build/*boot/firmware*")
                                     // archive build products
                                     archiveArtifacts artifacts: 'build/products/*', fingerprint: true
                                     // cleanup
