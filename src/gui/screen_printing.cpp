@@ -820,7 +820,13 @@ void screen_printing_data_t::change_print_state() {
             return printing_state_t::PRINTED;
         case State::PowerPanic_acFault:
         case State::SerialPrintInit:
-            break;
+            // It is questionable in this case if it is really printing at this
+            // point. But at least in case of power panic, it _can_ happen. It
+            // won't show on the screen, but we don't want to BSOD.
+            //
+            // In that case, the display is turned off, but the GUI thread
+            // still runs (even though it doesn't show anywhere).
+            return printing_state_t::PRINTING;
         }
         BUDDY_UNREACHABLE();
     }();
