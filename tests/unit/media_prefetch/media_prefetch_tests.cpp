@@ -649,3 +649,28 @@ TEST_CASE("media_prefetch::compression::deployment") {
 
     REQUIRE(cnt > 0);
 }
+
+TEST_CASE("media_prefetch::cropped_flag") {
+    MediaPrefetchManager::ReadResult c;
+
+    static_assert(MAX_CMD_SIZE == 96, "If it's not 96, the test makes no sense");
+
+    StubGcodeProviderMemory p;
+    const std::string fullGcodeEarlySemicolon = "M204 P4000 R1200 T4000 ;abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz";
+    const std::string fullGcodeLateSemicolon = "M204 P4000 R1200 T4000 abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz abcdefghijklmno;pqrstuvwxyz";
+    p.add_gcode(fullGcodeEarlySemicolon);
+    p.add_gcode(fullGcodeLateSemicolon);
+
+    MediaPrefetchManager mp;
+    mp.start(p.filename(), {});
+    mp.issue_fetch();
+
+    mp.read_command(c);
+
+    REQUIRE(!c.cropped);
+    REQUIRE(std::string(c.gcode.data()) == fullGcodeEarlySemicolon.substr(0, MAX_CMD_SIZE - 1));
+
+    mp.read_command(c);
+    REQUIRE(c.cropped);
+    REQUIRE(std::string(c.gcode.data()) == fullGcodeLateSemicolon.substr(0, MAX_CMD_SIZE - 1));
+}

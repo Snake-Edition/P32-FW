@@ -264,6 +264,9 @@ private:
             /// If set, denotes that the gcode did not fit into the buffer and was cropped
             bool cropped = false;
 
+            /// If set, denotes that the buffer contains a ';' character
+            bool contains_semicolon = false;
+
         } command_buffer;
 
         struct {

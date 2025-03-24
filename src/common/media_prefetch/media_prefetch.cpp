@@ -516,6 +516,7 @@ bool MediaPrefetchManager::fetch_command(AsyncJobExecutionControl &control) {
 
     char ch;
     const auto getc_result = s.gcode_reader->stream_getc(ch);
+    const bool buffer_full = buf_pos >= s.command_buffer_data.size();
 
     if (getc_result == SR::RESULT_EOF && buf_pos > 0) {
         // EOF, but there is something in the buffer -> first flush the remaining command
@@ -529,12 +530,19 @@ bool MediaPrefetchManager::fetch_command(AsyncJobExecutionControl &control) {
         // We've fetched one byte, increase the offset in the stream
         s.gcode_reader_pos++;
     }
+    if (ch == ';' && !buffer_full) {
+        // Detect semicolon in the useful part of the gcode
+        s.command_buffer.contains_semicolon = true;
+    }
 
     if (ch == '\n') {
-        if (buf_pos == s.command_buffer_data.size()) {
-            log_warning(MediaPrefetch, "Warning: gcode didn't fit in the command buffer, cropped");
+        if (buffer_full) {
+            // If the line is too long and doesn't contain a semicolon, need to warn and set a flag [BFW-6396]
+            if (!s.command_buffer.contains_semicolon) {
+                log_warning(MediaPrefetch, "Warning: gcode didn't fit in the command buffer, cropped");
+                s.command_buffer.cropped = true;
+            }
             buf_pos--;
-            s.command_buffer.cropped = true;
         }
 
         s.command_buffer_data[buf_pos] = '\0';
@@ -560,7 +568,7 @@ bool MediaPrefetchManager::fetch_command(AsyncJobExecutionControl &control) {
     } else if (buf_pos == 0 && isspace(ch)) {
         // Skip whitespaces at the beginning of the line
 
-    } else if (!s.command_buffer.skip_rest_of_line && buf_pos < s.command_buffer_data.size()) {
+    } else if (!s.command_buffer.skip_rest_of_line && !buffer_full) {
         // If we get a gcode that's longer than our buffer, we do best-effort: crop it and try to execute it anyway (but show a warning)
         s.command_buffer_data[buf_pos++] = ch;
     }
