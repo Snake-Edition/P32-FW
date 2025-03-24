@@ -40,7 +40,6 @@
 #include <option/xl_enclosure_support.h>
 #include <option/has_precise_homing_corexy.h>
 #include <option/has_precise_homing.h>
-#include <option/developer_mode.h>
 #include <option/has_chamber_filtration_api.h>
 #include <option/has_auto_retract.h>
 #include <option/has_door_sensor_calibration.h>
@@ -638,7 +637,7 @@ struct CurrentStore
 #endif
 
 #if HAS_EMERGENCY_STOP()
-    StoreItem<bool, (DEVELOPER_MODE() ? false : true), ItemFlag::features, journal::hash("Emergency stop enable")> emergency_stop_enable;
+    StoreItem<bool, true, ItemFlag::features, journal::hash("Emergency stop enable")> emergency_stop_enable;
 #endif
 
 #if HAS_ILI9488_DISPLAY()
