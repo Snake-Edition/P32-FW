@@ -3442,7 +3442,18 @@ Response wait_for_response(FSMAndPhase fsm_and_phase) {
             return r;
         }
 
-        ::idle(true);
+        // The second true - don't disable steppers. If we are sitting in some
+        // kind of dialog (eg. nozzle cleaning failed), we do _not_ want to
+        // disable it during the dialog, because we would lose homing and that
+        // can lead to very interesting behavior (especially for example on XL
+        // with tool changer).
+        //
+        // It might also prevent disabling it in some rare cases where we would
+        // prefer to save the power (mostly out of the print), but that's
+        // significantly smaller problem.
+        //
+        // BFW-6914.
+        ::idle(true, true);
     }
 }
 
