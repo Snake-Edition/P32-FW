@@ -280,64 +280,6 @@ void GcodeSuite::M971() {
     }
 }
 
-/**
- *### M975: Measure dwarf accelerometer sampling frequency <a href="https://reprap.org/wiki/G-code#M975:_Measure_Dwarf_Accelerometer_Sampling_Frequency">M975: Measure Dwarf Accelerometer Sampling Frequency</a>
- *
- * Only XL/iX/COREONE
- *
- *#### Usage
- *
- *    M975
- *
- * Outputs sampling frequency of the accelerometer as "sample freq: <freq>".
- **/
-void GcodeSuite::M975() {
-    PrusaAccelerometer accelerometer;
-    if (accelerometer.report_error(print_error)) {
-        return;
-    }
-
-    constexpr int request_samples_num = 3'000;
-
-    auto report = [sampleNum = 0](const PrusaAccelerometer::Acceleration &sample) mutable {
-        SERIAL_ECHO(sampleNum);
-        SERIAL_ECHO(", ");
-        SERIAL_ECHO(sample.val[0]);
-        SERIAL_ECHO(", ");
-        SERIAL_ECHO(sample.val[1]);
-        SERIAL_ECHO(", ");
-        SERIAL_ECHOLN(sample.val[2]);
-        sampleNum++;
-    };
-
-    accelerometer.clear();
-
-    for (int i = 0; i < request_samples_num;) {
-        PrusaAccelerometer::Acceleration measured_acceleration;
-        using GetSampleResult = PrusaAccelerometer::GetSampleResult;
-        const GetSampleResult get_sample_result = accelerometer.get_sample(measured_acceleration);
-
-        switch (get_sample_result) {
-
-        case GetSampleResult::ok:
-            ++i;
-            report(measured_acceleration);
-            break;
-
-        case GetSampleResult::buffer_empty:
-            idle(true, true);
-            break;
-
-        case GetSampleResult::error:
-            accelerometer.report_error(print_error);
-            return;
-        }
-    }
-
-    SERIAL_ECHO("sample freq: ");
-    SERIAL_ECHOLN(accelerometer.get_sampling_rate());
-}
-
 class CalibrateAxisHooks final : public phase_stepping::CalibrateAxisHooks {
     std::vector<std::tuple<float, float>> _calibration_results;
     std::size_t _current_calibration_phase = 0;
