@@ -259,7 +259,7 @@
  * M959 - Tune input shaper
  * M970 - Set/enable phase stepping
  * M971 - Read/reset/write phase-stepping motor current correction
- * M977 - Calibrate motor for phase stepping
+ * M972 - Calibrate motor for phase stepping
  * M997 - Perform in-application firmware update
  * M999 - Restart after being stopped by error
  *
@@ -955,7 +955,7 @@ private:
 #if HAS_PHASE_STEPPING()
   static void M970();
   static void M971();
-  static void M977();
+  static void M972();
   static void M978();
   static void M979();
 #endif
