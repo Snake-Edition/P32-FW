@@ -253,7 +253,6 @@ class MI_INFO_FW : public WI_INFO_t {
 
 public:
     MI_INFO_FW();
-    virtual void click(IWindowMenu &window_menu) override; // FW version is clickable when development tools are shown
 };
 
 class MI_INFO_BOOTLOADER : public WI_INFO_t {

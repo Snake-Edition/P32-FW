@@ -480,13 +480,6 @@ MI_INFO_FW::MI_INFO_FW()
     : WI_INFO_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
 
-void MI_INFO_FW::click([[maybe_unused]] IWindowMenu &window_menu) {
-    // If we have development tools shown, click will print whole fw version string in info messagebox
-    if constexpr (GuiDefaults::ShowDevelopmentTools) {
-        MsgBoxInfo(string_view_utf8::MakeRAM(version::project_version_full), Responses_Ok);
-    }
-}
-
 MI_INFO_BOOTLOADER::MI_INFO_BOOTLOADER()
     : WI_INFO_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
