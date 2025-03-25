@@ -1,6 +1,7 @@
 #pragma once
 
 #include <option/has_chamber_api.h>
+#include <option/has_auto_retract.h>
 
 #include "print_status_message_data.hpp"
 
@@ -32,6 +33,9 @@ struct PrintStatusMessage {
 #endif
 #if HAS_CHAMBER_API()
         waiting_for_chamber_temp,
+#endif
+#if HAS_AUTO_RETRACT()
+        auto_retracting,
 #endif
 
         _cnt
@@ -88,6 +92,9 @@ struct PrintStatusMessage {
 #endif
 #if HAS_CHAMBER_API()
         TypeRecord<Type::waiting_for_chamber_temp, PrintStatusMessageDataProgress>,
+#endif
+#if HAS_AUTO_RETRACT()
+        TypeRecord<Type::auto_retracting, std::monostate>,
 #endif
 
         TypeRecord<Type::none, std::monostate>>;

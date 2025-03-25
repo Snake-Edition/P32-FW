@@ -27,6 +27,9 @@ static constexpr EnumArray<Message::Type, const char *, Message::Type::_cnt> mes
 #if HAS_CHAMBER_API()
         { Message::Type::waiting_for_chamber_temp, N_("Waiting for chamber") },
 #endif
+#if HAS_AUTO_RETRACT()
+        { Message::Type::auto_retracting, N_("Auto-retracting filament") },
+#endif
 };
 
 void PrintStatusMessageFormatterBuddy::format(StringBuilder &target, const Message &msg) {
@@ -45,6 +48,9 @@ void PrintStatusMessageFormatterBuddy::format(StringBuilder &target, const Messa
 #if ENABLED(PRUSA_SPOOL_JOIN)
     case Message::Type::spool_joined:
     case Message::Type::joining_spool:
+#endif
+#if HAS_AUTO_RETRACT()
+    case Message::Type::auto_retracting:
 #endif
         // No extra data to show
         break;

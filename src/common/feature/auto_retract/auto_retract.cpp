@@ -7,6 +7,7 @@
 #include <RAII.hpp>
 #include <filament_sensors_handler.hpp>
 #include <logging/log.hpp>
+#include <feature/print_status_message/print_status_message_guard.hpp>
 
 #include <option/has_mmu2.h>
 #if HAS_MMU2()
@@ -64,6 +65,9 @@ void AutoRetract::maybe_retract_from_nozzle() {
     if (config_store().get_filament_type(hotend).parameters().is_flexible) {
         return;
     }
+
+    PrintStatusMessageGuard psm_guard;
+    psm_guard.update<PrintStatusMessage::Type::auto_retracting>({});
 
     const auto orig_e_position = planner.get_position_msteps().e;
     const auto orig_current_e_position = current_position.e;
