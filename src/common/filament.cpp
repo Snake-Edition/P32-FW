@@ -26,6 +26,10 @@ static_assert(sizeof(FilamentTypeParameters_EEPROM1) == 14);
 static_assert(sizeof(FilamentTypeParameters_EEPROM2) == 3);
 #endif
 
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+static_assert(sizeof(FilamentTypeParameters_EEPROM3) == 1);
+#endif
+
 static_assert(preset_filament_type_count <= max_preset_filament_type_count);
 static_assert(user_filament_type_count <= max_user_filament_type_count);
 static_assert(EXTRUDERS <= adhoc_filament_type_count);
@@ -48,6 +52,9 @@ constexpr EnumArray<PresetFilamentType, FilamentTypeParameters, PresetFilamentTy
             .name = FilamentTypeParameters::name_from_str("PLA"),
             .nozzle_temperature = 215,
             .heatbed_temperature = 60,
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+            .heatbreak_temperature = 45,
+#endif
 #if HAS_CHAMBER_API()
             .chamber_min_temperature = 15,
             .chamber_max_temperature = 38,
@@ -61,6 +68,9 @@ constexpr EnumArray<PresetFilamentType, FilamentTypeParameters, PresetFilamentTy
             .name = FilamentTypeParameters::name_from_str("PETG"),
             .nozzle_temperature = 230,
             .heatbed_temperature = 85,
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+            .heatbreak_temperature = 60,
+#endif
 #if HAS_CHAMBER_API()
             .chamber_min_temperature = 15,
             .chamber_max_temperature = 45,
@@ -74,6 +84,9 @@ constexpr EnumArray<PresetFilamentType, FilamentTypeParameters, PresetFilamentTy
             .name = FilamentTypeParameters::name_from_str("ASA"),
             .nozzle_temperature = 260,
             .heatbed_temperature = 100,
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+            .heatbreak_temperature = 65,
+#endif
 #if HAS_CHAMBER_API()
             .chamber_min_temperature = 40,
             .chamber_max_temperature = 75,
@@ -89,6 +102,9 @@ constexpr EnumArray<PresetFilamentType, FilamentTypeParameters, PresetFilamentTy
             .nozzle_temperature = 275,
             .nozzle_preheat_temperature = HAS_LOADCELL() ? 170 : 275 - 25,
             .heatbed_temperature = 100,
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+            .heatbreak_temperature = 65,
+#endif
 #if HAS_CHAMBER_API()
             .chamber_min_temperature = 40,
             .chamber_max_temperature = 80,
@@ -116,6 +132,9 @@ constexpr EnumArray<PresetFilamentType, FilamentTypeParameters, PresetFilamentTy
             .name = FilamentTypeParameters::name_from_str("ABS"),
             .nozzle_temperature = 255,
             .heatbed_temperature = 100,
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+            .heatbreak_temperature = 65,
+#endif
 #if HAS_CHAMBER_API()
             .chamber_min_temperature = 40,
             .chamber_max_temperature = 75,
