@@ -540,11 +540,6 @@ void Pause::assist_insertion_process([[maybe_unused]] Response response) {
         return;
     }
 
-    // Moves are planned wait until they aren't before planning more
-    if (planner.processing()) {
-        return;
-    }
-
     // Load for at least 40 seconds before giving up. Alternatively, if filament is removed altogether, stop too.
     if ((!unstoppable && ticks_diff(ticks_ms(), start_time_ms) > 40000) /*Move for at least 40 seconds before giving up*/
         || FSensors_instance().no_filament_surely(LogicalFilamentSensor::side)) {
@@ -558,10 +553,12 @@ void Pause::assist_insertion_process([[maybe_unused]] Response response) {
         return;
     }
 
-    if (do_e_move_notify_progress_coldextrude(FILAMENT_CHANGE_SLOW_LOAD_FEEDRATE, FILAMENT_CHANGE_SLOW_LOAD_FEEDRATE, 10, 10, StopConditions::All) == StopConditions::SideFilamentSensorRunout) {
-        runout_during_load();
-        return;
-    }
+    AutoRestore<bool> CE(thermalManager.allow_cold_extrude);
+    thermalManager.allow_cold_extrude = true;
+    // Enqueue an E move, but only if there are no more than 4 moves scheduled.
+    // This ensures that there is always 0.4mm of movement enqueued in advance,
+    // Guaranteeing a maximum movement difference of 0.1mm
+    mapi::extruder_schedule_turning(FILAMENT_CHANGE_SLOW_LOAD_FEEDRATE, 0.1f);
 }
 
 void Pause::load_to_gears_process([[maybe_unused]] Response response) { // slow load
