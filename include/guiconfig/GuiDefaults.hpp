@@ -8,7 +8,6 @@
 #include "color_scheme.hpp"
 #include "window_types.hpp"
 #include <optional>
-#include "option/development_items.h"
 #include <guiconfig/guiconfig.h>
 
 struct GuiDefaults {
@@ -161,7 +160,6 @@ struct GuiDefaults {
     static constexpr bool MenuSwitchHasBrackets = true; // draw brackets around switch values in menus
     static constexpr bool MenuSpinHasUnits = true; // draw units behind spin
 #endif // USE_<display>
-    static constexpr bool ShowDevelopmentTools = static_cast<bool>(option::development_items); // Show menu items for development
 
     // New menu feature settings
 #if HAS_MINI_DISPLAY() || HAS_MOCK_DISPLAY()

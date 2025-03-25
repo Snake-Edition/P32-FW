@@ -9,6 +9,7 @@
 
 #include <gui/event/focus_event.hpp>
 #include <gui/event/touch_event.hpp>
+#include <option/development_items.h>
 
 namespace window_menu_item_private {
 
@@ -338,11 +339,11 @@ void IWindowMenuItem::Touch([[maybe_unused]] IWindowMenu &window_menu, [[maybe_u
 }
 
 bool IWindowMenuItem::IsHidden() const {
-    return (hidden == (uint8_t)is_hidden_t::yes) || (hidden == (uint8_t)is_hidden_t::dev && !GuiDefaults::ShowDevelopmentTools);
+    return (hidden == (uint8_t)is_hidden_t::yes) || (hidden == (uint8_t)is_hidden_t::dev && !option::development_items);
 }
 
 bool IWindowMenuItem::IsDevOnly() const {
-    return hidden == (uint8_t)is_hidden_t::dev && GuiDefaults::ShowDevelopmentTools;
+    return hidden == (uint8_t)is_hidden_t::dev && option::development_items;
 }
 
 void IWindowMenuItem::SetIconId(const img::Resource *id) {
