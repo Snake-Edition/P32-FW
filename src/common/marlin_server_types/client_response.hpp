@@ -38,6 +38,7 @@
 #include <option/has_uneven_bed_prompt.h>
 #include <option/has_ceiling_clearance.h>
 #include <option/has_door_sensor_calibration.h>
+#include <option/has_auto_retract.h>
 
 #include <option/has_hotend_type_support.h>
 #if HAS_HOTEND_TYPE_SUPPORT()
@@ -154,6 +155,10 @@ enum class PhasesLoadUnload : PhaseUnderlyingType {
 
 #if HAS_LOADCELL()
     FilamentStuck,
+#endif
+
+#if HAS_AUTO_RETRACT()
+    AutoRetracting,
 #endif
 
 #if HAS_MMU2()
@@ -647,6 +652,9 @@ class ClientResponses {
             { PhasesLoadUnload::Unparking, {} },
 #if HAS_LOADCELL()
             { PhasesLoadUnload::FilamentStuck, { Response::Unload } },
+#endif
+#if HAS_AUTO_RETRACT()
+            { PhasesLoadUnload::AutoRetracting, {} },
 #endif
 #if HAS_MMU2()
             { PhasesLoadUnload::LoadFilamentIntoMMU, { Response::Continue } },
