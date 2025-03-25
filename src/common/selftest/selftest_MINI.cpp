@@ -318,9 +318,7 @@ void CSelftest::phaseDidSelftestPass() {
 
     // dont run wizard again
     if (SelftestResult_Passed_All(m_result)) {
-        auto &store = config_store();
-        auto transaction = store.get_backend().transaction_guard();
-        store.run_selftest.set(false); // clear selftest flag
+        config_store().run_selftest.set(false);
     }
 }
 
@@ -330,11 +328,7 @@ bool CSelftest::phaseWaitUser(PhasesSelftest phase) {
         Abort();
     }
     if (response == Response::Ignore) {
-        {
-            auto &store = config_store();
-            auto transaction = store.get_backend().transaction_guard();
-            store.run_selftest.set(false); // clear selftest flag
-        }
+        config_store().run_selftest.set(false);
         Abort();
     }
     return response == Response::_none;
