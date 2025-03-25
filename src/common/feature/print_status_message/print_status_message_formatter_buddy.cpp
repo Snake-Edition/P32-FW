@@ -40,6 +40,15 @@ void PrintStatusMessageFormatterBuddy::format(StringBuilder &target, const Messa
 
     switch (msg.type) {
 
+    case Message::Type::homing:
+    case Message::Type::recalibrating_home:
+#if ENABLED(PRUSA_SPOOL_JOIN)
+    case Message::Type::spool_joined:
+    case Message::Type::joining_spool:
+#endif
+        // No extra data to show
+        break;
+
     case Message::Type::custom: {
         const auto d = std::get<PrintStatusMessageDataCustom>(msg.data);
         target.append_string(d.message.get());
@@ -80,7 +89,8 @@ void PrintStatusMessageFormatterBuddy::format(StringBuilder &target, const Messa
         break;
     }
 
-    default:
+    case Message::Type::none:
+    case Message::Type::_cnt:
         break;
     }
 }
