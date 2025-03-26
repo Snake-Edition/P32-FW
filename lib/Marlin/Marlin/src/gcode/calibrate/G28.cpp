@@ -194,23 +194,24 @@
       constexpr xy_float_t okay_homing_xy = safe_homing_xy;
     #endif
 
-    destination.set(okay_homing_xy, current_position.z);
+    xyze_pos_t dest_pos;
+    dest_pos.set(okay_homing_xy, current_position.z);
 
-    TERN_(HOMING_Z_WITH_PROBE, destination -= probe_offset);
-    TERN_(HAS_HOTEND_OFFSET, destination -= hotend_currently_applied_offset);
+    TERN_(HOMING_Z_WITH_PROBE, dest_pos -= probe_offset);
+    TERN_(HAS_HOTEND_OFFSET, dest_pos -= hotend_currently_applied_offset);
 
-    if (position_is_reachable(destination)) {
+    if (position_is_reachable(dest_pos)) {
 
-      if (DEBUGGING(LEVELING)) DEBUG_POS("home_z_safely", destination);
+      if (DEBUGGING(LEVELING)) DEBUG_POS("home_z_safely", dest_pos);
 
 #if ENABLED(PRUSA_TOOLCHANGER)
-      do_blocking_move_to_xy(destination, PrusaToolChanger::limit_stealth_feedrate(XY_PROBE_FEEDRATE_MM_S));
+      do_blocking_move_to_xy(dest_pos, PrusaToolChanger::limit_stealth_feedrate(XY_PROBE_FEEDRATE_MM_S));
 #elif HAS_NOZZLE_CLEANER()
     // with nozzle cleaner (iX), move in Y first to avoid going over the cleaner
-    do_blocking_move_to_xy(current_position.x, destination.y);
-    do_blocking_move_to_xy(destination.x, destination.y);
+    do_blocking_move_to_xy(current_position.x, dest_pos.y);
+    do_blocking_move_to_xy(dest_pos.x, dest_pos.y);
 #else
-      do_blocking_move_to_xy(destination);
+      do_blocking_move_to_xy(dest_pos);
 #endif
 
       if (!homeaxis(Z_AXIS)) {
