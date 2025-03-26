@@ -11,6 +11,7 @@
 #include "filename_type.hpp"
 #include "settings_ini.hpp"
 #include <str_utils.hpp>
+#include <sys/unistd.h>
 #include <wui_api.h>
 #include <version/version.hpp>
 
@@ -416,14 +417,7 @@ Config::Status name_and_psk_status() {
 } // namespace
 
 void screen_home_data_t::handle_wifi_credentials() {
-    // first we find if there is an WIFI config
-    bool has_wifi_credentials = false;
-    {
-        unique_file_ptr fl;
-        // if other thread modifies files during this action, detection might fail
-        fl.reset(fopen(settings_ini::file_name, "r"));
-        has_wifi_credentials = fl.get() != nullptr;
-    }
+    const bool has_wifi_credentials = access(settings_ini::file_name, R_OK) == 0;
     if (has_wifi_credentials && (name_and_psk_status() == Config::Status::not_equal) && !option::developer_mode) {
         if (MsgBoxInfo(_("Wi-Fi credentials (SSID and password) discovered on the USB flash drive. Would you like to connect your printer to Wi-Fi now?"), Responses_YesNo, 1)
             == Response::Yes) {
