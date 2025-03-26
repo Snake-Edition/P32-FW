@@ -2,6 +2,7 @@ CompileFlags:
   Add:
     - "-Wno-deprecated-volatile"
     - "-Wno-vla-cxx-extension"
+    - "-Wno-unknown-pragmas"
     - "-ferror-limit=0"
     - "-D__GNUC__=13"
     - "-D__GNUC_MINOR__=3"
