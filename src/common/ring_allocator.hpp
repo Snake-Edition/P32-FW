@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <span>
 
 // Adds extra computations and space for debug logging, we probably don't want
 // that in general.
@@ -65,8 +66,8 @@ private:
     size_t records = 1;
 #endif
 
-    std::unique_ptr<uint8_t[]> buffer;
-    size_t size;
+    std::span<uint8_t> buffer;
+
     /// Finger to where we were sitting.
     Record *alloc_head;
 
@@ -94,11 +95,15 @@ private:
     }
 
 public:
-    RingAllocator(size_t size);
+    RingAllocator(const std::span<uint8_t> &buffer);
     /// Like malloc.
     void *allocate(size_t size);
     /// Like free.
     void free(void *ptr);
+
+    size_t size() const {
+        return buffer.size();
+    }
 
 #ifdef UNITTESTS
     /// To be used in tests. Asserts if something seems wrong.

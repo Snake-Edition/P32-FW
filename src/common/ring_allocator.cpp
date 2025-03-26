@@ -14,15 +14,14 @@ constexpr size_t alignment = 4;
 
 namespace buddy {
 
-RingAllocator::RingAllocator(size_t size)
-    : size(size) {
-    buffer.reset(new uint8_t[size]);
+RingAllocator::RingAllocator(const std::span<uint8_t> &buffer)
+    : buffer(buffer) {
     // Check: All pointers are aligned to (at least) 4.
-    assert(reinterpret_cast<uintptr_t>(buffer.get()) % alignment == 0);
-    assert(size > sizeof(Record));
+    assert(reinterpret_cast<uintptr_t>(buffer.data()) % alignment == 0);
+    assert(size() > sizeof(Record));
     // Check: Buffer is smaller than our available offset (2^16)
-    assert(size < 65536);
-    Record *head = reinterpret_cast<Record *>(buffer.get());
+    assert(size() < 65536);
+    Record *head = reinterpret_cast<Record *>(buffer.data());
     head->next = head->prev = 0;
     head->in_use = false;
     alloc_head = head;
@@ -35,8 +34,8 @@ void RingAllocator::free(void *ptr) {
     uint8_t *ptr_b = reinterpret_cast<uint8_t *>(ptr);
     ptr_b -= sizeof(Record);
     // Check this is "our" pointer
-    assert(ptr_b >= buffer.get());
-    assert(ptr_b < buffer.get() + size);
+    assert(ptr_b >= buffer.data());
+    assert(ptr_b < buffer.data() + size());
     Record *rec = reinterpret_cast<Record *>(ptr_b);
     assert(rec->in_use);
 
@@ -121,7 +120,7 @@ void *RingAllocator::allocate(size_t size) {
         alloc_head = get_next(alloc_head);
         // Got past the last one, rewind to the beginning.
         if (!alloc_head) {
-            alloc_head = reinterpret_cast<Record *>(buffer.get());
+            alloc_head = reinterpret_cast<Record *>(buffer.data());
         }
     } while (alloc_head != stop);
 
@@ -158,7 +157,7 @@ void RingAllocator::split(Record *record, size_t current_size, size_t new_size) 
 
 size_t RingAllocator::available_size(Record *record) const {
     const uintptr_t rec_pos = reinterpret_cast<uintptr_t>(record);
-    const uintptr_t end_pos = reinterpret_cast<uintptr_t>(buffer.get()) + size;
+    const uintptr_t end_pos = reinterpret_cast<uintptr_t>(buffer.data()) + size();
     const uintptr_t next_pos = record->next ? reinterpret_cast<uintptr_t>(record) + decode_offset(record->next) : end_pos;
 
     assert(next_pos >= rec_pos + sizeof(Record));
@@ -201,7 +200,7 @@ uint16_t RingAllocator::offset_between(const Record *from, const Record *to) con
 
 #ifdef UNITTESTS
 void RingAllocator::sanity_check() {
-    Record *r = reinterpret_cast<Record *>(buffer.get());
+    Record *r = reinterpret_cast<Record *>(buffer.data());
     assert(r != nullptr);
 
     bool seen_head = false;

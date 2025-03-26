@@ -14,7 +14,9 @@ constexpr size_t mtu_cnt = 10;
 // A bit more for "small" packets.
 constexpr size_t buffer_size = mtu_cnt * (mtu_size + alloc_record + pbuf_head) + 500;
 
-buddy::RingAllocator rx_allocator(buffer_size);
+std::array<uint8_t, buffer_size> rx_allocator_buffer;
+buddy::RingAllocator rx_allocator(rx_allocator_buffer);
+
 freertos::Mutex allocator_mutex;
 
 void rx_free(struct pbuf *p) {
