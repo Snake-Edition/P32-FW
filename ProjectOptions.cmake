@@ -708,9 +708,11 @@ endif()
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(DEBUG YES)
   define_boolean_option(NETWORKING_BENCHMARK_ENABLED YES)
+  define_boolean_option(HEAP_INSTRUMENTATION_ENABLED YES)
 else()
   set(DEBUG NO)
   define_boolean_option(NETWORKING_BENCHMARK_ENABLED NO)
+  define_boolean_option(HEAP_INSTRUMENTATION_ENABLED NO)
 endif()
 
 # define enabled features

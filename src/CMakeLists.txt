@@ -17,6 +17,10 @@ if(BOARD IN_LIST BUDDY_BOARDS)
   add_subdirectory(persistent_stores)
   add_subdirectory(version)
 
+  if(HEAP_INSTRUMENTATION_ENABLED)
+    add_subdirectory(heap_instrumentation)
+  endif()
+
   if(CONNECT OR WUI)
     add_subdirectory(transfers)
     add_subdirectory(state)

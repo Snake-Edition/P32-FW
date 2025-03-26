@@ -41,6 +41,13 @@
                         "port": 0,
                         "noprompt": true,
                         "type": "console"
+                    },
+                    {
+                        "label": "Heap instrumentation",
+                        "port": 1,
+                        "noprompt": true,
+                        "type": "console",
+                        "logfile": "heap_instrumentation.txt"
                     }
                 ]
             }
