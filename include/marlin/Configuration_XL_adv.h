@@ -986,7 +986,7 @@
 // @section serial
 
 // The ASCII buffer for serial input
-#define MAX_CMD_SIZE 256
+#define MAX_CMD_SIZE 96
 #define BUFSIZE 8
 
 // Transmission to Host Buffer Size
