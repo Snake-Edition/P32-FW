@@ -29,7 +29,7 @@ protected:
     QueueBase &operator=(const QueueBase &) = delete;
     QueueBase &operator=(QueueBase &&) = delete;
     void send(const void *payload);
-    void send_from_isr(const void *payload);
+    [[nodiscard]] bool send_from_isr(const void *payload);
     void receive(void *payload);
     [[nodiscard]] bool try_send(const void *payload, size_t milliseconds_to_wait);
     [[nodiscard]] bool try_receive(void *payload, size_t milliseconds_to_wait);
@@ -47,8 +47,8 @@ public:
     }
 
     /// Send item to queue from interrupt handler.
-    void send_from_isr(const T &payload) {
-        QueueBase::send_from_isr(&payload);
+    [[nodiscard]] bool send_from_isr(const T &payload) {
+        return QueueBase::send_from_isr(&payload);
     }
 
     void receive(T &payload) {
