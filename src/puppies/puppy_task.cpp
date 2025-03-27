@@ -287,7 +287,7 @@ static void puppy_task_body([[maybe_unused]] void const *argument) {
 
 void start_puppy_task() {
 
-    osThreadDef(puppies, puppy_task_body, TASK_PRIORITY_PUPPY_TASK, 0, 896);
+    osThreadCCMDef(puppies, puppy_task_body, TASK_PRIORITY_PUPPY_TASK, 0, 896);
     puppy_task_handle = osThreadCreate(osThread(puppies), NULL);
 }
 
