@@ -487,8 +487,9 @@ void GcodeSuite::M973() {
         revs,
         harmonic,
         params,
-        [n = 0](float sample) mutable {
+        [n = 0](phase_stepping::AccelerometerSample raw_sample) mutable {
             char buff[64];
+            const float sample = PrusaAccelerometer::raw_to_accel(raw_sample.value);
             snprintf(buff, sizeof(buff), "%d, %.5f\n", n++, sample);
             int len = strlen(buff);
             SerialUSB.cdc_write_sync(reinterpret_cast<uint8_t *>(buff), len);
@@ -576,8 +577,9 @@ void GcodeSuite::M974() {
         start_speed,
         end_speed,
         revs,
-        [n = 0](float sample) mutable {
+        [n = 0](phase_stepping::AccelerometerSample raw_sample) mutable {
             char buff[64];
+            const float sample = PrusaAccelerometer::raw_to_accel(raw_sample.value);
             snprintf(buff, sizeof(buff), "%d, %.5f\n", n++, sample);
             int len = strlen(buff);
             SerialUSB.cdc_write_sync(reinterpret_cast<uint8_t *>(buff), len);

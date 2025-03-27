@@ -48,20 +48,27 @@ struct SweepParams {
     }
 };
 
+/// Prevent implicit conversions from int16_t to float
+struct AccelerometerSample {
+    int16_t value;
+};
+
+using YieldSample = stdext::inplace_function<void(AccelerometerSample)>;
+
 /**
  * Assuming phase stepping is enabled, make a movement during which a parameter
  * sweep is performed. Yield a projection of captured sample to the active axis.
  * Returns accelerometer sampling frequency, or 0 on error.
  */
 SamplesAnnotation capture_param_sweep_samples(AxisEnum axis, float speed, float revs,
-    int harmonic, const SweepParams &params, const stdext::inplace_function<void(float)> &yield_sample);
+    int harmonic, const SweepParams &params, const YieldSample &yield_sample);
 
 /**
  * Make an accelerated movement and capture samples. Return accelerometer
  * sampling frequency, or 0 on error.
  */
 SamplesAnnotation capture_speed_sweep_samples(AxisEnum axis, float start_speed, float end_speed,
-    float revs, const stdext::inplace_function<void(float)> &yield_sample);
+    float revs, const YieldSample &yield_sample);
 
 /**
  * Calibration routine notifies about the progress made via this class. Subclass

@@ -148,11 +148,13 @@ public:
     }
 };
 
-using SignalContainer = sfl::segmented_vector<float, 256>;
+using EnergyContainer = sfl::segmented_vector<float, 256>;
+using MagnitudeContainer = sfl::segmented_vector<float, 256>;
+using SignalContainer = sfl::segmented_vector<AccelerometerSample, 512>;
 using SignalView = SignalViewT<SignalContainer>;
 
 struct DftSweepResult {
-    SignalContainer samples; // Magnitudes of the sweep result
+    MagnitudeContainer samples; // Magnitudes of the sweep result
     float start_x, end_x; // Start and end of the sweep control variable
 
     float x_for_index(int idx) const {
@@ -233,16 +235,16 @@ static bool wait_for_movement_state(phase_stepping::AxisState &axis_state,
 
 // Computes a pseudo-projection of one vector to another. The length of
 // direction vector is not normalized.
-[[maybe_unused]] static float pseudo_project(std::tuple<float, float> what, std::tuple<float, float> dir) {
-    return std::get<0>(what) * std::get<0>(dir) + std::get<1>(what) * std::get<1>(dir);
+[[maybe_unused]] static AccelerometerSample pseudo_project(std::tuple<int16_t, int16_t> what, std::tuple<float, float> dir) {
+    return AccelerometerSample { .value = static_cast<int16_t>(std::get<0>(what) * std::get<0>(dir) + std::get<1>(what) * std::get<1>(dir)) };
 }
 
-static float project_to_axis(AxisEnum axis, const PrusaAccelerometer::Acceleration &sample) {
+static AccelerometerSample project_to_axis(AxisEnum axis, const PrusaAccelerometer::RawAcceleration &sample) {
 #if PRINTER_IS_PRUSA_COREONE()
     if (axis == AxisEnum::X_AXIS) {
-        return sample.val[1];
+        return AccelerometerSample { .value = sample.val[1] };
     } else if (axis == AxisEnum::Y_AXIS) {
-        return sample.val[0];
+        return AccelerometerSample { .value = sample.val[0] };
     } else {
         bsod("Unsupported axis");
     }
@@ -259,9 +261,9 @@ static float project_to_axis(AxisEnum axis, const PrusaAccelerometer::Accelerati
     return pseudo_project({ sample.val[0], sample.val[1] }, proj_dir);
 #else
     if (axis == AxisEnum::X_AXIS) {
-        return sample.val[0];
+        return AccelerometerSample { .value = sample.val[0] };
     } else if (axis == AxisEnum::Y_AXIS) {
-        return sample.val[1];
+        return AccelerometerSample { .value = sample.val[1] };
     } else {
         bsod("Unsupported axis");
     }
@@ -270,19 +272,19 @@ static float project_to_axis(AxisEnum axis, const PrusaAccelerometer::Accelerati
 
 // Given a signal, compute signal energy for each sample. The energy is deduced
 // from the surrounding symmetrical window of size window_size.
-static SignalContainer signal_local_energy(SignalView signal, int window_size) {
-    SignalContainer result;
+static EnergyContainer signal_local_energy(SignalView signal, int window_size) {
+    EnergyContainer result;
     result.reserve(signal.size());
 
     int half_window = window_size / 2;
 
     auto first_window = signal.subsignal(-half_window, half_window);
     result.push_back(std::accumulate(first_window.begin(), first_window.end(), 0.f,
-        [](float acc, float x) { return acc + x * x; }));
+        [](float acc, AccelerometerSample raw_x) { float x = PrusaAccelerometer::raw_to_accel(raw_x.value); return acc + x * x; }));
 
     for (int i = 0; i < signal.size(); i++) {
-        float throw_away_elem = signal[i - half_window - 1];
-        float add_elem = signal[i + half_window];
+        float throw_away_elem = PrusaAccelerometer::raw_to_accel(signal[i - half_window - 1].value);
+        float add_elem = PrusaAccelerometer::raw_to_accel(signal[i + half_window].value);
         result.push_back(result.back() - throw_away_elem * throw_away_elem + add_elem * add_elem);
     }
     return result;
@@ -398,7 +400,7 @@ static DftSweepResult motor_harmonic_dft_sweep(
 
     auto sample_correlation = [&](int idx) {
         float arg = 2 * std::numbers::pi_v<float> * idx * analysis_freq * sampling_period;
-        float s = signal[idx];
+        float s = PrusaAccelerometer::raw_to_accel(signal[idx].value);
 
         const int int_arg = opts::SIN_PERIOD * std::fmod(arg, 2 * std::numbers::pi_v<float>) / (2 * std::numbers::pi_v<float>);
         return std::make_tuple(sin_lut(int_arg) * s, cos_lut(int_arg) * s);
@@ -471,7 +473,7 @@ static std::array<DftSweepResult, 2> motor_speed_dft_sweep(SignalView signal,
         }
 
         if (freq < sampling_freq / 2) {
-            float s = signal[idx];
+            float s = PrusaAccelerometer::raw_to_accel(signal[idx].value);
             const int int_arg = opts::SIN_PERIOD * std::fmod(arg, 2 * std::numbers::pi_v<float>) / (2 * std::numbers::pi_v<float>);
             return std::make_tuple(sin_lut(int_arg) * s, cos_lut(int_arg) * s);
         } else {
@@ -600,7 +602,7 @@ std::tuple<float, float> harmonic_peaks_fit(std::span<const HarmonicPeak> peaks)
 // the best estimated peak positions for each harmonic.
 template <typename PosConverter>
 std::tuple<std::vector<HarmonicPeak>, std::vector<HarmonicPeak>> find_harmonic_peaks(
-    std::span<const HarmonicT<SignalContainer>> sweeps, PosConverter idx_to_pos,
+    std::span<const HarmonicT<MagnitudeContainer>> sweeps, PosConverter idx_to_pos,
     float min_prominence = 0.1, int n_closest = 2) {
     std::vector<HarmonicT<std::vector<SignalPeak>>> peaks;
     peaks.reserve(sweeps.size());
@@ -1054,7 +1056,7 @@ static float plan_marker_move(AxisEnum physical_axis, int direction) {
 // - movement success flag,
 // - accelerometer error.
 static std::tuple<float, bool, PrusaAccelerometer::Error> capture_movement_samples(AxisEnum axis, int32_t timeout_ms,
-    const stdext::inplace_function<void(float)> &yield_sample) {
+    const YieldSample &yield_sample) {
 
     if (!wait_for_movement_state(phase_stepping::axis_states[axis], 300, [](phase_stepping::AxisState &s) {
             return phase_stepping::processing();
@@ -1073,7 +1075,7 @@ static std::tuple<float, bool, PrusaAccelerometer::Error> capture_movement_sampl
     accelerometer.clear();
 
     while (Planner::busy() && ticks_diff(ticks_ms(), start_ts) < timeout_ms) {
-        PrusaAccelerometer::Acceleration sample;
+        PrusaAccelerometer::RawAcceleration sample;
         using GetSampleResult = PrusaAccelerometer::GetSampleResult;
 
         switch (accelerometer.get_sample(sample)) {
@@ -1105,7 +1107,7 @@ static std::tuple<float, bool, PrusaAccelerometer::Error> capture_movement_sampl
 }
 
 SamplesAnnotation phase_stepping::capture_param_sweep_samples(AxisEnum axis, float speed, float revs, int harmonic,
-    const SweepParams &sweep_params, const stdext::inplace_function<void(float)> &yield_sample) {
+    const SweepParams &sweep_params, const YieldSample &yield_sample) {
     assert(speed > 0);
 
     Planner::synchronize();
@@ -1161,7 +1163,7 @@ SamplesAnnotation phase_stepping::capture_param_sweep_samples(AxisEnum axis, flo
 
 SamplesAnnotation phase_stepping::capture_speed_sweep_samples(AxisEnum axis,
     float start_speed, float end_speed, float revs,
-    const stdext::inplace_function<void(float)> &yield_sample) {
+    const YieldSample &yield_sample) {
 
     assert(start_speed >= 0 && end_speed >= 0);
     assert(start_speed != 0 || start_speed != end_speed);
@@ -1242,7 +1244,7 @@ static void debug_dump_raw_measurement(const char *name, const SignalContainer &
     serial_printf("\"signal_bounds\": [%d, %d], ", start, end);
     serial_printf("\"signal\": [");
     for (size_t i = 0; i < signal.size(); i++) {
-        serial_printf("%f", signal[i]);
+        serial_printf("%f", PrusaAccelerometer::raw_to_accel(signal[i].value));
         if (i + 1 < signal.size()) {
             serial_printf(", ");
         }
@@ -1291,7 +1293,7 @@ static void debug_dump_harmonic_peaks(const char *name,
 #endif
 }
 
-static void debug_dump_magnitude_search(int harmonic, float magnitude, const SignalContainer &response) {
+static void debug_dump_magnitude_search(int harmonic, float magnitude, const MagnitudeContainer &response) {
 #ifdef SERIAL_DEBUG
     serial_printf("# magnitude_search {");
     serial_printf("\"harmonic\": %d, ", harmonic);
@@ -1307,7 +1309,7 @@ static void debug_dump_magnitude_search(int harmonic, float magnitude, const Sig
 #endif
 }
 
-static void debug_dump_param_search(int harmonic, const SweepParams &params, int move_dir, const SignalContainer &response) {
+static void debug_dump_param_search(int harmonic, const SweepParams &params, int move_dir, const MagnitudeContainer &response) {
 #ifdef SERIAL_DEBUG
     serial_printf("# param_search {");
     serial_printf("\"harmonic\": %d, ", harmonic);
@@ -1380,13 +1382,13 @@ measure_calibration_speeds(AxisEnum axis, const AxisCalibrationConfig &calibrati
     ABORT_CHECK();
 
     // Then construct a combined signal for each harmonic from all measurements
-    std::vector<HarmonicT<SignalContainer>> harmonic_signals;
+    std::vector<HarmonicT<MagnitudeContainer>> harmonic_signals;
     for (int harmonic = 1; harmonic <= opts::CORRECTION_HARMONICS; harmonic++) {
         if (!calibration_config.enabled_harmonics[harmonic - 1]) {
             continue;
         }
 
-        SignalContainer combined;
+        MagnitudeContainer combined;
         const float window_size = calibration_config.analysis_window_size_seconds;
         const int ramp_samples = forward_signal.size() / 2;
         const float time_step = ramp_samples / forward_annotation.sampling_freq / calibration_config.speed_sweep_bins;
@@ -1486,7 +1488,7 @@ static std::expected<float, const char *> find_approx_mag(AxisEnum axis,
         };
 
         auto annotation = capture_param_sweep_samples(axis, speed,
-            revs, harmonic, params, [&](float sample) {
+            revs, harmonic, params, [&](AccelerometerSample sample) {
                 samples.push_back(sample);
             });
 
@@ -1566,7 +1568,7 @@ static std::expected<float, const char *> find_approx_mag(AxisEnum axis,
     };
 
     auto annotation = capture_param_sweep_samples(axis, speed,
-        calib_config.fine_movement_duration * speed, harmonic, params, [&](float sample) {
+        calib_config.fine_movement_duration * speed, harmonic, params, [&](AccelerometerSample sample) {
             samples.push_back(sample);
         });
     if (!annotation.movement_ok) {
@@ -1614,7 +1616,7 @@ collect_param_sweep_response(AxisEnum axis, const AxisCalibrationConfig &calib_c
 
             samples.clear();
             auto annotation = capture_param_sweep_samples(axis, speed,
-                movement_dir * revs, harmonic, param_set, [&](float sample) {
+                movement_dir * revs, harmonic, param_set, [&](AccelerometerSample sample) {
                     samples.push_back(sample);
                 });
 
