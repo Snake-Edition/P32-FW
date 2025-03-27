@@ -22,6 +22,12 @@
     #include <feature/xbuddy_extension/xbuddy_extension.hpp>
 #endif
 
+#include <option/xl_enclosure_support.h>
+#if XL_ENCLOSURE_SUPPORT()
+    #include <CFanCtlEnclosure.hpp>
+    #include <fanctl.hpp>
+#endif
+
 extern osThreadId displayTaskHandle;
 
 using StatusLeds = neopixel::LedsSPI10M5Hz<4, GuiLedsWriter::write>;
@@ -53,12 +59,6 @@ static SideLeds &get_side_leds() {
     static SideLeds ret;
     return ret;
 }
-
-        #if XL_ENCLOSURE_SUPPORT()
-// Has to be outside of LEDManager, as it's accessed from an interrupt and
-// LEDManager constructs a mutex
-std::atomic<uint8_t> enclosure_fan_pwm { 0 };
-        #endif
     #endif // HAS_SIDE_LED_DRIVER
 #else
     #define HAS_SIDE_LED_DRIVER() 0
@@ -119,7 +119,7 @@ void LEDManager::update() {
     if constexpr (SideStripHandler::has_white_led_and_enclosure_on_second_driver()) {
         uint8_t second_led_green = 0;
         #if XL_ENCLOSURE_SUPPORT()
-        second_led_green = enclosure_fan_pwm;
+        second_led_green = static_cast<CFanCtlEnclosure &>(Fans::enclosure()).output_pwm();
         #endif
 
         // On XL, there are two neopixel drivers, the first one controls RGB of
@@ -182,11 +182,5 @@ void LEDManager::set_lcd_brightness(uint8_t brightness) {
     // LCD backlight is connected to the green channel of the fourth LED (index 3) on the status strip
     get_status_leds().set(ColorRGBW(0, (std::min<uint8_t>(brightness, 100) * 255) / 100, 0).data, 3);
 }
-
-#if XL_ENCLOSURE_SUPPORT()
-void LEDManager::set_enclosure_fan_pwm(uint8_t pwm) {
-    enclosure_fan_pwm = pwm;
-}
-#endif
 
 } // namespace leds

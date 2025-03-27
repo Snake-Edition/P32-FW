@@ -28,6 +28,12 @@ public:
     virtual void exitSelftestMode() override;
     virtual bool selftestSetPWM(uint8_t pwm) override;
 
+    /// The actual PWM the fan should be driven at
+    /// Thread-safe
+    uint8_t output_pwm() const {
+        return output_pwm_;
+    }
+
 private:
     struct Tachometer {
         Tachometer(const buddy::hw::InputPin &pin)
@@ -58,4 +64,6 @@ private:
     std::atomic<FanState> state = idle;
     uint16_t edges = 0;
     uint16_t ticks = 0; //< state machine time measurement [milliseconds]
+
+    std::atomic<uint8_t> output_pwm_ = 0;
 };

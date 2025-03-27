@@ -4,7 +4,6 @@
 #include <device/hal.h>
 #include "cmsis_os.h"
 #include <random.h>
-#include "leds/led_manager.hpp"
 
 CFanCtlEnclosure::CFanCtlEnclosure(const buddy::hw::InputPin &pin_tach,
     uint16_t min_rpm, uint16_t max_rpm)
@@ -15,55 +14,52 @@ CFanCtlEnclosure::CFanCtlEnclosure(const buddy::hw::InputPin &pin_tach,
 }
 
 void CFanCtlEnclosure::tick() {
-    bool edge = tachometer.tick();
+    const bool edge = tachometer.tick();
+    uint8_t output_pwm = desired_pwm.load();
 
     if (desired_pwm == 0) {
         state = idle;
     }
     switch (state) {
     case idle:
+        output_pwm = 0;
         if (desired_pwm > 0) {
             state = starting;
             edges = 0;
             ticks = 0;
-        } else {
-            leds::LEDManager::set_enclosure_fan_pwm(0);
         }
         break;
     case starting:
+        output_pwm = 255;
         ticks++;
+        edges += edge ? 1 : 0;
         if (ticks > start_timeout) {
             state = error_starting;
-        } else {
-            leds::LEDManager::set_enclosure_fan_pwm(255);
-            edges += edge ? 1 : 0;
-            if (edges >= start_edges) {
-                state = rpm_stabilization;
-                ticks = 0;
-            }
+        } else if (edges >= start_edges) {
+            state = rpm_stabilization;
+            ticks = 0;
         }
         break;
     case rpm_stabilization:
-        leds::LEDManager::set_enclosure_fan_pwm(desired_pwm);
-        if (ticks < rpm_delay) {
-            ticks++;
-        } else {
+        ticks++;
+        if (ticks > rpm_delay) {
             state = running;
         }
         break;
     case running:
-        leds::LEDManager::set_enclosure_fan_pwm(desired_pwm);
         if (!getRPMIsOk()) {
             state = error_running;
         }
         break;
     default: // error state
-        leds::LEDManager::set_enclosure_fan_pwm(desired_pwm);
         if (getRPMIsOk()) {
             state = running;
         }
         break;
     }
+
+    // Atomic store
+    output_pwm_ = output_pwm;
 }
 
 bool CFanCtlEnclosure::Tachometer::tick() {
