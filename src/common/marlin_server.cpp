@@ -1428,7 +1428,7 @@ void schedule_media_retry() {
 }
 
 void clear_media_error() {
-    if (!print_state.recover_media_error_at.has_value()) {
+    if (!print_state.recover_media_error_backoff.get().has_value()) {
         return;
     }
 
@@ -1616,9 +1616,9 @@ void try_recover_from_media_error() {
         // If we're printing, simply try issuing a fetch to make sure everything's fine
         media_prefetch.issue_fetch();
 
-    } else if (print_state.recover_media_error_at.has_value()) {
+    } else if (print_state.recover_media_error_backoff.get().has_value()) {
         // Do NOT reset - will be reset if the resume is successful
-        // print_state.recover_media_error_at.reset();
+        // print_state.recover_media_error_backoff.get().reset();
         print_resume();
     }
 }
@@ -2098,7 +2098,10 @@ static void _server_print_loop(void) {
             print_resume();
         } else if (print_state.recover_media_error_at.has_value() && ticks_diff(*print_state.recover_media_error_at, ticks_s()) <= 0) {
             log_info(MarlinServer, "Try recover from media error");
+            print_state.recover_media_error_at.reset();
             try_recover_from_media_error();
+            // Ensure we do try to unpause here.
+            assert(server.print_state != State::Paused);
         }
 
         break;
