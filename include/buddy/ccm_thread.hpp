@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include <stdint.h>
 #include <cmsis_os.h>
 #include <stm32f4xx_hal.h>
 
@@ -22,6 +22,8 @@
         static StaticTask_t __attribute__((section(".ccmram"))) os_thread_control_##name;     \
         const osThreadDef_t os_thread_def_##name = { #name, (thread), (priority), (instances), (stacksz), os_thread_buffer_##name, &os_thread_control_##name }
 #endif
+
+#ifdef __cplusplus
 
 /**
  * @brief Check if data are in CCMRAM.
@@ -46,3 +48,5 @@ template <class T>
 FORCE_INLINE bool can_be_used_by_dma(T *address) {
     return !is_ccm_ram(reinterpret_cast<uintptr_t>(address));
 }
+
+#endif
