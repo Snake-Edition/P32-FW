@@ -451,6 +451,7 @@ void Backend::migrate_bank() {
     }
 }
 void Backend::transaction_start() {
+    auto lock_guard = lock();
     if (transaction.has_value()) {
         bsod("Starting transaction while transaction is running");
     }
@@ -458,6 +459,7 @@ void Backend::transaction_start() {
 }
 
 void Backend::transaction_end() {
+    auto lock_guard = lock();
     if (!transaction.has_value()) {
         bsod("Transaction is not in progress");
     }
@@ -476,7 +478,10 @@ void Backend::version_migration_start() {
 }
 
 void Backend::version_migration_end() {
-    transaction_end();
+    if (!transaction.has_value()) {
+        bsod("Transaction is not in progress");
+    }
+    transaction.reset();
 }
 
 auto Backend::version_migration_guard() -> VersionMigratingTransactionGuard {
