@@ -3,7 +3,6 @@
 #include "i_window_menu_item.hpp"
 
 #include <span>
-#include <functional>
 
 #include <timing.h>
 

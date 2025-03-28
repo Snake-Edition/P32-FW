@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <array>
-#include <functional>
 
 namespace common::puppies::fifo {
 

@@ -3,7 +3,6 @@
 #include "ModbusRegisterDictionary.hpp"
 #include <cstdint>
 #include <array>
-#include <functional>
 #include <dwarf_registers.hpp>
 
 namespace dwarf::ModbusRegisters {

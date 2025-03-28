@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <algorithm>
 #include <tuple>
-#include <functional>
 #include <optional>
 #include <numeric>
 #include <limits>

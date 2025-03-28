@@ -8,7 +8,6 @@
 
 #include "hwio_pindef.h"
 #include <type_traits>
-#include <functional>
 
 namespace buddy::hw {
 

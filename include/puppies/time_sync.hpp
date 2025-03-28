@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <limits>
 #include <array>
-#include <functional>
 
 #include <filters/kalman.hpp>
 #include "puppies/PuppyModbus.hpp"

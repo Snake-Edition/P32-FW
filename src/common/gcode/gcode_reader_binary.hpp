@@ -5,7 +5,6 @@
 #include "gcode_buffer.hpp"
 #include "gcode_reader_interface.hpp"
 #include "meatpack.h"
-#include <functional>
 #include <optional>
 extern "C" {
 #include "heatshrink_decoder.h"

@@ -1,6 +1,5 @@
 #include "display_helper.h"
 #include "display.hpp"
-#include <functional>
 #include <cmath>
 #include <guiconfig/guiconfig.h>
 #include <img_resources.hpp>

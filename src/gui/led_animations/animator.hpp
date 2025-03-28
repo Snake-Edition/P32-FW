@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <utility>
 #include "static_alocation_ptr.hpp"
-#include <functional>
 #include "bsod.h"
 #include <mutex>
 #include "bsod.h"
