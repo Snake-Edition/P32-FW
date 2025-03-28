@@ -1380,7 +1380,7 @@ METRIC_DEF(metric_home_diff, "home_diff", METRIC_VALUE_CUSTOM, 0, METRIC_ENABLED
  * @param crash_was_active true if crash recovery was active, this is used if crash_recovery was temporarily disabled
  * @param recover_z true if failed during Z homing and should rehome Z
  */
-void homing_failed(std::function<void()> fallback_error, [[maybe_unused]] bool crash_was_active, bool recover_z) {
+void homing_failed(stdext::inplace_function<void()> fallback_error, [[maybe_unused]] bool crash_was_active, bool recover_z) {
   #if ENABLED(CRASH_RECOVERY)
     const bool is_active = crash_s.is_active();
     if ((is_active || crash_was_active) // Allow if crash recovery was temporarily disabled

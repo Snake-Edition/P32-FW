@@ -30,7 +30,7 @@
 
 #include "../inc/MarlinConfig.h"
 
-#include <functional>
+#include <inplace_function.hpp>
 
 #if HAS_BED_PROBE
   #include "probe.h"
@@ -291,7 +291,7 @@ void set_axis_is_at_home(const AxisEnum axis, bool homing_z_with_probe = true);
 
 void set_axis_is_not_at_home(const AxisEnum axis);
 
-void homing_failed(std::function<void()> fallback_error, bool crash_was_active = false, bool recover_z = false);
+void homing_failed(stdext::inplace_function<void()> fallback_error, bool crash_was_active = false, bool recover_z = false);
 
 // Home a single logical axis
 [[nodiscard]] bool homeaxis(const AxisEnum axis, const feedRate_t fr_mm_s=0.0, bool invert_home_dir = false,
