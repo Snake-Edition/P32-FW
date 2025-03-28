@@ -2,7 +2,7 @@
 
 #include "async_job_executor.hpp"
 
-bool AsyncJobExecutionControl::with_synchronized(const std::function<void()> &f) {
+bool AsyncJobExecutionControl::with_synchronized(const stdext::inplace_function<void()> &f) {
     std::lock_guard mutex_guard(executor.mutex);
 
     if (executor.synchronized_data.current_job_discarded) {

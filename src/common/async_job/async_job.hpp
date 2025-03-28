@@ -1,7 +1,7 @@
 #pragma once
 
-#include <functional>
 #include <atomic>
+#include <inplace_function.hpp>
 
 #include "async_job_executor.hpp"
 #include "async_job_execution_control.hpp"
@@ -13,7 +13,7 @@ class AsyncJobBase {
     friend class AsyncJobExecutor;
 
 public:
-    using Callback = std::function<void(AsyncJobExecutionControl &control)>;
+    using Callback = stdext::inplace_function<void(AsyncJobExecutionControl &control)>;
     using Executor = AsyncJobExecutor;
 
     enum class State {
@@ -100,7 +100,7 @@ class AsyncJobWithResult final : public AsyncJobBase {
 
 public:
     using Result = Result_;
-    using Callback = std::function<void(AsyncJobExecutionControl &control, Result &result)>;
+    using Callback = stdext::inplace_function<void(AsyncJobExecutionControl &control, Result &result)>;
 
 public:
     inline const Result &result() const {
