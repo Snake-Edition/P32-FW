@@ -6,6 +6,8 @@
     #include <puppies/Dwarf.hpp>
     #include <module/tool_change.h>
 
+    #include <inplace_function.hpp>
+
 struct PrusaToolInfo {
     float dock_x;
     float dock_y;
@@ -151,8 +153,8 @@ protected:
      * It is used to clean up something on a return from a function.
      */
     struct ResetOnReturn {
-        std::function<void(bool)> set_state;
-        [[nodiscard]] ResetOnReturn(std::function<void(bool)> set_state)
+        stdext::inplace_function<void(bool)> set_state;
+        [[nodiscard]] ResetOnReturn(stdext::inplace_function<void(bool)> set_state)
             : set_state(set_state) { set_state(true); }
         ~ResetOnReturn() { set_state(false); }
     };
@@ -183,7 +185,7 @@ protected:
      * @param timeout_ms maximal time to wait [ms]
      * @return true on success, false if timeout was reached
      */
-    [[nodiscard]] bool wait(std::function<bool()> function, uint32_t timeout_ms);
+    [[nodiscard]] bool wait(stdext::inplace_function<bool()> function, uint32_t timeout_ms);
 
     /**
      * @brief Force a selected tool to marlin.
