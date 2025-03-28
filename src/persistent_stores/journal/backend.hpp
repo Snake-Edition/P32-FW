@@ -146,6 +146,16 @@ public:
         CRCType last_item_crc = 0;
         ItemHeader last_item_header = { true, 0, 0 };
         uint16_t item_count = 0;
+        // The user transactions / non-migration ones can be initiated by
+        // multiple threads concurrently. We merge them in such case, as these
+        // transactions are mostly just optimizing the storage space on the
+        // eeprom.
+        //
+        // Ref count specifies how many there are concurrently. When dropping
+        // to 0, we destroy the object.
+        //
+        // Unused and not tracked for other types.
+        uint16_t ref_count = 1;
 
         Transaction(Type type, Backend &backend);
         ~Transaction();

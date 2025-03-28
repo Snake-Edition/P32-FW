@@ -453,17 +453,26 @@ void Backend::migrate_bank() {
 void Backend::transaction_start() {
     auto lock_guard = lock();
     if (transaction.has_value()) {
-        bsod("Starting transaction while transaction is running");
+        if (transaction->type == Transaction::Type::transaction) {
+            transaction->ref_count++;
+        } else {
+            bsod("Starting transaction while other-type transaction is running");
+        }
+    } else {
+        transaction.emplace(Transaction::Type::transaction, *this);
     }
-    transaction.emplace(Transaction::Type::transaction, *this);
 }
 
 void Backend::transaction_end() {
     auto lock_guard = lock();
-    if (!transaction.has_value()) {
-        bsod("Transaction is not in progress");
+    if (!transaction.has_value() || transaction->type != Transaction::Type::transaction) {
+        bsod("This transaction is not in progress");
     }
-    transaction.reset();
+    assert(transaction->ref_count > 0);
+    transaction->ref_count--;
+    if (transaction->ref_count == 0) {
+        transaction.reset();
+    }
 }
 
 auto Backend::transaction_guard() -> TransactionGuard {
@@ -625,8 +634,10 @@ void Backend::Transaction::store_item(Backend::Id id, const std::span<const uint
 
 void Backend::Transaction::reinitialize() {
     Backend &_backend = backend;
-    Type _type = type;
+    const Type _type = type;
+    const uint16_t _ref_count = ref_count;
     // using placement new, because we want to get default values without calling destructor
     new (this) Backend::Transaction(_type, _backend);
+    ref_count = _ref_count;
 }
 } // namespace journal
