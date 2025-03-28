@@ -3,7 +3,7 @@
 #include "common.hpp"
 
 #include <cassert>
-#include <functional>
+#include <inplace_function.hpp>
 #include <tuple>
 #include <optional>
 #include <vector>
@@ -54,14 +54,14 @@ struct SweepParams {
  * Returns accelerometer sampling frequency, or 0 on error.
  */
 SamplesAnnotation capture_param_sweep_samples(AxisEnum axis, float speed, float revs,
-    int harmonic, const SweepParams &params, const std::function<void(float)> &yield_sample);
+    int harmonic, const SweepParams &params, const stdext::inplace_function<void(float)> &yield_sample);
 
 /**
  * Make an accelerated movement and capture samples. Return accelerometer
  * sampling frequency, or 0 on error.
  */
 SamplesAnnotation capture_speed_sweep_samples(AxisEnum axis, float start_speed, float end_speed,
-    float revs, const std::function<void(float)> &yield_sample);
+    float revs, const stdext::inplace_function<void(float)> &yield_sample);
 
 /**
  * Calibration routine notifies about the progress made via this class. Subclass

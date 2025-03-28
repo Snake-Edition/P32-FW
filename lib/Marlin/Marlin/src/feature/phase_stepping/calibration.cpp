@@ -197,7 +197,7 @@ struct MagCalibResult {
     float score;
 };
 
-using AbortFun = std::function<bool(void)>;
+using AbortFun = stdext::inplace_function<bool(void)>;
 
 // Given change in physical space, return change in logical axis.
 // - for cartesian this is identity,
@@ -1054,7 +1054,7 @@ static float plan_marker_move(AxisEnum physical_axis, int direction) {
 // - movement success flag,
 // - accelerometer error.
 static std::tuple<float, bool, PrusaAccelerometer::Error> capture_movement_samples(AxisEnum axis, int32_t timeout_ms,
-    const std::function<void(float)> &yield_sample) {
+    const stdext::inplace_function<void(float)> &yield_sample) {
 
     if (!wait_for_movement_state(phase_stepping::axis_states[axis], 300, [](phase_stepping::AxisState &s) {
             return phase_stepping::processing();
@@ -1105,7 +1105,7 @@ static std::tuple<float, bool, PrusaAccelerometer::Error> capture_movement_sampl
 }
 
 SamplesAnnotation phase_stepping::capture_param_sweep_samples(AxisEnum axis, float speed, float revs, int harmonic,
-    const SweepParams &sweep_params, const std::function<void(float)> &yield_sample) {
+    const SweepParams &sweep_params, const stdext::inplace_function<void(float)> &yield_sample) {
     assert(speed > 0);
 
     Planner::synchronize();
@@ -1161,7 +1161,7 @@ SamplesAnnotation phase_stepping::capture_param_sweep_samples(AxisEnum axis, flo
 
 SamplesAnnotation phase_stepping::capture_speed_sweep_samples(AxisEnum axis,
     float start_speed, float end_speed, float revs,
-    const std::function<void(float)> &yield_sample) {
+    const stdext::inplace_function<void(float)> &yield_sample) {
 
     assert(start_speed >= 0 && end_speed >= 0);
     assert(start_speed != 0 || start_speed != end_speed);
