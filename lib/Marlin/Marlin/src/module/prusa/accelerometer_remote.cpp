@@ -95,7 +95,7 @@ void PrusaAccelerometer::clear() {
     m_sample_buffer.error.clear_overflow();
 }
 
-PrusaAccelerometer::GetSampleResult PrusaAccelerometer::get_sample(Acceleration &acceleration) {
+PrusaAccelerometer::GetSampleResult PrusaAccelerometer::get_sample(RawAcceleration &raw_acceleration) {
     std::lock_guard lock(s_buffer_mutex);
     if (get_error() != Error::none) {
         return GetSampleResult::error;
@@ -107,7 +107,7 @@ PrusaAccelerometer::GetSampleResult PrusaAccelerometer::get_sample(Acceleration 
     }
 
     AccelerometerUtils::SampleStatus sample_status;
-    acceleration = AccelerometerUtils::unpack_sample(sample_status, sample);
+    raw_acceleration = AccelerometerUtils::unpack_sample(sample_status, sample);
 
     if (sample_status.buffer_overflow) {
         m_sample_buffer.error.set(Error::overflow_dwarf);

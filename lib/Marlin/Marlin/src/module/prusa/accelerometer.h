@@ -29,6 +29,10 @@ public:
         float val[3];
     };
 
+    struct RawAcceleration {
+        int16_t val[3];
+    };
+
     enum class Error {
         none,
         communication,
@@ -60,8 +64,28 @@ public:
         error,
     };
 
+    /// Convert raw sample to physical acceleration.
+    constexpr static float raw_to_accel(int16_t raw) {
+        constexpr float standard_gravity = 9.80665f;
+        constexpr int16_t max_value = 0b0111'1111'1111'1111;
+        constexpr float factor2g = 2.f * standard_gravity / max_value;
+        return raw * factor2g;
+    }
+
+    /// Obtains one sample from the buffer and puts it to \param raw_acceleration (if the results is ok).
+    GetSampleResult get_sample(RawAcceleration &raw_acceleration);
+
     /// Obtains one sample from the buffer and puts it to \param acceleration (if the results is ok).
-    GetSampleResult get_sample(Acceleration &acceleration);
+    GetSampleResult get_sample(Acceleration &acceleration) {
+        RawAcceleration raw_acceleration;
+        const GetSampleResult result = get_sample(raw_acceleration);
+        if (result == GetSampleResult::ok) {
+            acceleration.val[0] = raw_to_accel(raw_acceleration.val[0]);
+            acceleration.val[1] = raw_to_accel(raw_acceleration.val[1]);
+            acceleration.val[2] = raw_to_accel(raw_acceleration.val[2]);
+        }
+        return result;
+    }
 
     float get_sampling_rate() const;
     /**

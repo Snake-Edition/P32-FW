@@ -66,14 +66,7 @@ float PrusaAccelerometer::get_sampling_rate() const {
     return g_local_accelerometer_poller->get_sampling_rate();
 }
 
-static float raw_to_accel(int16_t raw) {
-    constexpr float standard_gravity = 9.80665f;
-    constexpr int16_t max_value = 0b0111'1111'1111'1111;
-    // Assuming 2g range...
-    return 2.f * raw * standard_gravity / max_value;
-}
-
-PrusaAccelerometer::GetSampleResult PrusaAccelerometer::get_sample(Acceleration &acceleration) {
+PrusaAccelerometer::GetSampleResult PrusaAccelerometer::get_sample(RawAcceleration &raw_acceleration) {
     if (!g_local_accelerometer_poller->hw_good() || g_local_accelerometer_poller->overflow_count() > 0) {
         return GetSampleResult::error;
     }
@@ -83,9 +76,9 @@ PrusaAccelerometer::GetSampleResult PrusaAccelerometer::get_sample(Acceleration 
         return GetSampleResult::buffer_empty;
     }
     auto [x, y, z] = *sample;
-    acceleration.val[0] = raw_to_accel(x);
-    acceleration.val[1] = raw_to_accel(y);
-    acceleration.val[2] = raw_to_accel(z);
+    raw_acceleration.val[0] = x;
+    raw_acceleration.val[1] = y;
+    raw_acceleration.val[2] = z;
 
     return GetSampleResult::ok;
 }

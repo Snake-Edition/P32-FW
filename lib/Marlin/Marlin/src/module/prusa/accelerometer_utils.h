@@ -44,6 +44,6 @@ public:
         bool buffer_overflow;
         bool sample_overrun;
     };
-    static PrusaAccelerometer::Acceleration unpack_sample(SampleStatus &sampleStatus, common::puppies::fifo::AccelerometerXyzSample sample);
+    static PrusaAccelerometer::RawAcceleration unpack_sample(SampleStatus &sampleStatus, common::puppies::fifo::AccelerometerXyzSample sample);
 #endif
 };
