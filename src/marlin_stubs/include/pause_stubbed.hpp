@@ -26,6 +26,11 @@ void unhomed_z_lift(float amount_mm);
 
 class PausePrivatePhase : public IPause {
 protected:
+    /**
+     * @brief Phase inside the load/unload process
+     * @details This represents the current state inside one load/unload process.
+     *          It is used to determine which function to call in the FSM.
+     */
     enum class LoadState {
         start = 0,
         unload_start,
@@ -133,6 +138,10 @@ class Pause : public PausePrivatePhase {
     static constexpr const float heating_phase_min_hotend_diff = 5.0F;
 
 public:
+    /**
+     * @brief Type of load/unload/change process
+     * @details This enum is used to determine which process to start/perform.
+     */
     enum class LoadType : uint8_t {
         load,
         autoload,
