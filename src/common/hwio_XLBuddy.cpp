@@ -407,6 +407,7 @@ void analogWrite(uint32_t ulPin, uint32_t ulValue) {
             return;
         }
         case MARLIN_PIN(FAN1): {
+            static_assert(!HAS_FILAMENT_HEATBREAK_PARAM());
             // heatbreak fan, any writes to it are ignored, its controlled by dwarf
             return;
         }
