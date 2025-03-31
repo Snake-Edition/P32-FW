@@ -15,7 +15,6 @@
 #include <usb_host.h>
 #include <state/printer_state.hpp>
 #include <transfers/transfer.hpp>
-#include <feature/prusa/restore_z.h>
 #include <gcode/gcode_reader_restore_info.hpp>
 
 #include <option/bootloader.h>
@@ -33,42 +32,10 @@
 #endif
 
 /**
- * Restore Z coordinate after boot if enabled.
  * Restore print after power panic event.
  * Auto-start gcode.
- *
- * REBOOT_RESTORE_Z is hooked here just before power panic to
- * make sure it is not called later than power panic. If
- * restore_z::restore() would be called later than power panic it
- * might screw power panic restored Z coordinate.
- *
- * Z-coordinate restored by restore_z will be immediately rewritten by power panic.
- * So to make it clear it has no effect in case of power panic restore
- * it is explicitly skipped and cleared.
- *
- * Hooking REBOOT_RESTORE_Z here has also some down sides. This hook is
- * called only after USB storage is detected. This means REBOOT_RESTORE_Z
- * doesn't work if the USB flash drive is not connected in time. Also
- * it might take long to detect USB storage so some move can be initiated
- * by user or WUI and that movement may be screwed by restore_z.
- *
- * If this is the problem REBOOT_RESTORE_Z might be hooked much earlier.
- * E.g. Marlin.cpp setup().
  */
 void run_once_after_boot() {
-#if ENABLED(REBOOT_RESTORE_Z)
-    #if ENABLED(POWER_PANIC)
-    if (power_panic::state_stored()) {
-        restore_z::clear();
-    } else
-    #endif
-    {
-        restore_z::restore();
-    }
-#else
-    restore_z::clear();
-#endif
-
 #if ENABLED(POWER_PANIC)
     if (power_panic::state_stored()) {
         // Data has been saved: ensure we're coming either from self-reset (we reached the end of

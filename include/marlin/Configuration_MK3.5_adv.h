@@ -1494,8 +1494,6 @@
     #define POWER_PANIC_E_CURRENT 300 // (mA) RMS current
 #endif
 
-//#define REBOOT_RESTORE_Z
-
 /**
    * TMC2130, TMC2160, TMC2209, TMC2660, TMC5130, and TMC5160 only
    * Use StallGuard2 to sense an obstacle and trigger an endstop.

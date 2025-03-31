@@ -23,7 +23,6 @@
 #include <module/prusa/dock_position.hpp>
 #include <module/prusa/tool_offset.hpp>
 #include <filament_sensors_remap_data.hpp>
-#include <feature/prusa/restore_z_storage.h>
 #include <option/has_loadcell.h>
 #include <option/has_sheet_profiles.h>
 #include <option/has_adc_side_fsensor.h>
@@ -552,8 +551,6 @@ struct CurrentStore
     StoreItemArray<HotendType, defaults::hotend_type, ItemFlag::hw_config, journal::hash("Hotend Type Per Tool"), 8, HOTENDS> hotend_type;
 #endif
 
-    StoreItem<restore_z::Position, restore_z::default_position, ItemFlag::features, journal::hash("Restore Z Coordinate After Boot")> restore_z_after_boot;
-
     StoreItem<int16_t, defaults::homing_sens_x, ItemFlag::calibrations | ItemFlag::common_misconfigurations, journal::hash("Homing Sens X")> homing_sens_x; // X axis homing sensitivity
     StoreItem<int16_t, defaults::homing_sens_y, ItemFlag::calibrations | ItemFlag::common_misconfigurations, journal::hash("Homing Sens Y")> homing_sens_y; // Y axis homing sensitivity
 
@@ -782,6 +779,14 @@ struct DeprecatedStore
 #endif
 
     StoreItem<bool, false, journal::hash("USB MSC Enabled")> usb_msc_enabled;
+
+    struct RestoreZPosition {
+        float current_position_z;
+        uint8_t axis_known_position;
+        constexpr auto operator<=>(const RestoreZPosition &) const = default;
+    };
+    static inline constexpr RestoreZPosition restore_z_default_position { NAN, 0 };
+    StoreItem<RestoreZPosition, restore_z_default_position, journal::hash("Restore Z Coordinate After Boot")> restore_z_after_boot;
 };
 
 } // namespace config_store_ns
