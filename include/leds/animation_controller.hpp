@@ -6,20 +6,14 @@
 
 namespace leds {
 
-template <template <size_t count> typename AnimationType, typename AnimationEnum, size_t count>
+template <template <size_t count> typename AnimationType, size_t count>
 class AnimationController {
 public:
-    using Mapping = EnumArray<AnimationEnum, typename AnimationType<count>::Params, static_cast<int>(AnimationEnum::_last) + 1>;
+    using AnimationParams = AnimationType<count>::Params;
 
-    AnimationController(const Mapping &anim_mapping, AnimationEnum startup_type)
-        : animation_mapping(anim_mapping)
-        , current_animation { startup_type, anim_mapping[startup_type] }
-        , prev_animation { startup_type, anim_mapping[startup_type] } {
-    }
-
-    AnimationController(const Mapping &anim_mapping, AnimationEnum startup_type, AnimationEnum custom_type_)
-        : AnimationController(anim_mapping, startup_type) {
-        custom_type = custom_type_;
+    AnimationController(const AnimationParams &startup_params)
+        : current_animation { &startup_params, startup_params }
+        , prev_animation { &startup_params, startup_params } {
     }
 
     void update() {
@@ -36,24 +30,12 @@ public:
         }
     }
 
-    void set(AnimationEnum type) {
-        if (type != current_animation.first) {
+    void set(const AnimationParams &params) {
+        if (&params != current_animation.first) {
             prev_animation = current_animation;
-            current_animation.first = type;
-            if (type == custom_type) {
-                current_animation.second.start(custom_params);
-            } else {
-                current_animation.second.start(animation_mapping[type]);
-            }
+            current_animation.first = &params;
+            current_animation.second.start(params);
         }
-    }
-
-    AnimationType<count>::Params &get_custom_params() {
-        return custom_params;
-    }
-
-    void set_custom(const AnimationType<count>::Params &params) {
-        custom_params = params;
     }
 
     std::span<const ColorRGBW, count> data() const {
@@ -61,16 +43,12 @@ public:
     }
 
 private:
-    using AnimationPair = std::pair<AnimationEnum, AnimationType<count>>;
+    using AnimationPair = std::pair<const AnimationParams *, AnimationType<count>>;
 
     static constexpr uint32_t transition_time_ms { 400 };
 
-    const Mapping &animation_mapping;
     AnimationPair current_animation;
     AnimationPair prev_animation;
-
-    std::optional<AnimationEnum> custom_type;
-    AnimationType<count>::Params custom_params;
 
     std::array<ColorRGBW, count> data_;
 };

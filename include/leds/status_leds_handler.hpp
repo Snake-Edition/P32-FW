@@ -1,6 +1,7 @@
 #pragma once
 
 #include <leds/color.hpp>
+#include "leds/frame_animation.hpp"
 
 #include <freertos/mutex.hpp>
 
@@ -15,8 +16,7 @@ enum class StateAnimation : uint8_t {
     PowerPanic,
     PowerUp,
     Error,
-    Custom,
-    _last = Custom,
+    _last = Error,
 };
 
 enum class AnimationType : uint8_t {
@@ -58,6 +58,9 @@ private:
     bool active { config_store().run_leds.get() };
     StateAnimation old_state { StateAnimation::Idle };
     bool is_error_state { false };
+
+    std::array<FrameAnimation<3>::Params, 2> custom_params_banks;
+    uint8_t custom_params_bank_index { 0 };
 };
 
 } // namespace leds

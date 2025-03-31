@@ -1,7 +1,6 @@
 #include "leds/status_leds_handler.hpp"
 
 #include "leds/animation_controller.hpp"
-#include "leds/frame_animation.hpp"
 #include "marlin_vars.hpp"
 
 namespace leds {
@@ -84,14 +83,14 @@ static StateAnimation marlin_to_anim_state() {
 
 namespace {
 
-    using StateAnimationController = AnimationController<FrameAnimation, StateAnimation, 3>;
+    using StateAnimationController = AnimationController<FrameAnimation, 3>;
 
     constexpr auto solid = std::to_array<FrameAnimation<3>::Frame>({ { 100, 100, 100 } });
 
     constexpr auto pulsing = std::to_array<FrameAnimation<3>::Frame>({ { 100, 100, 100 },
         { 0, 0, 0 } });
 
-    constexpr StateAnimationController::Mapping animations {
+    constexpr EnumArray<StateAnimation, typename FrameAnimation<3>::Params, static_cast<int>(StateAnimation::_last) + 1> animations {
         { StateAnimation::Idle, { { 0, 0, 0 }, 1000, 0, 400, solid } },
         { StateAnimation::Printing, { { 0, 150, 255 }, 1000, 0, 400, solid } },
         { StateAnimation::Aborting, { { 0, 0, 0 }, 1000, 0, 400, solid } },
@@ -100,13 +99,17 @@ namespace {
         { StateAnimation::PowerPanic, { { 0, 0, 0 }, 1000, 0, 400, solid } },
         { StateAnimation::PowerUp, { { 0, 255, 0 }, 1500, 0, 1500, pulsing } },
         { StateAnimation::Error, { { 255, 0, 0 }, 500, 0, 500, pulsing } },
-        { StateAnimation::Custom, { { 0, 0, 0 }, 1000, 0, 300, solid } },
+    };
+
+    constexpr EnumArray<AnimationType, std::span<const FrameAnimation<3>::Frame>, static_cast<int>(AnimationType::_last) + 1> custom_frames {
+        { AnimationType::Solid, solid },
+        { AnimationType::Pulsing, pulsing },
     };
 
 } // namespace
 
 StateAnimationController &controller_instance() {
-    static StateAnimationController instance { animations, StateAnimation::Idle, StateAnimation::Custom };
+    static StateAnimationController instance { animations[StateAnimation::Idle] };
     return instance;
 }
 
@@ -122,7 +125,7 @@ void StatusLedsHandler::set_error() {
 
 void StatusLedsHandler::set_animation(StateAnimation state) {
     std::lock_guard lock(mutex);
-    controller_instance().set(state);
+    controller_instance().set(animations[state]);
 }
 
 bool StatusLedsHandler::get_active() {
@@ -133,17 +136,11 @@ bool StatusLedsHandler::get_active() {
 void StatusLedsHandler::set_custom_animation(const ColorRGBW &color, AnimationType type, uint16_t period_ms) {
     std::lock_guard lock(mutex);
     auto &controller = controller_instance();
-    auto &custom_params = controller.get_custom_params();
+
+    auto &custom_params = custom_params_banks[custom_params_bank_index];
 
     custom_params.color = color;
-    switch (type) {
-    case AnimationType::Solid:
-        custom_params.frames = solid;
-        break;
-    case AnimationType::Pulsing:
-        custom_params.frames = pulsing;
-        break;
-    }
+    custom_params.frames = custom_frames[type];
 
     if (period_ms > 0) {
         custom_params.frame_length = period_ms / custom_params.frames.size();
@@ -153,7 +150,8 @@ void StatusLedsHandler::set_custom_animation(const ColorRGBW &color, AnimationTy
         custom_params.blend_time = 300;
     }
 
-    controller.set(StateAnimation::Custom);
+    controller.set(custom_params);
+    custom_params_bank_index = custom_params_bank_index > 0 ? 0 : 1;
 }
 
 void StatusLedsHandler::set_active(bool val) {
@@ -176,7 +174,7 @@ void StatusLedsHandler::update() {
 
     if (state != old_state) {
         old_state = state;
-        controller_instance().set(state);
+        controller_instance().set(animations[state]);
     }
 
     controller_instance().update();
