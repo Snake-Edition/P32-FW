@@ -565,7 +565,19 @@ void Backend::bank_migration_end() {
         bsod("Migration is not started");
     }
     if (transaction.has_value()) {
-        transaction->reinitialize();
+        // Reinitialize the transaction.
+        //
+        // Doing so "from the outside", because it is questionable if an object
+        // can replace _itself_ (it probably can, but that raised a lot of
+        // questions).
+        Backend &_backend = transaction->backend;
+        const Transaction::Type _type = transaction->type;
+        const uint16_t _ref_count = transaction->ref_count;
+        // Launder probably isn't strictly necessary either, but better safe than sorry.
+        Transaction *t = std::launder(&*transaction);
+        // using placement new, because we want to get default values without calling destructor
+        new (t) Backend::Transaction(_type, _backend);
+        t->ref_count = _ref_count;
     }
     bank_migration.reset();
 }
@@ -576,7 +588,8 @@ auto Backend::bank_migration_guard() -> BankMigrationGuard {
 
 Backend::Transaction::Transaction(Transaction::Type type, Backend &backend)
     : backend(backend)
-    , type(type) {
+    , type(type)
+    , last_item_address(type == Type::version_migration ? backend.current_next_address : backend.current_address) {
 }
 
 Backend::Transaction::~Transaction() {
@@ -630,14 +643,5 @@ void Backend::Transaction::store_item(Backend::Id id, const std::span<const uint
     last_item_address = current_address;
 
     current_address += backend.write_item(current_address, header, data, std::nullopt);
-}
-
-void Backend::Transaction::reinitialize() {
-    Backend &_backend = backend;
-    const Type _type = type;
-    const uint16_t _ref_count = ref_count;
-    // using placement new, because we want to get default values without calling destructor
-    new (this) Backend::Transaction(_type, _backend);
-    ref_count = _ref_count;
 }
 } // namespace journal

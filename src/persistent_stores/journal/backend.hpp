@@ -141,7 +141,7 @@ public:
         Backend &backend;
 
         Type type = Type::transaction;
-        Address last_item_address = type == Type::version_migration ? backend.current_next_address : backend.current_address;
+        Address last_item_address;
         CRCType crc = 0;
         CRCType last_item_crc = 0;
         ItemHeader last_item_header = { true, 0, 0 };
@@ -161,11 +161,6 @@ public:
         ~Transaction();
         void calculate_crc(Id id, const std::span<const uint8_t> &data);
         void store_item(Id id, const std::span<const uint8_t> &data);
-
-        /// Called if bank migration happens during a transaction – that renders the transaction invalid.
-        /// Throws away the previous transaction data and reinitializes the transaction context, so that the transaction can continue.
-        /// In this case, we lose the atomicity of the transaction.
-        void reinitialize();
     };
 
     /**
