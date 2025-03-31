@@ -542,16 +542,20 @@ void Pause::assist_insertion_process([[maybe_unused]] Response response) {
         return;
     }
 
-    // Load for at least 40 seconds before giving up. Alternatively, if filament is removed altogether, stop too.
-    if ((!unstoppable && ticks_diff(ticks_ms(), start_time_ms) > 40000) /*Move for at least 40 seconds before giving up*/
-        || FSensors_instance().no_filament_surely(LogicalFilamentSensor::side)) {
+    // Load for at least 40 seconds before giving up.
+    if (ticks_diff(ticks_ms(), start_time_ms) > 40000) { /*Move for at least 40 seconds before giving up*/
         /*
          * Unstoppable processes should not be stopped. Neither by user, nor printer on itself without any serious failure.
          * The branch used here ensures the printer remains in an infinite loop, waiting in an alert state until the filament is properly loaded—an expected behavior for the printer.
          * In all other cases, exiting the process does not harm the print. Instead, the user is notified that the filament change was not fully completed, and the printer resumes idling.
          */
-
         set(unstoppable ? LoadState::load_start : LoadState::stop);
+        return;
+    }
+
+    // if filament is removed from side FS, stop too.
+    if (FSensors_instance().no_filament_surely(LogicalFilamentSensor::side)) {
+        set(LoadState::unload_finish_or_change);
         return;
     }
 
