@@ -420,7 +420,7 @@ namespace {
                                 if (state.need_comma) {
                                     JSON_COMMA;
                                 }
-                                JSON_CUSTOM("\"%s\"",  all_filament_types[state.iter].parameters().name);
+                                JSON_CUSTOM("\"%s\"",  all_filament_types[state.iter].parameters().name.data());
                                 state.need_comma = true;
                             }
                             JSON_ARR_END;
