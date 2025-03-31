@@ -324,6 +324,9 @@ void filament_gcodes::M1600_no_parser(FilamentType filament_to_be_loaded, uint8_
 #if HAS_CHAMBER_API()
             .preheat_chamber = config_store().filament_change_preheat_all.get(),
 #endif
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+            .set_heatbreak = true,
+#endif
         });
         filament = config_store().get_filament_type(target_extruder);
         if (filament == FilamentType::none) {

@@ -111,6 +111,10 @@ void filament_gcodes::preheat_to(FilamentType filament, uint8_t target_extruder,
         buddy::chamber().set_target_temperature(fil_cnf.chamber_target_temperature);
     }
 #endif
+
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+    thermalManager.setTargetHeatbreak(fil_cnf.heatbreak_temperature, target_extruder);
+#endif
 }
 
 std::pair<std::optional<PreheatStatus::Result>, FilamentType> filament_gcodes::preheat_for_change_load(PreheatData data, uint8_t target_extruder) {
@@ -184,6 +188,12 @@ void filament_gcodes::M1700_no_parser(const M1700Args &args) {
 #if HAS_CHAMBER_API()
     if (args.preheat_chamber) {
         buddy::chamber().set_target_temperature(fil_cnf.chamber_target_temperature);
+    }
+#endif
+
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+    if (args.set_heatbreak) {
+        thermalManager.setTargetHeatbreak(fil_cnf.heatbreak_temperature, args.target_extruder);
     }
 #endif
 
