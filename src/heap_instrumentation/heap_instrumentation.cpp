@@ -26,6 +26,7 @@
 ///     telnet localhost ${RTT_PORT}
 
 #include "SEGGER_RTT.h"
+#include <common/sys.hpp>
 #include <device/board.h>
 #include <cstddef>
 #include <cstdio>
@@ -46,11 +47,20 @@
 static unsigned rtt_buffer_index = 0;
 static char rtt_buffer_data[256];
 
+static void rtt_write(const void *data, unsigned size) {
+    // Do not write to RTT buffer if debugger is not attached. The buffer is setup
+    // to block when it is full, which quite quickly locks the printer when running
+    // debug build without debugger attached.
+    if (sys_debugger_attached()) {
+        SEGGER_RTT_Write(rtt_buffer_index, data, size);
+    }
+}
+
 __attribute__((format(printf, 1, 2))) static void rtt_buffer_printf(const char *fmt, ...) {
     if (!rtt_buffer_index) {
         rtt_buffer_index = 1;
         SEGGER_RTT_ConfigUpBuffer(rtt_buffer_index, "heap", &rtt_buffer_data[0], sizeof(rtt_buffer_data), SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL);
-        SEGGER_RTT_Write(rtt_buffer_index, HEADER, strlen(HEADER));
+        rtt_write(HEADER, strlen(HEADER));
     }
 
     va_list args;
@@ -58,7 +68,7 @@ __attribute__((format(printf, 1, 2))) static void rtt_buffer_printf(const char *
     char buffer[32];
     int n = vsnprintf(buffer, sizeof(buffer), fmt, args);
     va_end(args);
-    SEGGER_RTT_Write(rtt_buffer_index, buffer, n);
+    rtt_write(buffer, n);
 }
 
 extern "C" void *__wrap_malloc(size_t size) {
