@@ -8,6 +8,8 @@ extern version_t &boot_version; // (address) from flash -> "volatile" is not nec
 
 [[noreturn]] void sys_reset();
 
+bool sys_debugger_attached();
+
 [[noreturn]] void sys_dfu_request_and_reset();
 
 bool sys_dfu_requested();

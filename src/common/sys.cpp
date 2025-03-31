@@ -1,6 +1,7 @@
 /// @file
 #include <common/sys.hpp>
 
+#include "stm32f4xx.h"
 #include <buddy/main.h>
 #include <common/shared_config.h>
 #include <common/st25dv64k.h>
@@ -34,6 +35,10 @@ volatile uint8_t *psys_fw_valid = (uint8_t *)0x080FFFFF; // last byte in the fla
     SCB->AIRCR = aircr; // write AIRCR
     while (1)
         ; // endless loop
+}
+
+bool sys_debugger_attached() {
+    return CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk;
 }
 
 void sys_dfu_request_and_reset() {

@@ -1,5 +1,6 @@
 #include "bsod.h"
 #include "safe_state.h"
+#include <common/sys.hpp>
 
 void abort() {
     bsod("aborted");
@@ -7,7 +8,7 @@ void abort() {
 
 void __assert_func(const char *file, int line, const char * /*func*/, const char *msg) {
 #if _DEBUG
-    if (CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk) {
+    if (sys_debugger_attached()) {
         buddy_disable_heaters(); // put HW to safe state
         __asm("BKPT #0\n"); /* Only halt mcu if debugger is attached */
         __builtin_unreachable();

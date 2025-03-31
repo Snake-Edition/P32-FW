@@ -9,6 +9,7 @@
 #include <numeric>
 #include <limits>
 #include <common/sensor_data.hpp>
+#include <common/sys.hpp>
 #include "timing.h"
 #include <logging/log.hpp>
 #include "probe_position_lookback.hpp"
@@ -156,7 +157,7 @@ void Loadcell::ProcessSample(int32_t loadcellRaw, uint32_t time_us) {
         this->loadcellRaw = loadcellRaw;
         this->undefinedCnt = 0;
     } else {
-        if (!HAS_LOADCELL_HX717() || (!DBGMCU->CR || (TERN0(DEBUG_LEVELING_FEATURE, DEBUGGING(LEVELING)) || DEBUGGING(ERRORS)))) {
+        if (!HAS_LOADCELL_HX717() || (!sys_debugger_attached() || (TERN0(DEBUG_LEVELING_FEATURE, DEBUGGING(LEVELING)) || DEBUGGING(ERRORS)))) {
             // see comment in hx717mux: only enable additional safety checks if HX717 is multiplexed
             // and directly attached without an active debugging session or LEVELING/ERROR flags, to
             // avoid triggering inside other breakpoints.

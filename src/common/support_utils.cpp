@@ -16,6 +16,7 @@
 #include "support_utils_lib.hpp"
 #include "data_exchange.hpp"
 
+#include <common/sys.hpp>
 #include <option/bootloader.h>
 
 void printerHash(char *str, size_t size, bool state_prefix) {
@@ -82,7 +83,7 @@ bool appendix_exist() {
 #endif
 
     // If debugging session is active there is no appendix
-    if (DBGMCU->CR) {
+    if (sys_debugger_attached()) {
         return false;
     }
 

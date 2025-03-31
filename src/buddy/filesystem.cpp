@@ -6,8 +6,7 @@
 #include <buddy/filesystem_root.h>
 #include <buddy/filesystem_semihosting.h>
 #include <buddy/libsysbase_syscalls.h>
-
-#include "stm32f4xx.h"
+#include <common/sys.hpp>
 #include <logging/log.hpp>
 
 LOG_COMPONENT_DEF(FileSystem, logging::Severity::info);
@@ -21,7 +20,7 @@ void filesystem_init() {
     filesystem_littlefs_internal_init();
 
     // if debugger is attached, prepare semihosting fs
-    if (DBGMCU->CR != 0) {
+    if (sys_debugger_attached()) {
         filesystem_semihosting_init();
     }
 
