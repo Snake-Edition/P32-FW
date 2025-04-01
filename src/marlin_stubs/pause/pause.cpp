@@ -639,13 +639,16 @@ static constexpr feedRate_t retract_feedrate = 35; // mm/s
 void Pause::purge_process([[maybe_unused]] Response response) {
     // Extrude filament to get into hotend
     setPhase(is_unstoppable() ? PhasesLoadUnload::Purging_unstoppable : PhasesLoadUnload::Purging_stoppable, 70);
-    if (do_e_move_notify_progress_hotextrude(settings.purge_length(), ADVANCED_PAUSE_PURGE_FEEDRATE, 70, 98, StopConditions::All) == StopConditions::SideFilamentSensorRunout) {
+
+    const auto purge_result = do_e_move_notify_progress_hotextrude(settings.purge_length(), ADVANCED_PAUSE_PURGE_FEEDRATE, 70, 98, StopConditions::All);
+    if (purge_result == StopConditions::SideFilamentSensorRunout) {
         runout_during_load();
         return;
     }
-
-    // retraction is short -> safe to ignore the result
-    std::ignore = do_e_move_notify_progress_hotextrude(retract_distance, retract_feedrate, 98, 99, StopConditions::UserStopped);
+    // Skip retraction on UserStopped or Failed
+    if (purge_result != StopConditions::UserStopped && purge_result != StopConditions::Failed) {
+        std::ignore = do_e_move_notify_progress_hotextrude(retract_distance, retract_feedrate, 98, 99, StopConditions::UserStopped);
+    }
 
     config_store().set_filament_type(settings.GetExtruder(), filament::get_type_to_load());
 
