@@ -47,7 +47,10 @@ LOG_COMPONENT_DEF(PRUSA_GCODE, logging::Severity::info);
 static void record_pre_gcode_metrics();
 
 int8_t PrusaGcodeSuite::get_target_extruder_from_command(const GCodeParser2 &p) {
-    return GcodeSuite::get_target_extruder_from_option_value(p.option<uint8_t>('T'));
+    return GcodeSuite::get_target_extruder_from_option_value(p.option<uint8_t>('T'), false);
+}
+int8_t PrusaGcodeSuite::get_target_extruder_from_command_p(const GCodeParser2 &p) {
+    return GcodeSuite::get_target_extruder_from_option_value(p.option<uint8_t>('T'), p.option<bool>('P').value_or(false));
 }
 
 bool GcodeSuite::process_parsed_command_custom(bool no_ok) {

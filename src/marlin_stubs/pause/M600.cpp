@@ -97,6 +97,7 @@ static void M600_manual(const GCodeParser2 &);
  * - `C"color"` - Set color for filament change (color name as string)
  * - `S"filament"` - Set filament type for filament change. RepRap compatible.
  * - `N` - No return, don't return to previous position after fillament change
+ * - `P` - If set, the parameter 'T' is interpreted as a physical tool (tool mapping is not applied)
  *
  *  Default values are used for omitted arguments.
  */

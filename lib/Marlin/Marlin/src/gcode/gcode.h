@@ -366,10 +366,11 @@ public:
   static millis_t previous_move_ms;
   FORCE_INLINE static void reset_stepper_timeout() { previous_move_ms = millis(); }
 
-  /// Validates that the option value is valid and passes it through tool mapping
-  static int8_t get_target_extruder_from_option_value(std::optional<uint8_t> option_value);
+  /// Validates that the option value is valid and may pass it through tool mapping (depending on is_physical flag)
+  static int8_t get_target_extruder_from_option_value(std::optional<uint8_t> option_value, const bool is_physical);
 
   static int8_t get_target_extruder_from_command();
+  static int8_t get_target_extruder_from_command_p();
   static int8_t get_target_e_stepper_from_command();
   static void get_destination_from_command();
 

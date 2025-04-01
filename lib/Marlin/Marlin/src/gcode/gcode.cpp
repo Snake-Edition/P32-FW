@@ -95,15 +95,17 @@ PrinterGCodeCompatibilityReport GcodeSuite::compatibility;
   xyz_pos_t GcodeSuite::coordinate_system[MAX_COORDINATE_SYSTEMS];
 #endif
 
-int8_t GcodeSuite::get_target_extruder_from_option_value(std::optional<uint8_t> extruder) {
+int8_t GcodeSuite::get_target_extruder_from_option_value(std::optional<uint8_t> extruder, const bool is_physical) {
   if (extruder.has_value()) {
     uint8_t e = *extruder;
 
+    if(!is_physical) {
     #if ENABLED(PRUSA_TOOL_MAPPING)
       // map logical tool to physical tool if mapping is enabled
       const uint8_t mapped = tool_mapper.to_physical(e);
       e = mapped == ToolMapper::NO_TOOL_MAPPED ? -1 : mapped;
     #endif
+    }
 
     static_assert(EXTRUDERS <= INT8_MAX, "We need to return int8_t");
     bool valid_extruder = (e < EXTRUDERS);
@@ -126,9 +128,16 @@ int8_t GcodeSuite::get_target_extruder_from_option_value(std::optional<uint8_t> 
  * Return -1 if the T parameter is out of range
  */
 int8_t GcodeSuite::get_target_extruder_from_command() {
-  return get_target_extruder_from_option_value(parser.seenval('T') ? std::optional(parser.value_byte()) : std::nullopt);
+  return get_target_extruder_from_option_value(parser.seenval('T') ? std::optional(parser.value_byte()) : std::nullopt, false);
 }
 
+/**
+ * + specify if target extruder is logical or physical
+ */
+int8_t GcodeSuite::get_target_extruder_from_command_p() {
+  return get_target_extruder_from_option_value(parser.seenval('T') ? std::optional(parser.value_byte()) : std::nullopt, 
+  parser.seen('P') ? parser.value_bool() : false);
+}
 /**
  * Get the target e stepper from the T parameter
  * Return -1 if the T parameter is out of range or unspecified
