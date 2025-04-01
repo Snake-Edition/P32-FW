@@ -237,18 +237,6 @@ void MI_DISABLE_STEP::click(IWindowMenu & /*window_menu*/) {
 }
 
 /*****************************************************************************/
-// MI_ENTER_DFU
-#ifdef BUDDY_ENABLE_DFU_ENTRY
-MI_ENTER_DFU::MI_ENTER_DFU()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev) {
-}
-
-void MI_ENTER_DFU::click(IWindowMenu &) {
-    sys_dfu_request_and_reset();
-}
-#endif
-
-/*****************************************************************************/
 // MI_SAVE_DUMP
 MI_SAVE_DUMP::MI_SAVE_DUMP()
     : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {

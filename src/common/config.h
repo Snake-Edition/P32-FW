@@ -29,10 +29,6 @@ enum {
     #error Unsupported printer
 #endif
 
-#if defined(_DEBUG)
-    #define BUDDY_ENABLE_DFU_ENTRY
-#endif
-
 // Enabled Z calibration (MK3, MK4, XL)
 #if (PRINTER_IS_PRUSA_MK4() || PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_XL())
     #define WIZARD_Z_CALIBRATION

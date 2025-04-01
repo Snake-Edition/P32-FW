@@ -687,18 +687,6 @@ static void enable_segger_sysview() {
     SEGGER_SYSVIEW_Conf();
 }
 
-static void enable_dfu_entry() {
-#ifdef BUDDY_ENABLE_DFU_ENTRY
-    // check whether user requested to enter the DFU mode
-    // this has to be checked after having
-    //  1) initialized access to the backup domain
-    //  2) having initialized related clocks (SystemClock_Config)
-    if (sys_dfu_requested()) {
-        sys_dfu_boot_enter();
-    }
-#endif
-}
-
 static void eeprom_init_i2c() {
     I2C_INIT(eeprom);
 }
@@ -771,7 +759,6 @@ int main() {
     enable_trap_on_division_by_zero();
     enable_backup_domain();
     enable_segger_sysview();
-    enable_dfu_entry();
 
     // init the RAM area that serves for exchanging data with bootloader in
     // case this is a noboot build

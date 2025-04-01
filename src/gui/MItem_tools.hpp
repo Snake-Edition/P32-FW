@@ -107,18 +107,6 @@ protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
 
-#ifdef BUDDY_ENABLE_DFU_ENTRY
-class MI_ENTER_DFU : public IWindowMenuItem {
-    static constexpr const char *const label = "Enter DFU";
-
-public:
-    MI_ENTER_DFU();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-#endif
-
 class MI_SAVE_DUMP : public IWindowMenuItem {
     static constexpr const char *const label = N_("Save Crash Dump");
 
