@@ -311,7 +311,7 @@ uint16_t load_message_error_code() {
 
 static void dump_failed() {
     // nothing left to do here, when dump fails just restart
-    HAL_NVIC_SystemReset();
+    sys_reset();
 }
 
 static constexpr CrashCatcherMemoryRegion regions[] = {
@@ -415,7 +415,7 @@ CrashCatcherReturnCodes CrashCatcher_DumpEnd(void) {
     }
 
     // All done, now restart and display BSOD
-    HAL_NVIC_SystemReset();
+    sys_reset();
 
     // need to return something, but it should never get here.
     return CRASH_CATCHER_TRY_AGAIN;

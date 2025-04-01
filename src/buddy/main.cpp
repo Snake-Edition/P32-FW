@@ -437,8 +437,7 @@ extern "C" void main_cpp(void) {
     if (bootloader_update()) {
         // Wait a while, before restart (this prevents some older board without appendix to enter internal bootloader on reset)
         osDelay(300);
-        __disable_irq();
-        HAL_NVIC_SystemReset();
+        sys_reset();
     }
 #endif
 

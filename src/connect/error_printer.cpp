@@ -2,6 +2,7 @@
 #include "printer_common.hpp"
 #include <config_store/store_instance.hpp>
 #include <common/random.h>
+#include <common/sys.hpp>
 
 using printer_state::DeviceState;
 using printer_state::Dialog;
@@ -131,7 +132,7 @@ std::optional<ErrorPrinter::FinishedJobResult> ErrorPrinter::get_prior_job_resul
 }
 
 void ErrorPrinter::reset_printer() {
-    NVIC_SystemReset();
+    sys_reset();
 }
 
 void ErrorPrinter::set_slot_info(size_t, const SlotInfo &) {

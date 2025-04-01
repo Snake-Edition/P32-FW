@@ -3,6 +3,7 @@
  */
 #include "../../lib/Marlin/Marlin/src/gcode/queue.h"
 #include "PrusaGcodeSuite.hpp"
+#include <common/sys.hpp>
 
 /** \addtogroup G-Codes
  * @{
@@ -18,7 +19,7 @@
 void PrusaGcodeSuite::M999() {
     queue.ok_to_send();
     osDelay(1000);
-    NVIC_SystemReset();
+    sys_reset();
 }
 
 /** @}*/

@@ -15,6 +15,7 @@
 #include <filament_sensors_handler.hpp>
 #include <filament_sensor_states.hpp>
 #include <state/printer_state.hpp>
+#include <common/sys.hpp>
 #include <common/unique_file_ptr.hpp>
 
 #include <option/has_cancel_object.h>
@@ -598,7 +599,7 @@ bool MarlinPrinter::set_printer_ready(bool ready) {
 }
 
 void MarlinPrinter::reset_printer() {
-    NVIC_SystemReset();
+    sys_reset();
 }
 
 const char *MarlinPrinter::dialog_action(printer_state::DialogId dialog_id, Response response) {

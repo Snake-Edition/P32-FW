@@ -26,15 +26,39 @@ version_t &boot_version = *(version_t *)(BOOTLOADER_VERSION_ADDRESS); // (addres
 
 volatile uint8_t *psys_fw_valid = (uint8_t *)0x080FFFFF; // last byte in the flash
 
-// Needs to be RAM function as it is called when erasing the flash
 [[noreturn]] void __RAM_FUNC sys_reset() {
-    uint32_t aircr = SCB->AIRCR & 0x0000ffff; // read AIRCR, mask VECTKEY
-    __disable_irq();
-    aircr |= 0x05fa0000; // set VECTKEY
-    aircr |= 0x00000004; // set SYSRESETREQ
-    SCB->AIRCR = aircr; // write AIRCR
-    while (1)
-        ; // endless loop
+    // This needs to be RAM function as it is called when erasing the flash.
+    // Also, we manually inline HAL_NVIC_SystemReset() here to ensure every
+    // part of this function really lives in RAM.
+
+    // this code is Cortex-M4 specific
+    static_assert(__CORTEX_M == 4);
+
+    // disable interrupts
+    asm volatile("cpsid i"
+                 :
+                 :
+                 : "memory");
+
+    // data synchronization barrier
+    asm volatile("dsb"
+                 :
+                 :
+                 : "memory");
+
+    // request reset
+    SCB->AIRCR = (uint32_t)((0x5FAUL << SCB_AIRCR_VECTKEY_Pos) | (SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk) | SCB_AIRCR_SYSRESETREQ_Msk);
+
+    // data synchronization barrier
+    asm volatile("dsb"
+                 :
+                 :
+                 : "memory");
+
+    // wait for reset
+    for (;;) {
+        asm volatile("nop");
+    }
 }
 
 bool sys_debugger_attached() {
@@ -43,7 +67,7 @@ bool sys_debugger_attached() {
 
 void sys_dfu_request_and_reset() {
     DFU_REQUEST_RTC_BKP_REGISTER = DFU_REQUESTED_MAGIC_VALUE;
-    NVIC_SystemReset();
+    sys_reset();
 }
 
 bool sys_dfu_requested() {
