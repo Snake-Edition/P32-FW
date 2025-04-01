@@ -126,11 +126,11 @@ MI_PRINT_FAN_TYPE::MI_PRINT_FAN_TYPE(Toolhead toolhead)
 }
 
 PrintFanType MI_PRINT_FAN_TYPE::read_value_impl(ToolheadIndex ix) {
-    return config_store().print_fan_type.get(ix);
+    return get_print_fan_type(ix);
 }
 
 void MI_PRINT_FAN_TYPE::store_value_impl(ToolheadIndex ix, PrintFanType set) {
-    config_store().print_fan_type.set(ix, set);
+    set_print_fan_type(ix, set);
 }
 
 void MI_PRINT_FAN_TYPE::build_item_text(int index, const std::span<char> &buffer) const {
