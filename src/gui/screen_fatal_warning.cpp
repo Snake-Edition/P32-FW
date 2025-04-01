@@ -4,7 +4,6 @@
 #include "config.h"
 #include "ScreenHandler.hpp"
 #include "sound.hpp"
-#include "sys.h"
 #include "support_utils.h"
 
 #include <stdlib.h>

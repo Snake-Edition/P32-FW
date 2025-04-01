@@ -1,6 +1,5 @@
 #include "MItem_basic_selftest.hpp"
 #include "gui.hpp"
-#include "sys.h"
 #include "ScreenHandler.hpp"
 #include "printer_selftest.hpp"
 #include <buddy/main.h>

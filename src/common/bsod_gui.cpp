@@ -20,7 +20,7 @@
 #include "sound.hpp"
 #include "gui.hpp"
 #include "Jogwheel.hpp"
-#include "sys.h"
+#include <common/sys.hpp>
 #include "hwio.h"
 #include <version/version.hpp>
 #include "support_utils.h"

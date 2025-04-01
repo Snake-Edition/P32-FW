@@ -6,9 +6,9 @@
 #include "WindowMenuSpin.hpp"
 #include "ScreenHandler.hpp"
 #include "window_msgbox.hpp"
-#include "sys.h"
 #include "string.h" // memcmp
 #include "MItem_experimental_tools.hpp"
+#include <common/sys.hpp>
 #include <config_store/store_instance.hpp>
 
 void ScreenMenuExperimentalSettings::clicked_return() {

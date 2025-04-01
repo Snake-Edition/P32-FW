@@ -15,7 +15,6 @@
 #include "buffered_serial.hpp"
 #include "bsod_gui.hpp"
 #include <config_store/store_instance.hpp>
-#include "sys.h"
 #include <wdt.hpp>
 #include <crash_dump/dump.hpp>
 #include "error_codes.hpp"
@@ -32,6 +31,7 @@
 #include "printers.h"
 #include "MarlinPin.h"
 #include "crc32.h"
+#include <common/sys.hpp>
 #include <common/w25x.hpp>
 #include "timing.h"
 #include <buddy/filesystem.h>

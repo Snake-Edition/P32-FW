@@ -53,7 +53,7 @@
 #include <common/w25x.hpp>
 #include "sound.hpp"
 #include "bsod.h"
-#include "sys.h"
+#include <common/sys.hpp>
 #include "timing.h"
 #include "odometer.hpp"
 #include "marlin_vars.hpp"

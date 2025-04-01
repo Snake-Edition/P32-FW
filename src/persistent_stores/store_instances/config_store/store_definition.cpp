@@ -8,7 +8,7 @@
 #include <option/has_toolchanger.h>
 #include <option/has_config_store_wo_backend.h>
 #include <option/has_touch.h>
-#include <sys.h>
+#include <common/sys.hpp>
 
 #include <option/has_auto_retract.h>
 #if HAS_AUTO_RETRACT()

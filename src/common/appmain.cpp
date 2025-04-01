@@ -10,7 +10,6 @@
     #include "Jogwheel.hpp"
 #endif
 #include "hwio.h"
-#include "sys.h"
 #include "gpio.h"
 #include "metric.h"
 #include "cpu_utils.hpp"

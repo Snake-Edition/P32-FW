@@ -1,7 +1,6 @@
 #include "screen_menu_hardware.hpp"
 #include "screen_menu_experimental_settings.hpp"
 #include "ScreenHandler.hpp"
-#include "sys.h"
 
 ScreenMenuHardware::ScreenMenuHardware()
     : ScreenMenuHardware__(_(label)) {

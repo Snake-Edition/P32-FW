@@ -4,7 +4,6 @@
 #include "marlin_server.hpp"
 #include "gui.hpp"
 #include "time_helper.hpp"
-#include "sys.h"
 #include "window_dlg_wait.hpp"
 #include "window_file_list.hpp"
 #include "sound.hpp"
@@ -24,7 +23,7 @@
 #include "time_tools.hpp"
 #include "footer_eeprom.hpp"
 #include <version/version.hpp>
-#include "sys.h"
+#include <common/sys.hpp>
 #include <common/w25x.hpp>
 #include <bootloader/bootloader.hpp>
 #include "config_features.h"

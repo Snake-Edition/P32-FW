@@ -1,14 +1,12 @@
-// sys.cpp - system functions
-#include <stdlib.h>
-#include "sys.h"
-#include "shared_config.h"
-#include "stm32f4xx_hal.h"
-#include "st25dv64k.h"
+/// @file
+#include <common/sys.hpp>
+
 #include <buddy/main.h>
+#include <common/shared_config.h>
+#include <common/st25dv64k.h>
+#include <cstdlib>
 #include <logging/log.hpp>
-#include "interrupt_disabler.hpp"
-#include "utility_extensions.hpp"
-#include <string.h>
+#include <stm32f4xx.h>
 
 LOG_COMPONENT_REF(Buddy);
 
@@ -28,7 +26,7 @@ version_t &boot_version = *(version_t *)(BOOTLOADER_VERSION_ADDRESS); // (addres
 volatile uint8_t *psys_fw_valid = (uint8_t *)0x080FFFFF; // last byte in the flash
 
 // Needs to be RAM function as it is called when erasing the flash
-[[noreturn]] void __RAM_FUNC sys_reset(void) {
+[[noreturn]] void __RAM_FUNC sys_reset() {
     uint32_t aircr = SCB->AIRCR & 0x0000ffff; // read AIRCR, mask VECTKEY
     __disable_irq();
     aircr |= 0x05fa0000; // set VECTKEY
@@ -38,16 +36,16 @@ volatile uint8_t *psys_fw_valid = (uint8_t *)0x080FFFFF; // last byte in the fla
         ; // endless loop
 }
 
-void sys_dfu_request_and_reset(void) {
+void sys_dfu_request_and_reset() {
     DFU_REQUEST_RTC_BKP_REGISTER = DFU_REQUESTED_MAGIC_VALUE;
     NVIC_SystemReset();
 }
 
-bool sys_dfu_requested(void) {
+bool sys_dfu_requested() {
     return DFU_REQUEST_RTC_BKP_REGISTER == DFU_REQUESTED_MAGIC_VALUE;
 }
 
-void sys_dfu_boot_enter(void) {
+void sys_dfu_boot_enter() {
     // clear the flag
     DFU_REQUEST_RTC_BKP_REGISTER = 0;
 
@@ -88,15 +86,15 @@ int sys_calc_flash_latency(int freq) {
     return 5;
 }
 
-int sys_fw_update_is_enabled(void) {
-    return (std::to_underlying(FwAutoUpdate::on) == st25dv64k_user_read(FW_UPDATE_FLAG_ADDRESS)) ? 1 : 0;
+bool sys_fw_update_is_enabled() {
+    return std::to_underlying(FwAutoUpdate::on) == st25dv64k_user_read(FW_UPDATE_FLAG_ADDRESS);
 }
 
-void sys_fw_update_enable(void) {
+void sys_fw_update_enable() {
     st25dv64k_user_write(FW_UPDATE_FLAG_ADDRESS, std::to_underlying(FwAutoUpdate::on));
 }
 
-void sys_fw_update_disable(void) {
+void sys_fw_update_disable() {
     st25dv64k_user_write(FW_UPDATE_FLAG_ADDRESS, std::to_underlying(FwAutoUpdate::off));
 }
 

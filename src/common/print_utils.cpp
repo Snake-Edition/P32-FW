@@ -27,7 +27,7 @@
 #if ENABLED(POWER_PANIC)
     #include "power_panic.hpp"
     #if BOOTLOADER()
-        #include "sys.h" // support for bootloader<1.2.3
+        #include <common/sys.hpp> // support for bootloader<1.2.3
     #endif
 #endif
 

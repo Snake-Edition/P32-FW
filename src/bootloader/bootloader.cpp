@@ -1,6 +1,6 @@
 #include <bootloader/bootloader.hpp>
 #include <logging/log.hpp>
-#include <sys.h>
+#include <common/sys.hpp>
 #include <data_exchange.hpp>
 #include <device/hal.h>
 #include <bsod.h>

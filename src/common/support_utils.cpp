@@ -3,7 +3,6 @@
 
 #include "config.h"
 #include "otp.hpp"
-#include "sys.h"
 #include "shared_config.h"
 #include "support_utils.h"
 #include "string.h"

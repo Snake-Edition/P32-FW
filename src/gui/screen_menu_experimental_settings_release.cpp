@@ -6,7 +6,7 @@
 #include "WindowMenuSpin.hpp"
 #include "ScreenHandler.hpp"
 #include "window_msgbox.hpp"
-#include "sys.h"
+#include <common/sys.hpp>
 #include "string.h" // memcmp
 #include "MItem_experimental_tools.hpp"
 

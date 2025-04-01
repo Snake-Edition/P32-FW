@@ -3,7 +3,7 @@
  */
 
 #include "screen_menu_fw_update.hpp"
-#include "sys.h"
+#include <common/sys.hpp>
 #include "ScreenHandler.hpp"
 #include "data_exchange.hpp"
 #include <guiconfig/guiconfig.h>

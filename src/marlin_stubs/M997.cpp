@@ -2,7 +2,6 @@
 #include "gcode/queue.h"
 #include "PrusaGcodeSuite.hpp"
 #include <string.h>
-#include "sys.h"
 #include "data_exchange.hpp"
 
 static void update_main_board(bool update_older, const char *sfn) {
