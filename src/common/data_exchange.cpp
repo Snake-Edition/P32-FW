@@ -1,4 +1,5 @@
-#include "data_exchange.hpp"
+/// @file
+#include <common/data_exchange.hpp>
 
 #include <common/otp_types.hpp>
 #include <common/wdt.hpp>
@@ -10,6 +11,16 @@
 
 // pin PA13 state
 static constexpr uint8_t APPENDIX_FLAG_MASK = 0x01;
+
+enum class FwAutoUpdate : uint8_t {
+    on = 0xAA,
+    off = 0x00,
+    older = 0x55,
+    specified = 0xBB,
+    tester_mode_1 = 0xCA,
+    tester_mode_2 = 0xCB,
+    tester_mode_3 = 0xCC,
+};
 
 struct __attribute__((packed)) DataExchange {
     FwAutoUpdate fw_update_flag;
@@ -111,7 +122,7 @@ void data_exchange_init() {
 void data_exchange_init() {}
 #endif
 
-FwAutoUpdate get_auto_update_flag(void) {
+static FwAutoUpdate get_auto_update_flag(void) {
     // EEPROM flag is temporarly removed (for new bootloader downgrade testing)
     uint8_t RAM_flag = (FwAutoUpdate::on == ram_data_exchange.fw_update_flag) ? 1 : 0;
 
@@ -132,30 +143,6 @@ FwAutoUpdate get_auto_update_flag(void) {
         }
     }
     return FwAutoUpdate::off; // somehow corrupted data in shared RAM, no update
-}
-
-void get_specified_SFN(char *out_buff) {
-    strlcpy(out_buff, ram_data_exchange.bbf_sfn, sizeof(DataExchange::bbf_sfn));
-}
-
-void set_fw_update_flag(FwAutoUpdate flag) {
-    ram_data_exchange.fw_update_flag = flag;
-}
-
-void set_fw_signature(uint8_t fw_signature) {
-    ram_data_exchange.fw_signature = fw_signature;
-}
-
-void set_bootloader_valid() {
-    ram_data_exchange.bootloader_valid = 1;
-}
-
-void set_bootloader_invalid() {
-    ram_data_exchange.bootloader_valid = 0;
-}
-
-void clr_bbf_sfn() {
-    ram_data_exchange.bbf_sfn[0] = 0;
 }
 
 namespace data_exchange {
@@ -184,20 +171,12 @@ bool has_fw_signature() {
     return ram_data_exchange.fw_signature != 0;
 }
 
-bool is_fw_update_on_restart() {
-    return ram_data_exchange.fw_update_flag == FwAutoUpdate::on;
-}
-
 void fw_update_on_restart_enable() {
     ram_data_exchange.fw_update_flag = FwAutoUpdate::on;
 }
 
 void fw_update_older_on_restart_enable() {
     ram_data_exchange.fw_update_flag = FwAutoUpdate::older;
-}
-
-void fw_update_on_restart_disable() {
-    ram_data_exchange.fw_update_flag = FwAutoUpdate::off;
 }
 
 bool is_bootloader_valid() {
