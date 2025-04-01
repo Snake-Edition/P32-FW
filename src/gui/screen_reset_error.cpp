@@ -15,7 +15,12 @@ ScreenResetError::ScreenResetError(const Rect16 &fw_version_rect)
 
     ClrMenuTimeoutClose();
     ClrOnSerialClose();
-    start_sound();
+    if (!sound_started) {
+        /// avoid collision of sounds
+        Sound_Stop();
+        Sound_Play(eSOUND_TYPE::CriticalAlert);
+        sound_started = true;
+    }
 
     fw_version_txt.set_font(Font::small);
 
@@ -26,15 +31,6 @@ ScreenResetError::ScreenResetError(const Rect16 &fw_version_rect)
     const char *apendix_str = appendix_exist() ? " [A]" : "";
     StringBuilder(fw_version_str).append_printf("%s %s%s%s", PrinterModelInfo::current().id_str, version::project_version_full, signed_str, apendix_str);
     fw_version_txt.SetText(string_view_utf8::MakeRAM(fw_version_str.data()));
-}
-
-void ScreenResetError::start_sound() {
-    if (!sound_started) {
-        /// avoid collision of sounds
-        Sound_Stop();
-        Sound_Play(eSOUND_TYPE::CriticalAlert);
-        sound_started = true;
-    }
 }
 
 void ScreenResetError::windowEvent([[maybe_unused]] window_t *sender, GUI_event_t event, [[maybe_unused]] void *param) {
