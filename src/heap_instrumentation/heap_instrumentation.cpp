@@ -27,9 +27,9 @@
 
 #include "SEGGER_RTT.h"
 #include <device/board.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstddef>
+#include <cstdio>
+#include <cstring>
 
 /// Different boards have different MCUs and those have different RAM size
 #define RAM_START "0x20000000"
@@ -61,14 +61,14 @@ __attribute__((format(printf, 1, 2))) static void rtt_buffer_printf(const char *
     SEGGER_RTT_Write(rtt_buffer_index, buffer, n);
 }
 
-void *__wrap_malloc(size_t size) {
+extern "C" void *__wrap_malloc(size_t size) {
     void *__real_malloc(size_t size);
     void *result = __real_malloc(size);
     rtt_buffer_printf("hl{m,%d,0,0x%p}\n", size, result);
     return result;
 }
 
-void __wrap_free(void *ptr) {
+extern "C" void __wrap_free(void *ptr) {
     void __real_free(void *ptr);
     __real_free(ptr);
     if (ptr) {
@@ -76,14 +76,14 @@ void __wrap_free(void *ptr) {
     }
 }
 
-void *__wrap_calloc(size_t nmemb, size_t size) {
+extern "C" void *__wrap_calloc(size_t nmemb, size_t size) {
     void *__real_calloc(size_t nmemb, size_t size);
     void *result = __real_calloc(nmemb, size);
     rtt_buffer_printf("hl{c,%d,0,0x%p}\n", nmemb * size, result);
     return result;
 }
 
-void *__wrap_realloc(void *ptr, size_t size) {
+extern "C" void *__wrap_realloc(void *ptr, size_t size) {
     void *__real_realloc(void *ptr, size_t size);
     void *result = __real_realloc(ptr, size);
     rtt_buffer_printf("hl{r,%d,0,0x%p}\n", size, result);
