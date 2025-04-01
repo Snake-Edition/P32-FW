@@ -263,39 +263,6 @@ void MI_XFLASH_RESET::click(IWindowMenu & /*window_menu*/) {
 }
 
 /*****************************************************************************/
-// MI_M600
-MI_M600::MI_M600()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
-}
-
-void MI_M600::click(IWindowMenu &) {
-    if (MsgBoxQuestion(_("Perform filament change now?"), Responses_YesNo) != Response::Yes) {
-        return;
-    }
-
-    marlin_client::inject("M600");
-    enqueued = true;
-}
-
-void MI_M600::Loop() {
-    const auto current_command = marlin_vars().gcode_command.get();
-
-    if (current_command == marlin_server::Cmd::M600) {
-        enqueued = false;
-    }
-
-    set_enabled( //
-        !enqueued
-        && marlin_server::all_axes_homed()
-        && marlin_server::all_axes_known()
-        && (current_command != marlin_server::Cmd::G28)
-        && (current_command != marlin_server::Cmd::G29)
-        && (current_command != marlin_server::Cmd::M109)
-        && (current_command != marlin_server::Cmd::M190) //
-    );
-}
-
-/*****************************************************************************/
 // MI_DRYRUN
 MI_DRYRUN::MI_DRYRUN()
     : WI_ICON_SWITCH_OFF_ON_t((marlin_debug_flags & MARLIN_DEBUG_DRYRUN) ? 1 : 0, _(label), nullptr, is_enabled_t::yes, is_hidden_t::dev) {
