@@ -11,7 +11,6 @@
 #include "screen_menu_odometer.hpp"
 #include "screen_menu_version_info.hpp"
 #include "screen_menu_metrics.hpp"
-#include "screen_menu_fw_update.hpp"
 #include "screen_menu_network_status.hpp"
 #include "screen_menu_network_settings.hpp"
 #include "screen_menu_footer_settings.hpp"

@@ -54,7 +54,6 @@ target_sources(
           screen_menu_fail_stat.cpp
           screen_menu_filament.cpp
           screen_menu_footer_settings.cpp
-          screen_menu_fw_update.cpp
           screen_menu_hardware.cpp
           screen_menu_hardware_tune.cpp
           screen_menu_info.cpp
