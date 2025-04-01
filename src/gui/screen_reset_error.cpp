@@ -14,13 +14,9 @@ ScreenResetError::ScreenResetError(const Rect16 &fw_version_rect)
 
     ClrMenuTimeoutClose();
     ClrOnSerialClose();
-    bool sound_started = false;
-    if (!sound_started) {
-        /// avoid collision of sounds
-        Sound_Stop();
-        Sound_Play(eSOUND_TYPE::CriticalAlert);
-        sound_started = true;
-    }
+    /// avoid collision of sounds
+    Sound_Stop();
+    Sound_Play(eSOUND_TYPE::CriticalAlert);
 
     fw_version_txt.set_font(Font::small);
 
