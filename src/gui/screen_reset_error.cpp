@@ -10,11 +10,11 @@
 
 ScreenResetError::ScreenResetError(const Rect16 &fw_version_rect)
     : screen_t()
-    , sound_started(false)
     , fw_version_txt(this, fw_version_rect, is_multiline::no) {
 
     ClrMenuTimeoutClose();
     ClrOnSerialClose();
+    bool sound_started = false;
     if (!sound_started) {
         /// avoid collision of sounds
         Sound_Stop();

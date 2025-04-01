@@ -9,7 +9,6 @@
  * Reads error details from dump.
  */
 class ScreenResetError : public screen_t {
-    bool sound_started;
     std::array<char, 42> fw_version_str;
 
 public:
