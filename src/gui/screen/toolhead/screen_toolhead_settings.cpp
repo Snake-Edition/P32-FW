@@ -62,25 +62,28 @@ int MI_HOTEND_TYPE::item_count() const {
 
 void MI_HOTEND_TYPE::build_item_text(int index, const std::span<char> &buffer) const {
     StringBuilder sb(buffer);
+    const int effective_index = index - (has_varying_values_ ? 1 : 0);
 
     // If has varying values, the 0th item is "-" (for different values)
-    if (has_varying_values_ && index == 0) {
+    if (effective_index == -1) {
         sb.append_string("-");
     } else {
-        sb.append_string_view(_(hotend_type_name(hotend_type_list[index - (has_varying_values_ ? 1 : 0)])));
+        sb.append_string_view(_(hotend_type_name(hotend_type_list[effective_index])));
     }
 }
 
 bool MI_HOTEND_TYPE::on_item_selected([[maybe_unused]] int old_index, int new_index) {
-    if (has_varying_values_ && new_index == 0) {
+    const int effective_index = new_index - (has_varying_values_ ? 1 : 0);
+
+    if (effective_index == -1) {
         return false;
     }
 
-    if (!msgbox_confirm_change(this->toolhead(), this->user_already_confirmed_changes_)) {
+    if (!msgbox_confirm_change(toolhead(), user_already_confirmed_changes_)) {
         return false;
     }
 
-    store_value(hotend_type_list[new_index - (has_varying_values_ ? 1 : 0)]);
+    store_value(hotend_type_list[effective_index]);
     return true;
 }
 
@@ -149,7 +152,7 @@ bool MI_PRINT_FAN_TYPE::on_item_selected([[maybe_unused]] int old_index, int new
         return false;
     }
 
-    if (!msgbox_confirm_change(this->toolhead(), this->user_already_confirmed_changes_)) {
+    if (!msgbox_confirm_change(toolhead(), user_already_confirmed_changes_)) {
         return false;
     }
 
