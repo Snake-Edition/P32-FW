@@ -116,3 +116,7 @@ std::expected<char *, GCodeLoader::BufferState> GCodeLoader::get_result() {
 void GCodeLoader::reset() {
     state = BufferState::idle;
 }
+
+std::span<char> GCodeLoader::share_buffer() {
+    return std::span<char>(gcode_buffer);
+}
