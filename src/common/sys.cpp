@@ -1,12 +1,7 @@
 /// @file
 #include <common/sys.hpp>
 
-#include <common/shared_config.h>
-#include <common/st25dv64k.h>
 #include <stm32f4xx.h>
-
-// firmware update flag
-static const constexpr uint16_t FW_UPDATE_FLAG_ADDRESS = 0x040B;
 
 [[noreturn]] void __RAM_FUNC sys_reset() {
     // This needs to be RAM function as it is called when erasing the flash.
@@ -45,16 +40,4 @@ static const constexpr uint16_t FW_UPDATE_FLAG_ADDRESS = 0x040B;
 
 bool sys_debugger_attached() {
     return CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk;
-}
-
-bool sys_fw_update_is_enabled() {
-    return std::to_underlying(FwAutoUpdate::on) == st25dv64k_user_read(FW_UPDATE_FLAG_ADDRESS);
-}
-
-void sys_fw_update_enable() {
-    st25dv64k_user_write(FW_UPDATE_FLAG_ADDRESS, std::to_underlying(FwAutoUpdate::on));
-}
-
-void sys_fw_update_disable() {
-    st25dv64k_user_write(FW_UPDATE_FLAG_ADDRESS, std::to_underlying(FwAutoUpdate::off));
 }

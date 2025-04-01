@@ -2,7 +2,6 @@
 #include <Marlin/src/inc/MarlinConfigPre.h>
 #include <module/prusa/dock_position.hpp>
 #include <module/prusa/tool_offset.hpp>
-#include <option/development_items.h>
 #include <option/has_adc_side_fsensor.h>
 #include <option/has_mmu2.h>
 #include <option/has_toolchanger.h>
@@ -75,13 +74,6 @@ void CurrentStore::perform_config_check() {
         extended_printer_type.set(1);
 
 #endif
-    }
-
-    // BFW-5486
-    // Auto-update is now enablablable only in develeoper mode
-    // There were some issues with people leaving this option on, then upgrading and having problems turning it off
-    if constexpr (!option::development_items) {
-        sys_fw_update_disable();
     }
 
     // First run -> the config store is empty -> we don't need to do any migrations from older versions
