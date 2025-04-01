@@ -22,6 +22,7 @@
 #include <option/has_xbuddy_extension.h>
 #include <option/has_chamber_filtration_api.h>
 #include <device/board.h>
+#include <gui/screen/screen_m600.hpp>
 
 #if XL_ENCLOSURE_SUPPORT()
     #include "MItem_enclosure.hpp"
