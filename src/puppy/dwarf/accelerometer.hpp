@@ -1,7 +1,7 @@
 #pragma once
 
-#include "puppies/fifo_coder.hpp"
-#include <stdint.h>
+#include <puppies/fifo_coder.hpp>
+#include <cstddef>
 
 namespace dwarf::accelerometer {
 
