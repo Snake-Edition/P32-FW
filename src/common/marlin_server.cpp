@@ -3011,6 +3011,7 @@ static void _server_update_vars() {
     const auto prefetch_metrics = media_prefetch.get_metrics();
 
     marlin_vars().gqueue = queue.length;
+    marlin_vars().inject_queue_empty = inject_queue.is_empty();
     marlin_vars().pqueue = planner.movesplanned();
 
     // Get native position
