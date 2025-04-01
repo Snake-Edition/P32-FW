@@ -29,6 +29,20 @@ static constexpr float MAX_ACC_SAMPLING_RATE = 1500;
 static constexpr float SAMPLE_BUFFER_MARGIN = 1.05f;
 static constexpr float VIBRATION_SETTLE_TIME = 0.2f;
 
+static float convert(AccelerometerSample sample) {
+    // Optimization:
+    // We don't need to convert raw samples to physical acceleration.
+    // Algorithm is actually invariant to scaling of the samples,
+    // as long as the samples are floats and have enough precision.
+    // This is already utilized in pseudo_project() which doesn't
+    // normalize the vector's magnitude. As for the precision concerns,
+    // PrusaAccelerometer::raw_to_accel() adds multiplicative factor of
+    // 5.985687e-04 so we need about 4 orders of magnitude leaway.
+    // We are also squaring the samples and then summing a bunch of them,
+    // so let's say 12 orders of magnitude, meaning we should be fine.
+    return static_cast<float>(sample.value);
+}
+
 // Analogy of std::span - a non-owning view on part of a an infinite 1D
 // signal. Unlike std::span, it allows accessing elements out of the bounds.
 // This is useful for performing windowed sweeps. If there is no sample in the
@@ -280,11 +294,11 @@ static EnergyContainer signal_local_energy(SignalView signal, int window_size) {
 
     auto first_window = signal.subsignal(-half_window, half_window);
     result.push_back(std::accumulate(first_window.begin(), first_window.end(), 0.f,
-        [](float acc, AccelerometerSample raw_x) { float x = PrusaAccelerometer::raw_to_accel(raw_x.value); return acc + x * x; }));
+        [](float acc, AccelerometerSample raw_x) { float x = convert(raw_x); return acc + x * x; }));
 
     for (int i = 0; i < signal.size(); i++) {
-        float throw_away_elem = PrusaAccelerometer::raw_to_accel(signal[i - half_window - 1].value);
-        float add_elem = PrusaAccelerometer::raw_to_accel(signal[i + half_window].value);
+        float throw_away_elem = convert(signal[i - half_window - 1]);
+        float add_elem = convert(signal[i + half_window]);
         result.push_back(result.back() - throw_away_elem * throw_away_elem + add_elem * add_elem);
     }
     return result;
@@ -400,7 +414,7 @@ static DftSweepResult motor_harmonic_dft_sweep(
 
     auto sample_correlation = [&](int idx) {
         float arg = 2 * std::numbers::pi_v<float> * idx * analysis_freq * sampling_period;
-        float s = PrusaAccelerometer::raw_to_accel(signal[idx].value);
+        float s = convert(signal[idx]);
 
         const int int_arg = opts::SIN_PERIOD * std::fmod(arg, 2 * std::numbers::pi_v<float>) / (2 * std::numbers::pi_v<float>);
         return std::make_tuple(sin_lut(int_arg) * s, cos_lut(int_arg) * s);
@@ -473,7 +487,7 @@ static std::array<DftSweepResult, 2> motor_speed_dft_sweep(SignalView signal,
         }
 
         if (freq < sampling_freq / 2) {
-            float s = PrusaAccelerometer::raw_to_accel(signal[idx].value);
+            float s = convert(signal[idx]);
             const int int_arg = opts::SIN_PERIOD * std::fmod(arg, 2 * std::numbers::pi_v<float>) / (2 * std::numbers::pi_v<float>);
             return std::make_tuple(sin_lut(int_arg) * s, cos_lut(int_arg) * s);
         } else {
@@ -1244,7 +1258,7 @@ static void debug_dump_raw_measurement(const char *name, const SignalContainer &
     serial_printf("\"signal_bounds\": [%d, %d], ", start, end);
     serial_printf("\"signal\": [");
     for (size_t i = 0; i < signal.size(); i++) {
-        serial_printf("%f", PrusaAccelerometer::raw_to_accel(signal[i].value));
+        serial_printf("%f", convert(signal[i]));
         if (i + 1 < signal.size()) {
             serial_printf(", ");
         }
