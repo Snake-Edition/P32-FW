@@ -113,9 +113,11 @@ void MI_M600::update_enqueued_icon() {
 }
 
 void MI_M600::handle_enable_state() {
-    const auto current_command = marlin_vars().gcode_command.get();
 
-    if (current_command == marlin_server::Cmd::M600) {
+    // This is a little bit of a hack - instead of checking if M600 was executed
+    // we are checking if nothing is in the inject queue, which is much weaker assumption
+    // We need more proper information dumping from marlin server about queue to be able to do it the correct way
+    if (marlin_vars().inject_queue_empty) {
         enqueued = false;
     }
     // M600 during printing is enabled the moment after first layer started printing
