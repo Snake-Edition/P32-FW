@@ -8,8 +8,6 @@
 // firmware update flag
 static const constexpr uint16_t FW_UPDATE_FLAG_ADDRESS = 0x040B;
 
-version_t &boot_version = *(version_t *)(BOOTLOADER_VERSION_ADDRESS); // (address) from flash -> "volatile" is not necessary
-
 [[noreturn]] void __RAM_FUNC sys_reset() {
     // This needs to be RAM function as it is called when erasing the flash.
     // Also, we manually inline HAL_NVIC_SystemReset() here to ensure every
@@ -59,14 +57,4 @@ void sys_fw_update_enable() {
 
 void sys_fw_update_disable() {
     st25dv64k_user_write(FW_UPDATE_FLAG_ADDRESS, std::to_underlying(FwAutoUpdate::off));
-}
-
-bool version_less_than(const version_t *a, const uint8_t major, const uint8_t minor, const uint8_t patch) {
-    if (a->major != major) {
-        return a->major < major;
-    }
-    if (a->minor != minor) {
-        return a->minor < minor;
-    }
-    return a->patch < patch;
 }
