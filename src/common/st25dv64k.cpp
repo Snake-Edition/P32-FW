@@ -1,5 +1,6 @@
-#include "st25dv64k.h"
-#include "st25dv64k_internal.h"
+#include <common/st25dv64k.h>
+
+#include <common/st25dv64k_internal.h>
 
 #include <option/has_nfc.h>
 #include <nfc.hpp>

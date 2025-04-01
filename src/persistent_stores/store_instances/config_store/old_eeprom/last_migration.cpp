@@ -3,6 +3,7 @@
 #include <journal/backend.hpp>
 #include <charconv>
 #include <version/version.hpp>
+#include <common/st25dv64k.h>
 #include <config_store/backend_instance.hpp>
 #include <journal/store.hpp>
 #include <footer_eeprom.hpp>

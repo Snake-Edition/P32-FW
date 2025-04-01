@@ -1,7 +1,7 @@
 #include "nfc.hpp"
 
-#include "st25dv64k.h"
-#include "st25dv64k_internal.h"
+#include <common/st25dv64k.h>
+#include <common/st25dv64k_internal.h>
 
 // ntohs
 #ifdef UNITTESTS

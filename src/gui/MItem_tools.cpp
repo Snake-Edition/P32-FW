@@ -37,7 +37,6 @@
 #include <option/has_side_leds.h>
 #include <option/has_coldpull.h>
 #include <RAII.hpp>
-#include <st25dv64k.h>
 #include <time.h>
 #include <footer_items_heaters.hpp>
 #include <footer_line.hpp>

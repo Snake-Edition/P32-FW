@@ -1,5 +1,5 @@
+#include <common/st25dv64k.h>
 
-#include "st25dv64k.h"
 #include "dummy_eeprom_chip.h"
 #include <cstring>
 #include <catch2/catch.hpp>

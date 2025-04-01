@@ -26,7 +26,6 @@
 #include <logging/log.hpp>
 #include <bsod_gui.hpp>
 #include <usb_host.h>
-#include <st25dv64k.h>
 #include <usb_host.h>
 #include <lfn.h>
 #include <media_prefetch/media_prefetch.hpp>

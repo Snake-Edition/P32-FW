@@ -2,6 +2,7 @@
 
 #include <common/w25x.hpp>
 #include <wdt.hpp>
+#include <common/st25dv64k.h>
 #include <common/sys.hpp>
 
 #include <Marlin.h>

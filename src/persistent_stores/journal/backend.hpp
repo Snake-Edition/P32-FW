@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <optional>
-#include "st25dv64k.h"
 #include <algorithm>
 #include "bsod.h"
 #include <freertos/mutex.hpp>

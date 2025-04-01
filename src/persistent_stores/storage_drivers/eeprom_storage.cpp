@@ -1,5 +1,7 @@
 #include "eeprom_storage.hpp"
 
+#include <common/st25dv64k.h>
+
 uint8_t EEPROMStorage::read_byte(uint16_t address) {
     return st25dv64k_user_read(address);
 };
