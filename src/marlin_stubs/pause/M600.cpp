@@ -148,7 +148,7 @@ void M600_execute(xyz_pos_t park_point, uint8_t target_extruder,
     std::optional<FilamentType> filament_type, bool);
 
 void M600_manual(const GCodeParser2 &p) {
-    const int8_t target_extruder = PrusaGcodeSuite::get_target_extruder_from_command(p);
+    const int8_t target_extruder = PrusaGcodeSuite::get_target_extruder_from_command_p(p);
     if (target_extruder < 0) {
         return;
     }
