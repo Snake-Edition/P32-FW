@@ -3114,6 +3114,7 @@ static void _server_update_vars() {
 
     marlin_vars().job_id = job_id;
     marlin_vars().travel_acceleration = planner.settings.travel_acceleration;
+    marlin_vars().max_printed_z = planner.max_printed_z;
 
     uint8_t mmu2State =
 #if HAS_MMU2()

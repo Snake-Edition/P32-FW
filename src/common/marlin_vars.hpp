@@ -313,6 +313,7 @@ public:
     MarlinVariable<float> logical_pos[4]; ///< immediate position XYZE (logical coordinates) [mm]
     MarlinVariable<float> native_curr_pos[4]; ///< current position XYZE (native coordinates) [mm]
     MarlinVariable<float> logical_curr_pos[4]; ///< current position XYZE (logical coordinates) [mm]
+    MarlinVariable<float> max_printed_z;
 
     MarlinVariable<float> temp_bed; // bed temperature [C]
     MarlinVariable<float> target_bed; // bed target temperature [C]
