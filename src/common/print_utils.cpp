@@ -17,7 +17,6 @@
 #include <transfers/transfer.hpp>
 #include <gcode/gcode_reader_restore_info.hpp>
 
-#include <option/bootloader.h>
 #include <option/has_mmu2.h>
 
 #if HAS_MMU2()
@@ -26,9 +25,6 @@
 
 #if ENABLED(POWER_PANIC)
     #include "power_panic.hpp"
-    #if BOOTLOADER()
-        #include <common/sys.hpp> // support for bootloader<1.2.3
-    #endif
 #endif
 
 /**
@@ -42,13 +38,6 @@ void run_once_after_boot() {
         // the PP cycle due to a short power burst) OR brown-out has been detected. Clear the data
         // if the user pressed the reset button explicitly!
         bool reset_pp = !((HAL_RCC_CSR & (RCC_CSR_SFTRSTF | RCC_CSR_BORRSTF)));
-    #if BOOTLOADER()
-        if (version_less_than(&boot_version, 1, 2, 3)) {
-            // bootloader<1.2.3 clears the RCC_CSR register, so ignore reset flags completely.
-            // TODO: remove this compatibility hack for the final MK4 release
-            reset_pp = false;
-        }
-    #endif
         if (!reset_pp && transfers::is_valid_file_or_transfer(power_panic::stored_media_path()) && usb_host::is_media_inserted_since_startup()) {
             // load the panic data and setup print progress early
             // resume and bypass g-code autostart
