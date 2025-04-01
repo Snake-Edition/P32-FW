@@ -73,9 +73,6 @@ using MI_TEMPERATURE
 using MI_MOVE_AXIS
     = MI_SCREEN<N_("Move Axis"), class ScreenMenuMove, &img::move_16x16>;
 
-using MI_FW_UPDATE
-    = MI_SCREEN<N_("FW Update"), class ScreenMenuFwUpdate, nullptr, is_hidden_t::dev>;
-
 using MI_METRICS_SETTINGS
     = MI_SCREEN<N_("Metrics & Log"), class ScreenMenuMetricsSettings>;
 

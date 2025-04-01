@@ -91,7 +91,6 @@ template struct MI_SCREEN_CTOR<ScreenMenuOdometer>;
 template struct MI_SCREEN_CTOR<ScreenMenuFailStat>;
 template struct MI_SCREEN_CTOR<ScreenMenuTemperature>;
 template struct MI_SCREEN_CTOR<ScreenMenuMove>;
-template struct MI_SCREEN_CTOR<ScreenMenuFwUpdate>;
 template struct MI_SCREEN_CTOR<ScreenMenuMetricsSettings>;
 template struct MI_SCREEN_CTOR<ScreenMenuEthernetSettings>;
 template struct MI_SCREEN_CTOR<ScreenMenuWifiSettings>;
