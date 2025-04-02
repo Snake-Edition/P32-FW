@@ -233,14 +233,16 @@ bool Pause::is_unstoppable() const {
     switch (load_type) {
     case LoadType::load:
         return FSensors_instance().HasMMU();
-    case LoadType::load_to_gears:
+
     case LoadType::filament_change:
     case LoadType::filament_stuck:
         return true;
+
     case LoadType::autoload:
     case LoadType::load_purge:
     case LoadType::unload:
     case LoadType::unload_confirm:
+    case LoadType::load_to_gears:
     case LoadType::unload_from_gears:
         return false;
     }
