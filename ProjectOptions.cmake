@@ -297,6 +297,8 @@ set_feature_for_printers_master_board(
   )
 # POWER_PANIC requires SELFTEST and CRASH_DETECTION to work
 set_feature_for_printers_master_board(HAS_POWER_PANIC "MK4" "MK3.5" "iX" "XL" "COREONE")
+define_enum_option(NAME POWER_PANIC_STORAGE VALUE FLASH ALL_VALUES "FLASH;BKPSRAM")
+
 set_feature_for_printers(HAS_PRECISE_HOMING "MK4" "MK3.5")
 set_feature_for_printers(HAS_PRECISE_HOMING_COREXY "iX" "XL" "XL_DEV_KIT" "COREONE")
 set_feature_for_printers_master_board(HAS_PHASE_STEPPING "XL" "iX" "COREONE" "MK4")

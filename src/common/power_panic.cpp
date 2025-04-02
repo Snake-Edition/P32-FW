@@ -1,4 +1,5 @@
 #include "power_panic.hpp"
+#include "power_panic_storage.hpp"
 #include "timing_precise.hpp"
 
 #include <type_traits>
@@ -50,7 +51,7 @@
 #include "../lib/Marlin/Marlin/src/feature/pressure_advance/pressure_advance_config.hpp"
 
 #include <logging/log.hpp>
-#include <common/w25x.hpp>
+
 #include "sound.hpp"
 #include "bsod.h"
 #include <common/sys.hpp>
@@ -62,7 +63,11 @@
 #include "M73_PE.h"
 #include "../lib/Marlin/Marlin/src/module/printcounter.h"
 
-#include "ili9488.hpp"
+#include <option/has_gui.h>
+#if HAS_GUI()
+    #include "ili9488.hpp"
+#endif
+
 #include <option/has_leds.h>
 #if HAS_LEDS()
     #include <leds/led_manager.hpp>
@@ -91,6 +96,9 @@ namespace power_panic {
 
 LOG_COMPONENT_DEF(PowerPanic, logging::Severity::info);
 
+/// @brief Runtime state of power panic
+/// @note runtime means that it is not persistent, just used to store/resume
+runtime_state_t runtime_state;
 osThreadId ac_fault_task;
 
 void ac_fault_task_main([[maybe_unused]] void const *argument) {
@@ -122,269 +130,9 @@ void ac_fault_task_main([[maybe_unused]] void const *argument) {
     }
 }
 
-static constexpr uint32_t FLASH_OFFSET = w25x_pp_start_address;
-static constexpr uint32_t FLASH_SIZE = w25x_pp_size;
-
-// WARNING: mind the alignment, the following structures are not automatically packed
-// as they're shared also for the on-memory copy. The on-memory copy can be avoided
-// if we decide to use two flash blocks (keeping one as a working set)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wpadded"
-
-// planner state (TODO: a _lot_ of essential state is missing here and Crash_s also due to
-// the partial Motion_Parameters implementation)
-struct flash_planner_t {
-    user_planner_settings_t settings;
-
-    float z_position;
-    float max_printed_z;
-#if DISABLED(CLASSIC_JERK)
-    float junction_deviation_mm;
-#endif
-
-    int16_t target_nozzle[HOTENDS];
-    int16_t flow_percentage[HOTENDS];
-    int16_t target_bed;
-    int16_t extrude_min_temp;
-#if ENABLED(MODULAR_HEATBED)
-    uint16_t enabled_bedlets_mask;
-    uint8_t _padding_heat[2]; // padding to 2 or 4 bytes?
-#endif
-
-    uint16_t print_speed;
-    uint8_t was_paused;
-    uint8_t was_crashed;
-    uint8_t fan_speed;
-    uint8_t axis_relative;
-    uint8_t allow_cold_extrude;
-
-    PrinterGCodeCompatibilityReport compatibility;
-
-    uint8_t marlin_debug_flags;
-
-    uint8_t _padding_is[3];
-
-    // IS/PA
-    input_shaper::AxisConfig axis_config[3]; // XYZ
-    input_shaper::AxisConfig original_y;
-    input_shaper::WeightAdjustConfig axis_y_weight_adjust;
-    pressure_advance::Config axis_e_config;
-};
-
-// fully independent state that persist across panics until the end of the print
-struct flash_print_t {
-    float odometer_e_start; /// E odometer value at the start of the print
-};
-
-// crash recovery data
-struct flash_crash_t {
-    uint32_t sdpos; /// sdpos of the gcode instruction being aborted
-    xyze_pos_t start_current_position; /// absolute logical starting XYZE position of the gcode instruction
-    xyze_pos_t crash_current_position; /// absolute logical XYZE position of the crash location
-    abce_pos_t crash_position; /// absolute physical ABCE position of the crash location
-    uint16_t segments_finished = 0;
-    uint8_t axis_known_position; /// axis state before crashing
-    uint8_t leveling_active; /// state of MBL before crashing
-    feedRate_t fr_mm_s; /// current move feedrate
-    Crash_s_Counters::Data counters;
-    Crash_s::RecoverFlags recover_flags; /// instruction replay flags
-
-    uint8_t _padding[1]; // silence warning
-};
-
-// print progress data
-struct flash_progress_t {
-    struct ModeSpecificData {
-        uint32_t percent_done;
-        uint32_t time_to_end;
-        uint32_t time_to_pause;
-    };
-
-    millis_t print_duration;
-    ModeSpecificData standard_mode, stealth_mode;
-};
-
-// toolchanger recovery info
-//   can't use PrusaToolChanger::PrecrashData as it doesn't have to be packed
-struct flash_toolchanger_t {
-#if HAS_TOOLCHANGER()
-    xyz_pos_t return_pos; ///< Position wanted after toolchange
-    uint8_t precrash_tool; ///< Tool wanted to be picked before panic
-    tool_return_t return_type : 8; ///< Where to return after recovery
-    uint32_t : 16; ///< Padding to keep the structure size aligned to 32 bit
-#endif /*HAS_TOOLCHANGER()*/
-};
-
-#pragma GCC diagnostic pop
-
-// Data storage layout
-struct flash_data {
-    // non-changing print parameters
-    struct fixed_t {
-        xy_pos_t bounding_rect_a;
-        xy_pos_t bounding_rect_b;
-        bed_mesh_t z_values;
-        char media_SFN_path[FILE_PATH_MAX_LEN];
-
-        static void load();
-        static void save();
-    } fixed;
-
-    // varying parameters
-    struct state_t {
-        flash_crash_t crash;
-        flash_planner_t planner;
-        flash_progress_t progress;
-        flash_print_t print;
-        flash_toolchanger_t toolchanger;
-
-#if HAS_CANCEL_OBJECT()
-        buddy::CancelObject::State cancel_object;
-#endif
-#if ENABLED(PRUSA_TOOL_MAPPING)
-        ToolMapper::serialized_state_t tool_mapping;
-#endif
-#if ENABLED(PRUSA_SPOOL_JOIN)
-        SpoolJoin::serialized_state_t spool_join;
-#endif
-#if HAS_CHAMBER_API()
-        // The chamber API has it as optional, we map nullopt (disabled) to
-        // chamber_temp_off (0xffff), as optional is not guaranteed to be POD.
-        uint16_t chamber_target_temp;
-#endif
-        GCodeReaderStreamRestoreInfo gcode_stream_restore_info;
-        uint8_t invalid = true; // set to zero before writing, cleared on erase
-
-        static void load();
-        static void save();
-    } state;
-
-    static void erase();
-    static void sync();
-};
-
-static_assert(sizeof(flash_data) <= FLASH_SIZE, "powerpanic data exceeds reserved storage space");
-
-enum class PPState : uint8_t {
-    // note: order is important, there is check that PPState >= Triggered
-    Inactive,
-    Prepared,
-    Triggered,
-    Retracting,
-    SaveState,
-    WaitingToDie,
-};
-
 std::atomic_bool ac_fault_triggered = false;
 std::atomic_bool should_beep = true;
 static PPState power_panic_state = PPState::Inactive;
-
-// Temporary buffer for state filled at the time of the acFault trigger
-static struct : public flash_data::state_t {
-    bool nested_fault;
-    PPState orig_state;
-    char media_SFN_path[FILE_PATH_MAX_LEN]; // temporary buffer
-    uint8_t orig_axis_known_position;
-    uint32_t fault_stamp; // time since acFault trigger
-} state_buf;
-
-// Helper functions to read/write to the flash area with type checking
-#define FLASH_DATA_OFF(member) (FLASH_OFFSET + offsetof(flash_data, member))
-
-#define FLASH_SAVE(member, src)                                                          \
-    do {                                                                                 \
-        static_assert(std::is_same<decltype(flash_data::member), decltype(src)>::value); \
-        w25x_program(FLASH_DATA_OFF(member), (uint8_t *)(&src), sizeof(src));            \
-    } while (0)
-
-#define FLASH_SAVE_EXPR(member, expr)  \
-    ([&]() {                           \
-        decltype(member) buf = (expr); \
-        FLASH_SAVE(member, buf);       \
-        return buf;                    \
-    }())
-
-#define FLASH_LOAD(member, dst)                                                          \
-    do {                                                                                 \
-        static_assert(std::is_same<decltype(flash_data::member), decltype(dst)>::value); \
-        w25x_rd_data(FLASH_DATA_OFF(member), (uint8_t *)(&dst), sizeof(dst));            \
-    } while (0)
-
-#define FLASH_LOAD_EXPR(member)           \
-    ([]() {                               \
-        decltype(flash_data::member) buf; \
-        FLASH_LOAD(member, buf);          \
-        return buf;                       \
-    }())
-
-void flash_data::fixed_t::save() {
-    // print area
-    PrintArea::rect_t rect = print_area.get_bounding_rect();
-    FLASH_SAVE(fixed.bounding_rect_a, rect.a);
-    FLASH_SAVE(fixed.bounding_rect_b, rect.b);
-
-    // mbl
-    FLASH_SAVE(fixed.z_values, unified_bed_leveling::z_values);
-
-    // optimize the write to avoid writing the entire buffer
-    w25x_program(FLASH_DATA_OFF(fixed.media_SFN_path), (uint8_t *)state_buf.media_SFN_path,
-        strlen(state_buf.media_SFN_path) + 1);
-}
-
-void flash_data::fixed_t::load() {
-    // print area
-    PrintArea::rect_t rect = {
-        FLASH_LOAD_EXPR(fixed.bounding_rect_a),
-        FLASH_LOAD_EXPR(fixed.bounding_rect_b)
-    };
-    print_area.set_bounding_rect(rect);
-
-    // mbl
-    FLASH_LOAD(fixed.z_values, unified_bed_leveling::z_values);
-
-    // path
-    FLASH_LOAD(fixed.media_SFN_path, state_buf.media_SFN_path);
-}
-
-void flash_data::state_t::save() {
-    state_buf.invalid = false;
-    w25x_program(FLASH_DATA_OFF(state), reinterpret_cast<const uint8_t *>(&state_buf), sizeof(flash_data::state_t));
-    if (w25x_fetch_error()) {
-        log_error(PowerPanic, "Failed to save live data.");
-    }
-}
-
-void flash_data::state_t::load() {
-    w25x_rd_data(FLASH_DATA_OFF(state), reinterpret_cast<uint8_t *>(&state_buf), sizeof(flash_data::state_t));
-    state_buf.nested_fault = true;
-}
-
-void flash_data::erase() {
-    for (uintptr_t addr = 0; addr < FLASH_SIZE; addr += w25x_block_size) {
-        w25x_sector_erase(FLASH_OFFSET + addr);
-    }
-}
-
-void flash_data::sync() {
-}
-
-bool state_stored() {
-    bool retval = !FLASH_LOAD_EXPR(state.invalid);
-    if (w25x_fetch_error()) {
-        log_error(PowerPanic, "Failed to get stored.");
-        return false;
-    }
-    return retval;
-}
-
-const char *stored_media_path() {
-    assert(state_stored()); // caller is responsible for checking
-    FLASH_LOAD(fixed.media_SFN_path, state_buf.media_SFN_path);
-    if (w25x_fetch_error()) {
-        log_error(PowerPanic, "Failed to get media path.");
-    }
-    return state_buf.media_SFN_path;
-}
 
 bool panic_is_active() {
     // panic loop is active when state is higher then triggered
@@ -393,18 +141,14 @@ bool panic_is_active() {
 
 void prepare() {
     // do not erase/save unless we have a path we can use to resume later
-    if (!state_buf.nested_fault) {
+    if (!runtime_state.nested_fault) {
         // update the internal filename on the first fault
-        marlin_vars().media_SFN_path.copy_to(state_buf.media_SFN_path, sizeof(state_buf.media_SFN_path));
+        marlin_vars().media_SFN_path.copy_to(runtime_state.media_SFN_path, sizeof(runtime_state.media_SFN_path));
     }
 
     // erase and save the MBL data
-    flash_data::erase();
-    flash_data::fixed_t::save();
-    if (w25x_fetch_error()) {
-        log_error(PowerPanic, "Failed to save fixed data.");
-        return;
-    }
+    erase();
+    fixed_t::save();
 
     log_info(PowerPanic, "powerpanic prepared");
     power_panic_state = PPState::Prepared;
@@ -426,16 +170,13 @@ std::atomic<ResumeState> resume_state = ResumeState::Setup;
 static void atomic_reset() {
     // stored state
     if (state_stored()) {
-        flash_data::erase();
-        if (w25x_fetch_error()) {
-            log_error(PowerPanic, "Failed to reset.");
-        }
+        erase();
     }
 
     // internal state
     power_panic_state = PPState::Inactive;
     resume_state = ResumeState::Setup;
-    state_buf.nested_fault = false;
+    runtime_state.nested_fault = false;
 }
 
 /// transition from a nested_fault to a normal fault atomically
@@ -467,22 +208,18 @@ void resume_print() {
     assert(marlin_server::printer_idle()); // caller is responsible for checking
 
     // load the data
-    flash_data::fixed_t::load();
-    flash_data::state_t::load();
-    if (w25x_fetch_error()) {
-        log_error(PowerPanic, "Setup load failed.");
-        return;
-    }
+    fixed_t::load();
+    state_t::load();
 
     log_info(PowerPanic, "resuming print");
-    state_buf.nested_fault = true;
+    runtime_state.nested_fault = true;
 
     // immediately update print progress
     {
         print_job_timer.resume(state_buf.progress.print_duration);
         print_job_timer.pause();
 
-        const auto mode_specific = [](const flash_progress_t::ModeSpecificData &mbuf, ClProgressData::ModeSpecificData &pdata) {
+        const auto mode_specific = [](const state_progress_t::ModeSpecificData &mbuf, ClProgressData::ModeSpecificData &pdata) {
             pdata.percent_done.mSetValue(mbuf.percent_done, state_buf.progress.print_duration);
             pdata.percent_done.mSetValue(mbuf.time_to_end, state_buf.progress.print_duration);
             pdata.percent_done.mSetValue(mbuf.time_to_pause, state_buf.progress.print_duration);
@@ -518,7 +255,7 @@ void resume_print() {
         .restore_info = state_buf.gcode_stream_restore_info,
         .offset = state_buf.crash.sdpos,
     };
-    marlin_server::powerpanic_resume(state_buf.media_SFN_path, gcode_pos, auto_recover);
+    marlin_server::powerpanic_resume(runtime_state.media_SFN_path, gcode_pos, auto_recover);
 }
 
 void resume_continue() {
@@ -781,7 +518,9 @@ enum class ShutdownState {
 #if HAS_LEDS()
     leds,
 #endif
+#if HAS_GUI()
     display,
+#endif
 #if BOARD_IS_XLBUDDY()
     hwio,
 #endif
@@ -803,10 +542,11 @@ bool shutdown_loop() {
         leds::LEDManager::instance().enter_power_panic();
         break;
 #endif
-
+#if HAS_GUI()
     case ShutdownState::display:
         ili9488_power_down();
         break;
+#endif
 
 #if BOARD_IS_XLBUDDY()
     case ShutdownState::hwio:
@@ -876,7 +616,7 @@ void panic_loop() {
         crash_s.set_state(Crash_s::RECOVERY);
         planner.refresh_acceleration_rates();
 
-        if (!state_buf.nested_fault && !state_buf.planner.was_paused && !state_buf.planner.was_crashed && all_axes_homed()) {
+        if (!runtime_state.nested_fault && !state_buf.planner.was_paused && !state_buf.planner.was_crashed && all_axes_homed()) {
 #if !HAS_DWARF()
             // retract if we were printing
             plan_move_by(PAUSE_PARK_RETRACT_FEEDRATE, 0, 0, 0, -PAUSE_PARK_RETRACT_LENGTH / planner.e_factor[active_extruder]);
@@ -901,8 +641,8 @@ void panic_loop() {
 #endif
 
         // align the Z axis by lifting as little as sensibly possible
-        if (TEST(state_buf.orig_axis_known_position, Z_AXIS) && TEST(state_buf.crash.axis_known_position, Z_AXIS)) {
-            if (!state_buf.nested_fault || current_position[Z_AXIS] != state_buf.planner.z_position) {
+        if (TEST(runtime_state.orig_axis_known_position, Z_AXIS) && TEST(state_buf.crash.axis_known_position, Z_AXIS)) {
+            if (!runtime_state.nested_fault || current_position[Z_AXIS] != state_buf.planner.z_position) {
                 log_debug(PowerPanic, "Z MSCNT start: %d", stepperZ.MSCNT());
 
                 // lift just 1 cycle if already far enough from the print
@@ -935,7 +675,7 @@ void panic_loop() {
         // timer & progress state
         state_buf.progress.print_duration = print_job_timer.duration();
 
-        const auto mode_specific = [](flash_progress_t::ModeSpecificData &mbuf, const ClProgressData::ModeSpecificData &pdata) {
+        const auto mode_specific = [](state_progress_t::ModeSpecificData &mbuf, const ClProgressData::ModeSpecificData &pdata) {
             mbuf.percent_done = pdata.percent_done.mGetValue();
             mbuf.time_to_end = pdata.time_to_end.mGetValue();
             mbuf.time_to_pause = pdata.time_to_pause.mGetValue();
@@ -964,13 +704,12 @@ void panic_loop() {
 #endif /*HAS_TOOLCHANGER()*/
 
         log_info(PowerPanic, "powerpanic saving");
-        if (state_buf.orig_state != PPState::Prepared) {
+        if (runtime_state.orig_state != PPState::Prepared) {
             // no prepare was performed for this print yet, prepare the flash now
-            flash_data::erase();
-            flash_data::fixed_t::save();
+            erase();
+            fixed_t::save();
         }
-        flash_data::state_t::save();
-        flash_data::sync();
+        state_t::save();
 
         // commit odometer trip values
         Odometer_s::instance().force_to_eeprom();
@@ -995,7 +734,7 @@ void panic_loop() {
             } else
 #endif /*HAS_TOOLCHANGER()*/
             {
-                if ((state_buf.orig_axis_known_position & test_axes) == test_axes) {
+                if ((runtime_state.orig_axis_known_position & test_axes) == test_axes) {
                     // axis position is currently known, move to the closest endpoint
 #if ENABLED(COREXY)
                     if (std::min(current_position.x - print_rect.a.x, print_rect.b.x - current_position.x)
@@ -1068,10 +807,10 @@ void ac_fault_isr() {
     HAL_NVIC_DisableIRQ(buddy::hw::acFault.getIRQn());
 
     // check if handling the fault is worth it (printer is active or can be resumed)
-    if (!state_buf.nested_fault) {
+    if (!runtime_state.nested_fault) {
         if ((marlin_server::printer_idle() && !marlin_server::printer_paused())
             || marlin_server::aborting_or_aborted() || marlin_server::print_preview()) {
-            state_buf.fault_stamp = ticks_ms();
+            runtime_state.fault_stamp = ticks_ms();
             power_panic_state = PPState::WaitingToDie;
             // will continue in the main loop
             xTaskResumeFromISR(ac_fault_task);
@@ -1086,15 +825,15 @@ void ac_fault_isr() {
     HAL_NVIC_DisableIRQ(buddy::hw::xDiag.getIRQn());
     HAL_NVIC_DisableIRQ(buddy::hw::yDiag.getIRQn());
 
-    state_buf.orig_state = power_panic_state;
-    state_buf.fault_stamp = ticks_ms();
+    runtime_state.orig_state = power_panic_state;
+    runtime_state.fault_stamp = ticks_ms();
     power_panic_state = PPState::Triggered;
 
     // power off devices in order of power draw
 #if PRINTER_IS_PRUSA_iX()
     buddy::hw::modularBedReset.write(buddy::hw::Pin::State::high);
 #endif
-    state_buf.orig_axis_known_position = axis_known_position;
+    runtime_state.orig_axis_known_position = axis_known_position;
     disable_XY();
     buddy::hw::hsUSBEnable.write(buddy::hw::Pin::State::high);
 #if HAS_EMBEDDED_ESP32()
@@ -1102,8 +841,8 @@ void ac_fault_isr() {
 #endif
 
     // stop motion
-    if (!state_buf.nested_fault) {
-        marlin_vars().media_SFN_path.copy_to(state_buf.media_SFN_path, sizeof(state_buf.media_SFN_path));
+    if (!runtime_state.nested_fault) {
+        marlin_vars().media_SFN_path.copy_to(runtime_state.media_SFN_path, sizeof(runtime_state.media_SFN_path));
         state_buf.planner.was_paused = marlin_server::printer_paused();
         state_buf.planner.was_crashed = crash_s.did_trigger();
     }
@@ -1111,10 +850,10 @@ void ac_fault_isr() {
     if (!state_buf.planner.was_crashed) {
         // fault occurred outside of a crash: trigger one now to update the crash position
         crash_s.set_state(Crash_s::TRIGGERED_AC_FAULT);
-        crash_s.crash_axis_known_position = state_buf.orig_axis_known_position;
+        crash_s.crash_axis_known_position = runtime_state.orig_axis_known_position;
     }
 
-    if (!state_buf.nested_fault) {
+    if (!runtime_state.nested_fault) {
         const marlin_server::resume_state_t &resume = *marlin_server::get_resume_data();
 
         if (state_buf.planner.was_paused) {

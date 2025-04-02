@@ -47,6 +47,7 @@ MEMORY
   FLASH (rx)      : ORIGIN = 0x08020200, LENGTH = 1919K
   RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 192K
   CCMRAM (rw)     : ORIGIN = 0x10000000, LENGTH = 64K
+  BACKUP_RAM (rw) : ORIGIN = 0x40024000, LENGTH = 4K
 }
 
 EXTERN (_scanf_float) /* Require proper _scanf_float rather than a stub */
@@ -61,6 +62,12 @@ SECTIONS
     KEEP(*(.isr_vector)) /* Startup code */
     . = ALIGN(4);
   } >FLASH
+
+  .backup_ram (NOLOAD):
+  {
+    . = ALIGN(4);
+    *(.backup_ram)
+  } >BACKUP_RAM
 
   /* The program code and other data goes into FLASH */
   .text :

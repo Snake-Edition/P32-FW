@@ -77,6 +77,12 @@ function(define_enum_option)
       set(value_is_x "0")
     endif()
     file(APPEND "${input_file}" "#define ${option_name_upper}_IS_${value}() ${value_is_x}\n")
+
+    # also set cmake variable OPTION_IS_VALUE ON/OFF to allow usage in cmake
+    set(${option_name_upper}_IS_${value}
+        ${value_is_x}
+        PARENT_SCOPE
+        )
   endforeach()
   file(APPEND "${input_file}" "\n")
 
