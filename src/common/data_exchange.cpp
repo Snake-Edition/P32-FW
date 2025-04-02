@@ -123,24 +123,15 @@ void data_exchange_init() {}
 #endif
 
 static FwAutoUpdate get_auto_update_flag(void) {
-    // EEPROM flag is temporarly removed (for new bootloader downgrade testing)
-    uint8_t RAM_flag = (FwAutoUpdate::on == ram_data_exchange.fw_update_flag) ? 1 : 0;
-
-    if (ram_data_exchange.fw_update_flag == FwAutoUpdate::specified) {
-        return FwAutoUpdate::specified; // highest priority
-    } else if (RAM_flag) {
-        return FwAutoUpdate::on; // not from RAM but from eeprom, second highest priority
-    } else {
-        switch (ram_data_exchange.fw_update_flag) {
-        case FwAutoUpdate::on:
-        case FwAutoUpdate::off:
-        case FwAutoUpdate::older:
-        case FwAutoUpdate::specified:
-        case FwAutoUpdate::tester_mode_1:
-        case FwAutoUpdate::tester_mode_2:
-        case FwAutoUpdate::tester_mode_3:
-            return ram_data_exchange.fw_update_flag;
-        }
+    switch (ram_data_exchange.fw_update_flag) {
+    case FwAutoUpdate::on:
+    case FwAutoUpdate::off:
+    case FwAutoUpdate::older:
+    case FwAutoUpdate::specified:
+    case FwAutoUpdate::tester_mode_1:
+    case FwAutoUpdate::tester_mode_2:
+    case FwAutoUpdate::tester_mode_3:
+        return ram_data_exchange.fw_update_flag;
     }
     return FwAutoUpdate::off; // somehow corrupted data in shared RAM, no update
 }
