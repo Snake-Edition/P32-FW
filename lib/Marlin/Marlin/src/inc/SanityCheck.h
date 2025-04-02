@@ -471,17 +471,13 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
  * Granular software endstops (Marlin >= 1.1.7)
  */
 #if ENABLED(MIN_SOFTWARE_ENDSTOPS) && DISABLED(MIN_SOFTWARE_ENDSTOP_Z)
-  #if IS_KINEMATIC
-    #error "MIN_SOFTWARE_ENDSTOPS on DELTA/SCARA also requires MIN_SOFTWARE_ENDSTOP_Z."
-  #elif NONE(MIN_SOFTWARE_ENDSTOP_X, MIN_SOFTWARE_ENDSTOP_Y)
+  #if NONE(MIN_SOFTWARE_ENDSTOP_X, MIN_SOFTWARE_ENDSTOP_Y)
     #error "MIN_SOFTWARE_ENDSTOPS requires at least one of the MIN_SOFTWARE_ENDSTOP_[XYZ] options."
   #endif
 #endif
 
 #if ENABLED(MAX_SOFTWARE_ENDSTOPS) && DISABLED(MAX_SOFTWARE_ENDSTOP_Z)
-  #if IS_KINEMATIC
-    #error "MAX_SOFTWARE_ENDSTOPS on DELTA/SCARA also requires MAX_SOFTWARE_ENDSTOP_Z."
-  #elif NONE(MAX_SOFTWARE_ENDSTOP_X, MAX_SOFTWARE_ENDSTOP_Y)
+  #if NONE(MAX_SOFTWARE_ENDSTOP_X, MAX_SOFTWARE_ENDSTOP_Y)
     #error "MAX_SOFTWARE_ENDSTOPS requires at least one of the MAX_SOFTWARE_ENDSTOP_[XYZ] options."
   #endif
 #endif
@@ -941,13 +937,6 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
 #endif
 
 /**
- * Junction deviation is incompatible with kinematic systems.
- */
-#if DISABLED(CLASSIC_JERK) && IS_KINEMATIC
-  #error "CLASSIC_JERK is required for DELTA and SCARA."
-#endif
-
-/**
  * Probes
  */
 
@@ -1152,8 +1141,6 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
 #if ENABLED(CODEPENDENT_XY_HOMING)
   #if ENABLED(QUICK_HOME)
     #error "QUICK_HOME is incompatible with CODEPENDENT_XY_HOMING."
-  #elif IS_KINEMATIC
-    #error "CODEPENDENT_XY_HOMING requires a Cartesian setup."
   #endif
 #endif
 
@@ -1635,8 +1622,6 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
 #if ENABLED(G38_PROBE_TARGET)
   #if !HAS_BED_PROBE
     #error "G38_PROBE_TARGET requires a bed probe."
-  #elif !IS_CARTESIAN
-    #error "G38_PROBE_TARGET requires a Cartesian machine."
   #endif
 #endif
 

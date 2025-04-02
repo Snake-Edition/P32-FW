@@ -746,10 +746,8 @@ void MarlinSettings::reset() {
       CONFIG_ECHO_HEADING("Home offset:");
       CONFIG_ECHO_START();
       SERIAL_ECHOLNPAIR("  M206"
-        #if IS_CARTESIAN
-          " X", LINEAR_UNIT(home_offset.x),
-          " Y", LINEAR_UNIT(home_offset.y),
-        #endif
+        " X", LINEAR_UNIT(home_offset.x),
+        " Y", LINEAR_UNIT(home_offset.y),
         " Z", LINEAR_UNIT(home_offset.z)
       );
     #endif

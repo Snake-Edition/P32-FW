@@ -43,7 +43,7 @@
   #define NOT_A_PIN 0 // For PINS_DEBUGGING
 #endif
 
-#if (ENABLED(CLASSIC_JERK) || IS_KINEMATIC)
+#if (ENABLED(CLASSIC_JERK))
   #define HAS_CLASSIC_JERK 1
 #endif
 #define HAS_CLASSIC_E_JERK HAS_CLASSIC_JERK
@@ -61,11 +61,6 @@
 #endif
 #ifndef Y_BED_SIZE
   #define Y_BED_SIZE Y_MAX_LENGTH
-#endif
-
-// Require 0,0 bed center for Delta and SCARA
-#if IS_KINEMATIC
-  #define BED_CENTER_AT_0_0
 #endif
 
 // Define center values for future use
@@ -127,13 +122,6 @@
   #else
     #define CORESIGN(n) (n)
   #endif
-#endif
-
-/**
- * No adjustable bed on non-cartesians
- */
-#if IS_KINEMATIC
-  #undef LEVEL_BED_CORNERS
 #endif
 
 /**
@@ -1423,16 +1411,6 @@
 #endif
 
 /**
- * Only constrain Z on DELTA / SCARA machines
- */
-#if IS_KINEMATIC
-  #undef MIN_SOFTWARE_ENDSTOP_X
-  #undef MIN_SOFTWARE_ENDSTOP_Y
-  #undef MAX_SOFTWARE_ENDSTOP_X
-  #undef MAX_SOFTWARE_ENDSTOP_Y
-#endif
-
-/**
  * Bed Probing rectangular bounds
  * These can be further constrained in code for Delta and SCARA
  */
@@ -1508,15 +1486,7 @@
  * Default mesh area is an area with an inset margin on the print area.
  */
 #if HAS_LEVELING
-  #if IS_KINEMATIC
-    // Probing points may be verified at compile time within the radius
-    // using static_assert(HYPOT2(X2-X1,Y2-Y1)<=sq(DELTA_PRINTABLE_RADIUS),"bad probe point!")
-    // so that may be added to SanityCheck.h in the future.
-    #define _MESH_MIN_X (X_MIN_BED + MESH_INSET)
-    #define _MESH_MIN_Y (Y_MIN_BED + MESH_INSET)
-    #define _MESH_MAX_X (X_MAX_BED - (MESH_INSET))
-    #define _MESH_MAX_Y (Y_MAX_BED - (MESH_INSET))
-  #else
+  #if 1
     // Boundaries for Cartesian probing based on set limits
     #if ENABLED(AUTO_BED_LEVELING_UBL)
       #define _MESH_MIN_X (_MAX(X_MIN_BED + MESH_INSET, X_MIN_POS))  // UBL is careful not to probe off the bed.  It does not
@@ -1546,22 +1516,6 @@
   #endif
 
 #endif // AUTO_BED_LEVELING_UBL
-
-#if ENABLED(AUTO_BED_LEVELING_UBL) && IS_KINEMATIC
-    #define HAS_FIXED_3POINT
-    #define SIN0    0.0
-    #define SIN120  0.866025
-    #define SIN240 -0.866025
-    #define COS0    1.0
-    #define COS120 -0.5
-    #define COS240 -0.5
-    #define PROBE_PT_1_X (X_CENTER + (_PROBE_RADIUS) * COS0)
-    #define PROBE_PT_1_Y (Y_CENTER + (_PROBE_RADIUS) * SIN0)
-    #define PROBE_PT_2_X (X_CENTER + (_PROBE_RADIUS) * COS120)
-    #define PROBE_PT_2_Y (Y_CENTER + (_PROBE_RADIUS) * SIN120)
-    #define PROBE_PT_3_X (X_CENTER + (_PROBE_RADIUS) * COS240)
-    #define PROBE_PT_3_Y (Y_CENTER + (_PROBE_RADIUS) * SIN240)
-#endif
 
 /**
  * Buzzer/Speaker
@@ -1615,7 +1569,7 @@
 // Updated G92 behavior shifts the workspace
 #define HAS_POSITION_SHIFT DISABLED(NO_WORKSPACE_OFFSETS)
 // The home offset also shifts the coordinate space
-#define HAS_HOME_OFFSET (DISABLED(NO_WORKSPACE_OFFSETS) && IS_CARTESIAN)
+#define HAS_HOME_OFFSET (DISABLED(NO_WORKSPACE_OFFSETS))
 // The SCARA home offset applies only on G28
 #define HAS_SCARA_OFFSET (DISABLED(NO_WORKSPACE_OFFSETS) && IS_SCARA)
 // Cumulative offset to workspace to save some calculation

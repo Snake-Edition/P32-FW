@@ -886,10 +886,6 @@ private:
     static void M605();
   #endif
 
-  #if IS_KINEMATIC
-    static void M665();
-  #endif
-
   #if ENABLED(DELTA) || HAS_EXTRA_ENDSTOPS
     static void M666();
   #endif

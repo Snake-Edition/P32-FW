@@ -74,7 +74,7 @@ void safe_delay(millis_t ms) {
       TERN_(IS_CORE,       "Core")
       TERN_(MARKFORGED_XY, "MarkForgedXY")
       TERN_(MARKFORGED_YX, "MarkForgedYX")
-      TERN_(IS_CARTESIAN,  "Cartesian")
+      TERN_(true,  "Cartesian")
     );
 
     SERIAL_ECHOLNPGM("Probe: "

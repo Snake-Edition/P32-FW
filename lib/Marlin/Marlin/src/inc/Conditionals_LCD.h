@@ -709,10 +709,7 @@
 #if ENABLED(MORGAN_SCARA)
   #define IS_SCARA 1
 #endif
-#if (ENABLED(DELTA) || IS_SCARA)
-  #define IS_KINEMATIC 1
-#endif
-#define IS_CARTESIAN !IS_KINEMATIC
+static_assert(!(ENABLED(DELTA) || ENABLED(IS_SCARA)), "Support dropped");
 
 #ifndef INVERT_X_DIR
   #define INVERT_X_DIR false

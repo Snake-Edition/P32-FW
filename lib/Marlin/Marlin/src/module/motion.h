@@ -74,11 +74,6 @@ extern xyze_pos_t current_position,  // High-level current tool position
 // Scratch space for a cartesian result
 extern xyz_pos_t cartes;
 
-// Until kinematics.cpp is created, declare this here
-#if IS_KINEMATIC
-  extern abc_pos_t delta;
-#endif
-
 #if defined(XY_PROBE_SPEED_INITIAL)
   #define XY_PROBE_FEEDRATE_MM_S MMM_TO_MMS(XY_PROBE_SPEED_INITIAL)
 #else
@@ -196,23 +191,11 @@ void plan_move_by(const feedRate_t fr, const float dx, const float dy = 0, const
 
 void prepare_move_to_destination(const MoveHints &hints = {});
 
-void _internal_move_to_destination(const feedRate_t &fr_mm_s=0.0f
-  #if IS_KINEMATIC
-    , const bool is_fast=false
-  #endif
-);
+void _internal_move_to_destination(const feedRate_t &fr_mm_s=0.0f);
 
 inline void prepare_internal_move_to_destination(const feedRate_t &fr_mm_s=0.0f) {
   _internal_move_to_destination(fr_mm_s);
 }
-
-#if IS_KINEMATIC
-  void prepare_fast_move_to_destination(const feedRate_t &scaled_fr_mm_s=MMS_SCALED(feedrate_mm_s));
-
-  inline void prepare_internal_fast_move_to_destination(const feedRate_t &fr_mm_s=0.0f) {
-    _internal_move_to_destination(fr_mm_s, true);
-  }
-#endif
 
 enum class Segmented {
     yes,
@@ -384,40 +367,7 @@ void prepare_move_to(const xyze_pos_t &target, feedRate_t fr_mm_s, PrepareMoveHi
  * position_is_reachable family of functions
  */
 
-#if IS_KINEMATIC // (DELTA or SCARA)
-  #if HAS_SCARA_OFFSET
-    extern abc_pos_t scara_home_offset; // A and B angular offsets, Z mm offset
-  #endif
-
-  // Return true if the given point is within the printable area
-  inline bool position_is_reachable(const float &rx, const float &ry, const float inset=0) {
-    #if ENABLED(DELTA)
-      return HYPOT2(rx, ry) <= sq(DELTA_PRINTABLE_RADIUS - inset);
-    #elif IS_SCARA
-      const float R2 = HYPOT2(rx - SCARA_OFFSET_X, ry - SCARA_OFFSET_Y);
-      return (
-        R2 <= sq(L1 + L2) - inset
-        #if MIDDLE_DEAD_ZONE_R > 0
-          && R2 >= sq(float(MIDDLE_DEAD_ZONE_R))
-        #endif
-      );
-    #endif
-  }
-
-  inline bool position_is_reachable(const xy_pos_t &pos, const float inset=0) {
-    return position_is_reachable(pos.x, pos.y, inset);
-  }
-
-  #if HAS_BED_PROBE
-    // Return true if the both nozzle and the probe can reach the given point.
-    // Note: This won't work on SCARA since the probe offset rotates with the arm.
-    inline bool position_is_reachable_by_probe(const float &rx, const float &ry) {
-      return position_is_reachable(rx - probe_offset.x, ry - probe_offset.y)
-             && position_is_reachable(rx, ry, ABS(MIN_PROBE_EDGE));
-    }
-  #endif
-
-#else // CARTESIAN
+#if 1 // CARTESIAN
 
   // Return true if the given position is within the machine bounds.
   inline bool position_is_reachable(const float &rx, const float &ry) {

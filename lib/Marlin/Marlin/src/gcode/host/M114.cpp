@@ -71,17 +71,7 @@
       planner.unapply_leveling(unleveled);
       report_xyz(unleveled);
     #endif
-
-    #if IS_KINEMATIC
-      #if IS_SCARA
-        SERIAL_ECHOPGM("ScaraK: ");
-      #else
-        SERIAL_ECHOPGM("DeltaK: ");
-      #endif
-      inverse_kinematics(leveled);  // writes delta[]
-      report_xyz(delta);
-    #endif
-
+    
     planner.synchronize();
 
     SERIAL_ECHOPGM("Stepper:");

@@ -304,7 +304,7 @@ namespace ExtUI {
 
   bool canMove(const axis_t axis) {
     switch (axis) {
-      #if IS_KINEMATIC || ENABLED(NO_MOTION_BEFORE_HOMING)
+      #if ENABLED(NO_MOTION_BEFORE_HOMING)
         case X: return TEST(axis_homed, X_AXIS);
         case Y: return TEST(axis_homed, Y_AXIS);
         case Z: return TEST(axis_homed, Z_AXIS);

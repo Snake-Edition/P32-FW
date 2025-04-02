@@ -343,29 +343,27 @@ AxisEnum get_logical_axis(const uint16_t axis_flag) {
     const bool x_flag = axis_flag & STEP_EVENT_FLAG_STEP_X;
     const bool y_flag = axis_flag & STEP_EVENT_FLAG_STEP_Y;
     const bool z_flag = axis_flag & STEP_EVENT_FLAG_STEP_Z;
-#if IS_CARTESIAN
+
     if (z_flag) {
         return (!x_flag && !y_flag ? Z_AXIS : NO_AXIS_ENUM);
     }
 
-    #if IS_CORE
-        #if CORE_IS_XY
+#if IS_CORE
+    #if CORE_IS_XY
     if (x_flag == y_flag) {
         const bool x_dir = axis_flag & STEP_EVENT_FLAG_X_DIR;
         const bool y_dir = axis_flag & STEP_EVENT_FLAG_Y_DIR;
         return (x_dir == y_dir ? X_AXIS : Y_AXIS);
     }
-        #else
-            #error "Not implemented."
-        #endif
     #else
+        #error "Not implemented."
+    #endif
+#else
     if (x_flag != y_flag) {
         return (x_flag ? X_AXIS : Y_AXIS);
     }
-    #endif
-#else
-    #error "Not implemented."
 #endif
+
     return NO_AXIS_ENUM;
 }
 
@@ -801,13 +799,12 @@ float get_step_len(StepEventFlag_t axis_flag, const uint16_t orig_mres[]) {
         }
     }
 
-#if IS_CARTESIAN
     // return correct step length
     if ((motor_cnt == 1 && (motor_idx[0] == X_AXIS || motor_idx[0] == Y_AXIS))
         || (motor_cnt == 2 && motor_idx[0] == X_AXIS && motor_idx[1] == Y_AXIS)) {
         // X, Y, XY
-    #if IS_CORE
-        #if CORE_IS_XY
+#if IS_CORE
+    #if CORE_IS_XY
         switch (motor_cnt) {
         case 1:
             // diagonal
@@ -816,10 +813,10 @@ float get_step_len(StepEventFlag_t axis_flag, const uint16_t orig_mres[]) {
             // orthogonal
             return step_len;
         }
-        #else
-            #error "Not implemented."
-        #endif
     #else
+        #error "Not implemented."
+    #endif
+#else
         switch (motor_cnt) {
         case 1:
             // orthogonal
@@ -828,14 +825,11 @@ float get_step_len(StepEventFlag_t axis_flag, const uint16_t orig_mres[]) {
             // diagonal
             return sqrt(2.f) * step_len;
         }
-    #endif
+#endif
     } else if (motor_cnt == 1) {
         // single motor (not XY)
         return step_len;
     }
-#else
-    #error "Not implemented."
-#endif
 
     SERIAL_ECHOLN("error: unsupported configuration");
     return NAN;

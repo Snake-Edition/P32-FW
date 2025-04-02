@@ -203,26 +203,6 @@ float homing_bump_divisor[] = HOMING_BUMP_DIVISOR;
 // Cartesian conversion result goes here:
 xyz_pos_t cartes;
 
-#if IS_KINEMATIC
-
-  abc_pos_t delta;
-
-  #if HAS_SCARA_OFFSET
-    abc_pos_t scara_home_offset;
-  #endif
-
-  #if HAS_SOFTWARE_ENDSTOPS
-    float delta_max_radius, delta_max_radius_2;
-  #elif IS_SCARA
-    constexpr float delta_max_radius = SCARA_PRINTABLE_RADIUS,
-                    delta_max_radius_2 = sq(SCARA_PRINTABLE_RADIUS);
-  #else // DELTA
-    constexpr float delta_max_radius = DELTA_PRINTABLE_RADIUS,
-                    delta_max_radius_2 = sq(DELTA_PRINTABLE_RADIUS);
-  #endif
-
-#endif
-
 /**
  * The workspace can be offset by some commands, or
  * these offsets may be omitted to save on computation.
@@ -352,33 +332,7 @@ void line_to_current_position(const feedRate_t &fr_mm_s/*=feedrate_mm_s*/) {
   planner.buffer_line(current_position, fr_mm_s, active_extruder);
 }
 
-#if IS_KINEMATIC
-
-  /**
-   * Buffer a fast move without interpolation. Set current_position to destination
-   */
-  void prepare_fast_move_to_destination(const feedRate_t &scaled_fr_mm_s/*=MMS_SCALED(feedrate_mm_s)*/) {
-    if (DEBUGGING(LEVELING)) DEBUG_POS("prepare_fast_move_to_destination", destination);
-
-    #if UBL_SEGMENTED
-      // UBL segmented line will do Z-only moves in single segment
-      ubl.line_to_destination_segmented(scaled_fr_mm_s);
-    #else
-      if (current_position == destination) return;
-
-      planner.buffer_line(destination, scaled_fr_mm_s, active_extruder);
-    #endif
-
-    current_position = destination;
-  }
-
-#endif // IS_KINEMATIC
-
-void _internal_move_to_destination(const feedRate_t &fr_mm_s/*=0.0f*/
-  #if IS_KINEMATIC
-    , const bool is_fast/*=false*/
-  #endif
-) {
+void _internal_move_to_destination(const feedRate_t &fr_mm_s/*=0.0f*/) {
   const feedRate_t old_feedrate = feedrate_mm_s;
   if (fr_mm_s) feedrate_mm_s = fr_mm_s;
 
@@ -390,12 +344,7 @@ void _internal_move_to_destination(const feedRate_t &fr_mm_s/*=0.0f*/
      planner.e_factor[active_extruder] = 1.0f;
   #endif
 
-  #if IS_KINEMATIC
-    if (is_fast)
-      prepare_fast_move_to_destination();
-    else
-  #endif
-      prepare_move_to_destination();
+  prepare_move_to_destination();
 
   feedrate_mm_s = old_feedrate;
   feedrate_percentage = old_pct;
@@ -731,22 +680,7 @@ void restore_feedrate_and_scaling() {
 
     if (!soft_endstops_enabled || !all_axes_homed()) return;
 
-    #if IS_KINEMATIC
-
-      #if HAS_HOTEND_OFFSET && ENABLED(DELTA)
-        // The effector center position will be the target minus the hotend offset.
-        const xy_pos_t offs = hotend_offset[active_extruder];
-      #else
-        // SCARA needs to consider the angle of the arm through the entire move, so for now use no tool offset.
-        constexpr xy_pos_t offs{0};
-      #endif
-
-      const float dist_2 = HYPOT2(target.x - offs.x, target.y - offs.y);
-      if (dist_2 > delta_max_radius_2)
-        target *= delta_max_radius / SQRT(dist_2); // 200 / 300 = 0.66
-
-    #else
-
+    #if 1
       #if !HAS_SOFTWARE_ENDSTOPS || ENABLED(MIN_SOFTWARE_ENDSTOP_X)
         NOLESS(target.x, soft_endstop.min.x);
       #endif
