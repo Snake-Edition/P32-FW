@@ -1178,7 +1178,7 @@ void prepare_move_to(const xyze_pos_t &target, feedRate_t fr_mm_s, PrepareMoveHi
 
   // Segment the move enough for MBL
   #if ENABLED(AUTO_BED_LEVELING_UBL)
-  if(hints.apply_modifiers && planner.leveling_active && planner.leveling_active_at_z(destination.z)) {
+  if(hints.apply_modifiers && planner.leveling_active && planner.leveling_active_at_z(target.z)) {
     segment_count = std::max<SegmentCount>(segment_count, std::round(xy_distance / LEVELED_SEGMENT_LENGTH));
   }
   #endif
@@ -1214,7 +1214,7 @@ void prepare_move_to(const xyze_pos_t &target, feedRate_t fr_mm_s, PrepareMoveHi
     segment_pos += segment_diff;
     buffer_move(segment_pos);
   }
-  buffer_move(destination);
+  buffer_move(target);
 }
 
 /**
