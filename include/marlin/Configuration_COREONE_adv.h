@@ -1023,38 +1023,6 @@
 //#define EXTRA_FAN_SPEED
 
 /**
- * Firmware-based and LCD-controlled retract
- *
- * Add G10 / G11 commands for automatic firmware-based retract / recover.
- * Use M207 and M208 to define parameters for retract / recover.
- *
- * Use M209 to enable or disable auto-retract.
- * With auto-retract enabled, all G1 E moves within the set range
- * will be converted to firmware-based retract/recover moves.
- *
- * Be sure to turn off auto-retract during filament change.
- *
- * Note that M207 / M208 / M209 settings are saved to EEPROM.
- *
- */
-//#define FWRETRACT
-#if ENABLED(FWRETRACT)
-    #define FWRETRACT_AUTORETRACT // costs ~500 bytes of PROGMEM
-    #if ENABLED(FWRETRACT_AUTORETRACT)
-        #define MIN_AUTORETRACT 0.1 // When auto-retract is on, convert E moves of this length and over
-        #define MAX_AUTORETRACT 10.0 // Upper limit for auto-retract conversion
-    #endif
-    #define RETRACT_LENGTH 3 // Default retract length (positive mm)
-    #define RETRACT_LENGTH_SWAP 13 // Default swap retract length (positive mm), for extruder change
-    #define RETRACT_FEEDRATE 45 // Default feedrate for retracting (mm/s)
-    #define RETRACT_ZRAISE 0 // Default retract Z-raise (mm)
-    #define RETRACT_RECOVER_LENGTH 0 // Default additional recover length (mm, added to retract length when recovering)
-    #define RETRACT_RECOVER_LENGTH_SWAP 0 // Default additional swap recover length (mm, added to retract length when recovering from extruder change)
-    #define RETRACT_RECOVER_FEEDRATE 8 // Default feedrate for recovering from retraction (mm/s)
-    #define RETRACT_RECOVER_FEEDRATE_SWAP 8 // Default feedrate for recovering from swap retraction (mm/s)
-#endif
-
-/**
  * Universal tool change settings.
  * Applies to all types of extruders except where explicitly noted.
  */

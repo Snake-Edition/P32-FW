@@ -34,7 +34,6 @@
   #undef TEMP_SENSOR_3
   #undef TEMP_SENSOR_4
   #undef TEMP_SENSOR_5
-  #undef FWRETRACT
   #undef PIDTEMP
   #undef AUTOTEMP
   #undef PID_EXTRUSION_SCALING

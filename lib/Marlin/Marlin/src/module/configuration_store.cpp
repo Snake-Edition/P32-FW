@@ -81,8 +81,6 @@
   #define EEPROM_NUM_SERVOS NUM_SERVO_PLUGS
 #endif
 
-#include "../feature/fwretract.h"
-
 #include "../feature/pause.h"
 
 #if ENABLED(BACKLASH_COMPENSATION)
@@ -183,10 +181,6 @@ void MarlinSettings::postprocess() {
 
     #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
       set_z_fade_height(new_z_fade_height, false); // false = no report
-    #endif
-
-    #if ENABLED(FWRETRACT)
-      fwretract.refresh_autoretract();
     #endif
 
     #if HAS_LINEAR_E_JERK
@@ -471,14 +465,6 @@ void MarlinSettings::reset() {
 
   #if HAS_LCD_CONTRAST
     ui.set_contrast(DEFAULT_LCD_CONTRAST);
-  #endif
-
-  //
-  // Firmware Retraction
-  //
-
-  #if ENABLED(FWRETRACT)
-    fwretract.reset();
   #endif
 
   //
@@ -923,35 +909,6 @@ void MarlinSettings::reset() {
       CONFIG_ECHO_START();
       SERIAL_ECHOLNPAIR("  M250 C", ui.contrast);
     #endif
-
-    #if ENABLED(FWRETRACT)
-
-      CONFIG_ECHO_HEADING("Retract: S<length> F<units/m> Z<lift>");
-      CONFIG_ECHO_START();
-      SERIAL_ECHOLNPAIR(
-          "  M207 S", LINEAR_UNIT(fwretract.settings.retract_length)
-        , " W", LINEAR_UNIT(fwretract.settings.swap_retract_length)
-        , " F", LINEAR_UNIT(MMS_TO_MMM(fwretract.settings.retract_feedrate_mm_s))
-        , " Z", LINEAR_UNIT(fwretract.settings.retract_zraise)
-      );
-
-      CONFIG_ECHO_HEADING("Recover: S<length> F<units/m>");
-      CONFIG_ECHO_START();
-      SERIAL_ECHOLNPAIR(
-          "  M208 S", LINEAR_UNIT(fwretract.settings.retract_recover_extra)
-        , " W", LINEAR_UNIT(fwretract.settings.swap_retract_recover_extra)
-        , " F", LINEAR_UNIT(MMS_TO_MMM(fwretract.settings.retract_recover_feedrate_mm_s))
-      );
-
-      #if ENABLED(FWRETRACT_AUTORETRACT)
-
-        CONFIG_ECHO_HEADING("Auto-Retract: S=0 to disable, 1 to interpret E-only moves as retract/recover");
-        CONFIG_ECHO_START();
-        SERIAL_ECHOLNPAIR("  M209 S", fwretract.autoretract_enabled ? 1 : 0);
-
-      #endif // FWRETRACT_AUTORETRACT
-
-    #endif // FWRETRACT
 
     /**
      * Probe Offset

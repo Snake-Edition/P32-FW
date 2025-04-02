@@ -73,10 +73,6 @@
   #endif // ENABLED(CRASH_RECOVERY)
 #endif
 
-#if ENABLED(FWRETRACT)
-  #include "../feature/fwretract.h"
-#endif
-
 #if ENABLED(BABYSTEP_DISPLAY_TOTAL)
   #include "../feature/babystep.h"
 #endif
@@ -1779,11 +1775,6 @@ float homeaxis_single_run(const AxisEnum axis, const int axis_home_dir, const fe
     if (axis == Z_AXIS && homing_z_with_probe && STOW_PROBE()) {
       return NAN;
     }
-  #endif
-
-  // Clear retracted status if homing the Z axis
-  #if ENABLED(FWRETRACT)
-    if (axis == Z_AXIS) fwretract.current_hop = 0.0;
   #endif
 
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("<<< homeaxis(", axis_codes[axis], ")");

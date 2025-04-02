@@ -46,10 +46,6 @@
 // Value by which steps are multiplied to increase the precision of the Planner.
 constexpr const int PLANNER_STEPS_MULTIPLIER = 4;
 
-#if ENABLED(FWRETRACT)
-  #include "../feature/fwretract.h"
-#endif
-
 // Feedrate for manual moves
 #ifdef MANUAL_FEEDRATE
   constexpr xyze_feedrate_t manual_feedrate_mm_m = MANUAL_FEEDRATE;
@@ -559,13 +555,6 @@ class Planner {
       }
     #endif
 
-    #if ENABLED(FWRETRACT)
-      static void apply_retract(float &rz, float &e);
-      FORCE_INLINE static void apply_retract(xyze_pos_t &raw) { apply_retract(raw.z, raw.e); }
-      static void unapply_retract(float &rz, float &e);
-      FORCE_INLINE static void unapply_retract(xyze_pos_t &raw) { unapply_retract(raw.z, raw.e); }
-    #endif
-
     #if HAS_POSITION_MODIFIERS
       FORCE_INLINE static void apply_modifiers(xyze_pos_t &pos
         #if HAS_LEVELING
@@ -583,9 +572,6 @@ class Planner {
         #if HAS_LEVELING
           if (leveling) apply_leveling(pos);
         #endif
-        #if ENABLED(FWRETRACT)
-          apply_retract(pos);
-        #endif
       }
 
       FORCE_INLINE static void unapply_modifiers(xyze_pos_t &pos
@@ -598,9 +584,6 @@ class Planner {
           #endif
         #endif
       ) {
-        #if ENABLED(FWRETRACT)
-          unapply_retract(pos);
-        #endif
         #if HAS_LEVELING
           if (leveling) unapply_leveling(pos);
         #endif

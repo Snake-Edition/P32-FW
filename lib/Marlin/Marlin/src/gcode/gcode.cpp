@@ -283,11 +283,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 5: G5(); break;                                      // G5: Cubic B_spline
       #endif
 
-      #if ENABLED(FWRETRACT)
-        case 10: G10(); break;                                    // G10: Retract / Swap Retract
-        case 11: G11(); break;                                    // G11: Recover / Swap Recover
-      #endif
-
       #if ENABLED(CNC_WORKSPACE_PLANES)
         case 17: G17(); break;                                    // G17: Select Plane XY
         case 18: G18(); break;                                    // G18: Select Plane ZX
@@ -589,16 +584,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
       #if ANY(DELTA, X_DUAL_ENDSTOPS, Y_DUAL_ENDSTOPS, Z_DUAL_ENDSTOPS)
         case 666: M666(); break;                                  // M666: Set delta or dual endstop adjustment
-      #endif
-
-      #if ENABLED(FWRETRACT)
-        case 207: M207(); break;                                  // M207: Set Retract Length, Feedrate, and Z lift
-        case 208: M208(); break;                                  // M208: Set Recover (unretract) Additional Length and Feedrate
-        #if ENABLED(FWRETRACT_AUTORETRACT)
-          case 209:
-            if (MIN_AUTORETRACT <= MAX_AUTORETRACT) M209();       // M209: Turn Automatic Retract Detection on/off
-            break;
-        #endif
       #endif
 
       #if HAS_SOFTWARE_ENDSTOPS

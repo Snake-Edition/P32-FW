@@ -980,22 +980,6 @@ void Planner::check_axes_activity() {
 
 #endif // HAS_LEVELING
 
-#if ENABLED(FWRETRACT)
-  /**
-   * rz, e - Cartesian positions in mm
-   */
-  void Planner::apply_retract(float &rz, float &e) {
-    rz += fwretract.current_hop;
-    e -= fwretract.current_retract[active_extruder];
-  }
-
-  void Planner::unapply_retract(float &rz, float &e) {
-    rz -= fwretract.current_hop;
-    e += fwretract.current_retract[active_extruder];
-  }
-
-#endif
-
 void Planner::quick_stop() {
   // Immediately stop motion: all pending moves will be discarded later
   PreciseStepping::quick_stop();
@@ -2681,11 +2665,7 @@ void Planner::set_e_position_mm(const float e) {
   #if ENABLED(DISTINCT_E_FACTORS)
     last_extruder = active_extruder;
   #endif
-  #if ENABLED(FWRETRACT)
-    float e_new = e - fwretract.current_retract[active_extruder];
-  #else
-    const float e_new = e;
-  #endif
+  const float e_new = e;
   position.e = LROUND(settings.axis_msteps_per_mm[axis_index] * e_new);
   position_float.e = e_new;
 

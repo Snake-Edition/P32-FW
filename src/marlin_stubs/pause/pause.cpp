@@ -20,10 +20,6 @@
     #include "Marlin/src/feature/prusa/MMU2/mmu2_mk4.h"
 #endif
 
-#if ENABLED(FWRETRACT)
-    #include "fwretract.h"
-#endif
-
 #include "Marlin/src/lcd/extensible_ui/ui_api.h"
 #include "Marlin/src/core/language.h"
 #include "Marlin/src/lcd/ultralcd.h"
@@ -1313,7 +1309,6 @@ void Pause::unpark_nozzle_and_notify() {
  *   - the nozzle is already heated.
  * - Display "wait for print to resume"
  * - Re-prime the nozzle...
- *   -  FWRETRACT: Recover/prime from the prior G10.
  * - Move the nozzle back to resume_position
  * - Sync the planner E to resume_position.e
  * - Send host action for resume, if configured
@@ -1349,14 +1344,6 @@ void Pause::filament_change(const pause::Settings &settings_, bool is_filament_s
 #endif
 
     invoke_loop();
-
-// Intelligent resuming
-#if ENABLED(FWRETRACT)
-    // If retracted before goto pause
-    if (fwretract.retracted[active_extruder]) {
-        do_pause_e_move(-fwretract.settings.retract_length, fwretract.settings.retract_feedrate_mm_s);
-    }
-#endif
 
 #if ADVANCED_PAUSE_RESUME_PRIME != 0
     do_pause_e_move(ADVANCED_PAUSE_RESUME_PRIME, feedRate_t(ADVANCED_PAUSE_PURGE_FEEDRATE));

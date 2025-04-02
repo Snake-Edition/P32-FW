@@ -37,10 +37,6 @@
 #include "../module/printcounter.h"
 #include "../module/temperature.h"
 
-#if ENABLED(FWRETRACT)
-  #include "fwretract.h"
-#endif
-
 #if HAS_FILAMENT_SENSOR
   #include "runout.h"
 #endif
@@ -535,9 +531,8 @@ void wait_for_confirmation(const bool is_reload/*=false*/, const int8_t max_beep
  *   - the nozzle is already heated.
  * - Display "wait for print to resume"
  * - Re-prime the nozzle...
- *   -  FWRETRACT: Recover/prime from the prior G10.
- *   - !FWRETRACT: Retract by resume_position.e, if negative.
- *                 Not sure how this logic comes into use.
+ *   -  Retract by resume_position.e, if negative.
+ *      Not sure how this logic comes into use.
  * - Move the nozzle back to resume_position
  * - Sync the planner E to resume_position.e
  * - Send host action for resume, if configured
@@ -564,13 +559,6 @@ void resume_print(const float &slow_load_length/*=0*/, const float &fast_load_le
 
   if (nozzle_timed_out || thermalManager.hotEnoughToExtrude(active_extruder)) // Load the new filament
     load_filament(slow_load_length, fast_load_length, purge_length, max_beep_count, true, nozzle_timed_out, PAUSE_MODE_PAUSE_PRINT DXC_PASS);
-
-  // Intelligent resuming
-  #if ENABLED(FWRETRACT)
-    // If retracted before goto pause
-    if (fwretract.retracted[active_extruder])
-      do_pause_e_move(-fwretract.settings.retract_length, fwretract.settings.retract_feedrate_mm_s);
-  #endif
 
   // If resume_position is negative
   if (resume_position.e < 0) do_pause_e_move(resume_position.e, feedRate_t(PAUSE_PARK_RETRACT_FEEDRATE));
