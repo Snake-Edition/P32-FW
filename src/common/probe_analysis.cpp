@@ -13,11 +13,11 @@ void ProbeAnalysisBase::SetSamplingIntervalMs(float interval) {
     samplingInterval = interval / 1000;
 }
 
-void ProbeAnalysisBase::StoreSample(uint32_t time_us, float currentZ, float currentLoad) {
+void ProbeAnalysisBase::StoreSample([[maybe_unused]] uint32_t time_us, float currentZ, float currentLoad) {
     if (analysisInProgress) {
         return;
     }
-    window.push_back({ time_us, currentZ, currentLoad });
+    window.push_back({ currentZ, currentLoad });
 
 #if !defined(UNITTESTS)
     lastSampleTimestamp = ticks_us();
@@ -81,7 +81,7 @@ ProbeAnalysisBase::Result ProbeAnalysisBase::Analyse() {
         std::array<std::tuple<uint32_t, float>, 6> load_line_points;
 
         auto timestamp_for_time = [this](Time time) -> uint32_t {
-            return ClosestSample(time, SearchDirection::Both)->timestamp;
+            return TimeOfSample(ClosestSample(time, SearchDirection::Both));
         };
 
         // analysis start
