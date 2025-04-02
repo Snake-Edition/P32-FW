@@ -93,6 +93,8 @@ xyz_pos_t probe_offset; // Initialized by settings.load()
 
 #include "metric.h"
 
+#include <feature/print_status_message/print_status_message_guard.hpp>
+
 #if ENABLED(Z_PROBE_SLED)
 
   #ifndef SLED_DOCKING_OFFSET
@@ -812,13 +814,15 @@ bool cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max) {
     planner.apply_settings(s);
   }
 
+  PrintStatusMessageGuard pmg;
+  pmg.update<PrintStatusMessage::nozzle_cleaning>({});
+
   bool should_continue = true;
   for (float y = rect_min.y + radius; (y + radius) <= rect_max.y && should_continue; y += 2 * radius) {
     for (float x = rect_max.x - radius; (x - radius) >= rect_min.x && should_continue; x -= 2 * radius) {
       // move above the probe point
       xyz_pos_t pos = { x, y, static_cast<float>(PROBE_CLEANUP_CLEARANCE - TERN0(HAS_HOTEND_OFFSET, hotend_currently_applied_offset.z))};
       do_blocking_move_to(pos);
-        LCD_MESSAGEPGM_P("Nozzle cleaning");
 
       if(probe_deployed == false) {
         // first attempt: deploy probe

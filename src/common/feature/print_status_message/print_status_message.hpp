@@ -27,6 +27,9 @@ struct PrintStatusMessage {
         waiting_for_hotend_temp,
         waiting_for_bed_temp,
 
+#if ENABLED(PROBE_CLEANUP_SUPPORT)
+        nozzle_cleaning,
+#endif
 #if ENABLED(PRUSA_SPOOL_JOIN)
         spool_joined,
         joining_spool,
@@ -86,6 +89,9 @@ struct PrintStatusMessage {
         TypeRecord<Type::absorbing_heat, PrintStatusMessageDataProgress>,
         TypeRecord<Type::waiting_for_hotend_temp, PrintStatusMessageDataProgress>,
         TypeRecord<Type::waiting_for_bed_temp, PrintStatusMessageDataProgress>,
+#if ENABLED(PROBE_CLEANUP_SUPPORT)
+        TypeRecord<Type::nozzle_cleaning, std::monostate>,
+#endif
 #if ENABLED(PRUSA_SPOOL_JOIN)
         TypeRecord<Type::spool_joined, std::monostate>,
         TypeRecord<Type::joining_spool, std::monostate>,

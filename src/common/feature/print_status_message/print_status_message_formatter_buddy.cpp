@@ -20,6 +20,9 @@ static constexpr EnumArray<Message::Type, const char *, Message::Type::_cnt> mes
         { Message::Type::waiting_for_hotend_temp, N_("Waiting for hotend") },
         { Message::Type::waiting_for_bed_temp, N_("Waiting for bed") },
 
+#if ENABLED(PROBE_CLEANUP_SUPPORT)
+        { Message::Type::nozzle_cleaning, N_("Nozzle cleaning") },
+#endif
 #if ENABLED(PRUSA_SPOOL_JOIN)
         { Message::Type::spool_joined, N_("Spool joined") },
         { Message::Type::joining_spool, N_("Joining spool") },
@@ -51,6 +54,9 @@ void PrintStatusMessageFormatterBuddy::format(StringBuilder &target, const Messa
 #endif
 #if HAS_AUTO_RETRACT()
     case Message::Type::auto_retracting:
+#endif
+#if ENABLED(PROBE_CLEANUP_SUPPORT)
+    case Message::Type::nozzle_cleaning:
 #endif
         // No extra data to show
         break;
