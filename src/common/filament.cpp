@@ -272,13 +272,16 @@ void FilamentType::build_name_with_info(StringBuilder &builder) const {
                 return nullptr;
 
             } else if constexpr (std::is_same_v<T, PresetFilamentType>) {
-                return N_(" (Preset)");
+                // Used in filament type context, for example: "PLA (Preset)". Please try to fit the text in 6 characters.
+                return N_("Preset");
 
             } else if constexpr (std::is_same_v<T, UserFilamentType>) {
-                return N_(" (User)");
+                // Used in filament type context (user-defined preset), for example: "PCCF (User)". Please try to fit the text in 6 characters.
+                return N_("User");
 
             } else if constexpr (std::is_same_v<T, AdHocFilamentType> || std::is_same_v<T, PendingAdHocFilamentType>) {
-                return N_(" (Custom)");
+                // Used in filament type context (user-defined ad-hoc), for example: "XX (User)". Please try to fit the text in 6 characters.
+                return N_("Custom");
 
             } else {
                 static_assert(false);
@@ -288,7 +291,9 @@ void FilamentType::build_name_with_info(StringBuilder &builder) const {
 #endif
 
     if (suffix) {
+        builder.append_string(" (");
         builder.append_string_view(_(suffix));
+        builder.append_char(')');
     }
 }
 
