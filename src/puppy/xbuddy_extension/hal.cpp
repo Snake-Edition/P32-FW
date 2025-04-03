@@ -2,6 +2,7 @@
 #include "hal.hpp"
 
 #include "hal_clock.hpp"
+#include "extension_variant.h"
 #include <bitset>
 #include <freertos/binary_semaphore.hpp>
 #include <freertos/stream_buffer.hpp>
@@ -216,7 +217,12 @@ static void tim1_postinit() {
     PA10    ------> TIM1_CH3
     */
     constexpr GPIO_InitTypeDef GPIO_InitStruct {
+#if EXTENSION_IS_IX()
+        // iX has the filament sensor on PA9
+        .Pin = GPIO_PIN_8 | GPIO_PIN_10,
+#else
         .Pin = GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10,
+#endif
         .Mode = GPIO_MODE_AF_PP,
         .Pull = GPIO_NOPULL,
         .Speed = GPIO_SPEED_FREQ_LOW,
@@ -566,11 +572,13 @@ static void pub_enable() {
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_15, GPIO_PIN_RESET);
 }
 
+static constexpr auto FSENSOR_PIN = EXTENSION_IS_IX() ? GPIO_PIN_9 : GPIO_PIN_5;
+
 static void filament_sensor_pins_init() {
     constexpr GPIO_InitTypeDef GPIO_InitStruct {
-        .Pin = GPIO_PIN_5,
+        .Pin = FSENSOR_PIN,
         .Mode = GPIO_MODE_INPUT,
-        .Pull = GPIO_PULLDOWN,
+        .Pull = EXTENSION_IS_IX() ? GPIO_PULLUP : GPIO_PULLDOWN,
         .Speed = GPIO_SPEED_FREQ_LOW,
         .Alternate = 0,
     };
@@ -630,13 +638,13 @@ ISR_HANDLER(DebugMon_Handler)
 
 static uint32_t temperature_raw = 0;
 
-static uint8_t filament_sensor_measuring_phase = 0;
-
+#if !EXTENSION_IS_IX()
 /// FS readout at each phase
 static std::bitset<4> filament_sensor_raw;
+static uint8_t filament_sensor_measuring_phase = 0;
+#endif
 
 static hal::filament_sensor::State filament_sensor_state = hal::filament_sensor::State::uninitialized;
-
 static size_t filament_sensor_last_millis = 0;
 
 static void step_temperature_adc() {
@@ -656,7 +664,11 @@ static void step_filament_sensor() {
     }
 
     filament_sensor_last_millis = now;
-    filament_sensor_raw[filament_sensor_measuring_phase] = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5) == GPIO_PIN_SET);
+
+#if EXTENSION_IS_IX()
+    filament_sensor_state = (HAL_GPIO_ReadPin(GPIOA, FSENSOR_PIN) == GPIO_PIN_SET) ? hal::filament_sensor::State::no_filament : hal::filament_sensor::State::has_filament;
+#else
+    filament_sensor_raw[filament_sensor_measuring_phase] = (HAL_GPIO_ReadPin(GPIOA, FSENSOR_PIN) == GPIO_PIN_SET);
     filament_sensor_measuring_phase = (filament_sensor_measuring_phase + 1) % 4;
 
     // Set up the pull for the next phase, use the time between phases to stabilize the readout
@@ -680,6 +692,7 @@ static void step_filament_sensor() {
         // The filament could have been inserted/removed between the phases, wait for definitive values
         break;
     }
+#endif
 }
 
 void hal::step() {
