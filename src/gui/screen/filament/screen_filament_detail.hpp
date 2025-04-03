@@ -60,7 +60,7 @@ private:
     FilamentType filament_type;
 };
 
-class MI_FILAMENT_NAME final : public WI_INFO_t {
+class MI_FILAMENT_NAME final : public WiInfo<32> {
 public:
     MI_FILAMENT_NAME();
     void set_filament_type(FilamentType set);
