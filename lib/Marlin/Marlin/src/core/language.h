@@ -223,11 +223,9 @@
 #define STR_Y MSG_Y
 #define MSG_Z "Z"
 #define MSG_E "E"
-#if 1
-  #define MSG_A "X"
-  #define MSG_B "Y"
-  #define MSG_C "Z"
-#endif
+#define MSG_A "X"
+#define MSG_B "Y"
+#define MSG_C "Z"
 #define MSG_X2 "X2"
 #define MSG_Y2 "Y2"
 #define MSG_Z2 "Z2"
