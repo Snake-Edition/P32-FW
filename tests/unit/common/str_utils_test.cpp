@@ -70,7 +70,9 @@ TEST_CASE("StringBuilder", "[strbuilder]") {
         std::iota(overfill_order.begin(), overfill_order.end(), 0);
 
         do {
-            ArrayStringBuilder<8> b;
+            constexpr auto cap = 8;
+            ArrayStringBuilder<cap> b;
+
             b.append_string("abc");
             CHECK(b.is_ok());
             CHECK_THAT(b.str_nocheck(), Equals("abc"));
@@ -96,6 +98,7 @@ TEST_CASE("StringBuilder", "[strbuilder]") {
                 CHECK(b.is_problem());
                 CHECK_THAT(b.str_nocheck(), Equals("abc"));
                 CHECK(b.char_count() == 3);
+                CHECK(b.str_nocheck()[b.char_count()] == '\0');
             }
 
             {
