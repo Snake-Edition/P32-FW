@@ -165,6 +165,23 @@ public:
     }
 
 public:
+    inline const char *str() const {
+        if (is_ok()) {
+            return str_nocheck();
+        } else {
+            abort();
+        }
+    }
+    inline const char *str_nocheck() const {
+        return buffer_start_;
+    }
+
+    inline const uint8_t *str_bytes() const {
+        assert(is_ok());
+        return reinterpret_cast<const uint8_t *>(buffer_start_);
+    }
+
+public:
     StringBuilder &append_char(char ch);
 
     StringBuilder &append_string(const char *str);
@@ -225,23 +242,6 @@ class ArrayStringBuilder : public StringBuilder {
 public:
     inline ArrayStringBuilder()
         : StringBuilder(array) {}
-
-public:
-    inline const char *str() const {
-        if (is_ok()) {
-            return str_nocheck();
-        } else {
-            abort();
-        }
-    }
-    inline const char *str_nocheck() const {
-        return array.data();
-    }
-
-    inline const uint8_t *str_bytes() const {
-        assert(is_ok());
-        return reinterpret_cast<const uint8_t *>(array.data());
-    }
 
 private:
     std::array<char, array_size_> array;
