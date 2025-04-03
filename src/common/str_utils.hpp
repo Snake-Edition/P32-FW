@@ -165,13 +165,8 @@ public:
     }
 
 public:
-    inline const char *str() const {
-        if (is_ok()) {
-            return str_nocheck();
-        } else {
-            abort();
-        }
-    }
+    const char *str() const;
+
     inline const char *str_nocheck() const {
         return buffer_start_;
     }

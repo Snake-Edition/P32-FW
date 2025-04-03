@@ -6,6 +6,8 @@
 #include <cinttypes>
 #include <string_view_utf8.hpp>
 
+#include <bsod.h>
+
 RectTextLayout::RectTextLayout(StringReaderUtf8 &reader, uint16_t max_cols, uint16_t max_rows, is_multiline multiline) {
     if (max_cols == 0 || max_rows == 0) {
         overflow = (reader.getUtf8Char() != 0);
@@ -108,6 +110,14 @@ void StringBuilder::init(char *buffer, size_t buffer_size) {
 
     // Make the resulting string valid from the go
     *current_pos_ = '\0';
+}
+
+const char *StringBuilder::str() const {
+    if (is_ok()) {
+        return str_nocheck();
+    } else {
+        bsod("StringBuilder overflow");
+    }
 }
 
 StringBuilder &StringBuilder::append_char(char ch) {
