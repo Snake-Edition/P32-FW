@@ -103,6 +103,17 @@ TEST_CASE("StringBuilder", "[strbuilder]") {
         CHECK_THAT(b.str_nocheck(), Equals("1234565"));
     }
 
+    SECTION("append_std_string_view cropping") {
+        ArrayStringBuilder<8> b;
+        b.append_std_string_view("1234");
+        CHECK(b.is_ok());
+        CHECK_THAT(b.str_nocheck(), Equals("1234"));
+
+        b.append_std_string_view("56789");
+        CHECK(b.is_problem());
+        CHECK_THAT(b.str_nocheck(), Equals("1234567"));
+    }
+
     SECTION("append_float") {
         const auto afl_check = [](double val, const char *expected, const StringBuilder::AppendFloatConfig &cfg = {}) {
             ArrayStringBuilder<16> b;

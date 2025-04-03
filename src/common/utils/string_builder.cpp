@@ -62,10 +62,19 @@ StringBuilder &StringBuilder::append_string(const char *str) {
 }
 
 StringBuilder &StringBuilder::append_std_string_view(const std::string_view &view) {
-    if (const auto buf = alloc_chars(view.size())) {
-        view.copy(buf, view.size());
+    if (is_problem()) {
+        return *this;
     }
 
+    const int available_bytes = buffer_end_ - current_pos_;
+    const int copy_size = std::min<int>(view.size(), available_bytes - 1);
+    view.copy(current_pos_, copy_size);
+
+    // < because we need to account for the terminating \0
+    is_ok_ = (copy_size == static_cast<int>(view.size()));
+
+    current_pos_ += copy_size;
+    *current_pos_ = '\0';
     return *this;
 }
 
