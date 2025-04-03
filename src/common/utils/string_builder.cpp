@@ -104,14 +104,11 @@ StringBuilder &StringBuilder::append_vprintf(const char *fmt, va_list args) {
     const int available_bytes = int(buffer_end_ - current_pos_);
     const int ret = vsnprintf(current_pos_, available_bytes, fmt, args);
 
-    // >= because we need to account fo rhte terminating \0
-    if (ret < 0 || ret >= available_bytes) {
-        *current_pos_ = '\0';
-        is_ok_ = false;
-        return *this;
-    }
+    // < because we need to account for the terminating \0
+    is_ok_ = (ret >= 0 && ret < available_bytes);
 
-    current_pos_ += ret;
+    current_pos_ += std::clamp(ret, 0, available_bytes - 1);
+    *current_pos_ = '\0';
     return *this;
 }
 
