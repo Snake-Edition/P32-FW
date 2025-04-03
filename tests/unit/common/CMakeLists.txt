@@ -25,6 +25,17 @@ target_include_directories(
                          ${CMAKE_SOURCE_DIR}/src/lang
   )
 
+add_executable(
+  string_builder_tests
+  ${CMAKE_CURRENT_SOURCE_DIR}/string_builder_tests.cpp
+  ${CMAKE_SOURCE_DIR}/src/common/utils/string_builder.cpp
+  ${CMAKE_SOURCE_DIR}/src/lang/string_view_utf8.cpp
+  )
+target_include_directories(
+  string_builder_tests PUBLIC ${CMAKE_SOURCE_DIR}/src/common ${CMAKE_SOURCE_DIR}/src
+                              ${CMAKE_SOURCE_DIR}/src/lang
+  )
+
 add_executable(timing_tests timing_tests.cpp)
 target_compile_definitions(timing_tests PRIVATE MCU=STM32F407VG)
 target_include_directories(
