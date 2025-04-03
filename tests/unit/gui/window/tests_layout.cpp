@@ -9,8 +9,8 @@
 #include "window_text.hpp"
 #include "knob_event.hpp"
 #include <memory>
-#include "str_utils.hpp"
 #include "display_helper.h"
+#include <str_utils.hpp>
 
 // 8 bit resolution 1px per row .. 1 byte per row
 uint8_t font_dot_data[] = {

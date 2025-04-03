@@ -5,7 +5,6 @@
 #include <window_menu_virtual.hpp>
 #include <window_menu_adv.hpp>
 #include <i_window_menu_item.hpp>
-#include <str_utils.hpp>
 #include <img_resources.hpp>
 #include <dialog_text_input.hpp>
 #include <scope_guard.hpp>

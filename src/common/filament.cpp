@@ -8,9 +8,10 @@
 
 #include "i18n.h"
 #include "../../include/printers.h"
+
 #include <enum_array.hpp>
 #include <option/has_loadcell.h>
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 #include <guiconfig/guiconfig.h>
 #include <config_store/store_instance.hpp>
 #include <Configuration.h>

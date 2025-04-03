@@ -63,7 +63,6 @@
 #include "sound.hpp"
 #include <buddy/ccm_thread.hpp>
 #include <version/version.hpp>
-#include "str_utils.hpp"
 #include "data_exchange.hpp"
 #include "bootloader/bootloader.hpp"
 #include "gui_bootstrap_screen.hpp"

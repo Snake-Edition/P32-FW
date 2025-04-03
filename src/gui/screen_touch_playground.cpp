@@ -1,6 +1,6 @@
 #include "screen_touch_playground.hpp"
 
-#include "str_utils.hpp"
+#include <utils/string_builder.hpp>
 #include <hw/touchscreen/touchscreen.hpp>
 #include <ScreenHandler.hpp>
 

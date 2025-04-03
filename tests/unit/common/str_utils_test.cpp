@@ -10,7 +10,6 @@
 
 using Catch::Matchers::Equals;
 
-#include <str_utils.hpp>
 #include <lang/string_view_utf8.hpp>
 #include <str_utils.hpp>
 

@@ -6,7 +6,7 @@
 #include "SteelSheets.hpp"
 #include <marlin_client.hpp>
 #include <dialog_text_input.hpp>
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 
 void MI_SHEET_OFFSET::printExtension(Rect16 extension_rect, Color color_text, Color color_back, ropfn raster_op) const {
     if (calib) {

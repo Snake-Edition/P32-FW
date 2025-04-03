@@ -4,7 +4,6 @@
 #include <window_text.hpp>
 #include <IDialog.hpp>
 #include <numeric_input_config.hpp>
-#include <str_utils.hpp>
 #include <option/has_touch.h>
 
 #if HAS_TOUCH()

@@ -6,6 +6,7 @@
 #include <screen_menu.hpp>
 #include <img_resources.hpp>
 #include <timing.h>
+#include <utils/string_builder.hpp>
 
 namespace {
 

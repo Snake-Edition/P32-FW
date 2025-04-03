@@ -5,6 +5,7 @@
 #include "WindowMenuSpin.hpp"
 #include "img_resources.hpp"
 #include <numeric_input_config_common.hpp>
+#include <utils/string_builder.hpp>
 
 #if ENABLED(PRUSA_TOOLCHANGER)
     #include "module/prusa/toolchanger.h"

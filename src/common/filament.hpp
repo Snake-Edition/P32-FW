@@ -5,11 +5,14 @@
 #include <cstdint>
 #include <variant>
 #include <expected>
-
-#include <str_utils.hpp>
+#include <array>
+#include <string_view>
+#include <optional>
 
 #include <option/has_chamber_api.h>
 #include <option/has_filament_heatbreak_param.h>
+
+class StringBuilder;
 
 // !!! DO NOT CHANGE - this is used in config store
 /// Maximum length of a filament name, including the terminating zero

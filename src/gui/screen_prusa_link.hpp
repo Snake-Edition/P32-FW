@@ -9,7 +9,6 @@
 #include <config_store/constants.hpp>
 #include <guiconfig/guiconfig.h>
 #include <MItem_network.hpp>
-#include <str_utils.hpp>
 #include <gui/qr.hpp>
 
 // ----------------------------------------------------------------

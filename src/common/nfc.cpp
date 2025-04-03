@@ -10,7 +10,6 @@
     #include <lwip/def.h>
 #endif
 
-#include <str_utils.hpp>
 #include <string.h>
 #include <tuple>
 

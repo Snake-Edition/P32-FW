@@ -3,7 +3,7 @@
 #include <sound.hpp>
 #include <metric_handlers.h>
 #include <ScreenHandler.hpp>
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 
 using namespace screen_menu_metrics_list;
 

@@ -6,6 +6,7 @@
 #include <gui/dialogs/window_dlg_wait.hpp>
 #include <gcode/queue.h>
 #include <module/planner.h>
+#include <utils/string_builder.hpp>
 
 #include "screen_toolhead_settings_fs.hpp"
 #include "screen_toolhead_settings_dock.hpp"

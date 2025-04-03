@@ -1,6 +1,6 @@
 #include "screen_menu_network_status.hpp"
 
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 #include <netdev.h>
 #include <dns.h>
 #include <img_resources.hpp>

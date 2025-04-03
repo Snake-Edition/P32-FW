@@ -5,7 +5,7 @@
 #include "marlin_server.hpp"
 #include <usb_host.h>
 #include "marlin_vars.hpp"
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 
 /** \addtogroup G-Codes
  * @{

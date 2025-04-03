@@ -13,6 +13,7 @@
 #include "printers.h"
 #include "homing_reporter.hpp"
 #include "config_store/store_instance.hpp"
+#include <utils/string_builder.hpp>
 
 #include <limits>
 #include <option/has_loadcell.h>

@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "i18n.h"
 #include <sound.hpp>
+#include <utils/string_builder.hpp>
 
 screen_messages_data_t::screen_messages_data_t()
     : screen_t()

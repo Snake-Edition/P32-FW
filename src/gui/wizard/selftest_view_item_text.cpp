@@ -9,6 +9,7 @@
 #include <guiconfig/GuiDefaults.hpp>
 #include <guiconfig/wizard_config.hpp>
 #include "img_resources.hpp"
+#include <str_utils.hpp>
 
 /**
  * @brief Construct a new Self Test View Text:: Self Test View Text object

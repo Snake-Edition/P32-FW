@@ -16,7 +16,6 @@
 #include <option/enable_translation_it.h>
 #include <option/enable_translation_pl.h>
 #include <option/enable_translation_ja.h>
-#include <str_utils.hpp>
 #include <img_resources.hpp>
 
 class MI_LangBase : public IWindowMenuItem {

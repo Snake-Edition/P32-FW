@@ -1,7 +1,7 @@
 #include <gui/text_error_url.hpp>
 
 #include <common/error_code_mangle.hpp>
-#include <common/str_utils.hpp>
+#include <utils/string_builder.hpp>
 
 TextErrorUrlWindow::TextErrorUrlWindow(window_t *parent, Rect16 rect, ErrCode ec)
     : window_text_t { parent, rect, is_multiline::no } {

@@ -6,7 +6,7 @@
 #include "i18n.h"
 #include <limits>
 #include <filament_gui.hpp>
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 #include <gui/screen/filament/screen_filament_detail.hpp>
 #include <ScreenHandler.hpp>
 

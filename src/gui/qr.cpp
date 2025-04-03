@@ -3,7 +3,6 @@
 #include "window_qr.hpp"
 #include <common/error_code_mangle.hpp>
 #include <common/support_utils.h>
-#include <common/str_utils.hpp>
 #include <version/version.hpp>
 
 QRStaticStringWindow::QRStaticStringWindow(window_t *parent, Rect16 rect, Align_t align, const char *data)

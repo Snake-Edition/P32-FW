@@ -21,7 +21,6 @@
 #include <option/buddy_enable_connect.h>
 #include <option/has_belt_tuning.h>
 #include <meta_utils.hpp>
-#include <str_utils.hpp>
 #include <gui/menu_item/menu_item_gcode_action.hpp>
 
 /// Checks if there is space in the gcode queue for inserting further commands.

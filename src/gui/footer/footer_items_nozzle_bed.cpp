@@ -10,7 +10,7 @@
 #include "footer_eeprom.hpp"
 #include <option/has_toolchanger.h>
 #include <config_store/store_instance.hpp>
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 #include <common/nozzle_diameter.hpp>
 
 #if ENABLED(MODULAR_HEATBED)

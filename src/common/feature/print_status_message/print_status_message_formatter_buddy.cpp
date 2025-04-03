@@ -1,7 +1,9 @@
 #include "print_status_message_formatter_buddy.hpp"
 
-#include <buddy/unreachable.hpp>
 #include <option/has_translations.h>
+
+#include <buddy/unreachable.hpp>
+#include <utils/string_builder.hpp>
 
 using Message = PrintStatusMessage;
 

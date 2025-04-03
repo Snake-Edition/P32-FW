@@ -1,7 +1,6 @@
 
 #include "screen_menu_filament_changeall.hpp"
 
-#include <str_utils.hpp>
 #include <algorithm_extensions.hpp>
 
 #include <ScreenHandler.hpp>
@@ -14,7 +13,7 @@
 #include <window_dlg_wait.hpp>
 #include "Marlin/src/gcode/queue.h"
 #include "Marlin/src/module/planner.h"
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 #include <algorithm_extensions.hpp>
 #include <filament_list.hpp>
 

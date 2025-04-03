@@ -6,7 +6,6 @@
 #include <find_error.hpp>
 #include <connect/connect.hpp>
 #include <guiconfig/guiconfig.h>
-#include <str_utils.hpp>
 
 using connect_client::ConnectionStatus;
 using connect_client::OnlineStatus;

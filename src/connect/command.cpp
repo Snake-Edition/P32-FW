@@ -6,6 +6,7 @@
 #include <general_response.hpp>
 #include <module/prusa/tool_mapper.hpp>
 #include <netif_settings.h>
+#include <str_utils.hpp>
 
 #include <logging/log.hpp>
 

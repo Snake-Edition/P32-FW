@@ -1,6 +1,5 @@
 #include "render.hpp"
 #include "printer_type.hpp"
-#include "str_utils.hpp"
 
 #include <client_response.hpp>
 #include <segmented_json_macros.h>

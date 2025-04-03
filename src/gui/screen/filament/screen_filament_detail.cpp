@@ -6,6 +6,7 @@
 #include <algorithm_extensions.hpp>
 #include <dialog_text_input.hpp>
 #include <ScreenHandler.hpp>
+#include <utils/string_builder.hpp>
 
 #if HAS_CHAMBER_API()
     #include <feature/chamber/chamber.hpp>

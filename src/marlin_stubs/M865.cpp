@@ -1,8 +1,10 @@
 #include "PrusaGcodeSuite.hpp"
-#include <filament.hpp>
-#include <temperature.hpp>
 
 #include <option/has_filament_heatbreak_param.h>
+
+#include <filament.hpp>
+#include <temperature.hpp>
+#include <utils/string_builder.hpp>
 
 /** \addtogroup G-Codes
  * @{

@@ -6,7 +6,7 @@
 #include "sound.hpp"
 #include <version/version.hpp>
 #include "support_utils.h"
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 
 ScreenResetError::ScreenResetError(const Rect16 &fw_version_rect)
     : screen_t()

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <str_utils.hpp>
+
 namespace nozzle_cleaner {
 
 extern ConstexprString load_sequence;

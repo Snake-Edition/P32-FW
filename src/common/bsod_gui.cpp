@@ -28,7 +28,7 @@
 #include "power_panic.hpp"
 #include "crash_dump/dump_parse.hpp"
 
-#include "str_utils.hpp"
+#include <utils/string_builder.hpp>
 
 // this is private struct definition from FreeRTOS
 /*

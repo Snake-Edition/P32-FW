@@ -10,7 +10,7 @@
 #include "print_utils.hpp"
 #include "filename_type.hpp"
 #include "settings_ini.hpp"
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 #include <sys/unistd.h>
 #include <wui_api.h>
 #include <version/version.hpp>

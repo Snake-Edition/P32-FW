@@ -9,7 +9,6 @@
 #include <font_flags.hpp>
 #include <raster_opfn.hpp>
 #include <string_view_utf8.hpp>
-#include <str_utils.hpp>
 #include <fonts.hpp>
 
 uint32_t get_char_position_in_font(unichar c, const font_t *pf);

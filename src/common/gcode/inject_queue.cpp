@@ -1,7 +1,7 @@
 #include "inject_queue.hpp"
 
 #include "gcode_loader.hpp"
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 
 InjectQueue inject_queue; // instance
 

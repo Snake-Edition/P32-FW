@@ -36,6 +36,7 @@
 #include <RAII.hpp>
 #include <inject_queue.hpp>
 #include <buddy/unreachable.hpp>
+#include <utils/string_builder.hpp>
 
 #include "../Marlin/src/lcd/extensible_ui/ui_api.h"
 #include "../Marlin/src/gcode/queue.h"

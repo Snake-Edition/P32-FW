@@ -2,7 +2,6 @@
 
 #include <buddy/unreachable.hpp>
 #include <common/marlin_server.hpp>
-#include <common/str_utils.hpp>
 #include <Marlin/src/gcode/calibrate/M958.hpp>
 #include <Marlin/src/gcode/gcode.h>
 #include <Marlin/src/module/tool_change.h>

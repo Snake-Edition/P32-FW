@@ -6,7 +6,6 @@
 #include "window.hpp"
 #include "gui.hpp"
 #include "../lang/string_view_utf8.hpp"
-#include "../common/str_utils.hpp"
 #include "ScreenHandler.hpp"
 #include <common/conserve_cpu.hpp>
 

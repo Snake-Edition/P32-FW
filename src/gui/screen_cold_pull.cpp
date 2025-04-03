@@ -19,7 +19,6 @@
 #include <guiconfig/wizard_config.hpp>
 #include <common/cold_pull.hpp>
 #include <common/sound.hpp>
-#include <common/str_utils.hpp>
 #include <lang/i18n.h>
 
 namespace {

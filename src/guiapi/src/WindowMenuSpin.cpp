@@ -6,7 +6,7 @@
 
 #include "WindowMenuSpin.hpp"
 
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 
 #if HAS_TOUCH()
     #include <dialog_numeric_input.hpp>

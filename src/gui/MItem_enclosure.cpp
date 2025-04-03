@@ -5,7 +5,6 @@
 #include "xl_enclosure.hpp"
 #include "ScreenHandler.hpp"
 #include "screen_change_filter.hpp"
-#include <str_utils.hpp>
 #include <screen_menu_enclosure.hpp>
 #include <window_dlg_wait.hpp>
 

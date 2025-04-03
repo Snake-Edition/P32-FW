@@ -41,7 +41,7 @@
 #include <footer_items_heaters.hpp>
 #include <footer_line.hpp>
 #include <freertos/critical_section.hpp>
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 #include <netdev.h>
 #include <wui.h>
 #include <power_panic.hpp>

@@ -41,6 +41,7 @@ add_executable(
   ${CMAKE_CURRENT_SOURCE_DIR}/mini_display_tests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/text_fit_test.cpp
   ${CMAKE_SOURCE_DIR}/src/common/str_utils.cpp
+  ${CMAKE_SOURCE_DIR}/src/common/utils/string_builder.cpp
   ${CMAKE_SOURCE_DIR}/src/lang/string_view_utf8.cpp
   ${CMAKE_SOURCE_DIR}/src/gui/fonts.cpp
   ${CMAKE_SOURCE_DIR}/src/guiapi/src/Rect16.cpp
@@ -83,6 +84,7 @@ add_executable(
   ${CMAKE_CURRENT_SOURCE_DIR}/large_display_tests.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/text_fit_test.cpp
   ${CMAKE_SOURCE_DIR}/src/common/str_utils.cpp
+  ${CMAKE_SOURCE_DIR}/src/common/utils/string_builder.cpp
   ${CMAKE_SOURCE_DIR}/src/lang/string_view_utf8.cpp
   ${CMAKE_SOURCE_DIR}/src/gui/fonts.cpp
   ${CMAKE_SOURCE_DIR}/src/guiapi/src/Rect16.cpp

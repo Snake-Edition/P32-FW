@@ -4,7 +4,7 @@
 #include "Rect16.h"
 #include "window.hpp"
 #include <array>
-#include <common/str_utils.hpp>
+#include <utils/string_builder.hpp>
 
 /**
  * GUI widget for displaying QR codes with static string.

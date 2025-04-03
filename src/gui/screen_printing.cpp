@@ -20,6 +20,8 @@
 #include <option/has_mmu2.h>
 #include <option/has_toolchanger.h>
 #include <buddy/unreachable.hpp>
+#include <utils/string_builder.hpp>
+
 #if HAS_MMU2()
     #include <feature/prusa/MMU2/mmu2_mk4.h>
     #include <window_msgbox.hpp>

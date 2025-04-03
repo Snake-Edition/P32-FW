@@ -8,6 +8,7 @@
 #include <dynamic_index_mapping.hpp>
 #include <WindowMenuSwitch.hpp>
 #include <ScreenHandler.hpp>
+#include <utils/string_builder.hpp>
 
 using namespace buddy;
 
