@@ -2665,14 +2665,13 @@ void Planner::set_e_position_mm(const float e) {
   #if ENABLED(DISTINCT_E_FACTORS)
     last_extruder = active_extruder;
   #endif
-  const float e_new = e;
-  position.e = LROUND(settings.axis_msteps_per_mm[axis_index] * e_new);
-  position_float.e = e_new;
+  position.e = LROUND(settings.axis_msteps_per_mm[axis_index] * e);
+  position_float.e = e;
 
   if (processing())
     buffer_sync_block();
   else
-    stepper.set_axis_position(E_AXIS, LROUND(settings.axis_steps_per_mm[axis_index] * e_new));
+    stepper.set_axis_position(E_AXIS, LROUND(settings.axis_steps_per_mm[axis_index] * e));
 }
 
 void Planner::reset_position() {
