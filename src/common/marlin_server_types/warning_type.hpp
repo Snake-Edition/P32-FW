@@ -87,3 +87,5 @@ enum class WarningType : uint32_t {
 };
 
 PhasesWarning warning_type_phase(WarningType warning);
+
+uint32_t warning_lifespan_sec(WarningType type);

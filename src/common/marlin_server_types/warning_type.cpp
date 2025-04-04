@@ -66,6 +66,17 @@ PhasesWarning warning_type_phase(WarningType warning) {
     return warning_type_phase_constexpr(warning);
 }
 
+constexpr uint32_t warning_lifespan_sec_constexpr(WarningType type) {
+    switch (type) {
+    default:
+        return uint32_t(-1); // Unlimited
+    }
+}
+
+uint32_t warning_lifespan_sec(WarningType type) {
+    return warning_lifespan_sec_constexpr(type);
+}
+
 static_assert([] {
     std::bitset<CountPhases<PhasesWarning>()> used_phases;
 

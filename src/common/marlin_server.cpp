@@ -446,51 +446,110 @@ namespace {
         }
 #endif
     }
+} // end anonymous namespace
 
-    void handle_warnings() {
-        const auto phase_opt = fsm_states[ClientFSM::Warning];
-        if (!phase_opt.has_value()) {
-            return;
+/******************************************************************************/
+// Warning handling
+
+static std::bitset<static_cast<size_t>(WarningType::_last) + 1> warning_flags;
+static uint32_t active_warning_pop_timestamp_sec = 0;
+
+static void handle_warnings() {
+    const auto phase_opt = fsm_states[ClientFSM::Warning];
+    if (!phase_opt.has_value()) {
+        return;
+    }
+
+    const auto phase = static_cast<PhasesWarning>(phase_opt->GetPhase());
+    const auto warning_type = fsm::deserialize_data<WarningType>(phase_opt->GetData());
+
+    const auto consume_response = [&]() {
+        const auto response = get_response_from_phase(phase);
+        if (response != Response::_none) {
+            clear_warning(warning_type);
         }
 
-        const auto phase = static_cast<PhasesWarning>(phase_opt->GetPhase());
+        return response;
+    };
 
-        const auto consume_response = [&]() {
-            const auto response = get_response_from_phase(phase);
-            if (response != Response::_none) {
-                const WarningType warning_type = static_cast<WarningType>(*phase_opt->GetData().data());
-                clear_warning(warning_type);
-            }
+    switch (phase) {
 
-            return response;
-        };
-
-        switch (phase) {
-
-        case PhasesWarning::Warning:
+    case PhasesWarning::Warning:
+        if (fsm_states.get_top()->fsm_type != ClientFSM::Warning) {
+            // Some other FSM is on top of Warning FSM - reset warning lifespan timestamp
+            active_warning_pop_timestamp_sec = ticks_s();
+        }
+        if (ticks_s() - active_warning_pop_timestamp_sec > warning_lifespan_sec(warning_type)) {
+            clear_warning(warning_type);
+        } else {
             consume_response();
-            break;
+        }
+        break;
 
 #if XL_ENCLOSURE_SUPPORT()
-        case PhasesWarning::EnclosureFilterExpiration:
-            if (auto r = consume_response(); r != Response::_none) {
-                xl_enclosure.setUpReminder(r);
-            }
-            break;
+    case PhasesWarning::EnclosureFilterExpiration:
+        if (auto r = consume_response(); r != Response::_none) {
+            xl_enclosure.setUpReminder(r);
+        }
+        break;
 #endif
 
 #if HAS_CHAMBER_FILTRATION_API()
-        case PhasesWarning::EnclosureFilterExpiration:
-            buddy::chamber_filtration().handle_filter_expiration_warning(consume_response());
-            break;
+    case PhasesWarning::EnclosureFilterExpiration:
+        buddy::chamber_filtration().handle_filter_expiration_warning(consume_response());
+        break;
 #endif
 
-        default:
-            // Most warnings are handled somewhere else and we shouldn't consume and process the responses
-            break;
-        }
+    default:
+        // Most warnings are handled somewhere else and we shouldn't consume and process the responses
+        break;
     }
-} // end anonymous namespace
+}
+
+static void update_warning_fsm() {
+    if (warning_flags.any()) {
+        size_t i = 0;
+        for (; !warning_flags.test(i); i++)
+            ;
+        const WarningType type = static_cast<WarningType>(i);
+        const fsm::PhaseData data = fsm::serialize_data<WarningType>(type);
+
+        // Avoid reinit of warning timestamp timer if warning is already shown
+        if (!fsm_states[ClientFSM::Warning].has_value() || fsm_states[ClientFSM::Warning]->GetData() != data) {
+            active_warning_pop_timestamp_sec = ticks_s();
+            fsm_create(warning_type_phase(type), data);
+        }
+    } else {
+        fsm_destroy(ClientFSM::Warning);
+    }
+}
+
+void set_warning(WarningType type) {
+    log_warning(MarlinServer, "Warning type %d set", (int)type);
+    log_info(MarlinServer, "WARNING: %" PRIu32, std::to_underlying(type));
+
+    warning_flags.set(std::to_underlying(type));
+    update_warning_fsm();
+}
+
+void clear_warning(WarningType type) {
+    warning_flags.reset(std::to_underlying(type));
+    update_warning_fsm();
+}
+
+bool is_warning_active(WarningType type) {
+    return warning_flags.test(std::to_underlying(type));
+}
+
+Response prompt_warning(WarningType type) {
+    set_warning(type);
+    const Response r = wait_for_response(warning_type_phase(type));
+    clear_warning(type);
+    return r;
+}
+
+/******************************************************************************/
+// FSM Manipulation
 
 static void commit_fsm_states() {
     fsm_states.increment_state_id();
@@ -3353,49 +3412,6 @@ static void _server_set_var(const Request &request) {
 
     // if we got here, no variable was set, return error
     bsod("unimplemented _server_set_var for var_id %i", (int)variable_identifier);
-}
-
-static std::bitset<static_cast<size_t>(WarningType::_last) + 1> warning_flags;
-
-static void update_warning_fsm() {
-    if (warning_flags.any()) {
-        size_t i = 0;
-        for (; !warning_flags.test(i); i++)
-            ;
-        const WarningType type = static_cast<WarningType>(i);
-
-        fsm::PhaseData data;
-        memcpy(data.data(), &type, sizeof(data));
-
-        fsm_create(warning_type_phase(type), data);
-
-    } else {
-        fsm_destroy(ClientFSM::Warning);
-    }
-}
-
-void set_warning(WarningType type) {
-    log_warning(MarlinServer, "Warning type %d set", (int)type);
-    log_info(MarlinServer, "WARNING: %" PRIu32, std::to_underlying(type));
-
-    warning_flags.set(std::to_underlying(type));
-    update_warning_fsm();
-}
-
-void clear_warning(WarningType type) {
-    warning_flags.reset(std::to_underlying(type));
-    update_warning_fsm();
-}
-
-bool is_warning_active(WarningType type) {
-    return warning_flags.test(std::to_underlying(type));
-}
-
-Response prompt_warning(WarningType type) {
-    set_warning(type);
-    const Response r = wait_for_response(warning_type_phase(type));
-    clear_warning(type);
-    return r;
 }
 
 /*****************************************************************************/
