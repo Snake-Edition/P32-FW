@@ -164,6 +164,7 @@ void Chamber::reset() {
 
 #if HAS_XBUDDY_EXTENSION()
     xbuddy_extension().set_fan_target_pwm(XBuddyExtension::Fan::cooling_fan_1, pwm_auto);
+    xbuddy_extension().set_fan_target_pwm(XBuddyExtension::Fan::filtration_fan, pwm_auto);
 #endif
 }
 
