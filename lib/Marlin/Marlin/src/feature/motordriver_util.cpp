@@ -154,7 +154,7 @@ uint16_t stepper_microsteps(AxisEnum axis, std::optional<uint16_t> new_microstep
         bsod("Unknown driver");
     }
 
-    return result;
+    return std::max<uint16_t>(result, 1);
 }
 
 uint16_t stepper_mscnt(const AxisEnum axis) {
