@@ -50,7 +50,7 @@ void do_test(buddy::RingAllocator &allocator, std::vector<size_t> sizes, bool sh
 } // namespace
 
 TEST_CASE("Allocate and free success") {
-    std::vector<uint8_t> buffer(1024);
+    alignas(buddy::RingAllocator::alignment) std::array<uint8_t, 1024> buffer;
     buddy::RingAllocator allocator(buffer);
     std::vector<size_t> sizes;
 
@@ -84,7 +84,7 @@ TEST_CASE("Allocate and free success") {
 
 TEST_CASE("Allocate doesn't fit") {
     // Note: the Record size is (2x 15-bit offsets + 1-bit in_use) - aligned to 4 bytes
-    std::vector<uint8_t> buffer(1048);
+    alignas(buddy::RingAllocator::alignment) std::array<uint8_t, 1048> buffer;
     buddy::RingAllocator allocator(buffer);
 
     std::vector<size_t> sizes;
@@ -98,7 +98,7 @@ TEST_CASE("Allocate doesn't fit") {
 }
 
 TEST_CASE("Big big small") {
-    std::vector<uint8_t> buffer(1024);
+    alignas(buddy::RingAllocator::alignment) std::array<uint8_t, 1024> buffer;
     buddy::RingAllocator allocator(buffer);
 
     std::vector<size_t> sizes;

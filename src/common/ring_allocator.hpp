@@ -95,6 +95,14 @@ private:
     }
 
 public:
+    // Note: The alignment is possibly wrong on the 64bit system where tests run
+    // (it's fine on the real printer). However, that system also supports
+    // unaligned pointer access and all that, so for unit tests, that's fine
+    // enough.
+    static constexpr size_t alignment = 4;
+
+    static_assert(sizeof(Record) % alignment == 0);
+
     RingAllocator(const std::span<uint8_t> &buffer);
     /// Like malloc.
     void *allocate(size_t size);
