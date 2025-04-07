@@ -113,8 +113,12 @@ public:
     char *alloc_chars(size_t cnt);
 
 private:
-    /// For safety reasons, string builder copying is only for static constructors
-    StringBuilder(const StringBuilder &o) = default;
+    /// For safety reasons, string builder moving is only for static constructors
+    StringBuilder(const StringBuilder &o) = delete;
+    StringBuilder(StringBuilder &&) = default;
+
+    StringBuilder &operator=(const StringBuilder &) = delete;
+    StringBuilder &operator=(StringBuilder &&) = delete;
 
 private:
     /// Pointer to start of the buffer
@@ -137,6 +141,13 @@ class ArrayStringBuilder : public StringBuilder {
 public:
     inline ArrayStringBuilder()
         : StringBuilder(array) {}
+
+    // The new builder would point to the original array, cannot copy/move
+    ArrayStringBuilder(const ArrayStringBuilder &) = delete;
+    ArrayStringBuilder(ArrayStringBuilder &&) = delete;
+
+    ArrayStringBuilder &operator=(const ArrayStringBuilder &) = delete;
+    ArrayStringBuilder &operator=(ArrayStringBuilder &&) = delete;
 
 private:
     std::array<char, array_size_> array;
