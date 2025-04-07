@@ -104,7 +104,7 @@ void AutoRetract::maybe_deretract_to_nozzle() {
     const auto orig_e_position = planner.get_position_msteps().e;
     const auto orig_current_e_position = current_position.e;
 
-    standard_ramming_sequence(StandardRammingSequence::auto_retract, hotend).undo(PAUSE_PARK_RETRACT_FEEDRATE);
+    standard_ramming_sequence(StandardRammingSequence::auto_retract, hotend).undo(FILAMENT_CHANGE_FAST_LOAD_FEEDRATE);
 
     // "Fake" original extruder position - we are interrupting various movements by this function,
     // firmware gets very confused if the current position changes while it is planning a move
