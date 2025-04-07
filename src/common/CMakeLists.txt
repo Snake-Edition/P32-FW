@@ -8,6 +8,7 @@ if(BOARD IN_LIST BUDDY_BOARDS)
     PRIVATE adc.cpp
             app_metrics.cpp
             appmain.cpp
+            awdg.cpp
             base64_stream_decoder.cpp
             bbf.cpp
             conserve_cpu.cpp
