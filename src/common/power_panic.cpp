@@ -666,6 +666,10 @@ void panic_loop() {
             break;
         }
 
+        if (!runtime_state.nested_fault) {
+            marlin_vars().media_SFN_path.copy_to(runtime_state.media_SFN_path, sizeof(runtime_state.media_SFN_path));
+        }
+
         // Z axis is now aligned
         stepperZ.rms_current(POWER_PANIC_Z_CURRENT, 1);
         log_debug(PowerPanic, "Z MSCNT end: %d", stepperZ.MSCNT());
@@ -842,7 +846,6 @@ void ac_fault_isr() {
 
     // stop motion
     if (!runtime_state.nested_fault) {
-        marlin_vars().media_SFN_path.copy_to(runtime_state.media_SFN_path, sizeof(runtime_state.media_SFN_path));
         state_buf.planner.was_paused = marlin_server::printer_paused();
         state_buf.planner.was_crashed = crash_s.did_trigger();
     }
