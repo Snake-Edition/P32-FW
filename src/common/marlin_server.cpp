@@ -1074,13 +1074,13 @@ static void settings_load() {
 #endif
 }
 
-void test_start([[maybe_unused]] const uint64_t test_mask, [[maybe_unused]] const selftest::TestData test_data) {
 #if HAS_SELFTEST()
+void test_start([[maybe_unused]] const uint64_t test_mask, [[maybe_unused]] const selftest::TestData test_data) {
     if (((server.print_state == State::Idle) || (server.print_state == State::Finished) || (server.print_state == State::Aborted)) && (!SelftestInstance().IsInProgress())) {
         SelftestInstance().Start(test_mask, test_data);
     }
-#endif
 }
+#endif
 
 void quick_stop() {
 #if HAS_TOOLCHANGER()
