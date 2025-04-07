@@ -9,6 +9,8 @@
 #include <stm32h5xx_hal.h>
 #include <stm32h5xx_ll_gpio.h>
 
+const std::span<std::byte> hal::memory::peripheral_address_region(reinterpret_cast<std::byte *>(PERIPH_BASE_NS), 0x10000000);
+
 static UART_HandleTypeDef huart_rs485;
 static std::byte rx_buf_rs485[256];
 static volatile size_t rx_len_rs485;

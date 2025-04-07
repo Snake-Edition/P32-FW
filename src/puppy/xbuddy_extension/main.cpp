@@ -11,20 +11,6 @@
 extern uint32_t __shared_data_start__[];
 extern uint32_t __shared_data_end__[];
 
-MemoryRegion_t regions[3] {
-    {
-        .pvBaseAddress = (void *)0x40000000,
-        .ulLengthInBytes = 0x10000000,
-        .ulParameters = tskMPU_REGION_READ_WRITE | tskMPU_REGION_EXECUTE_NEVER | tskMPU_REGION_DEVICE_MEMORY,
-    },
-    {
-        .pvBaseAddress = __shared_data_start__,
-        .ulLengthInBytes = uint32_t((char *)__shared_data_end__ - (char *)__shared_data_start__),
-        .ulParameters = tskMPU_REGION_READ_WRITE | tskMPU_REGION_EXECUTE_NEVER | tskMPU_REGION_NORMAL_MEMORY,
-    },
-    {},
-};
-
 constexpr const size_t main_task_stack_size = 200;
 alignas(32) NON_SHARED_DATA StackType_t main_task_stack[main_task_stack_size];
 NON_SHARED_DATA StaticTask_t main_task_control_block;
@@ -52,26 +38,44 @@ extern "C" int main() {
     // Tasks have to be created before we yield control to FreeRTOS scheduler
     // because MPU would prevent them from accessing their control blocks.
     {
-        TaskHandle_t main_task_handle = xTaskCreateStatic(
-            main_task_code,
-            "main_task",
-            main_task_stack_size,
-            NULL,
-            tskIDLE_PRIORITY + 1,
-            main_task_stack,
-            &main_task_control_block);
-        vTaskAllocateMPURegions(main_task_handle, regions);
-    }
-    {
-        TaskHandle_t hal_task_handle = xTaskCreateStatic(
-            hal_task_code,
-            "hal_task",
-            hal_task_stack_size,
-            NULL,
-            tskIDLE_PRIORITY + 1,
-            hal_task_stack,
-            &hal_task_control_block);
-        vTaskAllocateMPURegions(hal_task_handle, regions);
+        const MemoryRegion_t mpu_regions[] {
+            {
+                // Peripherals - controllable from all threads
+                .pvBaseAddress = hal::memory::peripheral_address_region.data(),
+                .ulLengthInBytes = hal::memory::peripheral_address_region.size(),
+                .ulParameters = tskMPU_REGION_READ_WRITE | tskMPU_REGION_EXECUTE_NEVER | tskMPU_REGION_DEVICE_MEMORY,
+            },
+            {
+                .pvBaseAddress = __shared_data_start__,
+                .ulLengthInBytes = uint32_t((char *)__shared_data_end__ - (char *)__shared_data_start__),
+                .ulParameters = tskMPU_REGION_READ_WRITE | tskMPU_REGION_EXECUTE_NEVER | tskMPU_REGION_NORMAL_MEMORY,
+            },
+            {},
+        };
+
+        {
+            TaskHandle_t main_task_handle = xTaskCreateStatic(
+                main_task_code,
+                "main_task",
+                main_task_stack_size,
+                NULL,
+                tskIDLE_PRIORITY + 1,
+                main_task_stack,
+                &main_task_control_block);
+            vTaskAllocateMPURegions(main_task_handle, mpu_regions);
+        }
+
+        {
+            TaskHandle_t hal_task_handle = xTaskCreateStatic(
+                hal_task_code,
+                "hal_task",
+                hal_task_stack_size,
+                NULL,
+                tskIDLE_PRIORITY + 1,
+                hal_task_stack,
+                &hal_task_control_block);
+            vTaskAllocateMPURegions(hal_task_handle, mpu_regions);
+        }
     }
 
     // Start FreeRTOS scheduler and we are done.
