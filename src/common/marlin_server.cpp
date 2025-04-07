@@ -961,7 +961,7 @@ void loop() {
 
 #if HAS_EMERGENCY_STOP()
     // During printing, possibly block anytime
-    if (server.print_state == State::Printing) {
+    if (is_printing_state(server.print_state)) {
         buddy::emergency_stop().maybe_block();
     }
 #endif
@@ -988,7 +988,7 @@ static void idle(void) {
 
 #if HAS_EMERGENCY_STOP()
     // During printing, possibly block anytime
-    if (server.print_state == State::Printing) {
+    if (is_printing_state(server.print_state)) {
         buddy::emergency_stop().maybe_block();
     }
 #endif
