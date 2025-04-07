@@ -53,4 +53,8 @@ void BinarySemaphore::acquire() {
     }
 }
 
+bool BinarySemaphore::try_acquire_for(uint32_t ms) {
+    return xSemaphoreTake(SemaphoreHandle_t(handle), ms * portTICK_PERIOD_MS) == pdTRUE;
+}
+
 } // namespace freertos

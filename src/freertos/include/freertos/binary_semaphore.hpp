@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <freertos/config.hpp>
 
 namespace freertos {
@@ -44,6 +45,11 @@ public:
     /// Consumes one permit from the semaphore, blocking until it's available
     /// as necessary.
     void acquire();
+
+    /// Similar to acquire, but the task is blocked only for given timeout.
+    ///
+    /// Returns true if someone released it and false if it timeouted
+    bool try_acquire_for(uint32_t ms);
 };
 
 } // namespace freertos
