@@ -17,6 +17,12 @@ static_assert(BOARD_IS_XBUDDY());
 // TODO Document ADC peripherals
 TRACED_ISR(DMA2_Stream4_IRQHandler, HAL_DMA_IRQHandler, hadc1.DMA_Handle);
 TRACED_ISR(DMA2_Stream0_IRQHandler, HAL_DMA_IRQHandler, hadc3.DMA_Handle);
+extern "C" void ADC_IRQHandler() {
+    traceISR_ENTER();
+    HAL_ADC_IRQHandler(&hadc1);
+    HAL_ADC_IRQHandler(&hadc3);
+    traceISR_EXIT();
+}
 
 // SPI for trinamic driver
 TRACED_ISR(SPI3_IRQHandler, HAL_SPI_IRQHandler, &SPI_HANDLE_FOR(tmc));

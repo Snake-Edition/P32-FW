@@ -241,14 +241,15 @@ extern "C" void main_cpp(void) {
     hw_adc1_init();
     adcDma1.init();
 
-#if PRINTER_IS_PRUSA_XL()
-    // Read Sandwich hw revision
-    SandwichConfiguration::Instance();
-#endif
-
 #ifdef HAS_ADC3
     hw_adc3_init();
     adcDma3.init();
+#endif
+    hw_adc_irq_init();
+
+#if PRINTER_IS_PRUSA_XL()
+    // Read Sandwich hw revision
+    SandwichConfiguration::Instance();
 #endif
 
 #if BOARD_IS_BUDDY() || BOARD_IS_XBUDDY()

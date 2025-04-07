@@ -269,6 +269,7 @@ void hw_dma_init();
 
 void hw_adc1_init();
 void hw_adc3_init();
+void hw_adc_irq_init();
 
 //
 // i2c init may not exist without External Peripherals Assignment

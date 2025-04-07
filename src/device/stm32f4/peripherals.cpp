@@ -8,6 +8,7 @@
 #include "safe_state.h"
 #include <buddy/main.h>
 #include "adc.hpp"
+#include "stm32f4xx_hal_adc.h"
 #include "timer_defaults.h"
 #include "PCA9557.hpp"
 #include "TCA6408A.hpp"
@@ -288,7 +289,7 @@ void hw_dma_init() {
 
 void static config_adc(ADC_HandleTypeDef *hadc, ADC_TypeDef *ADC_NUM, uint32_t NbrOfConversion) {
     hadc->Instance = ADC_NUM;
-    hadc->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
+    hadc->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
     hadc->Init.Resolution = ADC_RESOLUTION_12B;
     hadc->Init.ScanConvMode = ENABLE;
     hadc->Init.ContinuousConvMode = ENABLE;
@@ -306,7 +307,7 @@ void static config_adc(ADC_HandleTypeDef *hadc, ADC_TypeDef *ADC_NUM, uint32_t N
 
 static void config_adc_ch(ADC_HandleTypeDef *hadc, uint32_t Channel, uint32_t Rank) {
     Rank++; // Channel rank starts at 1, but for array indexing, we need to start from 0.
-    ADC_ChannelConfTypeDef sConfig = { Channel, Rank, ADC_SAMPLETIME_480CYCLES, 0 };
+    ADC_ChannelConfTypeDef sConfig = { Channel, Rank, ADC_SAMPLETIME_56CYCLES, 0 };
     if (HAL_ADC_ConfigChannel(hadc, &sConfig) != HAL_OK) {
         Error_Handler();
     }
@@ -383,6 +384,11 @@ void hw_adc3_init() {
     HAL_NVIC_DisableIRQ(DMA2_Stream0_IRQn);
 }
 #endif
+
+void hw_adc_irq_init() {
+    HAL_NVIC_SetPriority(ADC_IRQn, ISR_PRIORITY_DEFAULT, 0);
+    HAL_NVIC_EnableIRQ(ADC_IRQn);
+}
 
 struct hw_pin {
     GPIO_TypeDef *port;
