@@ -39,7 +39,7 @@ public:
     /// Blockingly executes a simple "reverse" of the ramming sequence, getting the filament into the nozzle again.
     /// This equates extruding back \p for retracted_distance()
     /// \returns true if the sequence fully finishes
-    bool undo() const;
+    bool undo(float feedrate_mm_s) const;
 
 protected:
     // Only intended to be used from RammingSequenceArray
