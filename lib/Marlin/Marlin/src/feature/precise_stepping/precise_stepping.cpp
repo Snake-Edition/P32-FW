@@ -728,20 +728,8 @@ static int32_t counter_signed_diff(uint16_t timestamp1, uint16_t timestamp2) {
 }
 
 void PreciseStepping::step_isr() {
-#ifndef ISR_DEADLINE_TRACKING
     constexpr uint16_t min_delay = 6; // fuse isr for steps below this threshold (us)
-#else
-    constexpr uint32_t min_delay = 11; // fuse isr for steps below this threshold (us)
-#endif
     constexpr uint16_t min_reserve = 5; // minimum interval for isr re-entry (us)
-
-#ifdef ISR_DEADLINE_TRACKING
-    // in addition to checking for forward misses, check for past ones
-    static uint32_t scheduled_ts = 0;
-    if (scheduled_ts && ticks_us() > scheduled_ts + min_reserve * 2) {
-        ++step_dl_miss;
-    }
-#endif
 
     const auto timer_handle = &TimerHandle[STEP_TIMER_NUM].handle;
     const uint32_t compare = __HAL_TIM_GET_COMPARE(timer_handle, TIM_CHANNEL_1);
@@ -817,11 +805,6 @@ void PreciseStepping::step_isr() {
     } else {
         last_step_isr_delay = 0;
     }
-
-#ifdef ISR_DEADLINE_TRACKING
-    uint32_t scheduled_ticks = (((next & 0xFFFF) - __HAL_TIM_GET_COUNTER(&TimerHandle[STEP_TIMER_NUM].handle)) & 0xFFFF);
-    scheduled_ts = ticks_us() + scheduled_ticks;
-#endif
 }
 
 FORCE_INLINE move_t *append_beginning_empty_move() {
