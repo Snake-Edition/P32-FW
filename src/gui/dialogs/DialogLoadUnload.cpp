@@ -42,7 +42,6 @@ static constexpr const char *txt_tool = N_("Changing tool");
 static constexpr const char *txt_parking = N_("Parking");
 static constexpr const char *txt_unparking = N_("Unparking");
 static constexpr const char *txt_wait_temp = N_("Waiting for temperature");
-static constexpr const char *txt_prep_ram = N_("Preparing to ram");
 static constexpr const char *txt_ram = N_("Ramming");
 static constexpr const char *txt_unload = N_("Unloading");
 static constexpr const char *txt_unload_confirm = N_("Was filament unload successful?");
@@ -116,13 +115,10 @@ static constexpr EnumArray<PhasesLoadUnload, State, CountPhases<PhasesLoadUnload
     { PhasesLoadUnload::Parking_unstoppable, { txt_parking } },
     { PhasesLoadUnload::WaitingTemp_stoppable, { txt_wait_temp } },
     { PhasesLoadUnload::WaitingTemp_unstoppable, { txt_wait_temp } },
-    { PhasesLoadUnload::PreparingToRam_stoppable, { txt_prep_ram } },
-    { PhasesLoadUnload::PreparingToRam_unstoppable, { txt_prep_ram } },
     { PhasesLoadUnload::Ramming_stoppable, { txt_ram } },
     { PhasesLoadUnload::Ramming_unstoppable, { txt_ram } },
     { PhasesLoadUnload::Unloading_stoppable, { txt_unload } },
     { PhasesLoadUnload::Unloading_unstoppable, { txt_unload } },
-    { PhasesLoadUnload::RemoveFilament, { txt_unload } },
     { PhasesLoadUnload::IsFilamentUnloaded, { txt_unload_confirm, DialogLoadUnload::phaseWaitSound } },
     { PhasesLoadUnload::FilamentNotInFS, { txt_filament_not_in_fs, DialogLoadUnload::phaseAlertSound } },
     { PhasesLoadUnload::ManualUnload_continuable, { txt_manual_unload, DialogLoadUnload::phaseStopSound } },
