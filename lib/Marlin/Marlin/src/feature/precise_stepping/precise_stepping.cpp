@@ -812,7 +812,7 @@ void PreciseStepping::step_isr() {
         __HAL_TIM_SET_COMPARE(timer_handle_ptr, TIM_CHANNEL_1, adjusted_next);
     }
 
-    if (diff < min_delay) {
+    if (diff < min_reserve) {
         last_step_isr_delay = -diff + min_reserve;
     } else {
         last_step_isr_delay = 0;
