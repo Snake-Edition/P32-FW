@@ -1,3 +1,6 @@
+# Dependencies common for all tests
+link_libraries(SG14 buddy_utils)
+
 add_executable(
   gcode_basic_parser_tests
   ${CMAKE_SOURCE_DIR}/src/common/gcode/gcode_basic_parser.cpp
@@ -10,7 +13,6 @@ target_include_directories(
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/stub ${CMAKE_SOURCE_DIR}/src/common/gcode
          ${CMAKE_SOURCE_DIR}/src/common/ ${CMAKE_SOURCE_DIR}/src/lang
   )
-target_link_libraries(gcode_basic_parser_tests SG14)
 add_catch_test(gcode_basic_parser_tests)
 
 add_executable(
@@ -25,7 +27,6 @@ target_include_directories(
   gcode_parser_tests PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/stub ${CMAKE_SOURCE_DIR}/src/common/gcode
                             ${CMAKE_SOURCE_DIR}/src/common/ ${CMAKE_SOURCE_DIR}/src/lang
   )
-target_link_libraries(gcode_parser_tests SG14)
 add_catch_test(gcode_parser_tests)
 
 add_executable(
@@ -45,5 +46,4 @@ target_include_directories(
          ${CMAKE_SOURCE_DIR}/src/common/ ${CMAKE_SOURCE_DIR}/src/lang ${CMAKE_SOURCE_DIR}/include
          ${OPTIONS_INCLUDE_DIR}
   )
-target_link_libraries(gcode_parser_custom_types_tests SG14)
 add_catch_test(gcode_parser_custom_types_tests)

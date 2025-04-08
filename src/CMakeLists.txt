@@ -1,3 +1,6 @@
+# Modules are nice, so we can include them everywhere
+add_subdirectory(module)
+
 if(BOARD IN_LIST BUDDY_BOARDS)
   target_include_directories(firmware PRIVATE .)
 

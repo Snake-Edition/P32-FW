@@ -2,6 +2,9 @@
 # TEXT FIT TESTS
 #
 
+# Common dependencies
+link_libraries(SG14 buddy_utils)
+
 # Extract texts from error yaml
 file(GLOB ERROR_TEXT_EXTRACTOR ${PROJECT_ROOT_DIR}/utils/extract_error_texts.py)
 
@@ -74,8 +77,6 @@ target_compile_definitions(text_fit_tests_mini PUBLIC BOARD=1)
 add_dependencies(text_fit_tests_mini translation_hashtables)
 add_dependencies(text_fit_tests_mini error_texts_extraction)
 
-target_link_libraries(text_fit_tests_mini SG14)
-
 add_catch_test(text_fit_tests_mini)
 
 # Large display text fit test
@@ -116,7 +117,5 @@ target_compile_definitions(text_fit_tests_large PUBLIC BOARD=2)
 
 add_dependencies(text_fit_tests_large translation_hashtables)
 add_dependencies(text_fit_tests_large error_texts_extraction)
-
-target_link_libraries(text_fit_tests_large SG14)
 
 add_catch_test(text_fit_tests_large)

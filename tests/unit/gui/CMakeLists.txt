@@ -1,3 +1,6 @@
+# All these tests need buddy_utils
+link_libraries(buddy_utils)
+
 # define the test executable
 add_executable(
   rectangle_tests ${CMAKE_SOURCE_DIR}/src/guiapi/src/Rect16.cpp

@@ -241,8 +241,14 @@ target_include_directories(
   )
 
 target_link_libraries(
-  Marlin PUBLIC Arduino::Core Arduino::TMCStepper Marlin_Config error_codes marlin_server_types
-                SG14
+  Marlin
+  PUBLIC Arduino::Core
+         Arduino::TMCStepper
+         Marlin_Config
+         error_codes
+         marlin_server_types
+         SG14
+         buddy_utils
   )
 target_link_libraries(Marlin PRIVATE CppStdExtensions logging freertos)
 

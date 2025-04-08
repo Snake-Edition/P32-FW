@@ -27,6 +27,7 @@ target_link_libraries(
           Arduino::Core # config store 🤦
           SG14 # config store 🤦
           error_codes # config store 🤦
+          buddy_utils # config store 🤦
   PUBLIC log_interface
   )
 

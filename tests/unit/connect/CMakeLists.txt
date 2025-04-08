@@ -1,4 +1,7 @@
+# Common dependencies for all tests
+link_libraries(SG14 freertos_tests buddy_utils)
 add_definitions(-DPRUSA_TOOL_MAPPING)
+
 add_executable(
   connect_tests
   ${CMAKE_CURRENT_BINARY_DIR}/http_resp_automaton.cpp
@@ -111,7 +114,7 @@ target_include_directories(
           ${CMAKE_SOURCE_DIR}/lib/libbgcode/src/LibBGCode
           ${CMAKE_BINARY_DIR}/lib/libbgcode/src/
   )
-target_link_libraries(connect_tests mbedTLS bgcode_core SG14 freertos_tests)
+target_link_libraries(connect_tests mbedTLS bgcode_core)
 
 file(GLOB AUTOMATA_GENERATORS ${PROJECT_ROOT_DIR}/utils/gen-automata/*.py)
 
@@ -227,8 +230,6 @@ target_include_directories(
   )
 add_dependencies(connect_planner_tests generate-httpc-automata-tests-connect)
 
-target_link_libraries(connect_planner_tests SG14 freertos_tests)
-
 add_executable(
   connect_registration_tests
   ${CMAKE_CURRENT_BINARY_DIR}/http_resp_automaton.cpp
@@ -319,7 +320,6 @@ target_include_directories(
           ${CMAKE_BINARY_DIR}/lib/libbgcode/src/
   )
 add_dependencies(connect_registration_tests generate-httpc-automata-tests-connect)
-target_link_libraries(connect_registration_tests SG14 freertos_tests)
 
 add_catch_test(connect_tests)
 add_catch_test(connect_planner_tests)

@@ -136,6 +136,6 @@ add_custom_target(
 add_dependencies(nhttp_tests generate-http-automata-tests)
 # target_link_libraries(http_tests LwIP)
 
-target_link_libraries(nhttp_tests bgcode_core mbedTLS SG14 freertos_tests)
+target_link_libraries(nhttp_tests bgcode_core mbedTLS SG14 freertos_tests buddy_utils)
 
 add_catch_test(nhttp_tests)
