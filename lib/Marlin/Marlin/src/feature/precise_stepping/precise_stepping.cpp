@@ -728,7 +728,6 @@ static int32_t counter_signed_diff(uint16_t timestamp1, uint16_t timestamp2) {
 }
 
 void PreciseStepping::step_isr() {
-    constexpr uint16_t min_delay = 6; // fuse isr for steps below this threshold (us)
     constexpr uint16_t min_reserve = 5; // minimum interval for isr re-entry (us)
 
     const auto timer_handle = &TimerHandle[STEP_TIMER_NUM].handle;
@@ -745,7 +744,8 @@ void PreciseStepping::step_isr() {
             break;
         }
 
-        if (!left_ticks_to_next_step_event) {
+        // tick zero-interval steps together
+        while (!left_ticks_to_next_step_event) {
             left_ticks_to_next_step_event = process_one_step_event_from_queue();
         }
 
@@ -760,12 +760,8 @@ void PreciseStepping::step_isr() {
 
         // Compute the number of ticks for the next ISR.
         time_increment += ticks_to_next_step_event;
-        if (ticks_to_next_step_event <= min_delay) {
-            continue;
-        }
 
         next = compare + time_increment;
-
         const uint32_t counter = __HAL_TIM_GET_COUNTER(timer_handle);
 
         // truncate timer_remaining_time to the effective 16bit res required by
