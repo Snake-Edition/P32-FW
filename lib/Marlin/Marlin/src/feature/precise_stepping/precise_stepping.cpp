@@ -724,13 +724,7 @@ uint16_t PreciseStepping::process_one_step_event_from_queue() {
 }
 
 static int32_t counter_signed_diff(uint16_t timestamp1, uint16_t timestamp2) {
-    int32_t diff = int32_t(timestamp1) - int32_t(timestamp2);
-    if (diff > 0xFFFF / 2 - 1) {
-        diff -= 0xFFFF;
-    } else if (diff < -0xFFFF / 2) {
-        diff += 0xFFFF;
-    }
-    return diff;
+    return static_cast<int16_t>(timestamp1 - timestamp2);
 }
 
 void PreciseStepping::step_isr() {
