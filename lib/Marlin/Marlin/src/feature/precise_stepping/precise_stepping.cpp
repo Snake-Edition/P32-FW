@@ -743,7 +743,8 @@ void PreciseStepping::step_isr() {
     }
 #endif
 
-    const uint32_t compare = __HAL_TIM_GET_COMPARE(&TimerHandle[STEP_TIMER_NUM].handle, TIM_CHANNEL_1);
+    const auto timer_handle = &TimerHandle[STEP_TIMER_NUM].handle;
+    const uint32_t compare = __HAL_TIM_GET_COMPARE(timer_handle, TIM_CHANNEL_1);
 
     uint32_t next = 0;
     uint32_t time_increment = 0;
@@ -777,7 +778,7 @@ void PreciseStepping::step_isr() {
 
         next = compare + time_increment;
 
-        const uint32_t counter = __HAL_TIM_GET_COUNTER(&TimerHandle[STEP_TIMER_NUM].handle);
+        const uint32_t counter = __HAL_TIM_GET_COUNTER(timer_handle);
 
         // truncate timer_remaining_time to the effective 16bit res required by
         // counter_signed_diff() to correctly check for overflow later. However, if that happens
@@ -795,12 +796,11 @@ void PreciseStepping::step_isr() {
     // The difference of values passed into counter_signed_diff always has to be smaller
     // or equal to (UINT16_MAX / 2). Otherwise, the value returned by counter_signed_diff()
     // will be incorrect.
-    const auto timer_handle_ptr = &TimerHandle[STEP_TIMER_NUM].handle;
     uint32_t adjusted_next = next - last_step_isr_delay;
     int32_t diff;
     {
         buddy::InterruptDisabler _;
-        int32_t tim_counter = __HAL_TIM_GET_COUNTER(timer_handle_ptr);
+        int32_t tim_counter = __HAL_TIM_GET_COUNTER(timer_handle);
         diff = counter_signed_diff(adjusted_next, tim_counter);
         // We should miss the next deadline just by a couple of ticks. When the value of 'diff'
         // is a big negative number, the difference between 'adjusted_next' and 'tim_counter'
@@ -809,7 +809,7 @@ void PreciseStepping::step_isr() {
         if (diff < min_reserve) {
             adjusted_next = tim_counter + min_reserve;
         }
-        __HAL_TIM_SET_COMPARE(timer_handle_ptr, TIM_CHANNEL_1, adjusted_next);
+        __HAL_TIM_SET_COMPARE(timer_handle, TIM_CHANNEL_1, adjusted_next);
     }
 
     if (diff < min_reserve) {
