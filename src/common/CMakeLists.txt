@@ -142,10 +142,8 @@ elseif(BOARD STREQUAL "XL_DEV_KIT_XLB")
     )
 endif()
 
-if(NOT BOARD STREQUAL "DWARF" AND NOT BOARD STREQUAL "MODULARBED")
-  if(HAS_POWER_PANIC)
-    target_sources(firmware PRIVATE power_panic.cpp)
-  endif()
+if(HAS_POWER_PANIC)
+  target_sources(firmware PRIVATE power_panic.cpp)
 
   if(${POWER_PANIC_STORAGE_IS_FLASH})
     target_sources(firmware PRIVATE power_panic_storage_flash.cpp)
