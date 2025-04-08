@@ -89,21 +89,47 @@ namespace {
 
     constexpr auto pulsing = std::to_array<FrameAnimation<3>::Frame>({ { 100, 100, 100 },
         { 0, 0, 0 } });
-
+#if PRINTER_IS_PRUSA_iX()
+    constexpr auto running_left = std::to_array<FrameAnimation<3>::Frame>({ { 0, 0, 100 },
+        { 0, 100, 0 }, { 100, 0, 0 } });
+    constexpr auto running_right = std::to_array<FrameAnimation<3>::Frame>({ { 100, 0, 0 },
+        { 0, 100, 0 }, { 0, 0, 100 } });
+    constexpr auto alternating = std::to_array<FrameAnimation<3>::Frame>({ { 100, 0, 100 },
+        { 0, 100, 0 } });
+    constexpr auto pulsing_left = std::to_array<FrameAnimation<3>::Frame>({ { 100, 0, 0 },
+        { 0, 0, 0 } });
+    constexpr auto pulsing_right = std::to_array<FrameAnimation<3>::Frame>({ { 0, 0, 100 },
+        { 0, 0, 0 } });
+#endif
     constexpr EnumArray<StateAnimation, typename FrameAnimation<3>::Params, static_cast<int>(StateAnimation::_last) + 1> animations {
         { StateAnimation::Idle, { { 0, 0, 0 }, 1000, 0, 400, solid } },
-        { StateAnimation::Printing, { { 0, 150, 255 }, 1000, 0, 400, solid } },
-        { StateAnimation::Aborting, { { 0, 0, 0 }, 1000, 0, 400, solid } },
-        { StateAnimation::Finishing, { { 0, 255, 0 }, 1000, 0, 400, solid } },
-        { StateAnimation::Warning, { { 255, 255, 0 }, 1000, 0, 1000, pulsing } },
-        { StateAnimation::PowerPanic, { { 0, 0, 0 }, 1000, 0, 400, solid } },
-        { StateAnimation::PowerUp, { { 0, 255, 0 }, 1500, 0, 1500, pulsing } },
-        { StateAnimation::Error, { { 255, 0, 0 }, 500, 0, 500, pulsing } },
+            { StateAnimation::Printing, { { 0, 150, 255 }, 1000, 0, 400, solid } },
+            { StateAnimation::Aborting, { { 0, 0, 0 }, 1000, 0, 400, solid } },
+            { StateAnimation::Finishing, { { 0, 255, 0 }, 1000, 0, 400, solid } },
+            { StateAnimation::Warning, { { 255, 255, 0 }, 1000, 0, 1000, pulsing } },
+            { StateAnimation::PowerPanic, { { 0, 0, 0 }, 1000, 0, 400, solid } },
+            { StateAnimation::PowerUp, { { 0, 255, 0 }, 1500, 0, 1500, pulsing } },
+#if PRINTER_IS_PRUSA_iX()
+            { StateAnimation::Unloading, { { 0, 0, 255 }, 500, 0, 0, pulsing_right } },
+            { StateAnimation::WaitingForFilamentRemoval, { { 0, 0, 255 }, 500, 250, 0, running_left } },
+            { StateAnimation::FilamentRemoved, { { 0, 0, 255 }, 500, 0, 0, pulsing_left } },
+            { StateAnimation::Inserting, { { 0, 0, 255 }, 500, 250, 0, running_right } },
+            { StateAnimation::Loading, { { 0, 0, 255 }, 250, 0, 0, running_right } },
+            { StateAnimation::WaitingForFilamentUserRetraction, { { 0, 0, 255 }, 250, 0, 100, alternating } },
+#endif
+            { StateAnimation::Error, { { 255, 0, 0 }, 500, 0, 500, pulsing } },
     };
 
     constexpr EnumArray<AnimationType, std::span<const FrameAnimation<3>::Frame>, static_cast<int>(AnimationType::_last) + 1> custom_frames {
-        { AnimationType::Solid, solid },
-        { AnimationType::Pulsing, pulsing },
+#if PRINTER_IS_PRUSA_iX()
+        { AnimationType::RunningLeft, running_left },
+            { AnimationType::RunningRight, running_right },
+            { AnimationType::PulsingLeft, pulsing_left },
+            { AnimationType::PulsingRight, pulsing_right },
+            { AnimationType::Alternating, alternating },
+#endif
+            { AnimationType::Solid, solid },
+            { AnimationType::Pulsing, pulsing },
     };
 
 } // namespace

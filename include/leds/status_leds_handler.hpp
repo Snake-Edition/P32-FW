@@ -15,11 +15,26 @@ enum class StateAnimation : uint8_t {
     Warning,
     PowerPanic,
     PowerUp,
+#if PRINTER_IS_PRUSA_iX()
+    Unloading,
+    WaitingForFilamentRemoval,
+    FilamentRemoved,
+    Inserting,
+    Loading,
+    WaitingForFilamentUserRetraction,
+#endif
     Error,
     _last = Error,
 };
 
 enum class AnimationType : uint8_t {
+#if PRINTER_IS_PRUSA_iX()
+    RunningLeft,
+    RunningRight,
+    PulsingLeft,
+    PulsingRight,
+    Alternating,
+#endif
     Solid,
     Pulsing,
     _last = Pulsing,
