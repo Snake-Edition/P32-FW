@@ -805,7 +805,7 @@ void PreciseStepping::step_isr() {
         // We should miss the next deadline just by a couple of ticks. When the value of 'diff'
         // is a big negative number, the difference between 'adjusted_next' and 'tim_counter'
         // is bigger than (UINT16_MAX / 2), or something interrupts the stepper routine for a very long time.
-        assert(diff >= -STEPPER_ISR_MAX_TICKS && diff < STEPPER_ISR_MAX_TICKS);
+        assert(diff >= -STEPPER_ISR_MAX_TICKS && diff <= STEPPER_ISR_MAX_TICKS);
         if (diff < min_reserve) {
             adjusted_next = tim_counter + min_reserve;
         }
