@@ -26,7 +26,6 @@ MI_ActionSelect::MI_ActionSelect(uint8_t tool_ix)
     has_filament_loaded = (config_store().get_filament_type(tool_ix) != FilamentType::none);
     set_is_hidden(!is_tool_enabled(tool_ix));
     SetLabel(_(HAS_MMU2() ? N_("Tool %u Filament") : N_("Filament %u")).formatted(label_params, static_cast<unsigned>(tool_ix) + 1));
-    index_mapping.set_item_enabled<Action::unload>(has_filament_loaded);
 }
 
 void MI_ActionSelect::set_config(const ConfigItem &set) {

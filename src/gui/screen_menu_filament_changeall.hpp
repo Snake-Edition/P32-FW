@@ -29,7 +29,7 @@ private:
     static constexpr auto items = std::to_array<DynamicIndexMappingRecord<Action>>({
         Action::keep,
         { Action::change, DynamicIndexMappingType::dynamic_section },
-        { Action::unload, DynamicIndexMappingType::optional_item },
+        Action::unload,
     });
 
 private:
