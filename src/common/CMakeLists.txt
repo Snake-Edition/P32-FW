@@ -1,5 +1,7 @@
 target_include_directories(firmware PRIVATE . include)
 
+target_link_libraries(firmware PRIVATE buddy_utils)
+
 if(BOARD IN_LIST BUDDY_BOARDS)
   target_sources(
     firmware
@@ -12,7 +14,6 @@ if(BOARD IN_LIST BUDDY_BOARDS)
             crc32.cpp
             crc32_zlib.cpp
             data_exchange.cpp
-            enum_array.cpp
             error_code_mangle.cpp
             ExtInterruptHandler.cpp
             filename_type.cpp
