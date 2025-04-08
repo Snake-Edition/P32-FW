@@ -58,6 +58,9 @@ static constexpr const char *txt_is_color = N_("Is color correct?");
 #if HAS_LOADCELL()
 static constexpr const char *txt_filament_stuck = ""; // Empty here, set from the error description
 #endif
+#if HAS_NOZZLE_CLEANER()
+static constexpr const char *txt_nozzle_cleaning = N_("Cleaning nozzle");
+#endif
 #if HAS_MMU2()
 // MMU-related
 static constexpr const char *txt_mmu_engag_idler = N_("Engaging idler");
@@ -134,11 +137,19 @@ static constexpr EnumArray<PhasesLoadUnload, State, CountPhases<PhasesLoadUnload
     { PhasesLoadUnload::Ejecting_unstoppable, { txt_ejecting } },
     { PhasesLoadUnload::Loading_stoppable, { txt_loading } },
     { PhasesLoadUnload::Loading_unstoppable, { txt_loading } },
+    { PhasesLoadUnload::LoadingToGears_stoppable, { txt_inserting } },
+    { PhasesLoadUnload::LoadingToGears_unstoppable, { txt_inserting } },
     { PhasesLoadUnload::Purging_stoppable, { txt_purging } },
     { PhasesLoadUnload::Purging_unstoppable, { txt_purging } },
+    { PhasesLoadUnload::AwaitingFilament_stoppable, { txt_make_sure_inserted } },
+    { PhasesLoadUnload::AwaitingFilament_unstoppable, { txt_make_sure_inserted } },
     { PhasesLoadUnload::IsColor, { txt_is_color, DialogLoadUnload::phaseAlertSound } },
     { PhasesLoadUnload::IsColorPurge, { txt_is_color, DialogLoadUnload::phaseAlertSound } },
     { PhasesLoadUnload::Unparking, { txt_unparking } },
+#if HAS_NOZZLE_CLEANER()
+    { PhasesLoadUnload::UnloadNozzleCleaning, { txt_nozzle_cleaning } },
+    { PhasesLoadUnload::LoadNozzleCleaning, { txt_nozzle_cleaning } },
+#endif
 #if HAS_LOADCELL()
     { PhasesLoadUnload::FilamentStuck, { txt_filament_stuck, DialogLoadUnload::phaseAlertSound } },
 #endif

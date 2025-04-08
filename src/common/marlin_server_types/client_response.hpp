@@ -39,6 +39,7 @@
 #include <option/has_ceiling_clearance.h>
 #include <option/has_door_sensor_calibration.h>
 #include <option/has_auto_retract.h>
+#include <option/has_nozzle_cleaner.h>
 
 #include <option/has_hotend_type_support.h>
 #if HAS_HOTEND_TYPE_SUPPORT()
@@ -144,12 +145,19 @@ enum class PhasesLoadUnload : PhaseUnderlyingType {
     Ejecting_unstoppable,
     Loading_stoppable,
     Loading_unstoppable,
+    LoadingToGears_stoppable,
+    LoadingToGears_unstoppable,
     Purging_stoppable,
     Purging_unstoppable,
+    AwaitingFilament_stoppable,
+    AwaitingFilament_unstoppable,
     IsColor,
     IsColorPurge,
     Unparking,
-
+#if HAS_NOZZLE_CLEANER()
+    UnloadNozzleCleaning,
+    LoadNozzleCleaning,
+#endif
 #if HAS_LOADCELL()
     FilamentStuck,
 #endif
@@ -639,11 +647,19 @@ class ClientResponses {
             { PhasesLoadUnload::Ejecting_unstoppable, {} },
             { PhasesLoadUnload::Loading_stoppable, { Response::Stop } },
             { PhasesLoadUnload::Loading_unstoppable, {} },
+            { PhasesLoadUnload::LoadingToGears_stoppable, { Response::Stop } },
+            { PhasesLoadUnload::LoadingToGears_unstoppable, {} },
             { PhasesLoadUnload::Purging_stoppable, { Response::Stop } },
             { PhasesLoadUnload::Purging_unstoppable, {} },
+            { PhasesLoadUnload::AwaitingFilament_stoppable, { Response::Stop } },
+            { PhasesLoadUnload::AwaitingFilament_unstoppable, {} },
             { PhasesLoadUnload::IsColor, { Response::Yes, Response::Purge_more, Response::Retry } },
             { PhasesLoadUnload::IsColorPurge, { Response::Yes, Response::Purge_more } },
             { PhasesLoadUnload::Unparking, {} },
+#if HAS_NOZZLE_CLEANER()
+            { PhasesLoadUnload::UnloadNozzleCleaning, {} },
+            { PhasesLoadUnload::LoadNozzleCleaning, {} },
+#endif
 #if HAS_LOADCELL()
             { PhasesLoadUnload::FilamentStuck, { Response::Unload } },
 #endif

@@ -566,7 +566,7 @@ void Pause::assist_insertion_process([[maybe_unused]] Response response) {
 }
 
 void Pause::load_to_gears_process([[maybe_unused]] Response response) { // slow load
-    setPhase(is_unstoppable() ? PhasesLoadUnload::Inserting_unstoppable : PhasesLoadUnload::Inserting_stoppable, 10);
+    setPhase(is_unstoppable() ? PhasesLoadUnload::LoadingToGears_unstoppable : PhasesLoadUnload::LoadingToGears_stoppable, 10);
 
     if (do_e_move_notify_progress_coldextrude(settings.slow_load_length, FILAMENT_CHANGE_SLOW_LOAD_FEEDRATE, 10, 30, StopConditions::All) == StopConditions::SideFilamentSensorRunout) { // TODO method without param using actual phase
         runout_during_load();
@@ -790,6 +790,7 @@ void Pause::load_prime_process([[maybe_unused]] Response response) {
 
 #if HAS_NOZZLE_CLEANER()
 void Pause::load_nozzle_clean_process([[maybe_unused]] Response response) {
+    setPhase(PhasesLoadUnload::LoadNozzleCleaning);
     auto loader_result = nozzle_cleaner_gcode_loader.get_result();
 
     if (loader_result.has_value()) {
@@ -963,6 +964,7 @@ void Pause::unload_from_gears_process([[maybe_unused]] Response response) {
 
 #if HAS_NOZZLE_CLEANER()
 void Pause::unload_nozzle_clean_process([[maybe_unused]] Response response) {
+    setPhase(PhasesLoadUnload::UnloadNozzleCleaning);
     auto loader_result = nozzle_cleaner_gcode_loader.get_result();
 
     if (loader_result.has_value()) {
