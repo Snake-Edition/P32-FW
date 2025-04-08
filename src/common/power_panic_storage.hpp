@@ -182,6 +182,9 @@ struct state_t {
     // chamber_temp_off (0xffff), as optional is not guaranteed to be POD.
     uint16_t chamber_target_temp;
 #endif
+#if HAS_TEMP_HEATBREAK_CONTROL
+    std::array<uint8_t, HOTENDS> heatbreak_temperatures;
+#endif
     GCodeReaderStreamRestoreInfo gcode_stream_restore_info;
 
     static void load();

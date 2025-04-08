@@ -339,6 +339,12 @@ void resume_loop() {
             buddy::chamber().set_target_temperature(state_buf.chamber_target_temp);
         }
 #endif
+#if HAS_TEMP_HEATBREAK_CONTROL
+        for (uint8_t e = 0; e < HOTENDS; e++) {
+            thermalManager.setTargetHeatbreak(state_buf.heatbreak_temperatures[e], e);
+        }
+
+#endif
 
 #if HAS_TOOLCHANGER()
         if (state_buf.crash.crash_position.y > PrusaToolChanger::SAFE_Y_WITH_TOOL) { // Was in toolchange area
@@ -698,6 +704,11 @@ void panic_loop() {
 #endif
 #if HAS_CHAMBER_API()
         state_buf.chamber_target_temp = buddy::chamber().target_temperature().value_or(chamber_temp_off);
+#endif
+#if HAS_TEMP_HEATBREAK_CONTROL
+        for (uint8_t e = 0; e < HOTENDS; e++) {
+            state_buf.heatbreak_temperatures[e] = Temperature::degTargetHeatbreak(e);
+        }
 #endif
         state_buf.gcode_stream_restore_info = marlin_server::stream_restore_info();
 #if HAS_TOOLCHANGER()
