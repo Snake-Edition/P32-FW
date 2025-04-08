@@ -1,6 +1,6 @@
 #pragma once
 
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 
 enum class Unit : uint8_t {
     none,

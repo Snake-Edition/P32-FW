@@ -1,6 +1,6 @@
 #include "window_dlg_warning.hpp"
 
-#include <common/enum_array.hpp>
+#include <utils/enum_array.hpp>
 #include <common/find_error.hpp>
 #include <common/fsm_base_types.hpp>
 #include <option/has_dwarf.h>

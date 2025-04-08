@@ -4,7 +4,7 @@
 #include <cinttypes>
 
 #include <logging/log.hpp>
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 
 #include "prefetch_compression.hpp"
 

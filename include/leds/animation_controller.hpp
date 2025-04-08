@@ -1,6 +1,6 @@
 #pragma once
 
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 #include <leds/color.hpp>
 #include <timing.h>
 

@@ -1,7 +1,7 @@
 #include "general_response.hpp"
 
 #include <cstring>
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 
 #define R(NAME) \
     { Response::NAME, #NAME }

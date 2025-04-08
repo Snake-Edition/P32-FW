@@ -17,7 +17,7 @@
 #include "client_fsm_types.h"
 #include "general_response.hpp"
 #include "printers.h"
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 #include <option/filament_sensor.h>
 #include <option/has_attachable_accelerometer.h>
 #include <option/has_belt_tuning.h>

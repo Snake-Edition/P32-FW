@@ -5,7 +5,7 @@
 #include <array>
 #include <span>
 #include <selftest_fans_config.hpp>
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 #include <option/xl_enclosure_support.h>
 #include <option/has_xbuddy_extension.h>
 #include <pwm_utils.hpp>

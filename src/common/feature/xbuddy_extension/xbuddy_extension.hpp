@@ -4,7 +4,7 @@
 
 #include <optional>
 
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 #include <freertos/mutex.hpp>
 #include <leds/color.hpp>
 #include <temperature.hpp>

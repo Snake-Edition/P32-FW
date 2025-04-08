@@ -15,7 +15,7 @@
 #include <option/has_mmu2.h>
 #include <find_error.hpp>
 #include <filament_to_load.hpp>
-#include <common/enum_array.hpp>
+#include <utils/enum_array.hpp>
 
 RadioButtonNotice::RadioButtonNotice(window_t *parent, Rect16 rect)
     : RadioButton(parent, rect) {}

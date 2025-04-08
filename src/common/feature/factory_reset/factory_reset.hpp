@@ -2,7 +2,7 @@
 
 #include <bitset>
 
-#include <common/enum_array.hpp>
+#include <utils/enum_array.hpp>
 
 class FactoryReset {
 

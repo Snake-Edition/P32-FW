@@ -1,7 +1,7 @@
 #pragma once
 
 #include <core/types.h>
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 
 #include <option/has_wastebin.h>
 #include <buddy/unreachable.hpp>

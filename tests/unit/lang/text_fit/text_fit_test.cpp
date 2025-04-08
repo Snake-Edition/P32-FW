@@ -7,7 +7,7 @@
 #include <Rect16.h>
 #include <guiconfig/GuiDefaults.hpp>
 #include <fonts.hpp>
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 #include <text_fit_enums.hpp>
 #include <utils/string_builder.hpp>
 #include <str_utils.hpp>

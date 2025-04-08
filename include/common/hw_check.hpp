@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 #include <i18n.h>
 
 #include <inc/MarlinConfig.h>

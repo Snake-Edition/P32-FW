@@ -4,7 +4,7 @@
 #include <optional>
 #include <printers.h>
 #include <utility_extensions.hpp>
-#include "enum_array.hpp"
+#include <utils/enum_array.hpp>
 
 enum AxisEnum : uint8_t; // FWD declaration to avoid Marlin dependency in tests
 

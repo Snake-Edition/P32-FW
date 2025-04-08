@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 #include <printers.h>
 #include <i18n.h>
 #include <option/has_print_fan_type.h>

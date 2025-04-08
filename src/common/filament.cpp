@@ -9,7 +9,7 @@
 #include "i18n.h"
 #include "../../include/printers.h"
 
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 #include <option/has_loadcell.h>
 #include <utils/string_builder.hpp>
 #include <guiconfig/guiconfig.h>

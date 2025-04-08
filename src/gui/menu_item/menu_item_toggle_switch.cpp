@@ -1,6 +1,6 @@
 #include "menu_item_toggle_switch.hpp"
 
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 
 MenuItemToggleSwitch::MenuItemToggleSwitch(Tristate value, const string_view_utf8 &label)
     : IWindowMenuItem(label, 36)
