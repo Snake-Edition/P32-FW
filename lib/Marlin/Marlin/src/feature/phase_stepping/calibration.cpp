@@ -13,6 +13,7 @@
 #include <cmath>
 #include <numbers>
 #include <expected>
+#include <inplace_vector.hpp>
 
 using namespace phase_stepping;
 using namespace phase_stepping::opts;
@@ -1409,12 +1410,7 @@ static void debug_dump_param_search(int harmonic, const SweepParams &params, int
 // Analyze the motor and measure the best calibration speeds for each harmonic
 // Returns a vector of harmonic frequencies and their corresponding speeds or an
 // error message if the calibration failed.
-//
-// Note that we should return a vector<HarmonicT<float>> instead of std::array.
-// However, no heap allocation should survive function invocation in order to
-// prevent memory fragmentation. stdex::inplace_vector is not available in the
-// current firmware yet.
-static std::expected<std::array<HarmonicT<float>, opts::CORRECTION_HARMONICS>, const char *>
+static std::expected<stdext::inplace_vector<HarmonicT<float>, opts::CORRECTION_HARMONICS>, const char *>
 measure_calibration_speeds(AxisEnum axis, const AxisCalibrationConfig &calibration_config, AbortFun should_abort) {
     auto move_characteristics = characterize_speed_sweep(calibration_config);
     auto [start_speed, end_speed] = calibration_config.speed_range;
@@ -1512,9 +1508,9 @@ measure_calibration_speeds(AxisEnum axis, const AxisCalibrationConfig &calibrati
     }
 
     // Use detected peaks as the source of truth
-    std::array<HarmonicT<float>, opts::CORRECTION_HARMONICS> result;
-    for (std::size_t i = 0; i != detected_peaks.size(); i++) {
-        result[i] = { estimated_peaks[i].harmonic, estimated_peaks[i].position };
+    stdext::inplace_vector<HarmonicT<float>, opts::CORRECTION_HARMONICS> result;
+    for (const auto &peak : detected_peaks) {
+        result.emplace_back(peak.harmonic, peak.position);
     }
     return result;
 }
@@ -1908,8 +1904,7 @@ phase_stepping::calibrate_axis(AxisEnum axis, CalibrateAxisHooks &hooks) {
     // We first calibrate even harmonics, then odd harmonics
     for (int parity = 0; parity < 2; parity++) {
         for (const auto &harmonic_speed : *speed_analysis) {
-            // Ignore unpopulated harmonics
-            if (harmonic_speed.harmonic == 0 || harmonic_speed.harmonic % 2 != parity) {
+            if (harmonic_speed.harmonic % 2 != parity) {
                 continue;
             }
 
