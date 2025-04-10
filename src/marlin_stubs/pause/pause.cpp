@@ -506,7 +506,11 @@ void Pause::await_filament_process([[maybe_unused]] Response response) {
         RestoreTemp();
 
         mapi::park_move_with_conditional_home(mapi::park_positions[mapi::ParkPosition::load], mapi::ZAction::no_move);
-        set_timed(LoadState::assist_insertion);
+        if (settings.extruder_mmu_rework) {
+            set_timed(LoadState::assist_insertion);
+        } else {
+            set(LoadState::filament_push_ask);
+        }
         return;
     }
 }

@@ -197,6 +197,11 @@ void FilamentSensors::reconfigure_sensors_if_needed(bool force) {
         If the autoload would be triggered by extruder fs it could mean that user is trying to insert filament while manipulating with head itself, an action that could cause harm.
         This can change in the future but needs some thought on printer's behaviour in such case (e.g. filament is already in extruder, there is no need for parking movement) */
     ls[LFS::autoload] = side_fs ?: nullptr;
+#elif PRINTER_IS_PRUSA_COREONE()
+    ls[LFS::autoload] = side_fs ?: extruder_fs;
+    if (has_mmu) {
+        ls[LFS::autoload] = nullptr;
+    }
 #else
     ls[LFS::autoload] = has_mmu ? nullptr : extruder_fs;
 #endif
