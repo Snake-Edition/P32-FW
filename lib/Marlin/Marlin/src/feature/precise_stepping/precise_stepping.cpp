@@ -745,6 +745,7 @@ void PreciseStepping::step_isr() {
 
     uint32_t next = 0;
     uint32_t time_increment = 0;
+    uint32_t max_ticks = STEPPER_ISR_MAX_TICKS;
     for (;;) {
         if (stop_pending)
             [[unlikely]] {
@@ -764,15 +765,15 @@ void PreciseStepping::step_isr() {
 
         // limit the interval of the next tick
         uint32_t ticks_to_next_isr = left_ticks_to_next_step_event + time_increment;
-        if (ticks_to_next_isr <= STEPPER_ISR_MAX_TICKS) {
+        if (ticks_to_next_isr <= max_ticks) {
             // the next iteration will process the event
             time_increment += left_ticks_to_next_step_event;
             left_ticks_to_next_step_event = 0;
         } else {
             // the next iteration just advances the timer
-            left_ticks_to_next_step_event = ticks_to_next_isr - STEPPER_ISR_MAX_TICKS;
-            time_increment += STEPPER_ISR_MAX_TICKS;
-            ticks_to_next_isr = STEPPER_ISR_MAX_TICKS;
+            left_ticks_to_next_step_event = ticks_to_next_isr - max_ticks;
+            time_increment += max_ticks;
+            ticks_to_next_isr = max_ticks;
         }
 
         // actually plan the next deadline and check if we have enough time reserve
@@ -784,6 +785,9 @@ void PreciseStepping::step_isr() {
 
         // not enough reserve: iterate again to process the next event immediately
         ++steps_merged;
+
+        // adjust the deadline limit based on the real time elapsed to avoid rescheduling
+        max_ticks = STEPPER_ISR_MAX_TICKS + counter_signed_diff(counter, compare);
     }
 
     // keep some stats for debugging purposes
