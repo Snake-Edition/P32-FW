@@ -241,7 +241,8 @@ def writeLutCmd(axis: str, dir: str, port: str, filepath: str) -> None:
 
 def store_or_show_plot(show, output, name, plot):
     if output is not None:
-        Path(output).mkdir(parents=True, exist_ok=True)
+        output = Path(output)
+        output.mkdir(parents=True, exist_ok=True)
         plot.write_html(output / f"{name}.html")
     if show:
         plot.show()
