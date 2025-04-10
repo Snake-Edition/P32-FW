@@ -10,6 +10,7 @@
 #include <http/websocket.hpp>
 
 #include <logging/log.hpp>
+#include <str_utils.hpp>
 
 #include <atomic>
 #include <cassert>
