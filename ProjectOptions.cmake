@@ -709,12 +709,8 @@ endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(DEBUG YES)
-  define_boolean_option(NETWORKING_BENCHMARK_ENABLED YES)
-  define_boolean_option(HEAP_INSTRUMENTATION_ENABLED YES)
 else()
   set(DEBUG NO)
-  define_boolean_option(NETWORKING_BENCHMARK_ENABLED NO)
-  define_boolean_option(HEAP_INSTRUMENTATION_ENABLED NO)
 endif()
 
 # define enabled features
@@ -733,6 +729,18 @@ else()
   set(BOOTLOADER_UPDATE NO)
 endif()
 define_boolean_option(BOOTLOADER_UPDATE ${BOOTLOADER_UPDATE})
+
+set(NETWORKING_BENCHMARK_ENABLED
+    ${DEBUG}
+    CACHE BOOL "Enable network benchmarking instrumentation"
+    )
+define_boolean_option(NETWORKING_BENCHMARK_ENABLED ${NETWORKING_BENCHMARK_ENABLED})
+
+set(HEAP_INSTRUMENTATION_ENABLED
+    ${DEBUG}
+    CACHE BOOL "Enable heap profiling instrumentation"
+    )
+define_boolean_option(HEAP_INSTRUMENTATION_ENABLED ${HEAP_INSTRUMENTATION_ENABLED})
 
 set(DEVELOPER_MODE
     "OFF"
