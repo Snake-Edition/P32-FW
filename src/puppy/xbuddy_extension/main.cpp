@@ -4,6 +4,9 @@
 #include "task.h"
 #include <freertos/timing.hpp>
 
+// This magical incantation is required for fw_descriptor integration in cmake to work.
+[[maybe_unused]] __attribute__((section(".fw_descriptor"), used)) const std::byte fw_descriptor[48] {};
+
 // The logic is inverted here. We explicitly mark data we don't want to be
 // shared and make all the other are shared between tasks.
 #define NON_SHARED_DATA __attribute__((section("non_shared_data")))
