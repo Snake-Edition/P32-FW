@@ -1679,7 +1679,8 @@ static std::expected<float, const char *> find_approx_mag(AxisEnum axis,
 // function returns the magnitude of the harmonic or an error message if the
 // estimation failed.
 [[maybe_unused]] static std::expected<float, const char *> find_approx_mag_fast(AxisEnum axis,
-    const AxisCalibrationConfig &calib_config, int harmonic, float nominal_calib_speed) {
+    const AxisCalibrationConfig &calib_config, int harmonic, float nominal_calib_speed,
+    AbortFun should_abort) {
     // Magnitude is estimated by performing simultaneous phase sweeps with
     // magnitude sweep. We don't hit the precise minimum, but we can get a good
     // approximation with just a single movement.
@@ -1715,6 +1716,7 @@ static std::expected<float, const char *> find_approx_mag(AxisEnum axis,
             static_cast<unsigned>(annotation.accel_error), annotation.movement_ok);
         return std::unexpected("Param sweep movement failed");
     }
+    ABORT_CHECK();
     auto signal = locate_signal(annotation, samples);
     auto analysis = motor_harmonic_dft_sweep(signal, annotation.sampling_freq,
         speed, get_motor_steps(axis), harmonic, calib_config.analysis_window_periods, 1);
