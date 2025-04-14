@@ -587,7 +587,12 @@ void Pause::load_to_gears_process([[maybe_unused]] Response response) { // slow 
     }
 
     // if filament is not present we want to break and not set loaded filament
-    set(LoadState::move_to_purge);
+    if (load_type == LoadType::load_to_gears) {
+        RestoreTemp();
+        set(LoadState::_finished);
+    } else {
+        set(LoadState::move_to_purge);
+    }
     handle_filament_removal(LoadState::filament_push_ask);
 }
 
@@ -596,11 +601,7 @@ void Pause::move_to_purge_process([[maybe_unused]] Response response) {
     if constexpr (option::has_side_fsensor) {
         mapi::park_move_with_conditional_home(mapi::park_positions[mapi::ParkPosition::purge], mapi::ZAction::no_move);
     }
-    if (load_type == LoadType::load_to_gears) {
-        set(LoadState::_finished);
-    } else {
-        set(LoadState::wait_temp);
-    }
+    set(LoadState::wait_temp);
 }
 
 void Pause::wait_temp_process([[maybe_unused]] Response response) {
