@@ -14,6 +14,8 @@ static_assert(BOARD_IS_BUDDY());
 void uart_for_tmc_idle_isr() {
     uart_for_tmc.IdleISR();
 }
+// ADC for ADC watchdog
+TRACED_ISR(ADC_IRQHandler, HAL_ADC_IRQHandler, &hadc1);
 
 // SPI for flash memory
 TRACED_ISR(SPI3_IRQHandler, HAL_SPI_IRQHandler, &SPI_HANDLE_FOR(flash));
