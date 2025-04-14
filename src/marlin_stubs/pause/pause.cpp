@@ -503,8 +503,6 @@ void Pause::await_filament_process([[maybe_unused]] Response response) {
 
     // Either side sensor not working or it has filament, go to loading
     if (!FSensors_instance().no_filament_surely(LogicalFilamentSensor::side)) {
-        RestoreTemp();
-
         mapi::park_move_with_conditional_home(mapi::park_positions[mapi::ParkPosition::load], mapi::ZAction::no_move);
         if (settings.extruder_mmu_rework) {
             set_timed(LoadState::assist_insertion);
@@ -588,7 +586,6 @@ void Pause::load_to_gears_process([[maybe_unused]] Response response) { // slow 
 
     // if filament is not present we want to break and not set loaded filament
     if (load_type == LoadType::load_to_gears) {
-        RestoreTemp();
         set(LoadState::_finished);
     } else {
         set(LoadState::move_to_purge);
@@ -597,7 +594,6 @@ void Pause::load_to_gears_process([[maybe_unused]] Response response) { // slow 
 }
 
 void Pause::move_to_purge_process([[maybe_unused]] Response response) {
-    RestoreTemp();
     if constexpr (option::has_side_fsensor) {
         mapi::park_move_with_conditional_home(mapi::park_positions[mapi::ParkPosition::purge], mapi::ZAction::no_move);
     }
@@ -605,6 +601,7 @@ void Pause::move_to_purge_process([[maybe_unused]] Response response) {
 }
 
 void Pause::wait_temp_process([[maybe_unused]] Response response) {
+    RestoreTemp();
     if (ensureSafeTemperatureNotifyProgress(30, 50)) { // blocking -> checks for user stop
         if (load_type == LoadType::load_purge) {
             set(LoadState::purge);
