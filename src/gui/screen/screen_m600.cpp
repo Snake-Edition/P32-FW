@@ -6,18 +6,25 @@
 #include <screen_menu.hpp>
 #include <img_resources.hpp>
 #include <timing.h>
+#include <config_store/store_instance.hpp>
 #include <utils/string_builder.hpp>
 
 namespace {
 
 bool enqueued = false; // Used to avoid multiple M600 enqueue
 
-bool confirm_fil_change() {
-    return (MsgBoxQuestion(_("Perform filament change now?"), Responses_YesNo) == Response::Yes);
-};
+inline bool filament_change_dialog(uint8_t extruder) {
+    StringViewUtf8Parameters<8> params;
+    return MsgBoxQuestion(_("Change filament now?\n"
+                            "Use same filament type as currently loaded.\n"
+                            "Current filament type: %s")
+                              .formatted(params, config_store().get_filament_type(extruder).parameters().name.data()),
+               Responses_YesNo)
+        == Response::Yes;
+}
 
 bool inject(const uint8_t tool) {
-    if (!confirm_fil_change()) {
+    if (!filament_change_dialog(tool)) {
         return false;
     }
     marlin_client::inject(GCodeLiteral("M600 P T%.0f", static_cast<float>(tool)));
