@@ -6,7 +6,7 @@
 #include <regex>
 #include <string_view>
 #include <optional>
-#include "filters/median_filter.hpp"
+#include <filters/median_filter.hpp>
 
 using TimeStamp = std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>;
 using DataPoint = std::pair<TimeStamp, uint32_t>;

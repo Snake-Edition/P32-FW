@@ -28,7 +28,7 @@ target_include_directories(
           ${CMAKE_SOURCE_DIR}/include
           ${CMAKE_SOURCE_DIR}/tests/unit/connect/mock
   )
-target_link_libraries(common_http_tests mbedTLS)
+target_link_libraries(common_http_tests mbedTLS buddy_utils)
 
 file(GLOB AUTOMATA_GENERATORS ${PROJECT_ROOT_DIR}/utils/gen-automata/*.py)
 

@@ -63,11 +63,9 @@ target_include_directories(
 add_executable(algorithm_scale_tests algorithm_scale_tests.cpp)
 target_include_directories(algorithm_scale_tests PUBLIC ${CMAKE_SOURCE_DIR}/src/common)
 
-add_executable(
-  median_tests ${CMAKE_CURRENT_SOURCE_DIR}/median_test.cpp
-               ${CMAKE_SOURCE_DIR}/src/common/filters/median_filter.cpp
-  )
+add_executable(median_tests ${CMAKE_CURRENT_SOURCE_DIR}/median_test.cpp)
 target_include_directories(median_tests PUBLIC ${CMAKE_SOURCE_DIR}/src/common)
+target_link_libraries(median_tests buddy_utils)
 
 add_executable(
   otp_tests ${CMAKE_CURRENT_SOURCE_DIR}/otp_test.cpp ${CMAKE_SOURCE_DIR}/src/common/otp.cpp

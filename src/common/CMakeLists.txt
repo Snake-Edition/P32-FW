@@ -225,7 +225,6 @@ if(HAS_HOTEND_TYPE_SUPPORT)
   target_sources(firmware PRIVATE hotend_type.cpp)
 endif()
 
-add_subdirectory(filters)
 add_subdirectory(fanctl)
 add_subdirectory(mapi)
 add_subdirectory(marlin_server_types)
