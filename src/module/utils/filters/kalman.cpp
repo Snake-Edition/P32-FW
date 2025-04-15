@@ -1,21 +1,18 @@
 #include "kalman.hpp"
 #include "math.h"
 
-KalmanFilter::KalmanFilter(const double error_estimate, const double error_measure, const double error_weight, predictor_t predictor)
-    : error_estimate(error_estimate)
-    , error_measure(error_measure)
-    , current_estimate(0)
-    , last_estimate(0)
-    , error_weight(error_weight)
-    , predictor(predictor) {}
+void KalmanFilter::reset(double initial_error_estimate, double initial_value) {
+    error_estimate = initial_error_estimate;
+    current_estimate = initial_value;
+}
 
-double KalmanFilter::filter(const double value, const uint32_t now_us) {
-    if (predictor) {
-        last_estimate = predictor(last_estimate, now_us);
-    }
+double KalmanFilter::filter(double value, double prediction) {
     const double gain = error_estimate / (error_estimate + error_measure);
-    current_estimate = last_estimate + gain * (value - last_estimate);
-    error_estimate = (1.0 - gain) * error_estimate + fabs(last_estimate - current_estimate) * error_weight;
-    last_estimate = current_estimate;
+    current_estimate = prediction + gain * (value - prediction);
+    error_estimate = (1.0 - gain) * error_estimate + fabs(prediction - current_estimate) * error_weight;
     return current_estimate;
+}
+
+double KalmanFilterCallback::filter(double value, uint32_t now_us) {
+    return KalmanFilter::filter(value, predictor(current_estimate, now_us));
 }
