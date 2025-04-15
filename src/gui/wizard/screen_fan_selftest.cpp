@@ -58,6 +58,9 @@ static constexpr const char *en_text_print_fan = N_("Print fan");
 static constexpr const char *en_text_fans_switched = N_("Switched fans");
 #if HAS_CHAMBER_API()
 static constexpr const char *en_text_enclosure_fan = N_("Enclosure fan");
+static constexpr const char *en_text_cooling_fans = N_("Cooling fans");
+static constexpr const char *en_text_filtration_fan = N_("Filtration fan");
+
 #endif
 
 #if PRINTER_IS_PRUSA_MK3_5()
@@ -232,8 +235,10 @@ namespace frame {
                 static_assert(HAS_CHAMBER_FILTRATION_API());
                 if (xbuddy_extension().using_filtration_fan_instead_of_cooling_fans()) {
                     enclosure_fan_count = 1;
+                    enclosure_label.SetText(_(en_text_filtration_fan));
                 } else {
                     enclosure_fan_count = 2;
+                    enclosure_label.SetText(_(en_text_cooling_fans));
                 }
                 break;
     #endif
