@@ -100,6 +100,10 @@ static void M600_manual(const GCodeParser2 &);
  * - `P` - If set, the parameter 'T' is interpreted as a physical tool (tool mapping is not applied)
  *
  *  Default values are used for omitted arguments.
+ *
+ *  It needs to be noted that M600's S"filament" parameter is currently not actually setting the target temperature for the desired filament type.
+ *  In fact M600 never sets a target temperature for filament change (only when picking and inactive toolhead on a printer with toolchanger).
+ *  Temperature that is currently set will be used for both unloading and loading.
  */
 
 void GcodeSuite::M600() {
@@ -223,10 +227,10 @@ void M600_execute(xyz_pos_t park_point, uint8_t target_extruder, xyze_float_t re
         resume_point = logical_resume.asNative(); // Convert original resume point to the new native coordinates
         resume_point = prusa_toolchanger.get_tool_dock_position(target_extruder); // Sets only x, y coordinates
 
-        // Preheat the tool for filament change -> normally we don't do that for M600. But the slicer team wanted this.
+        // Sets the target temperature based on the current filament type
+        // M600 generally should not set target temperature, this is an exception for specific scenario where user wants to change filament on currently unused toolhead during print
         const auto filament_data = config_store().get_filament_type(target_extruder).parameters();
         Temperature::setTargetHotend(filament_data.nozzle_temperature, target_extruder);
-        Temperature::wait_for_hotend(target_extruder);
     }
 #endif
     park_point.z += current_position.z;
