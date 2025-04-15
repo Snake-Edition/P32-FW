@@ -279,6 +279,8 @@ bool Pause::should_park() {
         // autoload on printers with side_fs, should behave similary to iX autoload
     case Pause::LoadType::load:
         return option::has_human_interactions || !FSensors_instance().has_filament_surely(LogicalFilamentSensor::extruder);
+    case Pause::LoadType::unload_from_gears:
+        return false;
     default:
         return true;
     }
@@ -568,8 +570,15 @@ void Pause::assist_insertion_process([[maybe_unused]] Response response) {
 void Pause::load_to_gears_process([[maybe_unused]] Response response) { // slow load
     setPhase(is_unstoppable() ? PhasesLoadUnload::LoadingToGears_unstoppable : PhasesLoadUnload::LoadingToGears_stoppable, 10);
 
-    if (do_e_move_notify_progress_coldextrude(settings.slow_load_length, FILAMENT_CHANGE_SLOW_LOAD_FEEDRATE, 10, 30, StopConditions::All) == StopConditions::SideFilamentSensorRunout) { // TODO method without param using actual phase
+    const auto result = do_e_move_notify_progress_coldextrude(settings.slow_load_length, FILAMENT_CHANGE_SLOW_LOAD_FEEDRATE, 10, 30, StopConditions::All);
+
+    if (result == StopConditions::SideFilamentSensorRunout) { // TODO method without param using actual phase
         runout_during_load();
+        return;
+    }
+
+    if (result == StopConditions::UserStopped) {
+        set(LoadState::stop);
         return;
     }
 
@@ -1424,7 +1433,6 @@ bool Pause::check_user_stop(Response response) {
     if (response != Response::Stop) {
         return false;
     }
-
     set(LoadState::stop);
     return true;
 }
