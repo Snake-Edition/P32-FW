@@ -951,6 +951,9 @@ void MI_LOG_TO_TXT::OnChange(size_t) {
         return;
     }
 
+    log_info(Marlin, "Printer: %s", PrinterModelInfo::current().id_str);
+    log_info(Marlin, "Version: %s", version::project_version_full);
+
     MsgBoxInfo(_("The printer will now save all logs to file until restart.\n\nLog file: %s").formatted(fmt_buf, filename), Responses_Ok);
     MsgBoxWarning(_("Turn the logging off before disconnecting the USB drive, or you risk damaging the filesystem!"), Responses_Ok);
 }
