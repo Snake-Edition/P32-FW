@@ -32,14 +32,7 @@
 #include <stdlib.h>
 
 void stop();
-
-void idle(
-    bool waiting
-  #if ENABLED(ADVANCED_PAUSE_FEATURE)
-    , bool no_stepper_sleep = false  // pass true to keep steppers from disabling on timeout
-  #endif
-);
-
+void idle(bool waiting, bool no_stepper_sleep=false);
 void manage_inactivity(const bool ignore_stepper_queue=false);
 
 #if ENABLED(G38_PROBE_TARGET)

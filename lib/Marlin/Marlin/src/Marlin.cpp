@@ -610,13 +610,10 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
  *   @par @c true Caller is waiting for some event, release CPU to other tasks.
  *   @par @c false Caller has more data to process, do not release CPU.
  * @param no_stepper_sleep
+ *   @par @c true Keep steppers from disabling on timeout
+ *   @par @c false Allow steppers to release (and lose position) on timeout
  */
-void idle(
-    bool waiting
-  #if ENABLED(ADVANCED_PAUSE_FEATURE)
-    , bool no_stepper_sleep/*=false*/
-  #endif
-) {
+void idle(bool waiting, bool no_stepper_sleep/*=false*/) {
   #if HAS_PLANNER()
     endstops.event_handler();
   #endif
@@ -629,11 +626,7 @@ void idle(
     gcode.host_keepalive();
   #endif
 
-  manage_inactivity(
-    #if ENABLED(ADVANCED_PAUSE_FEATURE)
-      no_stepper_sleep
-    #endif
-  );
+  manage_inactivity(no_stepper_sleep);
 
   thermalManager.manage_heater();
 
