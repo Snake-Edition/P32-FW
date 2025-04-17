@@ -1008,7 +1008,7 @@
             #if HAS_HOTEND_OFFSET
             start_pos -= hotend_currently_applied_offset;
             #endif
-            do_blocking_move_to(start_pos.x, start_pos.y, start_pos.z);
+            do_blocking_move_to(start_pos.x, start_pos.y, start_pos.z, NOZZLE_PARK_XY_FEEDRATE);
             is_initial_probe = false;
             safe_delay(Z_FIRST_PROBE_DELAY); // dampen the system
           }
