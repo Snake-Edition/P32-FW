@@ -64,7 +64,7 @@ public:
      * @param   item Item to be added to the queue
      * @return  true if the operation was successful
      */
-    bool enqueue(T &&item) {
+    [[nodiscard]] bool enqueue(T &&item) {
         if (isFull()) {
             return false;
         }

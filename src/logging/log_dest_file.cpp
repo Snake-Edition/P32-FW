@@ -81,7 +81,7 @@ static void file_log_write(AsyncJobExecutionControl &) {
 static void flush_chunk() {
     assert(data->wip_chunk.size <= data->wip_chunk.data.size());
 
-    data->buffer.enqueue(data->wip_chunk);
+    (void)data->buffer.enqueue(data->wip_chunk);
     data->wip_chunk.size = 0;
 }
 
