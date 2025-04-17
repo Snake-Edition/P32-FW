@@ -254,12 +254,12 @@ def install_dependency(dependency):
 def install_openocd_config_template():
     debug_dir = project_root_dir / 'utils' / 'debug'
     os.makedirs(debug_dir)
-    custom_config_path = debug_dir / '10_custom_config_overrides.cfg'
+    custom_config_path = debug_dir / 'device_setup_overrides.cfg'
     if not custom_config_path.exists():
         print(
             f'Installing openocd user-config override to {custom_config_path}')
         custom_config_path.write_text(
-            "# This file is meant for custom configuration overrides.\n# See 10_custom_config_defaults.cfg for info and copy one proc section here.\n"
+            "# This file is meant for custom configuration overrides.\n# See 10_device_setup.cfg for info and copy one proc section here.\n"
         )
 
 
