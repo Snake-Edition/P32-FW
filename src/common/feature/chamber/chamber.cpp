@@ -10,6 +10,11 @@
     #include <hw/xl/xl_enclosure.hpp>
 #endif
 
+#if PRINTER_IS_PRUSA_COREONE()
+    #include <marlin_server.hpp>
+    #include <config_store/store_instance.hpp>
+#endif
+
 #if HAS_XBUDDY_EXTENSION()
     #include <feature/xbuddy_extension/xbuddy_extension.hpp>
 #endif
@@ -61,8 +66,8 @@ void Chamber::step() {
     }
 }
 
-Chamber::Capabilities Chamber::capabilities_nolock(Chamber::Backend backend) const {
-    switch (backend) {
+Chamber::Capabilities Chamber::capabilities_nolock() const {
+    switch (backend()) {
 
 #if XL_ENCLOSURE_SUPPORT()
     case Backend::xl_enclosure:
@@ -75,11 +80,8 @@ Chamber::Capabilities Chamber::capabilities_nolock(Chamber::Backend backend) con
     case Backend::xbuddy_extension:
         return Capabilities {
             .temperature_reporting = true,
-
-            // The chamber can effectively control temperature only if the fans are in auto mode
-                .cooling = xbuddy_extension().has_fan1_fan2_auto_control(),
-
-            // But always show temperature control menu items, even if disabled
+            .cooling = xbuddy_extension().can_auto_cool(),
+            // Always show temperature control menu items, even if auto cooling is disabled
                 .always_show_temperature_control = true,
 
     #if PRINTER_IS_PRUSA_COREONE()
@@ -97,7 +99,7 @@ Chamber::Capabilities Chamber::capabilities_nolock(Chamber::Backend backend) con
 Chamber::Capabilities Chamber::capabilities() const {
     std::lock_guard _lg(mutex_);
 
-    return capabilities_nolock(backend());
+    return capabilities_nolock();
 }
 
 Chamber::Backend Chamber::backend() const {
@@ -145,21 +147,19 @@ std::optional<Temperature> Chamber::target_temperature() const {
     return target_temperature_;
 }
 
-void Chamber::set_target_temperature(std::optional<Temperature> target) {
+std::optional<Temperature> Chamber::set_target_temperature(std::optional<Temperature> target) {
     std::lock_guard _lg(mutex_);
     target_temperature_ = target;
 
-    const auto max_temp = capabilities_nolock(backend()).max_temp;
+    const auto max_temp = capabilities_nolock().max_temp;
     if (max_temp.has_value() && target_temperature_.has_value()) {
         target_temperature_ = std::min(*target_temperature_, *max_temp);
     }
 
     METRIC_DEF(metric_chamber_ttemp, "chamber_ttemp", METRIC_VALUE_FLOAT, 1000, METRIC_DISABLED);
-    if (target_temperature_.has_value()) {
-        metric_record_float(&metric_chamber_ttemp, target_temperature_.value());
-    } else {
-        metric_record_float(&metric_chamber_ttemp, NAN);
-    }
+    metric_record_float(&metric_chamber_ttemp, target_temperature_.value_or(NAN));
+
+    return target_temperature_;
 }
 
 void Chamber::reset() {
@@ -167,8 +167,26 @@ void Chamber::reset() {
     target_temperature_ = std::nullopt;
 
 #if HAS_XBUDDY_EXTENSION()
-    xbuddy_extension().set_fan1_fan2_auto_control();
+    xbuddy_extension().set_fan_target_pwm(XBuddyExtension::Fan::cooling_fan_1, pwm_auto);
 #endif
 }
+
+#if PRINTER_IS_PRUSA_COREONE()
+void Chamber::check_vent_state() {
+    const auto fil_target = config_store().get_filament_type(0).parameters().chamber_target_temperature;
+    constexpr uint8_t temp_limit = 45; // Limit for closed grills is chamber max temperature of PETG
+
+    // Don't show any vent dialog if filament doesn't support chamber temperature control
+    if (fil_target.has_value()) {
+        if (fil_target.value() > temp_limit && vent_state_ != Chamber::VentState::closed) {
+            marlin_server::set_warning(WarningType::CloseChamberVents);
+            vent_state_ = Chamber::VentState::closed;
+        } else if (fil_target.value() <= temp_limit && vent_state_ != Chamber::VentState::open) {
+            marlin_server::set_warning(WarningType::OpenChamberVents);
+            vent_state_ = Chamber::VentState::open;
+        }
+    }
+}
+#endif
 
 } // namespace buddy

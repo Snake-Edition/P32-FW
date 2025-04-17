@@ -8,6 +8,8 @@
 
 #include <str_utils.hpp>
 
+#include <option/has_chamber_api.h>
+
 // !!! DO NOT CHANGE - this is used in config store
 /// Maximum length of a filament name, including the terminating zero
 constexpr size_t filament_name_buffer_size = 8;
@@ -28,35 +30,58 @@ constexpr size_t user_filament_type_count = 8;
 /// Hardcoded to prevent dependency pollution
 constexpr size_t adhoc_filament_type_count = 6;
 
-// !!! DO NOT CHANGE - this is used in config store
-struct __attribute__((packed)) FilamentTypeParameters {
+struct FilamentTypeParameters {
 
 public:
+    using Name = std::array<char, filament_name_buffer_size>;
+
     /// Name of the filament (zero terminated).
-    /// Keeping this as not array for ease of assignment and reading using snprintf
-    char name[filament_name_buffer_size] = "";
+    Name name { '\0' };
 
     /// Nozzle temperature for the filament, in degrees Celsius
-    uint16_t nozzle_temperature;
+    uint16_t nozzle_temperature = 215;
 
     /// Nozzle preheat temperature for the filament, in degrees Celsius
     uint16_t nozzle_preheat_temperature = 170;
 
     /// Bed temperature for the filament, in degrees Celsius
-    uint8_t heatbed_temperature;
+    uint16_t heatbed_temperature = 60;
+
+#if HAS_CHAMBER_API()
+    /// Minimum temperature at which it's recommended to print this material
+    std::optional<uint8_t> chamber_min_temperature = std::nullopt;
+
+    /// Maximum temperature at which it's recommended to print this material
+    std::optional<uint8_t> chamber_max_temperature = std::nullopt;
+
+    /// Ideal chamber temperature we would like to keep during printing
+    std::optional<uint8_t> chamber_target_temperature = std::nullopt;
 
     /// Whether the filament requires filtration (used in XL enclosure)
-    bool requires_filtration : 1 = false;
+    bool requires_filtration = false;
+#endif
 
     /// Whether the filament is abrasive and requires hardened (abrasive-resistant) nozzle
-    bool is_abrasive : 1 = false;
+    bool is_abrasive = false;
 
-    // Keeping the remaining bits of the bitfield unused, but zero initizliazed, for future proofing
-    uint8_t _unused : 6 = 0;
+    /// Whether the filament is flexible - might require special care in some cases
+    bool is_flexible = false;
 
 public:
     constexpr bool operator==(const FilamentTypeParameters &) const = default;
     constexpr bool operator!=(const FilamentTypeParameters &) const = default;
+
+    consteval static Name name_from_str(const char *str) {
+        Name result;
+
+        // This is a consteval function, strlcpy doesn't work
+        for (auto r = result.begin(), re = result.end(); r != re && *str; r++, str++) {
+            *r = *str;
+        }
+
+        result[result.size() - 1] = '\0';
+        return result;
+    }
 };
 
 // !!! DO NOT REORDER, DO NOT CHANGE - this is used in config store

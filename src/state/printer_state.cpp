@@ -9,6 +9,9 @@
 #include <option/xl_enclosure_support.h>
 #include <option/has_uneven_bed_prompt.h>
 #include <config_store/store_instance.hpp>
+#include <option/has_chamber_filtration_api.h>
+#include <option/has_door_sensor_calibration.h>
+#include <printers.h>
 
 using namespace marlin_server;
 using namespace printer_state;
@@ -47,7 +50,7 @@ optional<ErrCode> crash_recovery_attention(const PhasesCrashRecovery &phase) {
 optional<ErrCode> attention_while_printpreview(const PhasesPrintPreview preview_phases) {
     switch (preview_phases) {
     case PhasesPrintPreview::unfinished_selftest:
-        return ErrCode::CONNECT_PRINT_PREVIEW_UNFINISHED_SELFTEST;
+        return ErrCode::CONNECT_UNFINISHED_SELFTEST;
     case PhasesPrintPreview::new_firmware_available:
         return ErrCode::CONNECT_PRINT_PREVIEW_NEW_FW;
     case PhasesPrintPreview::wrong_printer:
@@ -80,6 +83,7 @@ bool is_warning_attention(const fsm::BaseData &data) {
     switch (code) {
     // Note: We don't consider these attention, so just note the dialog code and slap
     // it on whatever state we decide, that the printer is in later.
+    case ErrCode::ERR_MECHANICAL_FILAMENT_SENSORS_DISABLED:
     case ErrCode::CONNECT_NOZZLE_TIMEOUT:
     case ErrCode::CONNECT_HEATERS_TIMEOUT:
 #if _DEBUG
@@ -200,6 +204,9 @@ DeviceState get_state(bool ready) {
 #endif
 #if HAS_BELT_TUNING()
     case ClientFSM::BeltTuning:
+#endif
+#if HAS_DOOR_SENSOR_CALIBRATION()
+    case ClientFSM::DoorSensorCalibration:
 #endif
     case ClientFSM::Serial_printing:
         // FIXME: BFW-3893 Sadly there is no way (without saving state in this function)
@@ -389,6 +396,9 @@ StateWithDialog get_state_with_dialog(bool ready) {
 #if HAS_BELT_TUNING()
     case ClientFSM::BeltTuning:
 #endif
+#if HAS_DOOR_SENSOR_CALIBRATION()
+    case ClientFSM::DoorSensorCalibration:
+#endif
     case ClientFSM::Preheat:
         // TODO: On some future sunny day, we want to cover all the selftests
         // and ESP flashing with actual dialogs too; currently we only show a
@@ -507,6 +517,18 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
     case WarningType::ProbingFailed:
         return ErrCode::CONNECT_PROBING_FAILED;
 #endif
+    case WarningType::FilamentSensorStuckHelp:
+        return ErrCode::ERR_MECHANICAL_FILAMENT_SENSOR_STUCK_HELP;
+#if HAS_MMU2()
+    case WarningType::FilamentSensorStuckHelpMMU:
+        return ErrCode::ERR_MECHANICAL_FILAMENT_SENSOR_STUCK_HELP_MMU;
+    case WarningType::MaintenanceWarningFails:
+        return ErrCode::ERR_MECHANICAL_MAINTENANCE_WARNING_FAILS;
+    case WarningType::MaintenanceWarningChanges:
+        return ErrCode::ERR_MECHANICAL_MAINTENANCE_WARNING_CHANGES;
+#endif
+    case WarningType::FilamentSensorsDisabled:
+        return ErrCode::ERR_MECHANICAL_FILAMENT_SENSORS_DISABLED;
 #if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
     case WarningType::NozzleCleaningFailed:
         return ErrCode::CONNECT_NOZZLE_CLEANING_FAILED;
@@ -559,6 +581,23 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
         return ErrCode::ERR_TEMPERATURE_CHAMBER_OVERHEATING_TEMP;
     case WarningType::ChamberCriticalTemperature:
         return ErrCode::ERR_TEMPERATURE_CHAMBER_CRITICAL_TEMP;
+#endif
+
+#if HAS_XBUDDY_EXTENSION() || XL_ENCLOSURE_SUPPORT()
+    case WarningType::ChamberFiltrationFanError:
+        return ErrCode::CONNECT_CHAMBER_FILTRATION_FAN_ERROR;
+#endif
+
+#if HAS_XBUDDY_EXTENSION()
+    case WarningType::ChamberCoolingFanError:
+        return ErrCode::CONNECT_CHAMBER_COOLING_FAN_ERROR;
+#endif
+
+#if PRINTER_IS_PRUSA_COREONE()
+    case WarningType::OpenChamberVents:
+        return ErrCode::CONNECT_OPEN_CHAMBER_VENTS;
+    case WarningType::CloseChamberVents:
+        return ErrCode::CONNECT_CLOSE_CHAMBER_VENTS;
 #endif
     }
 

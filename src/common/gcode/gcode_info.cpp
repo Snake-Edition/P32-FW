@@ -177,6 +177,17 @@ void GCodeInfo::EvaluateToolsValid() {
         }
 #endif
 
+#if HAS_MMU2()
+        // Make sure that MMU gcode is sliced with the correct nozzle.
+        // Slicing with a non-HF nozzle while HF nozzle is installed results in unsufficient purging.
+        // Slicing for a HF nozzle without having it leads to extruder skipping.
+        if (per_extruder_info[e].requires_high_flow_nozzle.has_value() && (config_store().nozzle_is_high_flow.get()[e] != *per_extruder_info[e].requires_high_flow_nozzle)
+            && !is_singletool_gcode()
+            && MMU2::mmu2.Enabled()) {
+            valid_printer_settings.nozzle_flow_mismatch.fail();
+        }
+#endif
+
         auto do_nozzle_check = [&](uint8_t hotend) {
             assert(hotend < HOTENDS);
 
@@ -226,6 +237,9 @@ bool GCodeInfo::ValidPrinterSettings::is_valid(bool is_tools_mapping_possible) c
 #if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
         && fan_compatibility_mode.is_valid()
 #endif
+#if HAS_MMU2()
+        && nozzle_flow_mismatch.is_valid()
+#endif
         && !unsupported_features
         && (is_tools_mapping_possible // if is_possible -> always true -> handled by tools_mapping screen
             || (wrong_tools.is_valid() && wrong_nozzle_diameter.is_valid() && nozzle_not_hardened.is_valid() && nozzle_not_high_flow.is_valid()));
@@ -238,6 +252,9 @@ bool GCodeInfo::ValidPrinterSettings::is_fatal(bool is_tools_mapping_possible) c
 #endif
 #if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
         || fan_compatibility_mode.is_fatal()
+#endif
+#if HAS_MMU2()
+        || nozzle_flow_mismatch.is_fatal()
 #endif
         || (!is_tools_mapping_possible // if is_possible -> always false -> handled by tools_mapping screen
             && (wrong_tools.is_fatal() || wrong_nozzle_diameter.is_fatal() || nozzle_not_hardened.is_fatal() || nozzle_not_high_flow.is_fatal()));
@@ -520,7 +537,7 @@ void GCodeInfo::parse_gcode(GcodeBuffer::String cmd, uint32_t &gcode_counter) {
 
             if (!is_up_to_date(cmd.c_str())) {
                 valid_printer_settings.outdated_firmware.fail();
-                strlcpy(valid_printer_settings.latest_fw_version, cmd.c_str(), min(sizeof(valid_printer_settings.latest_fw_version), cmd.len()));
+                strlcpy(valid_printer_settings.latest_fw_version, cmd.c_str(), min(sizeof(valid_printer_settings.latest_fw_version), cmd.len() + 1 /* +1 for the null terminator */));
                 // Cut the string at the comment start
                 char *comment_start = strchr(valid_printer_settings.latest_fw_version, ';');
                 if (comment_start) {

@@ -124,7 +124,8 @@ static constexpr EnumArray<PhasesLoadUnload, State, CountPhases<PhasesLoadUnload
     { PhasesLoadUnload::RemoveFilament, { txt_unload } },
     { PhasesLoadUnload::IsFilamentUnloaded, { txt_unload_confirm, DialogLoadUnload::phaseWaitSound } },
     { PhasesLoadUnload::FilamentNotInFS, { txt_filament_not_in_fs, DialogLoadUnload::phaseAlertSound } },
-    { PhasesLoadUnload::ManualUnload, { txt_manual_unload, DialogLoadUnload::phaseStopSound } },
+    { PhasesLoadUnload::ManualUnload_continuable, { txt_manual_unload, DialogLoadUnload::phaseStopSound } },
+    { PhasesLoadUnload::ManualUnload_uncontinuable, { txt_manual_unload, DialogLoadUnload::phaseStopSound } },
     { PhasesLoadUnload::UserPush_stoppable, { txt_push_fil, DialogLoadUnload::phaseAlertSound } },
     { PhasesLoadUnload::UserPush_unstoppable, { txt_push_fil, DialogLoadUnload::phaseAlertSound } },
     { PhasesLoadUnload::MakeSureInserted_stoppable, { txt_make_sure_inserted, DialogLoadUnload::phaseAlertSound } },
@@ -143,6 +144,9 @@ static constexpr EnumArray<PhasesLoadUnload, State, CountPhases<PhasesLoadUnload
     { PhasesLoadUnload::Unparking, { txt_unparking } },
 #if HAS_LOADCELL()
     { PhasesLoadUnload::FilamentStuck, { txt_filament_stuck, DialogLoadUnload::phaseAlertSound } },
+#endif
+#if HAS_AUTO_RETRACT()
+    { PhasesLoadUnload::AutoRetracting, { N_("Auto-retracting filament") } },
 #endif
 #if HAS_MMU2()
     { PhasesLoadUnload::LoadFilamentIntoMMU, { txt_mmu_insert_filament } }, // TODO how the button is Continue
@@ -381,7 +385,7 @@ static constexpr bool is_notice(PhasesLoadUnload phase) {
     return is_notice_mmu(phase) || is_notice_fstuck(phase);
 }
 
-bool DialogLoadUnload::Change(fsm::BaseData base_data) {
+void DialogLoadUnload::Change(fsm::BaseData base_data) {
     PhasesLoadUnload phase = GetEnumFromPhaseIndex<PhasesLoadUnload>(base_data.GetPhase());
     fsm::PhaseData data = base_data.GetData();
     LoadUnloadMode new_mode = ProgressSerializerLoadUnload(data).mode;
@@ -428,7 +432,7 @@ bool DialogLoadUnload::Change(fsm::BaseData base_data) {
     #endif
         current_phase = phase;
 
-        return true;
+        return;
     }
 
     // was notice (or uninitialized), is normal
@@ -446,7 +450,6 @@ bool DialogLoadUnload::Change(fsm::BaseData base_data) {
     }
 
     set_progress_percent(deserialize_progress(data));
-    return true;
 }
 
 void DialogLoadUnload::notice_update(uint16_t errCode, const char *errTitle, const char *errDesc, ErrType type) {
@@ -522,11 +525,11 @@ void DialogLoadUnload::phaseEnter() {
 
     if (has_filament_to_load) {
         filament_type_parameters = filament_to_load.parameters();
-        filament_type_text.SetText(string_view_utf8::MakeRAM(filament_type_parameters.name));
+        filament_type_text.SetText(string_view_utf8::MakeRAM(filament_type_parameters.name.data()));
     }
 
     if (has_color_to_load) {
-        const int16_t left_pos = (GuiDefaults::ScreenWidth - (width(Font::normal) + 1) * (strlen(filament_type_parameters.name) + 1 + 1) - color_size) / 2; // make the pos to be on the left of the text (+ one added space to the left of the text, + additional one for some reason makes it work )
+        const int16_t left_pos = (GuiDefaults::ScreenWidth - (width(Font::normal) + 1) * (strlen(filament_type_parameters.name.data()) + 1 + 1) - color_size) / 2; // make the pos to be on the left of the text (+ one added space to the left of the text, + additional one for some reason makes it work )
         const auto rect = filament_color_icon_rect + Rect16::X_t { static_cast<int16_t>(left_pos) };
 
         const auto col = filament::get_color_to_load().value();

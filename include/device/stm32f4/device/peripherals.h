@@ -45,6 +45,7 @@ extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim8;
+extern TIM_HandleTypeDef htim9;
 extern TIM_HandleTypeDef htim13;
 extern TIM_HandleTypeDef htim14;
 
@@ -215,6 +216,7 @@ extern TIM_HandleTypeDef htim14;
     #define spi_lcd            6
     #define spi_tmc            3
     #define spi_accelerometer  2
+    #define tim_burst_stepping 8
     #define tim_phase_stepping 13
     #if PRINTER_IS_PRUSA_iX()
         /// iX uses the I2C3 pins for back door filament sensor - BFW-4746
@@ -297,6 +299,7 @@ void hw_tim1_init();
 void hw_tim2_init();
 void hw_tim3_init();
 void hw_tim8_init();
+void hw_tim9_init();
 void hw_tim13_init();
 void hw_tim14_init();
 

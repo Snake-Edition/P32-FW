@@ -6,6 +6,7 @@
 #include "marlin_vars.hpp"
 
 #include "encoded_fsm_response.hpp"
+#include <warning_type.hpp>
 #include "../../lib/Marlin/Marlin/src/inc/MarlinConfig.h"
 #include "marlin_events.h"
 #include "client_fsm_types.h"
@@ -118,6 +119,9 @@ bool printer_idle();
 // returns true if printer is printing, else false;
 bool is_printing();
 
+/// \returns whether the server is currently processing or has queued any gcodes, motion and such
+bool is_processing();
+
 /**
  * @brief Know if any print preview state is active.
  * @return true if print preview is on
@@ -140,8 +144,14 @@ void unpause_nozzle(const uint8_t extruder);
 // return true if the printer is currently aborting or already aborted the print
 bool aborting_or_aborted();
 
+// return true if the printer is currently finishing or already finished the print
+bool finishing_or_finished();
+
 // return true if the printer is in the paused and not moving state
 bool printer_paused();
+
+// Printer is paused, preparing for a pause or resuming from a pause.
+bool printer_paused_extended();
 
 // return the resume state during a paused print
 resume_state_t *get_resume_data();
@@ -195,8 +205,9 @@ void set_media_position(uint32_t set);
 
 void print_quick_stop_powerpanic();
 
+void increment_user_click_count();
 uint32_t get_user_click_count();
-
+void increment_user_move_count();
 uint32_t get_user_move_count();
 
 void nozzle_timeout_on();
@@ -298,9 +309,12 @@ public:
     }
 };
 
-void set_warning(WarningType type, PhasesWarning phase = PhasesWarning::Warning);
+void set_warning(WarningType type);
 void clear_warning(WarningType type);
 bool is_warning_active(WarningType type);
+
+/// Displays a warning and blockingly waits for the response
+Response prompt_warning(WarningType type);
 
 #if ENABLED(AXIS_MEASURE)
 // Sets length of X and Y axes for crash recovery

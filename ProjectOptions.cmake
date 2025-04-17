@@ -295,10 +295,10 @@ set_feature_for_printers(HAS_POWER_PANIC "MK4" "MK3.5" "iX" "XL" "COREONE") # th
 # selftest and crash detection to work
 set_feature_for_printers(HAS_PRECISE_HOMING "MK4" "MK3.5")
 set_feature_for_printers(HAS_PRECISE_HOMING_COREXY "iX" "XL" "XL_DEV_KIT" "COREONE")
-set_feature_for_printers_master_board(HAS_PHASE_STEPPING "XL" "iX" "COREONE")
+set_feature_for_printers_master_board(HAS_PHASE_STEPPING "XL" "iX" "COREONE" "MK4")
 set_feature_for_printers_master_board(HAS_PHASE_STEPPING_TOGGLE "XL")
 set_feature_for_printers_master_board(HAS_PHASE_STEPPING_SELFTEST "iX" "XL")
-set(PRINTERS_WITH_BURST_STEPPING "XL")
+set(PRINTERS_WITH_BURST_STEPPING "XL" "MK4" "iX" "COREONE")
 set_feature_for_printers_master_board(
   HAS_INPUT_SHAPER_CALIBRATION "MK4" "MK3.5" "XL" "XL_DEV_KIT" "COREONE"
   )
@@ -321,7 +321,7 @@ set(PRINTERS_WITH_PUPPIES_BOOTLOADER "XL" "iX" "XL_DEV_KIT" "COREONE")
 set(PRINTERS_WITH_DWARF "XL" "XL_DEV_KIT")
 set_feature_for_printers_master_board(HAS_MODULARBED "iX" "XL" "XL_DEV_KIT")
 set_feature_for_printers_master_board(HAS_XBUDDY_EXTENSION "COREONE")
-set_feature_for_printers_master_board(HAS_DOOR_SENSOR "COREONE")
+set_feature_for_printers_master_board(HAS_DOOR_SENSOR "COREONE" "MK4") # MK4: check valid FW-HW
 set_feature_for_printers(HAS_TOOLCHANGER "XL" "XL_DEV_KIT")
 set_feature_for_printers(HAS_SIDE_FSENSOR "iX" "XL" "COREONE")
 set_feature_for_printers(HAS_ADC_SIDE_FSENSOR "XL")
@@ -339,13 +339,17 @@ set_feature_for_printers(HAS_XLCD "MK4" "MK3.5" "iX" "XL" "COREONE")
 set_feature_for_printers(HAS_MMU2 "MK4" "MK3.5" "COREONE")
 set_feature_for_printers(HAS_CONFIG_STORE_WO_BACKEND "XL_DEV_KIT")
 set_feature_for_printers_master_board(HAS_CHAMBER_API "XL" "COREONE")
+set_feature_for_printers_master_board(HAS_CHAMBER_FILTRATION_API "COREONE")
 set_feature_for_printers_master_board(XL_ENCLOSURE_SUPPORT "XL")
 set_feature_for_printers(HAS_SWITCHED_FAN_TEST "MK4" "MK3.5" "COREONE")
-set_feature_for_printers(HAS_HOTEND_TYPE_SUPPORT "MK4" "MK3.5" "iX" "COREONE")
+set_feature_for_printers(HAS_HOTEND_TYPE_SUPPORT "MK4" "MK3.5" "iX" "COREONE" "XL")
 set_feature_for_printers(HAS_EMERGENCY_STOP "COREONE")
+set_feature_for_printers(HAS_AUTO_RETRACT "COREONE")
 
 # Checks for bed evenness during G29 and if it's too uneven, offers Z alignment calibration
 set_feature_for_printers(HAS_UNEVEN_BED_PROMPT "COREONE")
+
+set_feature_for_printers(HAS_DOOR_SENSOR_CALIBRATION "COREONE")
 
 # Set GUI settings
 set(PRINTERS_WITH_GUI "COREONE" "MINI" "MK4" "MK3.5" "XL" "iX")

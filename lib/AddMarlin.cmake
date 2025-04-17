@@ -201,6 +201,7 @@ if(BOARD_IS_MASTER_BOARD)
   endif()
   if(HAS_LOCAL_ACCELEROMETER)
     target_sources(Marlin PRIVATE Marlin/Marlin/src/module/prusa/accelerometer_local.cpp)
+    target_link_libraries(Marlin PRIVATE LIS2DH12)
   endif()
   if(HAS_REMOTE_ACCELEROMETER)
     target_sources(
@@ -261,8 +262,9 @@ if(BOARD_IS_MASTER_BOARD)
       Marlin
       PRIVATE Marlin/Marlin/src/feature/phase_stepping/calibration.cpp
               Marlin/Marlin/src/feature/phase_stepping/phase_stepping.cpp
-              Marlin/Marlin/src/gcode/feature/phase_stepping/M970-M977.cpp
+              Marlin/Marlin/src/gcode/feature/phase_stepping/M97x.cpp
       )
+    target_link_libraries(Marlin PRIVATE sfl-library)
   endif()
 endif()
 

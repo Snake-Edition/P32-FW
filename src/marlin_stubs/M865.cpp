@@ -23,7 +23,13 @@
  * - `P` - Nozzle preheat temperature
  * - `B` - Bed temperature
  * - `A` - Is abrasive
+ * - `G` - Is flexible
+ *
+ * - `C` - Target chamber temperature
+ * - `D` - Minimum chamber temperature
+ * - `E` - Maximum chamber temperature
  * - `F` - Requries filtration
+ *
  * - `N"<string>"` - New filament name
  *
  * Ad-hoc/custom filaments can the be referenced in other gcodes using adhoc_filament_gcode_prefix.
@@ -77,16 +83,32 @@ void PrusaGcodeSuite::M865() {
     if (const auto opt = p.option<bool>('A')) {
         params.is_abrasive = *opt;
     }
+    if (const auto opt = p.option<bool>('G')) {
+        params.is_flexible = *opt;
+    }
+
+#if HAS_CHAMBER_API()
+    if (const auto opt = p.option<uint8_t>('C')) {
+        params.chamber_target_temperature = *opt;
+    }
+    if (const auto opt = p.option<uint8_t>('D')) {
+        params.chamber_min_temperature = *opt;
+    }
+    if (const auto opt = p.option<uint8_t>('E')) {
+        params.chamber_max_temperature = *opt;
+    }
+
     if (const auto opt = p.option<bool>('F')) {
         params.requires_filtration = *opt;
     }
+#endif
 
     std::array<char, filament_name_buffer_size - 1> name_buf;
     if (const auto opt = p.option<std::string_view>('N', name_buf)) {
-        StringBuilder b = StringBuilder::from_ptr(params.name, filament_name_buffer_size);
+        StringBuilder b(params.name);
         b.append_std_string_view(*opt);
 
-        if (const auto r = filament_type.can_be_renamed_to(params.name); !r) {
+        if (const auto r = filament_type.can_be_renamed_to(params.name.data()); !r) {
             SERIAL_ERROR_START();
             SERIAL_ECHOLN(r.error());
             return;

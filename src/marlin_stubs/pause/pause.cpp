@@ -51,10 +51,16 @@
 #include <filament_to_load.hpp>
 #include <common/marlin_client.hpp>
 #include <common/mapi/parking.hpp>
+#include <feature/ramming/ramming_sequence.hpp>
 
 #include <option/has_human_interactions.h>
 #include <option/has_mmu2.h>
 #include <option/has_wastebin.h>
+
+#include <option/has_auto_retract.h>
+#if HAS_AUTO_RETRACT()
+    #include <feature/auto_retract/auto_retract.hpp>
+#endif
 
 LOG_COMPONENT_REF(MarlinServer);
 
@@ -84,6 +90,8 @@ GCodeLoader nozzle_cleaner_gcode_loader;
 #error unsupported
 #endif
 // clang-format on
+
+using namespace buddy;
 
 class PauseFsmNotifier : public marlin_server::FSM_notifier {
     Pause &pause;
@@ -126,54 +134,13 @@ void unhomed_z_lift(float amount_mm) {
     }
 }
 
-class RammingSequence {
-public:
-    struct Item {
-        int16_t e; ///< relative movement of Extruder
-        int16_t feedrate; ///< feedrate of the move
-    };
-
-    template <size_t elements>
-    constexpr RammingSequence(const Item (&sequence)[elements])
-        : m_begin(sequence)
-        , m_end(&(sequence[elements]))
-        , unload_length(calculateRamUnloadLen(sequence)) {}
-    const Item *begin() const { return m_begin; }
-    const Item *end() const { return m_end; }
-
-private:
-    const Item *const m_begin;
-    const Item *const m_end;
-
-public:
-    const decltype(Item::e) unload_length;
-
-private:
-    template <size_t elements>
-    static constexpr decltype(Item::e) calculateRamUnloadLen(const Item (&ramSeq)[elements]) {
-        decltype(Item::e) ramLen = 0;
-        size_t i = 0;
-        // skip all extrude movements
-        while (i < elements && ramSeq[i].e > 0) {
-            i++;
-        }
-        // calculate ram movement len
-        for (; i < elements; i++) {
-            ramLen += ramSeq[i].e;
-        }
-        return ramLen;
-    }
-};
-
 #ifdef FILAMENT_RUNOUT_RAMMING_SEQUENCE
-constexpr RammingSequence::Item ramRunoutSeqItems[] = FILAMENT_RUNOUT_RAMMING_SEQUENCE;
+constexpr RammingSequenceArray runoutRammingSequence(FILAMENT_RUNOUT_RAMMING_SEQUENCE);
 #else
-constexpr RammingSequence::Item ramRunoutSeqItems[] = FILAMENT_UNLOAD_RAMMING_SEQUENCE;
+constexpr RammingSequenceArray runoutRammingSequence(FILAMENT_UNLOAD_RAMMING_SEQUENCE);
 #endif
-constexpr RammingSequence runoutRammingSequence = RammingSequence(ramRunoutSeqItems);
 
-constexpr RammingSequence::Item ramUnloadSeqItems[] = FILAMENT_UNLOAD_RAMMING_SEQUENCE;
-constexpr RammingSequence unloadRammingSequence = RammingSequence(ramUnloadSeqItems);
+constexpr RammingSequenceArray unloadRammingSequence(FILAMENT_UNLOAD_RAMMING_SEQUENCE);
 
 /*****************************************************************************/
 // PausePrivatePhase
@@ -309,12 +276,14 @@ LoadUnloadMode Pause::get_load_unload_mode() {
 
 bool Pause::should_park() {
     switch (load_type) {
-    case Pause::LoadType::autoload:
-        return false;
     case Pause::LoadType::load_purge:
         return true;
     case Pause::LoadType::load_to_gears:
         return !FSensors_instance().has_filament_surely(LogicalFilamentSensor::extruder);
+    case Pause::LoadType::autoload:
+        // TODO: Change autoload trigger sensor on printers with side_fs
+        // and adjust phases to handle properly loading to gears, mmu_rework and parking
+        // autoload on printers with side_fs, should behave similary to iX autoload
     case Pause::LoadType::load:
         return option::has_human_interactions || !FSensors_instance().has_filament_surely(LogicalFilamentSensor::extruder);
     default:
@@ -521,6 +490,7 @@ void Pause::filament_push_ask_process(Response response) {
 
     if (FSensors_instance().no_filament_surely(LogicalFilamentSensor::extruder)) {
         setPhase(is_unstoppable() ? PhasesLoadUnload::MakeSureInserted_unstoppable : PhasesLoadUnload::MakeSureInserted_stoppable);
+        handle_help(response);
 
         // With extruder MMU rework, we gotta assist the user with inserting the filament
         // BFW-5134
@@ -727,10 +697,7 @@ void Pause::eject_process([[maybe_unused]] Response response) {
     }
 #endif
 
-    setPhase(is_unstoppable() ? PhasesLoadUnload::Ramming_unstoppable : PhasesLoadUnload::Ramming_stoppable, 98);
-    ram_filament();
-
-    planner.synchronize(); // do_pause_e_move(0, (FILAMENT_CHANGE_UNLOAD_FEEDRATE));//do previous moves, so Ramming text is visible
+    ram_filament(98);
 
     setPhase(is_unstoppable() ? PhasesLoadUnload::Ejecting_unstoppable : PhasesLoadUnload::Ejecting_stoppable, 99);
     unload_filament();
@@ -751,6 +718,16 @@ void Pause::eject_process([[maybe_unused]] Response response) {
 }
 
 void Pause::load_prime_process([[maybe_unused]] Response response) {
+#if HAS_AUTO_RETRACT()
+    if (!marlin_server::is_printing()) {
+        // Only retract from nozzle outside printing
+        setPhase(PhasesLoadUnload::AutoRetracting, 99);
+        auto_retract().maybe_retract_from_nozzle();
+        set(LoadState::_finish);
+        return;
+    }
+#endif
+
     if (load_type == LoadType::filament_change || load_type == LoadType::filament_stuck) {
         // Feed a little bit of filament to stabilize pressure in nozzle
 
@@ -838,10 +815,8 @@ void Pause::unload_start_process([[maybe_unused]] Response response) {
 
     case LoadType::filament_stuck:
 #if HAS_LOADCELL()
-        setPhase(PhasesLoadUnload::FilamentStuck);
         set(LoadState::filament_stuck_ask);
 #else
-        setPhase(PhasesLoadUnload::ManualUnload, 100);
         set(LoadState::manual_unload);
 #endif
         break;
@@ -856,20 +831,27 @@ void Pause::unload_start_process([[maybe_unused]] Response response) {
     }
 }
 
+#if HAS_LOADCELL()
 void Pause::filament_stuck_ask_process(Response response) {
+    setPhase(PhasesLoadUnload::FilamentStuck);
+
     if (response == Response::Unload) {
         set(LoadState::ram_sequence);
     }
 }
+#endif
 
 void Pause::ram_sequence_process([[maybe_unused]] Response response) {
-    if (!ensureSafeTemperatureNotifyProgress(0, 50)) {
-        settings.do_stop = true;
+#if HAS_AUTO_RETRACT()
+    if (auto_retract().is_retracted()) {
+        // The filament is already retracted from the nozzle -> no ramming needed, we don't even need to heat up the nozzle
+        ram_retracted_distance = auto_retract().retracted_distance();
+        set(LoadState::unload);
         return;
     }
+#endif
 
-    setPhase(is_unstoppable() ? PhasesLoadUnload::Ramming_unstoppable : PhasesLoadUnload::Ramming_stoppable, 50);
-    ram_filament();
+    ram_filament(50);
     set(LoadState::unload);
 }
 
@@ -918,7 +900,6 @@ void Pause::unloaded_ask_process(Response response) {
         return;
     }
     if (response == Response::No) {
-        setPhase(PhasesLoadUnload::ManualUnload, 100);
         disable_e_stepper(active_extruder);
         set(LoadState::manual_unload);
     }
@@ -958,8 +939,10 @@ void Pause::unload_finish_or_change_process([[maybe_unused]] Response response) 
     }
 }
 
-void Pause::filament_not_in_fs_process([[maybe_unused]] Response response) {
+void Pause::filament_not_in_fs_process(Response response) {
     setPhase(PhasesLoadUnload::FilamentNotInFS);
+    handle_help(response);
+
     if (!FSensors_instance().has_filament_surely(LogicalFilamentSensor::autoload)) {
         if constexpr (!option::has_human_interactions) {
             // In case of no human interactions, require no filament being
@@ -980,10 +963,15 @@ void Pause::filament_not_in_fs_process([[maybe_unused]] Response response) {
 }
 
 void Pause::manual_unload_process(Response response) {
+    const bool can_continue = !FSensors_instance().has_filament_surely(LogicalFilamentSensor::extruder);
+    setPhase(can_continue ? PhasesLoadUnload::ManualUnload_continuable : PhasesLoadUnload::ManualUnload_uncontinuable, 100);
+    handle_help(response);
+
     if (response == Response::Continue
-        && !FSensors_instance().has_filament_surely(LogicalFilamentSensor::extruder)) { // Allow to continue when nothing remains in filament sensor
+        && can_continue) { // Allow to continue when nothing remains in filament sensor
         enable_e_steppers();
         set(LoadState::unload_finish_or_change);
+
     } else if (response == Response::Retry) { // Retry unloading
         enable_e_steppers();
         set(LoadState::ram_sequence);
@@ -1138,7 +1126,7 @@ void Pause::park_nozzle_and_notify() {
             unhomed_z_lift(target_Z);
         } else {
             PauseFsmNotifier N(*this, current_position.z, target_Z, 0, parkMoveZPercent(Z_len, XY_len), marlin_vars().native_pos[MARLIN_VAR_INDEX_Z]);
-            plan_park_move_to(current_position.x, current_position.y, target_Z, NOZZLE_PARK_XY_FEEDRATE, Z_feedrate);
+            plan_park_move_to(current_position.x, current_position.y, target_Z, NOZZLE_PARK_XY_FEEDRATE, Z_feedrate, Segmented::yes);
             if (wait_for_motion_finish_or_user_stop()) {
                 return;
             }
@@ -1189,13 +1177,13 @@ void Pause::park_nozzle_and_notify() {
 
         if (x_greater_than_y) {
             PauseFsmNotifier N(*this, begin_pos, end_pos, parkMoveZPercent(Z_len, XY_len), 100, marlin_vars().native_pos[MARLIN_VAR_INDEX_X]); // from Z% to 100%
-            plan_park_move_to_xyz(settings.park_pos, NOZZLE_PARK_XY_FEEDRATE, Z_feedrate);
+            plan_park_move_to_xyz(settings.park_pos, NOZZLE_PARK_XY_FEEDRATE, Z_feedrate, Segmented::yes);
             if (wait_for_motion_finish_or_user_stop()) {
                 return;
             }
         } else {
             PauseFsmNotifier N(*this, begin_pos, end_pos, parkMoveZPercent(Z_len, XY_len), 100, marlin_vars().native_pos[MARLIN_VAR_INDEX_Y]); // from Z% to 100%
-            plan_park_move_to_xyz(settings.park_pos, NOZZLE_PARK_XY_FEEDRATE, Z_feedrate);
+            plan_park_move_to_xyz(settings.park_pos, NOZZLE_PARK_XY_FEEDRATE, Z_feedrate, Segmented::yes);
             if (wait_for_motion_finish_or_user_stop()) {
                 return;
             }
@@ -1248,7 +1236,7 @@ void Pause::unpark_nozzle_and_notify() {
 
         PauseFsmNotifier N(*this, current_position.z, resume_pos_adj.z, parkMoveXYPercent(Z_len, XY_len), 100, marlin_vars().native_pos[MARLIN_VAR_INDEX_Z]); // from XY% to 100%
         // FIXME: use a beter movement api when available
-        do_blocking_move_to_z(resume_pos_adj.z, feedRate_t(NOZZLE_PARK_Z_FEEDRATE));
+        do_blocking_move_to_z(resume_pos_adj.z, feedRate_t(NOZZLE_PARK_Z_FEEDRATE), Segmented::yes);
         // But since the plan_park_move_to overrides the current position values (which are by default in
         // native (without MBL) coordinates and we apply MBL to them) we need to reset the z height to
         // make all the future moves correct.
@@ -1345,22 +1333,33 @@ void Pause::filament_change(const pause::Settings &settings_, bool is_filament_s
     ui.reset_status();
 #endif
 }
-void Pause::ram_filament() {
-    const RammingSequence &sequence = get_ramming_sequence();
-
-    constexpr float mm_per_minute = 1 / 60.f;
-    // ram filament
-    for (auto &elem : sequence) {
-        plan_e_move(elem.e, elem.feedrate * mm_per_minute);
-        if (check_user_stop()) {
-            return;
-        }
+void Pause::ram_filament(uint8_t progress_percent) {
+    if (!ensureSafeTemperatureNotifyProgress(0, 50)) {
+        return;
     }
+
+    setPhase(is_unstoppable() ? PhasesLoadUnload::Ramming_unstoppable : PhasesLoadUnload::Ramming_stoppable, progress_percent);
+
+    const RammingSequence *ramming_sequence = nullptr;
+
+    switch (load_type) {
+    case LoadType::filament_change:
+    case LoadType::filament_stuck:
+        ramming_sequence = &runoutRammingSequence;
+        break;
+
+    default:
+        ramming_sequence = &unloadRammingSequence;
+        break;
+    }
+
+    ram_retracted_distance = ramming_sequence->retracted_distance();
+    ramming_sequence->execute([this] {
+        return !check_user_stop();
+    });
 }
 
 void Pause::unload_filament() {
-    const RammingSequence &sequence = get_ramming_sequence();
-
     const float saved_acceleration = planner.user_settings.retract_acceleration;
     {
         auto s = planner.user_settings;
@@ -1368,27 +1367,16 @@ void Pause::unload_filament() {
         planner.apply_settings(s);
     }
 
-    // subtract the already performed extruder movement from the total unload length and ensure it is negative
+    // The ramming that happened before the unload already resulted in some amount of retraction -> subtract that
+    const float remaining_unload_length = std::max<float>(std::abs(settings.unload_length) - ram_retracted_distance, 0);
 
-    float remaining_unload_length = -(std::abs(settings.unload_length) - std::abs(sequence.unload_length));
-    if (remaining_unload_length > .0f) {
-        remaining_unload_length = .0f;
-    }
-    do_e_move_notify_progress_hotextrude(remaining_unload_length, (FILAMENT_CHANGE_UNLOAD_FEEDRATE), 51, 99);
+    // At this point, we are already rammed (so the filament is out of the nozzle), so we do not need to enforce nozzle temp
+    do_e_move_notify_progress_coldextrude(-remaining_unload_length, (FILAMENT_CHANGE_UNLOAD_FEEDRATE), 51, 99);
 
     {
         auto s = planner.user_settings;
         s.retract_acceleration = saved_acceleration;
         planner.apply_settings(s);
-    }
-}
-const RammingSequence &Pause::get_ramming_sequence() const {
-    switch (load_type) {
-    case LoadType::filament_change:
-    case LoadType::filament_stuck:
-        return runoutRammingSequence;
-    default:
-        return unloadRammingSequence;
     }
 }
 
@@ -1448,6 +1436,26 @@ void Pause::handle_filament_removal(LoadState state_to_set) {
         return;
     }
     return;
+}
+
+void Pause::handle_help(Response response) {
+    if (response != Response::Help) {
+        return;
+    }
+
+    WarningType warning = WarningType::FilamentSensorStuckHelp;
+#if HAS_MMU2()
+    if (MMU2::mmu2.Enabled()) {
+        // MMU requires filament sensors to function, do not offer disabling them
+        warning = WarningType::FilamentSensorStuckHelpMMU;
+    }
+#endif
+
+    if (marlin_server::prompt_warning(warning) == Response::FS_disable) {
+        FSensors_instance().set_enabled_global(false);
+        marlin_server::set_warning(WarningType::FilamentSensorsDisabled);
+        config_store().show_fsensors_disabled_warning_after_print.set(true);
+    }
 }
 
 /*****************************************************************************/

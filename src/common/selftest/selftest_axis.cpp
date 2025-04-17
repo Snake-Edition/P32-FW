@@ -12,7 +12,6 @@
 #include "algorithm_scale.hpp"
 #include "printers.h"
 #include "homing_reporter.hpp"
-#include "PersistentStorage.h"
 #include "config_store/store_instance.hpp"
 
 #include <limits>
@@ -178,7 +177,14 @@ LoopResult CSelftestPart_Axis::stateHomeXY() {
 
     // Trigger home on axis
     ArrayStringBuilder<10> sb;
+#if PRINTER_IS_PRUSA_MK4()
+    // MK4 needs to be able to calibrate homing here, i.e.
+    // not have "D"o not calibrate parameter set
+    // (yes, those double negatives are fun).
+    sb.append_printf("G28 %c P", iaxis_codes[config.axis]);
+#else
     sb.append_printf("G28 %c D P", iaxis_codes[config.axis]);
+#endif
     queue.enqueue_one_now(sb.str());
 
     log_info(Selftest, "%s home single axis", config.partname);

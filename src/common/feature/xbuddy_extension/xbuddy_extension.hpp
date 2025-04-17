@@ -3,11 +3,12 @@
 #include "cooling.hpp"
 
 #include <optional>
-#include <span>
 
+#include <enum_array.hpp>
 #include <freertos/mutex.hpp>
 #include <leds/color.hpp>
 #include <temperature.hpp>
+#include <pwm_utils.hpp>
 
 #include <xbuddy_extension_shared/xbuddy_extension_shared_enums.hpp>
 
@@ -24,51 +25,52 @@ public: // General things, status
         ready,
     };
 
+    using Fan = xbuddy_extension_shared::Fan;
     using FilamentSensorState = xbuddy_extension_shared::FilamentSensorState;
+    using FanRPM = uint16_t;
+    using FanPWM = PWM255;
+    using FanPWMOrAuto = PWM255OrAuto;
 
     Status status() const;
 
     void step();
 
 public: // Fans
-    /// \returns measured RPM of the fan1 (chamber cooling)
-    std::optional<uint16_t> fan1_rpm() const;
+    /// \returns measured RPM of the specified fan
+    std::optional<FanRPM> fan_rpm(Fan fan) const;
 
-    /// \returns measured RPM of the fan2 (chamber cooling)
-    std::optional<uint16_t> fan2_rpm() const;
+    /// \returns False on unexpected fan behaviour (positive PWM but 0 RPM)
+    bool is_fan_ok(const Fan fan) const;
 
-    /// \returns shared target PWM for fan1/fan2
-    uint8_t fan1_fan2_pwm() const;
+    /// \returns shared target PWM of the specified fan
+    FanPWMOrAuto fan_target_pwm(Fan fan) const;
 
-    /// Sets PWM for fan 1 and fan 2 (chamber cooling fans; 0-255)
-    /// The fans have a single shared PWM line, so they can only be set both at once
-    /// Disables \p has_fan1_fan2_auto_control control
-    void set_fan1_fan2_pwm(uint8_t pwm);
+    /// \returns actual PWM the fans are controlled to
+    FanPWM fan_actual_pwm(Fan fan) const;
 
-    /// \returns whether the fan1 & fan2 are in auto control mode (or values set explicitly by set_XX_pwm)
-    bool has_fan1_fan2_auto_control() const;
-
-    /// See \p has_fan1_fan2_auto_control
-    void set_fan1_fan2_auto_control();
-
-    /// \returns measured RPM of the fan3 (in-chamber filtration)
-    std::optional<uint16_t> fan3_rpm() const;
-
-    /// \returns target PWM for fan3
-    uint8_t fan3_pwm() const;
-
-    /// Sets PRM for fan 3 (in-chamber filtration, 0-255)
-    void set_fan3_pwm(uint8_t pwm);
+    /// Sets target PWM for the given fan. The PWM can be overriden by some emergency events
+    /// * Please note than PWM control for the cooling fans is shared (so calling this with Fan::cooling_fan_1 does the same as with Fan::cooling_fan_2)
+    void set_fan_target_pwm(Fan fan, FanPWMOrAuto target);
 
     /// A convenience function returning a structure of data to be used in the Connect interface
     /// The key idea here is to avoid locking the internal mutex for every member while providing a consistent state of values.
     struct FanState {
         uint16_t fan1rpm, fan2rpm;
-        uint8_t fan12pct;
-        bool fan12autocontrol;
+        FanPWMOrAuto fan1_fan2_target_pwm;
     };
 
     FanState get_fan12_state() const;
+
+    /// \returns whether the fan 3 is connected/used and thus whether we should consider it in sensor info, selftest results and such
+    bool using_filtration_fan_instead_of_cooling_fans() const;
+
+    /// \returns maximum PWM that is used for cooling in non-emergency situations
+    PWM255 max_cooling_pwm() const;
+
+    void set_max_cooling_pwm(PWM255 set);
+
+    /// \returns whether the current configuration allows automatic chamber cooling (cooling fans are not set to a hard value)
+    bool can_auto_cool() const;
 
 public: // LEDs
     /// \returns color set for the bed LED strip
@@ -96,7 +98,7 @@ public: // Other
     /// \returns state of the filament sensor
     std::optional<FilamentSensorState> filament_sensor();
 
-public:
+public: // USB
     void set_usb_power(bool enabled);
     bool usb_power() const;
 
@@ -107,11 +109,19 @@ private:
 
     FanCooling chamber_cooling;
 
-    uint8_t fan3_pwm_ = 0;
+    FanPWMOrAuto cooling_fans_target_pwm_ = pwm_auto;
+    FanPWMOrAuto filtration_fan_target_pwm_ = pwm_auto;
+
+    FanPWM cooling_fans_actual_pwm_;
+    FanPWM filtration_fan_actual_pwm_;
 
     // keeps the last timestamp of Fan PWM update
     uint32_t last_fan_update_ms;
 
+    // keeps fan power up timestamp to measure headstart delay
+    EnumArray<Fan, uint32_t, xbuddy_extension_shared::fan_count> fan_start_timestamp = {};
+
+    bool can_auto_cool_ = false;
     bool overheating_warning_shown = false;
     bool critical_warning_shown = false;
 };

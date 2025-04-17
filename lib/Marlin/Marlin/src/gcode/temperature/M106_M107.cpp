@@ -56,13 +56,15 @@ static bool set_special_fan_speed(uint8_t fan, uint8_t speed, bool set_auto) {
     #endif
 
     #if HAS_XBUDDY_EXTENSION()
+    using XBE = buddy::XBuddyExtension;
     static_assert(FAN_COUNT < 3, "Fan 3 is dedicated to extboard");
     if (fan == 3) {
-        if (set_auto) {
-            buddy::xbuddy_extension().set_fan1_fan2_auto_control();
-        } else {
-            buddy::xbuddy_extension().set_fan1_fan2_pwm(speed);
-        }
+        // Cooling fan 2 has shared PWM line
+        buddy::xbuddy_extension().set_fan_target_pwm(XBE::Fan::cooling_fan_1, set_auto ? buddy::XBuddyExtension::FanPWMOrAuto(pwm_auto) : buddy::XBuddyExtension::FanPWM(speed));
+        return true;
+    }
+    if (fan == 4) {
+        buddy::xbuddy_extension().set_fan_target_pwm(XBE::Fan::filtration_fan, set_auto ? buddy::XBuddyExtension::FanPWMOrAuto(pwm_auto) : buddy::XBuddyExtension::FanPWM(speed));
         return true;
     }
     #endif

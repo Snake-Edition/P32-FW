@@ -4,10 +4,13 @@
 #include <client_response.hpp>
 #include <common/fsm_base_types.hpp>
 #include <common/marlin_server.hpp>
+#include <common/otp.hpp>
 #include <Marlin/src/feature/phase_stepping/calibration_config.hpp>
 #include <Marlin/src/feature/phase_stepping/calibration.hpp>
 #include <Marlin/src/gcode/gcode.h>
+#include <sys/fcntl.h>
 #include <sys/unistd.h>
+#include <version/version.hpp>
 
 namespace {
 
@@ -17,12 +20,11 @@ enum class State {
     aborted,
 };
 
-static constexpr const size_t calibration_phase_count = phase_stepping::printer_calibration_config.phases.size();
 struct CalibrationPhaseResult {
     float forward;
     float backward;
 };
-using CalibrationResult = std::array<CalibrationPhaseResult, calibration_phase_count>;
+using CalibrationResult = std::vector<CalibrationPhaseResult>;
 
 struct Context {
     CalibrationResult calibration_result_x;
@@ -46,26 +48,22 @@ public:
     explicit CalibrateAxisHooks(PhasesPhaseStepping phase)
         : phase { phase } {
         data[0] = 0;
-        data[1] = calibration_phase_count;
-        data[2] = 0;
+        data[1] = 0;
     }
 
-    void set_calibration_phases_count(int) override {
+    void on_motor_characterization_start() override {
+        marlin_server::fsm_change(phase, data);
+    }
+
+    void on_motor_characterization_result(int calibration_phase_count) override {
+        data[1] = calibration_phase_count;
+        calibration_result.resize(calibration_phase_count);
     }
 
     void on_enter_calibration_phase(int calibration_phase) override {
         data[0] = calibration_phase;
-        data[2] = 0;
         marlin_server::fsm_change(phase, data);
         current_calibration_phase = calibration_phase;
-    }
-
-    void on_initial_movement() override {
-    }
-
-    void on_calibration_phase_progress(int progress) override {
-        data[2] = progress;
-        marlin_server::fsm_change(phase, data);
     }
 
     void on_calibration_phase_result(float forward_score, float backward_score) override {
@@ -120,18 +118,54 @@ static PhasesPhaseStepping intro_helper() {
 #endif
 }
 
+__attribute__((format(printf, 2, 3))) static void fdprintf(int fd, const char *fmt, ...) {
+    std::array<char, 64> buffer;
+
+    va_list args;
+    va_start(args, fmt);
+    size_t n = vsnprintf(buffer.data(), buffer.size(), fmt, args);
+    va_end(args);
+
+    write(fd, buffer.data(), n);
+}
+
+static void dump_calibration_result(const Context &context) {
+    int fd = open("/usb/phstep.txt", O_CREAT | O_APPEND | O_WRONLY);
+    if (fd == -1) {
+        log_error(Marlin, "open() failed %d", errno);
+        return;
+    }
+    // We are not concerened with excessive error handling here.
+    // If we fail to write something here, we just lose it, no big deal.
+    if (serial_nr_t serial_nr; otp_get_serial_nr(serial_nr) != 0) {
+        fdprintf(fd, "SN\t%s\n", serial_nr.data());
+    }
+    fdprintf(fd, "CH\t%s\n", version::project_build_identification.commit_hash);
+    {
+        std::array<char, 1 + strlen("YYYYmmddHHMMSS")> strftime_buffer;
+        const time_t curr_sec = time(nullptr);
+        struct tm now;
+        localtime_r(&curr_sec, &now);
+        (void)strftime(strftime_buffer.data(), strftime_buffer.size(), "%Y%m%d%H%M%S", &now);
+        fdprintf(fd, "D\t%s\n", strftime_buffer.data());
+    }
+    for (const auto [forward, backward] : context.calibration_result_x) {
+        fdprintf(fd, "X\t%f\t%f\n", (double)forward, (double)backward);
+    }
+    for (const auto [forward, backward] : context.calibration_result_y) {
+        fdprintf(fd, "Y\t%f\t%f\n", (double)forward, (double)backward);
+    }
+    fdprintf(fd, "---\n");
+    close(fd);
+}
+
 std::optional<uint8_t> evaluate_calibration_result(const CalibrationResult &calibration_result) {
     for (const auto &res : calibration_result) {
         log_info(Marlin, "res %f %f", (double)res.backward, (double)res.forward);
     }
-    constexpr const size_t halfsize = calibration_phase_count / 2;
-    float reduction = 0.0f;
-    for (size_t i = 0; i < halfsize; ++i) {
-        const auto [coarse_forward, coarse_backward] = calibration_result[i];
-        const auto [fine_forward, fine_backward] = calibration_result[i + halfsize];
-        const float forward = coarse_forward * fine_forward;
-        const float backward = coarse_backward * fine_backward;
 
+    float reduction = 0.0f;
+    for (const auto [forward, backward] : calibration_result) {
         if (forward >= 1.f || backward >= 1.f) {
             return std::nullopt;
         }
@@ -140,10 +174,11 @@ std::optional<uint8_t> evaluate_calibration_result(const CalibrationResult &cali
         reduction += 1.f - std::max(forward, backward);
     }
     // average + scale to percent
-    return 100 * reduction / halfsize;
+    return 100 * reduction / calibration_result.size();
 }
 
 PhasesPhaseStepping evaluate_result(Context &context) {
+    dump_calibration_result(context);
     const auto reduction_x = evaluate_calibration_result(context.calibration_result_x);
     const auto reduction_y = evaluate_calibration_result(context.calibration_result_y);
     if (reduction_x && reduction_y) {

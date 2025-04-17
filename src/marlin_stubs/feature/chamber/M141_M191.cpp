@@ -1,3 +1,4 @@
+
 #include <marlin_stubs/PrusaGcodeSuite.hpp>
 #include <marlin_stubs/skippable_gcode.hpp>
 
@@ -77,13 +78,14 @@ static void set_chamber_temperature(buddy::Temperature target, bool wait_for_hea
         return;
     }
 
-    chamber().set_target_temperature(target);
+    // The temperature might have gotten cropped due to chamber limitations - make sure that we're waiting for the one that is actually set
+    target = *chamber().set_target_temperature(target);
     if (!wait_for_cooling && !wait_for_heating) {
         return;
     }
 
     /// How long we should wait until displaying a warning that we're failing to reach the temperature
-    static constexpr int32_t warning_timeout_ms = 10 * 60 * 1000;
+    static constexpr int32_t warning_timeout_ms = 30 * 60 * 1000;
 
     uint32_t last_report_time = 0;
     uint32_t warning_timeout_start = ticks_ms();
@@ -109,10 +111,10 @@ static void set_chamber_temperature(buddy::Temperature target, bool wait_for_hea
 
         // Show a heat failure warning if we're waiting for too long
         if (ticks_diff(now, warning_timeout_start) >= warning_timeout_ms && !marlin_server::is_warning_active(WarningType::FailedToReachChamberTemperature)) {
-            marlin_server::set_warning(WarningType::FailedToReachChamberTemperature, PhasesWarning::FailedToReachChamberTemperature);
+            marlin_server::set_warning(WarningType::FailedToReachChamberTemperature);
         }
 
-        switch (marlin_server::get_response_from_phase(PhasesWarning::FailedToReachChamberTemperature)) {
+        switch (marlin_server::get_response_from_phase(warning_type_phase(WarningType::FailedToReachChamberTemperature))) {
 
         case Response::Ok:
             marlin_server::clear_warning(WarningType::FailedToReachChamberTemperature);

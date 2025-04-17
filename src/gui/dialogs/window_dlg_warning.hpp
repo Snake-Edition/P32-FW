@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IDialogMarlin.hpp"
-#include "client_response.hpp"
+#include <warning_type.hpp>
 #include "window_icon.hpp"
 #include "window_text.hpp"
 #include "radio_button_fsm.hpp"
@@ -15,9 +15,8 @@ class DialogWarning : public IDialogMarlin {
     window_text_t text;
     RadioButtonFSM button;
 
-    DialogWarning(PhasesWarning, WarningType);
-    DialogWarning(PhasesWarning, WarningType, const ErrDesc &);
-
 public:
     DialogWarning(fsm::BaseData);
+
+    void Change(fsm::BaseData data) override;
 };

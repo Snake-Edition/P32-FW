@@ -2,12 +2,22 @@
 #include <selftest_types.hpp>
 #include <screen_menu_selftest_snake_result_parsing.hpp>
 #include <config_store/store_instance.hpp>
-#include <option/has_xbuddy_extension.h>
 #include <option/has_switched_fan_test.h>
+
+#include <option/has_chamber_filtration_api.h>
+
 #include <option/has_chamber_api.h>
 #if HAS_CHAMBER_API()
     #include <feature/chamber/chamber.hpp>
 #endif
+
+#include <option/has_xbuddy_extension.h>
+#if HAS_XBUDDY_EXTENSION()
+    #include <feature/xbuddy_extension/xbuddy_extension.hpp>
+#endif
+
+using namespace buddy;
+
 namespace SelftestSnake {
 TestResult get_test_result(Action action, [[maybe_unused]] Tool tool) {
 
@@ -20,17 +30,21 @@ TestResult get_test_result(Action action, [[maybe_unused]] Tool tool) {
                 return evaluate_results(sr.tools[e].evaluate_fans());
             });
 #if HAS_CHAMBER_API()
-        switch (buddy::chamber().backend()) {
+        switch (chamber().backend()) {
     #if HAS_XBUDDY_EXTENSION()
-        case buddy::Chamber::Backend::xbuddy_extension: {
+        case Chamber::Backend::xbuddy_extension: {
             const auto chamber_results = config_store().xbe_fan_test_results.get();
-            res = evaluate_results(res, chamber_results.fans[0]);
-            res = evaluate_results(res, chamber_results.fans[1]);
-            // TODO: Once third fan will be implemented, replace with for loop
+            static_assert(HAS_CHAMBER_FILTRATION_API());
+            if (buddy::xbuddy_extension().using_filtration_fan_instead_of_cooling_fans()) {
+                res = evaluate_results(res, chamber_results.fans[2]);
+            } else {
+                res = evaluate_results(res, chamber_results.fans[0]);
+                res = evaluate_results(res, chamber_results.fans[1]);
+            }
             break;
         }
     #endif /* HAS_XBUDDY_EXTENSION() */
-        case buddy::Chamber::Backend::none:
+        case Chamber::Backend::none:
             break;
         }
 #endif /* HAS_CHAMBER_API() */
@@ -59,6 +73,8 @@ TestResult get_test_result(Action action, [[maybe_unused]] Tool tool) {
         }));
     case Action::Gears:
         return evaluate_results(sr.gears);
+    case Action::DoorSensor:
+        return evaluate_results(config_store().selftest_result_door_sensor.get());
     case Action::FilamentSensorCalibration:
         if (tool == Tool::_all_tools) {
             return merge_hotends_evaluations(
@@ -81,6 +97,7 @@ ToolMask get_tool_mask([[maybe_unused]] Tool tool) {
 uint64_t get_test_mask(Action action) {
     switch (action) {
     case Action::Fans:
+    case Action::DoorSensor:
         bsod("This should be gcode");
     case Action::YCheck:
         return stmYAxis;

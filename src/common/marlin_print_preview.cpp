@@ -238,7 +238,7 @@ bool PrintPreview::check_correct_filament_type(uint8_t physical_extruder, uint8_
     const FilamentTypeParameters loaded_filament_params = loaded_filament_type.parameters();
 
     // when filament type not known, return that filament type is OK
-    return strcmp(extruder_info.filament_name->data(), "---") == 0 || strcmp(extruder_info.filament_name->data(), loaded_filament_params.name) == 0;
+    return strcmp(extruder_info.filament_name->data(), "---") == 0 || strcmp(extruder_info.filament_name->data(), loaded_filament_params.name.data()) == 0;
 }
 
 static bool check_correct_filament_type_tools_mapping(uint8_t physical_extruder) {
@@ -255,9 +255,19 @@ IPrintPreview::State PrintPreview::stateFromFilamentPresence() const {
         // with MMU, its only possible to check that filament is properly unloaded, no check of filaments presence in each "tool"
         if (FSensors_instance().MMUReadyToPrint()) {
             return State::checks_done;
-        } else if (GCodeInfo::getInstance().is_singletool_gcode() && FSensors_instance().WhereIsFilament() == MMU2::FilamentState::AT_FSENSOR) {
-            return State::checks_done; // it makes sense to allow starting a single material print with filament loaded
+        } else if (GCodeInfo::getInstance().is_singletool_gcode()
+            && FSensors_instance().WhereIsFilament() == MMU2::FilamentState::AT_FSENSOR
+            && check_correct_filament_type_tools_mapping(0) // only allow this shortcut print start if filament type is matching
+                                                            // Note: existence of a valid gcode extruder index 0 has been verified in the is_singletool_gcode() call
+        ) {
+            // beware: State::checks_done shows the toolmapping screen.
+            // We don't want that in MMU mode printing a single material gcode with filament already loaded in the nozzle.
+            // In such a case we want to avoid toolmapping and start the print right away instead -> set State::done and not checks_done
+            return State::done;
         } else {
+            // Request removal of the inserted filament, esp. when:
+            // - starting a multi-material print
+            // - singlematerial print's material type not matching the inserted filament
             return State::mmu_filament_inserted_wait_user;
         }
     } else
@@ -629,11 +639,18 @@ PrintPreview::Result PrintPreview::Loop() {
             ChangeState(State::inactive);
             return Result::Inactive;
 
-        case Response::Yes:
+        case Response::Yes: {
 
             ChangeState(State::mmu_filament_inserted_unload);
-            marlin_server::enqueue_gcode("M702 W0"); // unload, no return or cooldown
-            break;
+            // If filament is really loaded, MMU knows exactly the physical slot index.
+            // Silently assume, that the MMU is up and running -> therefore it's Set_Get_Selector_Slot register has already been read upon comm start
+            const uint8_t physical_slot_index = MMU2::mmu2.SelectorSlot();
+            // M702 translates given tool index through toolmapping -> need to hack around it (invert it).
+            // The tool_mapper should either return the same index in case of a freshly booted printer (or no mapping changes)
+            // or a valid mapping from the last print (which is also correct in this case).
+            const uint8_t gcode_slot_index = tool_mapper.to_gcode(physical_slot_index);
+            marlin_server::enqueue_gcode_printf("M702 W0 T%" PRIu8, gcode_slot_index); // unload, no return or cooldown
+        } break;
 
         default:
             break;

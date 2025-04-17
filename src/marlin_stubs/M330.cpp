@@ -141,7 +141,7 @@ void PrusaGcodeSuite::M334() {
     }
 
     // Prompt the user if he wants to allow the metrics change
-    if (!metrics_config_change_prompt()) {
+    if (marlin_server::prompt_warning(WarningType::MetricsConfigChangePrompt) != Response::Yes) {
         return;
     }
 
@@ -158,18 +158,6 @@ void PrusaGcodeSuite::M334() {
     // Let the new settings take effect
     metrics_reconfigure();
     logging::syslog_reconfigure();
-}
-
-bool PrusaGcodeSuite::metrics_config_change_prompt() {
-    marlin_server::set_warning(WarningType::MetricsConfigChangePrompt, PhasesWarning::MetricsConfigChangePrompt);
-
-    Response r;
-    while ((r = marlin_server::get_response_from_phase(PhasesWarning::MetricsConfigChangePrompt)) == Response::_none) {
-        idle(true);
-    }
-
-    marlin_server::fsm_destroy(ClientFSM::Warning);
-    return r == Response::Yes;
 }
 
 /** @}*/

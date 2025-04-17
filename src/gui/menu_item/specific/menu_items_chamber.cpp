@@ -3,31 +3,20 @@
 #include <feature/chamber/chamber.hpp>
 #include <img_resources.hpp>
 #include <marlin/Configuration.h>
+#include <numeric_input_config_common.hpp>
 
 using namespace buddy;
-
-static NumericInputConfig chamber_temperature_config = {
-    .max_value = 100,
-    .special_value = 0,
-    .unit = Unit::celsius,
-};
 
 // MI_CHAMBER_TARGET_TEMP
 // ============================================
 MI_CHAMBER_TARGET_TEMP::MI_CHAMBER_TARGET_TEMP(const char *label)
-    : WiSpin(
-        0,
-        chamber_temperature_config,
-        _(label),
-        &img::enclosure_16x16 //
-        ) //
-{
-    const auto max_temp = chamber().capabilities().max_temp;
-    chamber_temperature_config.max_value = max_temp.value_or(chamber_temperature_config.max_value);
+    : WiSpin(0, numeric_input_config::chamber_temp_with_off(), _(label), &img::enclosure_16x16) {
+    const auto caps = chamber().capabilities();
+    set_is_hidden(!caps.always_show_temperature_control && !caps.temperature_control());
 }
 
 void MI_CHAMBER_TARGET_TEMP::OnClick() {
-    chamber().set_target_temperature(value() != config().special_value ? std::make_optional<buddy::Temperature>(value()) : std::nullopt);
+    chamber().set_target_temperature(value_opt());
 }
 
 void MI_CHAMBER_TARGET_TEMP::Loop() {
@@ -37,9 +26,8 @@ void MI_CHAMBER_TARGET_TEMP::Loop() {
 
     const auto caps = chamber().capabilities();
     const bool temp_ctrl = caps.temperature_control();
-    const auto new_val = (temp_ctrl ? chamber().target_temperature() : std::nullopt).value_or(*config().special_value);
+    const auto new_val = (temp_ctrl ? chamber().target_temperature() : std::nullopt);
 
-    set_is_hidden(!caps.always_show_temperature_control && !temp_ctrl);
     set_enabled(temp_ctrl);
     set_value(new_val);
 }

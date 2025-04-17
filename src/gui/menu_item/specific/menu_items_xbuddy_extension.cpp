@@ -2,86 +2,109 @@
 
 #include <feature/xbuddy_extension/xbuddy_extension.hpp>
 #include <numeric_input_config_common.hpp>
+#include <feature/chamber/chamber.hpp>
 
 using namespace buddy;
+
+namespace {
+void setup_fan_item(WiSpin &item, XBuddyExtension::Fan fan) {
+    auto &exb = xbuddy_extension();
+    item.set_is_hidden(exb.status() == XBuddyExtension::Status::disabled);
+
+    const auto tgt = exb.fan_target_pwm(fan);
+    item.set_value(tgt.transform(XBuddyExtension::FanPWM::to_percent_static).value_or(*item.config().special_value));
+}
+
+void handle_fan_item_click(WiSpin &item, XBuddyExtension::Fan fan) {
+    XBuddyExtension::FanPWMOrAuto tgt = pwm_auto;
+    if (const auto val = item.value_opt()) {
+        tgt = XBuddyExtension::FanPWM::from_percent(*val);
+    }
+    xbuddy_extension().set_fan_target_pwm(fan, tgt);
+}
+
+template <XBuddyExtension::Fan fan>
+FanPWMAndRPM fan_info_function(auto) {
+    return FanPWMAndRPM {
+        .pwm = xbuddy_extension().fan_actual_pwm(fan).value,
+        .rpm = xbuddy_extension().fan_rpm(fan),
+    };
+}
+} // namespace
 
 // MI_XBUDDY_EXTENSION_CHAMBER_FANS
 // =============================================
 MI_XBUDDY_EXTENSION_COOLING_FANS::MI_XBUDDY_EXTENSION_COOLING_FANS()
     : WiSpin(0, numeric_input_config::percent_with_auto, _("Chamber Fans")) //
 {
-    auto &exb = xbuddy_extension();
-    set_is_hidden(exb.status() == XBuddyExtension::Status::disabled);
-
-    set_value(
-        exb.has_fan1_fan2_auto_control()
-            ? *config().special_value
-            : static_cast<int>(exb.fan1_fan2_pwm()) * 100 / buddy::FanCooling::max_pwm);
+    setup_fan_item(*this, XBuddyExtension::Fan::cooling_fan_1);
 }
 
 void MI_XBUDDY_EXTENSION_COOLING_FANS::OnClick() {
+    handle_fan_item_click(*this, XBuddyExtension::Fan::cooling_fan_1);
+}
+
+// MI_XBUDDY_EXTENSION_COOLING_FANS_CONTROL_MAX
+// =============================================
+static constexpr NumericInputConfig chamber_fan_max_percent = {
+    .min_value = FanCooling::min_pwm.to_percent(),
+    .max_value = 100.f,
+    .special_value = 0.f,
+    .unit = Unit::percent,
+};
+
+MI_XBUDDY_EXTENSION_COOLING_FANS_CONTROL_MAX::MI_XBUDDY_EXTENSION_COOLING_FANS_CONTROL_MAX()
+    : WiSpin(xbuddy_extension().max_cooling_pwm().to_percent(), chamber_fan_max_percent, _("Chamber Fans Limit")) {
     auto &exb = xbuddy_extension();
-    if (value() == config().special_value) {
-        exb.set_fan1_fan2_auto_control();
-    } else {
-        exb.set_fan1_fan2_pwm(value() * buddy::FanCooling::max_pwm / 100);
-    }
+    set_is_hidden(exb.status() == XBuddyExtension::Status::disabled);
+}
+
+void MI_XBUDDY_EXTENSION_COOLING_FANS_CONTROL_MAX::OnClick() {
+    // need to calculate value in float and round it properly, otherwise set value (in %) and stored value (in PWM duty cycle steps) could differ
+    xbuddy_extension().set_max_cooling_pwm(XBuddyExtension::FanPWM::from_percent(value()));
 }
 
 // MI_XBE_FILTRATION_FAN
 // =============================================
 MI_XBE_FILTRATION_FAN::MI_XBE_FILTRATION_FAN()
-    : WiSpin(xbuddy_extension().fan3_pwm() * 100 / 255, numeric_input_config::percent_with_off, _("Filtration Fan")) //
+    : WiSpin(0, numeric_input_config::percent_with_auto, _("Filtration Fan")) //
 {
+    setup_fan_item(*this, XBuddyExtension::Fan::filtration_fan);
 }
+
 void MI_XBE_FILTRATION_FAN::OnClick() {
-    xbuddy_extension().set_fan3_pwm(value() * 255 / 100);
+    handle_fan_item_click(*this, XBuddyExtension::Fan::filtration_fan);
 }
 
 // MI_INFO_XBUDDY_EXTENSION_FAN1
 // =============================================
 MI_INFO_XBUDDY_EXTENSION_FAN1::MI_INFO_XBUDDY_EXTENSION_FAN1()
-    : WI_FAN_LABEL_t(_("Chamber Fan 1"),
-        [](auto) { return FanPWMAndRPM {
-                       .pwm = xbuddy_extension().fan1_fan2_pwm(),
-                       .rpm = xbuddy_extension().fan1_rpm(),
-                   }; } //
-    ) {
+    : WI_FAN_LABEL_t(_("Chamber Fan 1"), fan_info_function<XBuddyExtension::Fan::cooling_fan_1>) {
     set_is_hidden(xbuddy_extension().status() == XBuddyExtension::Status::disabled);
 }
 
 // MI_INFO_XBUDDY_EXTENSION_FAN2
 // =============================================
 MI_INFO_XBUDDY_EXTENSION_FAN2::MI_INFO_XBUDDY_EXTENSION_FAN2()
-    : WI_FAN_LABEL_t(_("Chamber Fan 2"),
-        [](auto) { return FanPWMAndRPM {
-                       .pwm = xbuddy_extension().fan1_fan2_pwm(),
-                       .rpm = xbuddy_extension().fan2_rpm(),
-                   }; } //
-    ) {
+    : WI_FAN_LABEL_t(_("Chamber Fan 2"), fan_info_function<XBuddyExtension::Fan::cooling_fan_2>) {
     set_is_hidden(xbuddy_extension().status() == XBuddyExtension::Status::disabled);
 }
 
 // MI_INFO_XBUDDY_EXTENSION_FAN3
 // =============================================
 MI_INFO_XBUDDY_EXTENSION_FAN3::MI_INFO_XBUDDY_EXTENSION_FAN3()
-    : WI_FAN_LABEL_t(_("Filtration Fan"),
-        [](auto) { return FanPWMAndRPM {
-                       .pwm = xbuddy_extension().fan3_pwm(),
-                       .rpm = xbuddy_extension().fan3_rpm(),
-                   }; } //
-    ) {
-    set_is_hidden(xbuddy_extension().status() == XBuddyExtension::Status::disabled);
+    : WI_FAN_LABEL_t(_("Filtration fan"), fan_info_function<XBuddyExtension::Fan::filtration_fan>) {
+    set_is_hidden(!xbuddy_extension().using_filtration_fan_instead_of_cooling_fans());
 }
 
 // MI_CAM_USB_PWR
 // =============================================
 MI_CAM_USB_PWR::MI_CAM_USB_PWR()
-    : WI_ICON_SWITCH_OFF_ON_t(buddy::xbuddy_extension().usb_power(), _("Camera")) {}
+    : WI_ICON_SWITCH_OFF_ON_t(xbuddy_extension().usb_power(), _("Camera")) {}
 
 void MI_CAM_USB_PWR::OnChange([[maybe_unused]] size_t old_index) {
     // FIXME: Don't interact with xbuddy_extension directly, but use some common interface, like we have for Chamber API
-    buddy::xbuddy_extension().set_usb_power(!old_index);
+    xbuddy_extension().set_usb_power(!old_index);
 }
 
 void MI_CAM_USB_PWR::Loop() {

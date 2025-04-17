@@ -37,9 +37,17 @@
 #include <option/has_i2c_expander.h>
 #include <option/has_xbuddy_extension.h>
 #include <option/has_emergency_stop.h>
+#include <option/has_side_leds.h>
 #include <option/xl_enclosure_support.h>
+#include <option/has_precise_homing_corexy.h>
+#include <option/has_precise_homing.h>
+#include <option/developer_mode.h>
+#include <option/has_chamber_filtration_api.h>
+#include <option/has_auto_retract.h>
+#include <option/has_door_sensor_calibration.h>
 #include <common/extended_printer_type.hpp>
 #include <common/hw_check.hpp>
+#include <pwm_utils.hpp>
 #include <feature/xbuddy_extension/xbuddy_extension_fan_results.hpp>
 
 #if HAS_SHEET_PROFILES()
@@ -48,6 +56,11 @@
 
 #if ENABLED(PRECISE_HOMING_COREXY)
     #include <Marlin/src/module/prusa/homing_corexy_config.hpp>
+#endif
+
+#include <option/has_chamber_filtration_api.h>
+#if HAS_CHAMBER_FILTRATION_API()
+    #include <feature/chamber_filtration/chamber_filtration_enums.hpp>
 #endif
 
 namespace config_store_ns {
@@ -71,6 +84,12 @@ struct CurrentStore
     /// This is an opportunity to check for invalid config combinations and such
     void perform_config_check();
 
+    /// Config store "version", gets incremented each time we need to add a new config migration
+    static constexpr uint8_t newest_config_version = 1;
+
+    /// Stores newest_migration_version of the previous firmware
+    StoreItem<uint8_t, 0, journal::hash("Config Version")> config_version;
+
     // wizard flags
     StoreItem<bool, true, journal::hash("Run Selftest")> run_selftest;
 
@@ -79,6 +98,10 @@ struct CurrentStore
 
     /// Global filament sensor enable
     StoreItem<bool, defaults::fsensor_enabled, journal::hash("FSensor Enabled V2")> fsensor_enabled;
+
+    /// BFW-5545 When filament sensor is not responding during filament change, the user has an option to disable it.
+    /// This is a flag to remind them to turn it back on again when they finis printing
+    StoreItem<bool, false, journal::hash("Show Fsensors Disabled warning after print")> show_fsensors_disabled_warning_after_print;
 
     /// Bitfield of enabled side filament sensors
     StoreItem<uint8_t, 0xff, journal::hash("Extruder FSensors enabled")> fsensor_side_enabled_bits;
@@ -315,16 +338,19 @@ struct CurrentStore
 
     // We cannot use the constant in StoreItemArray, because it is scanned by a script and it would not be able to parse it
     static_assert(max_user_filament_type_count == 32);
-    StoreItemArray<FilamentTypeParameters, defaults::user_filament_parameters, journal::hash("User Filament Parameters"), 32, user_filament_type_count> user_filament_parameters;
+    StoreItemArray<FilamentTypeParameters_EEPROM1, defaults::user_filament_parameters, journal::hash("User Filament Parameters"), 32, user_filament_type_count> user_filament_parameters;
+    StoreItemArray<FilamentTypeParameters_EEPROM2, FilamentTypeParameters_EEPROM2 {}, journal::hash("User Filament Parameters 2"), 32, user_filament_type_count> user_filament_parameters_2;
 
-    StoreItemArray<FilamentTypeParameters, defaults::adhoc_filament_parameters, journal::hash("Adhoc Filament Parameters"), 8, adhoc_filament_type_count> adhoc_filament_parameters;
+    StoreItemArray<FilamentTypeParameters_EEPROM1, defaults::adhoc_filament_parameters, journal::hash("Adhoc Filament Parameters"), 8, adhoc_filament_type_count> adhoc_filament_parameters;
+    StoreItemArray<FilamentTypeParameters_EEPROM2, FilamentTypeParameters_EEPROM2 {}, journal::hash("Adhoc Filament Parameters 2"), 8, adhoc_filament_type_count> adhoc_filament_parameters_2;
 
     StoreItem<std::bitset<max_user_filament_type_count>, defaults::visible_user_filament_types, journal::hash("Visible User Filament Types")> visible_user_filament_types;
 
     FilamentType get_filament_type(uint8_t index);
     void set_filament_type(uint8_t index, FilamentType value);
 
-    StoreItem<bool, false, journal::hash("Heatup Bed")> heatup_bed;
+    // Note: hash is kept for backwards compatibility
+    StoreItem<bool, false, journal::hash("Heatup Bed")> filament_change_preheat_all;
 
     StoreItem<float, defaults::nozzle_diameter, journal::hash("Nozzle Diameter 0")> nozzle_diameter_0;
 #if HOTENDS > 1 // for now only doing one ifdef for simplicity
@@ -350,13 +376,15 @@ struct CurrentStore
     StoreItem<float, 0.0f, journal::hash("Homing Bump Divisor X")> homing_bump_divisor_x;
     StoreItem<float, 0.0f, journal::hash("Homing Bump Divisor Y")> homing_bump_divisor_y;
 
+#if HAS_SIDE_LEDS()
     /// 0-255; 0 = disabled. Decreases when dimming is enabled
     StoreItem<uint8_t, 255, journal::hash("XBuddy Extension Chamber LEDs PWM")> side_leds_max_brightness;
 
-    StoreItem<bool, true, journal::hash("Enable Serial Printing Screen")> serial_print_screen_enabled;
-
     /// Whether the side leds should dim down a bit when user is not interacting with the printer or stay on full power the whole time
     StoreItem<bool, true, journal::hash("Enable Side LEDs dimming")> side_leds_dimming_enabled;
+#endif
+
+    StoreItem<bool, true, journal::hash("Enable Serial Printing Screen")> serial_print_screen_enabled;
 
     StoreItem<bool, true, journal::hash("Enable Tool LEDs")> tool_leds_enabled;
 
@@ -480,10 +508,7 @@ struct CurrentStore
     StoreItem<float, defaults::axis_z_max_pos_mm, journal::hash("Axis Z Max Pos MM")> axis_z_max_pos_mm;
 
     // Nozzle Sock has is here for backwards compatibility (should be binary compatible)
-    StoreItem<HotendType, defaults::hotend_type, journal::hash("Nozzle Sock")> hotend_type;
-
-    // If hotend count increases, we need to migrate hotend_type to an array
-    static_assert(!HAS_HOTEND_TYPE_SUPPORT() || HOTENDS == 1);
+    StoreItemArray<HotendType, defaults::hotend_type, journal::hash("Hotend Type Per Tool"), 8, HOTENDS> hotend_type;
 
     StoreItem<restore_z::Position, restore_z::default_position, journal::hash("Restore Z Coordinate After Boot")> restore_z_after_boot;
 
@@ -506,6 +531,11 @@ struct CurrentStore
 
     input_shaper::AxisConfig get_input_shaper_axis_config(AxisEnum axis);
     void set_input_shaper_axis_config(AxisEnum axis, const input_shaper::AxisConfig &);
+
+    /// FW base printer model from the last boot of the printer.
+    /// Used for detecting when the printer has been upgraded to a different base model with the same board (for example MK3.5 -> MK3.9)
+    /// We want to detect those cases and force a factory reset, because some config store might not be compatible between different firmwares.
+    StoreItem<PrinterModel, static_cast<PrinterModel>(-1), journal::hash("Last Boot Base Printer Model")> last_boot_base_printer_model;
 
 #if PRINTER_IS_PRUSA_MK3_5()
     StoreItem<bool, false, journal::hash("Has Alt Fans")> has_alt_fans;
@@ -553,6 +583,12 @@ struct CurrentStore
 #if HAS_XBUDDY_EXTENSION()
     StoreItem<XBEFanTestResults, XBEFanTestResults {}, journal::hash("XBE Chamber fan selftest results")> xbe_fan_test_results;
     StoreItem<bool, true, journal::hash("XBE USB Host power")> xbe_usb_power;
+    StoreItem<uint8_t, 102, journal::hash("XBuddy Extension Chamber Fan Max Control Limit")> xbe_cooling_fan_max_auto_pwm;
+    StoreItem<uint8_t, PWM255::from_percent(70).value, journal::hash("XBE Filtration Fan Max Auto PWM")> xbe_filtration_fan_max_auto_pwm;
+#endif
+
+#if HAS_DOOR_SENSOR_CALIBRATION()
+    StoreItem<TestResult, defaults::test_result_unknown, journal::hash("Selftest Result - Door Sensor")> selftest_result_door_sensor;
 #endif
 
 #if HAS_EMERGENCY_STOP()
@@ -569,6 +605,32 @@ struct CurrentStore
 #if ENABLED(PRECISE_HOMING_COREXY) && HAS_TRINAMIC && defined(XY_HOMING_MEASURE_SENS_MIN)
     StoreItem<CoreXYHomeTMCSens, COREXY_NO_HOME_TMC_SENS, journal::hash("CoreXY home TMC calibration")> corexy_home_tmc_sens;
 #endif
+#if ENABLED(PRECISE_HOMING)
+    static constexpr uint8_t precise_homing_axis_sample_count = 9;
+    static constexpr uint8_t precise_homing_axis_count = 2;
+
+    /// Per-axis circular buffer that keeps \p precise_homing_axis_sample_count latest hoing samples
+    StoreItemArray<uint16_t, uint16_t { 0xffff }, journal::hash("Precise homing samples"), 32, precise_homing_axis_count * precise_homing_axis_sample_count> precise_homing_sample_history;
+    StoreItemArray<uint8_t, uint8_t { 0 }, journal::hash("Precise homing samples index"), 3, precise_homing_axis_count> precise_homing_sample_history_index;
+#endif
+
+#if HAS_CHAMBER_FILTRATION_API()
+    StoreItem<buddy::ChamberFiltrationBackend, buddy::ChamberFiltrationBackend::none, journal::hash("Chamber filtration backend")> chamber_filtration_backend;
+    StoreItem<bool, true, journal::hash("Chamber filtration post print enable")> chamber_post_print_filtration_enable;
+    StoreItem<uint8_t, 10, journal::hash("Chamber filtration post print duration")> chamber_post_print_filtration_duration_min;
+    StoreItem<PWM255, PWM255::from_percent(40).value, journal::hash("Chamber mid print filtration pwm")> chamber_mid_print_filtration_pwm;
+    StoreItem<PWM255, PWM255::from_percent(40).value, journal::hash("Chamber post print filtration pwm")> chamber_post_print_filtration_pwm;
+#endif
+
+#if HAS_AUTO_RETRACT()
+    /// Bitset, one bit for each hotend
+    /// !!! Do not set directly, always use auto_retract().mark_as_retracted
+    StoreItem<uint8_t, 0, journal::hash("Filament auto-retracted")> filament_auto_retracted_bitset;
+    static_assert(HOTENDS <= 8);
+#endif
+
+private:
+    void perform_config_migrations();
 };
 
 /**
@@ -648,6 +710,8 @@ struct DeprecatedStore
     StoreItem<uint8_t, 0, journal::hash("Nozzle Type")> nozzle_type;
 
     StoreItem<bool, true, journal::hash("Enable Side LEDs")> side_leds_enabled;
+
+    StoreItem<HotendType, defaults::hotend_type, journal::hash("Nozzle Sock")> hotend_type_single_hotend;
 };
 
 } // namespace config_store_ns

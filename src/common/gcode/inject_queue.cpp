@@ -5,7 +5,11 @@
 
 InjectQueue inject_queue; // instance
 
-GCodeLoader loader; // loader instance for async gcode loading from the InjectQueue
+static GCodeLoader loader; // loader instance for async gcode loading from the InjectQueue
+
+bool InjectQueue::is_empty() const {
+    return queue.size() == 0 && loader.is_idle();
+}
 
 bool InjectQueue::try_push(InjectQueueRecord record) {
     return queue.try_put(record);
@@ -17,8 +21,10 @@ std::expected<const char *, InjectQueue::GetGCodeError> InjectQueue::get_gcode()
     if (loader_result.has_value()) {
         loader.reset();
         return loader_result.value();
+
     } else if (loader_result.error() == GCodeLoader::BufferState::buffering) {
         return std::unexpected(GetGCodeError::buffering);
+
     } else if (loader_result.error() == GCodeLoader::BufferState::error) {
         loader.reset();
         return std::unexpected(GetGCodeError::loading_aborted);

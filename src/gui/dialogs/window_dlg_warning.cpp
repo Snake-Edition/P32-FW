@@ -40,97 +40,65 @@ static constexpr Rect16 qr_rect = {
     qr_size,
 };
 
-static constexpr Rect16 text_rect = {
+static constexpr Rect16 text_rect = Rect16::fromLTRB(
     padding,
     padding + top_row_height + padding,
-    screen_rect.Width() - padding * 2,
-    screen_rect.Height() - (padding + top_row_height + padding),
-};
+    screen_rect.Width() - padding,
+    GuiDefaults::GetButtonRect(screen_rect).Top());
 
 const img::Resource *warning_dialog_icon(WarningType warning_type) {
-    static constexpr EnumArray<WarningType, const img::Resource *, static_cast<int>(WarningType::_last) + 1> data {
-        { WarningType::HotendFanError, &img::fan_error_48x48 },
-            { WarningType::PrintFanError, &img::fan_error_48x48 },
-            { WarningType::HeatersTimeout, &img::exposure_times_48x48 },
-            { WarningType::HotendTempDiscrepancy, &img::warning_48x48 },
-            { WarningType::NozzleTimeout, &img::exposure_times_48x48 },
-            { WarningType::FilamentLoadingTimeout, &img::warning_48x48 },
-#if _DEBUG
-            { WarningType::SteppersTimeout, &img::exposure_times_48x48 },
-#endif
-            { WarningType::USBFlashDiskError, &img::usb_error_48x48 },
-            { WarningType::USBDriveUnsupportedFileSystem, &img::usb_error_48x48 },
-#if ENABLED(POWER_PANIC)
-            { WarningType::HeatbedColdAfterPP, &img::warning_48x48 },
-#endif
-            { WarningType::HeatBreakThermistorFail, &img::warning_48x48 },
-#if ENABLED(CALIBRATION_GCODE)
-            { WarningType::NozzleDoesNotHaveRoundSection, &img::nozzle_34x32 },
-#endif
-            { WarningType::BuddyMCUMaxTemp, &img::warning_48x48 },
-#if HAS_DWARF()
-            { WarningType::DwarfMCUMaxTemp, &img::warning_48x48 },
-#endif
-#if HAS_MODULARBED()
-            { WarningType::ModBedMCUMaxTemp, &img::warning_48x48 },
-#endif
-#if HAS_BED_PROBE
-            { WarningType::ProbingFailed, &img::warning_48x48 },
-#endif
-#if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-            { WarningType::NozzleCleaningFailed, &img::warning_48x48 },
-#endif
-#if XL_ENCLOSURE_SUPPORT()
-            { WarningType::EnclosureFilterExpirWarning, &img::warning_48x48 },
-            { WarningType::EnclosureFilterExpiration, &img::warning_48x48 },
-            { WarningType::EnclosureFanError, &img::warning_48x48 },
-#endif
-#if ENABLED(DETECT_PRINT_SHEET)
-            { WarningType::SteelSheetNotDetected, &img::warning_48x48 },
-#endif
-            { WarningType::NotDownloaded, &img::no_stream_48x48 },
-            { WarningType::GcodeCorruption, &img::warning_48x48 },
-            { WarningType::GcodeCropped, &img::warning_48x48 },
-            { WarningType::MetricsConfigChangePrompt, &img::warning_48x48 },
-#if HAS_EMERGENCY_STOP()
-            { WarningType::DoorOpen, &img::warning_48x48 },
-#endif
-#if HAS_CHAMBER_API()
-            { WarningType::FailedToReachChamberTemperature, &img::warning_48x48 },
-#endif
-#if HAS_UNEVEN_BED_PROMPT()
-            { WarningType::BedUnevenAlignmentPrompt, &img::warning_48x48 },
-#endif
-#if HAS_CHAMBER_API()
-            { WarningType::ChamberOverheatingTemperature, &img::warning_48x48 },
-            { WarningType::ChamberCriticalTemperature, &img::warning_48x48 },
-#endif
-            { WarningType::AccelerometerCommunicationFailed, &img::warning_48x48 },
-    };
-    return data[warning_type];
-}
+    switch (warning_type) {
 
-static ErrDesc warning_type_to_error_desc(WarningType warning_type) {
-    return find_error(printer_state::warning_type_to_error_code(warning_type));
+    default:
+        // Warnings have the warning icon by default, but you can change it if you need it
+        return &img::warning_48x48;
+
+    case WarningType::HotendFanError:
+    case WarningType::PrintFanError:
+        return &img::fan_error_48x48;
+
+    case WarningType::HeatersTimeout:
+    case WarningType::NozzleTimeout:
+#if _DEBUG
+    case WarningType::SteppersTimeout:
+#endif
+        return &img::exposure_times_48x48;
+
+    case WarningType::USBFlashDiskError:
+    case WarningType::USBDriveUnsupportedFileSystem:
+        return &img::usb_error_48x48;
+
+#if ENABLED(CALIBRATION_GCODE)
+    case WarningType::NozzleDoesNotHaveRoundSection:
+        return &img::nozzle_34x32;
+#endif
+
+    case WarningType::NotDownloaded:
+        return &img::no_stream_48x48;
+    }
 }
 
 DialogWarning::DialogWarning(fsm::BaseData data)
-    : DialogWarning {
-        GetEnumFromPhaseIndex<PhasesWarning>(data.GetPhase()),
-        static_cast<WarningType>(*data.GetData().data())
-    } {
-}
-
-DialogWarning::DialogWarning(PhasesWarning phase, WarningType warning_type)
-    : DialogWarning { phase, warning_type, warning_type_to_error_desc(warning_type) } {
-}
-
-DialogWarning::DialogWarning(PhasesWarning data, WarningType warning_type, const ErrDesc &error_desc)
     : IDialogMarlin(screen_rect)
-    , icon(this, icon_rect, warning_dialog_icon(warning_type))
+    , icon(this, icon_rect, nullptr)
     , phone(this, phone_rect, phone_resource)
-    , qr(this, qr_rect, error_desc.err_code)
-    , text(this, text_rect, is_multiline::yes, is_closed_on_click_t::yes, _(error_desc.err_text))
-    , button(this, GuiDefaults::GetButtonRect(screen_rect), data) {
+    , qr(this, qr_rect, ErrCode::ERR_UNDEF)
+    , text(this, text_rect, is_multiline::yes, is_closed_on_click_t::yes, {})
+    , button(this, GuiDefaults::GetButtonRect(screen_rect), PhasesWarning::_last) {
     CaptureNormalWindow(button);
+    Change(data);
+}
+
+void DialogWarning::Change(fsm::BaseData data) {
+    const auto phase = GetEnumFromPhaseIndex<PhasesWarning>(data.GetPhase());
+    const auto warning_type = static_cast<WarningType>(*data.GetData().data());
+    const auto err_desc = find_error(printer_state::warning_type_to_error_code(warning_type));
+
+    icon.SetRes(warning_dialog_icon(warning_type));
+    qr.set_error_code(err_desc.err_code);
+    text.SetText(_(err_desc.err_text));
+    button.set_fsm_and_phase(phase);
+
+    // Reset selection to default on phase change
+    button.SetBtnIndex(0);
 }

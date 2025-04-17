@@ -7,20 +7,33 @@
 #include <dialog_text_input.hpp>
 #include <ScreenHandler.hpp>
 
+#if HAS_CHAMBER_API()
+    #include <feature/chamber/chamber.hpp>
+#endif
+
+using namespace buddy;
 using namespace screen_filament_detail;
 
-template <typename T>
-concept CMI_COMMON = requires(T a, FilamentType ft) {
-    { a.set_filament_type(ft) };
-};
+// *MI_TOGGLE
+MI_TOGGLE::MI_TOGGLE(Parameter param, const char *label)
+    : WI_ICON_SWITCH_OFF_ON_t(false, _(label))
+    , param_(param) {
+}
+void MI_TOGGLE::set_filament_type(FilamentType set) {
+    filament_type = set;
+    set_value(filament_type.parameters().*param_, false);
+    set_enabled(filament_type.is_customizable());
+}
+void MI_TOGGLE::OnChange(size_t) {
+    filament_type.modify_parameters([&](auto &p) { p.*param_ = value(); });
+}
 
 // * MI_FILAMENT_NAME
-static_assert(UpdatableMenuItem<MI_FILAMENT_NAME>);
-
 MI_FILAMENT_NAME::MI_FILAMENT_NAME()
-    : MI_COMMON(_("Name"), nullptr, is_enabled_t(filament_type.is_customizable())) {}
+    : WiInfo(_("Name")) {}
 
-void MI_FILAMENT_NAME::update() {
+void MI_FILAMENT_NAME::set_filament_type(FilamentType set) {
+    filament_type = set;
     ArrayStringBuilder<GetInfoLen()> sb;
     filament_type.build_name_with_info(sb);
     ChangeInformation(sb.str());
@@ -28,7 +41,7 @@ void MI_FILAMENT_NAME::update() {
 }
 
 void MI_FILAMENT_NAME::click(IWindowMenu &) {
-    std::array<char, filament_name_buffer_size> buf = std::to_array(filament_type.parameters().name);
+    FilamentTypeParameters::Name buf = filament_type.parameters().name;
 
     while (true) {
         if (!DialogTextInput::exec(GetLabel(), buf)) {
@@ -47,93 +60,71 @@ void MI_FILAMENT_NAME::click(IWindowMenu &) {
         break;
     }
 
-    filament_type.modify_parameters([&](auto &p) { memcpy(p.name, buf.data(), buf.size()); });
-    update();
+    filament_type.modify_parameters([&](auto &p) { memcpy(p.name.data(), buf.data(), buf.size()); });
+    set_filament_type(filament_type);
 }
 
 // * MI_FILAMENT_NOZZLE_TEMPERATURE
-static_assert(UpdatableMenuItem<MI_FILAMENT_NOZZLE_TEMPERATURE>);
-
 MI_FILAMENT_NOZZLE_TEMPERATURE::MI_FILAMENT_NOZZLE_TEMPERATURE()
-    : MI_COMMON(0, numeric_input_config::filament_nozzle_temperature, HAS_MINI_DISPLAY() ? _("Nozzle Temp") : _("Nozzle Temperature")) {}
-
-void MI_FILAMENT_NOZZLE_TEMPERATURE::update() {
-    set_value(filament_type.parameters().nozzle_temperature);
-    set_enabled(filament_type.is_customizable());
-}
-
-void MI_FILAMENT_NOZZLE_TEMPERATURE::OnClick() {
-    filament_type.modify_parameters([&](auto &p) { p.nozzle_temperature = value(); });
-}
+    : MI_SPIN(&FilamentTypeParameters::nozzle_temperature, numeric_input_config::filament_nozzle_temperature, HAS_MINI_DISPLAY() ? N_("Nozzle Temp") : N_("Nozzle Temperature")) {}
 
 // * MI_FILAMENT_NOZZLE_PREHEAT_TEMPERATURE
-static_assert(UpdatableMenuItem<MI_FILAMENT_NOZZLE_PREHEAT_TEMPERATURE>);
-
 MI_FILAMENT_NOZZLE_PREHEAT_TEMPERATURE::MI_FILAMENT_NOZZLE_PREHEAT_TEMPERATURE()
-    : MI_COMMON(0, numeric_input_config::nozzle_temperature, HAS_MINI_DISPLAY() ? _("Preheat Temp") : _("Nozzle Preheat Temperature")) {}
-
-void MI_FILAMENT_NOZZLE_PREHEAT_TEMPERATURE::update() {
-    set_value(filament_type.parameters().nozzle_preheat_temperature);
-    set_enabled(filament_type.is_customizable());
-}
-
-void MI_FILAMENT_NOZZLE_PREHEAT_TEMPERATURE::OnClick() {
-    filament_type.modify_parameters([&](auto &p) { p.nozzle_preheat_temperature = value(); });
-}
+    : MI_SPIN(&FilamentTypeParameters::nozzle_preheat_temperature, numeric_input_config::nozzle_temperature, HAS_MINI_DISPLAY() ? N_("Preheat Temp") : N_("Nozzle Preheat Temperature")) {}
 
 // * MI_FILAMENT_BED_TEMPERATURE
-static_assert(UpdatableMenuItem<MI_FILAMENT_BED_TEMPERATURE>);
-
 MI_FILAMENT_BED_TEMPERATURE::MI_FILAMENT_BED_TEMPERATURE()
-    : MI_COMMON(0, numeric_input_config::bed_temperature, HAS_MINI_DISPLAY() ? _("Bed Temp") : _("Bed Temperature")) {}
+    : MI_SPIN(&FilamentTypeParameters::heatbed_temperature, numeric_input_config::bed_temperature, HAS_MINI_DISPLAY() ? N_("Bed Temp") : N_("Bed Temperature")) {}
 
-void MI_FILAMENT_BED_TEMPERATURE::update() {
-    set_value(filament_type.parameters().heatbed_temperature);
-    set_enabled(filament_type.is_customizable());
+#if HAS_CHAMBER_API()
+namespace {
+void setup_chamber_temp_item(IWindowMenuItem &item) {
+    const auto caps = chamber().capabilities();
+    item.set_is_hidden(!caps.temperature_control() && !caps.always_show_temperature_control);
+}
+} // namespace
+
+// * MI_FILAMENT_MIN_CHAMBER_TEMPERATURE
+MI_FILAMENT_MIN_CHAMBER_TEMPERATURE::MI_FILAMENT_MIN_CHAMBER_TEMPERATURE()
+    : MI_SPIN(&FilamentTypeParameters::chamber_min_temperature, numeric_input_config::chamber_temp_with_none(), N_("Minimum Chamber Temperature")) {
+    setup_chamber_temp_item(*this);
 }
 
-void MI_FILAMENT_BED_TEMPERATURE::OnClick() {
-    filament_type.modify_parameters([&](auto &p) { p.heatbed_temperature = value(); });
+// * MI_FILAMENT_MAX_CHAMBER_TEMPERATURE
+MI_FILAMENT_MAX_CHAMBER_TEMPERATURE::MI_FILAMENT_MAX_CHAMBER_TEMPERATURE()
+    : MI_SPIN(&FilamentTypeParameters::chamber_max_temperature, numeric_input_config::chamber_temp_with_none(), N_("Maximum Chamber Temperature")) {
+    setup_chamber_temp_item(*this);
 }
+
+// * MI_FILAMENT_TARGET_CHAMBER_TEMPERATURE
+MI_FILAMENT_TARGET_CHAMBER_TEMPERATURE::MI_FILAMENT_TARGET_CHAMBER_TEMPERATURE()
+    : MI_SPIN(&FilamentTypeParameters::chamber_target_temperature, numeric_input_config::chamber_temp_with_none(), N_("Nominal Chamber Temperature")) {
+    setup_chamber_temp_item(*this);
+}
+#endif
 
 // * MI_FILAMENT_REQUIRES_FILTRATION
-static_assert(UpdatableMenuItem<MI_FILAMENT_REQUIRES_FILTRATION>);
-
+#if HAS_CHAMBER_API()
 MI_FILAMENT_REQUIRES_FILTRATION::MI_FILAMENT_REQUIRES_FILTRATION()
-    : MI_COMMON(false, _("Requires Filtration")) {}
+    : MI_TOGGLE(&FilamentTypeParameters::requires_filtration, N_("Requires Filtration")) {}
 
-void MI_FILAMENT_REQUIRES_FILTRATION::update() {
-    set_value(filament_type.parameters().requires_filtration, false);
-    set_enabled(filament_type.is_customizable());
-}
-
-void MI_FILAMENT_REQUIRES_FILTRATION::OnChange(size_t) {
-    filament_type.modify_parameters([&](auto &p) { p.requires_filtration = value(); });
-}
+#endif
 
 // * MI_FILAMENT_IS_ABRASIVE
-static_assert(UpdatableMenuItem<MI_FILAMENT_IS_ABRASIVE>);
-
 MI_FILAMENT_IS_ABRASIVE::MI_FILAMENT_IS_ABRASIVE()
-    : MI_COMMON(false, _("Is Abrasive")) {}
+    : MI_TOGGLE(&FilamentTypeParameters::is_abrasive, N_("Is Abrasive")) {}
 
-void MI_FILAMENT_IS_ABRASIVE::update() {
-    set_value(filament_type.parameters().is_abrasive, false);
-    set_enabled(filament_type.is_customizable());
-}
-
-void MI_FILAMENT_IS_ABRASIVE::OnChange(size_t) {
-    filament_type.modify_parameters([&](auto &p) { p.is_abrasive = value(); });
-}
+// * MI_FILAMENT_IS_FLEXIBLE
+MI_FILAMENT_IS_FLEXIBLE::MI_FILAMENT_IS_FLEXIBLE()
+    : MI_TOGGLE(&FilamentTypeParameters::is_flexible, N_("Is Flexible")) {}
 
 // * MI_FILAMENT_VISIBLE
-static_assert(UpdatableMenuItem<MI_FILAMENT_VISIBLE>);
-
 MI_FILAMENT_VISIBLE::MI_FILAMENT_VISIBLE()
-    : MI_COMMON(false, _("Visible")) {
+    : WI_ICON_SWITCH_OFF_ON_t(false, _("Visible")) {
 }
 
-void MI_FILAMENT_VISIBLE::update() {
+void MI_FILAMENT_VISIBLE::set_filament_type(FilamentType set) {
+    filament_type = set;
     set_value(filament_type.is_visible(), false);
     set_is_hidden(filament_type.is_visibility_customizable());
 }
@@ -144,9 +135,10 @@ void MI_FILAMENT_VISIBLE::OnChange(size_t) {
 
 // * MI_PREHEAT_CONFIRM
 MI_PREHEAT_CONFIRM::MI_PREHEAT_CONFIRM()
-    : MI_COMMON(_("Confirm"), &img::ok_16x16) {}
+    : IWindowMenuItem(_("Confirm"), &img::ok_16x16) {}
 
-void MI_PREHEAT_CONFIRM::update() {
+void MI_PREHEAT_CONFIRM::set_filament_type(FilamentType set) {
+    filament_type = set;
 }
 
 void MI_PREHEAT_CONFIRM::click(IWindowMenu &) {
@@ -159,7 +151,7 @@ ScreenFilamentDetail::ScreenFilamentDetail(Params params)
     : ScreenMenu(params.mode == Mode::preheat ? _("CUSTOM PARAMETERS") : _("FILAMENT DETAIL")) {
 
     stdext::visit_tuple(container.menu_items, [&]<typename T>(T &item) {
-        if constexpr (CMI_COMMON<T>) {
+        if constexpr (!std::is_same_v<T, MI_RETURN>) {
             item.set_filament_type(params.filament_type);
         };
     });

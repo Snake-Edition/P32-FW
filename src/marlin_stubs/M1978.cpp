@@ -14,18 +14,26 @@
 #include <config_store/store_instance.hpp>
 #include <printers.h>
 #include <option/has_switched_fan_test.h>
-#include <option/has_toolchanger.h>
+
 #if HAS_TOOLCHANGER()
     #include <Marlin/src/module/prusa/toolchanger.h>
 #endif
+
 #include <option/xl_enclosure_support.h>
 #if XL_ENCLOSURE_SUPPORT()
     #include <xl_enclosure.hpp>
 #endif
+
 #include <option/has_chamber_api.h>
 #if HAS_CHAMBER_API()
     #include <feature/chamber/chamber.hpp>
 #endif
+
+#include <option/has_chamber_filtration_api.h>
+#if HAS_CHAMBER_FILTRATION_API()
+    #include <feature/chamber_filtration/chamber_filtration.hpp>
+#endif
+
 #include <option/has_xbuddy_extension.h>
 #if HAS_XBUDDY_EXTENSION()
     #include <feature/xbuddy_extension/xbuddy_extension.hpp>
@@ -36,6 +44,7 @@
 LOG_COMPONENT_REF(Selftest);
 
 using namespace fan_selftest;
+using namespace buddy;
 using marlin_server::wait_for_response;
 
 namespace {
@@ -275,21 +284,21 @@ private:
         config_store().selftest_result.set(result);
 
 #if HAS_CHAMBER_API()
-        switch (buddy::chamber().backend()) {
+        switch (chamber().backend()) {
 
     #if XL_ENCLOSURE_SUPPORT()
-        case buddy::Chamber::Backend::xl_enclosure:
+        case Chamber::Backend::xl_enclosure:
             config_store().xl_enclosure_fan_selftest_result.set(TestResult_Unknown);
             break;
     #endif /* XL_ENCLOSURE_SUPPORT() */
 
     #if HAS_XBUDDY_EXTENSION()
-        case buddy::Chamber::Backend::xbuddy_extension:
+        case Chamber::Backend::xbuddy_extension:
             config_store().xbe_fan_test_results.set({});
             break;
     #endif
 
-        case buddy::Chamber::Backend::none:
+        case Chamber::Backend::none:
             break;
         }
 #endif /* HAS_CHAMBER_API() */
@@ -323,7 +332,7 @@ private:
 #endif
 #if HAS_XBUDDY_EXTENSION()
             case FanType::xbe_chamber: {
-                assert(fan->get_desc_num() < buddy::puppies::XBuddyExtension::FAN_CNT);
+                assert(fan->get_desc_num() < puppies::XBuddyExtension::FAN_CNT);
                 auto res = config_store().xbe_fan_test_results.get();
                 res.fans[fan->get_desc_num()] = fan->test_result();
                 config_store().xbe_fan_test_results.set(res);
@@ -405,32 +414,37 @@ void M1978() {
     CommonFanHandler xl_enclosure_fan(FanType::xl_enclosure, 0, benevolent_fan_range, &Fans::enclosure());
 #endif
 #if HAS_XBUDDY_EXTENSION()
-    auto xbe_fans = [&]<size_t... ix>(std::index_sequence<ix...>) {
-        return std::array {
-            XBEFanHandler(FanType::xbe_chamber, ix, chamber_fan_range)...
-        };
-    }(std::make_index_sequence<buddy::puppies::XBuddyExtension::FAN_CNT>());
+    std::array xbe_fans {
+        XBEFanHandler(FanType::xbe_chamber, 0, chamber_fan_range),
+        XBEFanHandler(FanType::xbe_chamber, 1, chamber_fan_range),
+        XBEFanHandler(FanType::xbe_chamber, 2, filtration_fan_range),
+    };
+    static_assert(puppies::XBuddyExtension::FAN_CNT == 3);
 #endif
 
 #if HAS_CHAMBER_API()
-    switch (buddy::chamber().backend()) {
+    switch (chamber().backend()) {
 
     #if XL_ENCLOSURE_SUPPORT()
-    case buddy::Chamber::Backend::xl_enclosure: {
+    case Chamber::Backend::xl_enclosure: {
         fan_container[container_index++] = &xl_enclosure_fan;
         break;
     }
     #endif /* XL_ENCLOSURE_SUPPORT() */
 
     #if HAS_XBUDDY_EXTENSION()
-    case buddy::Chamber::Backend::xbuddy_extension:
-        fan_container[container_index++] = &xbe_fans[0];
-        fan_container[container_index++] = &xbe_fans[1];
-        // Third fan is not yet implemented
+        static_assert(HAS_CHAMBER_FILTRATION_API());
+    case Chamber::Backend::xbuddy_extension:
+        if (xbuddy_extension().using_filtration_fan_instead_of_cooling_fans()) {
+            fan_container[container_index++] = &xbe_fans[2];
+        } else {
+            fan_container[container_index++] = &xbe_fans[0];
+            fan_container[container_index++] = &xbe_fans[1];
+        }
         break;
     #endif
 
-    case buddy::Chamber::Backend::none:
+    case Chamber::Backend::none:
         break;
     }
 #endif /* HAS_CHAMBER_API() */

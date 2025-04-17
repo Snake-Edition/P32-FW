@@ -6,6 +6,7 @@
 #include <option/has_xbuddy_extension.h>
 #include <common/temperature.hpp>
 #include <freertos/mutex.hpp>
+#include <printers.h>
 
 // TODO: Migrate XL Enclosure to use this API (& unify)
 // TODO: Add support for controlling MK4 enclosure through GPIO expander
@@ -30,6 +31,7 @@ public: // Common/utilities
         /// In that situation, the temperature control widgets will be visible, but disabled
         bool always_show_temperature_control = false;
 
+        /// Maximum temperature the chamber is allowed to reach
         std::optional<Temperature> max_temp = std::nullopt;
 
         inline bool temperature_control() const {
@@ -70,7 +72,14 @@ public: // Temperature control
     std::optional<Temperature> target_temperature() const;
 
     /// Sets the \param target temperature. Can be nullopt if we are not interested in controlling the temperature at all.
-    void set_target_temperature(std::optional<Temperature> target);
+    /// \returns the target temperature the chamber was actually set to - might differe because of capabilities().max_temp
+    std::optional<Temperature> set_target_temperature(std::optional<Temperature> target);
+
+#if PRINTER_IS_PRUSA_COREONE()
+    /// Check the state of chamber grills (vents). Can be open/closed based on chamber target temperature
+    /// !HAS TO BE CALLED FROM DEFAULT THREAD ONLY!
+    void check_vent_state();
+#endif
 
 private:
     mutable freertos::Mutex mutex_;
@@ -78,7 +87,17 @@ private:
     std::optional<Temperature> thermistor_temperature_;
     std::optional<Temperature> target_temperature_;
 
-    Capabilities capabilities_nolock(Backend backend) const;
+#if PRINTER_IS_PRUSA_COREONE()
+    enum class VentState {
+        unknown,
+        open,
+        closed,
+    };
+
+    VentState vent_state_ = VentState::unknown;
+#endif
+
+    Capabilities capabilities_nolock() const;
 };
 
 Chamber &chamber();

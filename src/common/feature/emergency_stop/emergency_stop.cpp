@@ -12,6 +12,8 @@
 
 LOG_COMPONENT_DEF(EmergencyStop, logging::Severity::debug);
 
+static_assert(std::to_underlying(WarningType::DoorOpen) == 0, "Door open should have the highest priority for GUI warning to show properly");
+
 namespace buddy {
 
 namespace {
@@ -44,7 +46,9 @@ namespace {
 void EmergencyStop::invoke_emergency() {
     log_info(EmergencyStop, "Emergency stop");
     emergency_invoked = true;
-    if (marlin_server::printer_idle() || marlin_server::aborting_or_aborted() || !marlin_server::all_axes_homed()) {
+
+    const bool in_quickstoppable_state = marlin_server::printer_idle() || marlin_server::aborting_or_aborted() || marlin_server::finishing_or_finished();
+    if (in_quickstoppable_state || !marlin_server::all_axes_homed()) {
         log_info(EmergencyStop, "Quickstop");
         planner.quick_stop();
         while (PreciseStepping::stopping()) {
@@ -58,15 +62,17 @@ void EmergencyStop::invoke_emergency() {
         // aren't homed yet, so that's fine to keep (and to keep partial
         // homing, because until then, we move slowly and in straight lines
         // anyway).
-        if (marlin_server::printer_idle() || marlin_server::aborting_or_aborted()) {
+        if (in_quickstoppable_state) {
             set_all_unhomed();
         }
+
     } else if (!power_panic::ac_fault_triggered) {
         log_info(EmergencyStop, "PP");
         // Do a "synthetic" power panic. Should stop _right now_ and reboot, then we'll deal with the consequences.
         // Do not beep - BFW-6472
         power_panic::should_beep = false;
         buddy::hw::acFault.triggerIT();
+
     } else {
         log_info(EmergencyStop, "Out of options");
     }
@@ -91,7 +97,7 @@ void EmergencyStop::maybe_block() {
         return;
     }
 
-    marlin_server::set_warning(WarningType::DoorOpen, PhasesWarning::DoorOpen);
+    marlin_server::set_warning(WarningType::DoorOpen);
     maybe_block_running = true;
     allow_planning_movements = false;
 
@@ -110,7 +116,8 @@ void EmergencyStop::maybe_block() {
     // Don't park:
     // * If parking would mean we have to home first (which'll look bad, but also move in Z, which'd do Bad Things).
     // * If we are not actually printing.
-    const bool do_move = all_axes_homed() && !marlin_server::printer_idle();
+    // * If we are in/around pause (it was behaving a bit confused).
+    const bool do_move = all_axes_homed() && !marlin_server::printer_idle() && !marlin_server::printer_paused_extended();
     // We are manipulating the moves "under the hands" of other stuff, and "in
     // the middle" of other stuff.
     //
@@ -121,18 +128,25 @@ void EmergencyStop::maybe_block() {
     // which positions are with or without MBL).
     const auto old_pos = planner.get_machine_position_mm();
     const auto old_pos_motion = current_position;
+    const auto old_destination = destination;
     if (do_move) {
         // Make sure to not park too low. As the do_blocking_move_to doesn't
         // consider MBL (and we may not have that part mapped anyway), we could
         // scratch the bed.
         const auto park_z = std::max(old_pos.z, min_park_z);
         AutoRestore _ar(allow_planning_movements, true);
+        // All the do-move things expect the current position to be up to date.
+        // It is _not_ (because we might have interrupted another move in the
+        // middle). This is the best estimation we have for it (might be wrong
+        // by MBL :-( ). Should we un-apply it somehow?
+        current_position = old_pos;
         do_blocking_move_to(X_NOZZLE_PARK_POINT, Y_NOZZLE_PARK_POINT, park_z, feedRate_t(NOZZLE_PARK_XY_FEEDRATE));
     }
-    auto unpark = [this, old_pos, old_pos_motion] {
+    auto unpark = [this, old_pos, old_pos_motion, old_destination] {
         AutoRestore _ar(allow_planning_movements, true);
         do_blocking_move_to(old_pos.x, old_pos.y, old_pos.z, feedRate_t(NOZZLE_PARK_XY_FEEDRATE));
         current_position = old_pos_motion;
+        destination = old_destination;
     };
     ScopeGuard unpark_guard(std::move(unpark), do_move);
 

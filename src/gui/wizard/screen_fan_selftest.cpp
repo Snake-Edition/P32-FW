@@ -13,16 +13,26 @@
 #include <timing.h>
 #include <config_store/store_instance.hpp>
 #include <selftest_fans.hpp>
+
 #include <option/xl_enclosure_support.h>
 #if XL_ENCLOSURE_SUPPORT()
     #include <xl_enclosure.hpp>
 #endif
+
 #include <option/has_chamber_api.h>
 #if HAS_CHAMBER_API()
     #include <feature/chamber/chamber.hpp>
 #endif
 
+#include <option/has_chamber_filtration_api.h>
+
+#include <option/has_xbuddy_extension.h>
+#if HAS_XBUDDY_EXTENSION()
+    #include <feature/xbuddy_extension/xbuddy_extension.hpp>
+#endif
+
 using namespace fan_selftest;
+using namespace buddy;
 
 namespace {
 
@@ -125,23 +135,27 @@ namespace frame {
             }
 
 #if HAS_CHAMBER_API()
-            switch (buddy::chamber().backend()) {
+            switch (chamber().backend()) {
 
     #if XL_ENCLOSURE_SUPPORT()
-            case buddy::Chamber::Backend::xl_enclosure:
+            case Chamber::Backend::xl_enclosure:
                 process_fan_result(config_store().xl_enclosure_fan_selftest_result.get(), enclosure_icons, 0);
                 break;
     #endif /* XL_ENCLOSURE_SUPPORT() */
 
     #if HAS_XBUDDY_EXTENSION()
-            case buddy::Chamber::Backend::xbuddy_extension:
-                process_fan_result(config_store().xbe_fan_test_results.get().fans[0], enclosure_icons, 0);
-                process_fan_result(config_store().xbe_fan_test_results.get().fans[1], enclosure_icons, 1);
-                // Third chamber fan is not yet implemented
+            case Chamber::Backend::xbuddy_extension:
+                static_assert(HAS_CHAMBER_FILTRATION_API());
+                if (xbuddy_extension().using_filtration_fan_instead_of_cooling_fans()) {
+                    process_fan_result(config_store().xbe_fan_test_results.get().fans[2], enclosure_icons, 0 /* icon_index */);
+                } else {
+                    process_fan_result(config_store().xbe_fan_test_results.get().fans[0], enclosure_icons, 0 /* icon_index */);
+                    process_fan_result(config_store().xbe_fan_test_results.get().fans[1], enclosure_icons, 1);
+                }
                 break;
     #endif
 
-            case buddy::Chamber::Backend::none:
+            case Chamber::Backend::none:
                 break;
             }
 #endif /* HAS_CHAMBER_API() */
@@ -200,27 +214,42 @@ namespace frame {
 #endif
 
 #if HAS_CHAMBER_API()
-            switch (buddy::chamber().backend()) {
+            uint8_t enclosure_fan_count = 0;
 
-            case buddy::Chamber::Backend::none:
-                enclosure_label.Hide();
-                enclosure_label_icon.Hide();
-                enclosure_icons.Hide();
+            switch (chamber().backend()) {
+
+            case Chamber::Backend::none:
                 break;
 
     #if XL_ENCLOSURE_SUPPORT()
-            case buddy::Chamber::Backend::xl_enclosure:
-                // Set correctly by default in the initializer list (1 fan)
+            case Chamber::Backend::xl_enclosure:
+                enclosure_fan_count = 1;
                 break;
     #endif /* XL_ENCLOSURE_SUPPORT() */
 
     #if HAS_XBUDDY_EXTENSION()
-            case buddy::Chamber::Backend::xbuddy_extension: {
-                enclosure_icons.SetIconCount(2); // Third chamber fan is not implemented yet
+            case Chamber::Backend::xbuddy_extension:
+                static_assert(HAS_CHAMBER_FILTRATION_API());
+                if (xbuddy_extension().using_filtration_fan_instead_of_cooling_fans()) {
+                    enclosure_fan_count = 1;
+                } else {
+                    enclosure_fan_count = 2;
+                }
                 break;
-            }
     #endif
             }
+
+            if (enclosure_fan_count > 0) {
+                enclosure_icons.SetIconCount(enclosure_fan_count);
+            } else {
+                enclosure_label.Hide();
+                enclosure_label_icon.Hide();
+                enclosure_icons.Hide();
+            }
+
+#elif HAS_CHAMBER_FILTRATION_API()
+    #error Enclosure filtration fan selftest should be implemented
+
 #endif /* HAS_CHAMBER_API() */
 
             switch (phase) {
@@ -246,11 +275,13 @@ namespace frame {
 #if PRINTER_IS_PRUSA_MK3_5()
     class ManualCheck {
         window_text_t question;
+        window_icon_t fan_icon;
         RadioButtonFSM radio;
 
     public:
         explicit ManualCheck(window_t *parent, [[maybe_unused]] PhasesFansSelftest phase)
             : question { parent, Rect16(GuiDefaults::MessageTextRect), is_multiline::yes, is_closed_on_click_t::no }
+            , fan_icon { parent, &img::fan_error_48x48, GuiDefaults::MessageIconRect.TopLeft() }
             , radio { parent, GuiDefaults::GetButtonRect(GuiDefaults::RectScreenBody), PhasesFansSelftest::manual_check } {
             question.SetText(_(en_text_manual_check_hotend));
             static_cast<window_frame_t *>(parent)->CaptureNormalWindow(radio);
@@ -271,7 +302,7 @@ using Frames = FrameDefinitionList<ScreenFanSelftest::FrameStorage,
 } // namespace
 
 ScreenFanSelftest::ScreenFanSelftest()
-    : ScreenFSM(en_text_header, ScreenFanSelftest::get_inner_frame_rect()) {
+    : ScreenFSM(en_text_header, GuiDefaults::RectScreenBody) {
     header.SetIcon(&img::selftest_16x16);
     CaptureNormalWindow(inner_frame);
     create_frame();

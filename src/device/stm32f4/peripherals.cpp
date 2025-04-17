@@ -59,6 +59,7 @@ TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim8;
+TIM_HandleTypeDef htim9;
 TIM_HandleTypeDef htim13;
 TIM_HandleTypeDef htim14;
 
@@ -206,6 +207,15 @@ void hw_dma_init() {
     HAL_NVIC_SetPriority(DMA1_Stream3_IRQn, ISR_PRIORITY_DEFAULT, 0);
     #endif
     HAL_NVIC_EnableIRQ(DMA1_Stream3_IRQn);
+#endif
+
+#if (BOARD_IS_XBUDDY())
+    // Accelerometer DMA
+    HAL_NVIC_SetPriority(DMA1_Stream3_IRQn, ISR_PRIORITY_ACCELEROMETER, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Stream3_IRQn);
+
+    HAL_NVIC_SetPriority(DMA1_Stream4_IRQn, ISR_PRIORITY_ACCELEROMETER, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Stream4_IRQn);
 #endif
 
 #if (BOARD_IS_XBUDDY() || BOARD_IS_XLBUDDY())
@@ -357,7 +367,7 @@ void hw_adc3_init() {
     config_adc_ch(&hadc3, ADC_CHANNEL_14, AdcChannel::board_I);
         #if PRINTER_IS_PRUSA_iX()
     config_adc_ch(&hadc3, ADC_CHANNEL_15, AdcChannel::case_T);
-        #elif PRINTER_IS_PRUSA_COREONE()
+        #elif PRINTER_IS_PRUSA_COREONE() || PRINTER_IS_PRUSA_MK4()
     config_adc_ch(&hadc3, ADC_CHANNEL_15, AdcChannel::door_sensor);
         #endif
     #elif BOARD_IS_XLBUDDY()
@@ -532,7 +542,7 @@ void hw_i2c1_init() {
 
 #if HAS_I2CN(2)
 
-// speed must be 400k, to speedup PersistentStorage erase (mk3.9/4 switch)
+// speed must be 400k, maybe, for reasons lost in time
 static constexpr uint32_t i2c2_speed = 400'000;
 
 void hw_i2c2_pins_init() {
@@ -916,6 +926,36 @@ void hw_tim8_init() {
     }
 
     HAL_TIM_MspPostInit(&htim8);
+}
+
+void hw_tim9_init() {
+    TIM_ClockConfigTypeDef sClockSourceConfig {};
+    TIM_MasterConfigTypeDef sMasterConfig {};
+
+    // This timer is used for local accelerometer polling. The polling rate has
+    // to be higher than the actual accelerometer sampling rate. The sampling
+    // rate of LIS2DH12 is ~1.5 kH. Hence, we use double the rate.
+    htim9.Instance = TIM9;
+    htim9.Init.Prescaler = 1680 - 1; // 100kHz
+    htim9.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim9.Init.Period = 33 - 1; // ~3 kHz
+    htim9.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    if (HAL_TIM_Base_Init(&htim9) != HAL_OK) {
+        Error_Handler();
+    }
+
+    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+    if (HAL_TIM_ConfigClockSource(&htim9, &sClockSourceConfig) != HAL_OK) {
+        Error_Handler();
+    }
+
+    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+    if (HAL_TIMEx_MasterConfigSynchronization(&htim9, &sMasterConfig) != HAL_OK) {
+        Error_Handler();
+    }
+
+    HAL_TIM_MspPostInit(&htim9);
 }
 
 void hw_tim13_init() {

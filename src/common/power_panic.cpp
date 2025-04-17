@@ -678,7 +678,7 @@ void resume_loop() {
 
         // unpark only if the position was known
         if (TEST(state_buf.crash.axis_known_position, X_AXIS) && TEST(state_buf.crash.axis_known_position, Y_AXIS)) {
-            plan_park_move_to_xyz(state_buf.crash.crash_current_position, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE);
+            plan_park_move_to_xyz(state_buf.crash.crash_current_position, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE, Segmented::yes);
         }
 
         // always unretract
@@ -694,7 +694,7 @@ void resume_loop() {
 
         // return to the parking position
         plan_park_move_to_xyz(state_buf.crash.start_current_position,
-            NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE);
+            NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE, Segmented::yes);
         resume_state = ResumeState::Finish;
         break;
 
@@ -1054,15 +1054,9 @@ void panic_loop() {
 std::atomic<bool> ac_fault_enabled = false;
 
 void check_ac_fault_at_startup() {
-    // AC-fault during initialization //TODO: IXL Remove if after PP is ready
-    if constexpr (PRINTER_IS_PRUSA_XL() || PRINTER_IS_PRUSA_MK4() || PRINTER_IS_PRUSA_MK3_5()) {
-        if (power_panic::is_ac_fault_active()) {
-#if !PRINTER_IS_PRUSA_MK3_5() // TODO fix error codes
-            fatal_error(ErrCode::ERR_ELECTRO_ACF_AT_INIT);
-#endif
-        }
+    if (power_panic::is_ac_fault_active()) {
+        fatal_error(ErrCode::ERR_ELECTRO_ACF_AT_INIT);
     }
-
     ac_fault_enabled = true;
 }
 
@@ -1256,16 +1250,11 @@ void ac_fault_isr() {
         == true);
     state_buf.planner.marlin_debug_flags = marlin_debug_flags;
 
-    // Disabling heaters & fans on dwarves wouldn't be even done before the dwarvers are disabled altogether soon
-    // We're in the ISR and Dwarf functions lock mutexes, which we cannot do here - so the simplest thing is to just skip this step altogether.
-    // BFW-6419
-#if !HAS_DWARF()
     // heaters are *already* disabled via HW, but stop temperature and fan regulation too
-    thermalManager.disable_all_heaters();
+    thermalManager.disable_local_heaters();
     thermalManager.zero_fan_speeds();
-    #if !HAS_DWARF() && HAS_TEMP_HEATBREAK && HAS_TEMP_HEATBREAK_CONTROL
+#if !HAS_DWARF() && HAS_TEMP_HEATBREAK && HAS_TEMP_HEATBREAK_CONTROL
     thermalManager.suspend_heatbreak_fan(2000);
-    #endif
 #endif
 
     // stop & disable endstops

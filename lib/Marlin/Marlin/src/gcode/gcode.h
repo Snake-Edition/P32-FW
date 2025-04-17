@@ -276,12 +276,10 @@
  * M958 - Excite harmonic vibration and measure amplitude
  * M959 - Tune input shaper
  * M970 - Set/enable phase stepping
- * M972 - Read phase stepping lookup table
- * M973 - Write phase stepping lookup table
- * M974 - Measure print head resonances and return raw data
- * M975 - Measure accelerometer sampling rate
- * M976 - Measure print head resonances and return analyzed data
- * M977 - Calibrate motor for phase stepping
+ * M971 - Read/reset/write phase-stepping motor current correction
+ * M972 - Calibrate motor for phase stepping
+ * M973 - Perform phase and magnitude correction sweep
+ * M974 - Perform motor resonance measurement during a speed sweep
  * M997 - Perform in-application firmware update
  * M999 - Restart after being stopped by error
  *
@@ -1048,12 +1046,10 @@ private:
 
 #if HAS_PHASE_STEPPING()
   static void M970();
+  static void M971();
   static void M972();
   static void M973();
   static void M974();
-  static void M975();
-  static void M976();
-  static void M977();
 #endif
 
   #if ENABLED(PLATFORM_M997_SUPPORT)

@@ -89,6 +89,7 @@ typedef struct {
       bool nominal_length:1;
       bool continued:1;
       bool sync_position:1;
+      bool raw_block:1;
     };
   };
 
@@ -250,8 +251,7 @@ struct PlannerHints {
                                       // would calculate if it knew the as-yet-unbuffered path
   #endif
   bool raw_block = false;             // Enqueue block without further modifications
-
-  PlannerHints(const_float_t mm=0.0f) : millimeters(mm) {}
+  MoveHints move;
 };
 
 class Planner {
@@ -326,6 +326,9 @@ class Planner {
     #endif
 
     static xyze_pos_t position_float;
+
+    /// Maximum Z position at which we printed so far for
+    static float max_printed_z;
 
     xyze_long_t get_position_msteps() const { return position; };
 
@@ -670,6 +673,9 @@ class Planner {
       , feedRate_t fr_mm_s, const uint8_t extruder, const PlannerHints &hints
     );
 
+    static bool buffer_raw_block(const xyze_long_t &target, const xyze_pos_t &target_float,
+        float acceleration, float nominal_speed, float entry_speed, float exit_speed, uint8_t extruder);
+
     /**
      * @brief Populate a block in preparation for insertion
      * @details Populate the fields of a new linear movement block
@@ -689,6 +695,10 @@ class Planner {
         const xyze_long_t &target, const xyze_pos_t &target_float
       , feedRate_t fr_mm_s, const uint8_t extruder, const PlannerHints &hints
     );
+
+    static bool populate_raw_block(block_t *const block, const abce_long_t &target,
+        const xyze_pos_t &target_float, float acceleration, float nominal_speed,
+        float entry_speed, float exit_speed, uint8_t extruder);
 
     /**
      * Planner::buffer_sync_block
@@ -714,6 +724,9 @@ class Planner {
       , const PlannerHints &hints=PlannerHints()
     );
 
+    static bool buffer_raw_segment(const abce_pos_t &abce, float acceleration, float nominal_speed,
+        float entry_speed, float exit_speed, uint8_t extruder);
+
   public:
 
     /**
@@ -729,6 +742,9 @@ class Planner {
       , const uint8_t extruder=active_extruder
       , const PlannerHints &hints=PlannerHints()
     );
+
+    static bool buffer_raw_line(const xyze_pos_t &cart, float acceleration, float nominal_speed,
+        float entry_speed, float exit_speed, uint8_t extruder);
 
     /**
      * Set the planner.position and individual stepper positions.
@@ -874,6 +890,8 @@ class Planner {
 
     /**
      * Return if some processing is still pending before all queues are flushed
+     * 
+     * !!! Consider using marlin_server::is_processing() instead, it's usually the right choice
      */
     FORCE_INLINE static bool processing() { return has_blocks_queued() || PreciseStepping::processing() || phase_stepping::processing(); }
 

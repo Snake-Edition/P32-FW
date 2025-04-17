@@ -10,6 +10,7 @@
 #include "cmsis_os.h"
 #include <buddy/fatfs.h>
 #include <buddy/usb_device.hpp>
+#include <buddy/unreachable.hpp>
 #include "usb_host.h"
 #include "buffered_serial.hpp"
 #include "bsod_gui.hpp"
@@ -53,6 +54,7 @@
 #include <option/has_touch.h>
 #include <option/has_nfc.h>
 #include <option/has_i2c_expander.h>
+#include <option/has_local_accelerometer.h>
 #include "tasks.hpp"
 #include <appmain.hpp>
 #include "safe_state.h"
@@ -97,6 +99,10 @@
 
 #if HAS_PHASE_STEPPING()
     #include <feature/phase_stepping/phase_stepping.hpp>
+#endif
+
+#if HAS_LOCAL_ACCELEROMETER()
+    #include <module/prusa/accelerometer_local.hpp>
 #endif
 
 #if HAS_NFC()
@@ -262,6 +268,7 @@ extern "C" void main_cpp(void) {
 
 #if BOARD_IS_BUDDY() || BOARD_IS_XBUDDY()
     hw_tim1_init();
+    hw_tim9_init();
 #endif
 
 #if HAS_PHASE_STEPPING()
@@ -292,10 +299,12 @@ extern "C" void main_cpp(void) {
     nfc::turn_off();
 #endif
 
-#if PRINTER_IS_PRUSA_MK4() || PRINTER_IS_PRUSA_MK3_5()
+#if PRINTER_IS_PRUSA_MK4() || PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_COREONE()
     /*
      * MK3.5 HW detected on MK4 firmware or vice versa
-       Ignore the check in production (tester_mode), the xBuddy's connected peripherals are safe in this mode.
+     * MK4 HW detected on CORE ONE firmware or vice versa
+     *
+     * Ignore the check in production (tester_mode), the xBuddy's connected peripherals are safe in this mode.
      */
     if (buddy::hw::Configuration::Instance().is_fw_incompatible_with_hw() && !running_in_tester_mode()) {
         const auto &error = find_error(ErrCode::WARNING_DIFFERENT_FW_REQUIRED);
@@ -580,6 +589,16 @@ void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
     }
 }
 
+void HAL_SPI_TxRxCpltCallback([[maybe_unused]] SPI_HandleTypeDef *hspi) {
+#if HAS_LOCAL_ACCELEROMETER()
+    if (hspi == &SPI_HANDLE_FOR(accelerometer)) {
+        prusa_accelerometer_handle_spi_finish();
+        return;
+    }
+#endif
+    BUDDY_UNREACHABLE();
+}
+
 void StartDefaultTask([[maybe_unused]] void const *argument) {
     app_run();
     for (;;) {
@@ -620,6 +639,11 @@ void StartConnectTaskError([[maybe_unused]] void const *argument) {
  * @retval None
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+#if HAS_LOCAL_ACCELEROMETER()
+    if (htim->Instance == TIM9) {
+        prusa_accelerometer_handle_polling();
+    }
+#endif
     if (htim->Instance == TIM14) {
         app_tim14_tick();
     } else if (htim->Instance == TICK_TIMER) {

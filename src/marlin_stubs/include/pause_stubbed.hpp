@@ -30,7 +30,9 @@ protected:
         _finish = INT_MAX,
         start = 0,
         unload_start,
+#if HAS_LOADCELL()
         filament_stuck_ask,
+#endif
         ram_sequence,
         unload,
         unloaded_ask,
@@ -110,8 +112,6 @@ public:
     std::optional<LoadUnloadMode> get_mode() const { return load_unload_mode; }
 };
 
-class RammingSequence;
-
 // used by load / unlaod /change filament
 class Pause : public PausePrivatePhase {
     pause::Settings settings;
@@ -119,6 +119,9 @@ class Pause : public PausePrivatePhase {
 
     uint32_t start_time_ms { 0 };
     uint32_t runout_timer_ms { 0 };
+
+    /// How much filament was retracted thanks to ramming
+    float ram_retracted_distance = 0;
 
     // singleton
     Pause() = default;
@@ -173,7 +176,9 @@ private:
 
     void start_process(Response response);
     void unload_start_process(Response response);
+#if HAS_LOADCELL()
     void filament_stuck_ask_process(Response response);
+#endif
     void ram_sequence_process(Response response);
     void unload_process(Response response);
     void unloaded_ask_process(Response response);
@@ -208,7 +213,9 @@ private:
     static constexpr EnumArray<LoadState, StateHandler, static_cast<int>(LoadState::_last) + 1> state_handlers {
         { LoadState::start, &Pause::start_process },
             { LoadState::unload_start, &Pause::unload_start_process },
+#if HAS_LOADCELL()
             { LoadState::filament_stuck_ask, &Pause::filament_stuck_ask_process },
+#endif
             { LoadState::ram_sequence, &Pause::ram_sequence_process },
             { LoadState::unload, &Pause::unload_process },
             { LoadState::unloaded_ask, &Pause::unloaded_ask_process },
@@ -271,9 +278,12 @@ private:
     bool process_stop();
     void handle_filament_removal(LoadState state_to_set); //<checks if filament is present if not it sets a different state
 
-    void ram_filament();
+    /// To be called from states that are waiting for some filament sensor input (recovery strategy when FS has problems)
+    /// If Help response is displayed, shows a help dialog and provides options to resolve
+    void handle_help(Response response);
+
+    void ram_filament(uint8_t progress_percent);
     void unload_filament();
-    const RammingSequence &get_ramming_sequence() const;
 
     // create finite state machine and automatically destroy it at the end of scope
     // parks in ctor and unparks in dtor

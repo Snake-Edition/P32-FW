@@ -10,6 +10,11 @@
 #include <option/has_touch.h>
 #include <sys.h>
 
+#include <option/has_auto_retract.h>
+#if HAS_AUTO_RETRACT()
+    #include <feature/auto_retract/auto_retract.hpp>
+#endif
+
 namespace config_store_ns {
 #if not HAS_CONFIG_STORE_WO_BACKEND()
 static_assert((sizeof(CurrentStore) + aggregate_arity<CurrentStore>() * sizeof(journal::Backend::ItemHeader)) < (BANK_SIZE / 100) * 75, "EEPROM bank is almost full");
@@ -36,7 +41,7 @@ void CurrentStore::perform_config_check() {
 #if PRINTER_IS_PRUSA_MK4()
         static_assert(extended_printer_type_model[1] == PrinterModel::mk4s);
         extended_printer_type.set(1);
-        hotend_type.set(HotendType::stock_with_sock);
+        hotend_type.set(0, HotendType::stock_with_sock);
         nozzle_is_high_flow.set(1 << 0); // Bitset -> first and only nozzle
 
 #elif PRINTER_IS_PRUSA_XL()
@@ -58,6 +63,50 @@ void CurrentStore::perform_config_check() {
     if constexpr (!option::development_items) {
         sys_fw_update_disable();
     }
+
+    // First run -> the config store is empty -> we don't need to do any migrations from older versions
+    if (!is_first_run && config_version.get() != newest_config_version) {
+        perform_config_migrations();
+    }
+
+    config_version.set(newest_config_version);
+}
+
+namespace {
+    template <size_t new_version>
+    bool should_migrate() {
+        static_assert(CurrentStore::newest_config_version >= new_version);
+        return config_store().config_version.get() < new_version;
+    }
+} // namespace
+
+void CurrentStore::perform_config_migrations() {
+    // See the comment on the bottom of this function
+
+#if PRINTER_IS_PRUSA_MK4()
+    if (should_migrate<1>()) {
+        // We've introduced nozzle_is_high_flow in 6.2.0
+        // If the user upgrades from previous FW versions, we need to guess the HF nozleness based on whether he has MK4S or not
+        // MK4S+MMU is shipped and recommended without the HF nozzle, so exclude those
+
+        const auto model = PrinterModelInfo::current().model;
+        if ((model == PrinterModel::mk4s || model == PrinterModel::mk3_9s) && !is_mmu_rework.get()) {
+            // Bitset -> first and only nozzle
+            nozzle_is_high_flow.set(1 << 0);
+        }
+    }
+#endif
+
+    // To add a migration:
+    // - increment newest_config_version
+    // - add if(should_migrate<X>) { your migration code } at the END of this function
+    //    - the migrations have to be in an increasing order
+    //    - the X shall be the new incremented newest_config_version value
+    // - keep this comment on the BOTTOM of this function, so that it's visible when reviewing every new migration
+    //
+    // Don't confuse this with the config_store migrations.
+    // - config_store migrations are migrations on store item level (when the item structure changes and so on). They do not have access to the whole config_store/printer state.
+    // - migrations here are for the higher abstraction level
 }
 
 footer::Item CurrentStore::get_footer_setting([[maybe_unused]] uint8_t index) {
@@ -526,8 +575,15 @@ FilamentType CurrentStore::get_filament_type([[maybe_unused]] uint8_t index) {
 void CurrentStore::set_filament_type(uint8_t index, FilamentType value) {
     if (value == PendingAdHocFilamentType {}) {
         value = AdHocFilamentType { .tool = index };
-        adhoc_filament_parameters.set(index, pending_adhoc_filament_parameters);
+        value.set_parameters(pending_adhoc_filament_parameters);
     }
+
+#if HAS_AUTO_RETRACT()
+    if (value == FilamentType::none) {
+        // On filadment removal, also mark the hotend as non-retracted (meaning does not need deretracting)
+        buddy::auto_retract().mark_as_retracted(HAS_TOOLCHANGER() ? index : 0, false);
+    }
+#endif
 
     loaded_filament_type.set(index, value);
 }

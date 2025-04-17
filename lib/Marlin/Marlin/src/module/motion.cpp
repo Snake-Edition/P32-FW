@@ -394,19 +394,24 @@ void _internal_move_to_destination(const feedRate_t &fr_mm_s/*=0.0f*/
  * Performs a blocking fast parking move to (X, Y, Z) and sets the current_position.
  * Parking (Z-Manhattan): Moves XY and Z independently. Raises Z before or lowers Z after XY motion.
  */
-void do_blocking_move_to(const float rx, const float ry, const float rz, const feedRate_t &fr_mm_s/*=0.0*/) {
+void do_blocking_move_to(const float rx, const float ry, const float rz, const feedRate_t &fr_mm_s/*=0.0*/, Segmented segmented) {
   if (DEBUGGING(LEVELING)) DEBUG_XYZ(">>> do_blocking_move_to", rx, ry, rz);
 
   const feedRate_t z_feedrate = fr_mm_s ?: homing_feedrate(Z_AXIS),
                   xy_feedrate = fr_mm_s ?: feedRate_t(XY_PROBE_FEEDRATE_MM_S);
 
-  plan_park_move_to(rx, ry, rz, xy_feedrate, z_feedrate);
+  plan_park_move_to(rx, ry, rz, xy_feedrate, z_feedrate, segmented);
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("<<< do_blocking_move_to");
   planner.synchronize();
 }
 
+static void line_to_destination_position(const feedRate_t &fr_mm_s) {
+  current_position = destination;
+  line_to_current_position(fr_mm_s);
+}
+
 /// Z-Manhattan fast move
-void plan_park_move_to(const float rx, const float ry, const float rz, const feedRate_t &fr_xy, const feedRate_t &fr_z){
+void plan_park_move_to(const float rx, const float ry, const float rz, const feedRate_t &fr_xy, const feedRate_t &fr_z, Segmented segmented){
   #if ENABLED(DELTA)
 
     if (!position_is_reachable(rx, ry)) return;
@@ -469,19 +474,29 @@ void plan_park_move_to(const float rx, const float ry, const float rz, const fee
 
   #else
 
-    // If Z needs to raise, do it before moving XY
-    if (current_position.z < rz) {
-      current_position.z = rz;
-      line_to_current_position(fr_z);
+    void (*move)(const feedRate_t &fr_mm_s) = nullptr;
+    if (segmented == Segmented::yes) {
+        move = prepare_internal_move_to_destination;
+    } else {
+        move = line_to_destination_position;
     }
 
-    current_position.set(rx, ry);
-    line_to_current_position(fr_xy);
+    // If Z needs to raise, do it before moving XY
+    if (current_position.z < rz) {
+      destination = current_position;
+      destination.z = rz;
+      move(fr_z);
+    }
+
+    destination = current_position;
+    destination.set(rx, ry);
+    move(fr_xy);
 
     // If Z needs to lower, do it after moving XY
     if (current_position.z > rz) {
-      current_position.z = rz;
-      line_to_current_position(fr_z);
+      destination = current_position;
+      destination.z = rz;
+      move(fr_z);
     }
   #endif
 }
@@ -502,8 +517,8 @@ void do_blocking_move_to_x(const float &rx, const feedRate_t &fr_mm_s/*=0.0*/) {
 void do_blocking_move_to_y(const float &ry, const feedRate_t &fr_mm_s/*=0.0*/) {
   do_blocking_move_to(current_position.x, ry, current_position.z, fr_mm_s);
 }
-void do_blocking_move_to_z(const float &rz, const feedRate_t &fr_mm_s/*=0.0*/) {
-  do_blocking_move_to_xy_z(current_position, rz, fr_mm_s);
+void do_blocking_move_to_z(const float &rz, const feedRate_t &fr_mm_s/*=0.0*/, Segmented segmented) {
+  do_blocking_move_to_xy_z(current_position, rz, fr_mm_s, segmented);
 }
 
 void do_blocking_move_to_xy(const float &rx, const float &ry, const feedRate_t &fr_mm_s/*=0.0*/) {
@@ -513,8 +528,8 @@ void do_blocking_move_to_xy(const xy_pos_t &raw, const feedRate_t &fr_mm_s/*=0.0
   do_blocking_move_to_xy(raw.x, raw.y, fr_mm_s);
 }
 
-void do_blocking_move_to_xy_z(const xy_pos_t &raw, const float &z, const feedRate_t &fr_mm_s/*=0.0f*/) {
-  do_blocking_move_to(raw.x, raw.y, z, fr_mm_s);
+void do_blocking_move_to_xy_z(const xy_pos_t &raw, const float &z, const feedRate_t &fr_mm_s/*=0.0f*/, Segmented segmented) {
+  do_blocking_move_to(raw.x, raw.y, z, fr_mm_s, segmented);
 }
 
 void do_blocking_move_around_nozzle_cleaner_to_xy(const xy_pos_t& destination, const feedRate_t& feedrate) {
@@ -917,7 +932,7 @@ void restore_feedrate_and_scaling() {
    *
    * Return true if 'current_position' was set to 'destination'
    */
-  inline bool prepare_move_to_destination_cartesian() {
+  inline bool prepare_move_to_destination_cartesian(const PlannerHints &hints) {
     const float scaled_fr_mm_s = MMS_SCALED(feedrate_mm_s);
     #if HAS_MESH
       if (planner.leveling_active && planner.leveling_active_at_z(destination.z)) {
@@ -950,7 +965,7 @@ void restore_feedrate_and_scaling() {
       }
     #endif // HAS_MESH
 
-    planner.buffer_line(destination, scaled_fr_mm_s, active_extruder);
+    planner.buffer_line(destination, scaled_fr_mm_s, active_extruder, hints);
     return false; // caller will update current_position
   }
 
@@ -1059,7 +1074,14 @@ void plan_move_by(const feedRate_t fr, const float dx, const float dy, const flo
   current_position.y += dy;
   current_position.z += dz;
   current_position.e += de;
-  line_to_current_position(fr);
+
+  // Machine position could be different to current_position thanks to MBL - adjust both positions separately
+  auto target = planner.get_machine_position_mm();
+  target.x += dx;
+  target.y += dy;
+  target.z += dz;
+  target.e += de;
+  planner.buffer_segment(target, fr);
 }
 
 /**
@@ -1073,7 +1095,7 @@ void plan_move_by(const feedRate_t fr, const float dx, const float dy, const flo
  *
  * Before exit, current_position is set to destination.
  */
-void prepare_move_to_destination() {
+void prepare_move_to_destination(const MoveHints &hints) {
   apply_motion_limits(destination);
 
   #if EITHER(PREVENT_COLD_EXTRUSION, PREVENT_LENGTHY_EXTRUDE)
@@ -1118,12 +1140,12 @@ void prepare_move_to_destination() {
       #if IS_KINEMATIC // UBL using Kinematic / Cartesian cases as a workaround for now.
         ubl.line_to_destination_segmented(MMS_SCALED(feedrate_mm_s))
       #else
-        prepare_move_to_destination_cartesian()
+        prepare_move_to_destination_cartesian({.move = hints})
       #endif
     #elif IS_KINEMATIC
       line_to_destination_kinematic()
     #else
-      prepare_move_to_destination_cartesian()
+      prepare_move_to_destination_cartesian({.move = hints})
     #endif
   ) return;
 

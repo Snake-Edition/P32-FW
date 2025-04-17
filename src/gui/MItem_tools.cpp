@@ -24,7 +24,6 @@
 #include "time_tools.hpp"
 #include "footer_eeprom.hpp"
 #include <version/version.hpp>
-#include "../../common/PersistentStorage.h"
 #include "sys.h"
 #include "w25x.h"
 #include <bootloader/bootloader.hpp>
@@ -411,6 +410,10 @@ MI_M600::MI_M600()
     : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
 void MI_M600::click(IWindowMenu & /*window_menu*/) {
+    if (MsgBoxQuestion(_("Perform filament change now?"), Responses_YesNo) != Response::Yes) {
+        return;
+    }
+
     if (!enqueued) {
         marlin_client::inject("M600");
         enqueued = true;
@@ -856,14 +859,14 @@ void MI_FOOTER_RESET::click([[maybe_unused]] IWindowMenu &window_menu) {
 
 static constexpr const char *heatup_bed_values[] = {
     N_("Nozzle"),
-    N_("Noz&Bed"),
+    N_("All"),
 };
 
-MI_HEATUP_BED::MI_HEATUP_BED()
-    : MenuItemSwitch(_("For Filament Change, Preheat"), heatup_bed_values, config_store().heatup_bed.get()) {
+MI_FILAMENT_CHANGE_PREHEAT_ALL::MI_FILAMENT_CHANGE_PREHEAT_ALL()
+    : MenuItemSwitch(_("For Filament Change, Preheat"), heatup_bed_values, config_store().filament_change_preheat_all.get()) {
 }
-void MI_HEATUP_BED::OnChange(size_t old_index) {
-    config_store().heatup_bed.set(!old_index);
+void MI_FILAMENT_CHANGE_PREHEAT_ALL::OnChange(size_t old_index) {
+    config_store().filament_change_preheat_all.set(!old_index);
 }
 
 MI_SET_READY::MI_SET_READY()

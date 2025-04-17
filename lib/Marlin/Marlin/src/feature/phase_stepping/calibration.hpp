@@ -8,6 +8,7 @@
 #include <optional>
 #include <vector>
 #include <atomic>
+#include <expected>
 
 #include <module/prusa/accelerometer.h>
 #include <core/types.h>
@@ -15,27 +16,52 @@
 namespace phase_stepping {
 
 /**
- * Assuming phase stepping is enabled, measure resonance data for given axis.
- * Returns measured accelerometer samples via a callback, the function returns
- * measured frequency.
- *
- * Speed is assumed to be always positive in rotations per seconds, revolutions
- * to made can be negative.
- *
- * On accelerometer error returns 0 as frequency. The error reason is silently
- * ignored.
+ * Structure representing a metadata of motor parameter estimation measurement.
  */
-float capture_samples(AxisEnum axis, float speed, float revs,
-    const std::function<void(const PrusaAccelerometer::Acceleration &)> &yield_sample);
+struct SamplesAnnotation {
+    float sampling_freq;
+    bool movement_ok;
+    PrusaAccelerometer::Error accel_error;
+
+    // Planned times of the features in the recorded samples
+    float start_marker;
+    float end_marker;
+    float signal_start;
+    float signal_end;
+
+    bool is_valid() const {
+        return movement_ok && accel_error == PrusaAccelerometer::Error::none && sampling_freq > 0;
+    }
+};
 
 /**
- * Assuming phase stepping is enabled, measure resonance and return requested
- * harmonics.
- *
- * Returns the measurement measurement.
+ * Structure representing a sweep of motor parameters.
  */
-std::vector<float> analyze_resonance(AxisEnum axis,
-    float speed, float revs, const std::vector<int> &requested_harmonics);
+struct SweepParams {
+    float pha_start;
+    float pha_end;
+    float mag_start;
+    float mag_end;
+
+    SweepParams reverse() const {
+        return { pha_end, pha_start, mag_end, mag_start };
+    }
+};
+
+/**
+ * Assuming phase stepping is enabled, make a movement during which a parameter
+ * sweep is performed. Yield a projection of captured sample to the active axis.
+ * Returns accelerometer sampling frequency, or 0 on error.
+ */
+SamplesAnnotation capture_param_sweep_samples(AxisEnum axis, float speed, float revs,
+    int harmonic, const SweepParams &params, const std::function<void(float)> &yield_sample);
+
+/**
+ * Make an accelerated movement and capture samples. Return accelerometer
+ * sampling frequency, or 0 on error.
+ */
+SamplesAnnotation capture_speed_sweep_samples(AxisEnum axis, float start_speed, float end_speed,
+    float revs, const std::function<void(float)> &yield_sample);
 
 /**
  * Calibration routine notifies about the progress made via this class. Subclass
@@ -46,24 +72,20 @@ public:
     virtual ~CalibrateAxisHooks() = default;
 
     /**
-     * Report initial movement is in progress
+     * Report initial characterization started
      */
-    virtual void on_initial_movement() = 0;
+    virtual void on_motor_characterization_start() = 0;
 
     /**
-     * Set number of calibration phases
+     * Report initial characterization is done. Phases is the number of
+     * calibration phases that will follow
      */
-    virtual void set_calibration_phases_count(int phases) = 0;
+    virtual void on_motor_characterization_result(int phases) = 0;
 
     /**
      * Report beginning of the new phase
      */
     virtual void on_enter_calibration_phase(int phase) = 0;
-
-    /**
-     * Report progress in percent for given phase
-     */
-    virtual void on_calibration_phase_progress(int progress) = 0;
 
     /**
      * Report result in percents for given calibration phase. Lower = better.
@@ -86,9 +108,9 @@ public:
  * Assuming the printer is homed, calibrate given axis. The progress is reported
  * via hooks. The routine is blocking.
  *
- * Returns a tuple with forward and backward calibration
+ * Returns an array with forward and backward calibration
  */
-std::optional<std::tuple<MotorPhaseCorrection, MotorPhaseCorrection>>
+std::expected<std::array<MotorPhaseCorrection, 2>, const char *>
 calibrate_axis(AxisEnum axis, CalibrateAxisHooks &hooks);
 
 /**
