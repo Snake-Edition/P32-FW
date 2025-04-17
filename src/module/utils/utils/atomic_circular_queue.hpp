@@ -11,37 +11,24 @@
  */
 template <typename T, typename index_t, index_t N>
 class AtomicCircularQueue {
+    static_assert(std::numeric_limits<index_t>::is_integer, "Buffer index has to be an integer type");
+    static_assert(!std::numeric_limits<index_t>::is_signed, "Buffer index has to be an unsigned type");
+
+    // Note: We cannto allow N == max, because then we wouldn't be able to distinct between full and empty queue.
+    // There always needs to be a one "extra" index value free
+    static_assert(N < std::numeric_limits<index_t>::max(), "Buffer size bigger than the index can support");
+    static_assert((N & (N - 1)) == 0, "The size of the queue has to be a power of 2");
+
+    static_assert(std::atomic<index_t>::is_always_lock_free, "index_t is not lock-free");
+
 private:
-    /**
-     * @brief   Buffer structure
-     * @details This structure consolidates all the overhead required to handle
-     *          a circular queue such as the pointers and the buffer vector.
-     */
-    struct buffer_t {
-        std::atomic<index_t> head;
-        std::atomic<index_t> tail;
-        T queue[N];
-    } buffer;
+    std::atomic<index_t> head = 0;
+    std::atomic<index_t> tail = 0;
+    T queue[N];
 
     static index_t mask(index_t val) { return val & (N - 1); }
 
 public:
-    /**
-     * @brief   Class constructor
-     * @details This class requires two template parameters, T defines the type
-     *          of item this queue will handle and N defines the maximum number of
-     *          items that can be stored on the queue.
-     */
-    AtomicCircularQueue() {
-        static_assert(std::numeric_limits<index_t>::is_integer, "Buffer index has to be an integer type");
-        static_assert(!std::numeric_limits<index_t>::is_signed, "Buffer index has to be an unsigned type");
-        static_assert(N < std::numeric_limits<index_t>::max(), "Buffer size bigger than the index can support");
-        static_assert((N & (N - 1)) == 0, "The size of the queue has to be a power of 2");
-        static_assert(decltype(buffer_t::head)::is_always_lock_free, "index_t is not lock-free");
-        static_assert(decltype(buffer_t::tail)::is_always_lock_free, "index_t is not lock-free");
-        buffer.head = buffer.tail = 0;
-    }
-
     /**
      * @brief   Removes and returns a item from the queue
      * @details Removes the oldest item on the queue, pointed to by the
@@ -51,9 +38,9 @@ public:
     T dequeue() {
         assert(!isEmpty());
 
-        index_t index = buffer.head;
-        T ret = std::move(buffer.queue[mask(index++)]);
-        buffer.head = index;
+        index_t index = head;
+        T ret = std::move(queue[mask(index++)]);
+        head = index;
         return ret;
     }
 
@@ -69,9 +56,9 @@ public:
             return false;
         }
 
-        index_t index = buffer.tail;
-        buffer.queue[mask(index++)] = std::move(item);
-        buffer.tail = index;
+        index_t index = tail;
+        queue[mask(index++)] = std::move(item);
+        tail = index;
         return true;
     }
 
@@ -80,7 +67,7 @@ public:
      * @details Returns true if there are no items on the queue, false otherwise.
      * @return  true if queue is empty
      */
-    bool isEmpty() { return buffer.head == buffer.tail; }
+    bool isEmpty() { return head == tail; }
 
     /**
      * @brief   Checks if the queue is full
@@ -102,17 +89,17 @@ public:
      *          or updating the pointers.
      * @return  first item in the queue
      */
-    T peek() { return buffer.queue[mask(buffer.head)]; }
+    T peek() { return queue[mask(head)]; }
 
     /**
      * @brief Gets the number of items on the queue
      * @details Returns the current number of items stored on the queue.
      * @return number of items in the queue
      */
-    index_t count() { return buffer.tail - buffer.head; }
+    index_t count() { return tail - head; }
 
     /**
      * @brief Clear the contents of the queue
      */
-    void clear() { buffer.head.store(buffer.tail); }
+    void clear() { head.store(tail); }
 };
