@@ -38,6 +38,10 @@ protected:
 // C++ wrapper for FreeRTOS queue and its storage.
 template <class T, size_t N>
 class Queue final : public QueueBase {
+    // Freertos queue does a byte copy. This could be catastrophical for types that aren't trivially copyable and destructible.
+    static_assert(std::is_trivially_copy_constructible_v<T>);
+    static_assert(std::is_trivially_destructible_v<T>);
+
 public:
     Queue()
         : QueueBase(N, sizeof(T), reinterpret_cast<uint8_t *>(item_storage.data())) {}
