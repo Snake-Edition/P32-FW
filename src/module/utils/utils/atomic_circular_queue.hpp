@@ -52,7 +52,7 @@ public:
         assert(!isEmpty());
 
         index_t index = buffer.head;
-        T ret = buffer.queue[mask(index++)];
+        T ret = std::move(buffer.queue[mask(index++)]);
         buffer.head = index;
         return ret;
     }
@@ -64,13 +64,13 @@ public:
      * @param   item Item to be added to the queue
      * @return  true if the operation was successful
      */
-    bool enqueue(T const &item) {
+    bool enqueue(T &&item) {
         if (isFull()) {
             return false;
         }
 
         index_t index = buffer.tail;
-        buffer.queue[mask(index++)] = item;
+        buffer.queue[mask(index++)] = std::move(item);
         buffer.tail = index;
         return true;
     }
