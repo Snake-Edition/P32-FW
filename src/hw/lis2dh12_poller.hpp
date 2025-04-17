@@ -8,7 +8,7 @@
 #include <device/peripherals.h>
 #include <freertos/timing.hpp>
 #include <Pin.hpp>
-#include <libs/circularqueue.h>
+#include <utils/atomic_circular_queue.hpp>
 #include <timing.h>
 #include <bsod.h>
 #include <lis2dh12_reg.h>

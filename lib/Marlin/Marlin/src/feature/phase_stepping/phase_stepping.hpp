@@ -13,7 +13,7 @@
     #include "lut.hpp"
     #include "axes.hpp"
 
-    #include <libs/circularqueue.h>
+    #include <utils/atomic_circular_queue.hpp>
     #include <core/types.h>
     #include <bsod.h>
 

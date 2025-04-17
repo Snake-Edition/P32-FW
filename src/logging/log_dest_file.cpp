@@ -6,7 +6,7 @@
 
 #include <common/freertos_shared_mutex.hpp>
 #include <logging/log_dest_shared.hpp>
-#include <libs/circularqueue.h>
+#include <utils/atomic_circular_queue.hpp>
 #include <unique_file_ptr.hpp>
 #include <async_job/async_job.hpp>
 
