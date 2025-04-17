@@ -505,6 +505,8 @@ struct CurrentStore
     StoreItem<uint16_t, 0, journal::hash("Axis RMS Current MA Y")> axis_rms_current_ma_Y_; // 0 - default value, !=0 - user value
     StoreItem<uint16_t, defaults::axis_rms_current_ma_Z_, journal::hash("Axis RMS Current MA Z")> axis_rms_current_ma_Z_;
     StoreItem<uint16_t, defaults::axis_rms_current_ma_E0_, journal::hash("Axis RMS Current MA E0")> axis_rms_current_ma_E0_;
+    StoreItem<float, defaults::axis_x_length_mm, journal::hash("Axis X Length MM")> axis_x_length_mm;
+    StoreItem<float, defaults::axis_y_length_mm, journal::hash("Axis Y Length MM")> axis_y_length_mm;
     StoreItem<float, defaults::axis_z_max_pos_mm, journal::hash("Axis Z Max Pos MM")> axis_z_max_pos_mm;
 
     // Nozzle Sock has is here for backwards compatibility (should be binary compatible)

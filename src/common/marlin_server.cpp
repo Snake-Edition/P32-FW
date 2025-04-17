@@ -608,6 +608,10 @@ void init(void) {
 #if HAS_SHEET_PROFILES()
     SteelSheets::CheckIfCurrentValid();
 #endif
+
+    X_BED_SIZE = get_x_length_mm();
+    Y_BED_SIZE = get_y_length_mm();
+
     settings_load();
 }
 

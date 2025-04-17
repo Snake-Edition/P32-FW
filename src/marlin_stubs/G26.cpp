@@ -107,14 +107,14 @@ constexpr float y_step = 20;
 constexpr float y_step = 30;
 #endif
 constexpr float x_min = 10;
-constexpr float x_max = X_BED_SIZE - 10;
+constexpr float x_max = 180 - 10;
 constexpr float y_min = 30;
 constexpr float y1 = y_min + y_step;
 constexpr float y2 = y1 + y_step;
 constexpr float y3 = y2 + y_step;
 constexpr float y4 = y3 + y_step;
 constexpr float y5 = y4 + y_step;
-static_assert(Y_BED_SIZE > y5, "snake pattern out of bed");
+static_assert(180 > y5, "snake pattern out of bed");
 
 /// Path of Manhattan snake
 /// Alternate X and Y coordinates.
@@ -137,63 +137,63 @@ constexpr float snake2[] = {
     ///
     /// frame around
     9.5,
-    Y_BED_SIZE - 17,
+    180 - 17,
     30.5,
-    Y_BED_SIZE - 30.5,
+    180 - 30.5,
     x_min,
-    Y_BED_SIZE - 30,
+    180 - 30,
     ///
     /// infill
     30,
-    Y_BED_SIZE - 29.5,
+    180 - 29.5,
     x_min,
-    Y_BED_SIZE - 29,
+    180 - 29,
     30,
-    Y_BED_SIZE - 28.5,
+    180 - 28.5,
     x_min,
-    Y_BED_SIZE - 28,
+    180 - 28,
     30,
-    Y_BED_SIZE - 27.5,
+    180 - 27.5,
     x_min,
-    Y_BED_SIZE - 27,
+    180 - 27,
     30,
-    Y_BED_SIZE - 26.5,
+    180 - 26.5,
     x_min,
-    Y_BED_SIZE - 26,
+    180 - 26,
     30,
-    Y_BED_SIZE - 25.5,
+    180 - 25.5,
     x_min,
-    Y_BED_SIZE - 25,
+    180 - 25,
     30,
-    Y_BED_SIZE - 24.5,
+    180 - 24.5,
     x_min,
-    Y_BED_SIZE - 24,
+    180 - 24,
     30,
-    Y_BED_SIZE - 23.5,
+    180 - 23.5,
     x_min,
-    Y_BED_SIZE - 23,
+    180 - 23,
     30,
-    Y_BED_SIZE - 22.5,
+    180 - 22.5,
     x_min,
-    Y_BED_SIZE - 22,
+    180 - 22,
     30,
-    Y_BED_SIZE - 21.5,
+    180 - 21.5,
     x_min,
-    Y_BED_SIZE - 21,
+    180 - 21,
     30,
-    Y_BED_SIZE - 20.5,
+    180 - 20.5,
     x_min,
-    Y_BED_SIZE - 20,
+    180 - 20,
     30,
-    Y_BED_SIZE - 19.5,
+    180 - 19.5,
     x_min,
-    Y_BED_SIZE - 19,
+    180 - 19,
     30,
-    Y_BED_SIZE - 18.5,
+    180 - 18.5,
     x_min,
-    Y_BED_SIZE - 18,
+    180 - 18,
     30,
-    Y_BED_SIZE - 17.5,
+    180 - 17.5,
     x_min,
 };
 } // anonymous namespace

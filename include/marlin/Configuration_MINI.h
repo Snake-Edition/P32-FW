@@ -1165,19 +1165,10 @@
 // @section machine
 
 // The size of the print bed
-#ifdef MINI_I3_MK33
-    #define X_BED_SIZE 250
-#else
-    #define X_BED_SIZE 180
-#endif
+extern uint16_t X_BED_SIZE;
+extern uint16_t Y_BED_SIZE;
 
-#ifdef MINI_LONG_BED
-    #define Y_BED_SIZE 250
-#elif MINI_I3_MK33
-    #define Y_BED_SIZE 210
-#else
-    #define Y_BED_SIZE 180
-#endif
+
 
 #ifdef MINI_COREXY
     #define Z_SIZE 256
@@ -1204,15 +1195,15 @@
 
 #define Z_MIN_POS 0
 #ifdef MINI_I3_MK33
-	#define X_MAX_POS (X_BED_SIZE + 1)
+	#define X_MAX_POS (X_BED_SIZE + 1.f)
 #else
-	#define X_MAX_POS X_BED_SIZE
+	#define X_MAX_POS ((float)X_BED_SIZE)
 #endif
 
 #ifdef MINI_COREXY
-    #define Y_MAX_POS (Y_BED_SIZE + 1)
+    #define Y_MAX_POS (Y_BED_SIZE + 1.f)
 #else
-    #define Y_MAX_POS Y_BED_SIZE
+    #define Y_MAX_POS ((float)Y_BED_SIZE)
 #endif
 
 #ifdef USE_PRUSA_EEPROM_AS_SOURCE_OF_DEFAULT_VALUES
@@ -1720,16 +1711,27 @@
 	    #define X_AXIS_LOAD_POS  (std::numeric_limits<float>::quiet_NaN())
 	    #define X_AXIS_UNLOAD_POS  (std::numeric_limits<float>::quiet_NaN())
 	#elif MINI_COREXY
-	    #define X_AXIS_LOAD_POS  ((X_MAX_POS) / 2)
-	    #define X_AXIS_UNLOAD_POS  ((X_MAX_POS) / 2)
+	    #define X_AXIS_LOAD_POS  (90)
+	    #define X_AXIS_UNLOAD_POS  (90)
 	#else
-	    #define X_AXIS_LOAD_POS  ((X_MAX_POS) / 4)
-	    #define X_AXIS_UNLOAD_POS  ((X_MAX_POS) / 4)
+	    #define X_AXIS_LOAD_POS  (45)
+	    #define X_AXIS_UNLOAD_POS  (45)
 	#endif
     // Specify a park position as { X, Y, Z }
 
-    #define X_NOZZLE_PARK_POINT (X_MAX_POS - 10)
-    #define Y_NOZZLE_PARK_POINT (Y_MAX_POS - 10)
+
+	#ifdef MINI_I3_MK33
+        #define X_NOZZLE_PARK_POINT (10.f)
+        #define Y_NOZZLE_PARK_POINT (200.f)
+	#elif MINI_COREXY
+        #define X_NOZZLE_PARK_POINT (10.f)
+        #define Y_NOZZLE_PARK_POINT (10.f)
+	#else
+        #define X_NOZZLE_PARK_POINT (170.f)
+        #define Y_NOZZLE_PARK_POINT (170.f)
+	#endif
+
+
     #define Z_NOZZLE_PARK_POINT 20 // !!! THESE ARE NOT ABSOLUTE COORDINATES, BUT A RAISE VALUE (HOPEFULLY EVERYWHERE)
     // #define Z_NOZZLE_PARK_POINT_MIN 10 // Always raise the nozzle by this amount when parking on print end
 

@@ -267,6 +267,23 @@ namespace defaults {
     inline constexpr uint16_t axis_microsteps_E0_ { E0_MICROSTEPS };
     inline constexpr uint16_t axis_rms_current_ma_Z_ { Z_CURRENT };
     inline constexpr uint16_t axis_rms_current_ma_E0_ { E0_CURRENT };
+
+    inline constexpr float axis_x_length_mm {
+#ifdef MINI_I3_MK33
+        250
+#else
+        180
+#endif
+    };
+
+    inline constexpr float axis_y_length_mm {
+#ifdef MINI_I3_MK33
+        210
+#else
+        180
+#endif
+    };
+
     inline constexpr float axis_z_max_pos_mm {
 #ifdef DEFAULT_Z_MAX_POS
         DEFAULT_Z_MAX_POS
