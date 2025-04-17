@@ -2066,10 +2066,12 @@ static void _server_print_loop(void) {
         buddy::reenable_ceiling_clearance_warning();
 #endif
 
+#if HAS_CANCEL_OBJECT()
         buddy::cancel_object().reset();
         for (auto &cancel_object_name : marlin_vars().cancel_object_names) {
             cancel_object_name.set(""); // Erase object names
         }
+#endif
 
 #if HAS_LOADCELL()
         if (!server.print_is_serial) {
@@ -3228,7 +3230,6 @@ bool _process_server_valid_request(const Request &request, int client_id) {
 #else
     case Request::Type::CancelObjectID:
     case Request::Type::UncancelObjectID:
-    case Request::Type::CancelCurrentObject:
         return false;
 #endif
     case Request::Type::PrintStart:
@@ -3321,9 +3322,11 @@ static void process_request_flags() {
         case RequestFlag::GuiCantPrint:
             gui_cant_print();
             break;
+#if HAS_CANCEL_OBJECT()
         case RequestFlag::CancelCurrentObject:
             buddy::cancel_object().set_object_cancelled(buddy::cancel_object().current_object(), true);
             break;
+#endif
         case RequestFlag::_cnt:
             break;
         }

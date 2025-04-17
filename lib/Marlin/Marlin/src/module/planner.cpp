@@ -2502,7 +2502,7 @@ bool Planner::buffer_segment(const abce_pos_t &abce
   #endif
 
   // DRYRUN prevents E moves from taking place
-  if (DEBUGGING(DRYRUN) || buddy::cancel_object().is_current_object_cancelled()) {
+  if (DEBUGGING(DRYRUN) || TERN0(HAS_CANCEL_OBJECT(), buddy::cancel_object().is_current_object_cancelled())) {
     position.e = target.e;
     position_float.e = abce.e;
   }

@@ -169,7 +169,7 @@ int8_t GcodeSuite::get_target_e_stepper_from_command() {
  *  - Set the feedrate, if included
  */
 void GcodeSuite::get_destination_from_command() {
-  const bool skip_move = buddy::cancel_object().is_current_object_cancelled();
+  const bool skip_move = TERN0(HAS_CANCEL_OBJECT(), buddy::cancel_object().is_current_object_cancelled());
 
   xyze_bool_t seen = { false, false, false, false };
   LOOP_XYZE(i) {

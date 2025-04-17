@@ -491,7 +491,7 @@ void GcodeSuite::G2_G3(const bool clockwise) {
     if (parser.seenval(bchar)) arc_offset.b = parser.value_linear_units();
   }
 
-  if (buddy::cancel_object().is_current_object_cancelled()) {
+  if (TERN0(HAS_CANCEL_OBJECT(), buddy::cancel_object().is_current_object_cancelled())) {
     // Canceling an object, skip arc move
   } else if (arc_offset) {
 
