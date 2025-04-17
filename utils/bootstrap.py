@@ -253,6 +253,7 @@ def install_dependency(dependency):
 
 def install_openocd_config_template():
     debug_dir = project_root_dir / 'utils' / 'debug'
+    os.makedirs(debug_dir)
     custom_config_path = debug_dir / '10_custom_config_overrides.cfg'
     if not custom_config_path.exists():
         print(
