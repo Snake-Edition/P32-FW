@@ -224,9 +224,9 @@ void init_tmc(void) {
     pStep[Z_AXIS]->TCOOLTHRS(400);
     pStep[E_AXIS]->TCOOLTHRS(400);
 #if HAS_DRIVER(TMC2209)
-    pStep[X_AXIS]->SGTHRS(130);
-    pStep[Y_AXIS]->SGTHRS(130);
-    pStep[Z_AXIS]->SGTHRS(100);
+    pStep[X_AXIS]->SGTHRS(X_STALL_SENSITIVITY);
+    pStep[Y_AXIS]->SGTHRS(Y_STALL_SENSITIVITY);
+    pStep[Z_AXIS]->SGTHRS(Z_STALL_SENSITIVITY);
     pStep[E_AXIS]->SGTHRS(100);
 #endif
 }

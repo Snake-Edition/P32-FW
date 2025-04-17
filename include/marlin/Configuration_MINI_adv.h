@@ -88,23 +88,29 @@
  * THERMAL_PROTECTION_HYSTERESIS and/or THERMAL_PROTECTION_PERIOD
  */
 #if ENABLED(THERMAL_PROTECTION_HOTENDS)
-    #define THERMAL_PROTECTION_PERIOD 20        // Seconds
-    #define THERMAL_PROTECTION_HYSTERESIS 6 //4     // Degrees Celsius
-    #if ENABLED(MODEL_DETECT_STUCK_THERMISTOR)
-        /**
-         * Do not allow hotend PWM value to be THERMAL_PROTECTION_MODEL_DISCREPANCY
-         * above PWM expected by the model for more than THERMAL_PROTECTION_MODEL_PERIOD seconds
-         */
-        #define THERMAL_PROTECTION_MODEL_PERIOD 40
-        /**
-         * 26.6% of PWM max.
-         * 14% is needed to cover minimum heater power at minimum supply voltage.
-         * 12.6% is real reserve.
-         * It can never trigger at 100% fan if the temperature set is above 215degC
-         * and at 290degC if fan is above 26%.
-         */
-        #define THERMAL_PROTECTION_MODEL_DISCREPANCY 68
-    #endif
+	#ifdef MINI_I3_MK33
+	    #define THERMAL_PROTECTION_PERIOD 60 //40        // Seconds
+    	#define THERMAL_PROTECTION_HYSTERESIS 12 //4     // Degrees Celsius
+	#else
+
+	    #define THERMAL_PROTECTION_PERIOD 20        // Seconds
+	    #define THERMAL_PROTECTION_HYSTERESIS 6 //4     // Degrees Celsius
+	    #if ENABLED(MODEL_DETECT_STUCK_THERMISTOR)
+	        /**
+	         * Do not allow hotend PWM value to be THERMAL_PROTECTION_MODEL_DISCREPANCY
+	         * above PWM expected by the model for more than THERMAL_PROTECTION_MODEL_PERIOD seconds
+	         */
+	        #define THERMAL_PROTECTION_MODEL_PERIOD 40
+	        /**
+	         * 26.6% of PWM max.
+	         * 14% is needed to cover minimum heater power at minimum supply voltage.
+	         * 12.6% is real reserve.
+	         * It can never trigger at 100% fan if the temperature set is above 215degC
+	         * and at 290degC if fan is above 26%.
+	         */
+	        #define THERMAL_PROTECTION_MODEL_DISCREPANCY 68
+	    #endif
+	#endif
 
     //#define ADAPTIVE_FAN_SLOWING              // Slow part cooling fan if temperature drops
     #if BOTH(ADAPTIVE_FAN_SLOWING, PIDTEMP)
@@ -131,13 +137,23 @@
  * Thermal Protection parameters for the bed are just as above for hotends.
  */
 #if ENABLED(THERMAL_PROTECTION_BED)
-    #define THERMAL_PROTECTION_BED_PERIOD 45 // Seconds
-    #define THERMAL_PROTECTION_BED_HYSTERESIS 25 // Degrees Celsius
+    #ifdef MINI_I3_MK33
+        #define THERMAL_PROTECTION_BED_PERIOD 60 // Seconds
+        #define THERMAL_PROTECTION_BED_HYSTERESIS 10 // Degrees Celsius
+    #else
+        #define THERMAL_PROTECTION_BED_PERIOD 45 // Seconds
+        #define THERMAL_PROTECTION_BED_HYSTERESIS 25 // Degrees Celsius
+    #endif
 
     /**
    * As described above, except for the bed (M140/M190/M303).
    */
-    #define WATCH_BED_TEMP_PERIOD 240 // Seconds
+    #ifdef MINI_I3_MK33
+        #define WATCH_BED_TEMP_PERIOD 60 // Seconds
+    #else
+        #define WATCH_BED_TEMP_PERIOD 240 // Seconds
+    #endif
+
     #define WATCH_BED_TEMP_INCREASE 2 // Degrees Celsius
 #endif
 
@@ -158,7 +174,10 @@
 #if ENABLED(PIDTEMP)
     // this adds an experimental additional term to the heating power, proportional to the extrusion speed.
     // if Kc is chosen well, the additional required power due to increased melting should be compensated.
-    #define PID_EXTRUSION_SCALING
+    #ifdef MINI_I3_MK33
+	#else
+	    #define PID_EXTRUSION_SCALING
+	#endif
     #if ENABLED(PID_EXTRUSION_SCALING)
         /**
          * Increase in PWM duty cycle needed to to extrude 1 mm^2 per second
@@ -492,14 +511,38 @@
 #define HOMING_MAX_ATTEMPTS 10
 
 // Homing hits each endstop, retracts by these distances, then does a slower bump.
-#define X_HOME_BUMP_MM 0
-#define Y_HOME_BUMP_MM 0
-#define Z_HOME_BUMP_MM 2
-#define HOMING_BUMP_DIVISOR \
-    { 1, 1, 4 } // Re-Bump Speed Divisor (Divides the Homing Feedrate)
-#define HOMING_BUMP_DIVISOR_MAX HOMING_BUMP_DIVISOR
-#define HOMING_BUMP_DIVISOR_MIN HOMING_BUMP_DIVISOR
-//#define QUICK_HOME                     // If homing includes X and Y, do a diagonal move initially
+#ifdef MINI_I3_MK33
+	#define X_HOME_BUMP_MM 10
+	#define Y_HOME_BUMP_MM 10
+	#define Z_HOME_BUMP_MM 3
+	#define HOMING_BUMP_DIVISOR \
+	    { 1, 1, 1 } // Re-Bump Speed Divisor (Divides the Homing Feedrate)
+	#define HOMING_BUMP_DIVISOR_MAX \
+	    { 1.09f, 1.09f, 1 }
+	#define HOMING_BUMP_DIVISOR_MIN \
+	    { 0.96f, 0.96f, 1 }
+#else
+	#define X_HOME_BUMP_MM 0
+	#define Y_HOME_BUMP_MM 0
+	#define Z_HOME_BUMP_MM 2
+	#define HOMING_BUMP_DIVISOR \
+	    { 1, 1, 4 } // Re-Bump Speed Divisor (Divides the Homing Feedrate)
+	#define HOMING_BUMP_DIVISOR_MAX HOMING_BUMP_DIVISOR
+	#define HOMING_BUMP_DIVISOR_MIN HOMING_BUMP_DIVISOR
+#endif
+
+#ifdef MINI_I3_MK33
+	// If homing includes X and Y, do a diagonal move initially
+	#define QUICK_HOME
+
+	// Move away from the endstops after homing
+	#define HOMING_BACKOFF_POST_MM { 2, 2, 0 }
+#else
+	//#define QUICK_HOME                     // If homing includes X and Y, do a diagonal move initially
+
+	// Move away from the endstops after homing
+	#define HOMING_BACKOFF_POST_MM { 20, 0, 2 }
+#endif
 
 // When G28 is called, this option will make Y home before X
 //#define HOME_Y_BEFORE_X
@@ -550,8 +593,16 @@
 #define DEFAULT_STEPPER_DEACTIVE_TIME 120
 #define DISABLE_INACTIVE_X true
 #define DISABLE_INACTIVE_Y true
-#define DISABLE_INACTIVE_Z true // set to false if the nozzle will fall down on your printed part when print has finished.
+#ifdef MINI_I3_MK33
+	#define DISABLE_INACTIVE_Z false // set to false if the nozzle will fall down on your printed part when print has finished.
+#else
+	#define DISABLE_INACTIVE_Z true // set to false if the nozzle will fall down on your printed part when print has finished.
+#endif
 #define DISABLE_INACTIVE_E true
+
+#ifdef MINI_I3_MK33
+	#define Z_ALWAYS_ON // Keep Z motors enabled all the time (Calls enable_Z(); in Marlin.cpp in setup)
+#endif
 
 #define DEFAULT_MINIMUMFEEDRATE 0.0 // minimum feedrate
 #define DEFAULT_MINTRAVELFEEDRATE 0.0
@@ -560,8 +611,14 @@
 
 // @section lcd
 
-#define MANUAL_FEEDRATE \
-    { 50 * 60, 50 * 60, 6 * 60, 3 * 60 } // Feedrates for manual moves along X, Y, Z, E from panel
+#ifdef MINI_I3_MK33
+    #define MANUAL_FEEDRATE \
+        { 50 * 60, 50 * 60, 12 * 60, 4 * 60 } // Feedrates for manual moves along X, Y, Z, E from panel
+#else
+    #define MANUAL_FEEDRATE \
+        { 50 * 60, 50 * 60, 6 * 60, 3 * 60 } // Feedrates for manual moves along X, Y, Z, E from panel
+#endif
+
 
 #if ENABLED(ULTIPANEL)
     #define MANUAL_E_MOVES_RELATIVE // Show LCD extruder moves as relative rather than absolute positions
@@ -1092,10 +1149,17 @@
 
 #if EITHER(MESH_BED_LEVELING, AUTO_BED_LEVELING_UBL)
 // Override the mesh area if the automatic (max) area is too large
-#define MESH_MIN_X (-41)
-#define MESH_MIN_Y (-48)
-#define MESH_MAX_X (X_BED_SIZE + 15)
-#define MESH_MAX_Y (Y_BED_SIZE + 46)
+	#ifdef MINI_I3_MK33
+		#define MESH_MIN_X (10.5f)
+		#define MESH_MIN_Y (-10.5f)
+		#define MESH_MAX_X (X_BED_SIZE + MESH_MIN_X)
+		#define MESH_MAX_Y (Y_BED_SIZE - MESH_MIN_Y)
+	#else
+		#define MESH_MIN_X (-41)
+		#define MESH_MIN_Y (-48)
+		#define MESH_MAX_X (X_BED_SIZE + 15)
+		#define MESH_MAX_Y (Y_BED_SIZE + 46)
+	#endif
 #endif
 
 /**
@@ -1375,6 +1439,16 @@
             { -5, 50 }, \
             { -50, 1500 }, \
         }
+	#ifdef MINI_I3_MK33
+	    #define FILAMENT_RUNOUT_RAMMING_SEQUENCE \
+	           { \
+	                { 7, 1500 }, \
+	                { -50, 2700 }, \
+	                { -5, 50 }, \
+	                { -50, 1500 }, \
+	            }
+	#endif
+
     // TODO remove after mmu is not mandatory for the build
     #define FILAMENT_MMU2_RAMMING_SEQUENCE \
        { \
@@ -1383,38 +1457,74 @@
             { -5, 50 / 60.F}, \
             { -50, 1500 / 60.F}, \
         }
-    #define PAUSE_PARK_RETRACT_FEEDRATE 66 // (mm/s) Initial retract feedrate.
-    #define PAUSE_PARK_RETRACT_LENGTH 5 // (mm) Initial retract.
-// This short retract is done immediately, before parking the nozzle.
-    #define FILAMENT_CHANGE_UNLOAD_FEEDRATE 80 // (mm/s) Unload filament feedrate. This can be pretty fast.
-    #define FILAMENT_CHANGE_UNLOAD_ACCEL 1250 // (mm/s^2) Lower acceleration may allow a faster feedrate.
-    #define FILAMENT_CHANGE_UNLOAD_LENGTH 400 // (mm) The length of filament for a complete unload.
-//   For Bowden, the full length of the tube and nozzle.
-//   For direct drive, the full length of the nozzle.
-//   Set to 0 for manual unloading.
-    #define FILAMENT_CHANGE_SLOW_LOAD_FEEDRATE 10 // (mm/s) Slow move when starting load.
-    #define FILAMENT_CHANGE_SLOW_LOAD_LENGTH 40 // (mm) Slow length, to allow time to insert material.
-// 0 to disable start loading and skip to fast load only
-    #define FILAMENT_CHANGE_FAST_LOAD_FEEDRATE 80 // (mm/s) Load filament feedrate. This can be pretty fast.
-    #define FILAMENT_CHANGE_FAST_LOAD_ACCEL 625 // (mm/s^2) Lower acceleration may allow a faster feedrate.
-    #define FILAMENT_CHANGE_FAST_LOAD_LENGTH 320 // (mm) Load length of filament, from extruder gear to nozzle.
-//   For Bowden, the full length of the tube and nozzle.
-//   For direct drive, the full length of the nozzle.
-//#define ADVANCED_PAUSE_CONTINUOUS_PURGE       // Purge continuously up to the purge length until interrupted.
-    #define ADVANCED_PAUSE_PURGE_FEEDRATE 3 // (mm/s) Extrude feedrate (after loading). Should be slower than load feedrate.
-    #define ADVANCED_PAUSE_PURGE_LENGTH 50 // (mm) Length to extrude after loading.
-//   Set to 0 for manual extrusion.
-//   Filament can be extruded repeatedly from the Filament Change menu
-//   until extrusion is consistent, and to purge old filament.
-    #define ADVANCED_PAUSE_RESUME_PRIME 0 // (mm) Extra distance to prime nozzle after returning from park.
 
-// Filament Unload does a Retract, Delay, and Purge first:
-    #define FILAMENT_UNLOAD_RETRACT_LENGTH 30 // (mm) Unload initial retract length.
-    #define FILAMENT_UNLOAD_DELAY 5000 // (ms) Delay for the filament to cool after retract.
-    #define FILAMENT_UNLOAD_PURGE_LENGTH 16 // (mm) An unretract is done, then this length is purged.
-    #define FILAMENT_UNLOAD_PURGE_FEEDRATE 66 // (mm/s)
-    #define FILAMENT_UNLOAD_PHASE1_LENGHT 35 // (mm)fast phase
-    #define FILAMENT_UNLOAD_PHASE2_LENGHT 45 // (mm)slow phase
+	#ifdef MINI_I3_MK33
+	    #define PAUSE_PARK_RETRACT_FEEDRATE 10.8 // (mm/s) Initial retract feedrate.
+	    #define PAUSE_PARK_RETRACT_LENGTH 1 // (mm) Initial retract.
+	        // This short retract is done immediately, before parking the nozzle.
+	    #define FILAMENT_CHANGE_UNLOAD_FEEDRATE 27 // (mm/s) Unload filament feedrate. This can be pretty fast.
+	    #define FILAMENT_CHANGE_UNLOAD_ACCEL 1100 // (mm/s^2) Lower acceleration may allow a faster feedrate.
+	    #define FILAMENT_CHANGE_UNLOAD_LENGTH 105 // (mm) The length of filament for a complete unload.
+	        //   For Bowden, the full length of the tube and nozzle.
+	        //   For direct drive, the full length of the nozzle.
+	        //   Set to 0 for manual unloading.
+	    #define FILAMENT_CHANGE_SLOW_LOAD_FEEDRATE 5.4 // (mm/s) Slow move when starting load.
+	    #define FILAMENT_CHANGE_SLOW_LOAD_LENGTH 30 // (mm) Slow length, to allow time to insert material. //60
+	        // 0 to disable start loading and skip to fast load only
+	    #define FILAMENT_CHANGE_FAST_LOAD_FEEDRATE 18 // (mm/s) Load filament feedrate. This can be pretty fast. //40
+	    #define FILAMENT_CHANGE_FAST_LOAD_ACCEL 100 // (mm/s^2) Lower acceleration may allow a faster feedrate.  //200
+	    #define FILAMENT_CHANGE_FAST_LOAD_LENGTH 50 // (mm) Load length of filament, from extruder gear to nozzle. //75
+	        //   For Bowden, the full length of the tube and nozzle.
+	        //   For direct drive, the full length of the nozzle.
+	    //#define ADVANCED_PAUSE_CONTINUOUS_PURGE       // Purge continuously up to the purge length until interrupted.
+	    #define ADVANCED_PAUSE_PURGE_FEEDRATE 2.7 // (mm/s) Extrude feedrate (after loading). Should be slower than load feedrate.
+	    #define ADVANCED_PAUSE_PURGE_LENGTH 21 // (mm) Length to extrude after loading. //50
+	        //   Set to 0 for manual extrusion.
+	        //   Filament can be extruded repeatedly from the Filament Change menu
+	        //   until extrusion is consistent, and to purge old filament.
+	    #define ADVANCED_PAUSE_RESUME_PRIME 0 // (mm) Extra distance to prime nozzle after returning from park.
+
+	// Filament Unload does a Retract, Delay, and Purge first:
+	    #define FILAMENT_UNLOAD_RETRACT_LENGTH 0 // (mm) Unload initial retract length.
+	    #define FILAMENT_UNLOAD_DELAY 0 // (ms) Delay for the filament to cool after retract.
+	    #define FILAMENT_UNLOAD_PURGE_LENGTH 15 // (mm) An unretract is done, then this length is purged.
+	    #define FILAMENT_UNLOAD_PURGE_FEEDRATE 24 // (mm/s)
+		#define FILAMENT_UNLOAD_PHASE1_LENGHT       20  // (mm)fast phase
+		#define FILAMENT_UNLOAD_PHASE2_LENGHT       30  // (mm)slow phase
+	#else
+	    #define PAUSE_PARK_RETRACT_FEEDRATE 66 // (mm/s) Initial retract feedrate.
+	    #define PAUSE_PARK_RETRACT_LENGTH 5 // (mm) Initial retract.
+	// This short retract is done immediately, before parking the nozzle.
+	    #define FILAMENT_CHANGE_UNLOAD_FEEDRATE 80 // (mm/s) Unload filament feedrate. This can be pretty fast.
+	    #define FILAMENT_CHANGE_UNLOAD_ACCEL 1250 // (mm/s^2) Lower acceleration may allow a faster feedrate.
+	    #define FILAMENT_CHANGE_UNLOAD_LENGTH 400 // (mm) The length of filament for a complete unload.
+	//   For Bowden, the full length of the tube and nozzle.
+	//   For direct drive, the full length of the nozzle.
+	//   Set to 0 for manual unloading.
+	    #define FILAMENT_CHANGE_SLOW_LOAD_FEEDRATE 10 // (mm/s) Slow move when starting load.
+	    #define FILAMENT_CHANGE_SLOW_LOAD_LENGTH 40 // (mm) Slow length, to allow time to insert material.
+	// 0 to disable start loading and skip to fast load only
+	    #define FILAMENT_CHANGE_FAST_LOAD_FEEDRATE 80 // (mm/s) Load filament feedrate. This can be pretty fast.
+	    #define FILAMENT_CHANGE_FAST_LOAD_ACCEL 625 // (mm/s^2) Lower acceleration may allow a faster feedrate.
+	    #define FILAMENT_CHANGE_FAST_LOAD_LENGTH 320 // (mm) Load length of filament, from extruder gear to nozzle.
+	//   For Bowden, the full length of the tube and nozzle.
+	//   For direct drive, the full length of the nozzle.
+	//#define ADVANCED_PAUSE_CONTINUOUS_PURGE       // Purge continuously up to the purge length until interrupted.
+	    #define ADVANCED_PAUSE_PURGE_FEEDRATE 3 // (mm/s) Extrude feedrate (after loading). Should be slower than load feedrate.
+	    #define ADVANCED_PAUSE_PURGE_LENGTH 50 // (mm) Length to extrude after loading.
+	//   Set to 0 for manual extrusion.
+	//   Filament can be extruded repeatedly from the Filament Change menu
+	//   until extrusion is consistent, and to purge old filament.
+	    #define ADVANCED_PAUSE_RESUME_PRIME 0 // (mm) Extra distance to prime nozzle after returning from park.
+
+	// Filament Unload does a Retract, Delay, and Purge first:
+	    #define FILAMENT_UNLOAD_RETRACT_LENGTH 30 // (mm) Unload initial retract length.
+	    #define FILAMENT_UNLOAD_DELAY 5000 // (ms) Delay for the filament to cool after retract.
+	    #define FILAMENT_UNLOAD_PURGE_LENGTH 16 // (mm) An unretract is done, then this length is purged.
+	    #define FILAMENT_UNLOAD_PURGE_FEEDRATE 66 // (mm/s)
+	    #define FILAMENT_UNLOAD_PHASE1_LENGHT 35 // (mm)fast phase
+	    #define FILAMENT_UNLOAD_PHASE2_LENGHT 45 // (mm)slow phase
+	#endif
 
     #define PAUSE_PARK_NOZZLE_TIMEOUT 45 // (seconds) Time limit before the nozzle is turned off for safety.
     #define FILAMENT_CHANGE_ALERT_BEEPS 10 // Number of alert beeps to play when a response is needed.
@@ -1577,8 +1687,13 @@
     #endif
 
     #if AXIS_IS_TMC(Z)
-        #define Z_CURRENT 350 //530//650
-        #define Z_MICROSTEPS 8 //16
+		#ifdef MINI_I3_MK33
+	        #define Z_CURRENT 600
+	        #define Z_MICROSTEPS 16
+		#else
+	        #define Z_CURRENT 350 //530//650
+	        #define Z_MICROSTEPS 8 //16
+		#endif
         #define Z_RSENSE 0.22
     #endif
 
@@ -1595,8 +1710,13 @@
     #endif
 
     #if AXIS_IS_TMC(E0)
-        #define E0_CURRENT 400 //520
-        #define E0_MICROSTEPS 16 //32
+		#ifdef MINI_I3_MK33
+	        #define E0_CURRENT 490
+	        #define E0_MICROSTEPS 32
+		#else
+	        #define E0_CURRENT 400 //520
+	        #define E0_MICROSTEPS 16 //32
+		#endif
         #define E0_RSENSE 0.22
     #endif
 
@@ -1675,7 +1795,7 @@
     #ifdef MINI_I3_MK33
     #elif MINI_COREXY
     #else
-        #define STEALTHCHOP_XY
+    #define STEALTHCHOP_XY
     #endif
     #define STEALTHCHOP_Z
 //  #define STEALTHCHOP_E
@@ -1812,11 +1932,17 @@
 
     #if EITHER(SENSORLESS_HOMING, SENSORLESS_PROBING)
         #if X_DRIVER_TYPE == TMC2209
-            #define X_STALL_SENSITIVITY 130
+            #ifdef MINI_I3_MK33
+                #define X_STALL_SENSITIVITY 145
+            #elif MINI_COREXY
+                #define X_STALL_SENSITIVITY 112
+            #else
+                #define X_STALL_SENSITIVITY 130
+            #endif
         #endif
 
         #if Y_DRIVER_TYPE == TMC2209
-            #define Y_STALL_SENSITIVITY 130
+                #define Y_STALL_SENSITIVITY X_STALL_SENSITIVITY
         #endif
 
         #if Z_DRIVER_TYPE == TMC2209
