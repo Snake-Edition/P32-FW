@@ -29,6 +29,19 @@ private:
     static index_t mask(index_t val) { return val & (N - 1); }
 
 public:
+    /// Removes an item from the queue and stores it into \param target
+    /// \returns false if the queue was empty
+    [[nodiscard]] bool dequeue(T &target) {
+        if (isEmpty()) {
+            return false;
+        }
+
+        index_t index = head;
+        target = std::move(queue[mask(index++)]);
+        head = index;
+        return true;
+    }
+
     /**
      * @brief   Removes and returns a item from the queue
      * @details Removes the oldest item on the queue, pointed to by the
