@@ -763,7 +763,7 @@
         { 200, 200, 40, 45 }
 #else
     #define DEFAULT_MAX_FEEDRATE \
-        { 180, 180, 12, 80 }
+        { 400, 400, 12, 80 }
 #endif
 
 /// HW limits of feed rate
