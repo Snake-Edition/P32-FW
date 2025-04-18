@@ -2,6 +2,7 @@
 
 #include <core/types.h>
 #include <utils/enum_array.hpp>
+#include <variant>
 
 #include <option/has_wastebin.h>
 #include <buddy/unreachable.hpp>
