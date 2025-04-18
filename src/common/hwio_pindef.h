@@ -44,7 +44,6 @@
 #include <stdint.h>
 #include "MarlinPin.h"
 #include "../../lib/Marlin/Marlin/src/HAL/HAL_STM32_F4_F7/endstop_ISR.h"
-#include "device/peripherals.h"
 #include <type_traits>
 #include "buddy/priorities_config.h"
 #include <option/has_modularbed.h>
@@ -85,6 +84,7 @@ void hw_init_spi_side_leds();
 #else // Not special board with separate pin definition file.
 
     #if PRINTER_IS_PRUSA_iX()
+        #include <device/peripherals.h>
 inline constexpr SPI_HandleTypeDef *hw_get_spi_side_strip() {
     return &SPI_HANDLE_FOR(led);
 }

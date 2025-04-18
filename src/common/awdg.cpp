@@ -1,11 +1,11 @@
 #include "awdg.hpp"
 
-#include <array>
-#include <bsod.h>
-#include <freertos/mutex.hpp>
-
 #ifdef STM32F4
 
+    #include <array>
+    #include <bsod.h>
+    #include <freertos/mutex.hpp>
+    #include <device/peripherals.h>
     #include <stm32f4xx_hal_adc.h>
 
 namespace awdg {

@@ -6,7 +6,8 @@
 #include <logging/log.hpp>
 #include "cmsis_os.h"
 #include "bsod.h"
-#include "hwio_pindef.h"
+#include <device/peripherals.h>
+#include <hwio_pindef.h>
 #include <stdlib.h>
 
 LOG_COMPONENT_DEF(W25X, logging::Severity::debug);

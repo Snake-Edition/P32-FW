@@ -3,7 +3,8 @@
 #include "cmath_ext.h"
 #include "cmsis_os.h"
 #include "interrupt_disabler.hpp"
-#include "hwio_pindef.h"
+#include <device/peripherals.h>
+#include <hwio_pindef.h>
 #include "qoi_decoder.hpp"
 #include "raster_opfn_c.h"
 #include <buddy/ccm_thread.hpp>

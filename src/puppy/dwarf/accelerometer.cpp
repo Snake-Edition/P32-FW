@@ -8,7 +8,8 @@
 #include <atomic>
 #include <cassert>
 #include <lis2dh12_reg.h>
-#include "hwio_pindef.h"
+#include <device/peripherals.h>
+#include <hwio_pindef.h>
 
 using namespace dwarf::accelerometer;
 using namespace buddy::hw;

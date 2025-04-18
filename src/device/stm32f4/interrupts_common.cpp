@@ -1,4 +1,5 @@
 #include "interrupts_helper.hpp"
+#include <device/peripherals.h>
 #include <common/bsod.h>
 #include <tusb.h>
 #include <wdt.hpp>
