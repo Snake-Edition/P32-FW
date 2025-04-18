@@ -122,14 +122,6 @@ PrusaAccelerometer::GetSampleResult PrusaAccelerometer::get_sample(RawAccelerati
     return GetSampleResult::ok;
 }
 
-float PrusaAccelerometer::get_sampling_rate() const {
-    return m_sampling_rate;
-}
-
-PrusaAccelerometer::Error PrusaAccelerometer::get_error() const {
-    return m_sample_buffer.error.get();
-}
-
 void PrusaAccelerometer::put_sample(common::puppies::fifo::AccelerometerXyzSample sample) {
     std::lock_guard lock(s_buffer_mutex);
     if (s_sample_buffer) {
@@ -139,11 +131,19 @@ void PrusaAccelerometer::put_sample(common::puppies::fifo::AccelerometerXyzSampl
     }
 }
 
+PrusaAccelerometer::Error PrusaAccelerometer::get_error() const {
+    return m_sample_buffer.error.get();
+}
+
 void PrusaAccelerometer::set_possible_overflow() {
     std::lock_guard lock(s_buffer_mutex);
     if (s_sample_buffer) {
         s_sample_buffer->error.set(Error::overflow_possible);
     }
+}
+
+float PrusaAccelerometer::get_sampling_rate() const {
+    return m_sampling_rate;
 }
 
 void PrusaAccelerometer::set_rate(float rate) {

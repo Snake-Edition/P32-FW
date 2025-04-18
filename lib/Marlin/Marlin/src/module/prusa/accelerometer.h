@@ -113,7 +113,13 @@ public:
 
 #if HAS_REMOTE_ACCELEROMETER()
     static void put_sample(common::puppies::fifo::AccelerometerXyzSample sample);
+
+    /**
+     * @brief Set frequency of calling put_sample().
+     * @param rate frequency [Hz]
+     */
     static void set_rate(float rate);
+
     static void set_possible_overflow();
 #endif
 
