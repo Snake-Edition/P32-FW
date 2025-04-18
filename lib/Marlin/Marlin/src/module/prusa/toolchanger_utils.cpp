@@ -447,7 +447,7 @@ void PrusaToolChangerUtils::expand_first_dock_position() {
     // Compute dock positions using first dock position
     const PrusaToolInfo first = get_tool_info(dwarfs[0]);
 
-    for (uint i = 1; i < tool_info.size(); ++i) {
+    for (unsigned int i = 1; i < tool_info.size(); ++i) {
         const PrusaToolInfo computed = {
             .dock_x = first.dock_x + i * DOCK_OFFSET_X_MM,
             .dock_y = first.dock_y
