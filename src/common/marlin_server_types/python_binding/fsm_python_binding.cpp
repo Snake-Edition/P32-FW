@@ -2,6 +2,14 @@
 #include "client_fsm_types.h"
 #include "client_response.hpp"
 #include <warning_type.hpp>
+#include "magic_enum.hpp"
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/array.h>
+
 #include <option/has_selftest.h>
 #if HAS_SELFTEST()
     #include "selftest_types.hpp"
@@ -9,12 +17,6 @@
     #include "selftest/selftest_sub_state.hpp"
     #include "selftest_heaters_type.hpp"
 #endif
-#include "magic_enum.hpp"
-#include <nanobind/nanobind.h>
-#include <nanobind/stl/map.h>
-#include <nanobind/stl/string.h>
-#include <nanobind/stl/vector.h>
-#include <nanobind/stl/array.h>
 
 namespace nb = nanobind;
 using namespace nb::literals;
