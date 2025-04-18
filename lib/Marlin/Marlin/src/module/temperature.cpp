@@ -3872,7 +3872,7 @@ void Temperature::isr() {
       print_heater_state(degHeatbreak(target_extruder)
           , degTargetHeatbreak(target_extruder)
         #if ENABLED(SHOW_TEMP_ADC_VALUES)
-          , rawHeatbreakTemp()
+          , rawHeatbreakTemp(target_extruder)
         #endif
         , (heater_ind_t) (H_HEATBREAK_E0 + target_extruder)
       );
