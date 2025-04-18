@@ -801,6 +801,27 @@ void Endstops::update() {
   }
 } // Endstops::update()
 
+void Endstops::trigger_endstop(EndstopEnum endstop) {
+  hit_state |= (1 << endstop);
+  switch(endstop) {
+  case X_MIN:
+  case X_MAX:
+    planner.endstop_triggered(X_AXIS);
+    break;
+  case Y_MIN:
+  case Y_MAX:
+    planner.endstop_triggered(Y_AXIS);
+    break;
+  case Z_MIN:
+  case Z_MAX:
+  case Z_MIN_PROBE:
+    planner.endstop_triggered(Z_AXIS);
+    break;
+  default:
+    bsod("unhandled endstop triggered");
+  };
+}
+
 #if ENABLED(PINS_DEBUGGING)
 
   bool Endstops::monitor_flag = false;

@@ -152,6 +152,9 @@ class Endstops {
       FORCE_INLINE static void validate_homing_move() { hit_on_purpose(); }
     #endif
 
+    // Trigger a software endstop
+    void trigger_endstop(EndstopEnum endstop);
+
     // Clear endstops (i.e., they were hit intentionally) to suppress the report
     FORCE_INLINE static void hit_on_purpose() { hit_state = 0; }
 
