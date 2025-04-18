@@ -30,7 +30,6 @@ ScreenMenuTune::ScreenMenuTune()
 void ScreenMenuTune::windowEvent(window_t *sender, GUI_event_t event, void *param) {
     switch (event) {
     case GUI_event_t::LOOP: {
-        /*
         const auto current_command = marlin_client::get_command();
         Item<MI_M600>().set_enabled( //
             marlin_server::all_axes_homed()
@@ -46,7 +45,6 @@ void ScreenMenuTune::windowEvent(window_t *sender, GUI_event_t event, void *para
             // This resets the behaviour once M600 is executed
             Item<MI_M600>().resetEnqueued();
         }
-*/
 
 #if XL_ENCLOSURE_SUPPORT()
         /* Once is Enclosure enabled in menu with ON/OFF switch (MI_ENCLOSURE_ENABLED), it tests the fan and if it passes, Enclosure is declared Active */

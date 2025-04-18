@@ -25,7 +25,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 10. **Selftest check**: Now you can select `Ignore` to immediately pass all selftests.
 11. ~~**Temperature calibration**: You can calibrate PID temperature control for your hotend/bed directly from the menu. Calibration does 5 cycles.~~
 12. ~~**Total time**: Elapsed, Remaining and Total or End time are shown during printing.~~
-13. **Change filament**: Change of filament in Tune menu is moved to submenu to avoid unwanted interruption.
+13.
 14. **Adjust brightness**: You can change brightness of the display. It does not dim the light but draws darker colors.
 15. **Cold mode (min.temp.)**: If you enable Cold Mode, temperatures (once set) won't drop below 30°C. For safety reasons cold mode must be enabled after every start of the printer.
 16. **Show MBL and tilt**: After mesh bed leveling (G29) you can go to `Snake Settings` and see the MBL Z levels at the measured points and check the tilt of the axes. Levels are shifted to avoid negative numbers.

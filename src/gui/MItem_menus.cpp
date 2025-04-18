@@ -29,7 +29,6 @@
 #include "screen_menu_hardware.hpp"
 #include "screen_menu_hardware_tune.hpp"
 #include "screen_menu_snake_settings.hpp"
-#include "screen_menu_change_filament.hpp"
 #include "screen_menu_system.hpp"
 #include "screen_menu_statistics.hpp"
 #include "screen_menu_factory_reset.hpp"
@@ -147,8 +146,7 @@ template struct MI_SCREEN_CTOR<ScreenMenuFilamentSensors>;
 template struct MI_SCREEN_CTOR<ScreenMenuSTSCalibrations>;
 #endif
 
-/* -===============================================(:>- */
-
+/**********************************************************************************************/
 MI_SNAKE_SETTINGS::MI_SNAKE_SETTINGS()
     : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
@@ -157,6 +155,7 @@ void MI_SNAKE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuSnakeSettings>);
 }
 
+/**********************************************************************************************/
 MI_SNAKE_TUNE_SETTINGS::MI_SNAKE_TUNE_SETTINGS()
     : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }
@@ -172,7 +171,6 @@ MI_SNAKE::MI_SNAKE()
 void MI_SNAKE::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<screen_snake_data_t>);
 }
-
 MI_MBL_VALUES::MI_MBL_VALUES()
     : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
 }
@@ -180,16 +178,6 @@ MI_MBL_VALUES::MI_MBL_VALUES()
 void MI_MBL_VALUES::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<screen_mbl_values_t>);
 }
-
-MI_M600_MENU::MI_M600_MENU()
-    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
-}
-
-void MI_M600_MENU::click(IWindowMenu & /*window_menu*/) {
-    Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuM600>);
-}
-
-/* -===============================================(:>- */
 
 #if PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_MINI()
 template struct MI_SCREEN_CTOR<ScreenMenuBedLevelCorrection>;
