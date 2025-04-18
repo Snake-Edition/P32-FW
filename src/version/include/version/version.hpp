@@ -63,4 +63,6 @@ extern const BuildIdentification project_build_identification;
  */
 void fill_project_version_no_dots(char *buffer, size_t buffer_size);
 
+void snake_version(char *version, int length);
+
 } // namespace version

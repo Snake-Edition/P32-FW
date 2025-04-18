@@ -44,22 +44,9 @@ ScreenMenuVersionInfo::ScreenMenuVersionInfo()
     int project_version_full_len = strlen(version::project_version_full);
 
     /* -===============================================(:>- */
-    // convert version from 1.2.34 to 1.2.3.4
-    char snake_version[18];
-    project_version_full_len = std::min(18, project_version_full_len);
-    strncpy(snake_version, version::project_version_full, project_version_full_len);
-    if (version::project_version_full[project_version_full_len - 2] == '.') {
-        snake_version[project_version_full_len + 2] = 0;
-        snake_version[project_version_full_len + 1] = snake_version[project_version_full_len - 1];
-        snake_version[project_version_full_len - 0] = '.';
-        snake_version[project_version_full_len - 1] = '0';
-        project_version_full_len += 2;
-    } else {
-        snake_version[project_version_full_len + 1] = 0;
-        snake_version[project_version_full_len - 0] = snake_version[project_version_full_len - 1];
-        snake_version[project_version_full_len - 1] = '.';
-        project_version_full_len += 1;
-    }
+    char snake_version_[max_chars_per_line];
+    version::snake_version(snake_version_, max_chars_per_line);
+    project_version_full_len = strlen(snake_version_);
     /* -===============================================(:>- */
 
     for (int i = 0; i < project_version_full_len; i += max_chars_per_line) {
@@ -70,14 +57,13 @@ ScreenMenuVersionInfo::ScreenMenuVersionInfo()
             line_length = max_chars_per_line;
         }
         if (end > begin) {
-            begin += snprintf(begin, end - begin, "%.*s\n", line_length, snake_version + i);
+            begin += snprintf(begin, end - begin, "%.*s\n", line_length, snake_version_ + i);
         }
     }
 
 #ifdef MINI_I3_MK33
     begin += snprintf(begin, end - begin, "i3 MK3.3\n");
-#endif
-#ifdef MINI_COREXY
+#elif MINI_COREXY
     begin += snprintf(begin, end - begin, "COREXY\n");
 #endif
 
