@@ -4,8 +4,13 @@
 
 #include <device/hal.h>
 #include <freertos/mutex.hpp>
-#include <option/developer_mode.h>
 #include <device/peripherals.h>
+#include <mutex>
+
+#include <option/developer_mode.h>
+#if DEVELOPER_MODE()
+    #include <bsod.h>
+#endif
 
 static freertos::Mutex rand_strong_mutex;
 
