@@ -1079,6 +1079,12 @@ void test_start([[maybe_unused]] const uint64_t test_mask, [[maybe_unused]] cons
         SelftestInstance().Start(test_mask, test_data);
     }
 }
+
+void test_abort() {
+    if (SelftestInstance().IsInProgress()) {
+        SelftestInstance().Abort();
+    }
+}
 #endif
 
 void quick_stop() {
@@ -3322,6 +3328,11 @@ static void process_request_flags() {
         case RequestFlag::GuiCantPrint:
             gui_cant_print();
             break;
+#if HAS_SELFTEST()
+        case RequestFlag::TestAbort:
+            test_abort();
+            break;
+#endif
 #if HAS_CANCEL_OBJECT()
         case RequestFlag::CancelCurrentObject:
             buddy::cancel_object().set_object_cancelled(buddy::cancel_object().current_object(), true);

@@ -3,6 +3,7 @@
 #include "cmsis_os.h" // for osThreadId
 #include <limits>
 #include <time.h>
+#include <option/has_selftest.h>
 #include <option/has_cancel_object.h>
 #include "marlin_server_state.h"
 #include "utility_extensions.hpp"
@@ -26,6 +27,9 @@ enum class RequestFlag : uint8_t {
     KnobMove,
     KnobClick,
     GuiCantPrint,
+#if HAS_SELFTEST()
+    TestAbort,
+#endif
 #if HAS_CANCEL_OBJECT()
     CancelCurrentObject,
 #endif
