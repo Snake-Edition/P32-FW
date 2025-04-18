@@ -11,6 +11,7 @@
 
 #include <buddy/priorities_config.h>
 #include "metric_handlers.h"
+#include <printers.h>
 
 static_assert(sizeof(metric_t) == 12);
 
