@@ -455,7 +455,7 @@ USBH_StatusTypeDef USBH_ReEnumerate(USBH_HandleTypeDef *phost)
     (void)USBH_Stop(phost);
 
     // This was formerly inside USBH_Start's USBH_LL_DriverVBUS,
-    // got to put it out because it was called from Tmr Svc, which does not allow blocking
+    // got to put it out because it was called from TmrSvc, which does not allow blocking
     // BFW-5213
     (void)USBH_Delay(200);
 
