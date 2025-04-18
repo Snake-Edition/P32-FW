@@ -173,7 +173,11 @@
     #include <feature/auto_retract/auto_retract.hpp>
 #endif
 
-#include <wui.h>
+#include <option/buddy_enable_wui.h>
+#if BUDDY_ENABLE_WUI()
+    #include <wui.h>
+#endif
+
 #include <feature/print_status_message/print_status_message_mgr.hpp>
 
 using namespace ExtUI;
