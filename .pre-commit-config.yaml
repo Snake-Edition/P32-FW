@@ -65,6 +65,7 @@ exclude: |
        (gcode/)?feature/pressure_advance/|
        (gcode/)?feature/precise_stepping/|
        (gcode/)?feature/phase_stepping/|
+       (gcode/)?feature/motordriver_util\.|
        gcode/calibrate/M958\.|
        module/prusa/|
        module/stepper/indirection\.cpp$|
