@@ -10,6 +10,7 @@
 #include <array>
 #include <stdint.h>
 #include <cstddef> //size_t
+#include <cstring>
 
 namespace fsm {
 #pragma pack(push, 1)
