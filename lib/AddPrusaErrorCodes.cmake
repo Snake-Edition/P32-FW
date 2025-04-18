@@ -43,12 +43,12 @@ set(error_codes_dir "${CMAKE_CURRENT_SOURCE_DIR}/Prusa-Error-Codes")
 
 if(PRINTER STREQUAL "XL_DEV_KIT")
   # use XL error codes for XL_DEV_KIT
-  add_generated_error_codes_header("${error_codes_dir}/yaml/buddy-error-codes.yaml" 17 XL FALSE)
-else()
-  add_generated_error_codes_header(
-    "${error_codes_dir}/yaml/buddy-error-codes.yaml" ${PRINTER_CODE} ${PRINTER} FALSE
-    )
+  set(PRINTER "XL")
 endif()
+
+add_generated_error_codes_header(
+  "${error_codes_dir}/yaml/buddy-error-codes.yaml" ${PRINTER_CODE} ${PRINTER} FALSE
+  )
 
 # TODO temporarily build the mmu header, not easy to separate the mmu code, needs refactor
 # if(HAS_MMU2)
