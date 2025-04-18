@@ -8,6 +8,10 @@
 #include "client_response.hpp"
 #include <option/has_selftest.h>
 #include "Marlin/src/core/types.h"
+#include <option/has_selftest.h>
+#if HAS_SELFTEST()
+    #include "common/selftest/selftest_data.hpp"
+#endif
 #include "common/selftest/selftest_data.hpp"
 #include <gcode/inject_queue_actions.hpp>
 

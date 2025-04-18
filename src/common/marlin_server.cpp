@@ -3257,8 +3257,8 @@ bool _process_server_valid_request(const Request &request, int client_id) {
             server.client_events[client_id] |= make_mask(Event::MediaInserted);
         }
         return true;
-    case Request::Type::TestStart:
 #if HAS_SELFTEST()
+    case Request::Type::TestStart:
         marlin_server::test_start(
             request.test_start.test_mask,
             selftest::deserialize_test_data_from_int(request.test_start.test_data_index, request.test_start.test_data_data));

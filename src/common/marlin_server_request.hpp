@@ -15,7 +15,9 @@ struct Request {
         Inject,
         SetVariable,
         Babystep,
+#if HAS_SELFTEST()
         TestStart,
+#endif
         PrintStart,
         FSM,
         CancelObjectID,

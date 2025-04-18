@@ -19,12 +19,14 @@
 namespace nb = nanobind;
 using namespace nb::literals;
 
+#if HAS_SELFTEST()
 // Change exported range for some types
 template <>
 struct magic_enum::customize::enum_range<ToolMask> {
     static constexpr int min = 0;
     static constexpr int max = 256;
 };
+#endif
 
 template <typename enum_T>
 void export_enum(::nanobind::module_ &m, char const *name) {
@@ -50,6 +52,7 @@ void export_phase_responses(::nanobind::module_ &m, char const *name) {
     m.attr(name) = responses_map;
 }
 
+#if HAS_SELFTEST()
 SelftestHeaters_t deserialize(nb::bytes &data) {
     if (data.size() != sizeof(SelftestHeaters_t)) {
         throw std::runtime_error("Invalid data size");
@@ -76,6 +79,7 @@ void export_selftest_heaters_result(::nanobind::module_ &m) {
                                 })
                                 .def_rw("bed", &SelftestHeaters_t::bed);
 }
+#endif
 
 NB_MODULE(marlin_server_types_python_module_impl, m) {
     m.doc() = "Python library exposing types used in marlin server and FSM";
@@ -109,8 +113,10 @@ NB_MODULE(marlin_server_types_python_module_impl, m) {
     export_enum<PhasesPrintPreview>(m, "PhasesPrintPreview");
     export_phase_responses<PhasesPrintPreview>(m, "phases_print_preview_responses_data");
 
+#if HAS_SELFTEST()
     export_enum<PhasesSelftest>(m, "PhasesSelftest");
     export_phase_responses<PhasesSelftest>(m, "phases_selftest_responses_data");
+#endif
 
     export_enum<PhasesCrashRecovery>(m, "PhasesCrashRecovery");
     export_phase_responses<PhasesCrashRecovery>(m, "phases_crash_recovery_responses_data");
