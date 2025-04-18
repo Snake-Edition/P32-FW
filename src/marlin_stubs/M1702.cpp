@@ -1,6 +1,7 @@
 #include <option/has_coldpull.h>
 #include <option/has_mmu2.h>
 #include <option/has_toolchanger.h>
+#include <option/has_gui.h>
 
 #include <M70X.hpp>
 #include <fs_autoload_autolock.hpp>
@@ -13,7 +14,7 @@
 #include <common/marlin_server.hpp>
 #include <common/RAII.hpp>
 
-#if HAS_TOOLCHANGER()
+#if HAS_TOOLCHANGER() && HAS_GUI()
     #include <window_tool_action_box.hpp>
 #endif
 

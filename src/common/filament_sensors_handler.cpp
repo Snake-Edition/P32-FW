@@ -8,14 +8,18 @@
 #include "filament_sensors_handler.hpp"
 #include "bsod.h"
 #include <tasks.hpp>
-#include "window_msgbox.hpp"
 #include <logging/log.hpp>
 #include <option/has_selftest.h>
 #include <option/has_mmu2.h>
 #include <option/has_toolchanger.h>
 #include <stdio.h>
 
-#if HAS_SELFTEST()
+#include <option/has_gui.h>
+#if HAS_GUI()
+    #include <window_msgbox.hpp>
+#endif
+
+#if HAS_SELFTEST() && HAS_GUI()
     #include <ScreenHandler.hpp>
     #include "screen_menu_selftest_snake.hpp"
 #endif
@@ -55,6 +59,7 @@ void FilamentSensors::request_enable_state_update([[maybe_unused]] bool check_fs
     enable_state_update_pending = true;
 }
 
+#if HAS_GUI()
 bool FilamentSensors::gui_wait_for_init_with_msg() {
     enum : uint8_t {
         f_extruder = 1,
@@ -96,6 +101,7 @@ bool FilamentSensors::gui_wait_for_init_with_msg() {
 
     return true;
 }
+#endif
 
 void FilamentSensors::for_all_sensors(const stdext::inplace_function<void(IFSensor &sensor, uint8_t index, bool is_side)> &f) {
     HOTEND_LOOP() {
@@ -223,7 +229,7 @@ void FilamentSensors::process_events() {
             || autoload_sent
             || isAutoloadLocked()
             || !config_store().fs_autoload_enabled.get()
-#if HAS_SELFTEST()
+#if HAS_SELFTEST() && HAS_GUI()
             // We're accessing screens from the filamentsensors thread here. This looks quite unsafe.
             || Screens::Access()->IsScreenOnStack<ScreenMenuSTSWizard>()
             || Screens::Access()->IsScreenOnStack<ScreenMenuSTSCalibrations>()
