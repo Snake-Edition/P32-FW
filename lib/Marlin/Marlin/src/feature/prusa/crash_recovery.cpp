@@ -105,7 +105,7 @@ void Crash_s::stop_and_save() {
         true
         #endif
     );
-    #endif
+    #endif /*HAS_POSITION_MODIFIERS*/
 }
 
 void check_stack_unwound() {
@@ -425,11 +425,11 @@ void Crash_s::set_homing_sensitivity(const AxisEnum axis) {
     auto sensitivity_fallback = [](int16_t s) {
         return s == config_store_ns::stallguard_sensitivity_unset ? XY_STALL_SENSITIVITY_MIN : s;
     };
-    #else
+    #else /*defined(XY_STALL_SENSITIVITY_MIN)*/
     auto sensitivity_fallback = [](int16_t s) {
         return s;
     };
-    #endif
+    #endif /*defined(XY_STALL_SENSITIVITY_MIN)*/
 
     if (axis == X_AXIS) {
         stepperX.stall_sensitivity(sensitivity_fallback(crash_s.home_sensitivity[0]));
@@ -447,7 +447,7 @@ void Crash_s::start_sensorless_homing_per_axis(const AxisEnum axis) {
             set_homing_sensitivity(Y_AXIS);
     #else
             set_homing_sensitivity(axis);
-    #endif
+    #endif /*ENABLED(CORE_IS_XY)*/
         }
     }
 }
@@ -471,5 +471,5 @@ void Crash_s::set_filter(bool on) {
     config_store().crash_filter.set(on);
     update_machine();
 }
-    #endif
+    #endif /*HAS_DRIVER(TMC2130)*/
 #endif // ENABLED(CRASH_RECOVERY)

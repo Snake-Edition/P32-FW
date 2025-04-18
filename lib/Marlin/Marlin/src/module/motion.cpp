@@ -1192,7 +1192,7 @@ void set_axis_is_at_home(const AxisEnum axis, [[maybe_unused]] bool homing_z_wit
     #endif
     : base_home_pos(axis));
   #else
-    #ifdef WORKSPACE_HOME 
+    #ifdef WORKSPACE_HOME
       /*Fill workspace_homes[] with data from config*/
       xyz_pos_t workspace_homes[MAX_COORDINATE_SYSTEMS]={{{{0}}}};
 
@@ -1226,7 +1226,7 @@ void set_axis_is_at_home(const AxisEnum axis, [[maybe_unused]] bool homing_z_wit
       #ifdef WORKSPACE_9_X_POS
         workspace_homes[9].set(WORKSPACE_9_X_POS, WORKSPACE_9_Y_POS, WORKSPACE_9_Z_POS);
       #endif
-      
+
 
       int8_t active_coordinate_system = GcodeSuite::get_coordinate_system();
       if (active_coordinate_system == -1){ /*If base coordinate system, proceed as usual*/
@@ -1234,7 +1234,7 @@ void set_axis_is_at_home(const AxisEnum axis, [[maybe_unused]] bool homing_z_wit
       } else { /*If in alternate system, update position shift and system offset from base system*/
         position_shift[axis] = - current_position[axis] + workspace_homes[active_coordinate_system][axis];
         GcodeSuite::set_coordinate_system_offset(0, axis, position_shift[axis]);
-        update_workspace_offset(axis);        
+        update_workspace_offset(axis);
       }
     #else
       current_position[axis] = base_home_pos(axis)
@@ -1468,7 +1468,7 @@ bool homeaxis(const AxisEnum axis, const feedRate_t fr_mm_s, bool invert_home_di
         ui.status_printf_P(0,"%c axis homing failed, retrying", axis_codes[axis]);
       }
     }
-  #else // HOMING_MAX_ATTEMPTS 
+  #else // HOMING_MAX_ATTEMPTS
     homeaxis_single_run(axis, axis_home_dir);
   #endif // HOMING_MAX_ATTEMPTS
 
@@ -1625,7 +1625,7 @@ float homeaxis_single_run(const AxisEnum axis, const int axis_home_dir, const fe
     #endif //HOMING_Z_WITH_PROBE
     {
       bump_feedrate = fr_mm_s ?: get_homing_bump_feedrate(axis);
-    }  
+    }
 
     do_homing_move(axis, 2 * bump, bump_feedrate, false, homing_z_with_probe);
 

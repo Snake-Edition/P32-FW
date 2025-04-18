@@ -315,11 +315,16 @@ public:
     [[nodiscard]] bool get_orig_state() const { return orig_state; }
 };
 
-#else
+#else // ENABLED(CRASH_RECOVERY)
 
 /// Stubs for printers without CRASH_RECOVERY support
 static constexpr struct {
     static constexpr bool did_trigger() { return false; }
 } crash_s;
 
-#endif // ENABLED(CRASH_RECOVERY)
+struct Crash_Temporary_Deactivate {
+    Crash_Temporary_Deactivate() {} // avoids unused warning
+    static constexpr bool get_orig_state() { return false; }
+};
+
+#endif
