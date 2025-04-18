@@ -327,7 +327,7 @@ void before_dump() {
     if (!dump_breakpoint_paused) {
         dump_breakpoint_paused = true;
         buddy_disable_heaters(); // put HW to safe state
-#ifdef _DEBUG
+#if defined(_DEBUG) || DEVELOPER_MODE()
         if (sys_debugger_attached()) {
             // if case debugger is attached, issue breakpoint instead of crash dump.
             // If you still want to do crash dump, resume the processor

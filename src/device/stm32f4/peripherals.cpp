@@ -473,7 +473,7 @@ static void i2c_unblock_sda(uint32_t clk, hw_pin sda, hw_pin scl) {
 
 // in case code reaches this, there is some HW issue
 // but we cannot log it or rise red screen, it is too early
-#ifdef _DEBUG
+#if defined(_DEBUG) || DEVELOPER_MODE()
     buddy_disable_heaters();
     __BKPT(0);
 #endif
