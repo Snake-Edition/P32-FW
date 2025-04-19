@@ -82,16 +82,16 @@ void fill_project_version_no_dots(char *buffer, size_t buffer_size) {
 /* -===============================================(:>- */
 // convert version from 1.2.34 to 1.2.3.4 (or 1.2.3 to 1.2.3.0)
 void snake_version(char *version, int length) {
-    strncpy(version, version::project_version_full, length - 2);
-    if (version::project_version_full[length - 2] == '.') {
-        version[length - 1] = '0';
-        version[length - 0] = '.';
-        version[length + 1] = version[length - 1];
-        version[length + 2] = 0;
+    strncpy(version, version::project_version_full, length);
+    int project_length = strlen(version::project_version_full);
+    if (version::project_version_full[project_length - 2] == '.') {
+        version[project_length + 2] = 0;
+        version[project_length + 1] = '0';
+        version[project_length - 0] = '.';
     } else {
-        version[length - 1] = '.';
-        version[length - 0] = version[length - 1];
-        version[length + 1] = 0;
+        version[project_length + 1] = 0;
+        version[project_length - 0] = version[project_length - 1];
+        version[project_length - 1] = '.';
     }
 }
 /* -===============================================(:>- */
