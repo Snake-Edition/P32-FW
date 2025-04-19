@@ -38,8 +38,12 @@ enum MeshPointType : char { INVALID, REAL, SET_IN_BITMAP };
 
 struct mesh_index_pair;
 
-#define MESH_X_DIST (float(MESH_MAX_X - (MESH_MIN_X)) / float(GRID_MAX_POINTS_X - 1))
-#define MESH_Y_DIST (float(MESH_MAX_Y - (MESH_MIN_Y)) / float(GRID_MAX_POINTS_Y - 1))
+float mesh_x_dist();
+float mesh_y_dist();
+
+#define MESH_X_DIST mesh_x_dist()
+#define MESH_Y_DIST mesh_y_dist()
+
 
 class unified_bed_leveling {
   private:
