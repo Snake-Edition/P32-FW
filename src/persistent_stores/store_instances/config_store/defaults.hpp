@@ -292,6 +292,15 @@ namespace defaults {
 #endif
     };
 
+    // E fast load length
+    inline constexpr float axis_e_length_mm {
+#ifdef MINI_I3_MK33
+        50
+#else
+        320
+#endif
+    };
+
     inline constexpr int16_t homing_sens_x { stallguard_sensitivity_unset };
     inline constexpr int16_t homing_sens_y { stallguard_sensitivity_unset };
 

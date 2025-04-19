@@ -508,6 +508,7 @@ struct CurrentStore
     StoreItem<float, defaults::axis_x_length_mm, journal::hash("Axis X Length MM")> axis_x_length_mm;
     StoreItem<float, defaults::axis_y_length_mm, journal::hash("Axis Y Length MM")> axis_y_length_mm;
     StoreItem<float, defaults::axis_z_max_pos_mm, journal::hash("Axis Z Max Pos MM")> axis_z_max_pos_mm;
+    StoreItem<float, defaults::axis_e_length_mm, journal::hash("Filament Fast Load Length MM")> axis_e_length_mm;
 
     // Nozzle Sock has is here for backwards compatibility (should be binary compatible)
     StoreItemArray<HotendType, defaults::hotend_type, journal::hash("Hotend Type Per Tool"), 8, HOTENDS> hotend_type;

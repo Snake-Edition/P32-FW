@@ -409,6 +409,14 @@ public:
     virtual void OnClick() override;
 };
 
+class MI_E_LOAD_LENGTH : public WiSpin {
+    constexpr static const char *const label = N_("E load length");
+
+public:
+    MI_E_LOAD_LENGTH();
+    virtual void OnClick() override;
+};
+
 class MI_COLD_MODE : public WI_ICON_SWITCH_OFF_ON_t {
     constexpr static const char *const label = N_("Cold Mode");
 

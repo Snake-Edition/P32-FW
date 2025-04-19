@@ -1458,6 +1458,8 @@
             { -50, 1500 / 60.F}, \
         }
 
+extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
+
 	#ifdef MINI_I3_MK33
 	    #define PAUSE_PARK_RETRACT_FEEDRATE 10.8 // (mm/s) Initial retract feedrate.
 	    #define PAUSE_PARK_RETRACT_LENGTH 1 // (mm) Initial retract.
@@ -1473,7 +1475,7 @@
 	        // 0 to disable start loading and skip to fast load only
 	    #define FILAMENT_CHANGE_FAST_LOAD_FEEDRATE 18 // (mm/s) Load filament feedrate. This can be pretty fast. //40
 	    #define FILAMENT_CHANGE_FAST_LOAD_ACCEL 100 // (mm/s^2) Lower acceleration may allow a faster feedrate.  //200
-	    #define FILAMENT_CHANGE_FAST_LOAD_LENGTH 50 // (mm) Load length of filament, from extruder gear to nozzle. //75
+	    // #define FILAMENT_CHANGE_FAST_LOAD_LENGTH 50 // (mm) Load length of filament, from extruder gear to nozzle. //75
 	        //   For Bowden, the full length of the tube and nozzle.
 	        //   For direct drive, the full length of the nozzle.
 	    //#define ADVANCED_PAUSE_CONTINUOUS_PURGE       // Purge continuously up to the purge length until interrupted.
@@ -1506,7 +1508,7 @@
 	// 0 to disable start loading and skip to fast load only
 	    #define FILAMENT_CHANGE_FAST_LOAD_FEEDRATE 80 // (mm/s) Load filament feedrate. This can be pretty fast.
 	    #define FILAMENT_CHANGE_FAST_LOAD_ACCEL 625 // (mm/s^2) Lower acceleration may allow a faster feedrate.
-	    #define FILAMENT_CHANGE_FAST_LOAD_LENGTH 320 // (mm) Load length of filament, from extruder gear to nozzle.
+	    // #define FILAMENT_CHANGE_FAST_LOAD_LENGTH 320 // (mm) Load length of filament, from extruder gear to nozzle.
 	//   For Bowden, the full length of the tube and nozzle.
 	//   For direct drive, the full length of the nozzle.
 	//#define ADVANCED_PAUSE_CONTINUOUS_PURGE       // Purge continuously up to the purge length until interrupted.

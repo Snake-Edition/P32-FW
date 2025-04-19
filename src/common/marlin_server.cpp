@@ -611,6 +611,7 @@ void init(void) {
 
     X_BED_SIZE = get_x_length_mm();
     Y_BED_SIZE = get_y_length_mm();
+    FILAMENT_CHANGE_FAST_LOAD_LENGTH = get_e_length_mm();
 
     settings_load();
 }

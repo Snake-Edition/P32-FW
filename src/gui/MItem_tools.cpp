@@ -640,6 +640,24 @@ void MI_Y_AXIS_LEN::OnClick() {
 }
 
 /* -===============================================(:>- */
+static constexpr NumericInputConfig e_load_len_spin_config {
+    .min_value = FILAMENT_CHANGE_SLOW_LOAD_LENGTH,
+    .max_value = 999,
+    .unit = Unit::millimeter,
+};
+
+uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH = 320;
+
+// MI_E_LOAD_LENGTH
+MI_E_LOAD_LENGTH::MI_E_LOAD_LENGTH()
+    : WiSpin(FILAMENT_CHANGE_FAST_LOAD_LENGTH + FILAMENT_CHANGE_SLOW_LOAD_LENGTH, e_load_len_spin_config, _(label)) {}
+
+void MI_E_LOAD_LENGTH::OnClick() {
+    FILAMENT_CHANGE_FAST_LOAD_LENGTH = GetVal() - FILAMENT_CHANGE_SLOW_LOAD_LENGTH;
+    set_e_length_mm(FILAMENT_CHANGE_FAST_LOAD_LENGTH);
+}
+
+/* -===============================================(:>- */
 uint8_t cold_mode = false;
 MI_COLD_MODE::MI_COLD_MODE()
     : WI_ICON_SWITCH_OFF_ON_t(cold_mode, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
