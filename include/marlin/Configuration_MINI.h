@@ -1281,8 +1281,12 @@ extern uint16_t Y_BED_SIZE;
 // Max software endstops constrain movement within maximum coordinate bounds
 #define MAX_SOFTWARE_ENDSTOPS
 #if ENABLED(MAX_SOFTWARE_ENDSTOPS)
-    #define MAX_SOFTWARE_ENDSTOP_X
-    #define MAX_SOFTWARE_ENDSTOP_Y
+    #ifdef MINI_I3_MK33
+        #define MAX_SOFTWARE_ENDSTOP_X
+        #define MAX_SOFTWARE_ENDSTOP_Y
+    #else
+        /// hotfix: SW endstops are not updated according to bed size
+    #endif
     #define MAX_SOFTWARE_ENDSTOP_Z
 #endif
 
