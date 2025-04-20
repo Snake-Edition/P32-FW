@@ -1168,8 +1168,6 @@
 extern uint16_t X_BED_SIZE;
 extern uint16_t Y_BED_SIZE;
 
-
-
 #ifdef MINI_COREXY
     #define Z_SIZE 256
 #elif MINI_I3_MK33
@@ -1181,19 +1179,22 @@ extern uint16_t Y_BED_SIZE;
 // Travel limits (mm) after homing, corresponding to endstop positions.
 #ifdef MINI_I3_MK33
     #define X_MIN_POS -1
+#elif MINI_COREXY
+    #define X_MIN_POS 0
 #else
     #define X_MIN_POS -2
 #endif
 
-#ifdef MINI_COREXY
-    #define Y_MIN_POS -1
-#elif MINI_I3_MK33
+#ifdef MINI_I3_MK33
     #define Y_MIN_POS -4
+#elif MINI_COREXY
+    #define Y_MIN_POS 0
 #else
     #define Y_MIN_POS -3
 #endif
 
 #define Z_MIN_POS 0
+
 #ifdef MINI_I3_MK33
 	#define X_MAX_POS (X_BED_SIZE + 1.f)
 #else
