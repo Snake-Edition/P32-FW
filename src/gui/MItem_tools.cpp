@@ -52,6 +52,8 @@
 
 #include <type_traits>
 
+#include "../../../lib/Marlin/Marlin/src/feature/pause.h"
+
 #if ENABLED(PRUSA_TOOLCHANGER)
     #include "../../../lib/Marlin/Marlin/src/module/prusa/toolchanger.h"
     #include "screen_menu_tools.hpp"
@@ -655,6 +657,11 @@ MI_E_LOAD_LENGTH::MI_E_LOAD_LENGTH()
 void MI_E_LOAD_LENGTH::OnClick() {
     FILAMENT_CHANGE_FAST_LOAD_LENGTH = GetVal() - FILAMENT_CHANGE_SLOW_LOAD_LENGTH;
     set_e_length_mm(FILAMENT_CHANGE_FAST_LOAD_LENGTH);
+#if ENABLED(ADVANCED_PAUSE_FEATURE)
+    for (uint8_t e = 0; e < EXTRUDERS; e++) {
+        fc_settings[e].load_length = FILAMENT_CHANGE_FAST_LOAD_LENGTH;
+    }
+#endif
 }
 
 /* -===============================================(:>- */
