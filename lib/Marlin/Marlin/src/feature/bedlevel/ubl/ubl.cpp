@@ -233,8 +233,11 @@
 
 #endif // AUTO_BED_LEVELING_UBL
 
-float mesh_x_dist(){return
-  (float(MESH_MAX_X - (MESH_MIN_X)) / float(GRID_MAX_POINTS_X - 1));}
-  
- float mesh_y_dist(){return (float(MESH_MAX_Y - (MESH_MIN_Y)) / float(GRID_MAX_POINTS_Y - 1));}
+float mesh_x_dist() {
+  return (float(MESH_MAX_X - (MESH_MIN_X)) / float(GRID_MAX_POINTS_X - 1));
+}
+
+float mesh_y_dist() {
+  return (float(MESH_MAX_Y - (MESH_MIN_Y)) / float(GRID_MAX_POINTS_Y - 1));
+}
  

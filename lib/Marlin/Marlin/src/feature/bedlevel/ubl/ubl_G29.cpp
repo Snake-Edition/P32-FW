@@ -986,8 +986,8 @@
             continue;
 
           // skip points outside print area
-          if (!probe_area.contains(pos))
-            continue;
+          // if (!probe_area.contains(pos))
+            // continue;
 
           // skip points having meaningful value already
           // note: zero might be meaningful and we don't skip it; that is just to be conservative
