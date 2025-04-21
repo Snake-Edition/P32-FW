@@ -4,7 +4,15 @@
 #include "MItem_menus.hpp"
 #include "MItem_tools.hpp"
 
-using ScreenMenuSnakeSettings__ = ScreenMenu<EFooter::On, MI_RETURN, MI_BRIGHTNESS, MI_MBL_VALUES, MI_SKEW_XY, MI_SKEW_XZ, MI_SKEW_YZ, MI_X_AXIS_LEN, MI_Y_AXIS_LEN, MI_E_LOAD_LENGTH, MI_COLD_MODE>;
+using ScreenMenuSnakeSettings__ = ScreenMenu<EFooter::On, MI_RETURN,
+#if PRINTER_IS_PRUSA_MINI()
+    MI_BRIGHTNESS,
+#endif
+    MI_MBL_VALUES, MI_SKEW_XY, MI_SKEW_XZ, MI_SKEW_YZ,
+#if PRINTER_IS_PRUSA_MINI()
+    MI_X_AXIS_LEN, MI_Y_AXIS_LEN, MI_E_LOAD_LENGTH,
+#endif
+    MI_COLD_MODE>;
 
 class ScreenMenuSnakeSettings : public ScreenMenuSnakeSettings__ {
 public:
@@ -14,7 +22,11 @@ public:
 
 /*********************************************************************************/
 
-using ScreenMenuSnakeTuneSettings__ = ScreenMenu<EFooter::On, MI_RETURN, MI_BRIGHTNESS, MI_MBL_VALUES, MI_SKEW_XY, MI_SKEW_XZ, MI_SKEW_YZ, MI_COLD_MODE>;
+using ScreenMenuSnakeTuneSettings__ = ScreenMenu<EFooter::On, MI_RETURN,
+#if PRINTER_IS_PRUSA_MINI()
+    MI_BRIGHTNESS,
+#endif
+    MI_MBL_VALUES, MI_SKEW_XY, MI_SKEW_XZ, MI_SKEW_YZ, MI_COLD_MODE>;
 
 class ScreenMenuSnakeTuneSettings : public ScreenMenuSnakeTuneSettings__ {
 public:

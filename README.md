@@ -31,8 +31,9 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 16. **Show MBL and tilt**: After mesh bed leveling (G29) you can go to `Snake Settings` and see the MBL Z levels at the measured points and check the tilt of the axes. Levels are shifted to avoid negative numbers.
 17. **Speed up**: Parking, unparking and other moves are done faster.
 18. **Different printers**: Next to a standard version, other versions are released:
-  1. coreXY
-  1. i3 MK3.3 (i3 MK3 with MINI board, MINI display, Z motor split, and mosfet on heating)
+    1. coreXY
+    1. i3 MK3.3 (i3 MK3 with MINI board, MINI display, Z motor split, and mosfet on heating)
+    1. i3 MK3.5 coreXY
 19. **Different languages**
 20. **Avoid display flashing**: Some displays flash with original FW.
 21. **High geared extruder**: Allow up to 2000 steps/mm for extruder.

@@ -287,6 +287,18 @@
                 "BOARD_VERSION": "0.2.7"
             }
         },
+
+        {
+            "name": "i3xy_mk3.5",
+            "description": "Prusa MK3.5 with coreXY",
+            "cacheVariables": {
+                "PRINTER": "MK3.5",
+                "BOARD": "XBUDDY",
+                "BOARD_VERSION": "0.2.7",
+                "CUSTOM_COMPILE_OPTIONS": "-DI3_COREXY"
+            }
+        },
+
         {
             "name": "ix",
             "description": "Original Prusa iX with xBuddy 0.2.7c or newer, with 200-step motors",

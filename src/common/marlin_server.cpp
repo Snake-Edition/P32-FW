@@ -609,9 +609,11 @@ void init(void) {
     SteelSheets::CheckIfCurrentValid();
 #endif
 
+#if PRINTER_IS_PRUSA_MINI()
     X_BED_SIZE = get_x_length_mm();
     Y_BED_SIZE = get_y_length_mm();
     FILAMENT_CHANGE_FAST_LOAD_LENGTH = get_e_length_mm();
+#endif
 
     settings_load();
 }

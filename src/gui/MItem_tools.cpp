@@ -579,6 +579,7 @@ MI_TIME_NOW::MI_TIME_NOW()
     ChangeInformation(time_tools::get_time());
 }
 
+#if PRINTER_IS_PRUSA_MINI()
 /* -===============================================(:>- */
 static const NumericInputConfig bright_spin_config = {
     .min_value = 30,
@@ -593,6 +594,7 @@ void MI_BRIGHTNESS::OnClick() {
     brightness = GetVal();
 }
 /* -===============================================(:>- */
+#endif
 
 /*****************************************************************************/
 static const NumericInputConfig skew_spin_config = {
@@ -612,6 +614,7 @@ MI_SKEW_XZ::MI_SKEW_XZ()
 MI_SKEW_YZ::MI_SKEW_YZ()
     : WiSpin(planner.skew_factor.yz, skew_spin_config, _(label), 0, is_enabled_t::no) {}
 
+#if PRINTER_IS_PRUSA_MINI()
 /* -===============================================(:>- */
 static constexpr NumericInputConfig xy_axis_len_spin_config {
     .min_value = 180,
@@ -657,12 +660,13 @@ MI_E_LOAD_LENGTH::MI_E_LOAD_LENGTH()
 void MI_E_LOAD_LENGTH::OnClick() {
     FILAMENT_CHANGE_FAST_LOAD_LENGTH = GetVal() - FILAMENT_CHANGE_SLOW_LOAD_LENGTH;
     set_e_length_mm(FILAMENT_CHANGE_FAST_LOAD_LENGTH);
-#if ENABLED(ADVANCED_PAUSE_FEATURE)
+    #if ENABLED(ADVANCED_PAUSE_FEATURE)
     for (uint8_t e = 0; e < EXTRUDERS; e++) {
         fc_settings[e].load_length = FILAMENT_CHANGE_FAST_LOAD_LENGTH;
     }
-#endif
+    #endif
 }
+#endif
 
 /* -===============================================(:>- */
 uint8_t cold_mode = false;

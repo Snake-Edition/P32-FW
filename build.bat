@@ -54,4 +54,8 @@ move /Y build\mini_i3_mk33-en-pl_release_emptyboot\firmware.bbf "build\Snake_MIN
 python utils/build.py --bootloader empty --preset mini_i3_mk33-en-jp --final
 move /Y build\mini_i3_mk33-en-jp_release_emptyboot\firmware.bbf "build\Snake_MINI_i3_MK33_en-jp_%version%.bbf"
 
+rem i3 MK3.5 coreXY
+python utils/build.py --bootloader empty --preset i3xy_mk3.5 --final
+move /Y "build\i3xy_mk3.5_release_emptyboot\firmware.bbf" "build\Snake_i3_MK3.5_coreXY_%version%.bbf"
+
 pause

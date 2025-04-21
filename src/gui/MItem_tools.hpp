@@ -362,6 +362,7 @@ public:
     virtual void OnChange(size_t old_index) override;
 };
 
+#if PRINTER_IS_PRUSA_MINI()
 /* -===============================================(:>- */
 class MI_BRIGHTNESS : public WiSpin {
     constexpr static const char *const label = N_("Brightness");
@@ -370,6 +371,7 @@ public:
     MI_BRIGHTNESS();
     virtual void OnClick() override;
 };
+#endif
 
 class MI_SKEW_XY : public WiSpin {
     constexpr static const char *const label = N_("Skew XY");
@@ -393,6 +395,7 @@ public:
 };
 /* -===============================================(:>- */
 
+#if PRINTER_IS_PRUSA_MINI()
 class MI_X_AXIS_LEN : public WiSpin {
     constexpr static const char *const label = N_("X-axis length");
 
@@ -416,6 +419,7 @@ public:
     MI_E_LOAD_LENGTH();
     virtual void OnClick() override;
 };
+#endif
 
 class MI_COLD_MODE : public WI_ICON_SWITCH_OFF_ON_t {
     constexpr static const char *const label = N_("Cold Mode");

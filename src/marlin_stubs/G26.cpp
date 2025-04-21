@@ -102,19 +102,27 @@ constexpr float snake1[] = {
 };
 
 #if PRINTER_IS_PRUSA_MINI()
+    #define X_BED_SIZE_G26 (180)
+    #define Y_BED_SIZE_G26 (180)
+#else
+    #define X_BED_SIZE_G26 (X_BED_SIZE)
+    #define Y_BED_SIZE_G26 (Y_BED_SIZE)
+#endif
+
+#if PRINTER_IS_PRUSA_MINI()
 constexpr float y_step = 20;
 #else
 constexpr float y_step = 30;
 #endif
 constexpr float x_min = 10;
-constexpr float x_max = 180 - 10;
+constexpr float x_max = X_BED_SIZE_G26 - 10;
 constexpr float y_min = 30;
 constexpr float y1 = y_min + y_step;
 constexpr float y2 = y1 + y_step;
 constexpr float y3 = y2 + y_step;
 constexpr float y4 = y3 + y_step;
 constexpr float y5 = y4 + y_step;
-static_assert(180 > y5, "snake pattern out of bed");
+static_assert(Y_BED_SIZE_G26 > y5, "snake pattern out of bed");
 
 /// Path of Manhattan snake
 /// Alternate X and Y coordinates.
@@ -137,63 +145,63 @@ constexpr float snake2[] = {
     ///
     /// frame around
     9.5,
-    180 - 17,
+    Y_BED_SIZE_G26 - 17,
     30.5,
-    180 - 30.5,
+    Y_BED_SIZE_G26 - 30.5,
     x_min,
-    180 - 30,
+    Y_BED_SIZE_G26 - 30,
     ///
     /// infill
     30,
-    180 - 29.5,
+    Y_BED_SIZE_G26 - 29.5,
     x_min,
-    180 - 29,
+    Y_BED_SIZE_G26 - 29,
     30,
-    180 - 28.5,
+    Y_BED_SIZE_G26 - 28.5,
     x_min,
-    180 - 28,
+    Y_BED_SIZE_G26 - 28,
     30,
-    180 - 27.5,
+    Y_BED_SIZE_G26 - 27.5,
     x_min,
-    180 - 27,
+    Y_BED_SIZE_G26 - 27,
     30,
-    180 - 26.5,
+    Y_BED_SIZE_G26 - 26.5,
     x_min,
-    180 - 26,
+    Y_BED_SIZE_G26 - 26,
     30,
-    180 - 25.5,
+    Y_BED_SIZE_G26 - 25.5,
     x_min,
-    180 - 25,
+    Y_BED_SIZE_G26 - 25,
     30,
-    180 - 24.5,
+    Y_BED_SIZE_G26 - 24.5,
     x_min,
-    180 - 24,
+    Y_BED_SIZE_G26 - 24,
     30,
-    180 - 23.5,
+    Y_BED_SIZE_G26 - 23.5,
     x_min,
-    180 - 23,
+    Y_BED_SIZE_G26 - 23,
     30,
-    180 - 22.5,
+    Y_BED_SIZE_G26 - 22.5,
     x_min,
-    180 - 22,
+    Y_BED_SIZE_G26 - 22,
     30,
-    180 - 21.5,
+    Y_BED_SIZE_G26 - 21.5,
     x_min,
-    180 - 21,
+    Y_BED_SIZE_G26 - 21,
     30,
-    180 - 20.5,
+    Y_BED_SIZE_G26 - 20.5,
     x_min,
-    180 - 20,
+    Y_BED_SIZE_G26 - 20,
     30,
-    180 - 19.5,
+    Y_BED_SIZE_G26 - 19.5,
     x_min,
-    180 - 19,
+    Y_BED_SIZE_G26 - 19,
     30,
-    180 - 18.5,
+    Y_BED_SIZE_G26 - 18.5,
     x_min,
-    180 - 18,
+    Y_BED_SIZE_G26 - 18,
     30,
-    180 - 17.5,
+    Y_BED_SIZE_G26 - 17.5,
     x_min,
 };
 } // anonymous namespace
