@@ -226,12 +226,14 @@ if(BOARD_IS_MASTER_BOARD)
 
   if(HAS_PHASE_STEPPING)
     target_sources(
-      Marlin
-      PRIVATE Marlin/Marlin/src/feature/phase_stepping/calibration.cpp
-              Marlin/Marlin/src/feature/phase_stepping/phase_stepping.cpp
-              Marlin/Marlin/src/gcode/feature/phase_stepping/M97x.cpp
+      Marlin PRIVATE Marlin/Marlin/src/feature/phase_stepping/phase_stepping.cpp
+                     Marlin/Marlin/src/gcode/feature/phase_stepping/M97x.cpp
       )
-    target_link_libraries(Marlin PRIVATE sfl-library)
+
+    if(HAS_PHASE_STEPPING_CALIBRATION)
+      target_sources(Marlin PRIVATE Marlin/Marlin/src/feature/phase_stepping/calibration.cpp)
+      target_link_libraries(Marlin PRIVATE sfl-library)
+    endif()
   endif()
 endif()
 

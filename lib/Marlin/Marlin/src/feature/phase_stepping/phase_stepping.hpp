@@ -1,6 +1,7 @@
 #pragma once
 
 #include <option/has_phase_stepping.h>
+#include <option/has_phase_stepping_calibration.h>
 #include <option/has_burst_stepping.h>
 
 #include "../precise_stepping/fwdecl.hpp"
@@ -43,6 +44,7 @@ private:
     float move_end_time(double end_time) const;
 };
 
+    #if HAS_PHASE_STEPPING_CALIBRATION()
 struct CalibrationSweep {
     int harmonic; // Harmonic correction on which the sweep is performed
 
@@ -67,6 +69,7 @@ struct CalibrationSweep {
         };
     }
 };
+    #endif
 
 struct AxisState {
     AxisState(AxisEnum axis)
@@ -103,8 +106,10 @@ struct AxisState {
     AtomicCircularQueue<MoveTarget, unsigned, 16> pending_targets; // 16 element queue of pre-processed elements
     MoveTarget next_target; // Next planned target to move
 
+    #if HAS_PHASE_STEPPING_CALIBRATION()
     std::optional<CalibrationSweep> calibration_sweep; // Calibration sweep to perform
     std::atomic<bool> calibration_sweep_active = false; // Calibration sweep active flag
+    #endif
 
     // current_target_end_time is used to ensure pending_targets is replenished from the move ISR
     // whenever the current_target completes, and we want to ensure the type is lock free

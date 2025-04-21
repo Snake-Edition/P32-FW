@@ -271,6 +271,7 @@ void GcodeSuite::M971() {
     }
 }
 
+#if HAS_PHASE_STEPPING_CALIBRATION()
 class CalibrateAxisHooks final : public phase_stepping::CalibrateAxisHooks {
     std::vector<std::tuple<float, float>> _calibration_results;
     std::size_t _current_calibration_phase = 0;
@@ -586,5 +587,6 @@ void GcodeSuite::M974() {
         });
     dump_samples_annotation(result);
 }
+#endif
 
 /** @}*/

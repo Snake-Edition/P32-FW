@@ -647,6 +647,7 @@ static bool is_refresh_period_sane(uint32_t now, uint32_t last_timer_tick) {
     return refresh_period < 2 * REFRESH_PERIOD_US - UPDATE_DURATION_US;
 }
 
+#if HAS_PHASE_STEPPING_CALIBRATION()
 static std::tuple<int, int, int> compute_calibration_tweak(
     const CalibrationSweep &params, float relative_position) {
     relative_position = std::fabs(relative_position);
@@ -660,6 +661,7 @@ static std::tuple<int, int, int> compute_calibration_tweak(
         params.mag_start + progress * params.mag_diff
     };
 }
+#endif
 
 static FORCE_INLINE FORCE_OFAST void refresh_axis(
     AxisState &axis_state, uint32_t now, uint32_t previous_tick) {
@@ -694,11 +696,13 @@ static FORCE_INLINE FORCE_OFAST void refresh_axis(
             move_position = axis_state.current_target->target_pos;
             axis_state.current_target.reset();
 
+#if HAS_PHASE_STEPPING_CALIBRATION()
             // Cleanup after performin a calibration sweep
             if (axis_state.calibration_sweep_active) {
                 axis_state.calibration_sweep_active = false;
                 axis_state.calibration_sweep.reset();
             }
+#endif
         }
 
         if (!axis_state.pending_targets.isEmpty()) {
@@ -714,12 +718,14 @@ static FORCE_INLINE FORCE_OFAST void refresh_axis(
             move_position = current_target.initial_pos;
             move_epoch = ticks_diff(now, axis_state.initial_time);
 
+#if HAS_PHASE_STEPPING_CALIBRATION()
             // Make calibration sweep active if the move is long enough:
             if (axis_state.calibration_sweep.has_value() && axis_state.is_cruising) {
                 float calibration_distance = axis_state.calibration_sweep->setup_distance + axis_state.calibration_sweep->sweep_distance;
                 float move_distance = current_target.target_pos - current_target.initial_pos;
                 axis_state.calibration_sweep_active = std::fabs(move_distance) >= std::fabs(calibration_distance);
             }
+#endif
         } else {
             // No new movement
             axis_state.is_cruising = false;
@@ -746,6 +752,7 @@ static FORCE_INLINE FORCE_OFAST void refresh_axis(
 
 #if HAS_BURST_STEPPING()
     int phase_correction;
+    #if HAS_PHASE_STEPPING_CALIBRATION()
     if (axis_state.calibration_sweep_active) {
         float start_position = axis_state.current_target->initial_pos;
         auto [harmonic, pha, mag] = compute_calibration_tweak(*axis_state.calibration_sweep, position - start_position);
@@ -753,6 +760,9 @@ static FORCE_INLINE FORCE_OFAST void refresh_axis(
     } else {
         phase_correction = current_lut.get_phase_shift(new_phase);
     }
+    #else
+    phase_correction = current_lut.get_phase_shift(new_phase);
+    #endif
 
     int shifted_phase = normalize_motor_phase(new_phase + phase_correction);
     int steps_diff = phase_difference(shifted_phase, axis_state.driver_phase);
@@ -760,6 +770,7 @@ static FORCE_INLINE FORCE_OFAST void refresh_axis(
     axis_state.driver_phase = shifted_phase;
 #else
     CoilCurrents new_currents;
+    #if HAS_PHASE_STEPPING_CALIBRATION()
     if (axis_state.calibration_sweep_active) {
         float start_position = axis_state.current_target->initial_pos;
         auto [harmonic, pha, mag] = compute_calibration_tweak(*axis_state.calibration_sweep, position - start_position);
@@ -767,6 +778,9 @@ static FORCE_INLINE FORCE_OFAST void refresh_axis(
     } else {
         new_currents = current_lut.get_current(new_phase);
     }
+    #else
+    new_currents = current_lut.get_current(new_phase);
+    #endif
     int c_adj = current_adjustment(axis_index, mm_to_rev(axis_enum, physical_speed));
     new_currents.a = new_currents.a * c_adj / 255;
     new_currents.b = new_currents.b * c_adj / 255;
