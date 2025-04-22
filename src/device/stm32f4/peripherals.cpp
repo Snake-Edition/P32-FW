@@ -289,7 +289,7 @@ void hw_dma_init() {
 
 void static config_adc(ADC_HandleTypeDef *hadc, ADC_TypeDef *ADC_NUM, uint32_t NbrOfConversion) {
     hadc->Instance = ADC_NUM;
-    hadc->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
+    hadc->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
     hadc->Init.Resolution = ADC_RESOLUTION_12B;
     hadc->Init.ScanConvMode = ENABLE;
     hadc->Init.ContinuousConvMode = ENABLE;
@@ -306,8 +306,18 @@ void static config_adc(ADC_HandleTypeDef *hadc, ADC_TypeDef *ADC_NUM, uint32_t N
 }
 
 static void config_adc_ch(ADC_HandleTypeDef *hadc, uint32_t Channel, uint32_t Rank) {
+    // To make the MCU temperature measurement accurate we need to have higher sample time.
+    // The data sheet says for 1C accuracy measure for at least 10us.
+    // With 480 cycles we get around +- 0.3C accuracy.
+    // With 144 cycles we get around +- 0.5C accuracy + the total value is about 0.35 higher then with 480 cycles.
+    // 144 cycles is still good enough (also still keeps AWDG fast).
+    // If the MCU overheat will keep happening we can increase the cycles to 480
+    auto sample_time = ADC_SAMPLETIME_28CYCLES;
+    if (hadc == &hadc1 && (Channel == ADC_CHANNEL_TEMPSENSOR || Channel == ADC_CHANNEL_VREFINT)) {
+        sample_time = ADC_SAMPLETIME_480CYCLES;
+    }
     Rank++; // Channel rank starts at 1, but for array indexing, we need to start from 0.
-    ADC_ChannelConfTypeDef sConfig = { Channel, Rank, ADC_SAMPLETIME_56CYCLES, 0 };
+    ADC_ChannelConfTypeDef sConfig = { Channel, Rank, sample_time, 0 };
     if (HAL_ADC_ConfigChannel(hadc, &sConfig) != HAL_OK) {
         Error_Handler();
     }

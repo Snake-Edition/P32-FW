@@ -69,6 +69,7 @@
 #include "gui_bootstrap_screen.hpp"
 #include "resources/revision.hpp"
 #include <buddy/filesystem_semihosting.h>
+#include <freertos/timing.hpp>
 
 #if BUDDY_ENABLE_CONNECT()
     #include "connect/run.hpp"
@@ -246,6 +247,10 @@ extern "C" void main_cpp(void) {
     adcDma3.init();
 #endif
     hw_adc_irq_init();
+
+    // After initializing the adc we need to wait some time before the internal MCU temp channel is stable.
+    // Required time is at least 6us. We use 2ms to force pause of at least 1ms
+    freertos::delay(2);
 
 #if PRINTER_IS_PRUSA_XL()
     // Read Sandwich hw revision
