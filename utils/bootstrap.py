@@ -22,15 +22,14 @@ import stat
 from argparse import ArgumentParser
 from pathlib import Path
 from urllib.parse import urlparse
-
 try:
-    # Try importing the 'requests' package
     import requests
-except ImportError:
-    # If the package is not present, install it
-    print("The 'requests' package is not installed. Installing now...")
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "requests"])
-    import requests
+except ModuleNotFoundError:
+    print(
+        f'Python executable ({sys.executable}) is missing the "requests" package.',
+        file=sys.stderr,
+        flush=True)
+    raise
 
 assert sys.version_info >= (3, 8), 'Python 3.8+ is required.'
 is_windows = platform.system() == 'Windows'
