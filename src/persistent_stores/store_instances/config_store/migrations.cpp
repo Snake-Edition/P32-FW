@@ -249,5 +249,76 @@ namespace migrations {
         }
     }
 #endif
+
+#if HAS_CHAMBER_FILTRATION_API() && XL_ENCLOSURE_SUPPORT()
+    void xl_enclosure_old_api(journal::Backend &backend) {
+        // Old flags
+        static constexpr uint8_t ENABLED = 0x01;
+        static constexpr uint8_t PRINT_FILTRATION = 0x02;
+        static constexpr uint8_t WARNING_SHOWN = 0x04;
+        // static constexpr uint8_t EXPIRATION_SHOWN = 0x08;
+        static constexpr uint8_t POST_PRINT_FILTRATION = 0x10;
+        static constexpr uint8_t REMINDER_5DAYS = 0x20;
+
+        using OldEnabled = decltype(DeprecatedStore::xl_enclosure_flags);
+        using NewEnabled = decltype(CurrentStore::xl_enclosure_enabled);
+        using NewPrintFiltrationEnabled = decltype(CurrentStore::chamber_post_print_filtration_enable);
+        using NewPostPrintFiltrationEnabled = decltype(CurrentStore::chamber_post_print_filtration_enable);
+        using NewWarningShown = decltype(CurrentStore::chamber_filter_early_expiration_warning_shown);
+        using NewExpirationTimestamp = decltype(CurrentStore::chamber_filter_expiration_postpone_timestamp_1024);
+
+        using OldFilterTimer = decltype(DeprecatedStore::xl_enclosure_filter_timer);
+        using NewFilterTimer = decltype(CurrentStore::chamber_filter_time_used_s);
+
+        using OldFanRPM = decltype(DeprecatedStore::xl_enclosure_fan_manual);
+        using NewFanRPMPrint = decltype(CurrentStore::chamber_mid_print_filtration_pwm);
+        using NewFanRPMPostPrint = decltype(CurrentStore::chamber_post_print_filtration_pwm);
+
+        using OldPostPrintDuration = decltype(DeprecatedStore::xl_enclosure_post_print_duration);
+        using NewPostPrintDuration = decltype(CurrentStore::chamber_post_print_filtration_duration_min);
+
+        struct old_variables {
+            OldEnabled::value_type saved_flags = OldEnabled::default_val;
+            OldFilterTimer::value_type saved_filter_timer = OldFilterTimer::default_val;
+            OldFanRPM::value_type saved_fan_manual = OldFilterTimer::default_val;
+            OldPostPrintDuration::value_type saved_post_print_dur = OldPostPrintDuration::default_val;
+        };
+
+        struct old_variables old_vals;
+
+        auto callback
+            = [&](journal::Backend::ItemHeader header, std::array<uint8_t, journal::Backend::MAX_ITEM_SIZE> &buffer) -> void {
+            if (header.id == OldEnabled::hashed_id) {
+                memcpy(&old_vals.saved_flags, buffer.data(), header.len);
+            } else if (header.id == OldFilterTimer::hashed_id) {
+                memcpy(&old_vals.saved_filter_timer, buffer.data(), header.len);
+            } else if (header.id == OldFanRPM::hashed_id) {
+                memcpy(&old_vals.saved_fan_manual, buffer.data(), header.len);
+            } else if (header.id == OldPostPrintDuration::hashed_id) {
+                memcpy(&old_vals.saved_post_print_dur, buffer.data(), header.len);
+            }
+        };
+        backend.read_items_for_migrations(callback);
+
+        backend.save_migration_item<NewFanRPMPrint::value_type>(NewFanRPMPrint::hashed_id, PWM255::from_percent(old_vals.saved_fan_manual));
+        backend.save_migration_item<NewFanRPMPostPrint::value_type>(NewFanRPMPostPrint::hashed_id, PWM255::from_percent(old_vals.saved_fan_manual));
+        backend.save_migration_item<NewPostPrintDuration::value_type>(NewPostPrintDuration::hashed_id, old_vals.saved_post_print_dur);
+        backend.save_migration_item<NewEnabled::value_type>(NewEnabled::hashed_id, old_vals.saved_flags & ENABLED);
+        backend.save_migration_item<NewPrintFiltrationEnabled::value_type>(NewPrintFiltrationEnabled::hashed_id, old_vals.saved_flags & PRINT_FILTRATION);
+        backend.save_migration_item<NewPostPrintFiltrationEnabled::value_type>(NewPostPrintFiltrationEnabled::hashed_id, old_vals.saved_flags & POST_PRINT_FILTRATION);
+        backend.save_migration_item<NewWarningShown::value_type>(NewWarningShown::hashed_id, old_vals.saved_flags & WARNING_SHOWN);
+
+        if (old_vals.saved_flags & REMINDER_5DAYS) {
+            // Old implementation saved start of the time period (reminder), new one saves end timestamp
+            backend.save_migration_item<NewExpirationTimestamp::value_type>(NewExpirationTimestamp::hashed_id, (old_vals.saved_filter_timer + 5 * 24 * 3600) / 1024);
+            backend.save_migration_item<NewFilterTimer::value_type>(NewFilterTimer::hashed_id, 600 * 3600);
+        } else {
+            // This means saved_filter_timer still holds filter usage time in seconds
+            backend.save_migration_item<NewExpirationTimestamp::value_type>(NewExpirationTimestamp::hashed_id, 0);
+            backend.save_migration_item<NewFilterTimer::value_type>(NewFilterTimer::hashed_id, old_vals.saved_filter_timer);
+        }
+    }
+#endif
+
 } // namespace migrations
 } // namespace config_store_ns

@@ -5,6 +5,8 @@
 #include <option/has_selftest.h>
 #include <option/has_gui.h>
 #include <option/has_side_leds.h>
+#include <option/has_chamber_filtration_api.h>
+#include <option/xl_enclosure_support.h>
 
 namespace config_store_ns {
 namespace deprecated_ids {
@@ -64,6 +66,18 @@ namespace deprecated_ids {
         decltype(DeprecatedStore::hotend_type_single_hotend)::hashed_id,
     };
 #endif
+
+#if HAS_CHAMBER_FILTRATION_API() && XL_ENCLOSURE_SUPPORT()
+    inline constexpr uint16_t xl_enclosure_old_api_ids[] {
+        decltype(DeprecatedStore::xl_enclosure_flags)::hashed_id,
+        decltype(DeprecatedStore::xl_enclosure_fan_manual)::hashed_id,
+        decltype(DeprecatedStore::xl_enclosure_filter_timer)::hashed_id,
+        decltype(DeprecatedStore::xl_enclosure_post_print_duration)::hashed_id,
+        decltype(DeprecatedStore::xl_enclosure_fan_manual)::hashed_id,
+        decltype(DeprecatedStore::xl_enclosure_post_print_duration)::hashed_id,
+    };
+#endif
+
 } // namespace deprecated_ids
 
 namespace migrations {
@@ -89,6 +103,11 @@ namespace migrations {
     void side_leds_enable(journal::Backend &backend);
 #endif
     void hotend_type(journal::Backend &backend);
+
+#if HAS_CHAMBER_FILTRATION_API() && XL_ENCLOSURE_SUPPORT()
+    void xl_enclosure_old_api(journal::Backend &backend);
+#endif
+
 } // namespace migrations
 
 /**
@@ -119,6 +138,9 @@ inline constexpr journal::Backend::MigrationFunction migration_functions[] {
 #endif
 #if HAS_HOTEND_TYPE_SUPPORT()
         { migrations::hotend_type, deprecated_ids::hotend_type_single_hotend },
+#endif
+#if HAS_CHAMBER_FILTRATION_API() && XL_ENCLOSURE_SUPPORT()
+        { migrations::xl_enclosure_old_api, deprecated_ids::xl_enclosure_old_api_ids },
 #endif
 };
 

@@ -41,13 +41,6 @@ void CurrentStore::perform_config_check() {
     /// Whether this is the first run of the printer after assembly/factory reset
     [[maybe_unused]] const bool is_first_run = (config_store_init_result() == InitResult::cold_start);
 
-#if HAS_CHAMBER_FILTRATION_API()
-    if (chamber_mid_print_filtration_pwm.get() <= PWM255(0)) {
-        chamber_mid_print_filtration_pwm.set_to_default();
-        chamber_print_filtration_enable.set(false);
-    }
-#endif
-
 #if HAS_SELFTEST()
     // Do not show pritner setup screen if the user has run any selftests
     // This is for backwards compatibility - we don't want to show the screen after the firmware update introducing it for already configured printers
@@ -83,6 +76,15 @@ void CurrentStore::perform_config_check() {
 
 #endif
     }
+
+#if HAS_CHAMBER_FILTRATION_API()
+    // Old API had disabling print filtration through setting pwm to 0
+    // Now we have dedicated config store for it
+    if (chamber_mid_print_filtration_pwm.get() <= PWM255(0)) {
+        chamber_mid_print_filtration_pwm.set_to_default();
+        chamber_print_filtration_enable.set(false);
+    }
+#endif
 
     // BFW-5486
     // Older versions of the firmware had the ability to manually change this

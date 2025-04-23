@@ -594,10 +594,7 @@ struct CurrentStore
 #endif
 
 #if XL_ENCLOSURE_SUPPORT()
-    StoreItem<uint8_t, 6, ItemFlag::features, journal::hash("XL Enclosure Flags")> xl_enclosure_flags;
-    StoreItem<int64_t, defaults::int64_zero, ItemFlag::stats, journal::hash("XL Enclosure Filter Timer")> xl_enclosure_filter_timer;
-    StoreItem<uint8_t, defaults::uint8_percentage_80, ItemFlag::features, journal::hash("XL Enclosure Fan Manual Setting")> xl_enclosure_fan_manual;
-    StoreItem<uint8_t, 10, ItemFlag::features, journal::hash("XL Enclosure Post Print Duration")> xl_enclosure_post_print_duration;
+    StoreItem<bool, false, ItemFlag::features, journal::hash("XL Enclosure Enabled")> xl_enclosure_enabled;
     StoreItem<TestResult, defaults::test_result_unknown, ItemFlag::calibrations, journal::hash("XL Enclosure Fan Selftest Result")> xl_enclosure_fan_selftest_result;
 #endif
 
@@ -788,6 +785,13 @@ struct DeprecatedStore
     };
     static inline constexpr RestoreZPosition restore_z_default_position { NAN, 0 };
     StoreItem<RestoreZPosition, restore_z_default_position, journal::hash("Restore Z Coordinate After Boot")> restore_z_after_boot;
+
+#if XL_ENCLOSURE_SUPPORT()
+    StoreItem<uint8_t, 6, journal::hash("XL Enclosure Flags")> xl_enclosure_flags;
+    StoreItem<int64_t, defaults::int64_zero, journal::hash("XL Enclosure Filter Timer")> xl_enclosure_filter_timer;
+    StoreItem<uint8_t, defaults::uint8_percentage_80, journal::hash("XL Enclosure Fan Manual Setting")> xl_enclosure_fan_manual;
+    StoreItem<uint8_t, 10, journal::hash("XL Enclosure Post Print Duration")> xl_enclosure_post_print_duration;
+#endif
 };
 
 } // namespace config_store_ns
