@@ -16,7 +16,3 @@ ScreenMenuEnclosure::ScreenMenuEnclosure()
     Item<MI_ENCLOSURE_ENABLE>().set_is_hidden(false);
 #endif
 }
-
-ScreenMenuManualSetting::ScreenMenuManualSetting()
-    : detail::ScreenMenuManualSetting(_(label)) {
-}

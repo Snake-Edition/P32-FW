@@ -11,7 +11,7 @@
 #include <MItem_tools.hpp>
 #include "option/has_side_leds.h"
 #include "option/has_toolchanger.h"
-
+#include <option/has_chamber_filtration_api.h>
 #include <device/board.h>
 #include <gui/menu_item/specific/menu_items_chamber.hpp>
 
@@ -19,14 +19,15 @@ namespace detail {
 using ScreenMenuEnclosure = ScreenMenu<GuiDefaults::MenuFooter, MI_RETURN
 #if XL_ENCLOSURE_SUPPORT()
     ,
-    MI_ENCLOSURE_ENABLE, MI_CHAMBER_TEMP, MI_ENCLOSURE_FILTER_COUNTER, MI_ENCLOSURE_FILTER_CHANGE, MI_ENCLOSURE_MANUAL_SETTINGS
+    MI_ENCLOSURE_ENABLE
 #endif
-    >;
-
-using ScreenMenuManualSetting = ScreenMenu<GuiDefaults::MenuFooter, MI_RETURN
-#if XL_ENCLOSURE_SUPPORT()
+#if HAS_CHAMBER_FILTRATION_API()
     ,
-    MI_ENCLOSURE_PRINT_FILTRATION, MI_ENCLOSURE_POST_PRINT_FILTRATION, MI_ENCLOSURE_FAN_SETTING, MI_ENCLOSURE_POST_PRINT_DURATION
+    MI_CHAMBER_FILTRATION
+#endif
+#if HAS_CHAMBER_API()
+    ,
+    MI_CHAMBER_TEMP
 #endif
 #if HAS_SIDE_LEDS()
     ,
@@ -44,11 +45,4 @@ class ScreenMenuEnclosure : public detail::ScreenMenuEnclosure {
 public:
     constexpr static const char *label = N_("ENCLOSURE SETTINGS");
     ScreenMenuEnclosure();
-};
-
-class ScreenMenuManualSetting : public detail::ScreenMenuManualSetting {
-
-public:
-    constexpr static const char *label = N_("MANUAL SETTINGS");
-    ScreenMenuManualSetting();
 };
