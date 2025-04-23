@@ -69,6 +69,7 @@ exclude: |
        gcode/calibrate/M958\.|
        module/prusa/|
        module/stepper/indirection\.cpp$|
+       module/stepper/trinamic\.|
        module/stepper\.|
        gcode/temperature/M106_M107\.cpp$|
        bedlevel/ubl/G29\.cpp$|
