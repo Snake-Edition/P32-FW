@@ -27,8 +27,6 @@
 
 #include "../../inc/MarlinConfig.h"
 
-#if HAS_TRINAMIC
-
 #include "trinamic.h"
 #include "bsod.h"
 
@@ -866,5 +864,3 @@ TMCStepperType &stepper_axis(const AxisEnum axis)
     bsod("invalid stepper axis");
   }
 }
-
-#endif // HAS_TRINAMIC
