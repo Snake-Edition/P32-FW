@@ -12,7 +12,8 @@ using ScreenMenuSnakeSettings__ = ScreenMenu<EFooter::On, MI_RETURN,
 #if PRINTER_IS_PRUSA_MINI()
     MI_X_AXIS_LEN, MI_Y_AXIS_LEN, MI_E_LOAD_LENGTH,
 #endif
-    MI_COLD_MODE>;
+
+    MI_X_SENSITIVITY, MI_X_SENSITIVITY_RESET, MI_Y_SENSITIVITY, MI_Y_SENSITIVITY_RESET, MI_COLD_MODE>;
 
 class ScreenMenuSnakeSettings : public ScreenMenuSnakeSettings__ {
 public:

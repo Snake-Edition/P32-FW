@@ -39,6 +39,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 21. **High geared extruder**: Allow up to 2000 steps/mm for extruder.
 22. **Adjustable bed size**: FW can be used for arbitrary bed size. This includes [long bed HW](https://www.aliexpress.com/item/1005001632020501.html).
 23. **Adjustable filament load length**: Different extruders need different load length.
+24. **Adjustable homing sensitivity**: X and Y homing sensitivity can be changed in menu and saved.
 
 ## Feed the Snake
 

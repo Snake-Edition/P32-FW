@@ -1934,17 +1934,11 @@ extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
 
     #if EITHER(SENSORLESS_HOMING, SENSORLESS_PROBING)
         #if X_DRIVER_TYPE == TMC2209
-            #ifdef MINI_I3_MK33
-                #define X_STALL_SENSITIVITY 145
-            #elif MINI_COREXY
-                #define X_STALL_SENSITIVITY 112
-            #else
-                #define X_STALL_SENSITIVITY 130
-            #endif
+            #define X_STALL_SENSITIVITY config_store().homing_sens_x.get()
         #endif
 
         #if Y_DRIVER_TYPE == TMC2209
-                #define Y_STALL_SENSITIVITY X_STALL_SENSITIVITY
+            #define Y_STALL_SENSITIVITY config_store().homing_sens_y.get()
         #endif
 
         #if Z_DRIVER_TYPE == TMC2209

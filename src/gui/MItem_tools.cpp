@@ -669,6 +669,47 @@ void MI_E_LOAD_LENGTH::OnClick() {
 #endif
 
 /* -===============================================(:>- */
+static constexpr NumericInputConfig xy_home_sens_spin_config {
+    .min_value = -999,
+    .max_value = 999,
+};
+
+MI_X_SENSITIVITY::MI_X_SENSITIVITY()
+    : WiSpin(config_store().homing_sens_x.get(), xy_home_sens_spin_config, _(label)) {}
+
+void MI_X_SENSITIVITY::OnClick() {
+    config_store().homing_sens_x.set(GetVal());
+    marlin_server::enqueue_gcode_printf("M914 X%i", int(GetVal()));
+}
+
+MI_Y_SENSITIVITY::MI_Y_SENSITIVITY()
+    : WiSpin(config_store().homing_sens_x.get(), xy_home_sens_spin_config, _(label)) {}
+
+void MI_Y_SENSITIVITY::OnClick() {
+    config_store().homing_sens_y.set(GetVal());
+    marlin_server::enqueue_gcode_printf("M914 Y%i", int(GetVal()));
+}
+
+MI_X_SENSITIVITY_RESET::MI_X_SENSITIVITY_RESET()
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_X_SENSITIVITY_RESET::click(IWindowMenu & /*window_menu*/) {
+    config_store().homing_sens_x.set(config_store().homing_sens_x.default_val);
+    marlin_server::enqueue_gcode_printf("M914 X%i", config_store().homing_sens_x.default_val);
+}
+
+MI_Y_SENSITIVITY_RESET::MI_Y_SENSITIVITY_RESET()
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_Y_SENSITIVITY_RESET::click(IWindowMenu & /*window_menu*/) {
+    config_store().homing_sens_y.set(config_store().homing_sens_y.default_val);
+    marlin_server::enqueue_gcode_printf("M914 Y%i", config_store().homing_sens_y.default_val);
+}
+
+/* -===============================================(:>- */
+
 uint8_t cold_mode = false;
 MI_COLD_MODE::MI_COLD_MODE()
     : WI_ICON_SWITCH_OFF_ON_t(cold_mode, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}

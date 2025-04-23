@@ -301,8 +301,28 @@ namespace defaults {
 #endif
     };
 
-    inline constexpr int16_t homing_sens_x { stallguard_sensitivity_unset };
-    inline constexpr int16_t homing_sens_y { stallguard_sensitivity_unset };
+    inline constexpr int16_t homing_sens_x {
+#if X_DRIVER_TYPE == TMC2209
+    #ifdef MINI_I3_MK33
+        145
+    #elif MINI_COREXY
+        112
+    #else
+        130
+    #endif
+#else
+        stallguard_sensitivity_unset
+#endif
+    };
+
+    inline constexpr int16_t homing_sens_y {
+
+#if X_DRIVER_TYPE == TMC2209
+        homing_sens_x
+#else
+        stallguard_sensitivity_unset
+#endif
+    };
 
     inline constexpr HotendType hotend_type {
 #if PRINTER_IS_PRUSA_iX() || PRINTER_IS_PRUSA_COREONE()

@@ -421,6 +421,42 @@ public:
 };
 #endif
 
+class MI_X_SENSITIVITY : public WiSpin {
+    constexpr static const char *const label = N_("X homing sensitivity");
+
+public:
+    MI_X_SENSITIVITY();
+    virtual void OnClick() override;
+};
+
+class MI_Y_SENSITIVITY : public WiSpin {
+    constexpr static const char *const label = N_("Y homing sensitivity");
+
+public:
+    MI_Y_SENSITIVITY();
+    virtual void OnClick() override;
+};
+
+class MI_X_SENSITIVITY_RESET : public IWindowMenuItem {
+    constexpr static const char *const label = N_("Reset X homing sensitivity");
+
+public:
+    MI_X_SENSITIVITY_RESET();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_Y_SENSITIVITY_RESET : public IWindowMenuItem {
+    constexpr static const char *const label = N_("Reset Y homing sensitivity");
+
+public:
+    MI_Y_SENSITIVITY_RESET();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
 class MI_COLD_MODE : public WI_ICON_SWITCH_OFF_ON_t {
     constexpr static const char *const label = N_("Cold Mode");
 
