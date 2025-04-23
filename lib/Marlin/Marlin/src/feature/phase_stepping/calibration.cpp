@@ -203,6 +203,31 @@ struct CalibrationResult {
     float score;
 };
 
+struct CalibrationSweep {
+    int harmonic; // Harmonic correction on which the sweep is performed
+
+    float setup_distance; // Distance in mm before the sweep
+    float sweep_distance; // Distance in mm to perform the sweep
+
+    int pha_start, pha_diff; // Phase start and end diff in fixed point
+    int mag_start, mag_diff; // Magnitude start and end diff in fixed point
+
+    static CalibrationSweep build_for_motor(AxisEnum axis, int harmonic,
+        float setup_revs, float sweep_revs,
+        float pha_start, float pha_end,
+        float mag_start, float mag_end) {
+        return {
+            harmonic,
+            rev_to_mm(axis, setup_revs),
+            rev_to_mm(axis, sweep_revs),
+            pha_to_fixed(pha_start),
+            pha_to_fixed(pha_end - pha_start),
+            mag_to_fixed(mag_start),
+            mag_to_fixed(mag_end - mag_start)
+        };
+    }
+};
+
 enum class SweepDirection {
     Up,
     Down
@@ -398,6 +423,40 @@ public:
         return std::sqrt(sin_sum * sin_sum + cos_sum * cos_sum) * 2 / buffer.size();
     }
 };
+
+static std::tuple<int, int, int> compute_calibration_tweak(
+    const CalibrationSweep &params, float relative_position) {
+    relative_position = std::fabs(relative_position);
+
+    float progress = (relative_position - params.setup_distance) / params.sweep_distance;
+    progress = std::clamp(progress, 0.f, 1.f);
+
+    return {
+        params.harmonic,
+        params.pha_start + progress * params.pha_diff,
+        params.mag_start + progress * params.mag_diff
+    };
+}
+
+namespace phase_stepping::internal {
+static CalibrationSweep calibration_sweep;
+std::atomic<int> calibration_axis_request = -1;
+std::atomic<int> calibration_axis_active = -1;
+
+void calibration_new_move(const AxisState &axis_state) {
+    float calibration_distance = calibration_sweep.setup_distance + calibration_sweep.sweep_distance;
+    auto current_target = axis_state.current_target.value();
+    float move_distance = current_target.target_pos - current_target.initial_pos;
+    calibration_axis_active = std::fabs(move_distance) >= std::fabs(calibration_distance) ? axis_state.axis_index : -1;
+}
+
+std::tuple<int, int, int> compute_calibration_tweak(float relative_position) {
+    assert(calibration_axis_request >= 0);
+    assert(calibration_axis_active >= 0);
+    return compute_calibration_tweak(calibration_sweep, relative_position);
+}
+
+} // namespace phase_stepping::internal
 
 // Compute a windowed sweep for a single bin of DFT of a constant velocity
 // movement. The bin is determined by the harmonic of motor and its speed. The
@@ -1134,9 +1193,13 @@ SamplesAnnotation phase_stepping::capture_param_sweep_samples(AxisEnum axis, flo
     }
     revs = std::fabs(revs);
 
-    axis_state.calibration_sweep = CalibrationSweep::build_for_motor(
+    internal::calibration_sweep = CalibrationSweep::build_for_motor(
         axis, harmonic, VIBRATION_SETTLE_TIME * speed, revs,
         sweep_params.pha_start, sweep_params.pha_end, sweep_params.mag_start, sweep_params.mag_end);
+
+    // ensure the previous request has been consumed before resetting
+    assert(internal::calibration_axis_request < 0);
+    internal::calibration_axis_request = axis_state.axis_index;
 
     float start_marker = 0;
     start_marker = plan_no_movement_block(axis, direction, VIBRATION_SETTLE_TIME);

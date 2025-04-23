@@ -1,5 +1,10 @@
 #pragma once
 
+#include <option/has_phase_stepping_calibration.h>
+#if !HAS_PHASE_STEPPING_CALIBRATION()
+    #error "calibration disabled by configuration"
+#endif
+
 #include "common.hpp"
 
 #include <cassert>

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <option/has_phase_stepping.h>
-#include <option/has_phase_stepping_calibration.h>
 #include <option/has_burst_stepping.h>
 
 #include "../precise_stepping/fwdecl.hpp"
@@ -44,33 +43,6 @@ private:
     float move_end_time(double end_time) const;
 };
 
-    #if HAS_PHASE_STEPPING_CALIBRATION()
-struct CalibrationSweep {
-    int harmonic; // Harmonic correction on which the sweep is performed
-
-    float setup_distance; // Distance in mm before the sweep
-    float sweep_distance; // Distance in mm to perform the sweep
-
-    int pha_start, pha_diff; // Phase start and end diff in fixed point
-    int mag_start, mag_diff; // Magnitude start and end diff in fixed point
-
-    static CalibrationSweep build_for_motor(AxisEnum axis, int harmonic,
-        float setup_revs, float sweep_revs,
-        float pha_start, float pha_end,
-        float mag_start, float mag_end) {
-        return {
-            harmonic,
-            rev_to_mm(axis, setup_revs),
-            rev_to_mm(axis, sweep_revs),
-            pha_to_fixed(pha_start),
-            pha_to_fixed(pha_end - pha_start),
-            mag_to_fixed(mag_start),
-            mag_to_fixed(mag_end - mag_start)
-        };
-    }
-};
-    #endif
-
 struct AxisState {
     AxisState(AxisEnum axis)
         : axis_index(axis)
@@ -105,11 +77,6 @@ struct AxisState {
     std::optional<MoveTarget> current_target; // Current target to move
     AtomicCircularQueue<MoveTarget, unsigned, 16> pending_targets; // 16 element queue of pre-processed elements
     MoveTarget next_target; // Next planned target to move
-
-    #if HAS_PHASE_STEPPING_CALIBRATION()
-    std::optional<CalibrationSweep> calibration_sweep; // Calibration sweep to perform
-    std::atomic<bool> calibration_sweep_active = false; // Calibration sweep active flag
-    #endif
 
     // current_target_end_time is used to ensure pending_targets is replenished from the move ISR
     // whenever the current_target completes, and we want to ensure the type is lock free
