@@ -399,14 +399,14 @@ public:
     WithCorrectionDisabled(AxisEnum axis, int harmonic)
         : axis(axis)
         , harmonic(harmonic) {
-        original = axis_states[axis].forward_current.get_correction()[harmonic];
-        axis_states[axis].forward_current.modify_correction([&](auto &table) {
+        original = axis_states[axis].forward_current.get_correction_table()[harmonic];
+        axis_states[axis].forward_current.modify_correction_table([&](auto &table) {
             table[harmonic] = { 0, 0 };
         });
     }
 
     ~WithCorrectionDisabled() {
-        axis_states[axis].forward_current.modify_correction([&](auto &table) {
+        axis_states[axis].forward_current.modify_correction_table([&](auto &table) {
             table[harmonic] = original;
         });
     }

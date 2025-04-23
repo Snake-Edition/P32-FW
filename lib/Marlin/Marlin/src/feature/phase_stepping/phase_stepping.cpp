@@ -922,7 +922,7 @@ void save_correction_to_file(const CorrectedCurrentLut &lut, const char *file_pa
         return;
     }
 
-    CorrectionSaveFormat save_format { .correction = lut.get_correction() };
+    CorrectionSaveFormat save_format { .correction = lut.get_correction_table() };
     [[maybe_unused]] auto written = fwrite(&save_format, 1, sizeof(CorrectionSaveFormat), save_file);
     assert(written == sizeof(CorrectionSaveFormat));
 
@@ -938,7 +938,7 @@ void load_correction_from_file(CorrectedCurrentLut &lut, const char *file_path) 
     CorrectionSaveFormat save_format {};
     auto read = fread(&save_format, 1, sizeof(CorrectionSaveFormat), read_file);
     if (read == sizeof(CorrectionSaveFormat)) {
-        lut.modify_correction([&](MotorPhaseCorrection &table) {
+        lut.modify_correction_table([&](MotorPhaseCorrection &table) {
             table = save_format.correction;
         });
     }

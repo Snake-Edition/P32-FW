@@ -1865,10 +1865,10 @@ phase_stepping::calibrate_axis(AxisEnum axis, CalibrateAxisHooks &hooks) {
             hooks.on_calibration_phase_result(f_result.score, b_result.score);
 
             // Apply the correction to the motor
-            phase_stepping::axis_states[axis].forward_current.modify_correction([&](auto &table) {
+            phase_stepping::axis_states[axis].forward_current.modify_correction_table([&](auto &table) {
                 table[harmonic_speed.harmonic] = f_result.params;
             });
-            phase_stepping::axis_states[axis].backward_current.modify_correction([&](auto &table) {
+            phase_stepping::axis_states[axis].backward_current.modify_correction_table([&](auto &table) {
                 table[harmonic_speed.harmonic] = b_result.params;
             });
         }

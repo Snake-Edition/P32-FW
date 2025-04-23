@@ -132,7 +132,7 @@ static void M971_reset(const OptionsM971 &options) {
 }
 
 static void M971_read_axis_direction(const phase_stepping::CorrectedCurrentLut &lut, char axis_letter, char direction_letter) {
-    const auto &table = lut.get_correction();
+    const auto &table = lut.get_correction_table();
     for (size_t index = 0; index != table.size(); index++) {
         const float magnitude = table[index].mag;
         const float phase = table[index].pha;
@@ -177,7 +177,7 @@ static void M971_write_axis_direction(const OptionsM971 &options, phase_stepping
     const auto magnitude = *options.magnitude;
     const auto phase = *options.phase;
 
-    lut.modify_correction([&](phase_stepping::MotorPhaseCorrection &table) {
+    lut.modify_correction_table([&](phase_stepping::MotorPhaseCorrection &table) {
         if (0 <= index && index < (int)table.size()) {
             table[index] = phase_stepping::SpectralItem { .mag = magnitude, .pha = phase };
         } else {

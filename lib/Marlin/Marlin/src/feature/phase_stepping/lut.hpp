@@ -50,13 +50,13 @@ public:
 public:
     CorrectedCurrentLut() = default;
 
-    const auto &get_correction() const {
+    const auto &get_correction_table() const {
         return _spectrum;
     };
 
     template <typename F>
         requires requires(F f) { f(_spectrum); }
-    void modify_correction(F f) {
+    void modify_correction_table(F f) {
         f(_spectrum);
         _update_phase_shift();
     }
@@ -99,13 +99,13 @@ public:
         _update_phase_shift();
     }
 
-    const auto &get_correction() const {
+    const auto &get_correction_table() const {
         return _spectrum;
     };
 
     template <typename F>
         requires requires(F f) { f(_spectrum); }
-    void modify_correction(F f) {
+    void modify_correction_table(F f) {
         f(_spectrum);
         _update_phase_shift();
     }
