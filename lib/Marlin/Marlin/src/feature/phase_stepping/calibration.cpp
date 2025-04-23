@@ -26,6 +26,7 @@ LOG_COMPONENT_REF(PhaseStepping);
     if (should_abort && should_abort()) \
         return std::unexpected("Aborted");
 
+static constexpr std::size_t RETRY_COUNT = 2;
 static constexpr float MAX_ACC_SAMPLING_RATE = 1500;
 static constexpr float SAMPLE_BUFFER_MARGIN = 1.05f;
 static constexpr float VIBRATION_SETTLE_TIME = 0.2f;
@@ -242,6 +243,26 @@ struct MagCalibResult {
 };
 
 using AbortFun = stdext::inplace_function<bool(void)>;
+
+template <typename Func>
+auto with_retries(std::size_t n, Func &&func) {
+    assert(n >= 1);
+
+    using ExpectedType = std::invoke_result_t<Func>;
+    static_assert(
+        requires(ExpectedType e) { e.has_value(); },
+        "Function must return std::expected");
+
+    // We choose this construction to have a single return point to ease the
+    // compiler to perform named return value optimization.
+    for (std::size_t attempt = 0; attempt < n; ++attempt) {
+        if (auto result = func(); result.has_value() || attempt == n - 1) {
+            return result;
+        }
+        log_error(PhaseStepping, "Operation failed, retrying...");
+    }
+    __builtin_unreachable();
+}
 
 // Given change in physical space, return change in logical axis.
 // - for cartesian this is identity,
@@ -1950,7 +1971,9 @@ phase_stepping::calibrate_axis(AxisEnum axis, CalibrateAxisHooks &hooks) {
     const auto &calib_config = get_calibration_config(axis);
 
     hooks.on_motor_characterization_start();
-    auto speed_analysis = measure_calibration_speeds(axis, calib_config, should_abort);
+    auto speed_analysis = with_retries(RETRY_COUNT, [&] {
+        return measure_calibration_speeds(axis, calib_config, should_abort);
+    });
     if (!speed_analysis) {
         log_error(PhaseStepping, "Speed analysis failed: %s", speed_analysis.error());
         return std::unexpected(speed_analysis.error());
@@ -1970,8 +1993,10 @@ phase_stepping::calibrate_axis(AxisEnum axis, CalibrateAxisHooks &hooks) {
             }
 
             hooks.on_enter_calibration_phase(current_phase++);
-            auto calib_res = calibrate_single_harmonic(axis, calib_config,
-                harmonic_speed.harmonic, harmonic_speed.value, should_abort);
+            auto calib_res = with_retries(RETRY_COUNT, [&] {
+                return calibrate_single_harmonic(axis, calib_config,
+                    harmonic_speed.harmonic, harmonic_speed.value, should_abort);
+            });
             if (!calib_res) {
                 log_error(PhaseStepping, "Calibration failed: %s", calib_res.error());
                 return std::unexpected(calib_res.error());
