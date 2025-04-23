@@ -188,7 +188,13 @@ struct HarmonicPeak {
     int harmonic;
     float position;
 
-    auto operator<=>(const HarmonicPeak &other) const = default;
+    bool operator==(const HarmonicPeak &other) const {
+        const auto position_equal = [](float a, float b) {
+            return std::fabs(a - b) < 1e3;
+        };
+
+        return harmonic == other.harmonic && position_equal(position, other.position);
+    }
 };
 
 template <typename T>
@@ -705,7 +711,17 @@ struct HarmonicPeaksFit {
     float badness; // Error metric from fitting
     float prominence_sum; // Sum of prominences of all peaks
 
-    auto operator<=>(const HarmonicPeaksFit &other) const = default;
+    bool operator==(const HarmonicPeaksFit &other) const {
+        const auto badness_equal = [](float a, float b) {
+            return std::fabs(a - b) < 1e5;
+        };
+
+        const auto prominence_equal = [](float a, float b) {
+            return std::fabs(a - b) < 1e5;
+        };
+
+        return found == other.found && estimated == other.estimated && badness_equal(badness, other.badness) && prominence_equal(prominence_sum, other.prominence_sum);
+    }
 };
 
 // Detect harmonic peaks in a set of sweeps. Returns the top n fits sorted by prominence sum.
