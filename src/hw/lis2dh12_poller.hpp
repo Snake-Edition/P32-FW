@@ -190,23 +190,42 @@ public:
     }
 
     float get_sampling_rate() {
-        if (start_time == 0) {
+        if (start_time == 0 || !hw_good_flag) {
             return 0;
         }
+
+        uint32_t timeout_base = ticks_us();
+        auto handle_timeout = [&]() {
+            static constexpr int32_t TIMEOUT_US = 5000;
+            if (ticks_diff(ticks_us(), timeout_base) > TIMEOUT_US) {
+                is_running = true;
+                hw_good_flag = false;
+                return false;
+            }
+            return true;
+        };
 
         // In order to increase precision of the frequency measurement (as we
         // are limited by the frequency of the polling timer), we busy-poll for
         // two samples to get the precise end time.
         is_running = false;
-        while (pending_request != Request::none)
-            ;
+        timeout_base = ticks_us();
+        while (pending_request != Request::none) {
+            if (!handle_timeout()) {
+                return 0;
+            }
+        }
 
         uint32_t end_time = 0;
+        timeout_base = ticks_us();
         for (int i = 0; i != 2; i++) {
             lis2dh12_status_reg_t status;
             do {
                 end_time = ticks_us();
                 lis2dh12_status_get(&stlib_context, &status);
+                if (!handle_timeout()) {
+                    return 0;
+                }
             } while (!status.zyxda);
 
             int16_t buf[3];
