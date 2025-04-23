@@ -34,6 +34,12 @@ struct CoilCurrents {
     bool operator==(const CoilCurrents &) const = default;
 };
 
+#if HAS_BURST_STEPPING()
+using correction_t = int;
+#else
+using correction_t = CoilCurrents;
+#endif
+
 class CorrectedCurrentLut {
 
 public:
@@ -66,6 +72,18 @@ public:
 
     CoilCurrents get_current_for_calibration(int idx, int extra_harmonic, int extra_phase, int extra_mag) const;
     int get_phase_shift_for_calibration(int idx, int extra_harmonic, int extra_phase, int extra_mag) const;
+
+#if HAS_BURST_STEPPING()
+    correction_t get_correction(int idx) const { return get_phase_shift(idx); }
+    correction_t get_correction_for_calibration(int idx, int extra_harmonic, int extra_phase, int extra_mag) const {
+        return get_phase_shift_for_calibration(idx, extra_harmonic, extra_phase, extra_mag);
+    }
+#else
+    correction_t get_correction(int idx) const { return get_current(idx); }
+    correction_t get_correction_for_calibration(int idx, int extra_harmonic, int extra_phase, int extra_mag) const {
+        return get_current_for_calibration(idx, extra_harmonic, extra_phase, extra_mag);
+    }
+#endif
 };
 
 /**
