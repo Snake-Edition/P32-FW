@@ -418,6 +418,11 @@ enum class CorrectionType {
 };
 
 /**
+ * Reset runtime current lookup tables for axis.
+ */
+void reset_compensation(AxisEnum axis);
+
+/**
  * Load and enable previous settings, if any.
  **/
 void load();

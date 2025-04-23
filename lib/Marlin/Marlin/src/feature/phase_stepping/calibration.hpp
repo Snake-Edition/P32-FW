@@ -120,9 +120,4 @@ public:
 std::expected<std::array<MotorPhaseCorrection, 2>, const char *>
 calibrate_axis(AxisEnum axis, CalibrateAxisHooks &hooks);
 
-/**
- * Reset runtime current lookup tables for axis.
- */
-void reset_compensation(AxisEnum axis);
-
 } // namespace phase_stepping

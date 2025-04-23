@@ -1878,8 +1878,3 @@ phase_stepping::calibrate_axis(AxisEnum axis, CalibrateAxisHooks &hooks) {
 
     return result;
 }
-
-void phase_stepping::reset_compensation(AxisEnum axis) {
-    phase_stepping::axis_states[axis].forward_current.clear();
-    phase_stepping::axis_states[axis].backward_current.clear();
-}

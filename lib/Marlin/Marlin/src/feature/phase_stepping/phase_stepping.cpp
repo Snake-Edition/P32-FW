@@ -895,6 +895,11 @@ FORCE_OFAST std::tuple<float, float> phase_stepping::axis_position(const AxisSta
 }
 
 namespace phase_stepping {
+void reset_compensation(AxisEnum axis) {
+    axis_states[axis].forward_current.clear();
+    axis_states[axis].backward_current.clear();
+}
+
 void load() {
     assert_initialized();
     load_from_persistent_storage(AxisEnum::X_AXIS);
