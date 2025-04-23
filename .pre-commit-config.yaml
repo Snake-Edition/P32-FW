@@ -56,6 +56,8 @@ exclude: |
     lib/Catch2/|
     lib/CrashCatcher/|
     lib/Drivers/|
+    lib/Marlin/LICENSE|
+    lib/Marlin/Marlin/Version.h|
     lib/Marlin/Marlin/src/(?!
        # FILES TO BE FORMATTED
        (gcode/)?feature/prusa/|
