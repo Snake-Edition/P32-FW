@@ -64,6 +64,24 @@ public:
      * @param   item Item to be added to the queue
      * @return  true if the operation was successful
      */
+    [[nodiscard]] bool enqueue(const T &item) {
+        if (isFull()) {
+            return false;
+        }
+
+        index_t index = tail;
+        queue[mask(index++)] = item;
+        tail = index;
+        return true;
+    }
+
+    /**
+     * @brief   Adds an item to the queue
+     * @details Adds an item to the queue on the location pointed by the buffer_t
+     *          tail variable. Returns false if no queue space is available.
+     * @param   item Item to be added to the queue
+     * @return  true if the operation was successful
+     */
     [[nodiscard]] bool enqueue(T &&item) {
         if (isFull()) {
             return false;
