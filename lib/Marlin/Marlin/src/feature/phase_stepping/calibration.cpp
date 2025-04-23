@@ -1223,8 +1223,8 @@ static std::tuple<float, bool, PrusaAccelerometer::Error> capture_movement_sampl
         }
     }
 
-    const PrusaAccelerometer::Error error = accelerometer.get_error();
     float sampling_freq = accelerometer.get_sampling_rate();
+    const PrusaAccelerometer::Error error = accelerometer.get_error();
 
     if (ticks_diff(ticks_ms(), start_ts) >= timeout_ms) {
         log_error(PhaseStepping, "Timeout while capturing samples");
