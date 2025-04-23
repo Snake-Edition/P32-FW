@@ -30,12 +30,21 @@ bool MI_CHAMBER_FILTRATION_BACKEND::on_item_selected(int, int new_index) {
     return true;
 }
 
+// MI_CHAMBER_PRINT_FILTRATION
+// ============================================
+MI_CHAMBER_PRINT_FILTRATION::MI_CHAMBER_PRINT_FILTRATION()
+    : WI_ICON_SWITCH_OFF_ON_t(config_store().chamber_print_filtration_enable.get(), _("Print Filtration")) {}
+
+void MI_CHAMBER_PRINT_FILTRATION::OnChange(size_t) {
+    config_store().chamber_print_filtration_enable.set(value());
+}
+
 // MI_CHAMBER_PRINT_FILTRATION_POWER
 // ============================================
 static constexpr NumericInputConfig print_power_numeric_config {
+    .min_value = 5,
     .max_value = 100,
     .step = 5,
-    .special_value = 0,
     .unit = Unit::percent,
 };
 
@@ -44,6 +53,10 @@ MI_CHAMBER_PRINT_FILTRATION_POWER::MI_CHAMBER_PRINT_FILTRATION_POWER()
 
 void MI_CHAMBER_PRINT_FILTRATION_POWER::OnClick() {
     config_store().chamber_mid_print_filtration_pwm.set(PWM255::from_percent(value()));
+}
+
+void MI_CHAMBER_PRINT_FILTRATION_POWER::Loop() {
+    set_enabled(config_store().chamber_print_filtration_enable.get());
 }
 
 // MI_CHAMBER_POST_PRINT_FILTRATION

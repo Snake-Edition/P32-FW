@@ -7,6 +7,7 @@
 #include <option/has_toolchanger.h>
 #include <option/has_config_store_wo_backend.h>
 #include <option/has_touch.h>
+#include <option/has_chamber_filtration_api.h>
 #include <common/sys.hpp>
 
 #include <option/has_auto_retract.h>
@@ -39,6 +40,13 @@ static_assert([] {
 void CurrentStore::perform_config_check() {
     /// Whether this is the first run of the printer after assembly/factory reset
     [[maybe_unused]] const bool is_first_run = (config_store_init_result() == InitResult::cold_start);
+
+#if HAS_CHAMBER_FILTRATION_API()
+    if (chamber_mid_print_filtration_pwm.get() <= PWM255(0)) {
+        chamber_mid_print_filtration_pwm.set_to_default();
+        chamber_print_filtration_enable.set(false);
+    }
+#endif
 
 #if HAS_SELFTEST()
     // Do not show pritner setup screen if the user has run any selftests

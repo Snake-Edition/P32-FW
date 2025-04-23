@@ -22,12 +22,21 @@ private:
     size_t item_count_ = 0;
 };
 
+class MI_CHAMBER_PRINT_FILTRATION : public WI_ICON_SWITCH_OFF_ON_t {
+public:
+    MI_CHAMBER_PRINT_FILTRATION();
+
+protected:
+    void OnChange(size_t) override;
+};
+
 class MI_CHAMBER_PRINT_FILTRATION_POWER : public WiSpin {
 public:
     MI_CHAMBER_PRINT_FILTRATION_POWER();
 
 protected:
     void OnClick() override;
+    void Loop() override;
 };
 
 class MI_CHAMBER_POST_PRINT_FILTRATION : public WI_ICON_SWITCH_OFF_ON_t {

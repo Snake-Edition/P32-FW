@@ -95,7 +95,7 @@ void ChamberFiltration::step() {
         output_pwm_ = {};
 
     } else if (is_printing) {
-        output_pwm_ = config_store().chamber_mid_print_filtration_pwm.get();
+        output_pwm_ = config_store().chamber_print_filtration_enable.get() ? config_store().chamber_mid_print_filtration_pwm.get() : PWM255(0);
         last_print_s_ = now_s;
 
     } else if (config_store().chamber_post_print_filtration_enable.get() && ticks_diff(now_s, last_print_s_) <= config_store().chamber_post_print_filtration_duration_min.get() * 60) {
