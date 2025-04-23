@@ -813,7 +813,7 @@ template <typename It, typename PosConverter>
 std::vector<float> find_evenly_spaced_peaks(It begin, It end,
     PosConverter idx_to_pos, float target_spacing, std::size_t num_peaks,
     int n_closest = 2, // Number of closest peaks to consider for each position
-    float min_prominence = 0.05) {
+    float min_prominence = 0.1) {
     static_assert(std::is_same_v<typename std::iterator_traits<It>::value_type, float>);
     static_assert(std::is_same_v<typename std::iterator_traits<It>::iterator_category, std::random_access_iterator_tag>);
     assert(num_peaks >= 2);
@@ -1829,17 +1829,10 @@ std::expected<std::array<float, 2>, const char *> find_best_pha(AxisEnum axis,
     std::array<float, 2> sweep_phases;
     for (std::size_t i = 0; i != sweep_response->size(); i++) {
         auto &response = (*sweep_response)[i];
-        auto smoothed_response = moving_average(response, response.size() / 60);
-        float mean = std::accumulate(smoothed_response.begin(), smoothed_response.end(), 0.f) / smoothed_response.size();
-        // Trim values below the mean to avoid not trigger high peaks
-        for (auto &val : smoothed_response) {
-            val = val < mean ? 0 : val;
-        }
-
         auto idx_to_phase = [&](int idx) {
-            return PHA_START + idx * (PHA_END - PHA_START) / (smoothed_response.size() - 1);
+            return PHA_START + idx * (PHA_END - PHA_START) / (response.size() - 1);
         };
-        auto peak_positions = find_evenly_spaced_peaks(smoothed_response.begin(), smoothed_response.end(),
+        auto peak_positions = find_evenly_spaced_peaks(response.begin(), response.end(),
             idx_to_phase, 2 * std::numbers::pi_v<float>, PHA_CYCLES);
         if (peak_positions.size() != PHA_CYCLES) {
             log_error(PhaseStepping, "Cannot find %d peaks in phase sweep", PHA_CYCLES);
