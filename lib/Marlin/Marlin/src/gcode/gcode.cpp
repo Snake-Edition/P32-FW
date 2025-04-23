@@ -66,6 +66,8 @@ GcodeSuite gcode;
 #include <option/has_local_accelerometer.h>
 #include <option/has_remote_accelerometer.h>
 #include <option/has_gcode_compatibility.h>
+#include <option/has_phase_stepping.h>
+#include <option/has_phase_stepping_calibration.h>
 #include <marlin_vars.hpp>
 
 millis_t GcodeSuite::previous_move_ms;

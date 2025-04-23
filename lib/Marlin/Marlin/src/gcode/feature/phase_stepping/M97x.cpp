@@ -5,7 +5,11 @@
 
 #include <feature/precise_stepping/precise_stepping.hpp>
 #include <feature/phase_stepping/phase_stepping.hpp>
-#include <feature/phase_stepping/calibration.hpp>
+
+#include <option/has_phase_stepping_calibration.h>
+#if HAS_PHASE_STEPPING_CALIBRATION()
+    #include <feature/phase_stepping/calibration.hpp>
+#endif
 
 #include <vector>
 #include <string_view>
