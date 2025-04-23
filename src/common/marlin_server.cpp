@@ -492,14 +492,6 @@ static void handle_warnings() {
         }
         break;
 
-#if XL_ENCLOSURE_SUPPORT()
-    case PhasesWarning::EnclosureFilterExpiration:
-        if (auto r = consume_response(); r != Response::_none) {
-            xl_enclosure.setUpReminder(r);
-        }
-        break;
-#endif
-
 #if HAS_CHAMBER_FILTRATION_API()
     case PhasesWarning::EnclosureFilterExpiration:
         buddy::chamber_filtration().handle_filter_expiration_warning(consume_response());
@@ -796,8 +788,7 @@ static void cycle() {
     dwarf_temp = prusa_toolchanger.getActiveToolOrFirst().get_board_temperature();
     #endif
 
-    xl_enclosure.loop(remote_bed::get_mcu_temperature(), dwarf_temp, server.print_state);
-
+    xl_enclosure.loop(remote_bed::get_mcu_temperature(), dwarf_temp);
 #endif
 
     if (call_print_loop) {
@@ -907,9 +898,6 @@ void static finalize_print(bool finished) {
     marlin_vars().print_end_time = time(nullptr);
     marlin_vars().add_job_result(job_id, finished ? marlin_vars_t::JobInfo::JobResult::finished : marlin_vars_t::JobInfo::JobResult::aborted);
 
-#if XL_ENCLOSURE_SUPPORT()
-    xl_enclosure.checkFilterExpiration();
-#endif
 #if HAS_CHAMBER_FILTRATION_API()
     buddy::chamber_filtration().check_filter_expiration();
 #endif
@@ -2116,9 +2104,6 @@ static void _server_print_loop(void) {
                 fsm_create(PhasesPrinting::active);
             }
         }
-#if XL_ENCLOSURE_SUPPORT()
-        xl_enclosure.checkFilterExpiration();
-#endif
 #if HAS_MANUAL_CHAMBER_VENTS()
         buddy::chamber().check_vent_state();
 #endif

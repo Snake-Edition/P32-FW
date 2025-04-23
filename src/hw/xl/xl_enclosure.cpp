@@ -10,50 +10,45 @@
 #include "filament.hpp"
 #include <ctime>
 #include <tools_mapping.hpp>
-#include <option/xl_enclosure_support.h>
 #include <marlin_server.hpp>
+#include <buddy/unreachable.hpp>
+#include <option/xl_enclosure_support.h>
+#include <option/has_chamber_filtration_api.h>
+#include <feature/chamber_filtration/chamber_filtration.hpp>
 
-static_assert(XL_ENCLOSURE_SUPPORT());
-
-static constexpr uint32_t footer_temp_delay_sec = 5 * 60;
-static constexpr int64_t expiration_5day_reminder_period_sec = 5 * 24 * 3600;
-
-static constexpr uint32_t tick_delay_sec = 1;
-static constexpr uint32_t timers_update_period_sec = 60;
-static constexpr uint32_t fan_presence_test_period_sec = 3;
-
-static constexpr int32_t fan_start_temp_treshold = 80; // °C
-static constexpr int32_t fan_stop_temp_treshold = 75; // °C
-static constexpr int32_t dwarf_board_temp_model_difference = -15; // °C
-
-static constexpr const int pwm_on_50_percent = (FANCTLENCLOSURE_PWM_MAX * 50) / 100;
+static_assert(XL_ENCLOSURE_SUPPORT() && HAS_CHAMBER_FILTRATION_API());
 
 Enclosure xl_enclosure;
 
 Enclosure::Enclosure()
-    : persistent_flags(config_store().xl_enclosure_flags.get())
-    , runtime_flags(0)
-    , user_rpm(config_store().xl_enclosure_fan_manual.get())
-    , post_print_duration_sec(config_store().xl_enclosure_post_print_duration.get() * 60 /* stored in minutes */)
-    , active_mode(EnclosureMode::Idle)
-    , print_start_sec(0)
-    , print_end_sec(0)
-    , filter_postpone_sec(0)
+    : active_mode(EnclosureMode::Idle)
     , fan_presence_test_sec(0)
-    , previous_print_state(marlin_server::State::Idle) //
+    , is_enabled_(config_store().xl_enclosure_enabled.get()) //
 {
+    last_sec = ticks_s();
+}
 
-    // Set up timers
-    last_timer_update_sec = last_sec = ticks_s();
+void Enclosure::setEnabled(bool set) {
+    if (is_enabled_ == set) {
+        return;
+    }
+
+    is_enabled_ = set;
+    config_store().xl_enclosure_enabled.set(is_enabled_);
+    if (set) {
+        buddy::chamber_filtration().set_backend(buddy::ChamberFiltrationBackend::xl_enclosure);
+    }
 }
 
 void Enclosure::testFanPresence(uint32_t curr_tick) {
+    static constexpr uint32_t fan_presence_test_period_sec = 3;
     if (curr_tick - fan_presence_test_sec >= fan_presence_test_period_sec) {
         if (Fans::enclosure().get_rpm_is_ok()) {
-            setPersistentFlg(PERSISTENT::ENABLED);
+            setEnabled(true);
             active_mode = EnclosureMode::Active;
         } else {
-            clrPersistentFlg(PERSISTENT::ENABLED);
+            setEnabled(false);
+            is_temp_valid_ = false;
             active_mode = EnclosureMode::Idle;
             marlin_server::set_warning(WarningType::EnclosureFanError);
         }
@@ -69,249 +64,68 @@ bool Enclosure::testFanTacho() {
     return false; // Valid behaviour can be checked only with active fan
 }
 
-void Enclosure::setEnabled(bool enable) {
-    if (enable) {
-        setPersistentFlg(PERSISTENT::ENABLED);
-    } else {
-        clrPersistentFlg(PERSISTENT::ENABLED);
-    }
-}
-
-void Enclosure::setPrintFiltration(bool enable) {
-    if (enable) {
-        setPersistentFlg(PERSISTENT::PRINT_FILTRATION);
-    } else {
-        clrPersistentFlg(PERSISTENT::PRINT_FILTRATION);
-    }
-}
-
-void Enclosure::setPostPrintFiltration(bool enable) {
-    if (enable) {
-        setPersistentFlg(PERSISTENT::POST_PRINT_FILTRATION);
-    } else {
-        clrPersistentFlg(PERSISTENT::POST_PRINT_FILTRATION);
-    }
-}
-
 std::optional<buddy::Temperature> Enclosure::getEnclosureTemperature() {
-    if (const auto temp = active_dwarf_board_temp.load(); isTemperatureValid() && temp.has_value()) {
+    if (const auto temp = active_dwarf_board_temp.load(); is_temp_valid_ && temp.has_value()) {
+        static constexpr int32_t dwarf_board_temp_model_difference = -15; // °C
         return *temp + dwarf_board_temp_model_difference;
     }
     return std::nullopt;
 }
 
-void Enclosure::resetFilterTimer() {
-    clrPersistentFlg(PERSISTENT::WARNING_SHOWN | PERSISTENT::EXPIRATION_SHOWN | PERSISTENT::REMINDER_5DAYS);
-    config_store().xl_enclosure_filter_timer.set(0);
-}
-
-void Enclosure::setUpReminder(Response response) {
-    switch (response) {
-    case Response::Done:
-        resetFilterTimer();
-        break;
-    case Response::Postpone5Days:
-        // RTC time is saved in EEPROM (xl_enclosure_filter_timer) on filter expiration
-        // Check if RTC is initialized
-        if (int64_t t = time(nullptr); t != static_cast<time_t>(-1)) {
-            setPersistentFlg(PERSISTENT::REMINDER_5DAYS);
-            config_store().xl_enclosure_filter_timer.set(t); // Reuse filter counter for 5 day reminder - set timestamp of expiration
-        } else {
-            // Do not set REMINDER_5DAY flag, with uninitialized RTC there is no way to measure off-power time -> Expiration dialog pops up on every print start
-            config_store().xl_enclosure_filter_timer.set(0);
-        }
-
-        break;
-    case Response::Ignore:
-    default:
-        // Popup on each print start (except Resuming)
-        // Expiration flag is already set & REMINDER_5DAYS should not be set
-        break;
-    }
-}
-
-void Enclosure::updateTempValidationTimer(uint32_t curr_sec) {
-    if (curr_sec - print_start_sec >= footer_temp_delay_sec) {
-        setRuntimeFlg(RUNTIME::TEMP_VALID);
-    }
-}
-
-bool Enclosure::updatePostPrintFiltrationTimer(uint32_t curr_sec) {
-    bool times_up = curr_sec - print_end_sec >= post_print_duration_sec;
-    if (times_up) {
-        print_end_sec = 0;
-    }
-    return times_up;
-}
-
-// Expiration timer + Expiration warning timer
-// expiration_shown flag and xl_enclosure_filter_timer EEPROM value are reused for 5 day reminder
-void Enclosure::checkFilterExpiration() {
-    if (!isEnabled()) {
-        return;
-    }
-    int64_t expiration_timer = config_store().xl_enclosure_filter_timer.get();
-
-    if (isExpirationShown()) {
-        // 5 day reminder after filter already expired (RTC time)
-        if (isReminderSet() && time(nullptr) - expiration_timer >= expiration_5day_reminder_period_sec) {
-            marlin_server::set_warning(WarningType::EnclosureFilterExpiration);
-        }
-        return;
-    }
-
-    // check filter expiration
-    if (!isWarningShown() && expiration_timer >= expiration_warning_sec) {
-        setPersistentFlg(PERSISTENT::WARNING_SHOWN);
-        marlin_server::set_warning(WarningType::EnclosureFilterExpirWarning);
-    }
-    if (!isExpirationShown() && expiration_timer >= expiration_deadline_sec) {
-        setPersistentFlg(PERSISTENT::EXPIRATION_SHOWN);
-        marlin_server::set_warning(WarningType::EnclosureFilterExpiration);
-    }
-}
-
-bool Enclosure::isPostPrintFiltrationNeeded() {
-    if (GCodeInfo::getInstance().UsedExtrudersCount() <= 0) {
-        return false;
-    }
-
-    EXTRUDER_LOOP() { // e == physical_extruder
-        auto &extruder_info = GCodeInfo::getInstance().get_extruder_info(e);
-        if (!extruder_info.used()) {
-            continue;
-        }
-
-        const uint8_t tool_index = tools_mapping::to_physical_tool(e);
-        if (tool_index == tools_mapping::no_tool) {
-            continue;
-        }
-
-        if (config_store().get_filament_type(tool_index).parameters().requires_filtration) {
-            return true;
-        }
-    }
-    return false;
-}
-
-// The previous state is not more narrowly defined here, because enclosure loop is executed periodically with a delay
-// More state switches could take place between loop executions
-static bool isBasicStartPrint(marlin_server::State previous_state) {
-    switch (previous_state) {
-    case marlin_server::State::Idle:
-    case marlin_server::State::WaitGui:
-    case marlin_server::State::PrintPreviewInit:
-    case marlin_server::State::PrintPreviewImage:
-    case marlin_server::State::PrintPreviewConfirmed:
-    case marlin_server::State::PrintPreviewQuestions:
-    case marlin_server::State::PrintPreviewToolsMapping:
-    case marlin_server::State::PrintInit:
-    case marlin_server::State::SerialPrintInit:
-        return true;
-    default:
-        break;
-    }
-    return false;
-}
-
-static bool isPausing(marlin_server::State state) {
-    switch (state) {
-    case marlin_server::State::Pausing_Begin:
-    case marlin_server::State::Pausing_Failed_Code:
-    case marlin_server::State::Pausing_WaitIdle:
-    case marlin_server::State::Pausing_ParkHead:
-    case marlin_server::State::Paused:
-        return true;
-    default:
-        break;
-    }
-    return false;
-}
-
-static bool isResuming(marlin_server::State state) {
-    // Just to be sure, more state switches could take place between loop executions
-    if (isPausing(state)) {
-        return true;
-    }
-
-    switch (state) {
-    case marlin_server::State::Resuming_BufferData:
-    case marlin_server::State::Resuming_Begin:
-    case marlin_server::State::Resuming_Reheating:
-    case marlin_server::State::Resuming_UnparkHead_XY:
-    case marlin_server::State::Resuming_UnparkHead_ZE:
-        return true;
-    default:
-        break;
-    }
-    return false;
-}
-
-void Enclosure::checkPrintState(marlin_server::State print_state, uint32_t curr_sec) {
-    if (print_state == marlin_server::State::Printing) {
-        if (!isPrinting()) {
-            // PRINT STARTED - can be Start / Resume / Recovery
-            setRuntimeFlg(RUNTIME::PRINTING);
-            // Do not invalidate on Resume
-            if (!isResuming(previous_print_state)) {
-                clrRuntimeFlg(RUNTIME::TEMP_VALID);
-            }
-            print_start_sec = curr_sec;
-            print_end_sec = 0;
-
-            // Pop up expiration dialog
-            if (isExpirationShown() && !isReminderSet() && isBasicStartPrint(previous_print_state)) {
-                // Print start (except for resuming)
-                marlin_server::set_warning(WarningType::EnclosureFilterExpiration);
-            }
-        }
-    } else {
-        if (isPrinting()) {
-            // PRINT ENDED - can be Pause / Abort / Crash / Power Panic
-            // Do not invalidate temperature on Pause
-            if (!isPausing(print_state)) {
-                clrRuntimeFlg(RUNTIME::TEMP_VALID);
-                print_start_sec = 0;
-            }
-            clrRuntimeFlg(RUNTIME::PRINTING);
-            if (isPostPrintFiltrationEnabled() && isPostPrintFiltrationNeeded()) {
-                setRuntimeFlg(RUNTIME::ACTIVE_POST_PRINT_FILTRATION);
-                print_end_sec = curr_sec;
-            }
-        } else if (print_state == marlin_server::State::Aborted && isTemperatureValid()) {
-            clrRuntimeFlg(RUNTIME::TEMP_VALID);
+void Enclosure::updateTempValidationTimer() {
+    const auto print_state = marlin_vars().print_state.get();
+    if (!marlin_server::is_printing_state(print_state) && !marlin_server::printer_paused_extended()) {
+        // Reset the counter
+        is_temp_valid_ = false;
+    } else if (!is_temp_valid_) {
+        // Printer is printing/pausing/paused/resuming and temp is not validated yet
+        static constexpr uint32_t footer_temp_delay_ms = 5 * 60 * 1000;
+        const auto print_dur = marlin_vars().print_duration.get();
+        if (print_dur >= footer_temp_delay_ms) {
+            is_temp_valid_ = true;
         }
     }
 }
 
-uint8_t Enclosure::getPwmFromMode() const {
+PWM255 Enclosure::calculatePwm(int32_t MCU_modular_bed_temp) {
+
+    if (isMCUOverheating(MCU_modular_bed_temp)) {
+        // Override Fan pwm control
+        // Overheating modular bed MCU has priority over active_mode
+        return PWM255::from_percent(100);
+    }
 
     switch (active_mode) {
 
     case EnclosureMode::Idle:
-        return isEnabled() ? pwm_on_50_percent : 0;
+        return PWM255(0);
 
     case EnclosureMode::Test:
-        return pwm_on_50_percent;
+        return PWM255::from_percent(50);
 
     case EnclosureMode::Active:
-        if (isCooling()) {
-            return FANCTLENCLOSURE_PWM_MAX;
-        }
-
-        if ((isPrintFiltrationEnabled() && isPrinting()) || (isPostPrintFiltrationEnabled() && isPostPrintFiltrationActive())) {
-            return (FANCTLENCLOSURE_PWM_MAX * user_rpm) / 100;
-        }
-
-        return 0;
+        return buddy::chamber_filtration().output_pwm();
     }
 
-    return 0;
+    BUDDY_UNREACHABLE();
 }
 
-void Enclosure::loop(int32_t MCU_modular_bed_temp, int16_t dwarf_board_temp, marlin_server::State print_state) {
+bool Enclosure::isMCUOverheating(int32_t MCU_modular_bed_temp) {
+    static constexpr int32_t MB_MCU_maxtemp = 80; // °C
+    static constexpr int32_t MB_MCU_safe_temp_treshold = 75; // °C
 
-    // 1s loop delay
+    if (MCU_modular_bed_temp > MB_MCU_maxtemp) {
+        is_mcu_overheated_ = true;
+    } else if (MCU_modular_bed_temp <= MB_MCU_safe_temp_treshold) {
+        is_mcu_overheated_ = false;
+    }
+
+    return is_mcu_overheated_;
+}
+
+void Enclosure::loop(int32_t MCU_modular_bed_temp, int16_t dwarf_board_temp) {
+
+    static constexpr uint32_t tick_delay_sec = 1;
     const uint32_t curr_sec = ticks_s();
     if (curr_sec - last_sec < tick_delay_sec) {
         return;
@@ -320,13 +134,10 @@ void Enclosure::loop(int32_t MCU_modular_bed_temp, int16_t dwarf_board_temp, mar
     last_sec = curr_sec;
     active_dwarf_board_temp = dwarf_board_temp; // update actual temp of active dwarf board
 
-    checkPrintState(print_state, curr_sec);
-    previous_print_state = print_state;
-
     // Deactivated enclosure
     if (!isEnabled() && active_mode != EnclosureMode::Idle) {
         active_mode = EnclosureMode::Idle;
-        clrRuntimeFlg(RUNTIME::ACTIVE_COOLING | RUNTIME::ACTIVE_POST_PRINT_FILTRATION | RUNTIME::TEMP_VALID);
+        is_temp_valid_ = false;
     }
 
     switch (active_mode) {
@@ -339,58 +150,25 @@ void Enclosure::loop(int32_t MCU_modular_bed_temp, int16_t dwarf_board_temp, mar
         break;
 
     case EnclosureMode::Test:
+
         testFanPresence(curr_sec);
         break;
 
-    case EnclosureMode::Active: {
+    case EnclosureMode::Active:
 
         if (testFanTacho()) {
-            clrPersistentFlg(PERSISTENT::ENABLED);
-            clrRuntimeFlg(RUNTIME::ACTIVE_COOLING | RUNTIME::ACTIVE_POST_PRINT_FILTRATION | RUNTIME::TEMP_VALID);
+            setEnabled(false);
+            is_temp_valid_ = false;
             marlin_server::set_warning(WarningType::EnclosureFanError);
             break;
         }
 
         // Update temperature validation timer (even during MCU Cooling)
-        if (!isTemperatureValid() && isPrinting() && print_start_sec != 0) {
-            updateTempValidationTimer(curr_sec);
-        }
-
-        // MCU Cooling has a priority and cannot be overriden by Print Filtration / Post Print Filtration / Users manual RPM change
-        if (!isCooling() && MCU_modular_bed_temp >= fan_start_temp_treshold) {
-            setRuntimeFlg(RUNTIME::ACTIVE_COOLING);
-        } else if (isCooling() && MCU_modular_bed_temp < fan_stop_temp_treshold) {
-            clrRuntimeFlg(RUNTIME::ACTIVE_COOLING);
-        }
-
-        if (isCooling() || (isPrintFiltrationEnabled() && isPrinting())) {
-            break;
-        }
-
-        if (isPostPrintFiltrationEnabled() && isPostPrintFiltrationActive()) {
-            if (print_end_sec == 0 || updatePostPrintFiltrationTimer(curr_sec)) {
-                clrRuntimeFlg(RUNTIME::ACTIVE_POST_PRINT_FILTRATION | RUNTIME::TEMP_VALID);
-            }
-        }
-
-    } break;
+        updateTempValidationTimer();
+        break;
     }
 
     // Control Fan PWM
-    const uint8_t fan_pwm = getPwmFromMode();
-    Fans::enclosure().set_pwm(fan_pwm);
-
-    if (!isActive() || fan_pwm == 0) {
-        last_timer_update_sec = curr_sec;
-        return;
-    }
-
-    // Check timer every minute of active fan - longer period because it writes to EEPROM
-    if (curr_sec - last_timer_update_sec >= timers_update_period_sec) {
-        // Filter expiration notification
-        if (!isReminderSet()) {
-            config_store().xl_enclosure_filter_timer.set(config_store().xl_enclosure_filter_timer.get() + (curr_sec - last_timer_update_sec));
-        }
-        last_timer_update_sec = curr_sec;
-    }
+    PWM255 fan_pwm = calculatePwm(MCU_modular_bed_temp);
+    Fans::enclosure().set_pwm(fan_pwm.value);
 }

@@ -16,6 +16,7 @@ class ChamberFiltration {
 
 public:
     static constexpr size_t max_backend_count = 4;
+    static constexpr size_t max_post_print_filtration_time_min = 30;
 
     using Backend = ChamberFiltrationBackend;
     using BackendArray = std::array<Backend, max_backend_count>;
@@ -34,6 +35,8 @@ public:
 
     /// \returns the current backend that should be using the filtration API
     ChamberFiltrationBackend backend() const;
+
+    void set_backend(ChamberFiltrationBackend backend);
 
     bool is_enabled() const {
         return backend() != ChamberFiltrationBackend::none;

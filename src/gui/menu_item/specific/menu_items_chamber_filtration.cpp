@@ -5,6 +5,10 @@
 #include <feature/chamber/chamber.hpp>
 #include <numeric_input_config_common.hpp>
 
+#include <screen_change_filter.hpp>
+#include <ScreenHandler.hpp>
+#include <option/xl_enclosure_support.h>
+
 using namespace buddy;
 
 // MI_CHAMBER_FILTRATION_BACKEND
@@ -26,7 +30,7 @@ void MI_CHAMBER_FILTRATION_BACKEND::build_item_text(int index, const std::span<c
 }
 
 bool MI_CHAMBER_FILTRATION_BACKEND::on_item_selected(int, int new_index) {
-    config_store().chamber_filtration_backend.set(items_[new_index]);
+    chamber_filtration().set_backend(items_[new_index]);
     return true;
 }
 
@@ -145,9 +149,12 @@ MI_CHAMBER_CHANGE_FILTER::MI_CHAMBER_CHANGE_FILTER()
     : IWindowMenuItem(_("Change Filter")) {}
 
 void MI_CHAMBER_CHANGE_FILTER::click(IWindowMenu &) {
+#if XL_ENCLOSURE_SUPPORT()
+    Screens::Access()->Open(ScreenFactory::Screen<ScreenChangeFilter>);
+#else
     if (MsgBoxQuestion(_("Reset filter usage?"), Responses_YesNo) != Response::Yes) {
         return;
     }
-
     chamber_filtration().change_filter();
+#endif
 }

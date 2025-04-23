@@ -18,8 +18,9 @@
     #include <feature/cancel_object/cancel_object.hpp>
 #endif
 
-#if XL_ENCLOSURE_SUPPORT()
-    #include <xl_enclosure.hpp>
+#include <option/has_chamber_filtration_api.h>
+#if HAS_CHAMBER_FILTRATION_API()
+    #include <feature/chamber_filtration/chamber_filtration.hpp>
 #endif
 
 #include <cassert>
@@ -410,7 +411,7 @@ namespace {
                             JSON_FIELD_BOOL("printing_filtration", params.enclosure_info.printing_filtration) JSON_COMMA;
                             JSON_FIELD_BOOL("post_print", params.enclosure_info.post_print) JSON_COMMA;
                             JSON_FIELD_INT("post_print_filtration_time", params.enclosure_info.post_print_filtration_time) JSON_COMMA;
-                            JSON_FIELD_INT("filter_lifetime", Enclosure::expiration_deadline_sec) JSON_COMMA;
+                            JSON_FIELD_INT("filter_lifetime", buddy::chamber_filtration().filter_lifetime_s()) JSON_COMMA;
                             JSON_FIELD_ARR("filtration_filaments");
                             for (state.iter = 0, state.need_comma = false; state.iter <all_filament_types.size(); state.iter++) {
                                 if(!all_filament_types[state.iter].parameters().requires_filtration) {

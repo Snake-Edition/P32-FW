@@ -12,6 +12,11 @@
     #include <feature/xbuddy_extension/xbuddy_extension.hpp>
 #endif
 
+#include <option/xl_enclosure_support.h>
+#if XL_ENCLOSURE_SUPPORT()
+    #include <xl_enclosure.hpp>
+#endif
+
 namespace buddy {
 
 ChamberFiltration &chamber_filtration() {
@@ -23,10 +28,23 @@ ChamberFiltrationBackend ChamberFiltration::backend() const {
     return config_store().chamber_filtration_backend.get();
 }
 
+void ChamberFiltration::set_backend(ChamberFiltrationBackend backend) {
+    config_store().chamber_filtration_backend.set(backend);
+
+#if XL_ENCLOSURE_SUPPORT()
+    xl_enclosure.setEnabled(backend == ChamberFiltrationBackend::xl_enclosure);
+#endif
+}
+
 const char *ChamberFiltration::backend_name(Backend backend) {
     switch (backend) {
     case Backend::none:
         return N_("None");
+
+#if XL_ENCLOSURE_SUPPORT()
+    case Backend::xl_enclosure:
+        return N_("Enclosure");
+#endif
 
 #if HAS_XBUDDY_EXTENSION()
     case Backend::xbe_official_filter:
@@ -50,7 +68,11 @@ size_t ChamberFiltration::get_available_backends(BackendArray &target) {
 
     append.operator()<Backend::none>();
 
-#if HAS_XBUDDY_EXTENSION()
+#if XL_ENCLOSURE_SUPPORT()
+    // We cannot know if enclosure is mounted until we enable it and test fan's RPM
+    // For that, it has to be available
+    append.operator()<Backend::xl_enclosure>();
+#elif HAS_XBUDDY_EXTENSION()
     if (xbuddy_extension().status() != XBuddyExtension::Status::disabled) {
         append.operator()<Backend::xbe_official_filter>();
         append.operator()<Backend::xbe_filter_on_cooling_fans>();
@@ -138,7 +160,10 @@ uint32_t ChamberFiltration::filter_lifetime_s() const {
 
     case Backend::none:
         return 0;
-
+#if XL_ENCLOSURE_SUPPORT()
+    case Backend::xl_enclosure:
+        return 600 * 3600;
+#endif
 #if HAS_XBUDDY_EXTENSION()
     case Backend::xbe_official_filter:
         return 600 * 3600;
@@ -216,7 +241,7 @@ void ChamberFiltration::handle_filter_expiration_warning(Response response) {
 }
 
 void ChamberFiltration::update_needs_filtration() {
-    // Chack the always on flag (aplies to all prints) [BFW-6829]
+    // Check the always on flag (applies to all prints) [BFW-6829]
     if (config_store().chamber_filtration_always_on.get()) {
         needs_filtration_ = true;
         return;

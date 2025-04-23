@@ -31,7 +31,12 @@
 #if XL_ENCLOSURE_SUPPORT()
     #include <xl_enclosure.hpp>
     #include <fanctl.hpp>
+
+    #include <option/has_chamber_filtration_api.h>
+static_assert(HAS_CHAMBER_FILTRATION_API());
+    #include <feature/chamber_filtration/chamber_filtration.hpp>
 #endif
+
 #if PRINTER_IS_PRUSA_COREONE()
     #include <feature/chamber/chamber.hpp>
     #include <feature/xbuddy_extension/xbuddy_extension.hpp>
@@ -289,13 +294,13 @@ Printer::Params MarlinPrinter::params() const {
     params.enclosure_info = {
         .present = xl_enclosure.isActive(),
         .enabled = xl_enclosure.isEnabled(),
-        .printing_filtration = xl_enclosure.isPrintFiltrationEnabled(),
-        .post_print = xl_enclosure.isPostPrintFiltrationEnabled(),
+        .printing_filtration = config_store().chamber_print_filtration_enable.get(),
+        .post_print = config_store().chamber_post_print_filtration_enable.get(),
         // it is stored is minutes, but we want seconds, so that it is consistent with the rest
-        .post_print_filtration_time = static_cast<uint16_t>(config_store().xl_enclosure_post_print_duration.get() * 60),
+        .post_print_filtration_time = static_cast<uint16_t>(config_store().chamber_post_print_filtration_duration_min.get() * 60),
         .temp = static_cast<int>(xl_enclosure.getEnclosureTemperature().value_or(0)),
         .fan_rpm = Fans::enclosure().get_actual_rpm(),
-        .time_in_use = std::min(config_store().xl_enclosure_filter_timer.get(), Enclosure::expiration_deadline_sec)
+        .time_in_use = config_store().chamber_filter_time_used_s.get()
     };
 #endif
 #if PRINTER_IS_PRUSA_COREONE()
