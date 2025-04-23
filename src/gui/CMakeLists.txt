@@ -42,7 +42,6 @@ target_sources(
           qr.cpp
           screen_blue_error.cpp
           screen_bsod.cpp
-          screen_change_filter.cpp
           screen_filebrowser.cpp
           screen_hardfault.cpp
           screen_help_fw_update.cpp
@@ -190,8 +189,8 @@ if(BOARD STREQUAL "XBUDDY" OR BOARD STREQUAL "XLBUDDY")
   target_sources(firmware PRIVATE menu_item_xlcd.cpp)
 endif()
 
-if(BOARD STREQUAL "XLBUDDY")
-  target_sources(firmware PRIVATE MItem_enclosure.cpp)
+if(XL_ENCLOSURE_SUPPORT)
+  target_sources(firmware PRIVATE MItem_enclosure.cpp screen_change_filter.cpp)
 endif()
 
 if(HAS_LOVE_BOARD)

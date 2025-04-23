@@ -8,8 +8,10 @@
 #include <config_store/store_instance.hpp>
 #include <guiconfig/GuiDefaults.hpp>
 #include "img_resources.hpp"
-#include <option/xl_enclosure_support.h>
+#include <option/has_chamber_filtration_api.h>
 #include <feature/chamber_filtration/chamber_filtration.hpp>
+
+static_assert(HAS_CHAMBER_FILTRATION_API());
 
 // This is visible only on XL (ILI9488 layout) so we don't need vertical display layout option
 namespace {
@@ -54,10 +56,8 @@ void ScreenChangeFilter::windowEvent([[maybe_unused]] window_t *sender, [[maybe_
     case GUI_event_t::CHILD_CLICK:
         switch (event_conversion_union { .pvoid = param }.response) {
         case Response::Done:
-#if XL_ENCLOSURE_SUPPORT()
             // Reset EEPROM variable holding HEPA filter expiration counter (600h)
             buddy::chamber_filtration().change_filter();
-#endif
             break;
         default:
             break;
