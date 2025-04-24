@@ -4,9 +4,12 @@
 #include <atomic>
 
 /**
- * @brief   Atomic Circular Queue class
+ * @brief   SPSC (Single Producer Single Consumer) Atomic Circular Queue class
  * @details Implementation of an atomic ring buffer data structure which can use all slots
- *          at the cost of strict index requirements
+ *          at the cost of strict index requirements.
+ *          Please note that the "atomicity" only means here that enqueing and dequeing can be in different threads.
+ *          All enqueues have to be done in the same thread however, and all the dequeues too.
+ *
  * @note Inspired from https://www.snellman.net/blog/archive/2016-12-13-ring-buffers/
  */
 template <typename T, typename index_t, index_t N>
