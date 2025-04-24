@@ -432,9 +432,11 @@
     #define DEFAULT_Kd 100.00
 
     #define STEADY_STATE_HOTEND // Enable support for STEADY_STATE_HOTEND (feed-forward thermal management)
-    #define STEADY_STATE_HOTEND_LINEAR_COOLING_TERM 0.322
-    #define STEADY_STATE_HOTEND_QUADRATIC_COOLING_TERM 0.0002
-    #define STEADY_STATE_HOTEND_FAN_COOLING_TERM 9.24
+
+    // Values measured and determined for the Dwarf in BFW-7058 (script attached)
+    #define STEADY_STATE_HOTEND_LINEAR_COOLING_TERM 0.1555
+    #define STEADY_STATE_HOTEND_QUADRATIC_COOLING_TERM 0.00027
+    #define STEADY_STATE_HOTEND_FAN_COOLING_TERM 3.0529
 #endif // PIDTEMP
 
 //===========================================================================

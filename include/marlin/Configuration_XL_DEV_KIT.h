@@ -474,10 +474,7 @@
     #define DEFAULT_Ki 1.00
     #define DEFAULT_Kd 100.00
 
-    #define STEADY_STATE_HOTEND // Enable support for STEADY_STATE_HOTEND (feed-forward thermal management)
-    #define STEADY_STATE_HOTEND_LINEAR_COOLING_TERM 0.322
-    #define STEADY_STATE_HOTEND_QUADRATIC_COOLING_TERM 0.0002
-    #define STEADY_STATE_HOTEND_FAN_COOLING_TERM 9.24
+    // STEADY_STATE_HOTEND IS CONFIGURED ON DWARF CONFIG, ANYTHING PUT HERE WILL BE POINTLESS
 #endif // PIDTEMP
 
 //===========================================================================
