@@ -95,10 +95,22 @@ private:
     }
 
 public:
-    // Note: The alignment is possibly wrong on the 64bit system where tests run
-    // (it's fine on the real printer). However, that system also supports
-    // unaligned pointer access and all that, so for unit tests, that's fine
-    // enough.
+    // Notes about alignment:
+    //
+    // * Technically, the platform alignment of the printers is 8, not 4 (in
+    //   case of double/uint64_t). However, it was found out that a) network
+    //   packets, which are the primary user of this interface, don't contain
+    //   these data types, b) unaligned access works on that platform even for
+    //   these. For that reason, we've decided to leave this at 4, since raising
+    //   it to the proper 8 would waste more memory and would become somewhat
+    //   more complex in the case of this allocator.
+    //
+    //   See BFW-7033.
+    //
+    // * For unit tests, this might be even a bit worse, because there are more
+    //   data types that are aligned to 8 ‒ for example, pointers. But for unit
+    //   tests (on Intel architecture, where unaligned access is also
+    //   supported), this is also fine.
     static constexpr size_t alignment = 4;
 
     static_assert(sizeof(Record) % alignment == 0);
