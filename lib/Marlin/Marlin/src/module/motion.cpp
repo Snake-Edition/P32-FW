@@ -491,23 +491,6 @@ void do_blocking_move_to_xy_z(const xy_pos_t &raw, const float &z, const feedRat
   do_blocking_move_to(raw.x, raw.y, z, fr_mm_s, segmented);
 }
 
-void do_blocking_move_around_nozzle_cleaner_to_xy(const xy_pos_t& destination, const feedRate_t& feedrate) {
-#if HAS_NOZZLE_CLEANER()
-  const bool destination_in_wastebin_area = destination.x > (X_NOZZLE_PARK_POINT + 1) && destination.y > Y_WASTEBIN_SAFE_POINT;
-  const bool start_in_wastebin_area = current_position.x > (X_NOZZLE_PARK_POINT + 1) && current_position.y > Y_WASTEBIN_SAFE_POINT;
-
-  // First move to the right edge (the safe way to cross over the v-blade)
-  if (destination_in_wastebin_area || start_in_wastebin_area) {
-    do_blocking_move_to_x(X_WASTEBIN_POINT);
-  }
-  // If we are in the wastebin area, and need to move somewhere else OR we are somewhere else and need to move to the wastebin area, go through the safe point
-  if (destination_in_wastebin_area != start_in_wastebin_area) {
-    do_blocking_move_to_y(Y_WASTEBIN_SAFE_POINT);
-  }
-#endif
-  do_blocking_move_to_xy(destination, feedrate); 
-}
-
 #if HAS_Z_AXIS
   uint8_t do_z_clearance(const float zclear, const bool lower_allowed/*=false*/) {
     float zdest = zclear;
