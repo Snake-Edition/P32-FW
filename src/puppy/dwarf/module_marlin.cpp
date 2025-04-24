@@ -143,10 +143,10 @@ void stop_marlin() {
 void analogWrite(uint32_t ulPin, uint32_t ulValue) {
     switch (ulPin) {
     case MARLIN_PIN(FAN): // print fan
-        Fans::print(0).setPWM(ulValue);
+        Fans::print(0).set_pwm(ulValue);
         return;
     case MARLIN_PIN(FAN1): // heatbreak
-        Fans::heat_break(0).setPWM(ulValue);
+        Fans::heat_break(0).set_pwm(ulValue);
         return;
     default:
         bsod("Write undefined pin");

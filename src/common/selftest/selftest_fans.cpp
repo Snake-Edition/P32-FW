@@ -45,20 +45,20 @@ TestResult FanHandler::test_result() const {
 CommonFanHandler::CommonFanHandler(const FanType type, uint8_t tool_nr, FanRPMRange fan_range, CFanCtlCommon *fan_control, FanRPMRange low_fan_range)
     : FanHandler(type, fan_range, tool_nr, low_fan_range)
     , fan(fan_control) {
-    fan->enterSelftestMode();
+    fan->enter_selftest_mode();
 }
 
 CommonFanHandler::~CommonFanHandler() {
-    fan->exitSelftestMode();
+    fan->exit_selftest_mode();
 }
 
 void CommonFanHandler::set_pwm(uint8_t pwm) {
-    fan->selftestSetPWM(pwm);
+    fan->selftest_set_pwm(pwm);
 }
 
 void CommonFanHandler::record_sample() {
     sample_count++;
-    sample_sum += fan->getActualRPM();
+    sample_sum += fan->get_actual_rpm();
 }
 
 #if HAS_XBUDDY_EXTENSION()

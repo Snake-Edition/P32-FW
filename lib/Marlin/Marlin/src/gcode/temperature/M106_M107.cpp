@@ -50,7 +50,7 @@ static bool set_special_fan_speed(uint8_t fan, uint8_t speed, bool set_auto) {
     #if XL_ENCLOSURE_SUPPORT()
     static_assert(FAN_COUNT < 3, "Fan index 3 is reserved for Enclosure fan and should not be set by thermalManager");
     if (fan == 3) {
-        Fans::enclosure().setPWM(speed);
+        Fans::enclosure().set_pwm(speed);
         return true;
     }
     #endif

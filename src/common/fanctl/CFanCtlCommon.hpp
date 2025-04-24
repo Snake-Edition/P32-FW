@@ -16,31 +16,31 @@ public:
         idle = 0, // idle - no rotation, PWM = 0%
         starting = 1, // starting - PWM = 100%, waiting for 4 tacho edges
         rpm_stabilization = 2, // tick delay for reaching wanted rpm
-        running = 3, // running - PWM set by setPWM(), no regulation
+        running = 3, // running - PWM set by set_pwm(), no regulation
         error_starting = -1, // starting error - means no feedback after timeout expired
         error_running = -2, // running error - means zero RPM measured (no feedback)
     };
 
-    inline uint8_t getMinRPM() const { return min_rpm; }
-    inline uint8_t getMaxRPM() const { return max_rpm; }
-    inline uint16_t getMaxPWM() const { return 255; }
+    inline uint8_t get_min_rpm() const { return min_rpm; }
+    inline uint8_t get_max_rpm() const { return max_rpm; }
+    inline uint16_t get_max_pwm() const { return 255; }
 
-    virtual uint16_t getMinPWM() const = 0;
-    virtual FanState getState() const = 0;
-    virtual uint8_t getPWM() const = 0;
-    virtual uint16_t getActualRPM() const = 0;
-    virtual bool getRPMIsOk() const = 0;
-    virtual bool getRPMMeasured() const = 0;
+    virtual uint16_t get_min_pwm() const = 0;
+    virtual FanState get_state() const = 0;
+    virtual uint8_t get_pwm() const = 0;
+    virtual uint16_t get_actual_rpm() const = 0;
+    virtual bool get_rpm_is_ok() const = 0;
+    virtual bool get_rpm_measured() const = 0;
 
     // Accepts uint16_t only because Puppies use (uint16_t)-1 as an "auto-fan" signal. PWM is still 0-255.
-    virtual bool setPWM(uint16_t pwm) = 0;
+    virtual bool set_pwm(uint16_t pwm) = 0;
 
-    inline bool isSelftest() { return selftest_mode; }
+    inline bool is_selftest() { return selftest_mode; }
     constexpr void disable_autocontrol() { autocontrol_enabled = false; }
     constexpr void enable_autocontrol() { autocontrol_enabled = true; }
-    virtual void enterSelftestMode() = 0;
-    virtual void exitSelftestMode() = 0;
-    virtual bool selftestSetPWM(uint8_t pwm) = 0;
+    virtual void enter_selftest_mode() = 0;
+    virtual void exit_selftest_mode() = 0;
+    virtual bool selftest_set_pwm(uint8_t pwm) = 0;
 
     virtual bool is_fan_ok() const;
 

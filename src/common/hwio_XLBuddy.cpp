@@ -398,7 +398,7 @@ void analogWrite(uint32_t ulPin, uint32_t ulValue) {
     if (HAL_PWM_Initialized) {
         switch (ulPin) {
         case MARLIN_PIN(FAN): // print fan
-            Fans::print(active_extruder).setPWM(ulValue);
+            Fans::print(active_extruder).set_pwm(ulValue);
             buddy::puppies::modular_bed.set_print_fan_active(ulValue > 0);
             return;
         case MARLIN_PIN(FAN1): {

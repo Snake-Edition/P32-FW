@@ -222,7 +222,7 @@ void CFanCtl3Wire::tick() {
             m_State = idle;
         } else {
             m_pwm.set_PWM(m_PWMValue);
-            if (!getRPMIsOk() && m_skip_tacho != skip_tacho_t::yes) {
+            if (!get_rpm_is_ok() && m_skip_tacho != skip_tacho_t::yes) {
                 m_State = error_running;
             }
         }
@@ -232,7 +232,7 @@ void CFanCtl3Wire::tick() {
             m_State = idle;
         } else {
             m_pwm.set_PWM(m_PWMValue);
-            if (getRPMIsOk()) {
+            if (get_rpm_is_ok()) {
                 m_State = running;
             }
         }
@@ -248,7 +248,7 @@ uint16_t CFanCtl3Wire::unscalePWM(uint16_t pwm) const {
     return pwm * 255 / m_pwm.get_max_PWM();
 }
 
-bool CFanCtl3Wire::setPWM(uint16_t pwm) {
+bool CFanCtl3Wire::set_pwm(uint16_t pwm) {
     if (selftest_mode) {
         return false;
     }
@@ -256,7 +256,7 @@ bool CFanCtl3Wire::setPWM(uint16_t pwm) {
     return true;
 }
 
-bool CFanCtl3Wire::selftestSetPWM(uint8_t pwm) {
+bool CFanCtl3Wire::selftest_set_pwm(uint8_t pwm) {
     if (!selftest_mode) {
         return false;
     }
@@ -273,27 +273,27 @@ bool CFanCtl3Wire::setPhaseShiftMode(CFanCtlPWM::PhaseShiftMode psm) {
 }
 
 void CFanCtl3Wire::safeState() {
-    setPWM(m_pwm.get_max_PWM());
+    set_pwm(m_pwm.get_max_PWM());
     m_pwm.safeState();
     selftest_mode = false;
 }
 
-bool CFanCtl3Wire::getRPMIsOk() const {
-    if (m_PWMValue > min_pwm_to_measure_rpm && (getActualRPM() < min_rpm)) {
+bool CFanCtl3Wire::get_rpm_is_ok() const {
+    if (m_PWMValue > min_pwm_to_measure_rpm && (get_actual_rpm() < min_rpm)) {
         return false;
     }
     return true;
 }
 
-void CFanCtl3Wire::enterSelftestMode() {
+void CFanCtl3Wire::enter_selftest_mode() {
     if (selftest_mode) {
         return;
     }
     selftest_mode = true;
-    selftest_initial_pwm = getPWM();
+    selftest_initial_pwm = get_pwm();
 }
 
-void CFanCtl3Wire::exitSelftestMode() {
+void CFanCtl3Wire::exit_selftest_mode() {
     if (!selftest_mode) {
         return;
     }
@@ -307,5 +307,5 @@ void CFanCtl3Wire::exitSelftestMode() {
         pwm_to_restore = selftest_initial_pwm.load();
     }
 
-    setPWM(pwm_to_restore);
+    set_pwm(pwm_to_restore);
 }

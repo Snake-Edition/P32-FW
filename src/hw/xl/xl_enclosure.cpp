@@ -49,7 +49,7 @@ Enclosure::Enclosure()
 
 void Enclosure::testFanPresence(uint32_t curr_tick) {
     if (curr_tick - fan_presence_test_sec >= fan_presence_test_period_sec) {
-        if (Fans::enclosure().getRPMIsOk()) {
+        if (Fans::enclosure().get_rpm_is_ok()) {
             setPersistentFlg(PERSISTENT::ENABLED);
             active_mode = EnclosureMode::Active;
         } else {
@@ -62,9 +62,9 @@ void Enclosure::testFanPresence(uint32_t curr_tick) {
 }
 
 bool Enclosure::testFanTacho() {
-    if (isEnabled() && Fans::enclosure().getPWM() != 0) {
-        auto state = Fans::enclosure().getState();
-        return (state == CFanCtlCommon::FanState::running || state == CFanCtlCommon::FanState::error_running || state == CFanCtlCommon::FanState::error_starting) && !Fans::enclosure().getRPMIsOk();
+    if (isEnabled() && Fans::enclosure().get_pwm() != 0) {
+        auto state = Fans::enclosure().get_state();
+        return (state == CFanCtlCommon::FanState::running || state == CFanCtlCommon::FanState::error_running || state == CFanCtlCommon::FanState::error_starting) && !Fans::enclosure().get_rpm_is_ok();
     }
     return false; // Valid behaviour can be checked only with active fan
 }
@@ -378,7 +378,7 @@ void Enclosure::loop(int32_t MCU_modular_bed_temp, int16_t dwarf_board_temp, mar
 
     // Control Fan PWM
     const uint8_t fan_pwm = getPwmFromMode();
-    Fans::enclosure().setPWM(fan_pwm);
+    Fans::enclosure().set_pwm(fan_pwm);
 
     if (!isActive() || fan_pwm == 0) {
         last_timer_update_sec = curr_sec;

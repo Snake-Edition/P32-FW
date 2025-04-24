@@ -1845,8 +1845,8 @@ bool active_extruder_fan_checks() {
             if (!fan.is_fan_ok()) {
                 log_error(MarlinServer, "%s FAN RPM is not OK - Actual: %d rpm, PWM: %d",
                     fan_name,
-                    (int)fan.getActualRPM(),
-                    fan.getPWM());
+                    (int)fan.get_actual_rpm(),
+                    fan.get_pwm());
                 return true;
             }
             return false;
@@ -2712,11 +2712,11 @@ static void _server_print_loop(void) {
     if (marlin_vars().fan_check_enabled) {
         HOTEND_LOOP() {
 #if !PRINTER_IS_PRUSA_iX()
-            const auto fan_state = Fans::heat_break(e).getState();
+            const auto fan_state = Fans::heat_break(e).get_state();
             hotendFanErrorChecker[e].checkTrue(fan_state != CFanCtlCommon::FanState::error_running && fan_state != CFanCtlCommon::FanState::error_starting, WarningType::HotendFanError, true, true);
 #endif
         }
-        const auto fan_state = Fans::print(active_extruder).getState();
+        const auto fan_state = Fans::print(active_extruder).get_state();
         printFanErrorChecker.checkTrue(fan_state != CFanCtlCommon::FanState::error_running && fan_state != CFanCtlCommon::FanState::error_starting, WarningType::PrintFanError, false, true);
 
 #if HAS_XBUDDY_EXTENSION()
@@ -2742,11 +2742,11 @@ static void _server_print_loop(void) {
     }
 
     HOTEND_LOOP() {
-        if (Fans::heat_break(e).getRPMIsOk()) {
+        if (Fans::heat_break(e).get_rpm_is_ok()) {
             hotendFanErrorChecker[e].reset();
         }
     }
-    if (Fans::print(active_extruder).getRPMIsOk()) {
+    if (Fans::print(active_extruder).get_rpm_is_ok()) {
         printFanErrorChecker.reset();
     }
 
@@ -3115,8 +3115,8 @@ static void _server_update_vars() {
         extruder.target_heatbreak = thermalManager.temp_heatbreak[e].target;
 #endif
         extruder.flow_factor = static_cast<uint16_t>(planner.flow_percentage[e]);
-        extruder.print_fan_rpm = Fans::print(e).getActualRPM();
-        extruder.heatbreak_fan_rpm = Fans::heat_break(e).getActualRPM();
+        extruder.print_fan_rpm = Fans::print(e).get_actual_rpm();
+        extruder.heatbreak_fan_rpm = Fans::heat_break(e).get_actual_rpm();
     }
 
     marlin_vars().temp_bed = thermalManager.degBed();

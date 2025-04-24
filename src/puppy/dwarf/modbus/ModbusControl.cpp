@@ -207,19 +207,19 @@ void ProcessModbusMessages() {
         case std::to_underlying(ModbusRegisters::SystemHoldingRegister::fan1_pwm): {
             if (msg->m_Value == std::numeric_limits<uint16_t>::max()) {
                 // switch back to auto control
-                if (Fans::heat_break(0).isSelftest()) {
+                if (Fans::heat_break(0).is_selftest()) {
                     log_info(ModbusControl, "Heatbreak fan: AUTO");
-                    Fans::heat_break(0).exitSelftestMode();
+                    Fans::heat_break(0).exit_selftest_mode();
                 }
             } else {
                 // direct PWM control mode (for selftest)
-                if (!Fans::heat_break(0).isSelftest()) {
+                if (!Fans::heat_break(0).is_selftest()) {
                     log_info(ModbusControl, "Heatbreak fan: SELFTEST");
-                    Fans::heat_break(0).enterSelftestMode();
+                    Fans::heat_break(0).enter_selftest_mode();
                 }
 
                 log_info(ModbusControl, "Set heatbreak fan PWM:: %" PRIu32, msg->m_Value);
-                Fans::heat_break(0).selftestSetPWM(msg->m_Value);
+                Fans::heat_break(0).selftest_set_pwm(msg->m_Value);
             }
 
             break;
@@ -334,15 +334,15 @@ void UpdateRegisters() {
     ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::mcu_temperature, std::clamp<int32_t>(mcu_temp_filter / 8, INT16_MIN, INT16_MAX));
     ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::heatbreak_temp, clamp_to_int16(Temperature::degHeatbreak(0)));
 
-    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan0_rpm, Fans::print(0).getActualRPM());
-    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan0_pwm, Fans::print(0).getPWM());
-    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan0_state, Fans::print(0).getState());
-    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan0_is_rpm_ok, Fans::print(0).getRPMIsOk());
+    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan0_rpm, Fans::print(0).get_actual_rpm());
+    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan0_pwm, Fans::print(0).get_pwm());
+    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan0_state, Fans::print(0).get_state());
+    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan0_is_rpm_ok, Fans::print(0).get_rpm_is_ok());
 
-    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan1_rpm, Fans::heat_break(0).getActualRPM());
-    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan1_pwm, Fans::heat_break(0).getPWM());
-    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan1_state, Fans::heat_break(0).getState());
-    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan1_is_rpm_ok, Fans::heat_break(0).getRPMIsOk());
+    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan1_rpm, Fans::heat_break(0).get_actual_rpm());
+    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan1_pwm, Fans::heat_break(0).get_pwm());
+    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan1_state, Fans::heat_break(0).get_state());
+    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan1_is_rpm_ok, Fans::heat_break(0).get_rpm_is_ok());
 
     ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::is_picked_raw, Cheese::get_raw_picked());
     ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::is_parked_raw, Cheese::get_raw_parked());

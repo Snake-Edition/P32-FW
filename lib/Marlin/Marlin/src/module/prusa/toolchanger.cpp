@@ -339,7 +339,7 @@ bool PrusaToolChanger::tool_change(const uint8_t new_tool, tool_return_t return_
     // Disable print fan on old dwarf, fan on new dwarf will be enabled by marlin
     // todo: remove this when multiple fans are implemented properly
     if (old_dwarf != nullptr) {
-        Fans::print(old_dwarf->dwarf_index()).setPWM(0);
+        Fans::print(old_dwarf->dwarf_index()).set_pwm(0);
     }
 
     if (new_dwarf != old_dwarf) {
@@ -487,8 +487,8 @@ bool PrusaToolChanger::purge_tool(Dwarf &dwarf) {
     // fan to 100% for better sopel
     // use fanctl interface directly, without modifing marlin's value. This will prevent restoring wrong fan value on power panic or failed toolchange.
     // !!! Note: This does not work if you're purging the currently selected tool - see BFW-6365
-    const auto prev_pwm = Fans::print(tool_nr).getPWM();
-    Fans::print(tool_nr).setPWM(255);
+    const auto prev_pwm = Fans::print(tool_nr).get_pwm();
+    Fans::print(tool_nr).set_pwm(255);
 
     // go to purge location
     const PrusaToolInfo &info = get_tool_info(dwarf, /*check_calibrated=*/true);
@@ -518,7 +518,7 @@ bool PrusaToolChanger::purge_tool(Dwarf &dwarf) {
     (void)wait([]() { return false; }, 5000);
 
     // restore fan speed
-    Fans::print(tool_nr).setPWM(prev_pwm);
+    Fans::print(tool_nr).set_pwm(prev_pwm);
 
     if (!park(dwarf)) {
         return false;

@@ -10,7 +10,7 @@ CFanCtlEnclosure::CFanCtlEnclosure(const buddy::hw::InputPin &pin_tach,
     : CFanCtlCommon(min_rpm, max_rpm)
     , tachometer(pin_tach) {
     buddy::hw::fanPowerSwitch.set();
-    setPWM(0);
+    set_pwm(0);
 }
 
 void CFanCtlEnclosure::tick() {
@@ -47,12 +47,12 @@ void CFanCtlEnclosure::tick() {
         }
         break;
     case running:
-        if (!getRPMIsOk()) {
+        if (!get_rpm_is_ok()) {
             state = error_running;
         }
         break;
     default: // error state
-        if (getRPMIsOk()) {
+        if (get_rpm_is_ok()) {
             state = running;
         }
         break;
@@ -75,7 +75,7 @@ bool CFanCtlEnclosure::Tachometer::tick() {
     return edge;
 }
 
-bool CFanCtlEnclosure::setPWM(uint16_t pwm) {
+bool CFanCtlEnclosure::set_pwm(uint16_t pwm) {
     if (selftest_mode) {
         selftest_initial_pwm = pwm > 255 ? 255 : static_cast<uint8_t>(pwm);
     } else {
@@ -84,27 +84,27 @@ bool CFanCtlEnclosure::setPWM(uint16_t pwm) {
     return true;
 }
 
-void CFanCtlEnclosure::enterSelftestMode() {
+void CFanCtlEnclosure::enter_selftest_mode() {
     if (selftest_mode) {
         return;
     }
     selftest_mode = true;
-    selftest_initial_pwm = getPWM();
+    selftest_initial_pwm = get_pwm();
 }
 
-void CFanCtlEnclosure::exitSelftestMode() {
+void CFanCtlEnclosure::exit_selftest_mode() {
     if (!selftest_mode) {
         return;
     }
     selftest_mode = false;
-    setPWM(selftest_initial_pwm.load());
+    set_pwm(selftest_initial_pwm.load());
     selftest_initial_pwm = 0;
 }
 
-bool CFanCtlEnclosure::selftestSetPWM(uint8_t pwm) {
+bool CFanCtlEnclosure::selftest_set_pwm(uint8_t pwm) {
     if (!selftest_mode) {
         return false;
     }
-    desired_pwm = pwm; // Set PWM directly without setPWM function
+    desired_pwm = pwm; // Set PWM directly without set_pwm function
     return true;
 }

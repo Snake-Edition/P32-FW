@@ -112,10 +112,10 @@ LoopResult CSelftestPart_Loadcell::stateCooldownInit() {
         IPartHandler::SetFsmPhase(PhasesSelftest::Loadcell_cooldown);
         log_info(Selftest, "%s cooling needed, target: %d current: %f", rConfig.partname,
             static_cast<int>(rConfig.cool_temp), static_cast<double>(temp));
-        rConfig.print_fan_fnc(rConfig.tool_nr).enterSelftestMode();
-        rConfig.heatbreak_fan_fnc(rConfig.tool_nr).enterSelftestMode();
-        rConfig.print_fan_fnc(rConfig.tool_nr).selftestSetPWM(255); // it will be restored by exitSelftestMode
-        rConfig.heatbreak_fan_fnc(rConfig.tool_nr).selftestSetPWM(255); // it will be restored by exitSelftestMode
+        rConfig.print_fan_fnc(rConfig.tool_nr).enter_selftest_mode();
+        rConfig.heatbreak_fan_fnc(rConfig.tool_nr).enter_selftest_mode();
+        rConfig.print_fan_fnc(rConfig.tool_nr).selftest_set_pwm(255); // it will be restored by exitSelftestMode
+        rConfig.heatbreak_fan_fnc(rConfig.tool_nr).selftest_set_pwm(255); // it will be restored by exitSelftestMode
         log_info(Selftest, "%s fans set to maximum", rConfig.partname);
     }
     return LoopResult::RunNext;
@@ -140,8 +140,8 @@ LoopResult CSelftestPart_Loadcell::stateCooldown() {
 
 LoopResult CSelftestPart_Loadcell::stateCooldownDeinit() {
     if (need_cooling) { // if cooling was needed, return control of fans
-        rConfig.print_fan_fnc(rConfig.tool_nr).exitSelftestMode();
-        rConfig.heatbreak_fan_fnc(rConfig.tool_nr).exitSelftestMode();
+        rConfig.print_fan_fnc(rConfig.tool_nr).exit_selftest_mode();
+        rConfig.heatbreak_fan_fnc(rConfig.tool_nr).exit_selftest_mode();
         log_info(Selftest, "%s fans disabled", rConfig.partname);
     }
     return LoopResult::RunNext;

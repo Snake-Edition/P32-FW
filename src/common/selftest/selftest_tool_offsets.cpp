@@ -75,16 +75,16 @@ private:
 
     static void start_cooling(uint8_t tool_nr) {
         tool_cooling_down[tool_nr] = true;
-        Fans::print(tool_nr).enterSelftestMode();
-        Fans::heat_break(tool_nr).enterSelftestMode();
-        Fans::print(tool_nr).selftestSetPWM(255);
-        Fans::heat_break(tool_nr).selftestSetPWM(255);
+        Fans::print(tool_nr).enter_selftest_mode();
+        Fans::heat_break(tool_nr).enter_selftest_mode();
+        Fans::print(tool_nr).selftest_set_pwm(255);
+        Fans::heat_break(tool_nr).selftest_set_pwm(255);
     }
 
     static void stop_cooling(uint8_t tool_nr) {
         tool_cooling_down[tool_nr] = false;
-        Fans::print(tool_nr).exitSelftestMode();
-        Fans::heat_break(tool_nr).exitSelftestMode();
+        Fans::print(tool_nr).exit_selftest_mode();
+        Fans::heat_break(tool_nr).exit_selftest_mode();
     }
 };
 

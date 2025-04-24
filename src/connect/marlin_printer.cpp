@@ -294,7 +294,7 @@ Printer::Params MarlinPrinter::params() const {
         // it is stored is minutes, but we want seconds, so that it is consistent with the rest
         .post_print_filtration_time = static_cast<uint16_t>(config_store().xl_enclosure_post_print_duration.get() * 60),
         .temp = static_cast<int>(xl_enclosure.getEnclosureTemperature().value_or(0)),
-        .fan_rpm = Fans::enclosure().getActualRPM(),
+        .fan_rpm = Fans::enclosure().get_actual_rpm(),
         .time_in_use = std::min(config_store().xl_enclosure_filter_timer.get(), Enclosure::expiration_deadline_sec)
     };
 #endif

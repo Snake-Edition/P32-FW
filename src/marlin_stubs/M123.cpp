@@ -37,7 +37,7 @@ void PrusaGcodeSuite::M123() {
 
 void M123::print_fan_speed() {
     char buffer[50];
-    snprintf(buffer, sizeof buffer, "E0:%d RPM PRN1:%d RPM E0@:%u PRN1@:%u\n", Fans::heat_break(active_extruder).getActualRPM(), Fans::print(active_extruder).getActualRPM(), Fans::heat_break(active_extruder).getPWM(), Fans::print(active_extruder).getPWM());
+    snprintf(buffer, sizeof buffer, "E0:%d RPM PRN1:%d RPM E0@:%u PRN1@:%u\n", Fans::heat_break(active_extruder).get_actual_rpm(), Fans::print(active_extruder).get_actual_rpm(), Fans::heat_break(active_extruder).get_pwm(), Fans::print(active_extruder).get_pwm());
     SERIAL_ECHO(buffer);
     SERIAL_EOL();
 }

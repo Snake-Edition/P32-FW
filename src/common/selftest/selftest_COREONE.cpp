@@ -416,8 +416,8 @@ void CSelftest::restoreAfterSelftest() {
     marlin_server::set_temp_to_display(0, 0);
 
     // restore fan behavior
-    Fans::print(0).exitSelftestMode();
-    Fans::heat_break(0).exitSelftestMode();
+    Fans::print(0).exit_selftest_mode();
+    Fans::heat_break(0).exit_selftest_mode();
 
     thermalManager.disable_all_heaters();
     disable_all_steppers();
