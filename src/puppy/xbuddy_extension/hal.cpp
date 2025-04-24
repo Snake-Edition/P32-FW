@@ -829,7 +829,7 @@ void hal::mmu::nreset_pin_set(bool b) {
 }
 
 bool hal::mmu::power_pin_get() {
-    return expander_pins | expander_pin_mmu_power;
+    return expander_pins & expander_pin_mmu_power;
 }
 
 bool hal::mmu::nreset_pin_get() {
