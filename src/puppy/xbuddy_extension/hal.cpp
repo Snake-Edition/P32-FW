@@ -277,8 +277,8 @@ static void tim1_init() {
     // input mode, without remapping
     constexpr const uint32_t capture_compare_selection = 0b01;
 
-    // no filter, sampling is done at fDTS; this could be changed if we start getting false edges
-    constexpr const uint32_t input_capture_filter = 0b0000;
+    // 0110:fSAMPLING = fDTS/4, N = 6; was getting false edges on fans with longer wire - BFW-7090
+    constexpr const uint32_t input_capture_filter = 0b0111;
 
     // no prescaler, capture is done each time an edge is detected on the capture input
     constexpr const uint32_t input_capture_prescaler = 0b00;
