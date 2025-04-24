@@ -9,6 +9,8 @@
 #include <stm32h5xx_hal.h>
 #include <stm32h5xx_ll_gpio.h>
 
+#include <utils/timing/timer_event_period_tracker.hpp>
+
 const std::span<std::byte> hal::memory::peripheral_address_region(reinterpret_cast<std::byte *>(PERIPH_BASE_NS), 0x10000000);
 
 static UART_HandleTypeDef huart_rs485;
@@ -415,68 +417,35 @@ static void MX_ADC1_Init(void) {
 
     HAL_ADCEx_Calibration_Start(&hadc1, single_diff);
 }
-
-static constexpr uint32_t diff32(uint32_t prev, uint32_t curr) {
-    return (curr >= prev)
-        ? (curr - prev)
-        : (0xffffffff - prev + curr);
-}
-static constexpr uint32_t diff16(uint32_t prev, uint32_t curr) {
-    return (curr >= prev)
-        ? (curr - prev)
-        : (0xffff - prev + curr);
-}
-static_assert(diff16(0x0000, 0x0000) == 0x0);
-static_assert(diff16(0x0000, 0x0008) == 0x8);
-static_assert(diff16(0x0008, 0x0008) == 0x0);
-static_assert(diff16(0x0008, 0x0010) == 0x8);
-static_assert(diff16(0x0008, 0x0010) == 0x8);
-static_assert(diff16(0xfff8, 0x0001) == 0x8);
-
-// This number is incremented whenever TIM1 overflows.
-static uint32_t tim1_generation = 0;
+// Tracking TIM1 increments between two edges on the input pins (fan tacho)
+TimerEventPeriodTracker tim1_cc1;
+TimerEventPeriodTracker tim1_cc2;
+TimerEventPeriodTracker tim1_cc3;
 
 extern "C" void TIM1_UP_IRQHandler() {
     const uint32_t SR = TIM1->SR;
     TIM1->SR = SR & ~(TIM_SR_UIF);
     if (SR & TIM_SR_UIF) {
-        ++tim1_generation;
+        tim1_cc1.handle_timer_overflow();
+        tim1_cc2.handle_timer_overflow();
+        tim1_cc3.handle_timer_overflow();
     }
 }
-
-class Tim1ChannelData {
-private:
-    // Since TIM1 is a 16-bit timer, we can afford to store both previous
-    // and current values into a single machine word.
-    // This greatly simplifies IRQ handler.
-    uint32_t prev_curr = 0;
-    uint32_t generation = 0;
-
-public:
-    void update(uint32_t ccr) {
-        prev_curr = (prev_curr << 16) | ccr;
-        generation = tim1_generation;
-    }
-
-    uint32_t period() const {
-        return diff32(generation, tim1_generation) > 3 ? 0 : diff16(prev_curr >> 16, prev_curr & 0xffff);
-    }
-};
-Tim1ChannelData tim1_cc1;
-Tim1ChannelData tim1_cc2;
-Tim1ChannelData tim1_cc3;
 
 extern "C" void TIM1_CC_IRQHandler() {
     const uint32_t SR = TIM1->SR;
     TIM1->SR = SR & ~(TIM_SR_CC1IF | TIM_SR_CC2IF | TIM_SR_CC3IF);
+
+    // Called when there is an edge detected on the input pins -> those are our events that we are tracking
+    // CCRx then holds timer value at the time of the event
     if (SR & TIM_SR_CC1IF) {
-        tim1_cc1.update(TIM1->CCR1);
+        tim1_cc1.handle_event(TIM1->CCR1);
     }
     if (SR & TIM_SR_CC2IF) {
-        tim1_cc2.update(TIM1->CCR2);
+        tim1_cc2.handle_event(TIM1->CCR2);
     }
     if (SR & TIM_SR_CC3IF) {
-        tim1_cc3.update(TIM1->CCR3);
+        tim1_cc3.handle_event(TIM1->CCR3);
     }
 }
 
@@ -718,8 +687,14 @@ void hal::step() {
     step_filament_sensor();
 }
 
-static uint32_t tim1_period_to_rpm(uint32_t period) {
-    if (period == 0) {
+static uint32_t tim1_period_to_rpm(const TimerEventPeriodTracker &tracker) {
+    // Disable TIM1 interrupts while reading the period to avoid race conditions
+    const auto prev_dier = TIM1->DIER;
+    TIM1->DIER = 0;
+    const auto period = tracker.period_unsafe();
+    TIM1->DIER = prev_dier;
+
+    if (period == TimerEventPeriodTracker::invalid_period || period == 0) {
         return 0;
     }
     // 60 seconds in minute, 1 MHZ timer, 2 rising edges per revolution
@@ -736,7 +711,7 @@ void hal::fan1::set_pwm(DutyCycle duty_cycle) {
 }
 
 uint32_t hal::fan1::get_rpm() {
-    return tim1_period_to_rpm(tim1_cc1.period());
+    return tim1_period_to_rpm(tim1_cc1);
 }
 
 void hal::fan2::set_pwm(DutyCycle duty_cycle) {
@@ -748,7 +723,7 @@ uint32_t hal::fan2::get_rpm() {
     // following line because pwm is shared and motherboard goes crazy
     // when only one of the fans is spinning...
     // return fan1::get_rpm();
-    return tim1_period_to_rpm(tim1_cc2.period());
+    return tim1_period_to_rpm(tim1_cc2);
 }
 
 void hal::fan3::set_pwm(DutyCycle duty_cycle) {
@@ -756,7 +731,7 @@ void hal::fan3::set_pwm(DutyCycle duty_cycle) {
 }
 
 uint32_t hal::fan3::get_rpm() {
-    return tim1_period_to_rpm(tim1_cc3.period());
+    return tim1_period_to_rpm(tim1_cc3);
 }
 
 void hal::w_led::set_pwm(DutyCycle duty_cycle) {
