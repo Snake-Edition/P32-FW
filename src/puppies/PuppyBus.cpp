@@ -31,6 +31,8 @@ namespace puppies {
     }
 
     void PuppyBus::HalfDuplexCallbackSwitch(bool transmit) {
+        // WARNING: called within high priority ISR - never use RTT logging in this function
+        //
         // Some revisions of xBuddy board have pull-down resistor on receive pin.
         // As soon as you set RS485 transceiver to transmit mode, it disconnects
         // the receive pin and it gets pulled down on those xBuddy revisions.

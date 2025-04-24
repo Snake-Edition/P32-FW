@@ -55,9 +55,11 @@ TRACED_ISR(DMA1_Stream4_IRQHandler, HAL_DMA_IRQHandler, SPI_HANDLE_FOR(accelerom
 void uart_for_puppies_idle_isr() {
     uart_for_puppies.IdleISR();
 }
-TRACED_ISR(USART6_IRQHandler, HAL_UART_IRQHandler_with_idle, &uart_handle_for_puppies, uart_for_puppies_idle_isr);
-TRACED_ISR(DMA2_Stream2_IRQHandler, HAL_DMA_IRQHandler, uart_handle_for_puppies.hdmarx);
-TRACED_ISR(DMA2_Stream7_IRQHandler, HAL_DMA_IRQHandler, uart_handle_for_puppies.hdmatx);
+
+// These interrupts for puppy communication must not be tracked by Segger SysView, because they need higher priority than SysView lock
+BARE_ISR(USART6_IRQHandler, HAL_UART_IRQHandler_with_idle, &uart_handle_for_puppies, uart_for_puppies_idle_isr);
+BARE_ISR(DMA2_Stream2_IRQHandler, HAL_DMA_IRQHandler, uart_handle_for_puppies.hdmarx);
+BARE_ISR(DMA2_Stream7_IRQHandler, HAL_DMA_IRQHandler, uart_handle_for_puppies.hdmatx);
 
 #endif
 
@@ -67,9 +69,10 @@ TRACED_ISR(DMA2_Stream7_IRQHandler, HAL_DMA_IRQHandler, uart_handle_for_puppies.
 void uart_for_mmu_idle_isr() {
     uart_for_mmu.IdleISR();
 }
-TRACED_ISR(USART6_IRQHandler, HAL_UART_IRQHandler_with_idle, &uart_handle_for_mmu, uart_for_mmu_idle_isr);
-TRACED_ISR(DMA2_Stream2_IRQHandler, HAL_DMA_IRQHandler, uart_handle_for_mmu.hdmarx);
-TRACED_ISR(DMA2_Stream7_IRQHandler, HAL_DMA_IRQHandler, uart_handle_for_mmu.hdmatx);
+// These interrupts for puppy communication must not be tracked by Segger SysView, because they need higher priority than SysView lock
+BARE_ISR(USART6_IRQHandler, HAL_UART_IRQHandler_with_idle, &uart_handle_for_mmu, uart_for_mmu_idle_isr);
+BARE_ISR(DMA2_Stream2_IRQHandler, HAL_DMA_IRQHandler, uart_handle_for_mmu.hdmarx);
+BARE_ISR(DMA2_Stream7_IRQHandler, HAL_DMA_IRQHandler, uart_handle_for_mmu.hdmatx);
 
 #endif
 
