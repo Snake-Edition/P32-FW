@@ -552,7 +552,7 @@
     #define MIN_STOP_HEATBREAK_POWER 55 // Minimum PWM needed to keep fan spinning reliably
     #define HEATBREAK_FAN_KICK_CYCLES -1 // Output at least MIN_START_HEATBREAK_POWER once per cycles, -1 to deliver starting pulse just once
     #define HEATBREAK_FAN_ALWAYS_ON_NOZZLE_TEMPERATURE 45 // Never switch off heatbreak fan when nozzle temperature is over
-    #define DEFAULT_HEATBREAK_TEMPERATURE 36
+    #define DEFAULT_HEATBREAK_TEMPERATURE 45
     #define HEATBREAK_FAN_ID 1  //fan id for autocontroll
     #define MAX_HEATBREAK_TURBINE_POWER 60 // [%] maximum turbine power
     #define MIN_HEATBREAK_TURBINE_POWER 25 // [%] minimum turbine power to get it spinning reliably
