@@ -211,6 +211,7 @@ template<class T>
 concept valid_ipv_item = std::is_trivial_v<T> ||
     requires { []() consteval {
             T t{};
+            (void)t;
         };
     };
 
