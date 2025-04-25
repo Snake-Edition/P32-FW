@@ -41,7 +41,10 @@
 #include "Marlin/src/module/planner.h"
 #include <option/filament_sensor.h>
 
-#include <tusb.h>
+#include <option/has_usb_device.h>
+#if HAS_USB_DEVICE()
+    #include <tusb.h>
+#endif
 
 #if BOARD_IS_XLBUDDY()
     #include <puppies/Dwarf.hpp>
@@ -122,6 +125,7 @@ void app_marlin_serial_output_write_hook(const uint8_t *buffer, int size) {
     }
 }
 
+#if HAS_USB_DEVICE()
 static void app_setup_marlin_logging() {
     SerialUSB.lineBufferHook = app_marlin_serial_output_write_hook;
 }
@@ -145,13 +149,16 @@ static void wait_for_serial() {
         osDelay(10);
     }
 }
+#endif
 
 static void app_startup() {
+#if HAS_USB_DEVICE()
     // Attempt to wait for CDC to initialize to get the full Marlin startup output
     wait_for_serial();
 
     // Finally link SerialUSB/marlin
     app_setup_marlin_logging();
+#endif
 
     log_info(Buddy, "marlin task waiting for dependencies");
     TaskDeps::wait(TaskDeps::Tasks::default_start);

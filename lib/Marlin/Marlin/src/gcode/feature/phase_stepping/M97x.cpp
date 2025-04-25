@@ -15,7 +15,10 @@
 #include <string_view>
 #include <config_store/store_instance.hpp>
 
-#include <USBSerial.h>
+#include <option/has_usb_device.h>
+#if HAS_USB_DEVICE()
+    #include <USBSerial.h>
+#endif
 
 using namespace std::literals;
 using phase_stepping::opts::SERIAL_DECIMALS;
@@ -497,7 +500,12 @@ void GcodeSuite::M973() {
             const float sample = PrusaAccelerometer::raw_to_accel(raw_sample.value);
             snprintf(buff, sizeof(buff), "%d, %.5f\n", n++, sample);
             int len = strlen(buff);
+    #if HAS_USB_DEVICE()
+            // bypass logging infrastructure when possible
             SerialUSB.cdc_write_sync(reinterpret_cast<uint8_t *>(buff), len);
+    #else
+        #error "Not implemented on boards without serial"
+    #endif
         });
     dump_samples_annotation(result);
 }

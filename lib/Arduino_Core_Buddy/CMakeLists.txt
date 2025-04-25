@@ -11,7 +11,7 @@ target_compile_definitions(CoreBuddy PUBLIC ARDUINO=187 HAVE_HWSERIAL2 USBD_USE_
 
 target_link_libraries(CoreBuddy PUBLIC FreeRTOS::FreeRTOS BuddyHeaders)
 
-if(BOARD IN_LIST BOARDS_WITH_ARDUINO_USB_SERIAL)
+if(${HAS_USB_DEVICE})
   target_sources(CoreBuddy PRIVATE cores/arduino/USBSerial.cpp)
   target_link_libraries(CoreBuddy PUBLIC STM32::USBHost tinyusb::tinyusb)
 endif()
