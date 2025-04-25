@@ -68,6 +68,9 @@ add_compile_options(-Wall -Wsign-compare)
 # make all paths stored inside firmware relative
 add_compile_options(-ffile-prefix-map=${CMAKE_SOURCE_DIR}=.)
 
+# make the builds reproducible
+add_compile_options(-frandom-seed=BuddyFW)
+
 add_compile_options(
   $<$<COMPILE_LANGUAGE:CXX>:-Wno-register> $<$<COMPILE_LANGUAGE:CXX>:-Wno-volatile>
   $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
