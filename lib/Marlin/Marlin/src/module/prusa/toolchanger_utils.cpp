@@ -456,6 +456,24 @@ void PrusaToolChangerUtils::expand_first_dock_position() {
     }
 }
 
+PrusaToolChangerUtils::StepperConfigGuard::StepperConfigGuard() {
+    x_current_ma = stepperX.rms_current();
+    x_stall_sensitivity = stepperX.stall_sensitivity();
+    y_current_ma = stepperY.rms_current();
+    y_stall_sensitivity = stepperY.stall_sensitivity();
+    stepperX.rms_current(PARKING_CURRENT_MA);
+    stepperX.stall_sensitivity(PARKING_STALL_SENSITIVITY);
+    stepperY.rms_current(PARKING_CURRENT_MA);
+    stepperY.stall_sensitivity(PARKING_STALL_SENSITIVITY);
+}
+
+PrusaToolChangerUtils::StepperConfigGuard::~StepperConfigGuard() {
+    stepperX.rms_current(x_current_ma);
+    stepperX.stall_sensitivity(x_stall_sensitivity);
+    stepperY.rms_current(y_current_ma);
+    stepperY.stall_sensitivity(y_stall_sensitivity);
+}
+
 PrusaToolInfo PrusaToolChangerUtils::compute_synthetic_tool_info(const Dwarf &dwarf) const {
     return PrusaToolInfo({ .dock_x = DOCK_DEFAULT_FIRST_X_MM + DOCK_OFFSET_X_MM * (dwarf.dwarf_index()),
         .dock_y = DOCK_DEFAULT_Y_MM });

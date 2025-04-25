@@ -282,46 +282,34 @@ LoopResult CSelftestPart_Dock::state_selftest_check_todock() {
 }
 
 LoopResult CSelftestPart_Dock::state_selftest_check_unlock() {
-    // Set motor current and stall sensitivity to parking and remember old value
-    auto x_current_ma = stepperX.rms_current();
-    auto x_stall_sensitivity = stepperX.stall_sensitivity();
-    auto y_current_ma = stepperY.rms_current();
-    auto y_stall_sensitivity = stepperY.stall_sensitivity();
-    stepperX.rms_current(PrusaToolChanger::PARKING_CURRENT_MA);
-    stepperX.stall_sensitivity(PrusaToolChanger::PARKING_STALL_SENSITIVITY);
-    stepperY.rms_current(PrusaToolChanger::PARKING_CURRENT_MA);
-    stepperY.stall_sensitivity(PrusaToolChanger::PARKING_STALL_SENSITIVITY);
+    { // Set motor current and stall sensitivity to parking and remember old value
+        PrusaToolChanger::StepperConfigGuard sc;
 
-    // Unlock the clamps
-    current_position.x = prusa_toolchanger.get_tool_info(dwarf, false).dock_x + PrusaToolChanger::PARK_X_OFFSET_2;
-    line_to_current_position(PrusaToolChanger::SLOW_MOVE_MM_S);
+        // Unlock the clamps
+        current_position.x = prusa_toolchanger.get_tool_info(dwarf, false).dock_x + PrusaToolChanger::PARK_X_OFFSET_2;
+        line_to_current_position(PrusaToolChanger::SLOW_MOVE_MM_S);
 
-    const auto original_acceleration = planner.settings.travel_acceleration;
-    {
-        auto s = planner.user_settings;
-        s.travel_acceleration = PrusaToolChanger::SLOW_ACCELERATION_MM_S2;
-        planner.apply_settings(s);
+        const auto original_acceleration = planner.settings.travel_acceleration;
+        {
+            auto s = planner.user_settings;
+            s.travel_acceleration = PrusaToolChanger::SLOW_ACCELERATION_MM_S2;
+            planner.apply_settings(s);
+        }
+
+        current_position.x = prusa_toolchanger.get_tool_info(dwarf, false).dock_x + PrusaToolChanger::PARK_X_OFFSET_3;
+        line_to_current_position(PrusaToolChanger::SLOW_MOVE_MM_S);
+
+        /// @note This synchronization shouldn't be delegated to state_wait_moves_done().
+        ///  User could abort and acceleration and current wouldn't be reverted.
+        planner.synchronize();
+
+        // Back to high acceleration
+        {
+            auto s = planner.user_settings;
+            s.travel_acceleration = original_acceleration;
+            planner.apply_settings(s);
+        }
     }
-
-    current_position.x = prusa_toolchanger.get_tool_info(dwarf, false).dock_x + PrusaToolChanger::PARK_X_OFFSET_3;
-    line_to_current_position(PrusaToolChanger::SLOW_MOVE_MM_S);
-
-    /// @note This synchronization shouldn't be delegated to state_wait_moves_done().
-    ///  User could abort and acceleration and current wouldn't be reverted.
-    planner.synchronize();
-
-    // Back to high acceleration
-    {
-        auto s = planner.user_settings;
-        s.travel_acceleration = original_acceleration;
-        planner.apply_settings(s);
-    }
-
-    // Reset motor current and stall sensitivity to old value
-    stepperX.rms_current(x_current_ma);
-    stepperX.stall_sensitivity(x_stall_sensitivity);
-    stepperY.rms_current(y_current_ma);
-    stepperY.stall_sensitivity(y_stall_sensitivity);
 
     // Return a bit to the exact dock position
     current_position.x = prusa_toolchanger.get_tool_info(dwarf, false).dock_x;

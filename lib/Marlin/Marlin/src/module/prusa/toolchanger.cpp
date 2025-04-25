@@ -649,31 +649,19 @@ bool PrusaToolChanger::park(Dwarf &dwarf) {
     planner.synchronize(); // this creates a pause which allow the resonance in the tool to be damped before insertion of the tool in the dock
     conf_restorer.restore_jerk();
 
-    // set motor current and stall sensitivity to parking and remember old value
-    auto x_current_ma = stepperX.rms_current();
-    auto x_stall_sensitivity = stepperX.stall_sensitivity();
-    auto y_current_ma = stepperY.rms_current();
-    auto y_stall_sensitivity = stepperY.stall_sensitivity();
-    stepperX.rms_current(PARKING_CURRENT_MA);
-    stepperX.stall_sensitivity(PARKING_STALL_SENSITIVITY);
-    stepperY.rms_current(PARKING_CURRENT_MA);
-    stepperY.stall_sensitivity(PARKING_STALL_SENSITIVITY);
+    { // Set motor current and stall sensitivity to parking and remember old value
+        StepperConfigGuard sc;
 
-    move(info.dock_x + PARK_X_OFFSET_2, info.dock_y, SLOW_MOVE_MM_S);
-    {
-        auto s = planner.user_settings;
-        s.travel_acceleration = SLOW_ACCELERATION_MM_S2;
-        planner.apply_settings(s);
+        move(info.dock_x + PARK_X_OFFSET_2, info.dock_y, SLOW_MOVE_MM_S);
+        {
+            auto s = planner.user_settings;
+            s.travel_acceleration = SLOW_ACCELERATION_MM_S2;
+            planner.apply_settings(s);
+        }
+        move(info.dock_x + PARK_X_OFFSET_3, info.dock_y, SLOW_MOVE_MM_S);
+        planner.synchronize();
+        conf_restorer.restore_acceleration(); // back to high acceleration
     }
-    move(info.dock_x + PARK_X_OFFSET_3, info.dock_y, SLOW_MOVE_MM_S);
-    planner.synchronize();
-    conf_restorer.restore_acceleration(); // back to high acceleration
-
-    // set motor current and stall sensitivity to old value
-    stepperX.rms_current(x_current_ma);
-    stepperX.stall_sensitivity(x_stall_sensitivity);
-    stepperY.rms_current(y_current_ma);
-    stepperY.stall_sensitivity(y_stall_sensitivity);
 
     move(info.dock_x, info.dock_y, SLOW_MOVE_MM_S);
     planner.synchronize();
@@ -808,27 +796,15 @@ bool PrusaToolChanger::pickup(Dwarf &dwarf) {
         }
     }
 
-    // set motor current and stall sensitivity to parking and remember old value
-    auto x_current_ma = stepperX.rms_current();
-    auto x_stall_sensitivity = stepperX.stall_sensitivity();
-    auto y_current_ma = stepperY.rms_current();
-    auto y_stall_sensitivity = stepperY.stall_sensitivity();
-    stepperX.rms_current(PARKING_CURRENT_MA);
-    stepperX.stall_sensitivity(PARKING_STALL_SENSITIVITY);
-    stepperY.rms_current(PARKING_CURRENT_MA);
-    stepperY.stall_sensitivity(PARKING_STALL_SENSITIVITY);
+    { // Set motor current and stall sensitivity to parking and remember old value
+        StepperConfigGuard sc;
 
-    move(info.dock_x + PICK_X_OFFSET_1, info.dock_y, SLOW_MOVE_MM_S); // accelerate gently to low speed to gently place the tool against the TCM
-    conf_restorer.restore_acceleration(); // back to high acceleration
-    move(info.dock_x + PICK_X_OFFSET_2, info.dock_y, SLOW_MOVE_MM_S); // this line is just to allow a gentle acceleration and a quick deceleration
-    move(info.dock_x + PICK_X_OFFSET_3, info.dock_y, SLOW_MOVE_MM_S);
-    planner.synchronize();
-
-    // set motor current and stall sensitivity to old value
-    stepperX.rms_current(x_current_ma);
-    stepperX.stall_sensitivity(x_stall_sensitivity);
-    stepperY.rms_current(y_current_ma);
-    stepperY.stall_sensitivity(y_stall_sensitivity);
+        move(info.dock_x + PICK_X_OFFSET_1, info.dock_y, SLOW_MOVE_MM_S); // accelerate gently to low speed to gently place the tool against the TCM
+        conf_restorer.restore_acceleration(); // back to high acceleration
+        move(info.dock_x + PICK_X_OFFSET_2, info.dock_y, SLOW_MOVE_MM_S); // this line is just to allow a gentle acceleration and a quick deceleration
+        move(info.dock_x + PICK_X_OFFSET_3, info.dock_y, SLOW_MOVE_MM_S);
+        planner.synchronize();
+    }
 
     // Wait until dwarf is registering as not parked
     if (!wait(dwarf_not_parked, WAIT_TIME_TOOL_PARKED_PICKED)) {
