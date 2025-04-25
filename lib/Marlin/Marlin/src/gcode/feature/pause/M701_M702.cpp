@@ -51,7 +51,7 @@ Replaced by PRUSA specific gcodes in /src/marlin_stubs/
  *#### Parameters
  *
  * - `T` - Extruder number
- * - `Z` - Move the Z axis by this distance
+ * - `Z` - Minimum Z park position
  * - `L` - Extrude distance for insertion (positive value)
  *
  * Default values are used for omitted arguments.
@@ -125,7 +125,7 @@ Replaced by PRUSA specific gcodes in /src/marlin_stubs/
  *#### Parameters
  *
  * - `T` - Extruder number
- * - `Z` - Move the Z axis by this distance
+ * - `Z` - Minimum Z park position
  * - `U` - Retract distance for removal (manual reload)
  *
  *  Default values are used for omitted arguments.

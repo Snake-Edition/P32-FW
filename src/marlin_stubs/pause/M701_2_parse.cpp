@@ -24,7 +24,7 @@ using namespace filament_gcodes;
  *#### Parameters
  *
  * - `T` - Extruder number
- * - `Z` - Move the Z axis by this distance
+ * - `Z` - Minimal Z parking position
  * - `L` - Extrude distance for insertion (positive value)
  *   - `0` - PURGE
  * - `S"Filament"` - save filament by name, for example S"PLA". RepRap compatible.
@@ -73,7 +73,7 @@ void GcodeSuite::M701() {
  *#### Parameters
  *
  * - `T` - Extruder number
- * - `Z` - Move the Z axis by this distance
+ * - `Z` - Minimal Z parking position
  * - `U` - Retract distance for removal (manual reload)
  * - `W` - Preheat
  *   - `255` - default without preheat

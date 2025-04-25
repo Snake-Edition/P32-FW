@@ -83,7 +83,7 @@ void PrusaGcodeSuite::M1700() {
  *
  * - `T` - Extruder number. Required for mixing extruder.
  *        For non-mixing, current extruder if omitted.
- * - `Z` - Move the Z axis by this distance
+ * - `Z` - Minimum Z park position
  * - `L` - Extrude distance for insertion (positive value) (manual reload)
  *
  * Default values are used for omitted arguments.

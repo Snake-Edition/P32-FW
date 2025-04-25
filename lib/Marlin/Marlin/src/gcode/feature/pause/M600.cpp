@@ -41,7 +41,7 @@
  * M600: Pause for filament change
  *
  *  E[distance] - Retract the filament this far
- *  Z[distance] - Move the Z axis by this distance
+ *  Z[distance] - Minimum Z park position
  *  X[position] - Move to this X position, with Y
  *  Y[position] - Move to this Y position, with X
  *  U[distance] - Retract distance for removal (manual reload)
