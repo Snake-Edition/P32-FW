@@ -561,8 +561,10 @@ void Pause::assist_insertion_process([[maybe_unused]] Response response) {
         return;
     }
 
+#if ENABLED(PREVENT_COLD_EXTRUSION)
     AutoRestore<bool> CE(thermalManager.allow_cold_extrude);
     thermalManager.allow_cold_extrude = true;
+#endif
     // Enqueue an E move, but only if there are no more than 4 moves scheduled.
     // This ensures that there is always 0.4mm of movement enqueued in advance,
     // Guaranteeing a maximum movement difference of 0.1mm
