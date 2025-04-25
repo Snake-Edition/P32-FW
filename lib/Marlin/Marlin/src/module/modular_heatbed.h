@@ -27,9 +27,11 @@ public:
     }
 
 protected:
-    float bedlet_gradient_cutoff = HBL_GRADIENT_CUTOFF;
-    float bedlet_gradient_exponent = HBL_GRADIENT_EXPONENT;
-    bool expand_to_sides_enabled = HBL_EXPAND_TO_SIDES;
+    // Bedlet temperature gradient calculation, uses this equation:
+    // BEDLET_TEMP = NEAREST_ACTIVE_BEDLET_TEMPERATURE - NEAREST_ACTIVE_BEDLET_TEMPERATURE * ( 1 / bedlet_gradient_cutoff * ACTIVE_BEDLET_DISTANCE)^bedlet_gradient_exponent;
+    float bedlet_gradient_cutoff = 2.0f; // Bedlet this far apart from active bedlet will have zero target temperature
+    float bedlet_gradient_exponent = 2.0f; // Exponent used in equation to calculate heatbedlets temperature gradient
+    bool expand_to_sides_enabled = true; // Enable expansion of heated area to sides in order to prevent warping from bed material thermal expansion
 };
 
 extern AdvancedModularBed * const advanced_modular_bed;
