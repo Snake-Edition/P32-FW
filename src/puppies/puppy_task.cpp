@@ -15,6 +15,7 @@
 #include "Marlin/src/module/prusa/toolchanger.h"
 #include <tasks.hpp>
 #include <option/has_dwarf.h>
+#include <option/has_modularbed.h>
 #include <buddy/ccm_thread.hpp>
 #include "bsod.h"
 #include "gui_bootstrap_screen.hpp"

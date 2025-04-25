@@ -1,6 +1,7 @@
 #include "../inc/MarlinConfig.h"
 
-#if ENABLED(MODULAR_HEATBED)
+#include <option/has_modularbed.h>
+#if HAS_MODULARBED()
   #include "../module/temperature.h"
   #include "../module/modular_heatbed.h"
 #endif
@@ -18,7 +19,7 @@ void PrintArea::set_bounding_rect(rect_t new_bounding_rect) {
   bool enlarged = !bounding_rect.contains(new_bounding_rect);
   bounding_rect = new_bounding_rect;
 
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULARBED()
   uint16_t enabled_bedlet_mask = 0;
   for (int x = 0; x < X_HBL_COUNT; x++) {
     for (int y = 0; y < Y_HBL_COUNT; y++) {

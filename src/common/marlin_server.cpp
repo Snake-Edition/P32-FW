@@ -3121,7 +3121,7 @@ static void _server_update_vars() {
 
     marlin_vars().temp_bed = thermalManager.degBed();
     marlin_vars().target_bed = thermalManager.degTargetBed();
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULARBED()
     marlin_vars().enabled_bedlet_mask = thermalManager.getEnabledBedletMask();
 #endif
 

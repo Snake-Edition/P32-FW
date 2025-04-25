@@ -5,6 +5,7 @@
 #include "module/modular_heatbed.h"
 #include <modular_bed_errors.hpp>
 #include <modular_bed_registers.hpp>
+#include <option/has_modularbed.h>
 #include <utility_extensions.hpp>
 
 #if HAS_MODULARBED()

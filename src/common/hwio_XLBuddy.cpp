@@ -27,6 +27,7 @@
 #include "MarlinPin.hpp"
 #include <option/has_dwarf.h>
 #include <option/has_loadcell.h>
+#include <option/has_modularbed.h>
 #include <option/has_gui.h>
 #include <option/debug_with_beeps.h>
 #include "Marlin/src/module/motion.h" // for active_extruder
@@ -39,7 +40,7 @@ LOG_COMPONENT_REF(Buddy);
 #if ENABLED(PRUSA_TOOLCHANGER)
     #include "Marlin/src/module/prusa/toolchanger.h"
 #endif
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULARBED()
     #include "Marlin/src/module/modular_heatbed.h"
 #endif
 

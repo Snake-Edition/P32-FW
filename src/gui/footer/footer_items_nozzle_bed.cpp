@@ -12,8 +12,9 @@
 #include <config_store/store_instance.hpp>
 #include <utils/string_builder.hpp>
 #include <common/nozzle_diameter.hpp>
+#include <option/has_modularbed.h>
 
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULARBED()
     #include <puppies/modular_bed.hpp>
 #endif
 #if HAS_TOOLCHANGER()
@@ -35,7 +36,7 @@ FooterItemNozzlePWM::FooterItemNozzlePWM(window_t *parent)
 
 FooterItemBed::FooterItemBed(window_t *parent)
     : FooterItemHeater(parent, &img::heatbed_16x16, static_makeView, static_readValue) {
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULARBED()
     icon.Hide();
 #endif
     updateValue();
@@ -57,7 +58,7 @@ footer::ItemDrawType FooterItemAllNozzles::GetDrawType() {
 void FooterItemBed::unconditionalDraw() {
     FooterItemHeater::unconditionalDraw();
 
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULARBED()
     for (int x = 0; x < X_HBL_COUNT; x++) {
         for (int y = 0; y < Y_HBL_COUNT; y++) {
             uint16_t idx_mask = 1 << buddy::puppies::modular_bed.idx(x, y);
@@ -89,7 +90,7 @@ void FooterItemBed::unconditionalDraw() {
 
 changed_t FooterItemBed::updateValue() {
     changed_t ret = FooterItemHeater::updateValue();
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULARBED()
     bool is_heating = marlin_vars().target_bed > 0;
 
     // if not heating, act as no heatbedlet is activated

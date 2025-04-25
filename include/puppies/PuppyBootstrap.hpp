@@ -4,6 +4,7 @@
 #include "puppies/BootloaderProtocol.hpp"
 #include "unique_file_ptr.hpp"
 #include <span>
+#include <option/has_modularbed.h>
 #include <puppies/puppy_constants.hpp>
 #include <common/utils/algorithm_extensions.hpp>
 #include <bit>

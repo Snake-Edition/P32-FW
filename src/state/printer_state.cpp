@@ -11,6 +11,7 @@
 #include <option/xl_enclosure_support.h>
 #include <option/has_uneven_bed_prompt.h>
 #include <config_store/store_instance.hpp>
+#include <option/has_modularbed.h>
 #include <option/has_chamber_filtration_api.h>
 #include <option/has_door_sensor_calibration.h>
 

@@ -4,7 +4,6 @@
 #include <common/find_error.hpp>
 #include <common/fsm_base_types.hpp>
 #include <option/has_dwarf.h>
-#include <option/has_modularbed.h>
 #include <option/has_uneven_bed_prompt.h>
 #include <state/printer_state.hpp>
 

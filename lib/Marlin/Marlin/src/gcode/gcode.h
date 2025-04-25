@@ -272,6 +272,7 @@
 
 #include <option/has_i2c_expander.h>
 #include <option/has_local_accelerometer.h>
+#include <option/has_modularbed.h>
 #include <option/has_remote_accelerometer.h>
 #include <option/has_precise_homing_corexy.h>
 #include <option/has_precise_homing.h>
@@ -842,7 +843,7 @@ private:
 
   static void M555();
 
-  #if ENABLED(MODULAR_HEATBED)
+  #if HAS_MODULARBED()
     static void M556();
     static void M557();
   #endif

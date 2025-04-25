@@ -713,7 +713,7 @@ volatile bool Temperature::temp_meas_ready = false;
 int16_t Temperature::getHeaterPower(const heater_ind_t heater_id) {
   #if HAS_HEATED_BED
     if (heater_id == H_BED) {
-      #if ENABLED(MODULAR_HEATBED)
+      #if HAS_MODULARBED()
         return 0;
       #else
         return temp_bed.soft_pwm_amount;
@@ -2164,7 +2164,7 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
       return TEMP_AD595(raw);
     #elif ENABLED(HEATER_BED_USES_AD8495)
       return TEMP_AD8495(raw);
-    #elif ENABLED(MODULAR_HEATBED)
+    #elif HAS_MODULARBED()
       return raw
     #else
       return 0;
@@ -2249,7 +2249,7 @@ void Temperature::updateTemperaturesFromRawValues() {
     #endif
   #endif
   #if HAS_HEATED_BED
-    #if ENABLED(MODULAR_HEATBED)
+    #if HAS_MODULARBED()
       updateModularBedTemperature();
     #else
       temp_bed.celsius = analog_to_celsius_bed(temp_bed.raw);
@@ -3207,7 +3207,7 @@ void Temperature::readings_ready() {
     #else
       #define BEDCMP(A,B) ((A)>=(B))
     #endif
-    #if !ENABLED(MODULAR_HEATBED)//With MHB we get temperatures in °C from controller. No raw values to check.
+    #if !HAS_MODULARBED()//With MHB we get temperatures in °C from controller. No raw values to check.
     const bool bed_on = (temp_bed.target > 0)
       #if ENABLED(PIDTEMPBED)
         || (temp_bed.soft_pwm_amount > 0)
@@ -3215,7 +3215,7 @@ void Temperature::readings_ready() {
     ;
       if (BEDCMP(temp_bed.raw, maxtemp_raw_BED)) max_temp_error(H_BED);
       if (bed_on && BEDCMP(mintemp_raw_BED, temp_bed.raw)) min_temp_error(H_BED);
-    #endif //!ENABLED(MODULAR_HEATBED)
+    #endif
   #endif
 
   #if HAS_HEATED_CHAMBER
@@ -3919,7 +3919,7 @@ void Temperature::isr() {
     #endif
 
     // Detailed modular bed report
-    #if ENABLED(MODULAR_HEATBED)
+    #if HAS_MODULARBED()
       for(int y = 0; y < Y_HBL_COUNT; ++y) {
         for(int x = 0; x < X_HBL_COUNT; ++x) {
           SERIAL_ECHO(" B_");
@@ -4282,7 +4282,7 @@ void Temperature::isr() {
 
 #endif // HAS_TEMP_SENSOR
 
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULARBED()
 void Temperature::updateModularBedTemperature(){
       float sum = 0;
       uint8_t count = 0;

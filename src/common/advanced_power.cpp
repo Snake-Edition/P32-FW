@@ -13,6 +13,7 @@
     #include "bsod.h"
 #endif
 
+#include <option/has_modularbed.h>
 #if HAS_MODULARBED()
     #include <puppies/modular_bed.hpp>
 #endif

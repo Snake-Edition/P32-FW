@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <assert.h>
 
+#include <option/has_modularbed.h>
 #include <option/has_puppies.h>
 #include <option/has_dwarf.h>
 #include <option/has_embedded_esp32.h>
@@ -235,7 +236,7 @@ void resume_print() {
         }
 
 // check the bed temperature
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULARBED()
         thermalManager.setEnabledBedletMask(state_buf.planner.enabled_bedlets_mask);
 #endif
         const float current_bed_temp = thermalManager.degBed();
@@ -919,7 +920,7 @@ void ac_fault_isr() {
             state_buf.planner.print_speed = marlin_vars().print_speed;
         }
         state_buf.planner.target_bed = thermalManager.degTargetBed();
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULARBED()
         state_buf.planner.enabled_bedlets_mask = thermalManager.getEnabledBedletMask();
 #endif
 #if ENABLED(PREVENT_COLD_EXTRUSION)

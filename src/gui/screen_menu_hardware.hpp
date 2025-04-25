@@ -61,7 +61,7 @@ using ScreenMenuHardware__ = ScreenMenu<GuiDefaults::MenuFooter,
 // ================================
 // Bed related
 // ================================
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULARBED()
     MI_HEAT_ENTIRE_BED,
 #endif
 #if HAS_SHEET_PROFILES()

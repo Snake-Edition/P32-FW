@@ -3,6 +3,7 @@
 #include "advanced_power.hpp"
 #include "../../Marlin/src/module/temperature.h"
 #include "selftest_heater.h"
+#include <option/has_modularbed.h>
 
 LOG_COMPONENT_REF(Selftest);
 using namespace selftest;

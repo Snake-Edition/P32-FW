@@ -47,7 +47,6 @@
 #include <wdt.hpp>
 #include <crash_dump/dump.hpp>
 #include <option/has_dwarf.h>
-#include <option/has_modularbed.h>
 #include <option/has_leds.h>
 #if HAS_LEDS()
     #include <leds/led_manager.hpp>

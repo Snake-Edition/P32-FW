@@ -293,9 +293,6 @@
  *  Allows separate temperature controll of individual heatbedlets(HBL).
  */
 #if HAS_MODULARBED()
-    #define MODULAR_HEATBED
-#endif
-#if ENABLED(MODULAR_HEATBED)
     #define X_HBL_COUNT 3   // Number of heatbedlets in X direction
     #define Y_HBL_COUNT 3   // Number of heatbedlets in Y direction
     #define X_HBL_SIZE  90  // Size of single heatbedlet in X direction including gap between heatbedlets(mm)
@@ -309,7 +306,7 @@
     #define HBL_GRADIENT_CUTOFF 2.0f // Bedlet this far apart from active bedlet will have zero target temperature
     #define HBL_EXPAND_TO_SIDES true // Enable expansion of heated area to sides in order to prevent warping from bed material thermal expansion
 
-#endif //MODULAR_HEATBED
+#endif
 
 /**
  * Prusa Toolchanger

@@ -37,7 +37,7 @@
 #if ENABLED(PRUSA_TOOLCHANGER)
     #include "../../lib/Marlin/Marlin/src/module/prusa/toolchanger.h"
 #endif
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULARBED()
     #include "../../lib/Marlin/Marlin/src/module/modular_heatbed.h"
 #endif
 

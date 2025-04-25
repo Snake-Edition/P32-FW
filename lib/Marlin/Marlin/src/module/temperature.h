@@ -33,8 +33,8 @@
   #include "../feature/power.h"
 #endif
 
-
-#if ENABLED(MODULAR_HEATBED)
+#include <option/has_modularbed.h>
+#if HAS_MODULARBED()
   #include "modular_heatbed.h"
 #endif
 
@@ -198,7 +198,7 @@ struct PIDHeaterInfo : public HeaterInfo {
 };
 
 // Modular heater
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULARBED()
 struct ModularBedHeater: public HeaterInfo {
   uint16_t enabled_mask = 0xffff;
 };
@@ -212,7 +212,7 @@ struct ModularBedHeater: public HeaterInfo {
 #if HAS_HEATED_BED
   #if ENABLED(PIDTEMPBED)
     typedef struct PIDHeaterInfo<PID_t> bed_info_t;
-  #elif ENABLED(MODULAR_HEATBED)
+  #elif HAS_MODULARBED()
     typedef ModularBedHeater bed_info_t;
   #else
     typedef heater_info_t bed_info_t;
@@ -775,7 +775,7 @@ class Temperature {
       FORCE_INLINE static bool isHeatingBed()     { return temp_bed.target > temp_bed.celsius; }
       FORCE_INLINE static bool isCoolingBed()     { return temp_bed.target < temp_bed.celsius; }
 
-      #if ENABLED(MODULAR_HEATBED)
+      #if HAS_MODULARBED()
         FORCE_INLINE static uint16_t getEnabledBedletMask() {
           return temp_bed.enabled_mask;
         }
@@ -818,7 +818,7 @@ class Temperature {
           #endif
         ;
 
-        #if ENABLED(MODULAR_HEATBED)
+        #if HAS_MODULARBED()
           for(uint8_t x = 0; x < X_HBL_COUNT; ++x) {
             for(uint8_t y = 0; y < Y_HBL_COUNT; ++y) {
               int16_t target_temp = 0;

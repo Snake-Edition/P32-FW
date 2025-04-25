@@ -2,7 +2,7 @@
 
 #include "client_response.hpp"
 #include <option/has_manual_chamber_vents.h>
-
+#include <option/has_modularbed.h>
 #include <option/has_chamber_filtration_api.h>
 
 enum class WarningType : uint32_t {

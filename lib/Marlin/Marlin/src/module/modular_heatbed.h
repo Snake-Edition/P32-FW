@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Marlin.h"
+#include <option/has_modularbed.h>
 
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULARBED()
 
 class AdvancedModularBed {
 public:

@@ -7,6 +7,7 @@
 #include "config.h"
 #include "appmain.hpp"
 #include <device/board.h>
+#include <option/has_modularbed.h>
 #include "printers.h"
 #include "fanctl.hpp"
 #include <option/has_dwarf.h>

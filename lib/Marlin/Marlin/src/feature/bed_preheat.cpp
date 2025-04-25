@@ -7,6 +7,7 @@
 #include "../marlin_stubs/skippable_gcode.hpp"
 
 #include <feature/print_status_message/print_status_message_guard.hpp>
+#include <option/has_modularbed.h>
 
 #if HAS_HEATED_BED
 
@@ -17,7 +18,7 @@ void BedPreheat::update() {
     bool temp_near_target = thermalManager.degTargetBed() && std::abs(thermalManager.degBed() - thermalManager.degTargetBed()) < minimal_temp_diff;
 
     bool bedlets_changed = false;
-    #if ENABLED(MODULAR_HEATBED)
+    #if HAS_MODULARBED()
     if (thermalManager.getEnabledBedletMask() != last_enabled_bedlets) {
         last_enabled_bedlets = thermalManager.getEnabledBedletMask();
         bedlets_changed = true;

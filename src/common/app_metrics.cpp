@@ -10,6 +10,7 @@
 #include "heap.h"
 #include <adc.hpp>
 #include <option/has_door_sensor.h>
+#include <option/has_modularbed.h>
 #include <option/has_advanced_power.h>
 #if HAS_ADVANCED_POWER()
     #include "advanced_power.hpp"
