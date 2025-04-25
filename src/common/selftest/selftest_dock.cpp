@@ -207,7 +207,7 @@ LoopResult CSelftestPart_Dock::state_measure() {
     marlin_server::enqueue_gcode_printf(
         "G0 F%d X%f",
         PrusaToolChanger::FORCE_MOVE_MM_S * 60,
-        static_cast<double>(X_UNLOCK_DISTANCE_MM));
+        static_cast<double>(PrusaToolChanger::X_UNLOCK_DISTANCE_MM));
     // Back in front of the dock to not bump it when homing
     marlin_server::enqueue_gcode_printf(
         "G0 F%d Y%f",
