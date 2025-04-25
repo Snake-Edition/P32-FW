@@ -96,7 +96,7 @@ void filament_gcodes::M701_no_parser(FilamentType filament_to_be_loaded, const s
     settings.SetMmuFilamentToLoad(mmu_slot);
 
     mapi::ParkingPosition park_position = mapi::park_positions[do_purge_only ? mapi::ParkPosition::purge : mapi::ParkPosition::load];
-    park_position.z = std::max(current_position.z, z_min_pos);
+    park_position.z = std::max({ current_position.z, z_min_pos, planner.max_printed_z });
 
     settings.SetParkPoint(park_position);
     xyze_pos_t current_position_tmp = current_position;
@@ -153,7 +153,7 @@ void filament_gcodes::M702_no_parser(std::optional<float> unload_length, float z
     mapi::ParkingPosition park_position = {
         X_AXIS_UNLOAD_POS,
         Y_AXIS_UNLOAD_POS,
-        std::max(current_position.z, z_min_pos)
+        std::max({ current_position.z, z_min_pos, planner.max_printed_z })
     };
     settings.SetParkPoint(park_position);
     xyze_pos_t current_position_tmp = current_position;
@@ -240,7 +240,7 @@ void filament_gcodes::M1701_no_parser(const std::optional<float> &fast_load_leng
         mapi::ParkingPosition pos = {
             X_AXIS_LOAD_POS,
             Y_AXIS_LOAD_POS,
-            std::max(current_position.z, z_min_pos)
+            std::max({ current_position.z, z_min_pos, planner.max_printed_z })
         };
 
         settings.SetParkPoint(pos);
@@ -284,7 +284,7 @@ void filament_gcodes::M1701_no_parser(const std::optional<float> &fast_load_leng
             filament::set_type_to_load(filament);
             filament::set_color_to_load(std::nullopt);
 
-            mapi::ParkingPosition park_position({ mapi::ParkingPosition::unchanged, mapi::ParkingPosition::unchanged, std::max(current_position.z, z_min_pos) });
+            mapi::ParkingPosition park_position({ mapi::ParkingPosition::unchanged, mapi::ParkingPosition::unchanged, std::max({ current_position.z, z_min_pos, planner.max_printed_z }) });
             // Returning to previous position is unwanted outside of printing (M1701 should be used only outside of printing)
             settings.SetParkPoint(park_position);
 
