@@ -29,16 +29,13 @@
 
 #include <option/has_loadcell.h>
 #include <option/has_gui.h>
-#include <option/has_modularbed.h>
+#include <option/has_remote_bed.h>
 
 #include <Pin.hpp>
 #include <cmath>
 
 #if ENABLED(PRUSA_TOOLCHANGER)
     #include "../../lib/Marlin/Marlin/src/module/prusa/toolchanger.h"
-#endif
-#if HAS_MODULARBED()
-    #include "../../lib/Marlin/Marlin/src/module/modular_heatbed.h"
 #endif
 
 #if (BOARD_IS_XBUDDY())
@@ -242,7 +239,7 @@ void _hwio_pwm_analogWrite_set_val(int i_pwm, int val) {
     case HWIO_PWM_HEATER_0:
         thermalManager.nozzle_pwm = val;
         break;
-#if !HAS_MODULARBED()
+#if !HAS_REMOTE_BED()
     case HWIO_PWM_HEATER_BED:
         thermalManager.bed_pwm = val;
         break;
@@ -437,7 +434,7 @@ int digitalRead(uint32_t marlinPin) {
     case MARLIN_PIN(Z_MIN):
         return static_cast<bool>(buddy::hw::zMin.read());
 #endif
-#if HAS_MODULARBED()
+#if HAS_REMOTE_BED()
     case MARLIN_PIN(DUMMY): {
         return 0;
     }
@@ -471,7 +468,7 @@ void digitalWrite(uint32_t marlinPin, uint32_t ulVal) {
 #endif //_DEBUG
     switch (marlinPin) {
     case MARLIN_PIN(BED_HEAT):
-#if HAS_MODULARBED()
+#if HAS_REMOTE_BED()
         return;
 #else
         _hwio_pwm_analogWrite_set_val(HWIO_PWM_HEATER_BED, ulVal ? _pwm_analogWrite_max : 0);
@@ -511,7 +508,7 @@ uint32_t analogRead(uint32_t ulPin) {
         switch (ulPin) {
 
         case MARLIN_PIN(TEMP_BED):
-#if HAS_MODULARBED()
+#if HAS_REMOTE_BED()
             return 0;
 #else
             return AdcGet::bed();
@@ -563,7 +560,7 @@ void analogWrite(uint32_t ulPin, uint32_t ulValue) {
             Fans::print(0).set_pwm(ulValue);
             return;
         case MARLIN_PIN(BED_HEAT):
-#if HAS_MODULARBED()
+#if HAS_REMOTE_BED()
             return;
 #else
             _hwio_pwm_analogWrite_set_val(HWIO_PWM_HEATER_BED, ulValue);

@@ -3,7 +3,7 @@
 #include "advanced_power.hpp"
 #include "../../Marlin/src/module/temperature.h"
 #include "selftest_heater.h"
-#include <option/has_modularbed.h>
+#include <option/has_remote_bed.h>
 
 LOG_COMPONENT_REF(Selftest);
 using namespace selftest;
@@ -19,7 +19,7 @@ using namespace selftest;
  */
 void PowerCheckBoth::Callback([[maybe_unused]] CSelftestPart_Heater &part) {
 
-#if HAS_TOOLCHANGER() && HAS_MODULARBED()
+#if HAS_TOOLCHANGER()
     const float nozzle_current_A = advancedpower.get_nozzle_current(part.m_config.tool_nr);
     const float nozzle_voltage_V = advancedpower.get_nozzle_voltage(part.m_config.tool_nr);
     const uint32_t nozzle_pwm = advancedpower.get_nozzle_pwm(part.m_config.tool_nr);
@@ -31,7 +31,7 @@ void PowerCheckBoth::Callback([[maybe_unused]] CSelftestPart_Heater &part) {
     const float nozzle_power_W = nozzle_voltage_V * nozzle_current_A;
 #endif
 
-#if HAS_MODULARBED()
+#if HAS_REMOTE_BED()
     const float bed_voltage_V = 24; // Modular bed does not measure this
     const float bed_current_A = advancedpower.get_bed_current();
     const float bed_power_W = bed_current_A * bed_voltage_V;

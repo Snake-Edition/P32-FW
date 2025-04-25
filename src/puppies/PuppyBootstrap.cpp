@@ -17,7 +17,7 @@
 #include <option/has_puppies_bootloader.h>
 #include <option/puppy_flash_fw.h>
 #include <option/has_dwarf.h>
-#include <option/has_modularbed.h>
+#include <option/has_puppy_modularbed.h>
 #include <puppies/puppy_crash_dump.hpp>
 #include <cstring>
 #include <random.h>
@@ -46,7 +46,7 @@ const char *PuppyBootstrap::Progress::description() {
         return "Verifying dwarf";
     }
 #endif
-#if HAS_MODULARBED()
+#if HAS_PUPPY_MODULARBED()
     else if (stage == PuppyBootstrap::FlashingStage::CHECK_FINGERPRINT && puppy_type == PuppyType::MODULARBED) {
         return "Verifying modularbed";
     }
@@ -61,7 +61,7 @@ const char *PuppyBootstrap::Progress::description() {
         return "Flashing dwarf";
     }
 #endif
-#if HAS_MODULARBED()
+#if HAS_PUPPY_MODULARBED()
     else if (stage == PuppyBootstrap::FlashingStage::FLASHING && puppy_type == PuppyType::MODULARBED) {
         return "Flashing modularbed";
     }
@@ -93,7 +93,7 @@ PuppyBootstrap::BootstrapResult PuppyBootstrap::run(
     PuppyBootstrap::BootstrapResult result;
 #if HAS_DWARF()
     progressHook({ 0, FlashingStage::START, PuppyType::DWARF });
-#elif HAS_MODULARBED()
+#elif HAS_PUPPY_MODULARBED()
     progressHook({ 0, FlashingStage::START, PuppyType::MODULARBED });
 #endif
     auto guard = buddy::puppies::PuppyBus::LockGuard();
@@ -133,7 +133,7 @@ PuppyBootstrap::BootstrapResult PuppyBootstrap::run(
     }
     #if HAS_DWARF()
     progressHook({ 10, FlashingStage::CALCULATE_FINGERPRINT, PuppyType::DWARF });
-    #elif HAS_MODULARBED()
+    #elif HAS_PUPPY_MODULARBED()
     progressHook({ 10, FlashingStage::CALCULATE_FINGERPRINT, PuppyType::MODULARBED });
     #endif
     int percent_per_puppy = 80 / result.discovered_num();
@@ -224,7 +224,7 @@ PuppyBootstrap::BootstrapResult PuppyBootstrap::run(
     }
     #if HAS_DWARF()
     progressHook({ 100, FlashingStage::DONE, PuppyType::DWARF });
-    #elif HAS_MODULARBED()
+    #elif HAS_PUPPY_MODULARBED()
     progressHook({ 100, FlashingStage::DONE, PuppyType::MODULARBED });
     #endif
 
@@ -349,7 +349,7 @@ inline void write_dock_reset_pin(Dock dock, buddy::hw::Pin::State state) {
         dwarf6Reset.write(state);
         break;
 #endif
-#if HAS_MODULARBED()
+#if HAS_PUPPY_MODULARBED()
     case Dock::MODULAR_BED:
         modularBedReset.write(state);
         break;

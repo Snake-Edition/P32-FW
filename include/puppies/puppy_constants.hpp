@@ -5,7 +5,7 @@
 #include <ranges>
 #include <utility>
 #include <option/has_dwarf.h>
-#include <option/has_modularbed.h>
+#include <option/has_puppy_modularbed.h>
 #include <option/has_xbuddy_extension.h>
 #include <option/has_puppies.h>
 
@@ -37,7 +37,7 @@ enum class Dock : uint8_t {
 static_assert(std::to_underlying(Dock::XBUDDY_EXTENSION) == 7, "Must stay 8th puppy, because we are unable to do dynamic address assignemnt on startup on xBuddy");
 
 constexpr auto DOCKS = std::to_array({
-#if HAS_MODULARBED()
+#if HAS_PUPPY_MODULARBED()
     Dock::MODULAR_BED,
 #endif
 #if HAS_DWARF()
@@ -57,7 +57,7 @@ using DockIterator = decltype(DOCKS)::const_iterator;
 
 constexpr const char *to_string(Dock k) {
     switch (k) {
-#if HAS_MODULARBED()
+#if HAS_PUPPY_MODULARBED()
     case Dock::MODULAR_BED:
         return "MODULAR_BED";
 #endif
@@ -87,7 +87,7 @@ constexpr const char *to_string(Dock k) {
 
 constexpr PuppyType to_puppy_type(Dock dock) {
     switch (dock) {
-#if HAS_MODULARBED()
+#if HAS_PUPPY_MODULARBED()
     case Dock::MODULAR_BED:
         return MODULARBED;
 #endif
@@ -112,7 +112,7 @@ constexpr PuppyType to_puppy_type(Dock dock) {
 
 constexpr bool is_dynamicly_addressable(PuppyType puppy) {
     switch (puppy) {
-#if HAS_MODULARBED()
+#if HAS_PUPPY_MODULARBED()
     case MODULARBED:
         return true;
 #endif
@@ -166,7 +166,7 @@ inline constexpr PuppyInfo get_puppy_info(PuppyType puppy) {
             42,
         };
 #endif
-#if HAS_MODULARBED()
+#if HAS_PUPPY_MODULARBED()
     case MODULARBED:
         return {
             "modularbed",
@@ -198,7 +198,7 @@ struct DockInfo {
  */
 inline constexpr DockInfo get_dock_info(Dock dock) {
     switch (dock) {
-#if HAS_MODULARBED()
+#if HAS_PUPPY_MODULARBED()
     case Dock::MODULAR_BED:
         return {
             "/internal/dump_modularbed.dmp",

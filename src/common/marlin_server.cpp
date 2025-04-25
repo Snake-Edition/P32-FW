@@ -90,7 +90,8 @@
 #include <option/has_selftest.h>
 #include <option/has_mmu2.h>
 #include <option/has_dwarf.h>
-#include <option/has_modularbed.h>
+#include <option/has_remote_bed.h>
+#include <option/has_modular_bed.h>
 #include <option/has_loadcell.h>
 #include <option/has_nfc.h>
 #include <option/has_sheet_profiles.h>
@@ -104,9 +105,9 @@
     #include <puppies/Dwarf.hpp>
 #endif /*HAS_DWARF()*/
 
-#if HAS_MODULARBED()
-    #include <puppies/modular_bed.hpp>
-#endif /*HAS_MODULARBED()*/
+#if HAS_REMOTE_BED()
+    #include <common/feature/remote_bed/remote_bed.hpp>
+#endif
 
 #if HAS_SELFTEST()
     #include "printer_selftest.hpp"
@@ -412,9 +413,9 @@ namespace {
     /// Check Dwarf MCU temperature
     constinit std::array<MCUTempErrorChecker, HOTENDS> dwarfMaxTempErrorChecker;
 #endif /*HAS_DWARF()*/
-#if HAS_MODULARBED()
+#if HAS_REMOTE_BED()
     constinit MCUTempErrorChecker modbedMaxTempErrorChecker; ///< Check ModularBed MCU temperature
-#endif /*HAS_MODULARBED()*/
+#endif
 
     void pause_print(Pause_Type type) {
         if (!server.print_is_serial) {
@@ -795,7 +796,7 @@ static void cycle() {
     dwarf_temp = prusa_toolchanger.getActiveToolOrFirst().get_board_temperature();
     #endif
 
-    xl_enclosure.loop(buddy::puppies::modular_bed.get_mcu_temperature(), dwarf_temp, server.print_state);
+    xl_enclosure.loop(remote_bed::get_mcu_temperature(), dwarf_temp, server.print_state);
 
 #endif
 
@@ -2786,9 +2787,9 @@ static void _server_print_loop(void) {
         }
     }
 #endif /*HAS_DWARF()*/
-#if HAS_MODULARBED()
-    modbedMaxTempErrorChecker.check(buddy::puppies::modular_bed.get_mcu_temperature(), WarningType::ModBedMCUMaxTemp, "Modular Bed");
-#endif /*HAS_MODULARBED()*/
+#if HAS_REMOTE_BED()
+    modbedMaxTempErrorChecker.check(remote_bed::get_mcu_temperature(), WarningType::BedMCUMaxTemp, "Bed");
+#endif
 }
 
 void resuming_begin(void) {
@@ -2806,9 +2807,9 @@ void resuming_begin(void) {
         }
     }
 #endif /*HAS_DWARF()*/
-#if HAS_MODULARBED()
+#if HAS_REMOTE_BED()
     modbedMaxTempErrorChecker.reset();
-#endif /*HAS_MODULARBED()*/
+#endif /*HAS_REMOTE_BED()*/
 
     nozzle_timeout_on(); // could be turned off after pause by changing temperature.
     if (print_reheat_ready()) {
@@ -3121,7 +3122,7 @@ static void _server_update_vars() {
 
     marlin_vars().temp_bed = thermalManager.degBed();
     marlin_vars().target_bed = thermalManager.degTargetBed();
-#if HAS_MODULARBED()
+#if HAS_MODULAR_BED()
     marlin_vars().enabled_bedlet_mask = thermalManager.getEnabledBedletMask();
 #endif
 

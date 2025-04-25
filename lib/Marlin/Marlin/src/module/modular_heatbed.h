@@ -1,9 +1,9 @@
 #pragma once
 
-#include <option/has_modularbed.h>
+#include <option/has_modular_bed.h>
 #include <printers.h>
 
-#if HAS_MODULARBED()
+#if HAS_MODULAR_BED()
 
 #if PRINTER_IS_PRUSA_XL()
     #define X_HBL_COUNT 4   // Number of heatbedlets in X direction

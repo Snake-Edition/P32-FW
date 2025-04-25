@@ -12,10 +12,10 @@
 #include <config_store/store_instance.hpp>
 #include <utils/string_builder.hpp>
 #include <common/nozzle_diameter.hpp>
-#include <option/has_modularbed.h>
+#include <option/has_modular_bed.h>
 
-#if HAS_MODULARBED()
-    #include <puppies/modular_bed.hpp>
+#if HAS_MODULAR_BED()
+    #include <module/modular_heatbed.h>
 #endif
 #if HAS_TOOLCHANGER()
     #include <puppies/Dwarf.hpp>
@@ -36,7 +36,7 @@ FooterItemNozzlePWM::FooterItemNozzlePWM(window_t *parent)
 
 FooterItemBed::FooterItemBed(window_t *parent)
     : FooterItemHeater(parent, &img::heatbed_16x16, static_makeView, static_readValue) {
-#if HAS_MODULARBED()
+#if HAS_MODULAR_BED()
     icon.Hide();
 #endif
     updateValue();
@@ -58,10 +58,10 @@ footer::ItemDrawType FooterItemAllNozzles::GetDrawType() {
 void FooterItemBed::unconditionalDraw() {
     FooterItemHeater::unconditionalDraw();
 
-#if HAS_MODULARBED()
+#if HAS_MODULAR_BED()
     for (int x = 0; x < X_HBL_COUNT; x++) {
         for (int y = 0; y < Y_HBL_COUNT; y++) {
-            uint16_t idx_mask = 1 << buddy::puppies::modular_bed.idx(x, y);
+            uint16_t idx_mask = 1 << advanced_modular_bed->idx(x, y);
             bool enabled = last_enabled_bedlet_mask & idx_mask;
             bool warm = last_warm_bedlet_mask & idx_mask;
 
@@ -90,7 +90,7 @@ void FooterItemBed::unconditionalDraw() {
 
 changed_t FooterItemBed::updateValue() {
     changed_t ret = FooterItemHeater::updateValue();
-#if HAS_MODULARBED()
+#if HAS_MODULAR_BED()
     bool is_heating = marlin_vars().target_bed > 0;
 
     // if not heating, act as no heatbedlet is activated
@@ -103,8 +103,8 @@ changed_t FooterItemBed::updateValue() {
     uint16_t warm_bedlet_mask = 0;
     for (int y = 0; y < Y_HBL_COUNT; ++y) {
         for (int x = 0; x < X_HBL_COUNT; ++x) {
-            if (buddy::puppies::modular_bed.get_temp(x, y) > COLD) {
-                warm_bedlet_mask |= 1 << buddy::puppies::modular_bed.idx(x, y);
+            if (advanced_modular_bed->get_temp(x, y) > COLD) {
+                warm_bedlet_mask |= 1 << advanced_modular_bed->idx(x, y);
             }
         }
     }

@@ -2,7 +2,7 @@
 
 #include "client_response.hpp"
 #include <option/has_manual_chamber_vents.h>
-#include <option/has_modularbed.h>
+#include <option/has_remote_bed.h>
 #include <option/has_chamber_filtration_api.h>
 
 enum class WarningType : uint32_t {
@@ -38,8 +38,8 @@ enum class WarningType : uint32_t {
 #if HAS_DWARF()
     DwarfMCUMaxTemp,
 #endif
-#if HAS_MODULARBED()
-    ModBedMCUMaxTemp,
+#if HAS_REMOTE_BED()
+    BedMCUMaxTemp,
 #endif
     ProbingFailed,
 #if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)

@@ -6,7 +6,6 @@
 #include "cmsis_os.h"
 #include <logging/log.hpp>
 #include <buddy/main.h>
-#include <puppies/modular_bed.hpp>
 #include <puppies/Dwarf.hpp>
 #include <option/has_xbuddy_extension.h>
 #include "puppies/PuppyBootstrap.hpp"
@@ -15,10 +14,14 @@
 #include "Marlin/src/module/prusa/toolchanger.h"
 #include <tasks.hpp>
 #include <option/has_dwarf.h>
-#include <option/has_modularbed.h>
+#include <option/has_puppy_modularbed.h>
 #include <buddy/ccm_thread.hpp>
 #include "bsod.h"
 #include "gui_bootstrap_screen.hpp"
+
+#if HAS_PUPPY_MODULARBED()
+    #include <puppies/modular_bed.hpp>
+#endif
 
 #if HAS_XBUDDY_EXTENSION()
     #include <puppies/xbuddy_extension.hpp>
@@ -58,7 +61,7 @@ static void verify_puppies_running() {
     auto reacheability_wait_start = ticks_ms();
     do {
         bool modular_bed_ok = true;
-#if HAS_MODULARBED()
+#if HAS_PUPPY_MODULARBED()
         modular_bed_ok = !modular_bed.is_enabled() || (modular_bed.ping() != CommunicationStatus::ERROR);
 #endif
 
@@ -166,7 +169,7 @@ static void puppy_task_loop() {
             } else
 #endif
 
-#if HAS_MODULARBED()
+#if HAS_PUPPY_MODULARBED()
             {
                 // Try slow refresh of modular bed
                 if (modular_bed.refresh() == CommunicationStatus::ERROR) {
@@ -204,7 +207,7 @@ static bool puppy_initial_scan() {
     }
 #endif
 
-#if HAS_MODULARBED()
+#if HAS_PUPPY_MODULARBED()
     if (modular_bed.initial_scan() == CommunicationStatus::ERROR) {
         return false;
     }
@@ -234,7 +237,7 @@ static void puppy_task_body([[maybe_unused]] void const *argument) {
         // once some puppies are detected, consider this minimal puppy config (do no allow disconnection of puppy while running)
         minimal_puppy_config = bootstrap_result;
 
-#if HAS_MODULARBED()
+#if HAS_PUPPY_MODULARBED()
         // set what puppies are connected
         modular_bed.set_enabled(bootstrap_result.is_dock_occupied(Dock::MODULAR_BED));
 #endif

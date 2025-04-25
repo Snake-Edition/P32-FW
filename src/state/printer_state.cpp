@@ -11,7 +11,7 @@
 #include <option/xl_enclosure_support.h>
 #include <option/has_uneven_bed_prompt.h>
 #include <config_store/store_instance.hpp>
-#include <option/has_modularbed.h>
+#include <option/has_remote_bed.h>
 #include <option/has_chamber_filtration_api.h>
 #include <option/has_door_sensor_calibration.h>
 
@@ -522,8 +522,9 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
     case WarningType::DwarfMCUMaxTemp:
         return ErrCode::CONNECT_DWARF_MCU_MAX_TEMP;
 #endif
-#if HAS_MODULARBED()
-    case WarningType::ModBedMCUMaxTemp:
+#if HAS_REMOTE_BED()
+    case WarningType::BedMCUMaxTemp:
+        // TODO Rename this from "modular bed" to just "bed" in Prusa error codes.
         return ErrCode::CONNECT_MOD_BED_MCU_MAX_TEMP;
 #endif
     case WarningType::ProbingFailed:

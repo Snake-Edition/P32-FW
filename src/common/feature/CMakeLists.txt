@@ -34,4 +34,8 @@ if(HAS_AUTO_RETRACT)
   add_subdirectory(auto_retract)
 endif()
 
+if(HAS_REMOTE_BED)
+  add_subdirectory(remote_bed)
+endif()
+
 add_subdirectory(ramming)

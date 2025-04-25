@@ -1,6 +1,6 @@
 #include <assert.h>
 
-#include <option/has_modularbed.h>
+#include <option/has_modular_bed.h>
 #include <option/has_puppies.h>
 #include <option/has_toolchanger.h>
 #include <option/has_chamber_api.h>
@@ -79,7 +79,7 @@ struct state_planner_t {
     int16_t flow_percentage[HOTENDS];
     int16_t target_bed;
     int16_t extrude_min_temp;
-#if HAS_MODULARBED()
+#if HAS_MODULAR_BED()
     uint16_t enabled_bedlets_mask;
     uint8_t _padding_heat[2]; // padding to 2 or 4 bytes?
 #endif

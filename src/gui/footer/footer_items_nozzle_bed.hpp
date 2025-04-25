@@ -6,7 +6,7 @@
 #pragma once
 #include "footer_items_heaters.hpp"
 #include "config_features.h"
-#include <option/has_modularbed.h>
+#include <option/has_modular_bed.h>
 #include <option/has_toolchanger.h>
 
 class FooterItemNozzle final : public FooterItemHeater {
@@ -41,7 +41,7 @@ public:
     FooterItemBed(window_t *parent);
 
 protected:
-#if HAS_MODULARBED()
+#if HAS_MODULAR_BED()
     uint16_t last_enabled_bedlet_mask { 0 };
     uint16_t last_warm_bedlet_mask { 0 };
 #endif

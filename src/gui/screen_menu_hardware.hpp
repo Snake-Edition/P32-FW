@@ -15,7 +15,7 @@
 #include <option/has_sheet_profiles.h>
 #include <option/has_toolchanger.h>
 #include <option/has_side_fsensor.h>
-#include <option/has_modularbed.h>
+#include <option/has_modular_bed.h>
 #include <common/extended_printer_type.hpp>
 #include "MItem_basic_selftest.hpp"
 #include "printers.h"
@@ -23,8 +23,8 @@
 #if HAS_TOOLCHANGER()
     #include "screen_menu_tools.hpp"
 #endif
-#if HAS_MODULARBED()
-    #include "screen_menu_modularbed.hpp"
+#if HAS_MODULAR_BED()
+    #include "screen_menu_modular_bed.hpp"
 #endif
 #if HAS_MMU2()
     #include "MItem_mmu.hpp"
@@ -61,7 +61,7 @@ using ScreenMenuHardware__ = ScreenMenu<GuiDefaults::MenuFooter,
 // ================================
 // Bed related
 // ================================
-#if HAS_MODULARBED()
+#if HAS_MODULAR_BED()
     MI_HEAT_ENTIRE_BED,
 #endif
 #if HAS_SHEET_PROFILES()

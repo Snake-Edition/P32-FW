@@ -7,7 +7,7 @@
 #include "config.h"
 #include "appmain.hpp"
 #include <device/board.h>
-#include <option/has_modularbed.h>
+#include <option/has_remote_bed.h>
 #include "printers.h"
 #include "fanctl.hpp"
 #include <option/has_dwarf.h>
@@ -47,7 +47,7 @@ void hwio_safe_state(void) {
     gpio_set(MARLIN_PIN(HEAT0), 0);
     #endif
     // Disable heated bed
-    #if HAS_MODULARBED()
+    #if HAS_REMOTE_BED()
     // Set power panic for modular bed
     modularBedReset.set();
     #else

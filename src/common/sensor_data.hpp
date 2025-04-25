@@ -4,7 +4,7 @@
 #include <device/board.h>
 #include <option/has_door_sensor.h>
 #include <option/has_loadcell.h>
-#include <option/has_modularbed.h>
+#include <option/has_remote_bed.h>
 
 // this struct collects data from metrics and gives access to the
 // sensor info screen
@@ -40,8 +40,8 @@ public:
 #if HAS_LOADCELL()
     float loadCell;
 #endif
-#if HAS_MODULARBED()
-    float mbedMCUTemperature;
+#if HAS_REMOTE_BED()
+    float bedMCUTemperature;
 #endif
 };
 

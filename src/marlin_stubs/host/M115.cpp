@@ -21,7 +21,7 @@
  */
 
 #include "../gcode.h"
-#include <option/has_modularbed.h>
+#include <option/has_remote_bed.h>
 #include <option/has_dwarf.h>
 #include <option/has_mmu2.h>
 #include <option/has_toolchanger.h>
@@ -190,7 +190,7 @@ void GcodeSuite::M115() {
 
     // THERMAL_PROTECTION
     cap_line(PSTR("THERMAL_PROTECTION")
-    #if ((ENABLED(THERMAL_PROTECTION_HOTENDS) || HAS_DWARF()) && (ENABLED(THERMAL_PROTECTION_BED) || !HAS_HEATED_BED || HAS_MODULARBED()) && (ENABLED(THERMAL_PROTECTION_CHAMBER) || !HAS_HEATED_CHAMBER))
+    #if ((ENABLED(THERMAL_PROTECTION_HOTENDS) || HAS_DWARF()) && (ENABLED(THERMAL_PROTECTION_BED) || !HAS_HEATED_BED || HAS_REMOTE_BED()) && (ENABLED(THERMAL_PROTECTION_CHAMBER) || !HAS_HEATED_CHAMBER))
                  ,
         true
     #endif

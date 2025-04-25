@@ -23,9 +23,9 @@
 #include "../../../inc/MarlinConfig.h"
 #include "../../gcode.h"
 #include "../../../module/temperature.h"
-#include <option/has_modularbed.h>
+#include <option/has_modular_bed.h>
 
-#if HAS_MODULARBED()
+#if HAS_MODULAR_BED()
 
 #include "../../../module/modular_heatbed.h"
 

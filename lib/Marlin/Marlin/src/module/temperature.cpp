@@ -95,7 +95,8 @@
 #endif
 
 #include <option/has_dwarf.h>
-#include <option/has_modularbed.h>
+#include <option/has_remote_bed.h>
+#include <option/has_modular_bed.h>
 
 #if HOTEND_USES_THERMISTOR
   #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
@@ -713,7 +714,7 @@ volatile bool Temperature::temp_meas_ready = false;
 int16_t Temperature::getHeaterPower(const heater_ind_t heater_id) {
   #if HAS_HEATED_BED
     if (heater_id == H_BED) {
-      #if HAS_MODULARBED()
+      #if HAS_REMOTE_BED()
         return 0;
       #else
         return temp_bed.soft_pwm_amount;
@@ -2249,7 +2250,7 @@ void Temperature::updateTemperaturesFromRawValues() {
     #endif
   #endif
   #if HAS_HEATED_BED
-    #if HAS_MODULARBED()
+    #if HAS_MODULAR_BED()
       updateModularBedTemperature();
     #else
       temp_bed.celsius = analog_to_celsius_bed(temp_bed.raw);
@@ -2808,11 +2809,11 @@ void Temperature::disable_hotend() {
 }
 
 void Temperature::disable_local_heaters() {
-#if HAS_DWARF() && HAS_MODULARBED()
+#if HAS_DWARF() && HAS_REMOTE_BED()
     // No local heater present
-#elif !HAS_DWARF() && HAS_MODULARBED()
+#elif !HAS_DWARF() && HAS_REMOTE_BED()
     disable_hotend();
-#elif !HAS_DWARF() && !HAS_MODULARBED()
+#elif !HAS_DWARF() && !HAS_REMOTE_BED()
     disable_all_heaters();
 #else
 #error "Don't know how to disable the bed but not dwarf"
@@ -3207,7 +3208,7 @@ void Temperature::readings_ready() {
     #else
       #define BEDCMP(A,B) ((A)>=(B))
     #endif
-    #if !HAS_MODULARBED()//With MHB we get temperatures in °C from controller. No raw values to check.
+    #if !HAS_REMOTE_BED()//With remote bed we get temperatures in °C from controller. No raw values to check.
     const bool bed_on = (temp_bed.target > 0)
       #if ENABLED(PIDTEMPBED)
         || (temp_bed.soft_pwm_amount > 0)
@@ -3919,7 +3920,7 @@ void Temperature::isr() {
     #endif
 
     // Detailed modular bed report
-    #if HAS_MODULARBED()
+    #if HAS_MODULAR_BED()
       for(int y = 0; y < Y_HBL_COUNT; ++y) {
         for(int x = 0; x < X_HBL_COUNT; ++x) {
           SERIAL_ECHO(" B_");
@@ -4282,7 +4283,7 @@ void Temperature::isr() {
 
 #endif // HAS_TEMP_SENSOR
 
-#if HAS_MODULARBED()
+#if HAS_MODULAR_BED()
 void Temperature::updateModularBedTemperature(){
       float sum = 0;
       uint8_t count = 0;

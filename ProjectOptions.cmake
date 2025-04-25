@@ -317,7 +317,14 @@ set(PRINTERS_WITH_RESOURCES "MINI" "MK4" "MK3.5" "XL" "iX" "COREONE")
 set_feature_for_printers(HAS_BOWDEN "MINI")
 set(PRINTERS_WITH_PUPPIES_BOOTLOADER "XL" "iX" "XL_DEV_KIT" "COREONE")
 set(PRINTERS_WITH_DWARF "XL" "XL_DEV_KIT")
-set_feature_for_printers_master_board(HAS_MODULARBED "iX" "XL" "XL_DEV_KIT")
+
+# MODULAR_BED is a bed consisting of several bedlets
+set_feature_for_printers_master_board(HAS_MODULAR_BED "iX" "XL" "XL_DEV_KIT")
+# REMOTE_BED means there is a daughterboard controlling the bed
+set_feature_for_printers_master_board(HAS_REMOTE_BED "iX" "XL" "XL_DEV_KIT")
+# PUPPY_MODULARBED is remote modular bed implemented as a puppy, i.e. communicating over modbus
+set_feature_for_printers_master_board(HAS_PUPPY_MODULARBED "iX" "XL" "XL_DEV_KIT")
+
 set_feature_for_printers_master_board(HAS_XBUDDY_EXTENSION "COREONE")
 set_feature_for_printers_master_board(HAS_DOOR_SENSOR "COREONE" "MK4") # MK4: check valid FW-HW
 set_feature_for_printers(HAS_TOOLCHANGER "XL" "XL_DEV_KIT")
@@ -577,7 +584,7 @@ endif()
 define_boolean_option(HAS_DWARF ${HAS_DWARF})
 
 if(HAS_DWARF
-   OR HAS_MODULARBED
+   OR HAS_PUPPY_MODULARBED
    OR HAS_XBUDDY_EXTENSION
    )
   set(HAS_PUPPIES YES)

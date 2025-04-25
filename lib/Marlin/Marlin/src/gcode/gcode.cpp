@@ -64,7 +64,7 @@ GcodeSuite gcode;
 
 #include <option/has_i2c_expander.h>
 #include <option/has_local_accelerometer.h>
-#include <option/has_modularbed.h>
+#include <option/has_modular_bed.h>
 #include <option/has_remote_accelerometer.h>
 #include <option/has_gcode_compatibility.h>
 #include <option/has_phase_stepping.h>
@@ -721,7 +721,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
       case 555: M555(); break;                                    // M555: Set print area
 
-      #if HAS_MODULARBED()
+      #if HAS_MODULAR_BED()
         case 556: M556(); break;                                  // M556: Override modular bedled active
         case 557: M557(); break;                                  // M557: Set modular bed gradient parameters
       #endif

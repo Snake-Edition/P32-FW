@@ -123,8 +123,12 @@ if(HAS_TOOLCHANGER)
     )
 endif()
 
-if(HAS_MODULARBED)
-  target_sources(firmware PRIVATE screen_menu_modularbed.cpp)
+if(HAS_MODULAR_BED)
+  target_sources(firmware PRIVATE screen_menu_modular_bed.cpp)
+endif()
+
+if(HAS_REMOTE_BED)
+  target_sources(firmware PRIVATE screen_menu_remote_bed.cpp)
 endif()
 
 if(DEBUG)
