@@ -14,6 +14,9 @@
 #include <option/has_toolchanger.h>
 #include <stdio.h>
 
+#include "str_utils.hpp"
+#include "marlin_client.hpp"
+
 #include <option/has_gui.h>
 #if HAS_GUI()
     #include <window_msgbox.hpp>
