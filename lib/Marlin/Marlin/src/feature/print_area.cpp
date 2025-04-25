@@ -29,7 +29,7 @@ void PrintArea::set_bounding_rect(rect_t new_bounding_rect) {
           enabled_bedlet_mask |= 1 << advanced_modular_bed->idx(x, y);
     }
   }
-  if (PRINT_AREA_BASED_HEATING_ENABLED) {
+  if (get_print_area_based_heating_enabled()) {
     thermalManager.setEnabledBedletMask(enabled_bedlet_mask);
   }
 #endif
