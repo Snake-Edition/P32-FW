@@ -14,7 +14,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 2. **Skew compensation**: Turns on skew compensation in Marlin and allows it to be configured with `M852`.
 3. ~~**OctoPrint screen**: Adds support for `M73` (print progress) and `M117`~~
   ~~(LCD messages).~~
-4. ~~ [**PID tuning**:](https://github.com/Snake-Edition/P32-FW#configuring-pid-parameters) ~~
+4. **PID tuning**: Read nozzle and bed PID parameters and tune them automatically.
 5. **Max Temps**: Raises the maximum bed temperature from 100C to 110C
   and nozzle temperature from 275C to 285C (use with caution!).
 6. **Settings during print**: You can change Snake settings during printing.
@@ -132,10 +132,6 @@ the min or max travel on the X and Y axes while printing or even during
 mesh bed leveling. A skew factor of e.g. 0.01 equates to
 `0.01 * 180mm = 1.8mm` of movement at the far end of the bed,
 so your usable print area will be reduced accordingly.
-
-### Configuring PID Parameters
-
-Prusa [disabled M303 PID Autotune](https://github.com/prusa3d/Prusa-Firmware-Buddy/issues/3351#issuecomment-1866926815) due to memory restraints, this may be brought back in future releases.
 
 ---
 

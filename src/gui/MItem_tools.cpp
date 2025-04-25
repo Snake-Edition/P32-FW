@@ -709,6 +709,70 @@ void MI_Y_SENSITIVITY_RESET::click(IWindowMenu & /*window_menu*/) {
 }
 
 /* -===============================================(:>- */
+static constexpr NumericInputConfig pid_param_spin_config {
+    .min_value = -999,
+    .max_value = 999,
+    .max_decimal_places = 2,
+};
+
+static uint16_t nozzle_calibration_temp = 250;
+static uint8_t bed_calibration_temp = 80;
+
+MI_NOZZLE_CALIBRATION_TEMP::MI_NOZZLE_CALIBRATION_TEMP()
+    : WiSpin(nozzle_calibration_temp, xy_home_sens_spin_config, _(label)) {} {};
+
+void MI_NOZZLE_CALIBRATION_TEMP::OnClick() {
+    nozzle_calibration_temp = GetVal();
+}
+
+MI_CALIBRATE_NOZZLE_PID::MI_CALIBRATE_NOZZLE_PID()
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_CALIBRATE_NOZZLE_PID::click(IWindowMenu & /*window_menu*/) {
+    marlin_client::gcode_printf("M303 E0 S%i", nozzle_calibration_temp);
+}
+
+MI_BED_CALIBRATION_TEMP::MI_BED_CALIBRATION_TEMP()
+    : WiSpin(bed_calibration_temp, xy_home_sens_spin_config, _(label)) {} {};
+
+void MI_BED_CALIBRATION_TEMP::OnClick() {
+    bed_calibration_temp = GetVal();
+}
+
+MI_CALIBRATE_BED_PID::MI_CALIBRATE_BED_PID()
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_CALIBRATE_BED_PID::click(IWindowMenu & /*window_menu*/) {
+    marlin_client::gcode_printf("M303 E-1 S%i", bed_calibration_temp);
+}
+
+// MI_PID_NOZZLE_P
+MI_PID_NOZZLE_P::MI_PID_NOZZLE_P()
+    : WiSpin(config_store().pid_nozzle_p.get(), pid_param_spin_config, _(label), nullptr, is_enabled_t::no) {}
+
+// MI_PID_NOZZLE_I
+MI_PID_NOZZLE_I::MI_PID_NOZZLE_I()
+    : WiSpin(config_store().pid_nozzle_i.get(), pid_param_spin_config, _(label), nullptr, is_enabled_t::no) {}
+
+// MI_PID_NOZZLE_D
+MI_PID_NOZZLE_D::MI_PID_NOZZLE_D()
+    : WiSpin(config_store().pid_nozzle_d.get(), pid_param_spin_config, _(label), nullptr, is_enabled_t::no) {}
+
+// MI_PID_BED_P
+MI_PID_BED_P::MI_PID_BED_P()
+    : WiSpin(config_store().pid_bed_p.get(), pid_param_spin_config, _(label), nullptr, is_enabled_t::no) {}
+
+// MI_PID_BED_I
+MI_PID_BED_I::MI_PID_BED_I()
+    : WiSpin(config_store().pid_bed_i.get(), pid_param_spin_config, _(label), nullptr, is_enabled_t::no) {}
+
+// MI_PID_BED_D
+MI_PID_BED_D::MI_PID_BED_D()
+    : WiSpin(config_store().pid_bed_d.get(), pid_param_spin_config, _(label), nullptr, is_enabled_t::no) {}
+
+/* -===============================================(:>- */
 
 uint8_t cold_mode = false;
 MI_COLD_MODE::MI_COLD_MODE()

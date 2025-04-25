@@ -2593,4 +2593,4 @@ extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
 /**
  * Enable PID autotune
  **/
-//#define PID_AUTOTUNE
+#define PID_AUTOTUNE
