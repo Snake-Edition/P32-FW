@@ -27,7 +27,6 @@
 #include <Marlin/src/core/macros.h>
 #include <option/has_loadcell.h>
 #include <option/has_mmu2.h>
-#include <option/has_modularbed.h>
 #include <option/has_precise_homing_corexy.h>
 #include <option/has_precise_homing.h>
 #include <option/has_toolchanger.h>
@@ -284,27 +283,6 @@
     #define SWITCHING_TOOLHEAD_Y_CLEAR 60 // (mm) Minimum distance from dock for unobstructed X axis
     #define SWITCHING_TOOLHEAD_X_POS \
         { 215, 0 } // (mm) X positions for parking the extruders
-#endif
-
-/**
- * Modular heatbed(MHB)
- *
- *  Heatbed composed of multiple smaller heatbedlets.
- *  Allows separate temperature controll of individual heatbedlets(HBL).
- */
-#if HAS_MODULARBED()
-    #define X_HBL_COUNT 3   // Number of heatbedlets in X direction
-    #define Y_HBL_COUNT 3   // Number of heatbedlets in Y direction
-    #define X_HBL_SIZE  90  // Size of single heatbedlet in X direction including gap between heatbedlets(mm)
-    #define Y_HBL_SIZE  90  // Size of single heatbedlet in Y direction including gap between heatbedlets(mm)
-    #define PRINT_AREA_BASED_HEATING_ENABLED get_print_area_based_heating_enabled()
-
-
-    // Bedlet temperature gradient calculation, uses this equation:
-    // BEDLET_TEMP = NEAREST_ACTIVE_BEDLET_TEMPERATURE - NEAREST_ACTIVE_BEDLET_TEMPERATURE * ( 1 / HBL_GRADIENT_CUTOFF * ACTIVE_BEDLET_DISTANCE)^HBL_GRADIENT_EXPONENT;
-    #define HBL_GRADIENT_EXPONENT 2.0f // Exponent used in equation to calculate heatbedlets temperature gradient
-    #define HBL_GRADIENT_CUTOFF 2.0f // Bedlet this far apart from active bedlet will have zero target temperature
-    #define HBL_EXPAND_TO_SIDES true // Enable expansion of heated area to sides in order to prevent warping from bed material thermal expansion
 #endif
 
 /**
