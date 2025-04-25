@@ -277,6 +277,7 @@
 #include <option/has_precise_homing_corexy.h>
 #include <option/has_precise_homing.h>
 #include <option/has_phase_stepping.h>
+#include <option/has_phase_stepping_calibration.h>
 #include <option/has_gcode_compatibility.h>
 #include <option/has_cancel_object.h>
 
@@ -936,6 +937,8 @@ private:
 #if HAS_PHASE_STEPPING()
   static void M970();
   static void M971();
+#endif
+#if HAS_PHASE_STEPPING_CALIBRATION()
   static void M972();
   static void M973();
   static void M974();
