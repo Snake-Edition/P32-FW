@@ -24,7 +24,6 @@
 #define MOTHERBOARD BOARD_XLBUDDY_V1
 
 #include <option/has_loadcell.h>
-#include <option/has_modularbed.h>
 #include <option/has_precise_homing_corexy.h>
 #include <option/has_precise_homing.h>
 #include <option/has_toolchanger.h>
@@ -270,21 +269,6 @@
     #define SWITCHING_TOOLHEAD_Y_CLEAR 60 // (mm) Minimum distance from dock for unobstructed X axis
     #define SWITCHING_TOOLHEAD_X_POS \
         { 215, 0 } // (mm) X positions for parking the extruders
-#endif
-
-/**
- * Modular heatbed(MHB)
- *
- *  Heatbed composed of multiple smaller heatbedlets.
- *  Allows separate temperature controll of individual heatbedlets(HBL).
- *
- *
- */
-#if HAS_MODULARBED()
-    #define X_HBL_COUNT 4   // Number of heatbedlets in X direction
-    #define Y_HBL_COUNT 4   // Number of heatbedlets in Y direction
-    #define X_HBL_SIZE  90  // Size of single heatbedlet in X direction including gap between heatbedlets(mm)
-    #define Y_HBL_SIZE  90  // Size of single heatbedlet in Y direction including gap between heatbedlets(mm)
 #endif
 
 /**

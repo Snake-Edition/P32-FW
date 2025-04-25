@@ -1,10 +1,27 @@
 #pragma once
 
-#include "Marlin.h"
 #include <option/has_modularbed.h>
+#include <printers.h>
 
 #if HAS_MODULARBED()
 
+#if PRINTER_IS_PRUSA_XL()
+    #define X_HBL_COUNT 4   // Number of heatbedlets in X direction
+    #define Y_HBL_COUNT 4   // Number of heatbedlets in Y direction
+#elif PRINTER_IS_PRUSA_XL_DEV_KIT()
+    #define X_HBL_COUNT 4   // Number of heatbedlets in X direction
+    #define Y_HBL_COUNT 4   // Number of heatbedlets in Y direction
+#elif PRINTER_IS_PRUSA_iX()
+    #define X_HBL_COUNT 3   // Number of heatbedlets in X direction
+    #define Y_HBL_COUNT 3   // Number of heatbedlets in Y direction
+#else
+    #error
+#endif
+#define X_HBL_SIZE  90  // Size of single heatbedlet in X direction including gap between heatbedlets(mm)
+#define Y_HBL_SIZE  90  // Size of single heatbedlet in Y direction including gap between heatbedlets(mm)
+
+/// Heatbed composed of multiple smaller heatbedlets.
+/// Allows separate temperature controll of individual heatbedlets(HBL).
 class AdvancedModularBed {
 public:
     virtual ~AdvancedModularBed() = default;
