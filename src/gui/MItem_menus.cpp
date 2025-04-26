@@ -156,6 +156,15 @@ void MI_SNAKE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
 }
 
 /**********************************************************************************************/
+MI_PID_SETTINGS::MI_PID_SETTINGS()
+    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+}
+
+void MI_PID_SETTINGS::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuPIDSettings>);
+}
+
+/**********************************************************************************************/
 MI_SNAKE_TUNE_SETTINGS::MI_SNAKE_TUNE_SETTINGS()
     : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
 }

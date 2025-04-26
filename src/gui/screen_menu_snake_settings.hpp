@@ -12,15 +12,26 @@ using ScreenMenuSnakeSettings__ = ScreenMenu<EFooter::On, MI_RETURN,
 #if PRINTER_IS_PRUSA_MINI()
     MI_X_AXIS_LEN, MI_Y_AXIS_LEN, MI_E_LOAD_LENGTH,
 #endif
-
+    MI_PID_SETTINGS,
     MI_X_SENSITIVITY, MI_X_SENSITIVITY_RESET, MI_Y_SENSITIVITY, MI_Y_SENSITIVITY_RESET,
-    MI_PID_NOZZLE_P, MI_PID_NOZZLE_I, MI_PID_NOZZLE_D,
-    MI_PID_BED_P, MI_PID_BED_I, MI_PID_BED_D,
     MI_COLD_MODE>;
 
 class ScreenMenuSnakeSettings : public ScreenMenuSnakeSettings__ {
 public:
     ScreenMenuSnakeSettings();
+    virtual void windowEvent(window_t *sender, GUI_event_t ev, void *param) override;
+};
+
+/*********************************************************************************/
+// Submenu for PID settings
+using ScreenMenuPIDSettings__ = ScreenMenu<EFooter::On, MI_RETURN,
+    MI_NOZZLE_CALIBRATION_TEMP, MI_CALIBRATE_NOZZLE_PID, MI_BED_CALIBRATION_TEMP, MI_CALIBRATE_BED_PID,
+    MI_PID_NOZZLE_P, MI_PID_NOZZLE_I, MI_PID_NOZZLE_D,
+    MI_PID_BED_P, MI_PID_BED_I, MI_PID_BED_D>;
+
+class ScreenMenuPIDSettings : public ScreenMenuPIDSettings__ {
+public:
+    ScreenMenuPIDSettings();
     virtual void windowEvent(window_t *sender, GUI_event_t ev, void *param) override;
 };
 

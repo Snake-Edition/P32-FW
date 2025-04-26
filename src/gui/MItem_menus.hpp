@@ -121,6 +121,16 @@ protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
 
+class MI_PID_SETTINGS : public IWindowMenuItem {
+    static constexpr const char *const label = N_("PID Settings");
+
+public:
+    MI_PID_SETTINGS();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
 class MI_SNAKE_TUNE_SETTINGS : public IWindowMenuItem {
     static constexpr const char *const label = N_("Snake Settings");
 
