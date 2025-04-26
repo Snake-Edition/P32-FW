@@ -502,7 +502,6 @@ class MI_PID_NOZZLE_P : public WiSpin {
 
 public:
     MI_PID_NOZZLE_P();
-    void OnClick() override;
 };
 
 class MI_PID_NOZZLE_I : public WiSpin {
@@ -510,7 +509,6 @@ class MI_PID_NOZZLE_I : public WiSpin {
 
 public:
     MI_PID_NOZZLE_I();
-    void OnClick() override;
 };
 
 class MI_PID_NOZZLE_D : public WiSpin {
@@ -518,7 +516,6 @@ class MI_PID_NOZZLE_D : public WiSpin {
 
 public:
     MI_PID_NOZZLE_D();
-    void OnClick() override;
 };
 
 class MI_PID_BED_P : public WiSpin {
@@ -526,7 +523,6 @@ class MI_PID_BED_P : public WiSpin {
 
 public:
     MI_PID_BED_P();
-    void OnClick() override;
 };
 
 class MI_PID_BED_I : public WiSpin {
@@ -534,7 +530,6 @@ class MI_PID_BED_I : public WiSpin {
 
 public:
     MI_PID_BED_I();
-    void OnClick() override;
 };
 
 class MI_PID_BED_D : public WiSpin {
@@ -542,7 +537,6 @@ class MI_PID_BED_D : public WiSpin {
 
 public:
     MI_PID_BED_D();
-    void OnClick() override;
 };
 
 /* -===============================================(:>- */

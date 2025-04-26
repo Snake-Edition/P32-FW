@@ -42,6 +42,22 @@ int8_t PrusaGcodeSuite::get_target_extruder_from_command(const GCodeParser2 &p) 
     return GcodeSuite::get_target_extruder_from_option_value(p.option<uint8_t>('T'));
 }
 
+void save_bed_pid(void) {
+#if ENABLED(PIDTEMPBED)
+    config_store().pid_bed_p.set(thermalManager.temp_bed.pid.Kp);
+    config_store().pid_bed_i.set(thermalManager.temp_bed.pid.Ki);
+    config_store().pid_bed_d.set(thermalManager.temp_bed.pid.Kd);
+#endif
+}
+
+void save_noz_pid(void) {
+#if ENABLED(PIDTEMP)
+    config_store().pid_nozzle_p.set(Temperature::temp_hotend[0].pid.Kp);
+    config_store().pid_nozzle_i.set(Temperature::temp_hotend[0].pid.Ki);
+    config_store().pid_nozzle_d.set(Temperature::temp_hotend[0].pid.Kd);
+#endif
+}
+
 bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
     record_pre_gcode_metrics();
     bool processed = true;
@@ -115,6 +131,27 @@ bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
 #endif // HAS_I2C_EXPANDER()
         case 300:
             PrusaGcodeSuite::M300();
+            break;
+        case 301:
+            M301();
+            save_noz_pid();
+            break;
+        case 303: {
+            M303();
+            const int16_t e = parser.intval('E');
+            const bool u = parser.boolval('U');
+            if (u) {
+                if (e == -1) {
+                    save_bed_pid();
+                } else if (e == 0) {
+                    save_noz_pid();
+                }
+            }
+            break;
+        }
+        case 304:
+            M304();
+            save_bed_pid();
             break;
         case 330:
             // Metrics handler selection deprecated. We only really have one handler. Let's not pretend otherwise.

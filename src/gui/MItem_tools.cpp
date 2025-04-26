@@ -719,7 +719,7 @@ static uint16_t nozzle_calibration_temp = 250;
 static uint8_t bed_calibration_temp = 80;
 
 MI_NOZZLE_CALIBRATION_TEMP::MI_NOZZLE_CALIBRATION_TEMP()
-    : WiSpin(nozzle_calibration_temp, xy_home_sens_spin_config, _(label)) {} {};
+    : WiSpin(nozzle_calibration_temp, xy_home_sens_spin_config, _(label)) {};
 
 void MI_NOZZLE_CALIBRATION_TEMP::OnClick() {
     nozzle_calibration_temp = GetVal();
@@ -734,7 +734,7 @@ void MI_CALIBRATE_NOZZLE_PID::click(IWindowMenu & /*window_menu*/) {
 }
 
 MI_BED_CALIBRATION_TEMP::MI_BED_CALIBRATION_TEMP()
-    : WiSpin(bed_calibration_temp, xy_home_sens_spin_config, _(label)) {} {};
+    : WiSpin(bed_calibration_temp, xy_home_sens_spin_config, _(label)) {};
 
 void MI_BED_CALIBRATION_TEMP::OnClick() {
     bed_calibration_temp = GetVal();
