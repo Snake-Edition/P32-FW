@@ -587,11 +587,10 @@ static const NumericInputConfig bright_spin_config = {
     .step = 10,
 };
 
-extern uint8_t brightness;
 MI_BRIGHTNESS::MI_BRIGHTNESS()
-    : WiSpin(brightness, bright_spin_config, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
+    : WiSpin(config_store().brightness.get(), bright_spin_config, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
 void MI_BRIGHTNESS::OnClick() {
-    brightness = GetVal();
+    config_store().brightness.set(GetVal());
 }
 /* -===============================================(:>- */
 #endif

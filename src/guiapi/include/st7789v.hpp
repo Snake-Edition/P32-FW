@@ -14,13 +14,11 @@ enum {
     ST7789V_BUFFER_SIZE = ST7789V_COLS * ST7789V_BUFF_ROWS * 2
 };
 
-extern uint8_t brightness; //< in percents
-
 inline uint16_t color_to_565(Color clr) {
 
     /* -===============================================(:>- */
     // dim the screen
-    const float dim = std::clamp(brightness, uint8_t(30), uint8_t(150)) / 100.f;
+    const float dim = std::clamp(uint8_t(config_store().homing_sens_x.get()), uint8_t(30), uint8_t(150)) / 100.f;
     const uint8_t b = std::min(0xff, int(dim * (clr.raw & 0xff)));
     const uint8_t g = std::min(0xff, int(dim * ((clr.raw & 0xff00) >> 8)));
     const uint8_t r = std::min(0xff, int(dim * ((clr.raw & 0xff0000) >> 16)));
