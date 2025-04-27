@@ -682,7 +682,7 @@ void MI_X_SENSITIVITY::OnClick() {
 }
 
 MI_Y_SENSITIVITY::MI_Y_SENSITIVITY()
-    : WiSpin(config_store().homing_sens_x.get(), xy_home_sens_spin_config, _(label)) {}
+    : WiSpin(config_store().homing_sens_y.get(), xy_home_sens_spin_config, _(label)) {}
 
 void MI_Y_SENSITIVITY::OnClick() {
     config_store().homing_sens_y.set(GetVal());
