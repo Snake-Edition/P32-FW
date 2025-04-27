@@ -265,6 +265,8 @@ namespace defaults {
     inline constexpr float axis_steps_per_unit_e0 { default_axis_steps_flt[3] * ((DEFAULT_INVERT_E0_DIR == true) ? -1.f : 1.f) };
     inline constexpr uint16_t axis_microsteps_Z_ { Z_MICROSTEPS };
     inline constexpr uint16_t axis_microsteps_E0_ { E0_MICROSTEPS };
+    inline constexpr uint16_t axis_rms_current_ma_X_ { X_CURRENT };
+    inline constexpr uint16_t axis_rms_current_ma_Y_ { Y_CURRENT };
     inline constexpr uint16_t axis_rms_current_ma_Z_ { Z_CURRENT };
     inline constexpr uint16_t axis_rms_current_ma_E0_ { E0_CURRENT };
 

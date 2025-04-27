@@ -139,19 +139,19 @@ protected:
 };
 
 class MI_CURRENT_X : public WiSpin {
-    constexpr static const char *const label = N_("X current (0 default)");
+    constexpr static const char *const label = N_("X current");
 
 public:
     MI_CURRENT_X();
-    void Store();
+    virtual void OnClick() override;
 };
 
 class MI_CURRENT_Y : public WiSpin {
-    constexpr static const char *const label = N_("Y current (0 default)");
+    constexpr static const char *const label = N_("Y current");
 
 public:
     MI_CURRENT_Y();
-    void Store();
+    virtual void OnClick() override;
 };
 
 class MI_CURRENT_Z : public WiSpin {
@@ -159,7 +159,7 @@ class MI_CURRENT_Z : public WiSpin {
 
 public:
     MI_CURRENT_Z();
-    void Store();
+    virtual void OnClick() override;
 };
 
 class MI_CURRENT_E : public WiSpin {
@@ -167,7 +167,7 @@ class MI_CURRENT_E : public WiSpin {
 
 public:
     MI_CURRENT_E();
-    void Store();
+    virtual void OnClick() override;
 };
 
 class MI_RESET_CURRENTS : public IWindowMenuItem {

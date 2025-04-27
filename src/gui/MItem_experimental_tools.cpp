@@ -9,6 +9,7 @@
 #include "string.h" // memcmp
 #include "img_resources.hpp"
 #include <gui/menu_vars.h>
+#include "marlin_server.hpp"
 
 #define NOTRAN(x) string_view_utf8::MakeCPUFLASH((const uint8_t *)x)
 
@@ -163,8 +164,9 @@ static constexpr NumericInputConfig rms_current_spin_config = {
 MI_CURRENT_X::MI_CURRENT_X()
     : WiSpin(config_store().axis_rms_current_ma_X_.get(), rms_current_spin_config, NOTRAN(label)) {}
 
-void MI_CURRENT_X::Store() {
-    set_rms_current_ma_x(GetVal());
+void MI_CURRENT_X::OnClick() {
+    config_store().axis_rms_current_ma_X_.set(GetVal());
+    marlin_server::enqueue_gcode_printf("M906 X%i", int(GetVal()));
 }
 
 /*****************************************************************************/
@@ -172,26 +174,29 @@ void MI_CURRENT_X::Store() {
 MI_CURRENT_Y::MI_CURRENT_Y()
     : WiSpin(config_store().axis_rms_current_ma_Y_.get(), rms_current_spin_config, NOTRAN(label)) {}
 
-void MI_CURRENT_Y::Store() {
-    set_rms_current_ma_y(GetVal());
+void MI_CURRENT_Y::OnClick() {
+    config_store().axis_rms_current_ma_Y_.set(GetVal());
+    marlin_server::enqueue_gcode_printf("M906 Y%i", int(GetVal()));
 }
 
 /*****************************************************************************/
 // MI_CURRENT_Z
 MI_CURRENT_Z::MI_CURRENT_Z()
-    : WiSpin(get_rms_current_ma_z(), rms_current_spin_config, NOTRAN(label)) {}
+    : WiSpin(config_store().axis_rms_current_ma_Z_.get(), rms_current_spin_config, NOTRAN(label)) {}
 
-void MI_CURRENT_Z::Store() {
-    set_rms_current_ma_z(GetVal());
+void MI_CURRENT_Z::OnClick() {
+    config_store().axis_rms_current_ma_Z_.set(GetVal());
+    marlin_server::enqueue_gcode_printf("M906 Z%i", int(GetVal()));
 }
 
 /*****************************************************************************/
 // MI_CURRENT_E
 MI_CURRENT_E::MI_CURRENT_E()
-    : WiSpin(get_rms_current_ma_e(), rms_current_spin_config, NOTRAN(label)) {}
+    : WiSpin(config_store().axis_rms_current_ma_E0_.get(), rms_current_spin_config, NOTRAN(label)) {}
 
-void MI_CURRENT_E::Store() {
-    set_rms_current_ma_e(GetVal());
+void MI_CURRENT_E::OnClick() {
+    config_store().axis_rms_current_ma_E0_.set(GetVal());
+    marlin_server::enqueue_gcode_printf("M906 E%i", int(GetVal()));
 }
 
 /*****************************************************************************/

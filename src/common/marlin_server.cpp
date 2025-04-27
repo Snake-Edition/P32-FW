@@ -609,13 +609,27 @@ void init(void) {
     SteelSheets::CheckIfCurrentValid();
 #endif
 
-#if PRINTER_IS_PRUSA_MINI()
-    X_BED_SIZE = get_x_length_mm();
-    Y_BED_SIZE = get_y_length_mm();
-    FILAMENT_CHANGE_FAST_LOAD_LENGTH = get_e_length_mm();
-#endif
-
     settings_load();
+
+    // Set motor currents
+    int16_t cx = config_store().axis_rms_current_ma_X_.get();
+    if (cx <= 0) {
+        cx = defaults::axis_rms_current_ma_X_;
+    }
+    int16_t cy = config_store().axis_rms_current_ma_Y_.get();
+    if (cy <= 0) {
+        cy = defaults::axis_rms_current_ma_Y_;
+    }
+    int16_t cz = config_store().axis_rms_current_ma_Z_.get();
+    if (cz <= 0) {
+        cz = defaults::axis_rms_current_ma_Z_;
+    }
+    int16_t ce = config_store().axis_rms_current_ma_E0_.get();
+    if (ce <= 0) {
+        ce = defaults::axis_rms_current_ma_E0_;
+    }
+
+    marlin_server::enqueue_gcode_printf("M906 X%i Y%i Z%i E%i", cx, cy, cz, ce);
 }
 
 void print_fan_spd() {
@@ -1060,6 +1074,13 @@ bool inject(InjectQueueRecord record) {
 
 static void settings_load() {
     (void)settings.reset();
+
+#if PRINTER_IS_PRUSA_MINI()
+    X_BED_SIZE = get_x_length_mm();
+    Y_BED_SIZE = get_y_length_mm();
+    FILAMENT_CHANGE_FAST_LOAD_LENGTH = get_e_length_mm();
+#endif
+
 #if HAS_SHEET_PROFILES()
     probe_offset.z = SteelSheets::GetZOffset();
 #endif
