@@ -732,7 +732,9 @@ void Pause::eject_process([[maybe_unused]] Response response) {
     }
 #endif
 
-    ram_filament(98);
+    if (!ram_filament(98)) {
+        return; // Ramming unsuccessful (stopped by the user (button Stop) or temp not safe to extrude)
+    }
 
     setPhase(is_unstoppable() ? PhasesLoadUnload::Ejecting_unstoppable : PhasesLoadUnload::Ejecting_stoppable, 99);
     unload_filament();
@@ -916,8 +918,9 @@ void Pause::ram_sequence_process([[maybe_unused]] Response response) {
     }
 #endif
 
-    ram_filament(50);
-    set(LoadState::unload);
+    if (ram_filament(50)) {
+        set(LoadState::unload);
+    }
 }
 
 void Pause::unload_process([[maybe_unused]] Response response) {
@@ -1386,9 +1389,10 @@ void Pause::filament_change(const pause::Settings &settings_, bool is_filament_s
     ui.reset_status();
 #endif
 }
-void Pause::ram_filament(uint8_t progress_percent) {
+
+bool Pause::ram_filament(uint8_t progress_percent) {
     if (!ensureSafeTemperatureNotifyProgress(0, 50)) {
-        return;
+        return false;
     }
 
     setPhase(is_unstoppable() ? PhasesLoadUnload::Ramming_unstoppable : PhasesLoadUnload::Ramming_stoppable, progress_percent);
@@ -1410,6 +1414,7 @@ void Pause::ram_filament(uint8_t progress_percent) {
     ramming_sequence->execute([this] {
         return !check_user_stop(getResponse());
     });
+    return true;
 }
 
 void Pause::unload_filament() {

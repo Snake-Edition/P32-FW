@@ -327,7 +327,9 @@ private:
     /// If Help response is displayed, shows a help dialog and provides options to resolve
     void handle_help(Response response);
 
-    void ram_filament(uint8_t progress_percent);
+    /// @returns false if ramming was unsuccessful (temperature not safe or user stopped the action)
+    bool ram_filament(uint8_t progress_percent);
+
     void unload_filament();
 
     // create finite state machine and automatically destroy it at the end of scope
