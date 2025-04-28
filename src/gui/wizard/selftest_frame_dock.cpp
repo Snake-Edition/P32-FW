@@ -2,6 +2,7 @@
 #include "i18n.h"
 #include "img_resources.hpp"
 #include <guiconfig/wizard_config.hpp>
+#include <logging/log.hpp>
 
 #include <algorithm>
 
