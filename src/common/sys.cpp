@@ -1,7 +1,6 @@
 /// @file
 #include <common/sys.hpp>
-
-#include <stm32f4xx.h>
+#include <core_cm4.h>
 
 [[noreturn]] void __RAM_FUNC sys_reset() {
     // This needs to be RAM function as it is called when erasing the flash.
