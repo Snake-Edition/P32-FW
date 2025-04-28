@@ -22,7 +22,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
   which uses print fan to speed up cooling.
 8. **Game**: Instead of printing you can enjoy simple game.
 9. ~~**Bigger time**: Printing and remaining time is now bigger.~~
-10. **Selftest check**: Now you can select `Ignore` to immediately pass all selftests.
+10. ~~**Selftest check**: Now you can select `Ignore` to immediately pass all selftests.~~
 11. ~~**Temperature calibration**: You can calibrate PID temperature control for your hotend/bed directly from the menu. Calibration does 5 cycles.~~
 12. ~~**Total time**: Elapsed, Remaining and Total or End time are shown during printing.~~
 13.
