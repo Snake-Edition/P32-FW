@@ -614,19 +614,19 @@ void init(void) {
     // Set motor currents
     int16_t cx = config_store().axis_rms_current_ma_X_.get();
     if (cx <= 0) {
-        cx = defaults::axis_rms_current_ma_X_;
+        cx = config_store().axis_rms_current_ma_X_.default_val;
     }
     int16_t cy = config_store().axis_rms_current_ma_Y_.get();
     if (cy <= 0) {
-        cy = defaults::axis_rms_current_ma_Y_;
+        cy = config_store().axis_rms_current_ma_Y_.default_val;
     }
     int16_t cz = config_store().axis_rms_current_ma_Z_.get();
     if (cz <= 0) {
-        cz = defaults::axis_rms_current_ma_Z_;
+        cz = config_store().axis_rms_current_ma_Z_.default_val;
     }
     int16_t ce = config_store().axis_rms_current_ma_E0_.get();
     if (ce <= 0) {
-        ce = defaults::axis_rms_current_ma_E0_;
+        ce = config_store().axis_rms_current_ma_E0_.default_val;
     }
 
     marlin_server::enqueue_gcode_printf("M906 X%i Y%i Z%i E%i", cx, cy, cz, ce);
