@@ -401,7 +401,7 @@ void resume_loop() {
     }
 
     case ResumeState::Unpark:
-        if (queue.has_commands_queued() || planner.processing()) {
+        if (marlin_server::is_processing()) {
             break;
         }
 
@@ -427,7 +427,7 @@ void resume_loop() {
         break;
 
     case ResumeState::ParkForPause:
-        if (queue.has_commands_queued() || planner.processing()) {
+        if (marlin_server::is_processing()) {
             break;
         }
 
@@ -438,7 +438,7 @@ void resume_loop() {
         break;
 
     case ResumeState::Finish:
-        if (queue.has_commands_queued() || planner.processing()) {
+        if (marlin_server::is_processing()) {
             break;
         }
 
