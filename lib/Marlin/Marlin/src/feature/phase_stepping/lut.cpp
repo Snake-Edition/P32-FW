@@ -1,7 +1,6 @@
 #include "lut.hpp"
 #include "common.hpp"
 
-#include <hwio_pindef.h>
 #include <buddy/phase_stepping_opts.h>
 
 #include <array>
