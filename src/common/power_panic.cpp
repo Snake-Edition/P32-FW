@@ -11,6 +11,7 @@
 #include <option/has_embedded_esp32.h>
 #include <option/has_toolchanger.h>
 #include <option/has_chamber_api.h>
+#include <option/has_nozzle_cleaner.h>
 
 #if HAS_TOOLCHANGER()
     #include <module/prusa/toolchanger.h>
@@ -46,6 +47,9 @@
 #endif
 #if HAS_CHAMBER_API()
     #include <feature/chamber/chamber.hpp>
+#endif
+#if HAS_NOZZLE_CLEANER()
+    #include <nozzle_cleaner.hpp>
 #endif
 
 #include "../lib/Marlin/Marlin/src/feature/input_shaper/input_shaper_config.hpp"
@@ -395,6 +399,8 @@ void resume_loop() {
             snprintf(cmd_buf, sizeof(cmd_buf), "M190 S%d", state_buf.planner.target_bed);
             marlin_server::enqueue_gcode(cmd_buf);
         }
+
+        marlin_server::enqueue_gcode("G12"); // clean nozzle
 
         resume_state = ResumeState::Unpark;
         break;
