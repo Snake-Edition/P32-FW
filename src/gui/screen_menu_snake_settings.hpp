@@ -52,3 +52,26 @@ public:
     ScreenMenuSnakeTuneSettings();
     virtual void windowEvent(window_t *sender, GUI_event_t ev, void *param) override;
 };
+
+/*********************************************************************************/
+
+using ScreenMenuControlTuneSettings__ = ScreenMenu<EFooter::On, MI_RETURN,
+    MI_MOVE_AXIS,
+    MI_X_HOME, MI_Y_HOME>;
+
+class ScreenMenuControlTuneSettings : public ScreenMenuControlTuneSettings__ {
+public:
+    ScreenMenuControlTuneSettings();
+    virtual void windowEvent(window_t *sender, GUI_event_t ev, void *param) override;
+};
+
+/*********************************************************************************/
+
+using ScreenMenuSettingsTuneSettings__ = ScreenMenu<EFooter::On, MI_RETURN,
+    MI_INPUT_SHAPER, MI_USER_INTERFACE, MI_LANG_AND_TIME, MI_NETWORK>;
+
+class ScreenMenuSettingsTuneSettings : public ScreenMenuSettingsTuneSettings__ {
+public:
+    ScreenMenuSettingsTuneSettings();
+    virtual void windowEvent(window_t *sender, GUI_event_t ev, void *param) override;
+};

@@ -461,6 +461,28 @@ protected:
 
 /* -===============================================(:>- */
 
+class MI_X_HOME : public IWindowMenuItem {
+    constexpr static const char *const label = N_("Home X Axis");
+
+public:
+    MI_X_HOME();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_Y_HOME : public IWindowMenuItem {
+    constexpr static const char *const label = N_("Home Y Axis");
+
+public:
+    MI_Y_HOME();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+/* -===============================================(:>- */
+
 class MI_NOZZLE_CALIBRATION_TEMP : public WiSpin {
     constexpr static const char *const label = N_("Nozzle calibration temperature");
 

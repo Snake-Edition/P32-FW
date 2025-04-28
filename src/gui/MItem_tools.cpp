@@ -708,6 +708,33 @@ void MI_Y_SENSITIVITY_RESET::click(IWindowMenu & /*window_menu*/) {
 }
 
 /* -===============================================(:>- */
+MI_X_HOME::MI_X_HOME()
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_X_HOME::click(IWindowMenu & /*window_menu*/) {
+    if (marlin_vars().gqueue != 0) {
+        MsgBoxWarning(_(printer_busy_text), Responses_Ok);
+        return;
+    }
+
+    marlin_server::enqueue_gcode_printf("G28 X");
+}
+
+MI_Y_HOME::MI_Y_HOME()
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_Y_HOME::click(IWindowMenu & /*window_menu*/) {
+    if (marlin_vars().gqueue != 0) {
+        MsgBoxWarning(_(printer_busy_text), Responses_Ok);
+        return;
+    }
+
+    marlin_server::enqueue_gcode_printf("G28 Y");
+}
+
+/* -===============================================(:>- */
 static constexpr NumericInputConfig pid_param_spin_config {
     .min_value = -999,
     .max_value = 999,
