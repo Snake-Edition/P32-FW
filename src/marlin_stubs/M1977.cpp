@@ -1,3 +1,4 @@
+#include "libs/nozzle.h"
 #include <marlin_stubs/M1977.hpp>
 
 #include <buddy/unreachable.hpp>
@@ -244,6 +245,11 @@ namespace state {
 #endif
         }
         Planner::synchronize();
+
+#if PRINTER_IS_PRUSA_iX()
+        nozzle.move_out_of_nozzle_cleaner_area();
+#endif
+
 #if HAS_ATTACHABLE_ACCELEROMETER()
         return PhasesPhaseStepping::wait_for_extruder_temperature;
 #else

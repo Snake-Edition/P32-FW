@@ -22,6 +22,7 @@
 #pragma once
 
 #include "../inc/MarlinConfig.h"
+#include <option/has_nozzle_cleaner.h>
 
 /**
  * @brief Nozzle class
@@ -31,6 +32,9 @@
 class Nozzle {
   public:
     static void park(const uint8_t z_action, const xyz_pos_t &park={{XYZ_NOZZLE_PARK_POINT}}) __Os;
+#if HAS_NOZZLE_CLEANER()
+    static void move_out_of_nozzle_cleaner_area();
+#endif
 };
 
 extern Nozzle nozzle;
