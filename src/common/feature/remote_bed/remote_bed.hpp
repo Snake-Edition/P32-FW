@@ -10,4 +10,6 @@ float get_heater_current();
 
 uint16_t get_mcu_temperature();
 
+void safe_state();
+
 } // namespace remote_bed

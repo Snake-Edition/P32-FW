@@ -85,6 +85,8 @@ public:
 
     uint16_t get_mcu_temperature();
 
+    void safe_state();
+
 private:
     MODBUS_DISCRETE GeneralStatus {
         bool power_panic_status {};

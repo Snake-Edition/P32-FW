@@ -9,6 +9,7 @@
 #include <option/has_puppies.h>
 #include <option/has_dwarf.h>
 #include <option/has_embedded_esp32.h>
+#include <option/has_remote_bed.h>
 #include <option/has_toolchanger.h>
 #include <option/has_chamber_api.h>
 #include <option/has_nozzle_cleaner.h>
@@ -50,6 +51,9 @@
 #endif
 #if HAS_NOZZLE_CLEANER()
     #include <nozzle_cleaner.hpp>
+#endif
+#if HAS_REMOTE_BED()
+    #include <feature/remote_bed/remote_bed.hpp>
 #endif
 
 #include "../lib/Marlin/Marlin/src/feature/input_shaper/input_shaper_config.hpp"
@@ -852,8 +856,8 @@ void ac_fault_isr() {
     power_panic_state = PPState::Triggered;
 
     // power off devices in order of power draw
-#if PRINTER_IS_PRUSA_iX()
-    buddy::hw::modularBedReset.write(buddy::hw::Pin::State::high);
+#if HAS_REMOTE_BED()
+    remote_bed::safe_state();
 #endif
     runtime_state.orig_axis_known_position = axis_known_position;
     disable_XY();

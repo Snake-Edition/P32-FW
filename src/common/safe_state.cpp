@@ -13,6 +13,10 @@
 #include <option/has_dwarf.h>
 #include "CFanCtl3Wire.hpp"
 
+#if HAS_REMOTE_BED()
+    #include <common/feature/remote_bed/remote_bed.hpp>
+#endif
+
 using namespace buddy::hw;
 
 //! @brief Put hardware into safe state
@@ -48,8 +52,7 @@ void hwio_safe_state(void) {
     #endif
     // Disable heated bed
     #if HAS_REMOTE_BED()
-    // Set power panic for modular bed
-    modularBedReset.set();
+    remote_bed::safe_state();
     #else
     // disable heatbed
     gpio_init(MARLIN_PIN(BED_HEAT), GPIO_MODE_OUTPUT_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW);
