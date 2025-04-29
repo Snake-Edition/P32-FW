@@ -1283,13 +1283,6 @@
 #endif
 
 /**
- * FAST PWM FAN Settings
- */
-#if ENABLED(FAST_PWM_FAN) && !defined(FAST_PWM_FAN_FREQUENCY)
-  #define FAST_PWM_FAN_FREQUENCY ((F_CPU) / (2 * 255 * 1)) // Fan frequency default
-#endif
-
-/**
  * MIN/MAX case light PWM scaling
  */
 #if HAS_CASE_LIGHT
