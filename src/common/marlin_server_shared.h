@@ -5,8 +5,6 @@
 #include <time.h>
 #include <option/has_selftest.h>
 #include <option/has_cancel_object.h>
-#include "marlin_server_state.h"
-#include "utility_extensions.hpp"
 
 namespace marlin_server {
 

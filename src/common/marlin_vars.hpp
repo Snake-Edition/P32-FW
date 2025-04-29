@@ -14,6 +14,7 @@
 #include <assert.h>
 #include <tuple>
 #include <marlin_events.h>
+#include <marlin_server_types/marlin_server_state.h>
 
 #include <option/has_cancel_object.h>
 
