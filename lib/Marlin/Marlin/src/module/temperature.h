@@ -33,7 +33,7 @@
   #include "../feature/power.h"
 #endif
 
-#include <option/has_remote_bed.h>
+#include <option/has_local_bed.h>
 #include <option/has_modular_bed.h>
 #if HAS_MODULAR_BED()
   #include "modular_heatbed.h"
@@ -105,7 +105,7 @@ enum ADCSensorState : char {
   #if HAS_TEMP_ADC_0
     PrepareTemp_0, MeasureTemp_0,
   #endif
-  #if HAS_HEATED_BED
+  #if HAS_LOCAL_BED()
     PrepareTemp_BED, MeasureTemp_BED,
   #endif
   #if HAS_TEMP_CHAMBER
@@ -299,7 +299,7 @@ class Temperature {
     #endif
 
     // For metrics only
-    #if !HAS_REMOTE_BED()
+    #if HAS_LOCAL_BED()
       std::atomic<int> bed_pwm;
     #endif
     std::atomic<int> nozzle_pwm;

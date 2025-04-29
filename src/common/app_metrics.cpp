@@ -10,7 +10,7 @@
 #include "heap.h"
 #include <adc.hpp>
 #include <option/has_door_sensor.h>
-#include <option/has_remote_bed.h>
+#include <option/has_local_bed.h>
 #include <option/has_advanced_power.h>
 #if HAS_ADVANCED_POWER()
     #include "advanced_power.hpp"
@@ -209,7 +209,7 @@ void RecordMarlinVariables() {
     METRIC_DEF(metric_nozzle_pwm, "nozzle_pwm", METRIC_VALUE_INTEGER, 1000, METRIC_DISABLED);
     metric_record_integer(&metric_nozzle_pwm, thermalManager.nozzle_pwm);
 
-#if !HAS_REMOTE_BED()
+#if HAS_LOCAL_BED()
     METRIC_DEF(metric_bed_pwm, "bed_pwm", METRIC_VALUE_INTEGER, 1000, METRIC_DISABLED);
     metric_record_integer(&metric_bed_pwm, thermalManager.bed_pwm);
 #endif

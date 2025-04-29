@@ -260,9 +260,6 @@
 #ifndef HEATER_5_PIN
   #define HEATER_5_PIN -1
 #endif
-#ifndef HEATER_BED_PIN
-  #define HEATER_BED_PIN -1
-#endif
 
 #ifndef TEMP_0_PIN
   #define TEMP_0_PIN -1
@@ -281,9 +278,6 @@
 #endif
 #ifndef TEMP_5_PIN
   #define TEMP_5_PIN -1
-#endif
-#ifndef TEMP_BED_PIN
-  #define TEMP_BED_PIN -1
 #endif
 
 #ifndef LED_PIN

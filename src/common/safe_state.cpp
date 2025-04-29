@@ -7,6 +7,7 @@
 #include "config.h"
 #include "appmain.hpp"
 #include <device/board.h>
+#include <option/has_local_bed.h>
 #include <option/has_remote_bed.h>
 #include "printers.h"
 #include "fanctl.hpp"
@@ -53,7 +54,8 @@ void hwio_safe_state(void) {
     // Disable heated bed
     #if HAS_REMOTE_BED()
     remote_bed::safe_state();
-    #else
+    #endif
+    #if HAS_LOCAL_BED()
     // disable heatbed
     gpio_init(MARLIN_PIN(BED_HEAT), GPIO_MODE_OUTPUT_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW);
     gpio_set(MARLIN_PIN(BED_HEAT), 0);
@@ -111,7 +113,9 @@ void buddy_disable_heaters(void) {
 #if BOARD_IS_BUDDY() || BOARD_IS_XBUDDY()
     gpio_init(MARLIN_PIN(HEAT0), GPIO_MODE_OUTPUT_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW);
     gpio_set(MARLIN_PIN(HEAT0), 0);
+#endif
 
+#if HAS_LOCAL_BED()
     gpio_init(MARLIN_PIN(BED_HEAT), GPIO_MODE_OUTPUT_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW);
     gpio_set(MARLIN_PIN(BED_HEAT), 0);
 #endif

@@ -5,6 +5,7 @@
 
 #include <inttypes.h>
 
+#include <buddy/unreachable.hpp>
 #include "hwio.h"
 #include "config.h"
 #include <device/hal.h>
@@ -29,7 +30,7 @@
 
 #include <option/has_loadcell.h>
 #include <option/has_gui.h>
-#include <option/has_remote_bed.h>
+#include <option/has_local_bed.h>
 
 #include <Pin.hpp>
 #include <cmath>
@@ -290,11 +291,6 @@ int digitalRead(uint32_t marlinPin) {
     case MARLIN_PIN(Z_MIN):
         return static_cast<bool>(buddy::hw::zMin.read());
 #endif
-#if HAS_REMOTE_BED()
-    case MARLIN_PIN(DUMMY): {
-        return 0;
-    }
-#endif
     default:
 #if _DEBUG
         if (!buddy::hw::physicalPinExist(marlinPin)) {
@@ -306,17 +302,22 @@ int digitalRead(uint32_t marlinPin) {
     }
 }
 
-#if !HAS_REMOTE_BED()
-static void analogWrite_HEATER_BED(int new_value) {
+#if HAS_LOCAL_BED()
+void analogWrite_HEATER_BED(uint32_t new_value) {
     thermalManager.bed_pwm = new_value;
 
-    static int old_value = 0;
+    static uint32_t old_value = 0;
     if (old_value != new_value) {
         static_assert(TIM3_default_Period == _pwm_analogWrite_max);
         hwio_pwm_set_val(&htim3, TIM_CHANNEL_3, new_value);
         old_value = new_value;
     }
 }
+
+uint32_t analogRead_TEMP_BED() {
+    return AdcGet::bed();
+}
+
 #endif
 
 static void analogWrite_HEATER_0(int new_value) {
@@ -376,13 +377,6 @@ void digitalWrite(uint32_t marlinPin, uint32_t ulVal) {
     }
 #endif //_DEBUG
     switch (marlinPin) {
-    case MARLIN_PIN(BED_HEAT):
-#if HAS_REMOTE_BED()
-        return;
-#else
-        analogWrite_HEATER_BED(ulVal ? _pwm_analogWrite_max : 0);
-        return;
-#endif
     case MARLIN_PIN(HEAT0):
         analogWrite_HEATER_0(ulVal ? _pwm_analogWrite_max : 0);
         return;
@@ -415,14 +409,6 @@ void digitalWrite(uint32_t marlinPin, uint32_t ulVal) {
 uint32_t analogRead(uint32_t ulPin) {
     if (HAL_ADC_Initialized) {
         switch (ulPin) {
-
-        case MARLIN_PIN(TEMP_BED):
-#if HAS_REMOTE_BED()
-            return 0;
-#else
-            return AdcGet::bed();
-#endif
-
         case MARLIN_PIN(TEMP_0):
 #if (BOARD_IS_BUDDY() || BOARD_IS_XBUDDY())
             return AdcGet::nozzle();
@@ -468,13 +454,6 @@ void analogWrite(uint32_t ulPin, uint32_t ulValue) {
         case MARLIN_PIN(FAN):
             Fans::print(0).set_pwm(ulValue);
             return;
-        case MARLIN_PIN(BED_HEAT):
-#if HAS_REMOTE_BED()
-            return;
-#else
-            analogWrite_HEATER_BED(ulValue);
-            return;
-#endif
         case MARLIN_PIN(HEAT0):
             analogWrite_HEATER_0(ulValue);
             return;

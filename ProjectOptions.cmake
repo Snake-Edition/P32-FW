@@ -322,6 +322,8 @@ set(PRINTERS_WITH_DWARF "XL" "XL_DEV_KIT")
 set_feature_for_printers_master_board(HAS_MODULAR_BED "iX" "XL" "XL_DEV_KIT")
 # REMOTE_BED means there is a daughterboard controlling the bed
 set_feature_for_printers_master_board(HAS_REMOTE_BED "iX" "XL" "XL_DEV_KIT")
+# LOCAL_BED means the motherboard is directly controlling the bed
+set_feature_for_printers_master_board(HAS_LOCAL_BED "COREONE" "MINI" "MK4" "MK3.5")
 # PUPPY_MODULARBED is remote modular bed implemented as a puppy, i.e. communicating over modbus
 set_feature_for_printers_master_board(HAS_PUPPY_MODULARBED "iX" "XL" "XL_DEV_KIT")
 

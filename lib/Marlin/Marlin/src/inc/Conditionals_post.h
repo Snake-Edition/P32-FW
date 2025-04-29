@@ -21,6 +21,9 @@
  */
 #pragma once
 
+#include <option/has_local_bed.h>
+#include <option/has_remote_bed.h>
+
 /**
  * Conditionals_post.h
  * Defines that depend on configuration but are not editable.
@@ -889,13 +892,11 @@
 #define HAS_TEMP_ADC_3 HAS_ADC_TEST(3)
 #define HAS_TEMP_ADC_4 HAS_ADC_TEST(4)
 #define HAS_TEMP_ADC_5 HAS_ADC_TEST(5)
-#define HAS_TEMP_ADC_BED HAS_ADC_TEST(BED)
 #define HAS_TEMP_ADC_CHAMBER HAS_ADC_TEST(CHAMBER)
 #define HAS_TEMP_ADC_HEATBREAK HAS_ADC_TEST(HEATBREAK)
 #define HAS_TEMP_ADC_BOARD HAS_ADC_TEST(BOARD)
 
 #define HAS_TEMP_HOTEND HAS_TEMP_ADC_0
-#define HAS_TEMP_BED HAS_TEMP_ADC_BED
 #define HAS_TEMP_CHAMBER HAS_TEMP_ADC_CHAMBER
 #define HAS_TEMP_HEATBREAK HAS_TEMP_ADC_HEATBREAK
 #define HAS_TEMP_BOARD HAS_TEMP_ADC_BOARD
@@ -909,11 +910,10 @@
 #define HAS_HEATER_3 (PIN_EXISTS(HEATER_3))
 #define HAS_HEATER_4 (PIN_EXISTS(HEATER_4))
 #define HAS_HEATER_5 (PIN_EXISTS(HEATER_5))
-#define HAS_HEATER_BED (PIN_EXISTS(HEATER_BED))
 #define HAS_HEATER_HEATBREAK (PIN_EXISTS(HEATER_HEATBREAK))
 
 // Shorthand for common combinations
-#define HAS_HEATED_BED (HAS_TEMP_BED && HAS_HEATER_BED)
+#define HAS_HEATED_BED (HAS_LOCAL_BED() || HAS_REMOTE_BED())
 #define BED_OR_CHAMBER (HAS_HEATED_BED || HAS_TEMP_CHAMBER)
 #define HAS_TEMP_SENSOR (HAS_TEMP_HOTEND || BED_OR_CHAMBER)
 

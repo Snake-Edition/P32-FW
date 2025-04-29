@@ -66,7 +66,6 @@
 //
 
 #define TEMP_0_PIN             MARLIN_PIN(TEMP_0)     // Analog Input
-//#define TEMP_BED_PIN           MARLIN_PIN(TEMP_BED)   // Analog Input
 
 #define TEMP_BOARD_PIN         MARLIN_PIN(TEMP_BOARD) // Analog Input
 #define TEMP_HEATBREAK_PIN     MARLIN_PIN(TEMP_HEATBREAK) // Analog Input
@@ -76,7 +75,6 @@
 //
 
 #define HEATER_0_PIN             MARLIN_PIN(HEAT0)
-//#define HEATER_BED_PIN         MARLIN_PIN(BED_HEAT)
 
 #define FAN_PIN                MARLIN_PIN(FAN)
 

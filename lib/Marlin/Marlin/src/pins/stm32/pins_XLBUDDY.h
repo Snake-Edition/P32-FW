@@ -100,8 +100,6 @@
 
 
 
-#define TEMP_BED_PIN           MARLIN_PIN(TEMP_BED)   // Dummy, measured by puppy
-
 #define TEMP_BOARD_PIN         MARLIN_PIN(THERM2) // Dummy, measured by puppy
 #define TEMP_HEATBREAK_PIN     MARLIN_PIN(TEMP_HEATBREAK) // Dummy, measured by puppy
 #define TEMP_CHAMBER_PIN       MARLIN_PIN(AMBIENT) // Analog Input
@@ -119,8 +117,6 @@
 #define HEATER_3_PIN           MARLIN_PIN(HEAT0) // Dummy, measured by puppy
 #define HEATER_4_PIN           MARLIN_PIN(HEAT0) // Dummy, measured by puppy
 #define HEATER_5_PIN           MARLIN_PIN(HEAT0) // Dummy, measured by puppy
-
-#define HEATER_BED_PIN         MARLIN_PIN(BED_HEAT) // Dummy, measured by puppy
 
 #define FAN_PIN                MARLIN_PIN(FAN)
 

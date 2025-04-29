@@ -21,6 +21,8 @@
  */
 #pragma once
 
+#include <option/has_local_bed.h>
+
 //
 // Prepare a list of protected pins for M42/M43
 //
@@ -365,7 +367,11 @@
   #endif // HOTENDS > 1
 #endif // HOTENDS
 
-#define _BED_PINS HEATER_BED_PIN, analogInputToDigitalPin(TEMP_BED_PIN),
+#if HAS_LOCAL_BED()
+#define _BED_PINS MARLIN_PIN(BED_HEAT), MARLIN_PIN(TEMP_BED),
+#else
+#define _BED_PINS
+#endif
 
 //
 // Dual X, Dual Y, Multi-Z
@@ -493,8 +499,8 @@
   #define _Z_PROBE
 #endif
 
-#if TEMP_SENSOR_BED && PIN_EXISTS(HEATER_BED)
-  #define _HEATER_BED HEATER_BED_PIN,
+#if TEMP_SENSOR_BED && HAS_LOCAL_BED()
+  #define _HEATER_BED MARLIN_PIN(BED_HEAT),
 #else
   #define _HEATER_BED
 #endif

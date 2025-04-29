@@ -85,6 +85,7 @@
 #endif
 
 #include <option/has_dwarf.h>
+#include <option/has_local_bed.h>
 #include <option/has_remote_bed.h>
 #include <option/has_modular_bed.h>
 
@@ -124,11 +125,12 @@ Temperature thermalManager;
 #define _E_PSTR(h,N) ((HOTENDS) > N && (h) == N) ? PSTR(LCD_STR_E##N) :
 #define HEATER_PSTR(h) _BED_PSTR(h) _CHAMBER_PSTR(h) _E_PSTR(h,1) _E_PSTR(h,2) _E_PSTR(h,3) _E_PSTR(h,4) _E_PSTR(h,5) _HEATBREAK_PSTR(h,0) _HEATBREAK_PSTR(h,1) _HEATBREAK_PSTR(h,2) _HEATBREAK_PSTR(h,3) _HEATBREAK_PSTR(h,4) _HEATBREAK_PSTR(h,5) PSTR(LCD_STR_E0)
 
-#if HAS_HEATED_BED
-  #define MIN_BED_POWER 0
-  #define MAX_BED_POWER 255
-  #define HEATER_BED_INVERTING false
-  #define WRITE_HEATER_BED(v) WRITE(HEATER_BED_PIN, (v) ^ HEATER_BED_INVERTING)
+#define MIN_BED_POWER 0
+#define MAX_BED_POWER 255
+#if HAS_LOCAL_BED()
+  #define WRITE_HEATER_BED(v) analogWrite_HEATER_BED((v) ? MAX_BED_POWER : MIN_BED_POWER)
+#else
+  #define WRITE_HEATER_BED(v)
 #endif
 
 // public:
@@ -390,7 +392,7 @@ volatile bool Temperature::temp_meas_ready = false;
         // power manager from shutting us down, leading to temperature check failure.
         #define SHV(B,H) do {                         \
           if (isbed) {                                \
-            analogWrite(HEATER_BED_PIN, B);           \
+            analogWrite_HEATER_BED(B);                \
             temp_bed.soft_pwm_amount = B;             \
           } else {                                    \
             analogWrite(HEATER_0_PIN, H);             \
@@ -405,7 +407,7 @@ volatile bool Temperature::temp_meas_ready = false;
     #elif ENABLED(PIDTEMPBED)
       #define GHV(B,H) B
       #if ENABLED(HW_PWM_HEATERS)
-        #define SHV(B,H) do{ analogWrite(HEATER_BED_PIN, B); }while(0)
+        #define SHV(B,H) analogWrite_HEATER_BED(B)
       #else
         #define SHV(B,H) (temp_bed.soft_pwm_amount = B)
       #endif
@@ -414,7 +416,7 @@ volatile bool Temperature::temp_meas_ready = false;
     #else
       #define GHV(B,H) H
       #if ENABLED(HW_PWM_HEATERS)
-        #define SHV(B,H) do{ analogWrite(HEATER_BED_PIN, H); }while(0)
+        #define SHV(B,H) analogWrite_HEATER_BED(H)
       #else
         #define SHV(B,H) (temp_hotend[heater].soft_pwm_amount = H)
       #endif
@@ -1598,7 +1600,7 @@ void Temperature::manage_heater() {
 
     } while (false);
 
-  #endif // HAS_HEATED_BED
+  #endif
 
   #if HAS_HEATED_CHAMBER
 
@@ -1713,7 +1715,7 @@ void Temperature::manage_heater() {
       #error "This is made for one hotend!"
     #endif /* HOTENDS */
     #if HAS_HEATED_BED
-      analogWrite(HEATER_BED_PIN, temp_bed.soft_pwm_amount);
+      analogWrite_HEATER_BED(temp_bed.soft_pwm_amount);
     #endif /* HAS_HEATED_BED */
   #endif
 
@@ -1981,8 +1983,8 @@ void Temperature::init() {
     OUT_WRITE(HEATER_5_PIN, HEATER_5_INVERTING);
   #endif
 
-  #if HAS_HEATED_BED
-    OUT_WRITE(HEATER_BED_PIN, HEATER_BED_INVERTING);
+  #if HAS_LOCAL_BED()
+    WRITE_HEATER_BED(LOW);
   #endif
 
   #if HAS_HEATED_CHAMBER
@@ -2018,9 +2020,6 @@ void Temperature::init() {
   #endif
   #if HAS_TEMP_ADC_5
     HAL_ANALOG_SELECT(TEMP_5_PIN);
-  #endif
-  #if HAS_HEATED_BED
-    HAL_ANALOG_SELECT(TEMP_BED_PIN);
   #endif
   #if PRINTER_IS_PRUSA_iX()
     HAL_ANALOG_SELECT(TEMP_PSU_PIN);
@@ -2368,14 +2367,18 @@ void Temperature::disable_hotend() {
 }
 
 void Temperature::disable_local_heaters() {
-#if HAS_DWARF() && HAS_REMOTE_BED()
+#if HAS_DWARF() && HAS_REMOTE_BED() && !HAS_LOCAL_BED()
     // No local heater present
-#elif !HAS_DWARF() && HAS_REMOTE_BED()
+#elif !HAS_DWARF() && HAS_REMOTE_BED() && !HAS_LOCAL_BED()
     disable_hotend();
-#elif !HAS_DWARF() && !HAS_REMOTE_BED()
+#elif !HAS_DWARF() && !HAS_REMOTE_BED() && HAS_LOCAL_BED()
     disable_all_heaters();
 #else
-#error "Don't know how to disable the bed but not dwarf"
+#if BOARD_IS_DWARF()
+  disable_all_heaters();
+#else
+  #error
+#endif
 #endif
 }
 
@@ -2392,8 +2395,10 @@ void Temperature::disable_heaters(Temperature::disable_bed_t disable_bed) {
   #if HAS_HEATED_BED
     if (disable_bed == disable_bed_t::yes){
       setTargetBed(0);
+      #if HAS_LOCAL_BED()
       temp_bed.soft_pwm_amount = 0;
       WRITE_HEATER_BED(LOW);
+      #endif
     }
   #endif
 
@@ -2570,7 +2575,10 @@ void Temperature::readings_ready() {
     #else
       #define BEDCMP(A,B) ((A)>=(B))
     #endif
-    #if !HAS_REMOTE_BED()//With remote bed we get temperatures in °C from controller. No raw values to check.
+    #if HAS_REMOTE_BED()
+      //With remote bed we get temperatures in °C from controller. No raw values to check.
+    #endif
+    #if HAS_LOCAL_BED()
     const bool bed_on = (temp_bed.target > 0)
       #if ENABLED(PIDTEMPBED)
         || (temp_bed.soft_pwm_amount > 0)
@@ -2670,7 +2678,7 @@ void Temperature::isr() {
       static SoftPWM soft_pwm_hotend[HOTENDS];
     #endif
 
-    #if HAS_HEATED_BED
+    #if HAS_LOCAL_BED()
       static SoftPWM soft_pwm_bed;
     #endif
 
@@ -2718,7 +2726,7 @@ void Temperature::isr() {
           #endif // HOTENDS > 1
         #endif // HOTENDS
 
-        #if HAS_HEATED_BED
+        #if HAS_LOCAL_BED()
           _PWM_MOD(BED,soft_pwm_bed,temp_bed);
         #endif
 
@@ -2748,7 +2756,7 @@ void Temperature::isr() {
           #endif // HOTENDS > 1
         #endif // HOTENDS
 
-        #if HAS_HEATED_BED
+        #if HAS_LOCAL_BED()
           _PWM_LOW(BED, soft_pwm_bed);
         #endif
 
@@ -2823,9 +2831,9 @@ void Temperature::isr() {
       case MeasureTemp_0: ACCUMULATE_ADC(temp_hotend[0]); break;
     #endif
 
-    #if HAS_HEATED_BED
-      case PrepareTemp_BED: HAL_START_ADC(TEMP_BED_PIN); break;
-      case MeasureTemp_BED: ACCUMULATE_ADC(temp_bed); break;
+    #if HAS_LOCAL_BED()
+      case PrepareTemp_BED: break;
+      case MeasureTemp_BED: temp_bed.sample(analogRead_TEMP_BED()); break;
     #endif
 
     #if HAS_TEMP_CHAMBER
