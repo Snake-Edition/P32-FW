@@ -90,14 +90,14 @@ void CorrectedCurrentLut::_update_phase_shift() {
         int phase_shift = 0;
         for (size_t n = 0; n != fixed_spectrum.size(); n++) {
             const auto &s = fixed_spectrum[n];
-            phase_shift += SIN_FRACTION * s.mag * sin_lut(n * item_phase + s.pha);
+            phase_shift += s.mag * sin_lut(n * item_phase + s.pha);
         }
         _phase_shift[i] = round_fixed(phase_shift, SIN_LUT_FRACTIONAL + MAG_FRACTIONAL);
     }
 }
 
 int CorrectedCurrentLut::_phase_shift_for_harmonic(int idx, int harmonic, int phase, int mag) {
-    int raw_phase_shift = SIN_FRACTION * mag * sin_lut(harmonic * idx * SIN_FRACTION + phase);
+    int raw_phase_shift = mag * sin_lut(harmonic * idx * SIN_FRACTION + phase);
     return round_fixed(raw_phase_shift, SIN_LUT_FRACTIONAL + MAG_FRACTIONAL);
 }
 
