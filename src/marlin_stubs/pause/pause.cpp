@@ -731,6 +731,27 @@ void Pause::mmu_load_process([[maybe_unused]] Response response) {
     setPhase(PhasesLoadUnload::IsColor, 99);
     set(LoadState::color_correct_ask);
 }
+
+void Pause::mmu_unload_start_process([[maybe_unused]] Response response) {
+    if (load_type == LoadType::unload) {
+        MMU2::mmu2.unload();
+        set(LoadState::_finished);
+    } else if (load_type == LoadType::filament_change) {
+        settings.mmu_filament_to_load = MMU2::mmu2.get_current_tool();
+
+        // No filament loaded in MMU, we can't continue, as we don't know what slot to load
+        if (settings.mmu_filament_to_load == MMU2::FILAMENT_UNKNOWN) {
+            set(LoadState::unload_finish_or_change);
+            return;
+        }
+
+        MMU2::mmu2.unload();
+        MMU2::mmu2.eject_filament(settings.mmu_filament_to_load);
+        set(LoadState::unload_finish_or_change);
+    }
+
+    return;
+}
 #endif
 
 void Pause::eject_process([[maybe_unused]] Response response) {
@@ -871,23 +892,7 @@ void Pause::unload_start_process([[maybe_unused]] Response response) {
 
 #if HAS_MMU2()
     if (FSensors_instance().HasMMU()) {
-        if (load_type == LoadType::unload) {
-            MMU2::mmu2.unload();
-            set(LoadState::_finished);
-        } else if (load_type == LoadType::filament_change) {
-            settings.mmu_filament_to_load = MMU2::mmu2.get_current_tool();
-
-            // No filament loaded in MMU, we can't continue, as we don't know what slot to load
-            if (settings.mmu_filament_to_load == MMU2::FILAMENT_UNKNOWN) {
-                set(LoadState::unload_finish_or_change);
-                return;
-            }
-
-            MMU2::mmu2.unload();
-            MMU2::mmu2.eject_filament(settings.mmu_filament_to_load);
-            set(LoadState::unload_finish_or_change);
-        }
-
+        set(LoadState::mmu_unload_start);
         return;
     }
 #endif

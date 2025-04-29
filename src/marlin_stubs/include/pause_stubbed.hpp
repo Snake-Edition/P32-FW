@@ -62,6 +62,7 @@ protected:
         mmu_load_start,
         mmu_load_ask,
         mmu_load,
+        mmu_unload_start,
 #endif
 #if HAS_NOZZLE_CLEANER()
         load_nozzle_clean,
@@ -215,6 +216,7 @@ private:
     void mmu_load_start_process(Response response);
     void mmu_load_ask_process(Response response);
     void mmu_load_process(Response response);
+    void mmu_unload_start_process(Response response);
 #endif
 #if HAS_NOZZLE_CLEANER()
     void load_nozzle_clean_process(Response response);
@@ -255,6 +257,7 @@ private:
             { LoadState::mmu_load_start, &Pause::mmu_load_start_process },
             { LoadState::mmu_load_ask, &Pause::mmu_load_ask_process },
             { LoadState::mmu_load, &Pause::mmu_load_process },
+            { LoadState::mmu_unload_start, &Pause::mmu_unload_start_process },
 #endif
 #if HAS_NOZZLE_CLEANER()
             { LoadState::load_nozzle_clean, &Pause::load_nozzle_clean_process },
