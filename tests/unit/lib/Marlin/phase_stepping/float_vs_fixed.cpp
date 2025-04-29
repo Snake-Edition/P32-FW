@@ -32,7 +32,7 @@ void similar_values(int a, int b, const char *name) {
     // The smaller one of them, but at least 1 to make division work.
     const double divisor = std::max(1, std::min(std::abs(a), std::abs(b)));
     // Allow up to 5% difference for rounding errors.
-    REQUIRE(diff / divisor < 0.05);
+    CHECK(diff / divisor < 0.05);
 }
 
 } // namespace
@@ -42,14 +42,17 @@ void similar_values(int a, int b, const char *name) {
 TEST_CASE("PhaseStepping - fixed vs float") {
     fill_data fill;
     const char *name;
+    FILE *f;
     SECTION("Uncalibrated") {
         fill = uncalibrated;
         name = "Uncalibrated";
+        f = fopen("uncalibrated.csv", "w");
     }
 
     SECTION("Real printer") {
         fill = fill_test_data;
         name = "Real printer";
+        f = fopen("calibrated.csv", "w");
     }
     CorrectedCurrentLut table;
     table.modify_correction_table(fill);
@@ -76,5 +79,7 @@ TEST_CASE("PhaseStepping - fixed vs float") {
 
         similar_values(correction_real.a, correction_old.a, "Old a");
         similar_values(correction_real.b, correction_old.b, "Old b");
+        fprintf(f, "%d %d %d %d %d %d\n", correction_simple.a, correction_simple.b, correction_old.a, correction_old.b, correction_real.a, correction_real.b);
     }
+    fclose(f);
 }
