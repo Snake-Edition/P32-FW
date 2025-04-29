@@ -244,8 +244,6 @@
   #error "K1 is now PID_K1. Please update your configuration."
 #elif defined(PROBE_DOUBLE_TOUCH)
   #error "PROBE_DOUBLE_TOUCH is now MULTIPLE_PROBING. Please update your configuration."
-#elif defined(ANET_KEYPAD_LCD)
-  #error "ANET_KEYPAD_LCD is now ZONESTAR_LCD. Please update your configuration."
 #elif defined(LCD_I2C_SAINSMART_YWROBOT)
   #error "LCD_I2C_SAINSMART_YWROBOT is now LCD_SAINSMART_I2C_(1602|2004). Please update your configuration."
 #elif defined(MEASURED_LOWER_LIMIT) || defined(MEASURED_UPPER_LIMIT)
@@ -1680,7 +1678,6 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
   + ENABLED(G3D_PANEL) \
   + ENABLED(RIGIDBOT_PANEL) \
   + ENABLED(MAKEBOARD_MINI_2_LINE_DISPLAY_1602) \
-  + ENABLED(ZONESTAR_LCD) \
   + ENABLED(LCD_SAINSMART_I2C_1602) \
   + ENABLED(LCD_SAINSMART_I2C_2004) \
   + ENABLED(LCM1602) \
