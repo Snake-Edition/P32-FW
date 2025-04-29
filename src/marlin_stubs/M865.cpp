@@ -11,35 +11,36 @@
  */
 
 /**
- *### M865: Configure filament parameters
+ *### M865: Manage filament parameters
+ *
+ * Utility G-Code that allows managing filament types and their parameters.
+ * Allows changing filament parameters and force-setting the currently loaded filament.
+ * Also print selected filament parameters to the serial.
  *
  *#### Parameters
- * - `I<ix>` - Configure parameters of a filament currently loaded to the specified tool (indexed from 0)
- * - `U<ix>` - Configure parameters of a User filament (indexed from 0)
- * - `X` - Configure parameters of a Custom filament type that will be loaded using `M600 F"##"` (or similar filament change gcode)
- * - `S"<preset>"` - Configure parameters of filament with this name  (or select Preset filament for `L`)
+ * - `S"<name>"` - Select filament with the specified name
+ * - `I<ix>` - Select filament currently loaded to the specified tool (indexed from 0)
+ * - `U<ix>` - Select User filament (indexed from 0)
+ * - `X` - Select (pending) Custom filament type that will be loaded using `M600 F"#"` (or similar filament change gcode)
+ *
  * - `L<ix>` - Set currently loaded filament for the given tool to the selected filament
  *
  * - `R` - Reset parameters not specified in this gcode to defaults
  *
- * - `T` - Nozzle temperature
- * - `P` - Nozzle preheat temperature
- * - `B` - Bed temperature
- * - `H` - Heatbreak temperature
- * - `A` - Is abrasive
- * - `G` - Is flexible
+ * - `T<val>` - Set nozzle temperature
+ * - `P<val>` - Set nozzle preheat temperature
+ * - `B<val>` - Set bed temperature
+ * - `H<val>` - Set heatbreak temperature
+ * - `A<val>` - Set is abrasive
+ * - `G<val>` - Set is flexible
  *
- * - `C` - Target chamber temperature
- * - `D` - Minimum chamber temperature
- * - `E` - Maximum chamber temperature
- * - `F` - Requires filtration
+ * - `C<val>` - Set target chamber temperature
+ * - `D<val>` - Set minimum chamber temperature
+ * - `E<val>` - Set maximum chamber temperature
+ * - `F<val>` - Set requires filtration
  *
- * - `N"<string>"` - New filament name
+ * - `N"<name>"` - Set name
  *
- * Ad-hoc/custom filaments can the be referenced in other gcodes using adhoc_filament_gcode_prefix.
- * For example `M600 S"#0"` will load ad-hoc filament previously set with `M865 I0`.
- * The filament_type settings are printed to the serial console. For option I, the current filament_type
- * setting of the specified tool (indexed from 0) is displayed instead.
  */
 void PrusaGcodeSuite::M865() {
     GCodeParser2 p;
