@@ -120,10 +120,6 @@
   #define ENCODER_FEEDRATE_DEADZONE 6
 #endif
 
-#if ENABLED(IS_RRW_KEYPAD)
-  #define REPRAPWORLD_KEYPAD
-#endif
-
 // Aliases for LCD features
 #define HAS_ADC_BUTTONS      ENABLED(ADC_KEYPAD)
 
