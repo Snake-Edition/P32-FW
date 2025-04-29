@@ -148,9 +148,6 @@ enum ADCSensorState : char {
   #if ENABLED(FILAMENT_WIDTH_SENSOR)
     Prepare_FILWIDTH, Measure_FILWIDTH,
   #endif
-  #if HAS_ADC_BUTTONS
-    Prepare_ADC_KEY, Measure_ADC_KEY,
-  #endif
   SensorsReady, // Temperatures ready. Delay the next round of readings to let ADC pins settle.
   StartupDelay  // Startup, delay initial temp reading a tiny bit so the hardware can settle
 };
@@ -503,11 +500,6 @@ class Temperature {
     #endif
 
   public:
-    #if HAS_ADC_BUTTONS
-      static uint32_t current_ADCKey_raw;
-      static uint8_t ADCKey_count;
-    #endif
-
     #if ENABLED(PID_EXTRUSION_SCALING)
       static int16_t lpq_len;
     #endif

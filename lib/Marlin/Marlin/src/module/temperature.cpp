@@ -384,12 +384,6 @@ volatile bool Temperature::temp_meas_ready = false;
 
 // public:
 
-#if HAS_ADC_BUTTONS
-  uint32_t Temperature::current_ADCKey_raw = 1024;
-  uint8_t Temperature::ADCKey_count = 0;
-#endif
-
-
 #if HAS_PID_HEATING
 
   inline void say_default_() { SERIAL_ECHOPGM("#define DEFAULT_"); }
@@ -2466,9 +2460,6 @@ void Temperature::init() {
   #if ENABLED(FILAMENT_WIDTH_SENSOR)
     HAL_ANALOG_SELECT(FILWIDTH_PIN);
   #endif
-  #if HAS_ADC_BUTTONS
-    HAL_ANALOG_SELECT(ADC_KEYPAD_PIN);
-  #endif
 
   HAL_timer_start(TEMP_TIMER_NUM, TEMP_TIMER_FREQUENCY);
   ENABLE_TEMPERATURE_INTERRUPT();
@@ -3304,11 +3295,6 @@ void Temperature::isr() {
     // avoid multiple loads of pwm_count
     uint8_t pwm_count_tmp = pwm_count;
 
-    #if HAS_ADC_BUTTONS
-      static unsigned int raw_ADCKey_value = 0;
-      static bool ADCKey_pressed = false;
-    #endif
-
     #if HOTENDS
       static SoftPWM soft_pwm_hotend[HOTENDS];
     #endif
@@ -3572,29 +3558,6 @@ void Temperature::isr() {
       case PrepareJoy_Z: HAL_START_ADC(JOY_Z_PIN); break;
       case MeasureJoy_Z: ACCUMULATE_ADC(joystick.z); break;
     #endif
-
-    #if HAS_ADC_BUTTONS
-      case Prepare_ADC_KEY: HAL_START_ADC(ADC_KEYPAD_PIN); break;
-      case Measure_ADC_KEY:
-        if (!HAL_ADC_READY())
-          next_sensor_state = adc_sensor_state; // redo this state
-        else if (ADCKey_count < 16) {
-          raw_ADCKey_value = HAL_READ_ADC();
-          if (raw_ADCKey_value <= 900) {
-            NOMORE(current_ADCKey_raw, raw_ADCKey_value);
-            ADCKey_count++;
-          }
-          else { //ADC Key release
-            if (ADCKey_count > 0) ADCKey_count++; else ADCKey_pressed = false;
-            if (ADCKey_pressed) {
-              ADCKey_count = 0;
-              current_ADCKey_raw = 1024;
-            }
-          }
-        }
-        if (ADCKey_count == 16) ADCKey_pressed = true;
-        break;
-    #endif // ADC_KEYPAD
 
     case StartupDelay: break;
 

@@ -120,9 +120,6 @@
   #define ENCODER_FEEDRATE_DEADZONE 6
 #endif
 
-// Aliases for LCD features
-#define HAS_ADC_BUTTONS      ENABLED(ADC_KEYPAD)
-
 /**
  *  Multi-Material-Unit supported models
  */
