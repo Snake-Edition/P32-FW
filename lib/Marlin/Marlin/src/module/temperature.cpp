@@ -1803,13 +1803,7 @@ void Temperature::manage_heater() {
       #define KICKSTART_FAN(f) NOOP
     #endif
 
-    #if FAN_MIN_PWM != 0 || FAN_MAX_PWM != 255
-      #define CALC_FAN_SPEED(f) (applied_fan_speed[f] ? map(applied_fan_speed[f], 1, 255, FAN_MIN_PWM, FAN_MAX_PWM) : 0)
-    #else
-      #define CALC_FAN_SPEED(f) applied_fan_speed[f]
-    #endif
-
-    #define FAN_SET(F) do{ KICKSTART_FAN(F); analogWrite(pin_t(FAN##F##_PIN), CALC_FAN_SPEED(F)); }while(0)
+    #define FAN_SET(F) do{ KICKSTART_FAN(F); analogWrite(pin_t(FAN##F##_PIN), applied_fan_speed[F]); }while(0)
 
     #if HAS_FAN0
       FAN_SET(0);
