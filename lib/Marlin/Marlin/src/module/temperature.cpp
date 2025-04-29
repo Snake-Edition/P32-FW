@@ -2260,12 +2260,7 @@ void Temperature::updateTemperaturesFromRawValues() {
   SPIclass<MAX6675_DO_PIN, MOSI_PIN, MAX6675_SCK_PIN> max6675_spi;
 #endif
 
-// Init fans according to whether they're native PWM or Software PWM
-#ifdef ALFAWISE_UX0
-  #define _INIT_SOFT_FAN(P) OUT_WRITE_OD(P, FAN_INVERTING ? LOW : HIGH)
-#else
-  #define _INIT_SOFT_FAN(P) OUT_WRITE(P, FAN_INVERTING ? LOW : HIGH)
-#endif
+#define _INIT_SOFT_FAN(P) OUT_WRITE(P, FAN_INVERTING ? LOW : HIGH)
 #define INIT_FAN_PIN(P) do{ if (PWM_PIN(P)) SET_PWM(P); else _INIT_SOFT_FAN(P); }while(0)
 #if EXTRUDER_AUTO_FAN_SPEED != 255
   #define INIT_E_AUTO_FAN_PIN(P) do{ if (P == FAN1_PIN || P == FAN2_PIN) { SET_PWM(P); } else SET_OUTPUT(P); }while(0)
@@ -2304,11 +2299,7 @@ void Temperature::init() {
   #endif
 
   #if HAS_HEATER_0
-    #ifdef ALFAWISE_UX0
-      OUT_WRITE_OD(HEATER_0_PIN, HEATER_0_INVERTING);
-    #else
-      OUT_WRITE(HEATER_0_PIN, HEATER_0_INVERTING);
-    #endif
+    OUT_WRITE(HEATER_0_PIN, HEATER_0_INVERTING);
   #endif
 
   #if HAS_HEATER_1
@@ -2328,11 +2319,7 @@ void Temperature::init() {
   #endif
 
   #if HAS_HEATED_BED
-    #ifdef ALFAWISE_UX0
-      OUT_WRITE_OD(HEATER_BED_PIN, HEATER_BED_INVERTING);
-    #else
-      OUT_WRITE(HEATER_BED_PIN, HEATER_BED_INVERTING);
-    #endif
+    OUT_WRITE(HEATER_BED_PIN, HEATER_BED_INVERTING);
   #endif
 
   #if HAS_HEATED_CHAMBER
