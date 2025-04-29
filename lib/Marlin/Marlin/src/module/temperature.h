@@ -363,11 +363,6 @@ class Temperature {
       static uint8_t chamberfan_speed;
     #endif
 
-    #if ENABLED(FAN_SOFT_PWM)
-      static uint8_t soft_pwm_amount_fan[FAN_COUNT],
-                     soft_pwm_count_fan[FAN_COUNT];
-    #endif
-
     // For metrics only
     #if !HAS_REMOTE_BED()
       std::atomic<int> bed_pwm;

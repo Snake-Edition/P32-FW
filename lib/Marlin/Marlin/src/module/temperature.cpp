@@ -373,11 +373,6 @@ volatile bool Temperature::temp_meas_ready = false;
   millis_t Temperature::next_auto_fan_check_ms = 0;
 #endif
 
-#if ENABLED(FAN_SOFT_PWM)
-  uint8_t Temperature::soft_pwm_amount_fan[FAN_COUNT],
-          Temperature::soft_pwm_count_fan[FAN_COUNT];
-#endif
-
 #if ENABLED(PROBING_HEATERS_OFF)
   bool Temperature::paused;
 #endif
@@ -1814,12 +1809,7 @@ void Temperature::manage_heater() {
       #define CALC_FAN_SPEED(f) applied_fan_speed[f]
     #endif
 
-    #if ENABLED(FAN_SOFT_PWM)
-      #define _FAN_SET(F) thermalManager.soft_pwm_amount_fan[F] = CALC_FAN_SPEED(F);
-    #else
-      #define _FAN_SET(F) analogWrite(pin_t(FAN##F##_PIN), CALC_FAN_SPEED(F));
-    #endif
-    #define FAN_SET(F) do{ KICKSTART_FAN(F); _FAN_SET(F); }while(0)
+    #define FAN_SET(F) do{ KICKSTART_FAN(F); analogWrite(pin_t(FAN##F##_PIN), CALC_FAN_SPEED(F)); }while(0)
 
     #if HAS_FAN0
       FAN_SET(0);
@@ -2297,12 +2287,7 @@ void Temperature::updateTemperaturesFromRawValues() {
 #else
   #define _INIT_SOFT_FAN(P) OUT_WRITE(P, FAN_INVERTING ? LOW : HIGH)
 #endif
-#if ENABLED(FAN_SOFT_PWM)
-  #define _INIT_FAN_PIN(P) _INIT_SOFT_FAN(P)
-#else
-  #define _INIT_FAN_PIN(P) do{ if (PWM_PIN(P)) SET_PWM(P); else _INIT_SOFT_FAN(P); }while(0)
-#endif
-#define INIT_FAN_PIN(P) do{ _INIT_FAN_PIN(P); }while(0)
+#define INIT_FAN_PIN(P) do{ if (PWM_PIN(P)) SET_PWM(P); else _INIT_SOFT_FAN(P); }while(0)
 #if EXTRUDER_AUTO_FAN_SPEED != 255
   #define INIT_E_AUTO_FAN_PIN(P) do{ if (P == FAN1_PIN || P == FAN2_PIN) { SET_PWM(P); } else SET_OUTPUT(P); }while(0)
 #else
@@ -3347,23 +3332,6 @@ void Temperature::isr() {
         #if HAS_HEATED_CHAMBER
           _PWM_MOD(CHAMBER,soft_pwm_chamber,temp_chamber);
         #endif
-
-        #if ENABLED(FAN_SOFT_PWM)
-          #define _FAN_PWM(N) do{ \
-            uint8_t &spcf = soft_pwm_count_fan[N]; \
-            spcf = (spcf & pwm_mask) + (soft_pwm_amount_fan[N] >> 1); \
-            WRITE_FAN(N, spcf > pwm_mask ? HIGH : LOW); \
-          }while(0)
-          #if HAS_FAN0
-            _FAN_PWM(0);
-          #endif
-          #if HAS_FAN1
-            _FAN_PWM(1);
-          #endif
-          #if HAS_FAN2
-            _FAN_PWM(2);
-          #endif
-        #endif
       }
       else {
         #define _PWM_LOW(N,S) do{ if (S.count <= pwm_count_tmp) WRITE_HEATER_##N(LOW); }while(0)
@@ -3393,18 +3361,6 @@ void Temperature::isr() {
 
         #if HAS_HEATED_CHAMBER
           _PWM_LOW(CHAMBER, soft_pwm_chamber);
-        #endif
-
-        #if ENABLED(FAN_SOFT_PWM)
-          #if HAS_FAN0
-            if (soft_pwm_count_fan[0] <= pwm_count_tmp) WRITE_FAN(0, LOW);
-          #endif
-          #if HAS_FAN1
-            if (soft_pwm_count_fan[1] <= pwm_count_tmp) WRITE_FAN(1, LOW);
-          #endif
-          #if HAS_FAN2
-            if (soft_pwm_count_fan[2] <= pwm_count_tmp) WRITE_FAN(2, LOW);
-          #endif
         #endif
       }
 
