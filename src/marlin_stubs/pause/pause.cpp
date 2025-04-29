@@ -393,29 +393,7 @@ void Pause::load_start_process([[maybe_unused]] Response response) {
 
 #if HAS_MMU2()
     if (FSensors_instance().HasMMU()) {
-        if (load_type == LoadType::load) {
-            if (!MMU2::mmu2.load_filament_to_nozzle(settings.mmu_filament_to_load)) {
-                // TODO tell user that he has already loaded filament if he really wants to continue
-                // TODO check fsensor .. how should I behave if filament is not detected ???
-                // some error?
-                set(LoadState::load_prime);
-                return;
-            }
-
-            config_store().set_filament_type(settings.GetExtruder(), filament::get_type_to_load());
-
-            setPhase(PhasesLoadUnload::IsColor, 99);
-            set(LoadState::color_correct_ask);
-        } else if (load_type == LoadType::filament_change) {
-            if (settings.mmu_filament_to_load == MMU2::FILAMENT_UNKNOWN) {
-                set(LoadState::load_prime);
-                return;
-            }
-
-            setPhase(PhasesLoadUnload::LoadFilamentIntoMMU);
-            set(LoadState::mmu_load_ask);
-        }
-
+        set(LoadState::mmu_load_start);
         return;
     }
 #endif
@@ -707,6 +685,34 @@ void Pause::color_correct_ask_process(Response response) {
 }
 
 #if HAS_MMU2()
+
+void Pause::mmu_load_start_process([[maybe_unused]] Response response) {
+    if (load_type == LoadType::load) {
+        if (!MMU2::mmu2.load_filament_to_nozzle(settings.mmu_filament_to_load)) {
+            // TODO tell user that he has already loaded filament if he really wants to continue
+            // TODO check fsensor .. how should I behave if filament is not detected ???
+            // some error?
+            set(LoadState::load_prime);
+            return;
+        }
+
+        config_store().set_filament_type(settings.GetExtruder(), filament::get_type_to_load());
+
+        setPhase(PhasesLoadUnload::IsColor, 99);
+        set(LoadState::color_correct_ask);
+    } else if (load_type == LoadType::filament_change) {
+        if (settings.mmu_filament_to_load == MMU2::FILAMENT_UNKNOWN) {
+            set(LoadState::load_prime);
+            return;
+        }
+
+        setPhase(PhasesLoadUnload::LoadFilamentIntoMMU);
+        set(LoadState::mmu_load_ask);
+    }
+
+    return;
+}
+
 void Pause::mmu_load_ask_process(Response response) {
     if (response == Response::Continue) {
         set(LoadState::mmu_load);

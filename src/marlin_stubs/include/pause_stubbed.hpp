@@ -59,6 +59,7 @@ protected:
         color_correct_ask,
         eject,
 #if HAS_MMU2()
+        mmu_load_start,
         mmu_load_ask,
         mmu_load,
 #endif
@@ -211,6 +212,7 @@ private:
     void color_correct_ask_process(Response response);
     void eject_process(Response response);
 #if HAS_MMU2()
+    void mmu_load_start_process(Response response);
     void mmu_load_ask_process(Response response);
     void mmu_load_process(Response response);
 #endif
@@ -250,6 +252,7 @@ private:
             { LoadState::color_correct_ask, &Pause::color_correct_ask_process },
             { LoadState::eject, &Pause::eject_process },
 #if HAS_MMU2()
+            { LoadState::mmu_load_start, &Pause::mmu_load_start_process },
             { LoadState::mmu_load_ask, &Pause::mmu_load_ask_process },
             { LoadState::mmu_load, &Pause::mmu_load_process },
 #endif
