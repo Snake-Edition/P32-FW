@@ -112,15 +112,13 @@ void PrusaGcodeSuite::M865() {
     }
 
     if (filament_type != FilamentType::none) {
-        ArrayStringBuilder<filament_name_buffer_size + 82> filament_info;
-        filament_info.append_printf("name:%s\n", params.name.data());
-        filament_info.append_printf("nozzle_temperature:%d\n", params.nozzle_temperature);
-        filament_info.append_printf("heatbed_temperature:%d\n", params.heatbed_temperature);
-        filament_info.append_printf("is_abrasive:%d\n", params.is_abrasive);
+        SERIAL_ECHOLNPAIR("name:", params.name.data());
+        SERIAL_ECHOLNPAIR("nozzle_temperature:", params.nozzle_temperature);
+        SERIAL_ECHOLNPAIR("heatbed_temperature:", params.heatbed_temperature);
+        SERIAL_ECHOLNPAIR("is_abrasive:", params.is_abrasive);
 #if HAS_CHAMBER_API()
-        filament_info.append_printf("requires_filtration:%d\n", params.requires_filtration);
+        SERIAL_ECHOLNPAIR("requires_filtration:", params.requires_filtration);
 #endif
-        SERIAL_ECHOLN(filament_info.str());
     }
 }
 
