@@ -233,11 +233,6 @@
     #define CONTROLLERFAN_SPEED 255 // 255 == full speed
 #endif
 
-// When first starting the main fan, run it at full speed for the
-// given number of milliseconds.  This gets the fan spinning reliably
-// before setting a PWM value. (Does not work with software PWM for fan on Sanguinololu)
-//#define FAN_KICKSTART_TIME 100
-
 // @section extruder
 
 /**

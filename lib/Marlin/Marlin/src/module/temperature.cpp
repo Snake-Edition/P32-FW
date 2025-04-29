@@ -1788,22 +1788,7 @@ void Temperature::manage_heater() {
   //
   #if FAN_COUNT > 0
 
-    #if FAN_KICKSTART_TIME > 0
-      static millis_t fan_kick_end[FAN_COUNT] = { 0 };
-      #define KICKSTART_FAN(f)                         \
-        if (applied_fan_speed[f]) {                    \
-          millis_t ms = millis();                      \
-          if (fan_kick_end[f] == 0) {                  \
-            fan_kick_end[f] = ms + FAN_KICKSTART_TIME; \
-            applied_fan_speed[f] = 255;                \
-          } else if (PENDING(ms, fan_kick_end[f]))     \
-            applied_fan_speed[f] = 255;                \
-        } else fan_kick_end[f] = 0
-    #else
-      #define KICKSTART_FAN(f) NOOP
-    #endif
-
-    #define FAN_SET(F) do{ KICKSTART_FAN(F); analogWrite(pin_t(FAN##F##_PIN), applied_fan_speed[F]); }while(0)
+    #define FAN_SET(F) analogWrite(pin_t(FAN##F##_PIN), applied_fan_speed[F])
 
     #if HAS_FAN0
       FAN_SET(0);
