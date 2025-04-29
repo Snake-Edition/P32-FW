@@ -100,6 +100,12 @@ private:
         return [this, format](const std::span<char> &buffer) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdouble-promotion"
+            if constexpr (std::is_same_v<T, float>) {
+                if (std::isnan(value_)) {
+                    strlcpy(buffer.data(), "N/A", buffer.size());
+                    return;
+                }
+            }
             snprintf(buffer.data(), buffer.size(), format, value_);
 #pragma GCC diagnostic pop
         };
