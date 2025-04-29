@@ -1783,24 +1783,15 @@ void Temperature::manage_heater() {
     #endif /* HAS_HEATED_BED */
   #endif
 
-  //
-  // Update Fan speeds
-  //
-  #if FAN_COUNT > 0
-
-    #define FAN_SET(F) analogWrite(pin_t(FAN##F##_PIN), applied_fan_speed[F])
-
-    #if HAS_FAN0
-      FAN_SET(0);
-    #endif
-    #if HAS_FAN1
-      FAN_SET(1);
-    #endif
-    #if HAS_FAN2
-      FAN_SET(2);
-    #endif
-
-  #endif // FAN_COUNT > 0
+  #if HAS_FAN0
+    analogWrite(FAN0_PIN, applied_fan_speed[0]);
+  #endif
+  #if HAS_FAN1
+    analogWrite(FAN1_PIN, applied_fan_speed[1]);
+  #endif
+  #if HAS_FAN2
+    analogWrite(FAN2_PIN, applied_fan_speed[2]);
+  #endif
 }
 
 static bool temperatures_ready_state = false;
