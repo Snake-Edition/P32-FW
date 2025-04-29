@@ -70,12 +70,6 @@ private:
     PWM255 calculatePwm(int32_t MCU_modular_bed_temp);
 
     /**
-     *  Test enclosure fan.
-     *  @return True if test failed and fan is not behaving correctly.
-     */
-    bool testFanTacho();
-
-    /**
      *  Test enclosure fan presence
      */
     void testFanPresence(uint32_t curr_sec);

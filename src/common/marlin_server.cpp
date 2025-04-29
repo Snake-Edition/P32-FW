@@ -2720,7 +2720,10 @@ static void _server_print_loop(void) {
 #endif /* HAS_XBUDDY_EXTENSION() */
 #if XL_ENCLOSURE_SUPPORT()
         const bool enclosure_fan_ok = Fans::enclosure().is_fan_ok();
-        enclosure_fan_checker.checkTrue(enclosure_fan_ok, WarningType::ChamberFiltrationFanError, false, false);
+        if (!enclosure_fan_ok && !enclosure_fan_checker.isFailed()) {
+            xl_enclosure.setEnabled(false);
+        }
+        enclosure_fan_checker.checkTrue(enclosure_fan_ok, WarningType::EnclosureFanError, false, false);
         if (enclosure_fan_ok) {
             enclosure_fan_checker.reset();
         }

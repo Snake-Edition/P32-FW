@@ -56,14 +56,6 @@ void Enclosure::testFanPresence(uint32_t curr_tick) {
     }
 }
 
-bool Enclosure::testFanTacho() {
-    if (isEnabled() && Fans::enclosure().get_pwm() != 0) {
-        auto state = Fans::enclosure().get_state();
-        return (state == CFanCtlCommon::FanState::running || state == CFanCtlCommon::FanState::error_running || state == CFanCtlCommon::FanState::error_starting) && !Fans::enclosure().get_rpm_is_ok();
-    }
-    return false; // Valid behaviour can be checked only with active fan
-}
-
 std::optional<buddy::Temperature> Enclosure::getEnclosureTemperature() {
     if (const auto temp = active_dwarf_board_temp.load(); is_temp_valid_ && temp.has_value()) {
         static constexpr int32_t dwarf_board_temp_model_difference = -15; // °C
@@ -155,13 +147,6 @@ void Enclosure::loop(int32_t MCU_modular_bed_temp, int16_t dwarf_board_temp) {
         break;
 
     case EnclosureMode::Active:
-
-        if (testFanTacho()) {
-            setEnabled(false);
-            is_temp_valid_ = false;
-            marlin_server::set_warning(WarningType::EnclosureFanError);
-            break;
-        }
 
         // Update temperature validation timer (even during MCU Cooling)
         updateTempValidationTimer();
