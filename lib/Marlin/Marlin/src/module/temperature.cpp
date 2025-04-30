@@ -2952,12 +2952,7 @@ void Temperature::isr() {
 
   #include "../gcode/gcode.h"
 
-  static void print_heater_state(const float &c, const float &t
-    #if ENABLED(SHOW_TEMP_ADC_VALUES)
-      , const float r
-    #endif
-    , const heater_ind_t e=INDEX_NONE
-  ) {
+  static void print_heater_state(const float &c, const float &t, const heater_ind_t e=INDEX_NONE) {
     char k;
     int8_t tool_nr = -1;
     #if HAS_TEMP_CHAMBER
@@ -2993,28 +2988,15 @@ void Temperature::isr() {
     SERIAL_CHAR(':');
     SERIAL_ECHO(c);
     SERIAL_ECHOPAIR("/" , t);
-    #if ENABLED(SHOW_TEMP_ADC_VALUES)
-      SERIAL_ECHOPAIR(" (", r * RECIPROCAL(OVERSAMPLENR));
-      SERIAL_CHAR(')');
-    #endif
     delay(2);
   }
 
   void Temperature::print_heater_states(const uint8_t target_extruder) {
     #if HAS_TEMP_HOTEND
-      print_heater_state(degHotend(target_extruder), degTargetHotend(target_extruder)
-        #if ENABLED(SHOW_TEMP_ADC_VALUES)
-          , rawHotendTemp(target_extruder)
-        #endif
-      );
+      print_heater_state(degHotend(target_extruder), degTargetHotend(target_extruder));
     #endif
     #if HAS_HEATED_BED
-      print_heater_state(degBed(), degTargetBed()
-        #if ENABLED(SHOW_TEMP_ADC_VALUES)
-          , rawBedTemp()
-        #endif
-        , H_BED
-      );
+      print_heater_state(degBed(), degTargetBed(), H_BED);
     #endif
     #if HAS_TEMP_CHAMBER
       print_heater_state(degChamber()
@@ -3023,9 +3005,6 @@ void Temperature::isr() {
         #else
           , 0
         #endif
-        #if ENABLED(SHOW_TEMP_ADC_VALUES)
-          , rawChamberTemp()
-        #endif
         , H_CHAMBER
       );
     #endif // HAS_TEMP_CHAMBER
@@ -3033,9 +3012,6 @@ void Temperature::isr() {
     #if HAS_TEMP_HEATBREAK
       print_heater_state(degHeatbreak(target_extruder)
           , degTargetHeatbreak(target_extruder)
-        #if ENABLED(SHOW_TEMP_ADC_VALUES)
-          , rawHeatbreakTemp(target_extruder)
-        #endif
         , (heater_ind_t) (H_HEATBREAK_E0 + target_extruder)
       );
     #endif // HAS_TEMP_HEATBREAK
@@ -3043,18 +3019,12 @@ void Temperature::isr() {
     #if HAS_TEMP_BOARD
       print_heater_state(degBoard()
           , 0
-        #if ENABLED(SHOW_TEMP_ADC_VALUES)
-          , rawBoardTemp()
-        #endif
         , H_BOARD
       );
     #endif // HAS_TEMP_BOARD
 
     #if HOTENDS > 1
       HOTEND_LOOP() print_heater_state(degHotend(e), degTargetHotend(e)
-        #if ENABLED(SHOW_TEMP_ADC_VALUES)
-          , rawHotendTemp(e)
-        #endif
         , (heater_ind_t)e
       );
     #endif

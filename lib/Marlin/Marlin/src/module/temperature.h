@@ -550,16 +550,6 @@ class Temperature {
       );
     }
 
-    #if ENABLED(SHOW_TEMP_ADC_VALUES)
-      FORCE_INLINE static int16_t rawHotendTemp(const uint8_t E_NAME) {
-        return (0
-          #if HOTENDS
-            + temp_hotend[HOTEND_INDEX].raw
-          #endif
-        );
-      }
-    #endif
-
     FORCE_INLINE static int16_t degTargetHotend(const uint8_t E_NAME) {
       return (0
         #if HOTENDS
@@ -621,10 +611,6 @@ class Temperature {
     #endif // HOTENDS
 
     #if HAS_HEATED_BED
-
-      #if ENABLED(SHOW_TEMP_ADC_VALUES)
-        FORCE_INLINE static int16_t rawBedTemp()  { return temp_bed.raw; }
-      #endif
 
       FORCE_INLINE static float degBed()          { return temp_bed.celsius; }
       FORCE_INLINE static int16_t degTargetBed()  { return temp_bed.target; }
@@ -695,9 +681,6 @@ class Temperature {
     #endif // HAS_HEATED_BED
 
     #if HAS_TEMP_CHAMBER
-      #if ENABLED(SHOW_TEMP_ADC_VALUES)
-        FORCE_INLINE static int16_t rawChamberTemp()    { return temp_chamber.raw; }
-      #endif
       FORCE_INLINE static float degChamber()            { return temp_chamber.celsius; }
       #if HAS_HEATED_CHAMBER
         FORCE_INLINE static int16_t degTargetChamber()  { return temp_chamber.target; }
@@ -728,9 +711,6 @@ class Temperature {
     #endif // HAS_HEATED_CHAMBER
 
     #if HAS_TEMP_HEATBREAK
-      #if ENABLED(SHOW_TEMP_ADC_VALUES)
-        FORCE_INLINE static int16_t rawHeatbreakTemp(const uint8_t E_NAME)    { return temp_heatbreak[HOTEND_INDEX].raw; }
-      #endif
       FORCE_INLINE static float degHeatbreak(const uint8_t E_NAME)            { return temp_heatbreak[HOTEND_INDEX].celsius; }
       #if HAS_TEMP_HEATBREAK_CONTROL
         FORCE_INLINE static int16_t degTargetHeatbreak(const uint8_t E_NAME)  { return temp_heatbreak[HOTEND_INDEX].target; }
@@ -764,9 +744,6 @@ class Temperature {
     #endif // HAS_TEMP_HEATBREAK
 
     #if HAS_TEMP_BOARD
-      #if ENABLED(SHOW_TEMP_ADC_VALUES)
-        FORCE_INLINE static int16_t rawBoardTemp()    { return temp_board.raw; }
-      #endif
       FORCE_INLINE static float degBoard()            { return temp_board.celsius; }
     #endif // HAS_TEMP_BOARD
 
