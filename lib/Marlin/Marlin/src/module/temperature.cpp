@@ -341,10 +341,6 @@ volatile bool Temperature::temp_meas_ready = false;
   temp_range_t Temperature::temp_range[HOTENDS] = ARRAY_BY_HOTENDS(sensor_heater_0, sensor_heater_1, sensor_heater_2, sensor_heater_3, sensor_heater_4, sensor_heater_5);
 #endif
 
-#ifdef MAX_CONSECUTIVE_LOW_TEMPERATURE_ERROR_ALLOWED
-  uint8_t Temperature::consecutive_low_temperature_error[HOTENDS] = { 0 };
-#endif
-
 #ifdef MILLISECONDS_PREHEAT_TIME
   millis_t Temperature::preheat_end_time[HOTENDS] = { 0 };
 #endif
@@ -2613,15 +2609,8 @@ void Temperature::readings_ready() {
         if (heater_on && rawtemp < temp_range[e].raw_min * tdir && !is_preheating(e))
       #endif /*ENABLED(PRUSA_TOOLCHANGER)*/
         {
-          #ifdef MAX_CONSECUTIVE_LOW_TEMPERATURE_ERROR_ALLOWED
-            if (++consecutive_low_temperature_error[e] >= MAX_CONSECUTIVE_LOW_TEMPERATURE_ERROR_ALLOWED)
-          #endif
               min_temp_error((heater_ind_t)e);
         }
-        #ifdef MAX_CONSECUTIVE_LOW_TEMPERATURE_ERROR_ALLOWED
-          else
-            consecutive_low_temperature_error[e] = 0;
-        #endif
       }
     }
 

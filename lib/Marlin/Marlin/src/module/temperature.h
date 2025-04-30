@@ -408,10 +408,6 @@ class Temperature {
       #endif
     #endif
 
-    #ifdef MAX_CONSECUTIVE_LOW_TEMPERATURE_ERROR_ALLOWED
-      static uint8_t consecutive_low_temperature_error[HOTENDS];
-    #endif
-
     #ifdef MILLISECONDS_PREHEAT_TIME
       static millis_t preheat_end_time[HOTENDS];
     #endif
