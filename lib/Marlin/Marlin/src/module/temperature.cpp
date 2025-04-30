@@ -341,10 +341,6 @@ volatile bool Temperature::temp_meas_ready = false;
   temp_range_t Temperature::temp_range[HOTENDS] = ARRAY_BY_HOTENDS(sensor_heater_0, sensor_heater_1, sensor_heater_2, sensor_heater_3, sensor_heater_4, sensor_heater_5);
 #endif
 
-#ifdef MILLISECONDS_PREHEAT_TIME
-  millis_t Temperature::preheat_end_time[HOTENDS] = { 0 };
-#endif
-
 #if HAS_AUTO_FAN
   millis_t Temperature::next_auto_fan_check_ms = 0;
 #endif
@@ -1508,7 +1504,7 @@ void Temperature::manage_heater() {
           float feed_forward = .0f;
       #endif
 
-          temp_hotend[e].soft_pwm_amount = (temp_hotend[e].celsius > temp_range[e].mintemp || is_preheating(e)) && temp_hotend[e].celsius < temp_range[e].maxtemp ?
+          temp_hotend[e].soft_pwm_amount = (temp_hotend[e].celsius > temp_range[e].mintemp) && temp_hotend[e].celsius < temp_range[e].maxtemp ?
       #if ENABLED(MODEL_DETECT_STUCK_THERMISTOR)
               (int)(pid_output = get_pid_output_hotend(feed_forward, e))
       #else
@@ -2604,9 +2600,9 @@ void Temperature::readings_ready() {
         }
 
       #if ENABLED(PRUSA_TOOLCHANGER)
-        if (heater_on && temp_hotend[e].celsius < temp_range[e].mintemp && !is_preheating(e)) // Toolchanger doesn't report raw
+        if (heater_on && temp_hotend[e].celsius < temp_range[e].mintemp) // Toolchanger doesn't report raw
       #else /*ENABLED(PRUSA_TOOLCHANGER)*/
-        if (heater_on && rawtemp < temp_range[e].raw_min * tdir && !is_preheating(e))
+        if (heater_on && rawtemp < temp_range[e].raw_min * tdir)
       #endif /*ENABLED(PRUSA_TOOLCHANGER)*/
         {
               min_temp_error((heater_ind_t)e);

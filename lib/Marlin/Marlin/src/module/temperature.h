@@ -408,10 +408,6 @@ class Temperature {
       #endif
     #endif
 
-    #ifdef MILLISECONDS_PREHEAT_TIME
-      static millis_t preheat_end_time[HOTENDS];
-    #endif
-
     #if HAS_AUTO_FAN
       static millis_t next_auto_fan_check_ms;
     #endif
@@ -542,23 +538,6 @@ class Temperature {
     // Return true if the temperatures have been sampled at least once
     static bool temperatures_ready();
 
-    /**
-     * Preheating hotends
-     */
-    #ifdef MILLISECONDS_PREHEAT_TIME
-      static bool is_preheating(const uint8_t E_NAME) {
-        return preheat_end_time[HOTEND_INDEX] && PENDING(millis(), preheat_end_time[HOTEND_INDEX]);
-      }
-      static void start_preheat_time(const uint8_t E_NAME) {
-        preheat_end_time[HOTEND_INDEX] = millis() + MILLISECONDS_PREHEAT_TIME;
-      }
-      static void reset_preheat_time(const uint8_t E_NAME) {
-        preheat_end_time[HOTEND_INDEX] = 0;
-      }
-    #else
-      #define is_preheating(n) (false)
-    #endif
-
     //high level conversion routines, for use outside of temperature.cpp
     //inline so that there is no performance decrease.
     //deg=degreeCelsius
@@ -601,12 +580,6 @@ class Temperature {
         const uint8_t ee = HOTEND_INDEX;
         const int16_t new_temp = _MIN(celsius, temp_range[ee].maxtemp - HEATER_MAXTEMP_SAFETY_MARGIN);
 
-        #ifdef MILLISECONDS_PREHEAT_TIME
-          if (celsius == 0)
-            reset_preheat_time(ee);
-          else if (temp_hotend[ee].target == 0)
-            start_preheat_time(ee);
-        #endif
         #if ENABLED(AUTO_POWER_CONTROL)
           if (celsius) {
             powerManager.power_on();
