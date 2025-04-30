@@ -2611,17 +2611,10 @@ void Temperature::disable_heaters(Temperature::disable_bed_t disable_bed) {
 
     #define MAX6675_HEAT_INTERVAL 250UL
 
-    #if ENABLED(MAX6675_IS_MAX31855)
-      static uint32_t max6675_temp = 2000;
-      #define MAX6675_ERROR_MASK    7
-      #define MAX6675_DISCARD_BITS 18
-      #define MAX6675_SPEED_BITS    3  // (_BV(SPR1)) // clock ÷ 64
-    #else
       static uint16_t max6675_temp = 2000;
       #define MAX6675_ERROR_MASK    4
       #define MAX6675_DISCARD_BITS  3
       #define MAX6675_SPEED_BITS    2  // (_BV(SPR0)) // clock ÷ 16
-    #endif
 
     // Return last-read value between readings
     static millis_t next_max6675_ms[COUNT_6675] = { 0 };
@@ -2704,10 +2697,6 @@ void Temperature::disable_heaters(Temperature::disable_bed_t disable_bed) {
     }
     else
       max6675_temp >>= MAX6675_DISCARD_BITS;
-
-    #if ENABLED(MAX6675_IS_MAX31855)
-      if (max6675_temp & 0x00002000) max6675_temp |= 0xFFFFC000; // Support negative temperature
-    #endif
 
     #if COUNT_6675 > 1
       max6675_temp_previous[hindex] = max6675_temp;

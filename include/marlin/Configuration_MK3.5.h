@@ -296,7 +296,6 @@
  *
  * Temperature sensors available:
  *
- *    -3 : thermocouple with MAX31855 (only for sensor 0)
  *    -2 : thermocouple with MAX6675 (only for sensor 0)
  *     0 : not used
  *     1 : 100k thermistor - best choice for EPCOS 100k (4.7k pullup)
