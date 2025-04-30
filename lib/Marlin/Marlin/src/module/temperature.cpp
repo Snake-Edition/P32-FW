@@ -2012,9 +2012,6 @@ void Temperature::init() {
   #if HAS_FAN2
     INIT_FAN_PIN(FAN2_PIN);
   #endif
-  #if ENABLED(USE_CONTROLLER_FAN)
-    INIT_FAN_PIN(CONTROLLER_FAN_PIN);
-  #endif
 
   HAL_adc_init();
 

@@ -156,10 +156,6 @@
   #include "module/tool_change.h"
 #endif
 
-#if ENABLED(USE_CONTROLLER_FAN)
-  #include "feature/controllerfan.h"
-#endif
-
 #if ENABLED(PRUSA_MMU2)
   #include "feature/prusa/MMU2/mmu2_mk4.h"
 #endif
@@ -472,10 +468,6 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
         queue.enqueue_now_P(PSTR("G28"));
       }
     }
-  #endif
-
-  #if ENABLED(USE_CONTROLLER_FAN)
-    controllerfan_update(); // Check if fan should be turned on to cool stepper drivers down
   #endif
 
   #if ENABLED(AUTO_POWER_CONTROL)
@@ -881,10 +873,6 @@ void setup() {
 
   #if HAS_BED_PROBE
     endstops.enable_z_probe(false);
-  #endif
-
-  #if ENABLED(USE_CONTROLLER_FAN)
-    SET_OUTPUT(CONTROLLER_FAN_PIN);
   #endif
 
   #if HAS_STEPPER_RESET
