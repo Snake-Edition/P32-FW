@@ -34,12 +34,11 @@
  *
  *#### Usage
  *
- *    M105 [ T | R ]
+ *    M105 [ T ]
  *
  *#### Parameters
  *
  * - `T` - Tool
- * - `R` - Include the Redundant temperature sensor (not active)
  */
 void GcodeSuite::M105() {
 
@@ -50,11 +49,7 @@ void GcodeSuite::M105() {
 
   #if HAS_TEMP_SENSOR
 
-    thermalManager.print_heater_states(target_extruder
-      #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
-        , parser.boolval('R')
-      #endif
-    );
+    thermalManager.print_heater_states(target_extruder);
 
     SERIAL_EOL();
 

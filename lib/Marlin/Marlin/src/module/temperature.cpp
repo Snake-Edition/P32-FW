@@ -89,13 +89,8 @@
 #include <option/has_modular_bed.h>
 
 #if HOTEND_USES_THERMISTOR
-  #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
-    static void* heater_ttbl_map[2] = { (void*)HEATER_0_TEMPTABLE, (void*)HEATER_1_TEMPTABLE };
-    static constexpr uint8_t heater_ttbllen_map[2] = { HEATER_0_TEMPTABLE_LEN, HEATER_1_TEMPTABLE_LEN };
-  #else
     static void* heater_ttbl_map[HOTENDS] = ARRAY_BY_HOTENDS((void*)HEATER_0_TEMPTABLE, (void*)HEATER_1_TEMPTABLE, (void*)HEATER_2_TEMPTABLE, (void*)HEATER_3_TEMPTABLE, (void*)HEATER_4_TEMPTABLE, (void*)HEATER_5_TEMPTABLE);
     static constexpr uint8_t heater_ttbllen_map[HOTENDS] = ARRAY_BY_HOTENDS(HEATER_0_TEMPTABLE_LEN, HEATER_1_TEMPTABLE_LEN, HEATER_2_TEMPTABLE_LEN, HEATER_3_TEMPTABLE_LEN, HEATER_4_TEMPTABLE_LEN, HEATER_5_TEMPTABLE_LEN);
-  #endif
 #endif
 
 #if ENABLED(HW_PWM_HEATERS)
@@ -321,11 +316,6 @@ Temperature thermalManager;
 
 #if EARLY_WATCHDOG
   bool Temperature::inited = false;
-#endif
-
-#if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
-  uint16_t Temperature::redundant_temperature_raw = 0;
-  float Temperature::redundant_temperature = 0.0;
 #endif
 
 volatile bool Temperature::temp_meas_ready = false;
@@ -1547,12 +1537,6 @@ void Temperature::manage_heater() {
           }
       #endif
 
-      #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
-        // Make sure measured temperatures are close together
-        if (ABS(temp_hotend[0].celsius - redundant_temperature) > MAX_REDUNDANT_TEMP_SENSOR_DIFF)
-          _temp_error(H_E0, PSTR(MSG_REDUNDANCY), GET_TEXT(MSG_ERR_REDUNDANT_TEMP));
-      #endif
-
     } // HOTEND_LOOP
 
   #endif // HOTENDS
@@ -1810,11 +1794,7 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
   // Derived from RepRap FiveD extruder::getTemperature()
   // For hot end temperature measurement.
   float Temperature::analog_to_celsius_hotend(const int raw, const uint8_t e) {
-    #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
-      if (e > HOTENDS)
-    #else
       if (e >= HOTENDS)
-    #endif
       {
         SERIAL_ERROR_START();
         SERIAL_ECHO((int)e);
@@ -1986,9 +1966,6 @@ void Temperature::updateTemperaturesFromRawValues() {
     #else
       HOTEND_LOOP() temp_heatbreak[e].celsius = analog_to_celsius_heatbreak(temp_heatbreak[e].raw);
     #endif
-  #endif
-  #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
-    redundant_temperature = analog_to_celsius_hotend(redundant_temperature_raw, 1);
   #endif
   #if HAS_TEMP_BOARD
     temp_board.celsius = analog_to_celsius_board(temp_board.raw);
@@ -2558,11 +2535,7 @@ void Temperature::set_current_temp_raw() {
   #endif
 
   #if HAS_TEMP_ADC_1
-    #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
-      redundant_temperature_raw = temp_hotend[1].acc;
-    #else
       temp_hotend[1].update();
-    #endif
     #if HAS_TEMP_ADC_2
       temp_hotend[2].update();
       #if HAS_TEMP_ADC_3
@@ -2608,9 +2581,6 @@ void Temperature::readings_ready() {
 
   #if HOTENDS
     HOTEND_LOOP() temp_hotend[e].reset();
-    #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
-      temp_hotend[1].reset();
-    #endif
   #endif
 
   #if HAS_HEATED_BED
@@ -3054,9 +3024,6 @@ void Temperature::isr() {
     #if HAS_HEATED_BED
     if (e == H_BED) k = 'B';
     #endif
-    #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
-      if (e == H_REDUNDANT): k = 'R';
-    #endif
     #if HAS_TEMP_BOARD
       if (e == H_BOARD) k = 'A';
     #endif
@@ -3084,25 +3051,13 @@ void Temperature::isr() {
     delay(2);
   }
 
-  void Temperature::print_heater_states(const uint8_t target_extruder
-    #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
-      , const bool include_r/*=false*/
-    #endif
-  ) {
+  void Temperature::print_heater_states(const uint8_t target_extruder) {
     #if HAS_TEMP_HOTEND
       print_heater_state(degHotend(target_extruder), degTargetHotend(target_extruder)
         #if ENABLED(SHOW_TEMP_ADC_VALUES)
           , rawHotendTemp(target_extruder)
         #endif
       );
-      #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
-        if (include_r) print_heater_state(redundant_temperature, degTargetHotend(target_extruder)
-          #if ENABLED(SHOW_TEMP_ADC_VALUES)
-            , redundant_temperature_raw
-          #endif
-          , H_REDUNDANT
-        );
-      #endif
     #endif
     #if HAS_HEATED_BED
       print_heater_state(degBed(), degTargetBed()

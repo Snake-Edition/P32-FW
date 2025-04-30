@@ -346,11 +346,6 @@
 #define DUMMY_THERMISTOR_998_VALUE 25
 #define DUMMY_THERMISTOR_999_VALUE 100
 
-// Use temp sensor 1 as a redundant sensor with sensor 0. If the readings
-// from the two sensors differ too much the print will be aborted.
-//#define TEMP_SENSOR_1_AS_REDUNDANT
-#define MAX_REDUNDANT_TEMP_SENSOR_DIFF 10
-
 #define TEMP_RESIDENCY_TIME 1 // (seconds) Time to wait for hotend to "settle" in M109
 #define TEMP_WINDOW 2.5F // (°C) Temperature proximity for the "temperature reached" timer
 #define TEMP_HYSTERESIS 3 // (°C) Temperature proximity considered "close enough" to the target

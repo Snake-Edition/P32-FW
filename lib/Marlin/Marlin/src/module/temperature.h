@@ -259,11 +259,7 @@ class Temperature {
     static volatile bool in_temp_isr;
 
     #if HOTENDS
-      #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
-        #define HOTEND_TEMPS (HOTENDS + 1)
-      #else
         #define HOTEND_TEMPS HOTENDS
-      #endif
       static hotend_info_t temp_hotend[HOTEND_TEMPS];
 
       #if TEMP_RESIDENCY_TIME > 0
@@ -351,11 +347,6 @@ class Temperature {
 
     #if WATCH_HOTENDS
       static heater_watch_t watch_hotend[HOTENDS];
-    #endif
-
-    #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
-      static uint16_t redundant_temperature_raw;
-      static float redundant_temperature;
     #endif
 
     #if ENABLED(PID_EXTRUSION_SCALING)
@@ -902,11 +893,7 @@ public:
     #endif // HEATER_IDLE_HANDLER
 
     #if HAS_TEMP_SENSOR
-      static void print_heater_states(const uint8_t target_extruder
-        #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
-          , const bool include_r=false
-        #endif
-      );
+      static void print_heater_states(const uint8_t target_extruder);
       #if ENABLED(AUTO_REPORT_TEMPERATURES)
         static uint8_t auto_report_temp_interval;
         static millis_t next_temp_report_ms;
