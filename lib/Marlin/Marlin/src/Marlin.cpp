@@ -737,24 +737,6 @@ void setup() {
 
   HAL_init();
 
-  #if ENABLED(DISABLE_DEBUG)
-    // Disable any hardware debug to free up pins for IO
-    #ifdef JTAGSWD_DISABLE
-      JTAGSWD_DISABLE();
-    #elif defined(JTAG_DISABLE)
-      JTAG_DISABLE();
-    #else
-      #error "DISABLE_DEBUG is not supported for the selected MCU/Board"
-    #endif
-  #elif ENABLED(DISABLE_JTAG)
-    // Disable JTAG to free up pins for IO
-    #ifdef JTAG_DISABLE
-      JTAG_DISABLE();
-    #else
-      #error "DISABLE_JTAG is not supported for the selected MCU/Board"
-    #endif
-  #endif
-
   #if HAS_FILAMENT_SENSOR
     runout.setup();
   #endif
