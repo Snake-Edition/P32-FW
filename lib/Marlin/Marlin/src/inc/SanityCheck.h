@@ -84,10 +84,6 @@
   #error "SDSLOW deprecated. Set SPI_SPEED to SPI_HALF_SPEED instead."
 #elif defined(SDEXTRASLOW)
   #error "SDEXTRASLOW deprecated. Set SPI_SPEED to SPI_QUARTER_SPEED instead."
-// Disable this check in the Buddy Project, as we use FILAMENT_SENSOR macro for something else and
-// it is ok for it to be defined.
-//#elif defined(FILAMENT_SENSOR)
-//  #error "FILAMENT_SENSOR is now FILAMENT_WIDTH_SENSOR. Please update your configuration."
 #elif defined(ENDSTOPPULLUP_FIL_RUNOUT)
   #error "ENDSTOPPULLUP_FIL_RUNOUT is now FIL_RUNOUT_PULLUP. Please update your configuration."
 #elif defined(DISABLE_MAX_ENDSTOPS) || defined(DISABLE_MIN_ENDSTOPS)
@@ -246,8 +242,6 @@
   #error "PROBE_DOUBLE_TOUCH is now MULTIPLE_PROBING. Please update your configuration."
 #elif defined(LCD_I2C_SAINSMART_YWROBOT)
   #error "LCD_I2C_SAINSMART_YWROBOT is now LCD_SAINSMART_I2C_(1602|2004). Please update your configuration."
-#elif defined(MEASURED_LOWER_LIMIT) || defined(MEASURED_UPPER_LIMIT)
-  #error "MEASURED_(UPPER|LOWER)_LIMIT is now FILWIDTH_ERROR_MARGIN. Please update your configuration."
 #elif defined(HAVE_TMCDRIVER)
   #error "HAVE_TMCDRIVER is now [AXIS]_DRIVER_TYPE TMC26X. Please update your Configuration.h."
 #elif defined(STEALTHCHOP)
@@ -515,8 +509,6 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
     #error "LCD_PROGRESS_BAR requires LCD_SET_PROGRESS_MANUALLY."
   #elif 1
     #error "LCD_PROGRESS_BAR requires a character LCD."
-  #elif ENABLED(FILAMENT_LCD_DISPLAY)
-    #error "LCD_PROGRESS_BAR and FILAMENT_LCD_DISPLAY are not fully compatible. Comment out this line to use both."
   #elif PROGRESS_MSG_EXPIRE < 0
     #error "PROGRESS_MSG_EXPIRE must be greater than or equal to 0."
   #endif
@@ -1161,17 +1153,6 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
 #if ANY(DISABLE_X, DISABLE_Y, DISABLE_Z)
   #if EITHER(HOME_AFTER_DEACTIVATE, Z_SAFE_HOMING)
     #error "DISABLE_[XYZ] is not compatible with HOME_AFTER_DEACTIVATE or Z_SAFE_HOMING."
-  #endif
-#endif
-
-/**
- * Filament Width Sensor
- */
-#if ENABLED(FILAMENT_WIDTH_SENSOR)
-  #if !HAS_FILAMENT_WIDTH_SENSOR
-    #error "FILAMENT_WIDTH_SENSOR requires a FILWIDTH_PIN to be defined."
-  #elif ENABLED(NO_VOLUMETRICS)
-    #error "FILAMENT_WIDTH_SENSOR requires NO_VOLUMETRICS to be disabled."
   #endif
 #endif
 

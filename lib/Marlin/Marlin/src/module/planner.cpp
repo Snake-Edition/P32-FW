@@ -80,10 +80,6 @@
   #include "../feature/bedlevel/bedlevel.h"
 #endif
 
-#if ENABLED(FILAMENT_WIDTH_SENSOR)
-  #include "../feature/filwidth.h"
-#endif
-
 #if ENABLED(AUTO_POWER_CONTROL)
   #include "../feature/power.h"
 #endif
@@ -899,25 +895,6 @@ void Planner::check_axes_activity() {
 
 #endif // !NO_VOLUMETRICS
 
-#if ENABLED(FILAMENT_WIDTH_SENSOR)
-  /**
-   * Convert the ratio value given by the filament width sensor
-   * into a volumetric multiplier. Conversion differs when using
-   * linear extrusion vs volumetric extrusion.
-   */
-  void Planner::apply_filament_width_sensor(const int8_t encoded_ratio) {
-    // Reconstitute the nominal/measured ratio
-    const float nom_meas_ratio = 1 + 0.01f * encoded_ratio,
-                ratio_2 = sq(nom_meas_ratio);
-
-    volumetric_multiplier[FILAMENT_SENSOR_EXTRUDER_NUM] = parser.volumetric_enabled
-      ? ratio_2 / CIRCLE_AREA(filwidth.nominal_mm * 0.5f) // Volumetric uses a true volumetric multiplier
-      : ratio_2;                                          // Linear squares the ratio, which scales the volume
-
-    refresh_e_factor(FILAMENT_SENSOR_EXTRUDER_NUM);
-  }
-#endif
-
 #if HAS_LEVELING
 
   constexpr xy_pos_t level_fulcrum = {
@@ -1631,11 +1608,6 @@ bool Planner::_populate_block(block_t * const block,
 #if ENABLED(S_CURVE_ACCELERATION)
   block->nominal_rate = CEIL(block->mstep_event_count * inverse_secs); // (mini-step/sec) Always > 0
 #endif
-
-  #if ENABLED(FILAMENT_WIDTH_SENSOR)
-    if (extruder == FILAMENT_SENSOR_EXTRUDER_NUM)   // Only for extruder with filament sensor
-      filwidth.advance_e(delta_mm.e);
-  #endif
 
   // Calculate and limit speed in mm/sec for each axis
   xyze_float_t current_speed;

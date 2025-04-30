@@ -681,13 +681,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 403: M403(); break;
       #endif
 
-      #if ENABLED(FILAMENT_WIDTH_SENSOR)
-        case 404: M404(); break;                                  // M404: Enter the nominal filament width (3mm, 1.75mm ) N<3.0> or display nominal filament width
-        case 405: M405(); break;                                  // M405: Turn on filament sensor for control
-        case 406: M406(); break;                                  // M406: Turn off filament sensor for control
-        case 407: M407(); break;                                  // M407: Display measured filament diameter
-      #endif
-
       #if HAS_FILAMENT_SENSOR
         case 412: M412(); break;                                  // M412: Enable/Disable filament runout detection
       #endif

@@ -74,10 +74,6 @@
 
 #include "printcounter.h"
 
-#if ENABLED(FILAMENT_WIDTH_SENSOR)
-  #include "../feature/filwidth.h"
-#endif
-
 #if ENABLED(EMERGENCY_PARSER)
   #include "../feature/emergency_parser.h"
 #endif
@@ -1584,14 +1580,6 @@ void Temperature::manage_heater() {
     }
   #endif
 
-  #if ENABLED(FILAMENT_WIDTH_SENSOR)
-    /**
-     * Dynamically set the volumetric multiplier based
-     * on the delayed Filament Width measurement.
-     */
-    filwidth.update_volumetric();
-  #endif
-
   #if HAS_HEATED_BED
 
     #if ENABLED(THERMAL_PROTECTION_BED)
@@ -2221,9 +2209,6 @@ void Temperature::updateTemperaturesFromRawValues() {
   #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
     redundant_temperature = analog_to_celsius_hotend(redundant_temperature_raw, 1);
   #endif
-  #if ENABLED(FILAMENT_WIDTH_SENSOR)
-    filwidth.update_measured_mm();
-  #endif
   #if HAS_TEMP_BOARD
     temp_board.celsius = analog_to_celsius_board(temp_board.raw);
   #endif
@@ -2379,9 +2364,6 @@ void Temperature::init() {
   #endif
   #if HAS_TEMP_HEATBREAK
     HAL_ANALOG_SELECT(TEMP_HEATBREAK_PIN);
-  #endif
-  #if ENABLED(FILAMENT_WIDTH_SENSOR)
-    HAL_ANALOG_SELECT(FILWIDTH_PIN);
   #endif
 
   HAL_timer_start(TEMP_TIMER_NUM, TEMP_TIMER_FREQUENCY);
@@ -2996,11 +2978,6 @@ void Temperature::readings_ready() {
   // Update the raw values if they've been read. Else we could be updating them during reading.
   if (!temp_meas_ready) set_current_temp_raw();
 
-  // Filament Sensor - can be read any time since IIR filtering is used
-  #if ENABLED(FILAMENT_WIDTH_SENSOR)
-    filwidth.reading_ready();
-  #endif
-
   #if HOTENDS
     HOTEND_LOOP() temp_hotend[e].reset();
     #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
@@ -3406,16 +3383,6 @@ void Temperature::isr() {
     #if HAS_TEMP_ADC_5
       case PrepareTemp_5: HAL_START_ADC(TEMP_5_PIN); break;
       case MeasureTemp_5: ACCUMULATE_ADC(temp_hotend[5]); break;
-    #endif
-
-    #if ENABLED(FILAMENT_WIDTH_SENSOR)
-      case Prepare_FILWIDTH: HAL_START_ADC(FILWIDTH_PIN); break;
-      case Measure_FILWIDTH:
-        if (!HAL_ADC_READY())
-          next_sensor_state = adc_sensor_state; // redo this state
-        else
-          filwidth.accumulate(HAL_READ_ADC());
-      break;
     #endif
 
     case StartupDelay: break;

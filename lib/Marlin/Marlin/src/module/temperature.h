@@ -136,9 +136,6 @@ enum ADCSensorState : char {
   #if HAS_TEMP_ADC_5
     PrepareTemp_5, MeasureTemp_5,
   #endif
-  #if ENABLED(FILAMENT_WIDTH_SENSOR)
-    Prepare_FILWIDTH, Measure_FILWIDTH,
-  #endif
   SensorsReady, // Temperatures ready. Delay the next round of readings to let ADC pins settle.
   StartupDelay  // Startup, delay initial temp reading a tiny bit so the hardware can settle
 };

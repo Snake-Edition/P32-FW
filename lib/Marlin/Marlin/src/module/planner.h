@@ -289,7 +289,6 @@ class Planner {
       static float filament_size[EXTRUDERS],          // diameter of filament (in millimeters), typically around 1.75 or 2.85, 0 disables the volumetric calculations for the extruder
                    volumetric_area_nominal,           // Nominal cross-sectional area
                    volumetric_multiplier[EXTRUDERS];  // Reciprocal of cross-sectional area of filament (in mm^2). Pre-calculated to reduce computation in the planner
-                                                      // May be auto-adjusted by a filament width sensor
     #endif
 
     /// Reference to working_settings - settings with applied limits
@@ -452,17 +451,6 @@ class Planner {
 
     // Update multipliers based on new diameter measurements
     static void calculate_volumetric_multipliers();
-
-    #if ENABLED(FILAMENT_WIDTH_SENSOR)
-      void apply_filament_width_sensor(const int8_t encoded_ratio);
-
-      static inline float volumetric_percent(const bool vol) {
-        return 100.0f * (vol
-            ? volumetric_area_nominal / volumetric_multiplier[FILAMENT_SENSOR_EXTRUDER_NUM]
-            : volumetric_multiplier[FILAMENT_SENSOR_EXTRUDER_NUM]
-        );
-      }
-    #endif
 
     #if DISABLED(NO_VOLUMETRICS)
 

@@ -1107,9 +1107,6 @@
   #undef EDITABLE_SERVO_ANGLES
 #endif
 
-// Sensors
-#define HAS_FILAMENT_WIDTH_SENSOR (PIN_EXISTS(FILWIDTH))
-
 // User Interface
 #define HAS_HOME        (PIN_EXISTS(HOME))
 #define HAS_KILL        (PIN_EXISTS(KILL))
