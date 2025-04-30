@@ -321,11 +321,7 @@
 
 #define ANY_TEMP_SENSOR_IS(n) (TEMP_SENSOR_0 == (n) || TEMP_SENSOR_1 == (n) || TEMP_SENSOR_2 == (n) || TEMP_SENSOR_3 == (n) || TEMP_SENSOR_4 == (n) || TEMP_SENSOR_5 == (n) || TEMP_SENSOR_BED == (n) || TEMP_SENSOR_CHAMBER == (n))
 
-#if TEMP_SENSOR_0 == -2
-  #define HEATER_0_USES_MAX6675
-  #define HEATER_0_MAX6675_TMIN 0
-  #define HEATER_0_MAX6675_TMAX 1024
-#elif TEMP_SENSOR_0 > 0
+#if TEMP_SENSOR_0 > 0
   #define THERMISTOR_HEATER_0 TEMP_SENSOR_0
   #define HEATER_0_USES_THERMISTOR
 #else
@@ -333,11 +329,7 @@
   #undef HEATER_0_MAXTEMP
 #endif
 
-#if TEMP_SENSOR_1 == -2
-  #define HEATER_1_USES_MAX6675
-  #define HEATER_1_MAX6675_TMIN 0
-  #define HEATER_1_MAX6675_TMAX 1024
-#elif TEMP_SENSOR_1 > 0
+#if TEMP_SENSOR_1 > 0
   #define THERMISTOR_HEATER_1 TEMP_SENSOR_1
   #define HEATER_1_USES_THERMISTOR
 #else
@@ -345,9 +337,7 @@
   #undef HEATER_1_MAXTEMP
 #endif
 
-#if TEMP_SENSOR_2 == -2
-  #error "MAX6675 Thermocouples (-2) not supported for TEMP_SENSOR_2."
-#elif TEMP_SENSOR_2 > 0
+#if TEMP_SENSOR_2 > 0
   #define THERMISTOR_HEATER_2 TEMP_SENSOR_2
   #define HEATER_2_USES_THERMISTOR
 #else
@@ -355,9 +345,7 @@
   #undef HEATER_2_MAXTEMP
 #endif
 
-#if TEMP_SENSOR_3 == -2
-  #error "MAX6675 Thermocouples (-2) not supported for TEMP_SENSOR_3."
-#elif TEMP_SENSOR_3 > 0
+#if TEMP_SENSOR_3 > 0
   #define THERMISTOR_HEATER_3 TEMP_SENSOR_3
   #define HEATER_3_USES_THERMISTOR
 #else
@@ -365,9 +353,7 @@
   #undef HEATER_3_MAXTEMP
 #endif
 
-#if TEMP_SENSOR_4 == -2
-  #error "MAX6675 Thermocouples (-2) not supported for TEMP_SENSOR_4."
-#elif TEMP_SENSOR_4 > 0
+#if TEMP_SENSOR_4 > 0
   #define THERMISTOR_HEATER_4 TEMP_SENSOR_4
   #define HEATER_4_USES_THERMISTOR
 #else
@@ -375,9 +361,7 @@
   #undef HEATER_4_MAXTEMP
 #endif
 
-#if TEMP_SENSOR_5 == -2
-  #error "MAX6675 Thermocouples (-2) not supported for TEMP_SENSOR_5."
-#elif TEMP_SENSOR_5 > 0
+#if TEMP_SENSOR_5 > 0
   #define THERMISTOR_HEATER_5 TEMP_SENSOR_5
   #define HEATER_5_USES_THERMISTOR
 #else
@@ -385,9 +369,7 @@
   #undef HEATER_5_MAXTEMP
 #endif
 
-#if TEMP_SENSOR_BED == -2
-  #error "MAX6675 Thermocouples (-2) not supported for TEMP_SENSOR_BED."
-#elif TEMP_SENSOR_BED > 0
+#if TEMP_SENSOR_BED > 0
   #define THERMISTORBED TEMP_SENSOR_BED
   #define HEATER_BED_USES_THERMISTOR
 #else
@@ -395,9 +377,7 @@
   #undef BED_MAXTEMP
 #endif
 
-#if TEMP_SENSOR_CHAMBER == -2
-  #error "MAX6675 Thermocouples (-2) not supported for TEMP_SENSOR_CHAMBER."
-#elif TEMP_SENSOR_CHAMBER > 0
+#if TEMP_SENSOR_CHAMBER > 0
   #define THERMISTORCHAMBER TEMP_SENSOR_CHAMBER
   #define HEATER_CHAMBER_USES_THERMISTOR
 #else
@@ -406,9 +386,7 @@
 #endif
 
 
-#if TEMP_SENSOR_HEATBREAK == -2
-  #error "MAX6675 Thermocouples (-2) not supported for TEMP_SENSOR_HEATBREAK."
-#elif TEMP_SENSOR_HEATBREAK > 0
+#if TEMP_SENSOR_HEATBREAK > 0
   #define THERMISTORHEATBREAK TEMP_SENSOR_HEATBREAK
   #define HEATBREAK_USES_THERMISTOR
 #else
@@ -417,9 +395,7 @@
 #endif
 
 
-#if TEMP_SENSOR_BOARD == -2
-  #error "MAX6675 Thermocouples (-2) not supported for TEMP_SENSOR_BOARD."
-#elif TEMP_SENSOR_BOARD > 0
+#if TEMP_SENSOR_BOARD > 0
   #define THERMISTORBOARD TEMP_SENSOR_BOARD
   #define BOARD_USES_THERMISTOR
 #else
@@ -906,7 +882,7 @@
 #define HAS_CALIBRATION_PIN (PIN_EXISTS(CALIBRATION))
 
 // ADC Temp Sensors (Thermistor or Thermocouple with amplifier ADC interface)
-#define HAS_ADC_TEST(P) (PIN_EXISTS(TEMP_##P) && TEMP_SENSOR_##P != 0 && DISABLED(HEATER_##P##_USES_MAX6675))
+#define HAS_ADC_TEST(P) (PIN_EXISTS(TEMP_##P) && TEMP_SENSOR_##P != 0)
 #define HAS_TEMP_ADC_0 HAS_ADC_TEST(0)
 #define HAS_TEMP_ADC_1 HAS_ADC_TEST(1)
 #define HAS_TEMP_ADC_2 HAS_ADC_TEST(2)
@@ -918,7 +894,7 @@
 #define HAS_TEMP_ADC_HEATBREAK HAS_ADC_TEST(HEATBREAK)
 #define HAS_TEMP_ADC_BOARD HAS_ADC_TEST(BOARD)
 
-#define HAS_TEMP_HOTEND (HAS_TEMP_ADC_0 || ENABLED(HEATER_0_USES_MAX6675))
+#define HAS_TEMP_HOTEND HAS_TEMP_ADC_0
 #define HAS_TEMP_BED HAS_TEMP_ADC_BED
 #define HAS_TEMP_CHAMBER HAS_TEMP_ADC_CHAMBER
 #define HAS_TEMP_HEATBREAK HAS_TEMP_ADC_HEATBREAK

@@ -280,7 +280,6 @@
  *
  * Temperature sensors available:
  *
- *    -2 : thermocouple with MAX6675 (only for sensor 0)
  *     0 : not used
  *     1 : 100k thermistor - best choice for EPCOS 100k (4.7k pullup)
  *     2 : 200k thermistor - ATC Semitec 204GT-2 (4.7k pullup)

@@ -932,25 +932,6 @@ public:
     static void set_current_temp_raw();
     static void updateTemperaturesFromRawValues();
 
-    #define HAS_MAX6675 EITHER(HEATER_0_USES_MAX6675, HEATER_1_USES_MAX6675)
-    #if HAS_MAX6675
-      #if BOTH(HEATER_0_USES_MAX6675, HEATER_1_USES_MAX6675)
-        #define COUNT_6675 2
-      #else
-        #define COUNT_6675 1
-      #endif
-      #if COUNT_6675 > 1
-        #define READ_MAX6675(N) read_max6675(N)
-      #else
-        #define READ_MAX6675(N) read_max6675()
-      #endif
-      static int read_max6675(
-        #if COUNT_6675 > 1
-          const uint8_t hindex=0
-        #endif
-      );
-    #endif
-
     static void checkExtruderAutoFans();
 
     static float get_pid_output_hotend(

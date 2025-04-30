@@ -55,12 +55,6 @@
 #include "feature/chamber/chamber.hpp"
 #endif
 
-#define MAX6675_SEPARATE_SPI (EITHER(HEATER_0_USES_MAX6675, HEATER_1_USES_MAX6675) && PINS_EXIST(MAX6675_SCK, MAX6675_DO))
-
-#if MAX6675_SEPARATE_SPI
-  #include "../libs/private_spi.h"
-#endif
-
 #if EITHER(BABYSTEPPING, PID_EXTRUSION_SCALING)
   #include "stepper.h"
 #endif
@@ -1499,16 +1493,6 @@ void Temperature::manage_heater() {
 
   updateTemperaturesFromRawValues(); // also resets the watchdog
 
-  #if ENABLED(HEATER_0_USES_MAX6675)
-    if (temp_hotend[0].celsius > _MIN(HEATER_0_MAXTEMP, HEATER_0_MAX6675_TMAX - 1.0)) max_temp_error(H_E0);
-    if (temp_hotend[0].celsius < _MAX(HEATER_0_MINTEMP, HEATER_0_MAX6675_TMIN + .01)) min_temp_error(H_E0);
-  #endif
-
-  #if ENABLED(HEATER_1_USES_MAX6675)
-    if (temp_hotend[1].celsius > _MIN(HEATER_1_MAXTEMP, HEATER_1_MAX6675_TMAX - 1.0)) max_temp_error(H_E1);
-    if (temp_hotend[1].celsius < _MAX(HEATER_1_MINTEMP, HEATER_1_MAX6675_TMIN + .01)) min_temp_error(H_E1);
-  #endif
-
   millis_t ms = millis();
 
   #if HOTENDS
@@ -1841,17 +1825,13 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
 
     switch (e) {
       case 0:
-        #if ENABLED(HEATER_0_USES_MAX6675)
-          return raw * 0.25;
-        #elif ENABLED(PRUSA_TOOLCHANGER)
+        #if ENABLED(PRUSA_TOOLCHANGER)
           return prusa_toolchanger.getTool(0).get_hotend_temp();
         #else
           break;
         #endif
       case 1:
-        #if ENABLED(HEATER_1_USES_MAX6675)
-          return raw * 0.25;
-        #elif ENABLED(PRUSA_TOOLCHANGER)
+        #if ENABLED(PRUSA_TOOLCHANGER)
           return prusa_toolchanger.getTool(1).get_hotend_temp();
         #else
           break;
@@ -1983,12 +1963,6 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
  * as it would block the stepper routine.
  */
 void Temperature::updateTemperaturesFromRawValues() {
-  #if ENABLED(HEATER_0_USES_MAX6675)
-    temp_hotend[0].raw = READ_MAX6675(0);
-  #endif
-  #if ENABLED(HEATER_1_USES_MAX6675)
-    temp_hotend[1].raw = READ_MAX6675(1);
-  #endif
   #if HOTENDS
     #if ENABLED(PRUSA_TOOLCHANGER)
       HOTEND_LOOP() temp_hotend[e].celsius = prusa_toolchanger.getTool(e).get_hotend_temp();
@@ -2038,10 +2012,6 @@ void Temperature::updateTemperaturesFromRawValues() {
   temperatures_ready_state = true;
   temp_meas_ready = false;
 }
-
-#if MAX6675_SEPARATE_SPI
-  SPIclass<MAX6675_DO_PIN, MOSI_PIN, MAX6675_SCK_PIN> max6675_spi;
-#endif
 
 #define _INIT_SOFT_FAN(P) OUT_WRITE(P, FAN_INVERTING ? LOW : HIGH)
 #define INIT_FAN_PIN(P) do{ if (PWM_PIN(P)) SET_PWM(P); else _INIT_SOFT_FAN(P); }while(0)
@@ -2111,23 +2081,6 @@ void Temperature::init() {
   #endif
   #if ENABLED(USE_CONTROLLER_FAN)
     INIT_FAN_PIN(CONTROLLER_FAN_PIN);
-  #endif
-
-  #if MAX6675_SEPARATE_SPI
-
-    OUT_WRITE(SCK_PIN, LOW);
-    OUT_WRITE(MOSI_PIN, HIGH);
-    SET_INPUT_PULLUP(MISO_PIN);
-
-    max6675_spi.init();
-
-    OUT_WRITE(SS_PIN, HIGH);
-    OUT_WRITE(MAX6675_SS_PIN, HIGH);
-
-  #endif
-
-  #if ENABLED(HEATER_1_USES_MAX6675)
-    OUT_WRITE(MAX6675_SS2_PIN, HIGH);
   #endif
 
   HAL_adc_init();
@@ -2595,131 +2548,19 @@ void Temperature::disable_heaters(Temperature::disable_bed_t disable_bed) {
 
 #endif // PROBING_HEATERS_OFF
 
-#if HAS_MAX6675
-
-  int Temperature::read_max6675(
-    #if COUNT_6675 > 1
-      const uint8_t hindex
-    #endif
-  ) {
-    #if COUNT_6675 == 1
-      constexpr uint8_t hindex = 0;
-    #else
-      // Needed to return the correct temp when this is called too soon
-      static uint16_t max6675_temp_previous[COUNT_6675] = { 0 };
-    #endif
-
-    #define MAX6675_HEAT_INTERVAL 250UL
-
-      static uint16_t max6675_temp = 2000;
-      #define MAX6675_ERROR_MASK    4
-      #define MAX6675_DISCARD_BITS  3
-      #define MAX6675_SPEED_BITS    2  // (_BV(SPR0)) // clock ÷ 16
-
-    // Return last-read value between readings
-    static millis_t next_max6675_ms[COUNT_6675] = { 0 };
-    millis_t ms = millis();
-    if (PENDING(ms, next_max6675_ms[hindex]))
-      return int(
-        #if COUNT_6675 == 1
-          max6675_temp
-        #else
-          max6675_temp_previous[hindex] // Need to return the correct previous value
-        #endif
-      );
-
-    next_max6675_ms[hindex] = ms + MAX6675_HEAT_INTERVAL;
-
-    //
-    // TODO: spiBegin, spiRec and spiInit doesn't work when soft spi is used.
-    //
-    #if !MAX6675_SEPARATE_SPI
-      spiBegin();
-      spiInit(MAX6675_SPEED_BITS);
-    #endif
-
-    #if COUNT_6675 > 1
-      #define WRITE_MAX6675(V) do{ switch (hindex) { case 1: WRITE(MAX6675_SS2_PIN, V); break; default: WRITE(MAX6675_SS_PIN, V); } }while(0)
-      #define SET_OUTPUT_MAX6675() do{ switch (hindex) { case 1: SET_OUTPUT(MAX6675_SS2_PIN); break; default: SET_OUTPUT(MAX6675_SS_PIN); } }while(0)
-    #elif ENABLED(HEATER_1_USES_MAX6675)
-      #define WRITE_MAX6675(V) WRITE(MAX6675_SS2_PIN, V)
-      #define SET_OUTPUT_MAX6675() SET_OUTPUT(MAX6675_SS2_PIN)
-    #else
-      #define WRITE_MAX6675(V) WRITE(MAX6675_SS_PIN, V)
-      #define SET_OUTPUT_MAX6675() SET_OUTPUT(MAX6675_SS_PIN)
-    #endif
-
-    SET_OUTPUT_MAX6675();
-    WRITE_MAX6675(LOW);  // enable TT_MAX6675
-
-    DELAY_NS(100);       // Ensure 100ns delay
-
-    // Read a big-endian temperature value
-    max6675_temp = 0;
-    for (uint8_t i = sizeof(max6675_temp); i--;) {
-      max6675_temp |= (
-        #if MAX6675_SEPARATE_SPI
-          max6675_spi.receive()
-        #else
-          spiRec()
-        #endif
-      );
-      if (i > 0) max6675_temp <<= 8; // shift left if not the last byte
-    }
-
-    WRITE_MAX6675(HIGH); // disable TT_MAX6675
-
-    if (max6675_temp & MAX6675_ERROR_MASK) {
-      SERIAL_ERROR_START();
-      SERIAL_ECHOPGM("Temp measurement error! ");
-      #if MAX6675_ERROR_MASK == 7
-        SERIAL_ECHOPGM("MAX31855 ");
-        if (max6675_temp & 1)
-          SERIAL_ECHOLNPGM("Open Circuit");
-        else if (max6675_temp & 2)
-          SERIAL_ECHOLNPGM("Short to GND");
-        else if (max6675_temp & 4)
-          SERIAL_ECHOLNPGM("Short to VCC");
-      #else
-        SERIAL_ECHOLNPGM("MAX6675");
-      #endif
-
-      // Thermocouple open
-      max6675_temp = 4 * (
-        #if COUNT_6675 > 1
-          hindex ? HEATER_1_MAX6675_TMAX : HEATER_0_MAX6675_TMAX
-        #elif ENABLED(HEATER_1_USES_MAX6675)
-          HEATER_1_MAX6675_TMAX
-        #else
-          HEATER_0_MAX6675_TMAX
-        #endif
-      );
-    }
-    else
-      max6675_temp >>= MAX6675_DISCARD_BITS;
-
-    #if COUNT_6675 > 1
-      max6675_temp_previous[hindex] = max6675_temp;
-    #endif
-
-    return int(max6675_temp);
-  }
-
-#endif // HAS_MAX6675
-
 /**
  * Get raw temperatures
  */
 void Temperature::set_current_temp_raw() {
 
-  #if HAS_TEMP_ADC_0 && DISABLED(HEATER_0_USES_MAX6675)
+  #if HAS_TEMP_ADC_0
     temp_hotend[0].update();
   #endif
 
   #if HAS_TEMP_ADC_1
     #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
       redundant_temperature_raw = temp_hotend[1].acc;
-    #elif DISABLED(HEATER_1_USES_MAX6675)
+    #else
       temp_hotend[1].update();
     #endif
     #if HAS_TEMP_ADC_2
@@ -2796,17 +2637,9 @@ void Temperature::readings_ready() {
   #if HOTENDS
 
     static constexpr int8_t temp_dir[] = {
-      #if ENABLED(HEATER_0_USES_MAX6675)
-        0
-      #else
         TEMPDIR(0)
-      #endif
       #if HOTENDS > 1
-        #if ENABLED(HEATER_1_USES_MAX6675)
-          , 0
-        #else
           , TEMPDIR(1)
-        #endif
         #if HOTENDS > 2
           , TEMPDIR(2)
           #if HOTENDS > 3
