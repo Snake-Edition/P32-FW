@@ -452,14 +452,6 @@ void MarlinSettings::reset() {
   #endif
 
   //
-  // User-Defined Thermistors
-  //
-
-  #if HAS_USER_THERMISTORS
-    thermalManager.reset_user_thermistors();
-  #endif
-
-  //
   // LCD Contrast
   //
 
@@ -897,12 +889,6 @@ void MarlinSettings::reset() {
       #endif
 
     #endif // PIDTEMP || PIDTEMPBED
-
-    #if HAS_USER_THERMISTORS
-      CONFIG_ECHO_HEADING("User thermistors:");
-      for (uint8_t i = 0; i < USER_THERMISTORS; i++)
-        thermalManager.log_user_thermistor(i, true);
-    #endif
 
     #if HAS_LCD_CONTRAST
       CONFIG_ECHO_HEADING("LCD Contrast:");

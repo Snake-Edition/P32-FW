@@ -76,7 +76,6 @@ if(BOARD_IS_MASTER_BOARD)
             Marlin/Marlin/src/gcode/config/M301.cpp
             Marlin/Marlin/src/gcode/config/M302.cpp
             Marlin/Marlin/src/gcode/config/M304.cpp
-            Marlin/Marlin/src/gcode/config/M305.cpp
             Marlin/Marlin/src/gcode/config/M575.cpp
             Marlin/Marlin/src/gcode/control/M108_M112_M410.cpp
             Marlin/Marlin/src/gcode/control/M111.cpp

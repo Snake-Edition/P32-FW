@@ -1825,144 +1825,6 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
   }                                                                    \
 }while(0)
 
-#if HAS_USER_THERMISTORS
-
-  user_thermistor_t Temperature::user_thermistor[USER_THERMISTORS]; // Initialized by settings.load()
-
-  void Temperature::reset_user_thermistors() {
-    user_thermistor_t user_thermistor[USER_THERMISTORS] = {
-      #if ENABLED(HEATER_0_USER_THERMISTOR)
-        { true, 0, 0, HOTEND0_PULLUP_RESISTOR_OHMS, HOTEND0_RESISTANCE_25C_OHMS, 0, 0, HOTEND0_BETA, 0 },
-      #endif
-      #if ENABLED(HEATER_1_USER_THERMISTOR)
-        { true, 0, 0, HOTEND1_PULLUP_RESISTOR_OHMS, HOTEND1_RESISTANCE_25C_OHMS, 0, 0, HOTEND1_BETA, 0 },
-      #endif
-      #if ENABLED(HEATER_2_USER_THERMISTOR)
-        { true, 0, 0, HOTEND2_PULLUP_RESISTOR_OHMS, HOTEND2_RESISTANCE_25C_OHMS, 0, 0, HOTEND2_BETA, 0 },
-      #endif
-      #if ENABLED(HEATER_3_USER_THERMISTOR)
-        { true, 0, 0, HOTEND3_PULLUP_RESISTOR_OHMS, HOTEND3_RESISTANCE_25C_OHMS, 0, 0, HOTEND3_BETA, 0 },
-      #endif
-      #if ENABLED(HEATER_4_USER_THERMISTOR)
-        { true, 0, 0, HOTEND4_PULLUP_RESISTOR_OHMS, HOTEND4_RESISTANCE_25C_OHMS, 0, 0, HOTEND4_BETA, 0 },
-      #endif
-      #if ENABLED(HEATER_5_USER_THERMISTOR)
-        { true, 0, 0, HOTEND5_PULLUP_RESISTOR_OHMS, HOTEND5_RESISTANCE_25C_OHMS, 0, 0, HOTEND5_BETA, 0 },
-      #endif
-      #if ENABLED(HEATER_BED_USER_THERMISTOR)
-        { true, 0, 0, BED_PULLUP_RESISTOR_OHMS, BED_RESISTANCE_25C_OHMS, 0, 0, BED_BETA, 0 },
-      #endif
-      #if ENABLED(HEATER_CHAMBER_USER_THERMISTOR)
-        { true, 0, 0, CHAMBER_PULLUP_RESISTOR_OHMS, CHAMBER_RESISTANCE_25C_OHMS, 0, 0, CHAMBER_BETA, 0 }
-      #endif
-      #if ENABLED(HEATBREAK_USER_THERMISTOR)
-        { true, 0, 0, HEATBREAK_PULLUP_RESISTOR_OHMS, HEATBREAK_RESISTANCE_25C_OHMS, 0, 0, HEATBREAK_BETA, 0 }
-      #endif
-      #if ENABLED(BOARD_USER_THERMISTOR)
-        { true, 0, 0, BOARD_PULLUP_RESISTOR_OHMS, BOARD_RESISTANCE_25C_OHMS, 0, 0, BOARD_BETA, 0 }
-      #endif
-    };
-    COPY(thermalManager.user_thermistor, user_thermistor);
-  }
-
-  void Temperature::log_user_thermistor(const uint8_t t_index, const bool eprom/*=false*/) {
-
-    if (eprom)
-      SERIAL_ECHOPGM("  M305 ");
-    else
-      SERIAL_ECHO_START();
-    SERIAL_CHAR('P');
-    SERIAL_CHAR('0' + t_index);
-
-    const user_thermistor_t &t = user_thermistor[t_index];
-
-    SERIAL_ECHOPAIR_F(" R", t.series_res, 1);
-    SERIAL_ECHOPAIR_F(" T", t.res_25, 1);
-    SERIAL_ECHOPAIR_F(" B", t.beta, 1);
-    SERIAL_ECHOPAIR_F(" C", t.sh_c_coeff, 9);
-    SERIAL_ECHOPGM(" ; ");
-    serialprintPGM(
-      #if ENABLED(HEATER_0_USER_THERMISTOR)
-        t_index == CTI_HOTEND_0 ? PSTR("HOTEND 0") :
-      #endif
-      #if ENABLED(HEATER_1_USER_THERMISTOR)
-        t_index == CTI_HOTEND_1 ? PSTR("HOTEND 1") :
-      #endif
-      #if ENABLED(HEATER_2_USER_THERMISTOR)
-        t_index == CTI_HOTEND_2 ? PSTR("HOTEND 2") :
-      #endif
-      #if ENABLED(HEATER_3_USER_THERMISTOR)
-        t_index == CTI_HOTEND_3 ? PSTR("HOTEND 3") :
-      #endif
-      #if ENABLED(HEATER_4_USER_THERMISTOR)
-        t_index == CTI_HOTEND_4 ? PSTR("HOTEND 4") :
-      #endif
-      #if ENABLED(HEATER_5_USER_THERMISTOR)
-        t_index == CTI_HOTEND_5 ? PSTR("HOTEND 5") :
-      #endif
-      #if ENABLED(HEATER_BED_USER_THERMISTOR)
-        t_index == CTI_BED ? PSTR("BED") :
-      #endif
-      #if ENABLED(HEATER_CHAMBER_USER_THERMISTOR)
-        t_index == CTI_CHAMBER ? PSTR("CHAMBER") :
-      #endif
-      #if ENABLED(HEATBREAK_USER_THERMISTOR)
-        t_index == CTI_HEATBREAK ? PSTR("HEATBREAK") :
-      #endif
-      #if ENABLED(BOARD_USER_THERMISTOR)
-        t_index == CTI_BOARD ? PSTR("BOARD") :
-      #endif
-      nullptr
-    );
-    SERIAL_EOL();
-  }
-
-  float Temperature::user_thermistor_to_deg_c(const uint8_t t_index, const int raw) {
-    //#if (MOTHERBOARD == BOARD_RAMPS_14_EFB)
-    //  static uint32_t clocks_total = 0;
-    //  static uint32_t calls = 0;
-    //  uint32_t tcnt5 = TCNT5;
-    //#endif
-
-    if (!WITHIN(t_index, 0, COUNT(user_thermistor) - 1)) return 25;
-
-    user_thermistor_t &t = user_thermistor[t_index];
-    if (t.pre_calc) { // pre-calculate some variables
-      t.pre_calc     = false;
-      t.res_25_recip = 1.0f / t.res_25;
-      t.res_25_log   = logf(t.res_25);
-      t.beta_recip   = 1.0f / t.beta;
-      t.sh_alpha     = RECIPROCAL(THERMISTOR_RESISTANCE_NOMINAL_C - (THERMISTOR_ABS_ZERO_C))
-                        - (t.beta_recip * t.res_25_log) - (t.sh_c_coeff * cu(t.res_25_log));
-    }
-
-    // maximum adc value .. take into account the over sampling
-    const int adc_max = (THERMISTOR_ADC_RESOLUTION * OVERSAMPLENR) - 1,
-              adc_raw = constrain(raw, 1, adc_max - 1); // constrain to prevent divide-by-zero
-
-    const float adc_inverse = (adc_max - adc_raw) - 0.5f,
-                resistance = t.series_res * (adc_raw + 0.5f) / adc_inverse,
-                log_resistance = logf(resistance);
-
-    float value = t.sh_alpha;
-    value += log_resistance * t.beta_recip;
-    if (t.sh_c_coeff != 0)
-      value += t.sh_c_coeff * cu(log_resistance);
-    value = 1.0f / value;
-
-    //#if (MOTHERBOARD == BOARD_RAMPS_14_EFB)
-    //  int32_t clocks = TCNT5 - tcnt5;
-    //  if (clocks >= 0) {
-    //    clocks_total += clocks;
-    //    calls++;
-    //  }
-    //#endif
-
-    // Return degrees C (up to 999, as the LCD only displays 3 digits)
-    return _MIN(value + THERMISTOR_ABS_ZERO_C, 999);
-  }
-#endif
-
 #if HOTENDS
   // Derived from RepRap FiveD extruder::getTemperature()
   // For hot end temperature measurement.
@@ -1982,9 +1844,7 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
 
     switch (e) {
       case 0:
-        #if ENABLED(HEATER_0_USER_THERMISTOR)
-          return user_thermistor_to_deg_c(CTI_HOTEND_0, raw);
-        #elif ENABLED(HEATER_0_USES_MAX6675)
+        #if ENABLED(HEATER_0_USES_MAX6675)
           return raw * 0.25;
         #elif ENABLED(HEATER_0_USES_AD595)
           return TEMP_AD595(raw);
@@ -1996,9 +1856,7 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
           break;
         #endif
       case 1:
-        #if ENABLED(HEATER_1_USER_THERMISTOR)
-          return user_thermistor_to_deg_c(CTI_HOTEND_1, raw);
-        #elif ENABLED(HEATER_1_USES_MAX6675)
+        #if ENABLED(HEATER_1_USES_MAX6675)
           return raw * 0.25;
         #elif ENABLED(HEATER_1_USES_AD595)
           return TEMP_AD595(raw);
@@ -2010,9 +1868,7 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
           break;
         #endif
       case 2:
-        #if ENABLED(HEATER_2_USER_THERMISTOR)
-          return user_thermistor_to_deg_c(CTI_HOTEND_2, raw);
-        #elif ENABLED(HEATER_2_USES_AD595)
+        #if ENABLED(HEATER_2_USES_AD595)
           return TEMP_AD595(raw);
         #elif ENABLED(HEATER_2_USES_AD8495)
           return TEMP_AD8495(raw);
@@ -2022,9 +1878,7 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
           break;
         #endif
       case 3:
-        #if ENABLED(HEATER_3_USER_THERMISTOR)
-          return user_thermistor_to_deg_c(CTI_HOTEND_3, raw);
-        #elif ENABLED(HEATER_3_USES_AD595)
+        #if ENABLED(HEATER_3_USES_AD595)
           return TEMP_AD595(raw);
         #elif ENABLED(HEATER_3_USES_AD8495)
           return TEMP_AD8495(raw);
@@ -2034,9 +1888,7 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
           break;
         #endif
       case 4:
-        #if ENABLED(HEATER_4_USER_THERMISTOR)
-          return user_thermistor_to_deg_c(CTI_HOTEND_4, raw);
-        #elif ENABLED(HEATER_4_USES_AD595)
+        #if ENABLED(HEATER_4_USES_AD595)
           return TEMP_AD595(raw);
         #elif ENABLED(HEATER_4_USES_AD8495)
           return TEMP_AD8495(raw);
@@ -2046,9 +1898,7 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
           break;
         #endif
       case 5:
-        #if ENABLED(HEATER_5_USER_THERMISTOR)
-          return user_thermistor_to_deg_c(CTI_HOTEND_5, raw);
-        #elif ENABLED(HEATER_5_USES_AD595)
+        #if ENABLED(HEATER_5_USES_AD595)
           return TEMP_AD595(raw);
         #elif ENABLED(HEATER_5_USES_AD8495)
           return TEMP_AD8495(raw);
@@ -2076,9 +1926,7 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
   // Derived from RepRap FiveD extruder::getTemperature()
   // For bed temperature measurement.
   float Temperature::analog_to_celsius_bed(const int raw) {
-    #if ENABLED(HEATER_BED_USER_THERMISTOR)
-      return user_thermistor_to_deg_c(CTI_BED, raw);
-    #elif ENABLED(HEATER_BED_USES_THERMISTOR)
+    #if ENABLED(HEATER_BED_USES_THERMISTOR)
       float celsius = scan_thermistor_table_bed(raw);
       #ifdef BED_OFFSET
         float _offset = BED_OFFSET;
@@ -2117,9 +1965,7 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
   // Derived from RepRap FiveD extruder::getTemperature()
   // For chamber temperature measurement.
   float Temperature::analog_to_celsius_chamber(const int raw) {
-    #if ENABLED(HEATER_CHAMBER_USER_THERMISTOR)
-      return user_thermistor_to_deg_c(CTI_CHAMBER, raw);
-    #elif ENABLED(HEATER_CHAMBER_USES_THERMISTOR)
+    #if ENABLED(HEATER_CHAMBER_USES_THERMISTOR)
       SCAN_THERMISTOR_TABLE(CHAMBER_TEMPTABLE, CHAMBER_TEMPTABLE_LEN);
     #elif ENABLED(HEATER_CHAMBER_USES_AD595)
       return TEMP_AD595(raw);
@@ -2135,9 +1981,7 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
   // Derived from RepRap FiveD extruder::getTemperature()
   // For heatbreak temperature measurement.
   float Temperature::analog_to_celsius_heatbreak(const int raw) {
-    #if ENABLED(HEATBREAK_USER_THERMISTOR)
-      return user_thermistor_to_deg_c(CTI_HEATBREAK, raw);
-    #elif ENABLED(HEATBREAK_USES_THERMISTOR)
+    #if ENABLED(HEATBREAK_USES_THERMISTOR)
       #if (BOARD_IS_XBUDDY())
           uint8_t loveboard_bom = hwio_get_loveboard_bomid();
           if ((loveboard_bom < 33 && loveboard_bom != 0) // error -> expect more common variant
@@ -2159,9 +2003,7 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
   // Derived from RepRap FiveD extruder::getTemperature()
   // For ambient temperature measurement.
   float Temperature::analog_to_celsius_board(const int raw) {
-    #if ENABLED(BOARD_USER_THERMISTOR)
-      return user_thermistor_to_deg_c(CTI_BOARD, raw);
-    #elif ENABLED(BOARD_USES_THERMISTOR)
+    #if ENABLED(BOARD_USES_THERMISTOR)
       SCAN_THERMISTOR_TABLE(BOARD_TEMPTABLE, BOARD_TEMPTABLE_LEN);
     #else
       return 0;
