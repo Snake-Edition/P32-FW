@@ -228,11 +228,6 @@
 
 // @section temperature
 
-// Calibration for AD8495 sensor to adjust temperature measurements.
-// The final temperature is calculated as (measuredTemp * GAIN) + OFFSET.
-#define TEMP_SENSOR_AD8495_OFFSET 0.0
-#define TEMP_SENSOR_AD8495_GAIN 1.0
-
 /**
  * Controller Fan
  * To cool down the stepper drivers and MOSFETs.

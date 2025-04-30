@@ -1800,8 +1800,6 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
 }
 #endif
 
-#define TEMP_AD8495(RAW) ((RAW) * 6.6 * 100.0 / 1024.0 / (OVERSAMPLENR) * (TEMP_SENSOR_AD8495_GAIN) + TEMP_SENSOR_AD8495_OFFSET)
-
 /**
  * Bisect search for the range of the 'raw' value, then interpolate
  * proportionally between the under and over values.
@@ -1845,8 +1843,6 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
       case 0:
         #if ENABLED(HEATER_0_USES_MAX6675)
           return raw * 0.25;
-        #elif ENABLED(HEATER_0_USES_AD8495)
-          return TEMP_AD8495(raw);
         #elif ENABLED(PRUSA_TOOLCHANGER)
           return prusa_toolchanger.getTool(0).get_hotend_temp();
         #else
@@ -1855,41 +1851,31 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
       case 1:
         #if ENABLED(HEATER_1_USES_MAX6675)
           return raw * 0.25;
-        #elif ENABLED(HEATER_1_USES_AD8495)
-          return TEMP_AD8495(raw);
         #elif ENABLED(PRUSA_TOOLCHANGER)
           return prusa_toolchanger.getTool(1).get_hotend_temp();
         #else
           break;
         #endif
       case 2:
-        #if ENABLED(HEATER_2_USES_AD8495)
-          return TEMP_AD8495(raw);
-        #elif ENABLED(PRUSA_TOOLCHANGER)
+        #if ENABLED(PRUSA_TOOLCHANGER)
           return prusa_toolchanger.getTool(2).get_hotend_temp();
         #else
           break;
         #endif
       case 3:
-        #if ENABLED(HEATER_3_USES_AD8495)
-          return TEMP_AD8495(raw);
-        #elif ENABLED(PRUSA_TOOLCHANGER)
+        #if ENABLED(PRUSA_TOOLCHANGER)
           return prusa_toolchanger.getTool(3).get_hotend_temp();
         #else
           break;
         #endif
       case 4:
-        #if ENABLED(HEATER_4_USES_AD8495)
-          return TEMP_AD8495(raw);
-        #elif ENABLED(PRUSA_TOOLCHANGER)
+        #if ENABLED(PRUSA_TOOLCHANGER)
           return prusa_toolchanger.getTool(4).get_hotend_temp();
         #else
           break;
         #endif
       case 5:
-        #if ENABLED(HEATER_5_USES_AD8495)
-          return TEMP_AD8495(raw);
-        #elif ENABLED(PRUSA_TOOLCHANGER)
+        #if ENABLED(PRUSA_TOOLCHANGER)
           return prusa_toolchanger.getTool(5).get_hotend_temp();
         #else
           break;
@@ -1936,8 +1922,6 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
         }
       #endif
       return celsius;
-    #elif ENABLED(HEATER_BED_USES_AD8495)
-      return TEMP_AD8495(raw);
     #elif HAS_MODULARBED()
       return raw
     #else
@@ -1952,8 +1936,6 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
   float Temperature::analog_to_celsius_chamber(const int raw) {
     #if ENABLED(HEATER_CHAMBER_USES_THERMISTOR)
       SCAN_THERMISTOR_TABLE(CHAMBER_TEMPTABLE, CHAMBER_TEMPTABLE_LEN);
-    #elif ENABLED(HEATER_CHAMBER_USES_AD8495)
-      return TEMP_AD8495(raw);
     #else
       return 0;
     #endif
@@ -2084,15 +2066,6 @@ void Temperature::init() {
     // Flag that the thermalManager should be running
     if (inited) return;
     inited = true;
-  #endif
-
-  #if MB(RUMBA)
-    #define _AD(N) (ENABLED(HEATER_##N##_USES_AD8495))
-    #if _AD(0) || _AD(1) || _AD(2) || _AD(3) || _AD(4) || _AD(5) || _AD(BED) || _AD(CHAMBER)
-      // Disable RUMBA JTAG in case the thermocouple extension is plugged on top of JTAG connector
-      MCUCR = _BV(JTD);
-      MCUCR = _BV(JTD);
-    #endif
   #endif
 
   #if BOTH(PIDTEMP, PID_EXTRUSION_SCALING)
