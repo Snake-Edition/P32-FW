@@ -26,84 +26,6 @@
 #include "../../module/motion.h"
 #include "../../module/stepper.h"
 
-#if ENABLED(M114_DETAIL)
-
-  void report_xyze(const xyze_pos_t &pos, const uint8_t n=4, const uint8_t precision=3) {
-    char str[12];
-    for (uint8_t a = 0; a < n; a++) {
-      SERIAL_CHAR(' ');
-      SERIAL_CHAR(axis_codes[a]);
-      SERIAL_CHAR(':');
-      SERIAL_ECHO(dtostrf(pos[a], 1, precision, str));
-    }
-    SERIAL_EOL();
-  }
-
-  void report_xyz(const xyz_pos_t &pos, const uint8_t precision=3) {
-    char str[12];
-    for (uint8_t a = X_AXIS; a <= Z_AXIS; a++) {
-      SERIAL_CHAR(' ');
-      SERIAL_CHAR(axis_codes[a]);
-      SERIAL_CHAR(':');
-      SERIAL_ECHO(dtostrf(pos[a], 1, precision, str));
-    }
-    SERIAL_EOL();
-  }
-  inline void report_xyz(const xyze_pos_t &pos) { report_xyze(pos, 3); }
-
-  void report_current_position_detail() {
-
-    SERIAL_ECHOPGM("\nLogical:");
-    report_xyz(current_position.asLogical());
-
-    SERIAL_ECHOPGM("Raw:    ");
-    report_xyz(current_position);
-
-    xyze_pos_t leveled = current_position;
-
-    #if HAS_LEVELING
-      SERIAL_ECHOPGM("Leveled:");
-      planner.apply_leveling(leveled);
-      report_xyz(leveled);
-
-      SERIAL_ECHOPGM("UnLevel:");
-      xyze_pos_t unleveled = leveled;
-      planner.unapply_leveling(unleveled);
-      report_xyz(unleveled);
-    #endif
-    
-    planner.synchronize();
-
-    SERIAL_ECHOPGM("Stepper:");
-    LOOP_XYZE(i) {
-      SERIAL_CHAR(' ');
-      SERIAL_CHAR(axis_codes[i]);
-      SERIAL_CHAR(':');
-      SERIAL_ECHO(stepper.position((AxisEnum)i));
-    }
-    SERIAL_EOL();
-
-    #if IS_SCARA
-      const xy_float_t deg = {
-        planner.get_axis_position_degrees(A_AXIS),
-        planner.get_axis_position_degrees(B_AXIS)
-      };
-      SERIAL_ECHOPGM("Degrees:");
-      report_xyze(deg, 2);
-    #endif
-
-    SERIAL_ECHOPGM("FromStp:");
-    get_cartesian_from_steppers();  // writes 'cartes' (with forward kinematics)
-    xyze_pos_t from_steppers = { cartes.x, cartes.y, cartes.z, planner.get_axis_position_mm(E_AXIS) };
-    report_xyze(from_steppers);
-
-    const xyze_float_t diff = from_steppers - leveled;
-    SERIAL_ECHOPGM("Diff: ");
-    report_xyze(diff);
-  }
-
-#endif // M114_DETAIL
-
 /** \addtogroup G-Codes
  * @{
  */
@@ -113,21 +35,10 @@
  *
  *#### Usage
  *
- *    M114 [ D ]
+ *    M114
  *
- *#### Parameters
- *
- * - `D` - Detailed (not active)
  */
 void GcodeSuite::M114() {
-
-  #if ENABLED(M114_DETAIL)
-    if (parser.seen('D')) {
-      report_current_position_detail();
-      return;
-    }
-  #endif
-
   planner.synchronize();
   report_current_position();
 }

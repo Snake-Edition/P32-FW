@@ -182,9 +182,6 @@
     #define AUTOTEMP_OLDWEIGHT 0.98
 #endif
 
-// Show extra position information in M114
-//#define M114_DETAIL
-
 // @section extruder
 
 // Extruder runout prevention.
