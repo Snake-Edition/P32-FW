@@ -1803,45 +1803,9 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
         return 0.0;
       }
 
-    switch (e) {
-      case 0:
-        #if ENABLED(PRUSA_TOOLCHANGER)
-          return prusa_toolchanger.getTool(0).get_hotend_temp();
-        #else
-          break;
-        #endif
-      case 1:
-        #if ENABLED(PRUSA_TOOLCHANGER)
-          return prusa_toolchanger.getTool(1).get_hotend_temp();
-        #else
-          break;
-        #endif
-      case 2:
-        #if ENABLED(PRUSA_TOOLCHANGER)
-          return prusa_toolchanger.getTool(2).get_hotend_temp();
-        #else
-          break;
-        #endif
-      case 3:
-        #if ENABLED(PRUSA_TOOLCHANGER)
-          return prusa_toolchanger.getTool(3).get_hotend_temp();
-        #else
-          break;
-        #endif
-      case 4:
-        #if ENABLED(PRUSA_TOOLCHANGER)
-          return prusa_toolchanger.getTool(4).get_hotend_temp();
-        #else
-          break;
-        #endif
-      case 5:
-        #if ENABLED(PRUSA_TOOLCHANGER)
-          return prusa_toolchanger.getTool(5).get_hotend_temp();
-        #else
-          break;
-        #endif
-      default: break;
-    }
+    #if ENABLED(PRUSA_TOOLCHANGER)
+      return prusa_toolchanger.getTool(e).get_hotend_temp();
+    #endif
 
     #if HOTEND_USES_THERMISTOR
       // Thermistor with conversion table?
