@@ -2,6 +2,7 @@
 
 #include <config_store/store_definition.hpp>
 #include <buddy/unreachable.hpp>
+#include <option/has_loadcell.h>
 
 using namespace buddy;
 
@@ -12,8 +13,7 @@ const RammingSequence &buddy::standard_ramming_sequence(StandardRammingSequence 
 
 #if HAS_AUTO_RETRACT()
     case StandardRammingSequence::auto_retract: {
-        // TODO: Diffrent ramming for HF and non-HF
-        static_assert(PRINTER_IS_PRUSA_COREONE());
+        static_assert(HAS_LOADCELL()); // HAS_NEXTRUDER alternative
         static constexpr RammingSequenceArray seq({
             { 8, 995 },
             { -43, 6000 },
