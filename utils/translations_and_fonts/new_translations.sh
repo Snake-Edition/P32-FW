@@ -2,7 +2,7 @@
 
 export_path=$1
 lang_source_folder="src/lang/po"
-lang_codes=("cs" "de" "es" "fr" "it" "ja" "pl")
+lang_codes=("cs" "de" "es" "fr" "it" "ja" "pl" "uk")
 work_dir="./tmp_translations"
 remove_tmp_dir=0
 fail=0

@@ -8,14 +8,14 @@
 This pipeline can be fully automated with a bash script for a single font case:
 The script expects:
 1. Preparation steps are all done
-2. Source pngs are named * / \{type}_\{w}x\{h}.png e.g. "15px-LiberationMono-regular_9x16.png"
+2. Source pngs are named * / \{type}_\{w}x\{h}.png e.g. "15px-LiberationMono-regular_9x16.png" and non latin alphabet source pngs are named \{w}x\{h}px_*\{type}_\{katakana/cyrillic}.png e.g. "9x16px-LiberationMono-regular_cyrillic.png"
 3. Script is run from root directory of project
 
 ```bash
 w           - pixel width of given font
 h           - pixel height of given font
 type        - type of font used ("bold" / "regular")
-fnt_charset - set of characters ("full" / "digits" / "standard")
+fnt_charset - set of characters ("full" / "digits" / "latin" / "latin_and_katakana" / "latin_and_cyrillic")
 
 ./utils/translation_and_fonts/generate_single_fonts.sh
 ```
@@ -30,7 +30,7 @@ FOR GENERATION OF ALL FONTS AT ONCE USE:
 ```bash
 mode           - Script is actually capable of doing multiple things -h will show you the
 input-dir      - Given argument should contain pre-generated files required; the directory needs to contain po files with translations
-output-dir     - Three files will be generated there,  full-chars.txt/standard-chars.txt/digits-chars.txt containing necessary characters
+output-dir     - Multiple files will be generated there,  full-chars.txt/latin-chars.txt/digits-chars.txt/latin-and-katakana-chars.txt/latin-and-cyrillic-chars.txt containing necessary characters
 ```
 
 2. New pngs with all symbols are required.
@@ -41,23 +41,25 @@ output-dir     - Three files will be generated there,  full-chars.txt/standard-c
 
 ## Generating
 No we have to select, what character set option we want to generate. There are 3 possibilities:
-1. "full"       - contains full standard ASCII (32-127) + all needed non-ascii characters in latin + katakana
-2. "standard"   - contains full standard ASCII (32-127) + all needed non-ascii characters in latin
-3. "digits"     - contains only digits (0-9) + '%' + '?' + '.' + ' ' + '-'
-
+1. "full"               - contains full standard ASCII (32-127) + all needed non-ascii characters + katakana + cyrillic alphabet
+2. "latin"              - contains full standard ASCII (32-127) + all needed non-ascii characters
+3. "digits"             - contains only digits (0-9) + '%' + '?' + '.' + ' ' + '-'
+4. "latin_and_katakana" - contains full standard ASCII (32-127) + all needed non-ascii characters + katakana
+5. "latin_and_cyrillic" - contains full standard ASCII (32-127) + all needed non-ascii characters + cyrillic alphabet
 
 1. Run utils/translations_and_fonts/font.py. This script will generate png containing symbols of selected :
 ```bash
-charset_option      - character set option, "full" (standard ASCII + katakana) or "digits" (0-9 + '.' + '?' + '%' + '-')
-required_chars      - path to XXX-chars file generated in previous steps, only the .txt variant works; "{path}XXX-chars.txt" (XXX can be "full" / "standard" / "digits")
+charset_option      - character set option, see above
+required_chars      - path to XXX-chars file generated in previous steps, only the .txt variant works; "{path}XXX-chars.txt" (XXX can be "full" / "latin" / "digits" / "latin-and-katakana" / "latin-and-cyrillic")
 src_png             - path to source pngs with all necessary symbols; if source png is not of RGB type, script will return ERROR; "src/gui/res/fnt_src/{name}"
 katakana_src_png    - path to katakana source pngs with all necessary japanese symbols; if source png is not of RGB type, script will return ERROR; "src/gui/res/fnt_src/{name}"
+cyrillic_src_png    - path to cyrillic source pngs with all necessary cyrillic symbols; if source png is not of RGB type, script will return ERROR; "src/gui/res/fnt_src/{name}"
 char_width          - pixel width of given font
 char_height         - pixel height of given font
 dst_png             - destination path with name of the to be gnerated png;" src/gui/res/fnt_png/{name}"; convention is "font_{type}_{w}x{h}.png" e.g. "font_bold_9x16.png"
 ipp_path            - destination path with name of the to be generated ipp file; ipp file contains indexes of all chars required within generated png, therefore every character set option must have it's own ipp file.
                       ipp file needs to be included within the "src/guiapi/include/", there is no problem with it being rewritten multiple times.
-                      It's either "src/guiapi/include/fnt-full-indices.ipp" or "src/guiapi/include/fnt-standard-indices.ipp" or "src/guiapi/include/fnt-digits-indices.ipp"
+                      It's either "src/guiapi/include/fnt-full-indices.ipp" or "src/guiapi/include/fnt-latin-indices.ipp" or "src/guiapi/include/fnt-digits-indices.ipp" or "src/guiapi/include/fnt-latin-and-katakana-indices.ipp" or "src/guiapi/include/fnt-latin-and-cyrillic-indices.ipp"
 ```
 
 2. Build tests; run this form project root directory
@@ -74,7 +76,7 @@ make
 -src   - "src/gui/res/fnt_png/{name}.png" path to the png generated in step 1); png containing only symbols used by the printer
 -dst   - "src/gui/res/fnt_png/{name}_preview.png" path where preview of the font will be generated. Basically the same png, just inverted colours (white letters on black).
 -out   - destination of .bin files generated by the program; these will be used in the next step so name them properly; bin files will not be saved to git, they can be saved wherever
--bpp - bits-per-pixel; the colour depth of given png
+-bpp   - bits-per-pixel; the colour depth of given png
 -w     - pixel width of given font
 -h     - pixel height of given font
 -c     - number of columns in png generated in previous step; seems to be always "16"
@@ -88,7 +90,7 @@ dst_filename - "src/gui/res/cc/{name}.hpp" destination of .hpp file to be includ
 type         - type of given font; e.g. "15px-LiberationMono-regular_9x16.png" -> type = regular
 width        - pixel width of given font
 height       - pixel height of given font
-charset      - charset number (full == 0 (standard + katakana), digits == 1 (digits + '.' + '?' + '%'))
+charset      - character set option, "full" (latin + katakana + cyrillic) or "digits" (0-9 + '.' + '?' + '%' + '-') or "latin" or "latin_and_katakana" or "latin_and_cyrillic"
 ```
 
 5. Redo steps 1-4 for all fonts that are to be changed
