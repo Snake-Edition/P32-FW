@@ -18,8 +18,10 @@ add_custom_target(
   )
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/full-chars.txt"
-         "${CMAKE_CURRENT_BINARY_DIR}/standard-chars.txt"
+         "${CMAKE_CURRENT_BINARY_DIR}/latin-chars.txt"
          "${CMAKE_CURRENT_BINARY_DIR}/digits-chars.txt"
+         "${CMAKE_CURRENT_BINARY_DIR}/latin-and-katakana-chars.txt"
+         "${CMAKE_CURRENT_BINARY_DIR}/latin-and-cyrillic-chars.txt"
   COMMAND "${Python3_EXECUTABLE}" "${PROJECT_ROOT_DIR}/utils/translations_and_fonts/lang.py"
           "generate-required-chars" "${CMAKE_CURRENT_SOURCE_DIR}/po" "${CMAKE_CURRENT_BINARY_DIR}"
   DEPENDS "${PROJECT_ROOT_DIR}/utils/translations_and_fonts/lang.py" ${POFILES}

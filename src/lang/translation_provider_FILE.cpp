@@ -8,6 +8,7 @@
 #include <option/enable_translation_it.h>
 #include <option/enable_translation_pl.h>
 #include <option/enable_translation_ja.h>
+#include <option/enable_translation_uk.h>
 
 FILETranslationProvider::FILETranslationProvider(const char *path)
     : m_Path { path } {
@@ -94,6 +95,12 @@ ProviderRegistrator plReg("pl", &pl);
 static const FILETranslationProvider ja("/internal/res/lang/ja.mo");
 ProviderRegistrator jaReg("ja", &ja);
         #endif
+
+        #if ENABLE_TRANSLATION_UK()
+static const FILETranslationProvider uk("/internal/res/lang/uk.mo");
+ProviderRegistrator ukReg("uk", &uk);
+        #endif
+
 } // namespace
     #endif
 #endif

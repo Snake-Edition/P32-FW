@@ -38,7 +38,7 @@ printer_name_by_code = {
     31: "COREONE",
 }
 
-translations = ["cs", "de", "es", "fr", "it", "pl", "ja"]
+translations = ["cs", "de", "es", "fr", "it", "pl", "ja", "uk"]
 
 args = parser.parse_args()
 if args.debug is not None:

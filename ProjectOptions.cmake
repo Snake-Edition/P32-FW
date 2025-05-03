@@ -449,6 +449,7 @@ set(LANGUAGES_AVAILABLE
     IT
     JA
     PL
+    UK
     )
 if("${TRANSLATIONS_LIST}" STREQUAL "<default>")
   if(PRINTER STREQUAL "MINI"

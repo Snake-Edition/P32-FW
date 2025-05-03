@@ -12,12 +12,12 @@ enum class Font : uint8_t {
     normal,
     big,
     special,
-#if HAS_LARGE_DISPLAY()
+#if not PRINTER_IS_PRUSA_MINI()
     large,
 #endif
 
     largest_available =
-#if HAS_LARGE_DISPLAY()
+#if not PRINTER_IS_PRUSA_MINI()
         large,
 #else
         big,
@@ -54,7 +54,7 @@ struct font_size_t {
  */
 consteval font_size_t resource_font_size(Font id) {
     switch (id) {
-#if HAS_MINI_DISPLAY()
+#if PRINTER_IS_PRUSA_MINI()
     case Font::small:
         return { 7, 13 };
     case Font::normal:
@@ -64,7 +64,7 @@ consteval font_size_t resource_font_size(Font id) {
         return { 9, 16 };
 #endif
 
-#if HAS_LARGE_DISPLAY()
+#if not PRINTER_IS_PRUSA_MINI()
     case Font::small:
         return { 9, 16 };
     case Font::normal:

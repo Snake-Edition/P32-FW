@@ -15,21 +15,47 @@
 #include "cmath_ext.h"
 #include <utility_extensions.hpp>
 #include "font_character_sets.hpp"
+#include <printers.h>
+#include <option/enable_translation_ja.h>
+#include <option/enable_translation_uk.h>
 
-static constexpr const uint16_t font_full_char_indices[] = {
-#include "../guiapi/include/fnt-full-indices.ipp"
+#if PRINTER_IS_PRUSA_MINI()
+    #if ENABLE_TRANSLATION_JA()
+static constexpr const uint16_t font_latin_and_katakana_char_indices[] = {
+        #include "../guiapi/include/fnt-latin-and-katakana-indices.ipp"
 };
-
-static constexpr const uint16_t font_standard_char_indices[] = {
-#include "../guiapi/include/fnt-standard-indices.ipp"
+    #elif ENABLE_TRANSLATION_UK()
+static constexpr const uint16_t font_latin_and_cyrillic_char_indices[] = {
+        #include "../guiapi/include/fnt-latin-and-cyrillic-indices.ipp"
+};
+    #else
+static constexpr const uint16_t font_latin_char_indices[] = {
+        #include "../guiapi/include/fnt-latin-indices.ipp"
+};
+    #endif
+#else
+static constexpr const uint16_t font_full_char_indices[] = {
+    #include "../guiapi/include/fnt-full-indices.ipp"
 };
 
 static constexpr const uint16_t font_digits_char_indices[] = {
-#include "../guiapi/include/fnt-digits-indices.ipp"
+    #include "../guiapi/include/fnt-digits-indices.ipp"
 };
+#endif
 
 bool hasASCII(FontCharacterSet charset_option) {
-    return charset_option == FontCharacterSet::full || charset_option == FontCharacterSet::standard;
+    return
+#if not PRINTER_IS_PRUSA_MINI()
+        charset_option == FontCharacterSet::full;
+#else
+    #if ENABLE_TRANSLATION_JA()
+        charset_option == FontCharacterSet::latin_and_katakana;
+    #elif ENABLE_TRANSLATION_UK()
+        charset_option == FontCharacterSet::latin_and_cyrillic;
+    #else
+        charset_option == FontCharacterSet::latin;
+    #endif
+#endif
 }
 
 uint32_t get_char_position_in_font(unichar c, const font_t *pf) {
@@ -48,18 +74,37 @@ uint32_t get_char_position_in_font(unichar c, const font_t *pf) {
 
     const uint16_t *first = nullptr, *last = nullptr;
     switch (pf->charset) {
+#if PRINTER_IS_PRUSA_MINI()
+    #if ENABLE_TRANSLATION_JA()
+    case FontCharacterSet::latin_and_katakana:
+        first = std::begin(font_latin_and_katakana_char_indices);
+        last = std::end(font_latin_and_katakana_char_indices);
+        break;
+    #elif ENABLE_TRANSLATION_UK()
+    case FontCharacterSet::latin_and_cyrillic:
+        first = std::begin(font_latin_and_cyrillic_char_indices);
+        last = std::end(font_latin_and_cyrillic_char_indices);
+        break;
+    #else
+    case FontCharacterSet::latin:
+        first = std::begin(font_latin_char_indices);
+        last = std::end(font_latin_char_indices);
+        break;
+    #endif
+#else
     case FontCharacterSet::full:
         first = std::begin(font_full_char_indices);
         last = std::end(font_full_char_indices);
-        break;
-    case FontCharacterSet::standard:
-        first = std::begin(font_standard_char_indices);
-        last = std::end(font_standard_char_indices);
         break;
     case FontCharacterSet::digits:
         first = std::begin(font_digits_char_indices);
         last = std::end(font_digits_char_indices);
         break;
+#endif
+    }
+
+    if (!first || !last) {
+        return get_char_position_in_font('?', pf);
     }
 
     const uint16_t *i = std::lower_bound(first, last, c);
