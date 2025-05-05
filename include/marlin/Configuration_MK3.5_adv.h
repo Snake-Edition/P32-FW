@@ -58,10 +58,6 @@
     #define HEATER_BED_INVERTING true
 #endif
 
-#if DISABLED(PIDTEMPBED)
-    #define BED_CHECK_INTERVAL 5000 // ms between checks in bang-bang control
-#endif
-
 /**
  * Thermal Protection provides additional protection to your printer from damage
  * and fire. Marlin always includes safe min and max temperature ranges which

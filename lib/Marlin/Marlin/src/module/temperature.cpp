@@ -1558,7 +1558,7 @@ void Temperature::manage_heater() {
       #if DISABLED(PIDTEMPBED)
         if (PENDING(ms, next_bed_check_ms)
         ) break;
-        next_bed_check_ms = ms + BED_CHECK_INTERVAL;
+        next_bed_check_ms = ms + 5000; // ms between checks in bang-bang control
       #endif
 
       #if HEATER_IDLE_HANDLER
