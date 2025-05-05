@@ -878,13 +878,6 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
 #endif
 
 /**
- * Bed Heating Options - PID vs Limit Switching
- */
-#if BOTH(PIDTEMPBED, BED_LIMIT_SWITCHING)
-  #error "To use BED_LIMIT_SWITCHING you must disable PIDTEMPBED."
-#endif
-
-/**
  * Kinematics
  */
 

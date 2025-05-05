@@ -462,7 +462,7 @@
  * PID Bed Heating
  *
  * If this option is enabled set PID constants below.
- * If this option is disabled, bang-bang will be used and BED_LIMIT_SWITCHING will enable hysteresis.
+ * If this option is disabled, bang-bang will be used.
  *
  * The PID frequency will be the same as the extruder PWM.
  * If PID_dT is the default, and correct for the hardware/configuration, that means 7.689Hz,
@@ -472,8 +472,6 @@
  * the issues involved, don't use bed PID until someone else verifies that your hardware works.
  */
 //#define PIDTEMPBED
-
-//#define BED_LIMIT_SWITCHING
 
 /**
  * Max Bed Power
