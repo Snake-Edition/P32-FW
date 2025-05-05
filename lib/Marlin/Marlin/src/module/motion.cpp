@@ -970,18 +970,6 @@ uint8_t do_homing_move(const AxisEnum axis, const float distance, const feedRate
     buddy::CeilingClearanceCheckDisabler ccd;
   #endif
 
-  #if HOMING_Z_WITH_PROBE && HAS_HEATED_BED && ENABLED(WAIT_FOR_BED_HEATER)
-    if (homing_z_with_probe) {
-      // Wait for bed to heat back up between probing points
-      if (axis == Z_AXIS && distance < 0 && thermalManager.isHeatingBed()) {
-        serialprintPGM(msg_wait_for_bed_heating);
-        LCD_MESSAGEPGM(MSG_BED_HEATING);
-        thermalManager.wait_for_bed();
-        ui.reset_status();
-      }
-    }
-  #endif
-
     #if ENABLED(SENSORLESS_HOMING)
       sensorless_t stealth_states;
     #endif

@@ -395,22 +395,8 @@ bool set_probe_deployed(const bool deploy) {
  * @return true to indicate an error
  */
 
-#if HAS_HEATED_BED && ENABLED(WAIT_FOR_BED_HEATER)
-  const char msg_wait_for_bed_heating[25] PROGMEM = "Wait for bed heating...\n";
-#endif
-
 static bool do_probe_move(const float z, const feedRate_t fr_mm_s) {
   if (DEBUGGING(LEVELING)) DEBUG_POS(">>> do_probe_move", current_position);
-
-  #if HAS_HEATED_BED && ENABLED(WAIT_FOR_BED_HEATER)
-    // Wait for bed to heat back up between probing points
-    if (thermalManager.isHeatingBed()) {
-      serialprintPGM(msg_wait_for_bed_heating);
-      LCD_MESSAGEPGM(MSG_BED_HEATING);
-      thermalManager.wait_for_bed();
-      ui.reset_status();
-    }
-  #endif
 
   #if ENABLED(BLTOUCH) && DISABLED(BLTOUCH_HS_MODE)
     if (bltouch.deploy()) return true; // DEPLOY in LOW SPEED MODE on every probe action
