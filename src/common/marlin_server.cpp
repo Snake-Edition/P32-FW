@@ -989,7 +989,6 @@ static void idle(void) {
 
 void do_babystep_Z(float offs) {
     babystep.add_steps(Z_AXIS, std::round(offs * planner.settings.axis_steps_per_mm[Z_AXIS]));
-    babystep.task();
 }
 
 extern void move_axis(float pos, float feedrate, size_t axis) {
