@@ -412,10 +412,6 @@ class Temperature {
       static millis_t next_auto_fan_check_ms;
     #endif
 
-    #if ENABLED(PROBING_HEATERS_OFF)
-      static bool paused;
-    #endif
-
   public:
     #if ENABLED(PID_EXTRUSION_SCALING)
       static int16_t lpq_len;
@@ -815,11 +811,6 @@ public:
         }
       #endif
 
-    #endif
-
-    #if ENABLED(PROBING_HEATERS_OFF)
-      static void pause(const bool p);
-      FORCE_INLINE static bool is_paused() { return paused; }
     #endif
 
     #if HEATER_IDLE_HANDLER

@@ -194,8 +194,6 @@
   #error "MESH_NUM_[XY]_POINTS is now GRID_MAX_POINTS_[XY]. Please update your configuration."
 #elif defined(UBL_MESH_NUM_X_POINTS) || defined(UBL_MESH_NUM_Y_POINTS)
   #error "UBL_MESH_NUM_[XY]_POINTS is now GRID_MAX_POINTS_[XY]. Please update your configuration."
-#elif defined(BLTOUCH_HEATERS_OFF)
-  #error "BLTOUCH_HEATERS_OFF is now PROBING_HEATERS_OFF. Please update your configuration."
 #elif defined(BLTOUCH_V3)
   #error "BLTOUCH_V3 is obsolete. Please update your configuration."
 #elif defined(BLTOUCH_FORCE_OPEN_DRAIN_MODE)

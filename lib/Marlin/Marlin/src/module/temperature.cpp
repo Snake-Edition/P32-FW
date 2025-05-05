@@ -345,10 +345,6 @@ volatile bool Temperature::temp_meas_ready = false;
   millis_t Temperature::next_auto_fan_check_ms = 0;
 #endif
 
-#if ENABLED(PROBING_HEATERS_OFF)
-  bool Temperature::paused;
-#endif
-
 // public:
 
 #if HAS_PID_HEATING
@@ -2155,10 +2151,6 @@ void Temperature::init() {
       while (analog_to_celsius_board(maxtemp_raw_BOARD) > BOARD_MAXTEMP) maxtemp_raw_BOARD -= TEMPDIRBOARD * (OVERSAMPLENR);
     #endif
   #endif
-
-  #if ENABLED(PROBING_HEATERS_OFF)
-    paused = false;
-  #endif
 }
 
 #if WATCH_HOTENDS
@@ -2402,11 +2394,6 @@ void Temperature::disable_heaters(Temperature::disable_bed_t disable_bed) {
     setTargetChamber(0);
   #endif
 
-  // Unpause and reset everything
-  #if ENABLED(PROBING_HEATERS_OFF)
-    pause(false);
-  #endif
-
   #define DISABLE_HEATER(NR) { \
     setTargetHotend(0, NR); \
     temp_hotend[NR].soft_pwm_amount = 0; \
@@ -2438,28 +2425,6 @@ void Temperature::disable_heaters(Temperature::disable_bed_t disable_bed) {
     WRITE_HEATER_CHAMBER(LOW);
   #endif
 }
-
-#if ENABLED(PROBING_HEATERS_OFF)
-
-  void Temperature::pause(const bool p) {
-    if (p != paused) {
-      paused = p;
-      if (p) {
-        HOTEND_LOOP() hotend_idle[e].expire(); // timeout immediately
-        #if HAS_HEATED_BED
-          bed_idle.expire(); // timeout immediately
-        #endif
-      }
-      else {
-        HOTEND_LOOP() reset_heater_idle_timer(e);
-        #if HAS_HEATED_BED
-          reset_bed_idle_timer();
-        #endif
-      }
-    }
-  }
-
-#endif // PROBING_HEATERS_OFF
 
 /**
  * Get raw temperatures
