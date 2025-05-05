@@ -1064,22 +1064,6 @@
 #endif
 
 /**
- * Heated bed requires settings
- */
-#if HAS_HEATED_BED
-  #ifndef MIN_BED_POWER
-    #define MIN_BED_POWER 0
-  #endif
-  #ifndef MAX_BED_POWER
-    #define MAX_BED_POWER 255
-  #endif
-  #ifndef HEATER_BED_INVERTING
-    #define HEATER_BED_INVERTING false
-  #endif
-  #define WRITE_HEATER_BED(v) WRITE(HEATER_BED_PIN, (v) ^ HEATER_BED_INVERTING)
-#endif
-
-/**
  * Heated chamber requires settings
  */
 #if HAS_HEATED_CHAMBER
