@@ -23,10 +23,6 @@
 #include "ultralcd.h"
 #include <feature/print_status_message/print_status_message_mgr.hpp>
 
-#ifdef LED_BACKLIGHT_TIMEOUT
-  #include "../feature/leds/leds.h"
-#endif
-
 // All displays share the MarlinUI class
 #if HAS_GUI()
   #include "../gcode/queue.h"

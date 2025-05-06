@@ -1309,8 +1309,8 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
 /**
  * LED Control Menu
  */
-#if ENABLED(LED_CONTROL_MENU) && !HAS_COLOR_LEDS
-  #error "LED_CONTROL_MENU requires HAS_COLOR_LEDS."
+#if ENABLED(LED_CONTROL_MENU)
+  #error "LED_CONTROL_MENU not supported."
 #endif
 
 /**
@@ -1535,8 +1535,8 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
 /**
  * RGB_LED Requirements
  */
-#if ENABLED(PRINTER_EVENT_LEDS) && !HAS_COLOR_LEDS
-  #error "PRINTER_EVENT_LEDS requires HAS_COLOR_LEDS."
+#if ENABLED(PRINTER_EVENT_LEDS)
+  #error "PRINTER_EVENT_LEDS not supported."
 #endif
 
 /**

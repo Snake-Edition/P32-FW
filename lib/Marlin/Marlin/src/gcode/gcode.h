@@ -677,10 +677,6 @@ private:
     static void M149();
   #endif
 
-  #if HAS_COLOR_LEDS
-    static void M150();
-  #endif
-
   #if ENABLED(AUTO_REPORT_TEMPERATURES) && HAS_TEMP_SENSOR
     static void M155();
   #endif

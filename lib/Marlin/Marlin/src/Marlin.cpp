@@ -88,10 +88,6 @@
   #include "feature/digipot/digipot.h"
 #endif
 
-#if HAS_COLOR_LEDS
-  #include "feature/leds/leds.h"
-#endif
-
 #if ENABLED(BLTOUCH)
   #include "feature/bltouch.h"
 #endif
@@ -802,11 +798,6 @@ void setup() {
 
   // UI must be initialized before EEPROM
   // (because EEPROM code calls the UI).
-
-  // Set up LEDs early
-  #if HAS_COLOR_LEDS
-    leds.setup();
-  #endif
 
   #if ENABLED(EXTENSIBLE_UI)
     ui.init();

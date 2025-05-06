@@ -559,10 +559,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 149: M149(); break;                                  // M149: Set temperature units
       #endif
 
-      #if HAS_COLOR_LEDS
-        case 150: M150(); break;                                  // M150: Set Status LED Color
-      #endif
-
       #if DISABLED(NO_VOLUMETRICS)
         case 200: M200(); break;                                  // M200: Set filament diameter, E to cubic units
       #endif
