@@ -89,10 +89,18 @@ static TIM_HandleTypeDef *_pwm_p_htim[] = {
 };
 
 // buddy pwm output maximum values
-static constexpr int _pwm_max[] =
+static constexpr int _pwm_max[] = {
 #if PRINTER_IS_PRUSA_iX()
-    { static_cast<int>(std::round(static_cast<int>(TIM3_default_Period) * (MAX_HEATBREAK_TURBINE_POWER / 100.0))),
-        TIM3_default_Period, TIM1_default_Period, TIM1_default_Period };
+    static_cast<int>(std::round(static_cast<int>(TIM3_default_Period) * (MAX_HEATBREAK_TURBINE_POWER / 100.0))),
+#else
+    TIM3_default_Period,
+#endif
+    TIM3_default_Period,
+    TIM1_default_Period,
+    TIM1_default_Period,
+};
+
+#if PRINTER_IS_PRUSA_iX()
 static_assert(std::clamp(MAX_HEATBREAK_TURBINE_POWER, 0, 100) == MAX_HEATBREAK_TURBINE_POWER);
 static_assert(std::clamp(MIN_HEATBREAK_TURBINE_POWER, 0, 100) == MIN_HEATBREAK_TURBINE_POWER);
 
@@ -101,8 +109,6 @@ static_assert(MAX_HEATBREAK_TURBINE_POWER > MIN_HEATBREAK_TURBINE_POWER);
 // bottom PWM threshold for the turbine to spin
 // values below it will be equated to 0
 static constexpr int _pwm_turbine_min_threshold = static_cast<int>(static_cast<int>(TIM3_default_Period) * (MIN_HEATBREAK_TURBINE_POWER / 100.0));
-#else
-    { TIM3_default_Period, TIM3_default_Period, TIM1_default_Period, TIM1_default_Period };
 #endif
 
 static const TIM_OC_InitTypeDef sConfigOC_default = {
