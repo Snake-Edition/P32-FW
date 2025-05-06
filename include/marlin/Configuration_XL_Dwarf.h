@@ -1769,10 +1769,6 @@
 // Support for the BariCUDA Paste Extruder
 //#define BARICUDA
 
-// Support for PCA9533 PWM LED driver
-// https://github.com/mikeshub/SailfishRGB_LED
-//#define PCA9533
-
 /**
  * RGB LED / LED Strip Control
  *
@@ -1827,7 +1823,7 @@
  *  - Change to green once print has finished
  *  - Turn off after the print has finished and the user has pushed a button
  */
-#if ANY(RGB_LED, RGBW_LED, PCA9533, NEOPIXEL_LED)
+#if ANY(RGB_LED, RGBW_LED, NEOPIXEL_LED)
     #define PRINTER_EVENT_LEDS
 #endif
 
