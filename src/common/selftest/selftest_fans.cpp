@@ -1,6 +1,6 @@
 #include <selftest_fans.hpp>
-#include <option/has_xbuddy_extension.h>
-#if HAS_XBUDDY_EXTENSION()
+#include <option/xbuddy_extension_variant_standard.h>
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     #include <feature/xbuddy_extension/xbuddy_extension.hpp>
     #include <feature/xbuddy_extension/xbuddy_extension_fan_results.hpp>
     #include <puppies/xbuddy_extension.hpp> // For FAN_CNT
@@ -61,7 +61,7 @@ void CommonFanHandler::record_sample() {
     sample_sum += fan->get_actual_rpm();
 }
 
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
 
 static_assert(puppies::XBuddyExtension::FAN_CNT == XBEFanTestResults::fan_count, "Adjust the fan result structure in EEPROM (xbuddy_expansion_fan_result.hpp)");
 

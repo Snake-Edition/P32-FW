@@ -13,13 +13,13 @@
 #include <option/has_toolchanger.h>
 #include <option/has_leds.h>
 #include <option/has_touch.h>
-#include <option/has_xbuddy_extension.h>
+#include <option/xbuddy_extension_variant_standard.h>
 
 #if HAS_TOUCH()
     #include "MItem_touch.hpp"
 #endif
 
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     #include <menu_item/specific/menu_items_xbuddy_extension.hpp>
 #endif
 

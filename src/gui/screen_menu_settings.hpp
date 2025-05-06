@@ -12,14 +12,14 @@
 #include "Configuration_adv.h"
 #include <option/has_mmu2.h>
 #include <option/developer_mode.h>
-#include <option/has_xbuddy_extension.h>
+#include <option/xbuddy_extension_variant_standard.h>
 #include <option/has_phase_stepping.h>
 
 #if HAS_MMU2()
     #include "MItem_mmu.hpp"
 #endif
 
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     #include <gui/menu_item/specific/menu_items_xbuddy_extension.hpp>
 #endif
 
@@ -58,7 +58,7 @@ using ScreenMenuSettings__ = ScreenMenu<GuiDefaults::MenuFooter, MI_RETURN,
     MI_MMU_BOOTLOADER_RESULT,
     MI_MMU_CUTTER,
 #endif
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     MI_CAM_USB_PWR,
 #endif
     MI_STEALTH_MODE,

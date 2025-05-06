@@ -11,6 +11,7 @@
 #include <pwm_utils.hpp>
 
 #include <xbuddy_extension_shared/xbuddy_extension_shared_enums.hpp>
+#include <option/xbuddy_extension_variant_standard.h>
 
 namespace buddy {
 
@@ -25,14 +26,18 @@ public: // General things, status
         ready,
     };
 
-    using Fan = xbuddy_extension_shared::Fan;
     using FilamentSensorState = xbuddy_extension_shared::FilamentSensorState;
+
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     using FanRPM = uint16_t;
     using FanPWM = PWM255;
+    using Fan = xbuddy_extension_shared::Fan;
     using FanPWMOrAuto = PWM255OrAuto;
+#endif
 
     Status status() const;
 
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     void step();
 
 public: // Fans
@@ -91,20 +96,22 @@ public: // LEDs
         return static_cast<uint8_t>(((uint16_t)pct) * 255U / 100U);
     }
 
-public: // Other
-    /// \returns chamber temperature measured through the thermistor connected to the board, in degrees Celsius
-    std::optional<Temperature> chamber_temperature();
-
-    /// \returns state of the filament sensor
-    std::optional<FilamentSensorState> filament_sensor();
-
 public: // USB
     void set_usb_power(bool enabled);
     bool usb_power() const;
 
+public: // Other
+    /// \returns chamber temperature measured through the thermistor connected to the board, in degrees Celsius
+    std::optional<Temperature> chamber_temperature();
+#endif
+
+    /// \returns state of the filament sensor
+    std::optional<FilamentSensorState> filament_sensor();
+
 private:
     mutable freertos::Mutex mutex_;
 
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     leds::ColorRGBW bed_leds_color_;
 
     FanCooling chamber_cooling;
@@ -124,6 +131,7 @@ private:
     bool can_auto_cool_ = false;
     bool overheating_warning_shown = false;
     bool critical_warning_shown = false;
+#endif
 };
 
 XBuddyExtension &xbuddy_extension();

@@ -29,9 +29,9 @@
     #include "../../module/temperature.h"
     #include "fanctl.hpp"
     #include <device/board.h>
-    #include <option/has_xbuddy_extension.h>
+    #include <option/xbuddy_extension_variant_standard.h>
 
-    #if HAS_XBUDDY_EXTENSION()
+    #if XBUDDY_EXTENSION_VARIANT_STANDARD()
         #include <feature/xbuddy_extension/xbuddy_extension.hpp>
     #endif
 
@@ -55,7 +55,7 @@ static bool set_special_fan_speed(uint8_t fan, uint8_t speed, bool set_auto) {
     }
     #endif
 
-    #if HAS_XBUDDY_EXTENSION()
+    #if XBUDDY_EXTENSION_VARIANT_STANDARD()
     using XBE = buddy::XBuddyExtension;
     static_assert(FAN_COUNT < 3, "Fan 3 is dedicated to extboard");
     if (fan == 3) {

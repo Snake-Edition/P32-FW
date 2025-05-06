@@ -17,8 +17,8 @@
     #include <buddy/door_sensor.hpp>
 #endif
 
-#include <option/has_xbuddy_extension.h>
-#if HAS_XBUDDY_EXTENSION()
+#include <option/xbuddy_extension_variant_standard.h>
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     #include <feature/xbuddy_extension/xbuddy_extension.hpp>
 #endif
 
@@ -96,7 +96,7 @@ void LEDManager::update() {
         status_leds.set(data[i].data, i);
     }
 
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     // Bed LEDs copy LCD status bar strip
     buddy::xbuddy_extension().set_bed_leds_color(data[1].data);
 #endif

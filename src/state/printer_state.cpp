@@ -14,6 +14,7 @@
 #include <option/has_remote_bed.h>
 #include <option/has_chamber_filtration_api.h>
 #include <option/has_door_sensor_calibration.h>
+#include <option/xbuddy_extension_variant_standard.h>
 
 using namespace marlin_server;
 using namespace printer_state;
@@ -597,12 +598,12 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
         return ErrCode::ERR_TEMPERATURE_CHAMBER_CRITICAL_TEMP;
 #endif
 
-#if HAS_XBUDDY_EXTENSION() || XL_ENCLOSURE_SUPPORT()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD() || XL_ENCLOSURE_SUPPORT()
     case WarningType::ChamberFiltrationFanError:
         return ErrCode::CONNECT_CHAMBER_FILTRATION_FAN_ERROR;
 #endif
 
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     case WarningType::ChamberCoolingFanError:
         return ErrCode::CONNECT_CHAMBER_COOLING_FAN_ERROR;
 #endif

@@ -6,7 +6,7 @@
 #include <option/has_toolchanger.h>
 #include <option/has_remote_bed.h>
 #include <option/has_chamber_api.h>
-#include <option/has_xbuddy_extension.h>
+#include <option/xbuddy_extension_variant_standard.h>
 
 #include <Configuration_adv.h>
 #include <fs_autoload_autolock.hpp>
@@ -32,7 +32,7 @@
 #if HAS_CHAMBER_API()
     #include <gui/menu_item/specific/menu_items_chamber.hpp>
 #endif
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     #include <gui/menu_item/specific/menu_items_xbuddy_extension.hpp>
 #endif
 
@@ -100,7 +100,7 @@ struct ScreenMenuSensorInfo__<std::index_sequence<hotend...>> {
 
         MI_INFO_PRINT_FAN,
         MI_INFO_HBR_FAN,
-    #if HAS_XBUDDY_EXTENSION()
+    #if XBUDDY_EXTENSION_VARIANT_STANDARD()
         MI_INFO_XBUDDY_EXTENSION_FAN1,
         MI_INFO_XBUDDY_EXTENSION_FAN2,
         MI_INFO_XBUDDY_EXTENSION_FAN3,

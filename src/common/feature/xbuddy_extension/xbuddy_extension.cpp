@@ -27,6 +27,7 @@ XBuddyExtension::Status XBuddyExtension::status() const {
     return Status::ready;
 }
 
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
 void XBuddyExtension::step() {
     // Obtain these values before locking the mutex.
     // Chamber API is accessing XBuddyExtension in some methods as well, so we might cause a deadlock otherwise.
@@ -274,16 +275,17 @@ std::optional<Temperature> XBuddyExtension::chamber_temperature() {
     return puppies::xbuddy_extension.get_chamber_temp();
 }
 
-std::optional<XBuddyExtension::FilamentSensorState> XBuddyExtension::filament_sensor() {
-    return puppies::xbuddy_extension.get_filament_sensor_state().transform([](auto val) { return static_cast<FilamentSensorState>(val); });
-}
-
 void XBuddyExtension::set_usb_power(bool enabled) {
     config_store().xbe_usb_power.set(enabled);
 }
 
 bool XBuddyExtension::usb_power() const {
     return config_store().xbe_usb_power.get();
+}
+#endif
+
+std::optional<XBuddyExtension::FilamentSensorState> XBuddyExtension::filament_sensor() {
+    return puppies::xbuddy_extension.get_filament_sensor_state().transform([](auto val) { return static_cast<FilamentSensorState>(val); });
 }
 
 } // namespace buddy
