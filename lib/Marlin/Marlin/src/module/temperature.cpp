@@ -72,10 +72,6 @@
   #include "../feature/emergency_parser.h"
 #endif
 
-#if ENABLED(PRINTER_EVENT_LEDS)
-  #include "../feature/leds/printer_event_leds.h"
-#endif
-
 #if ENABLED(SINGLENOZZLE)
   #include "tool_change.h"
 #endif
@@ -458,10 +454,6 @@ volatile bool Temperature::temp_meas_ready = false;
     SHV(bias = d = (MAX_BED_POWER) >> soft_pwm_bit_shift, bias = d = (PID_MAX) >> soft_pwm_bit_shift);
 
     wait_for_heatup = true; // Can be interrupted with M108
-    #if ENABLED(PRINTER_EVENT_LEDS)
-      const float start_temp = GHV(temp_bed.celsius, temp_hotend[heater].celsius);
-      LEDColor color = ONHEATINGSTART();
-    #endif
 
     #if ENABLED(NO_FAN_SLOWING_IN_PID_TUNING)
       adaptive_fan_slowing = false;
@@ -479,10 +471,6 @@ volatile bool Temperature::temp_meas_ready = false;
         current_temp = GHV(temp_bed.celsius, temp_hotend[heater].celsius);
         NOLESS(maxT, current_temp);
         NOMORE(minT, current_temp);
-
-        #if ENABLED(PRINTER_EVENT_LEDS)
-          ONHEATING(start_temp, current_temp, target);
-        #endif
 
         #if HAS_AUTO_FAN
           if (ELAPSED(ms, next_auto_fan_check_ms)) {
@@ -648,20 +636,12 @@ volatile bool Temperature::temp_meas_ready = false;
           #endif
         }
 
-        #if ENABLED(PRINTER_EVENT_LEDS)
-          printerEventLEDs.onPidTuningDone(color);
-        #endif
-
         goto EXIT_M303;
       }
       ui.update();
     }
 
     disable_all_heaters();
-
-    #if ENABLED(PRINTER_EVENT_LEDS)
-      printerEventLEDs.onPidTuningDone(color);
-    #endif
 
     EXIT_M303:
       #if ENABLED(NO_FAN_SLOWING_IN_PID_TUNING)
@@ -3066,11 +3046,6 @@ void Temperature::isr() {
         KEEPALIVE_STATE(NOT_BUSY);
       #endif
 
-      #if ENABLED(PRINTER_EVENT_LEDS)
-        const float start_temp = degHotend(target_extruder);
-        printerEventLEDs.onHotendHeatingStart();
-      #endif
-
       float target_temp = -1.0, old_temp = 9999.0;
       bool wants_to_cool = false;
       wait_for_heatup = true;
@@ -3126,11 +3101,6 @@ void Temperature::isr() {
         const float temp = degHotend(target_extruder);
         statusGuard.update<PrintStatusMessage::waiting_for_hotend_temp>({.current = temp, .target = target_temp});
 
-        #if ENABLED(PRINTER_EVENT_LEDS)
-          // Gradually change LED strip from violet to red as nozzle heats up
-          if (!wants_to_cool) printerEventLEDs.onHotendHeating(start_temp, temp, target_temp);
-        #endif
-
         // Prevent a wait-forever situation if R is misused i.e. M109 R0
         if (wants_to_cool) {
           // break after MIN_COOLING_SLOPE_TIME seconds
@@ -3146,12 +3116,6 @@ void Temperature::isr() {
       /// reset fan speed
       if (fan_cools)
         thermalManager.set_fan_speed(target_extruder, fan_speed_at_start);
-
-      if (wait_for_heatup) {
-        #if ENABLED(PRINTER_EVENT_LEDS)
-          printerEventLEDs.onHeatingDone();
-        #endif
-      }
 
       return wait_for_heatup;
     }
@@ -3185,11 +3149,6 @@ void Temperature::isr() {
 
       #if DISABLED(BUSY_WHILE_HEATING) && ENABLED(HOST_KEEPALIVE_FEATURE)
         KEEPALIVE_STATE(NOT_BUSY);
-      #endif
-
-      #if ENABLED(PRINTER_EVENT_LEDS)
-        const float start_temp = degBed();
-        printerEventLEDs.onBedHeatingStart();
       #endif
 
       PrintStatusMessageGuard statusGuard;
@@ -3226,11 +3185,6 @@ void Temperature::isr() {
 
         const float temp = degBed();
         statusGuard.update<PrintStatusMessage::waiting_for_bed_temp>({.current = temp, .target = target_temp});
-
-        #if ENABLED(PRINTER_EVENT_LEDS)
-          // Gradually change LED strip from blue to violet as bed heats up
-          if (!wants_to_cool) printerEventLEDs.onBedHeating(start_temp, temp, target_temp);
-        #endif
 
         #if TEMP_BED_RESIDENCY_TIME > 0
 

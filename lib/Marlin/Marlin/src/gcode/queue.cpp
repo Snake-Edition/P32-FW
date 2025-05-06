@@ -36,10 +36,6 @@ GCodeQueue queue;
 #include "serial_printing.hpp"
 #include <gcode/inject_queue.hpp>
 
-#if ENABLED(PRINTER_EVENT_LEDS)
-  #include "../feature/leds/printer_event_leds.h"
-#endif
-
 /**
  * GCode line number handling. Hosts may opt to include line numbers when
  * sending commands to Marlin, and lines will be checked for sequentiality.

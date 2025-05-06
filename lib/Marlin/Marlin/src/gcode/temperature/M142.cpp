@@ -33,10 +33,6 @@
   #include "../../module/printcounter.h"
 #endif
 
-#if ENABLED(PRINTER_EVENT_LEDS)
-  #include "../../feature/leds/leds.h"
-#endif
-
 #include "../../Marlin.h" // for wait_for_heatup and idle()
 
 /** \addtogroup G-Codes

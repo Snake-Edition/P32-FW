@@ -1533,13 +1533,6 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
 #endif
 
 /**
- * RGB_LED Requirements
- */
-#if ENABLED(PRINTER_EVENT_LEDS)
-  #error "PRINTER_EVENT_LEDS not supported."
-#endif
-
-/**
  * Auto Fan check for PWM pins
  */
 #if HAS_AUTO_FAN && EXTRUDER_AUTO_FAN_SPEED != 255
