@@ -33,7 +33,7 @@
   #include "neopixel.h"
 #endif
 
-#define HAS_WHITE_LED EITHER(RGBW_LED, NEOPIXEL_LED)
+#define HAS_WHITE_LED ENABLED(NEOPIXEL_LED)
 
 /**
  * LEDcolor type for use with leds.set_color

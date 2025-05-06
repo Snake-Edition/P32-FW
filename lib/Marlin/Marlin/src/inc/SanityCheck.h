@@ -1312,7 +1312,7 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
  * LED Control Menu
  */
 #if ENABLED(LED_CONTROL_MENU) && !HAS_COLOR_LEDS
-  #error "LED_CONTROL_MENU requires RGB_LED, RGBW_LED, or NEOPIXEL_LED."
+  #error "LED_CONTROL_MENU requires NEOPIXEL_LED."
 #endif
 
 /**
@@ -1537,25 +1537,13 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
 /**
  * RGB_LED Requirements
  */
-#define _RGB_TEST (PIN_EXISTS(RGB_LED_R, RGB_LED_G, RGB_LED_B))
 #if ENABLED(PRINTER_EVENT_LEDS) && !HAS_COLOR_LEDS
-  #error "PRINTER_EVENT_LEDS requires RGB_LED, RGBW_LED or NEOPIXEL_LED."
-#elif ENABLED(RGB_LED)
-  #if !_RGB_TEST
-    #error "RGB_LED requires RGB_LED_R_PIN, RGB_LED_G_PIN, and RGB_LED_B_PIN."
-  #elif ENABLED(RGBW_LED)
-    #error "Please enable only one of RGB_LED and RGBW_LED."
-  #endif
-#elif ENABLED(RGBW_LED)
-  #if !(_RGB_TEST && PIN_EXISTS(RGB_LED_W))
-    #error "RGBW_LED requires RGB_LED_R_PIN, RGB_LED_G_PIN, RGB_LED_B_PIN, and RGB_LED_W_PIN."
-  #endif
+  #error "PRINTER_EVENT_LEDS requires NEOPIXEL_LED."
 #elif ENABLED(NEOPIXEL_LED)
   #if !(PIN_EXISTS(NEOPIXEL) && NEOPIXEL_PIXELS > 0)
     #error "NEOPIXEL_LED requires NEOPIXEL_PIN and NEOPIXEL_PIXELS."
   #endif
 #endif
-#undef _RGB_TEST
 
 /**
  * Auto Fan check for PWM pins
@@ -1631,7 +1619,7 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
 /**
  * FYSETC Mini 12864 RGB backlighting required
  */
-#if EITHER(FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0) && DISABLED(RGB_LED)
+#if EITHER(FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0)
   #error "RGB_LED is required for FYSETC_MINI_12864 1.2 and 2.0."
 #elif EITHER(FYSETC_MINI_12864_2_0, FYSETC_MINI_12864_2_1) && DISABLED(LED_USER_PRESET_STARTUP)
   #error "LED_USER_PRESET_STARTUP is required for FYSETC_MINI_12864 2.x displays."
