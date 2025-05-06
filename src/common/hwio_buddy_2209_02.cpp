@@ -74,30 +74,36 @@ constexpr const int _PWM_CNT = 4;
 
 } // end anonymous namespace
 
-static const uint32_t _pwm_chan[] = {
-    TIM_CHANNEL_3, //_PWM_HEATER_BED
-    TIM_CHANNEL_4, //_PWM_HEATER_0
-    TIM_CHANNEL_1, //_PWM_FAN1
-    TIM_CHANNEL_2, //_PWM_FAN
+struct PWMConfig {
+    uint32_t channel;
+    TIM_HandleTypeDef *timer;
+    int max;
 };
-
-static TIM_HandleTypeDef *_pwm_p_htim[] = {
-    &htim3, //_PWM_HEATER_BED
-    &htim3, //_PWM_HEATER_0
-    &htim1, //_PWM_FAN1
-    &htim1, //_PWM_FAN
-};
-
-// buddy pwm output maximum values
-static constexpr int _pwm_max[] = {
+static const PWMConfig pwm_config[] = {
+    [HWIO_PWM_HEATER_BED] = {
+        .channel = TIM_CHANNEL_3,
+        .timer = &htim3,
 #if PRINTER_IS_PRUSA_iX()
-    static_cast<int>(std::round(static_cast<int>(TIM3_default_Period) * (MAX_HEATBREAK_TURBINE_POWER / 100.0))),
+        .max = static_cast<int>(std::round(static_cast<int>(TIM3_default_Period) * (MAX_HEATBREAK_TURBINE_POWER / 100.0))),
 #else
-    TIM3_default_Period,
+        .max = TIM3_default_Period,
 #endif
-    TIM3_default_Period,
-    TIM1_default_Period,
-    TIM1_default_Period,
+    },
+    [HWIO_PWM_HEATER_0] = {
+        .channel = TIM_CHANNEL_4,
+        .timer = &htim3,
+        .max = TIM3_default_Period,
+    },
+    [HWIO_PWM_FAN1] = {
+        .channel = TIM_CHANNEL_1,
+        .timer = &htim1,
+        .max = TIM1_default_Period,
+    },
+    [HWIO_PWM_FAN] = {
+        .channel = TIM_CHANNEL_2,
+        .timer = &htim1,
+        .max = TIM1_default_Period,
+    },
 };
 
 #if PRINTER_IS_PRUSA_iX()
@@ -154,14 +160,14 @@ static constexpr int hwio_pwm_get_max(int i_pwm) // pwm output maximum value
     if (!is_pwm_id_valid(i_pwm)) {
         return -1;
     }
-    return _pwm_max[i_pwm];
+    return pwm_config[i_pwm].max;
 }
 
 uint32_t _pwm_get_chan(int i_pwm) {
     if (!is_pwm_id_valid(i_pwm)) {
         return -1;
     }
-    return _pwm_chan[i_pwm];
+    return pwm_config[i_pwm].channel;
 }
 
 TIM_HandleTypeDef *_pwm_get_htim(int i_pwm) {
@@ -169,7 +175,7 @@ TIM_HandleTypeDef *_pwm_get_htim(int i_pwm) {
         i_pwm = 0;
     }
 
-    return _pwm_p_htim[i_pwm];
+    return pwm_config[i_pwm].timer;
 }
 
 void hwio_pwm_set_val(int i_pwm, uint32_t val) // write pwm output and update _pwm_analogWrite_val
