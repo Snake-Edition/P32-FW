@@ -157,7 +157,6 @@ static void hwio_pwm_set_val(const PWMConfig &config, int &old_value, uint32_t n
 
     if ((old_value ^ new_value) || (cmp != new_value)) {
         __pwm_set_val(config.timer, config.channel, new_value);
-        old_value = (new_value * _pwm_analogWrite_max) / config.max;
     }
 }
 
