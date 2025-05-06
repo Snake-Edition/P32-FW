@@ -48,47 +48,13 @@
 LEDLights leds;
 
 void LEDLights::setup() {
-  #if ENABLED(NEOPIXEL_LED)
-    neo.init();
-  #endif
   #if ENABLED(LED_USER_PRESET_STARTUP)
     set_default();
   #endif
 }
 
 void LEDLights::set_color(const LEDColor &incol
-  #if ENABLED(NEOPIXEL_LED)
-    , bool isSequence/*=false*/
-  #endif
 ) {
-
-  #if ENABLED(NEOPIXEL_LED)
-
-    const uint32_t neocolor = LEDColorWhite() == incol
-                            ? neo.Color(NEO_WHITE)
-                            : neo.Color(incol.r, incol.g, incol.b, incol.w);
-    static uint16_t nextLed = 0;
-
-    #ifdef NEOPIXEL_BKGD_LED_INDEX
-      if (NEOPIXEL_BKGD_LED_INDEX == nextLed) {
-        if (++nextLed >= neo.pixels()) nextLed = 0;
-        return;
-      }
-    #endif
-
-    neo.set_brightness(incol.i);
-
-    if (isSequence) {
-      neo.set_pixel_color(nextLed, neocolor);
-      neo.show();
-      if (++nextLed >= neo.pixels()) nextLed = 0;
-      return;
-    }
-
-    neo.set_color(neocolor);
-
-  #endif
-
   #if EITHER(LED_CONTROL_MENU, PRINTER_EVENT_LEDS)
     // Don't update the color when OFF
     lights_on = !incol.is_off();

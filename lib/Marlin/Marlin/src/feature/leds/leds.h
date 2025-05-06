@@ -29,11 +29,7 @@
 
 #include <string.h>
 
-#if ENABLED(NEOPIXEL_LED)
-  #include "neopixel.h"
-#endif
-
-#define HAS_WHITE_LED ENABLED(NEOPIXEL_LED)
+#define HAS_WHITE_LED 0
 
 /**
  * LEDcolor type for use with leds.set_color
@@ -42,43 +38,28 @@ typedef struct LEDColor {
   uint8_t r, g, b
     #if HAS_WHITE_LED
       , w
-      #if ENABLED(NEOPIXEL_LED)
-        , i
-      #endif
     #endif
   ;
 
   LEDColor() : r(255), g(255), b(255)
     #if HAS_WHITE_LED
       , w(255)
-      #if ENABLED(NEOPIXEL_LED)
-        , i(NEOPIXEL_BRIGHTNESS)
-      #endif
     #endif
   {}
 
   LEDColor(uint8_t r, uint8_t g, uint8_t b
     #if HAS_WHITE_LED
       , uint8_t w=0
-      #if ENABLED(NEOPIXEL_LED)
-        , uint8_t i=NEOPIXEL_BRIGHTNESS
-      #endif
     #endif
     ) : r(r), g(g), b(b)
     #if HAS_WHITE_LED
       , w(w)
-      #if ENABLED(NEOPIXEL_LED)
-        , i(i)
-      #endif
     #endif
   {}
 
   LEDColor(const uint8_t (&rgbw)[4]) : r(rgbw[0]), g(rgbw[1]), b(rgbw[2])
     #if HAS_WHITE_LED
       , w(rgbw[3])
-      #if ENABLED(NEOPIXEL_LED)
-        , i(NEOPIXEL_BRIGHTNESS)
-      #endif
     #endif
   {}
 
@@ -115,11 +96,7 @@ typedef struct LEDColor {
  * Color helpers and presets
  */
 #if HAS_WHITE_LED
-  #if ENABLED(NEOPIXEL_LED)
-    #define MakeLEDColor(R,G,B,W,I) LEDColor(R, G, B, W, I)
-  #else
     #define MakeLEDColor(R,G,B,W,I) LEDColor(R, G, B, W)
-  #endif
 #else
   #define MakeLEDColor(R,G,B,W,I)   LEDColor(R, G, B)
 #endif
@@ -150,26 +127,14 @@ public:
   static void setup(); // init()
 
   static void set_color(const LEDColor &color
-    #if ENABLED(NEOPIXEL_LED)
-      , bool isSequence=false
-    #endif
   );
 
   inline void set_color(uint8_t r, uint8_t g, uint8_t b
     #if HAS_WHITE_LED
       , uint8_t w=0
-      #if ENABLED(NEOPIXEL_LED)
-        , uint8_t i=NEOPIXEL_BRIGHTNESS
-      #endif
-    #endif
-    #if ENABLED(NEOPIXEL_LED)
-      , bool isSequence=false
     #endif
   ) {
     set_color(MakeLEDColor(r, g, b, w, i)
-      #if ENABLED(NEOPIXEL_LED)
-        , isSequence
-      #endif
     );
   }
 

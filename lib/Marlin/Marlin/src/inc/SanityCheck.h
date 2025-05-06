@@ -210,8 +210,6 @@
   #error "Replace SLED_PIN with SOL1_PIN (applies to both Z_PROBE_SLED and SOLENOID_PROBE)."
 #elif defined(MIN_RETRACT)
   #error "MIN_RETRACT is now MIN_AUTORETRACT and MAX_AUTORETRACT. Please update your Configuration_adv.h."
-#elif defined(NEOPIXEL_RGBW_LED)
-  #error "NEOPIXEL_RGBW_LED is now NEOPIXEL_LED. Please update your configuration."
 #elif ENABLED(DELTA) && defined(DELTA_PROBEABLE_RADIUS)
   #error "Remove DELTA_PROBEABLE_RADIUS and use MIN_PROBE_EDGE to inset the probe area instead."
 #elif defined(UBL_MESH_INSET)
@@ -1312,7 +1310,7 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
  * LED Control Menu
  */
 #if ENABLED(LED_CONTROL_MENU) && !HAS_COLOR_LEDS
-  #error "LED_CONTROL_MENU requires NEOPIXEL_LED."
+  #error "LED_CONTROL_MENU requires HAS_COLOR_LEDS."
 #endif
 
 /**
@@ -1538,11 +1536,7 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
  * RGB_LED Requirements
  */
 #if ENABLED(PRINTER_EVENT_LEDS) && !HAS_COLOR_LEDS
-  #error "PRINTER_EVENT_LEDS requires NEOPIXEL_LED."
-#elif ENABLED(NEOPIXEL_LED)
-  #if !(PIN_EXISTS(NEOPIXEL) && NEOPIXEL_PIXELS > 0)
-    #error "NEOPIXEL_LED requires NEOPIXEL_PIN and NEOPIXEL_PIXELS."
-  #endif
+  #error "PRINTER_EVENT_LEDS requires HAS_COLOR_LEDS."
 #endif
 
 /**
@@ -2001,10 +1995,6 @@ static_assert(   _ARR_TEST(3,0) && _ARR_TEST(3,1) && _ARR_TEST(3,2)
 
 #if ENABLED(LED_CONTROL_MENU)
   #error "LED_CONTROL_MENU requires an LCD controller."
-#endif
-
-#if ENABLED(CASE_LIGHT_USE_NEOPIXEL) && DISABLED(NEOPIXEL_LED)
-  #error "CASE_LIGHT_USE_NEOPIXEL requires NEOPIXEL_LED."
 #endif
 
 #if ENABLED(SKEW_CORRECTION)

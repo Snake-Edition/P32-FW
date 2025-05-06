@@ -1869,17 +1869,6 @@
 // Support for the BariCUDA Paste Extruder
 //#define BARICUDA
 
-// Support for Adafruit Neopixel LED driver
-//#define NEOPIXEL_LED
-#if ENABLED(NEOPIXEL_LED)
-    #define NEOPIXEL_TYPE NEO_GRBW // NEO_GRBW / NEO_GRB - four/three channel driver type (defined in Adafruit_NeoPixel.h)
-    #define NEOPIXEL_PIN 4 // LED driving pin on motherboard 4 => D4 (EXP2-5 on Printrboard) / 30 => PC7 (EXP3-13 on Rumba)
-    #define NEOPIXEL_PIXELS 30 // Number of LEDs in the strip
-    #define NEOPIXEL_IS_SEQUENTIAL // Sequential display for temperature change - LED by LED. Disable to change all LEDs at once.
-    #define NEOPIXEL_BRIGHTNESS 127 // Initial brightness (0-255)
-//#define NEOPIXEL_STARTUP_TEST  // Cycle through colors at startup
-#endif
-
 /**
  * Printer Event LEDs
  *
@@ -1891,7 +1880,7 @@
  *  - Change to green once print has finished
  *  - Turn off after the print has finished and the user has pushed a button
  */
-#if ENABLED(NEOPIXEL_LED)
+#if 0
     #define PRINTER_EVENT_LEDS
 #endif
 

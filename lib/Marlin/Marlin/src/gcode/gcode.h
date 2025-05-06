@@ -146,7 +146,7 @@
  * M140 - Set bed target temp. S<temp>
  * M141 - Set heated chamber target temp. S<temp> (Requires a chamber heater)
  * M149 - Set temperature units. (Requires TEMPERATURE_UNITS_SUPPORT)
- * M150 - Set Status LED Color as R<red> U<green> B<blue> P<bright>. Values 0-255. (Requires NEOPIXEL_LED).
+ * M150 - Set Status LED Color as R<red> U<green> B<blue> P<bright>. Values 0-255.
  * M155 - Auto-report temperatures with interval of S<seconds>. (Requires AUTO_REPORT_TEMPERATURES)
  * M190 - S<temp> Wait for bed current temp to reach target temp. ** Wait only when heating! **
  *        R<temp> Wait for bed current temp to reach target temp. ** Wait for heating or cooling. **

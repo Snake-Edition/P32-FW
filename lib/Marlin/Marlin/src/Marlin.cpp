@@ -908,9 +908,7 @@ void setup() {
   #endif
 
   #if HAS_CASE_LIGHT
-    #if DISABLED(CASE_LIGHT_USE_NEOPIXEL)
       if (PWM_PIN(CASE_LIGHT_PIN)) SET_PWM(CASE_LIGHT_PIN); else SET_OUTPUT(CASE_LIGHT_PIN);
-    #endif
     update_case_light();
   #endif
 
