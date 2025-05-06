@@ -69,7 +69,10 @@ configure_file(
   ${PROJECT_ROOT_DIR}/src/lang/po/ja/Prusa-Firmware-Buddy_ja.mo
   ${CMAKE_CURRENT_BINARY_DIR}/MO/ja.mo COPYONLY
   )
-
+configure_file(
+  ${PROJECT_ROOT_DIR}/src/lang/po/uk/Prusa-Firmware-Buddy_uk.mo
+  ${CMAKE_CURRENT_BINARY_DIR}/MO/uk.mo COPYONLY
+  )
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/MOfilesTesting/magic.mo ${CMAKE_CURRENT_BINARY_DIR}/MO/magic.mo
   COPYONLY

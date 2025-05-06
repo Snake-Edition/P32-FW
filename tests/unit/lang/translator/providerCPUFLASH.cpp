@@ -199,6 +199,29 @@ uint16_t StringTableJATest::stringBeginsSize;
 
 using CPUFLASHTranslationProviderJATest = CPUFLASHTranslationProvider<StringTableJATest>;
 
+struct StringTableUKTest {
+    // this will get statically precomputed for each translation language separately
+    static uint16_t stringCount, stringBytes;
+    static uint16_t stringBeginsSize;
+    static uint32_t utf8RawSize, stringBegins[maxStringBegins];
+    // a piece of memory where the null-terminated strings are situated
+    static uint8_t utf8Raw[maxUtf8Raw];
+
+    static void Reset() {
+        stringBeginsSize = 0;
+        utf8RawSize = 0;
+        fill(stringBegins, stringBegins + maxStringBegins, 0);
+        fill(utf8Raw, utf8Raw + maxUtf8Raw, 0);
+    }
+};
+
+uint32_t StringTableUKTest::stringBegins[maxStringBegins], StringTableUKTest::utf8RawSize;
+uint8_t StringTableUKTest::utf8Raw[maxUtf8Raw];
+uint16_t StringTableUKTest::stringCount, StringTableUKTest::stringBytes;
+uint16_t StringTableUKTest::stringBeginsSize;
+
+using CPUFLASHTranslationProviderUKTest = CPUFLASHTranslationProvider<StringTableUKTest>;
+
 TEST_CASE("providerCPUFLASH::StringTableAt", "[translator]") {
     // simple test of several strings - setup first
     StringTableCSTest::Reset();
@@ -294,6 +317,7 @@ TEST_CASE("providerCPUFLASH::Translations singleton", "[translator]") {
     REQUIRE(Translations::Instance().LangExists(Translations::MakeLangCode("it")));
     REQUIRE(Translations::Instance().LangExists(Translations::MakeLangCode("pl")));
     REQUIRE(Translations::Instance().LangExists(Translations::MakeLangCode("ja")));
+    REQUIRE(Translations::Instance().LangExists(Translations::MakeLangCode("uk")));
 }
 
 /// This is a complex test of the whole translation mechanism
@@ -315,11 +339,12 @@ TEST_CASE("providerCPUFLASH::ComplexTest", "[translator]") {
     CPUFLASHTranslationProviderITTest providerIT;
     CPUFLASHTranslationProviderPLTest providerPL;
     CPUFLASHTranslationProviderJATest providerJA;
+    CPUFLASHTranslationProviderUKTest providerUK;
     deque<string> rawStringKeys;
     FillHashTableCPUFLASHProvider(CPUFLASHTranslationProviderBase::hash_table, "keys.txt", rawStringKeys);
 
     // now do a similar thing for the translated strings
-    deque<string> csStrings, deStrings, esStrings, frStrings, itStrings, plStrings, jaStrings;
+    deque<string> csStrings, deStrings, esStrings, frStrings, itStrings, plStrings, jaStrings, ukStrings;
     REQUIRE(LoadTranslatedStringsFile("cs.txt", &csStrings));
     REQUIRE(LoadTranslatedStringsFile("de.txt", &deStrings));
     REQUIRE(LoadTranslatedStringsFile("es.txt", &esStrings));
@@ -327,6 +352,7 @@ TEST_CASE("providerCPUFLASH::ComplexTest", "[translator]") {
     REQUIRE(LoadTranslatedStringsFile("it.txt", &itStrings));
     REQUIRE(LoadTranslatedStringsFile("pl.txt", &plStrings));
     REQUIRE(LoadTranslatedStringsFile("ja.txt", &jaStrings));
+    REQUIRE(LoadTranslatedStringsFile("uk.txt", &ukStrings));
 
     // need to have at least the same amount of translations like the keys (normally there will be an exact number of them)
     REQUIRE(rawStringKeys.size() <= csStrings.size());
@@ -336,6 +362,7 @@ TEST_CASE("providerCPUFLASH::ComplexTest", "[translator]") {
     REQUIRE(rawStringKeys.size() <= itStrings.size());
     REQUIRE(rawStringKeys.size() <= plStrings.size());
     REQUIRE(rawStringKeys.size() <= jaStrings.size());
+    REQUIRE(rawStringKeys.size() <= ukStrings.size());
 
     // now make the string table from cs.txt
     FillStringTable<StringTableCSTest>(csStrings);
@@ -345,13 +372,14 @@ TEST_CASE("providerCPUFLASH::ComplexTest", "[translator]") {
     FillStringTable<StringTableITTest>(itStrings);
     FillStringTable<StringTablePLTest>(plStrings);
     FillStringTable<StringTableJATest>(jaStrings);
+    FillStringTable<StringTableUKTest>(ukStrings);
 
     // prepare a map for comparison
     set<unichar> nonASCIICharacters;
     {
         // explicitly add characters from language names
-        // Čeština, Español, Français, Japanese
-        static const uint8_t na[] = "Čšñçニホンゴ";
+        // Čeština, Español, Français, Japanese, Ukrainian
+        static const uint8_t na[] = "ČšñçニホンゴУкраїнсьмов";
         string_view_utf8 nas = string_view_utf8::MakeRAM(na);
         StringReaderUtf8 reader(nas);
         unichar c;
@@ -366,6 +394,7 @@ TEST_CASE("providerCPUFLASH::ComplexTest", "[translator]") {
     REQUIRE(CheckAllTheStrings(rawStringKeys, itStrings, providerIT, nonASCIICharacters, "it"));
     REQUIRE(CheckAllTheStrings(rawStringKeys, plStrings, providerPL, nonASCIICharacters, "pl"));
     REQUIRE(CheckAllTheStrings(rawStringKeys, jaStrings, providerJA, nonASCIICharacters, "ja"));
+    REQUIRE(CheckAllTheStrings(rawStringKeys, ukStrings, providerUK, nonASCIICharacters, "uk"));
 
     CompareHashTables();
 
@@ -376,6 +405,7 @@ TEST_CASE("providerCPUFLASH::ComplexTest", "[translator]") {
     CompareProviders(&providerIT, "it");
     CompareProviders(&providerPL, "pl");
     CompareProviders(&providerJA, "ja");
+    CompareProviders(&providerUK, "uk");
 
     // Check the content of generated non-ascii-chars - to see, if we have enough font bitmaps
 
