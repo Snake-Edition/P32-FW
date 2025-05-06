@@ -140,9 +140,6 @@ static uint32_t hwio_beeper_duration_ms = 0;
  * */
 static void __pwm_set_val(TIM_HandleTypeDef *htim, uint32_t chan, int val);
 static void _hwio_pwm_analogWrite_set_val(int i_pwm, int val);
-static void _hwio_pwm_set_val(int i_pwm, int val);
-static uint32_t _pwm_get_chan(int i_pwm);
-static TIM_HandleTypeDef *_pwm_get_htim(int i_pwm);
 static constexpr int is_pwm_id_valid(int i_pwm);
 
 //--------------------------------------
@@ -155,59 +152,17 @@ static constexpr int is_pwm_id_valid(int i_pwm) {
     return ((i_pwm >= 0) && (i_pwm < _PWM_CNT));
 }
 
-static constexpr int hwio_pwm_get_max(int i_pwm) // pwm output maximum value
+static void hwio_pwm_set_val(const PWMConfig &config, int i_pwm, uint32_t val) // write pwm output and update _pwm_analogWrite_val
 {
-    if (!is_pwm_id_valid(i_pwm)) {
-        return -1;
-    }
-    return pwm_config[i_pwm].max;
-}
-
-uint32_t _pwm_get_chan(int i_pwm) {
-    if (!is_pwm_id_valid(i_pwm)) {
-        return -1;
-    }
-    return pwm_config[i_pwm].channel;
-}
-
-TIM_HandleTypeDef *_pwm_get_htim(int i_pwm) {
-    if (!is_pwm_id_valid(i_pwm)) {
-        i_pwm = 0;
-    }
-
-    return pwm_config[i_pwm].timer;
-}
-
-void hwio_pwm_set_val(int i_pwm, uint32_t val) // write pwm output and update _pwm_analogWrite_val
-{
-    if (!is_pwm_id_valid(i_pwm)) {
-        return;
-    }
-
-    uint32_t chan = _pwm_get_chan(i_pwm);
-    TIM_HandleTypeDef *htim = _pwm_get_htim(i_pwm);
-    uint32_t cmp = __HAL_TIM_GET_COMPARE(htim, chan);
+    uint32_t cmp = __HAL_TIM_GET_COMPARE(config.timer, config.channel);
 
     if ((_pwm_analogWrite_val[i_pwm] ^ val) || (cmp != val)) {
-        _hwio_pwm_set_val(i_pwm, val);
+        __pwm_set_val(config.timer, config.channel, val);
 
         // update _pwm_analogWrite_val
-        int pwm_max = hwio_pwm_get_max(i_pwm);
-
-        uint32_t pulse = (val * _pwm_analogWrite_max) / pwm_max;
+        uint32_t pulse = (val * _pwm_analogWrite_max) / config.max;
         _pwm_analogWrite_val[i_pwm] = pulse; // arduino compatible
     }
-}
-
-void _hwio_pwm_set_val(int i_pwm, int val) // write pwm output
-{
-    uint32_t chan = _pwm_get_chan(i_pwm);
-    TIM_HandleTypeDef *htim = _pwm_get_htim(i_pwm);
-    if ((chan == static_cast<uint32_t>(-1)) || htim->Instance == 0) {
-        return;
-    }
-
-    __pwm_set_val(htim, chan, val);
 }
 
 void __pwm_set_val(TIM_HandleTypeDef *htim, uint32_t pchan, int val) // write pwm output
@@ -249,6 +204,7 @@ void _hwio_pwm_analogWrite_set_val(int i_pwm, int val) {
     if (!is_pwm_id_valid(i_pwm)) {
         return;
     }
+    const PWMConfig &config = pwm_config[i_pwm];
 
     switch (i_pwm) {
     case HWIO_PWM_HEATER_0:
@@ -262,7 +218,7 @@ void _hwio_pwm_analogWrite_set_val(int i_pwm, int val) {
     }
 
     if (_pwm_analogWrite_val[i_pwm] != val) {
-        const int32_t pwm_max = hwio_pwm_get_max(i_pwm);
+        const int32_t pwm_max = config.max;
         uint32_t pulse = (val * pwm_max) / _pwm_analogWrite_max;
 #if PRINTER_IS_PRUSA_iX()
         if (i_pwm == HWIO_PWM_TURBINE) {
@@ -274,7 +230,7 @@ void _hwio_pwm_analogWrite_set_val(int i_pwm, int val) {
             pulse = _pwm_analogWrite_max - pulse;
         }
 #endif
-        hwio_pwm_set_val(i_pwm, pulse);
+        hwio_pwm_set_val(config, i_pwm, pulse);
         _pwm_analogWrite_val[i_pwm] = val;
     }
 }
