@@ -185,27 +185,27 @@ static void hwio_pwm_set_val(TIM_HandleTypeDef *htim, uint32_t pchan, int val) {
     }
 }
 
-void _hwio_pwm_analogWrite_set_val(int i_pwm, int val) {
+void _hwio_pwm_analogWrite_set_val(int i_pwm, int new_value) {
     if (!is_pwm_id_valid(i_pwm)) {
         return;
     }
     const PWMConfig &config = pwm_config[i_pwm];
-    int &value = _pwm_analogWrite_val[i_pwm];
+    int &old_value = _pwm_analogWrite_val[i_pwm];
 
     switch (i_pwm) {
     case HWIO_PWM_HEATER_0:
-        thermalManager.nozzle_pwm = val;
+        thermalManager.nozzle_pwm = new_value;
         break;
 #if !HAS_REMOTE_BED()
     case HWIO_PWM_HEATER_BED:
-        thermalManager.bed_pwm = val;
+        thermalManager.bed_pwm = new_value;
         break;
 #endif
     }
 
-    if (value != val) {
+    if (old_value != new_value) {
         const int32_t pwm_max = config.max;
-        uint32_t pulse = (val * pwm_max) / _pwm_analogWrite_max;
+        uint32_t pulse = (new_value * pwm_max) / _pwm_analogWrite_max;
 #if PRINTER_IS_PRUSA_iX()
         if (i_pwm == HWIO_PWM_TURBINE) {
             if (pulse < _pwm_turbine_min_threshold) {
@@ -217,7 +217,7 @@ void _hwio_pwm_analogWrite_set_val(int i_pwm, int val) {
         }
 #endif
         hwio_pwm_set_val(config.timer, config.channel, pulse);
-        value = val;
+        old_value = new_value;
     }
 }
 
