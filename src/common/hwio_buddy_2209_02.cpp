@@ -57,17 +57,7 @@ enum {
     HWIO_ERR_UNDEF_ANA_WR, //!< undefined pin analog write
 };
 
-// buddy pwm output pins
-const uint32_t _pwm_pin32[] = {
-    MARLIN_PIN(HEAT0),
-    MARLIN_PIN(BED_HEAT),
-    MARLIN_PIN(FAN1),
-    MARLIN_PIN(FAN)
-};
-
-enum {
-    _PWM_CNT = (sizeof(_pwm_pin32) / sizeof(uint32_t))
-};
+constexpr const int _PWM_CNT = 4;
 
 } // end anonymous namespace
 
@@ -137,7 +127,7 @@ static constexpr int is_pwm_id_valid(int i_pwm);
 // pwm output functions
 
 static constexpr int is_pwm_id_valid(int i_pwm) {
-    return ((i_pwm >= 0) && (i_pwm < static_cast<int>(_PWM_CNT)));
+    return ((i_pwm >= 0) && (i_pwm < _PWM_CNT));
 }
 
 static constexpr int hwio_pwm_get_max(int i_pwm) // pwm output maximum value
