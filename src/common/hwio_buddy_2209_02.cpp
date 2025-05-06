@@ -152,16 +152,12 @@ static constexpr int is_pwm_id_valid(int i_pwm) {
     return ((i_pwm >= 0) && (i_pwm < _PWM_CNT));
 }
 
-static void hwio_pwm_set_val(const PWMConfig &config, int i_pwm, uint32_t val) // write pwm output and update _pwm_analogWrite_val
-{
+static void hwio_pwm_set_val(const PWMConfig &config, int &old_value, uint32_t new_value) {
     uint32_t cmp = __HAL_TIM_GET_COMPARE(config.timer, config.channel);
 
-    if ((_pwm_analogWrite_val[i_pwm] ^ val) || (cmp != val)) {
-        __pwm_set_val(config.timer, config.channel, val);
-
-        // update _pwm_analogWrite_val
-        uint32_t pulse = (val * _pwm_analogWrite_max) / config.max;
-        _pwm_analogWrite_val[i_pwm] = pulse; // arduino compatible
+    if ((old_value ^ new_value) || (cmp != new_value)) {
+        __pwm_set_val(config.timer, config.channel, new_value);
+        old_value = (new_value * _pwm_analogWrite_max) / config.max;
     }
 }
 
@@ -205,6 +201,7 @@ void _hwio_pwm_analogWrite_set_val(int i_pwm, int val) {
         return;
     }
     const PWMConfig &config = pwm_config[i_pwm];
+    int &value = _pwm_analogWrite_val[i_pwm];
 
     switch (i_pwm) {
     case HWIO_PWM_HEATER_0:
@@ -217,7 +214,7 @@ void _hwio_pwm_analogWrite_set_val(int i_pwm, int val) {
 #endif
     }
 
-    if (_pwm_analogWrite_val[i_pwm] != val) {
+    if (value != val) {
         const int32_t pwm_max = config.max;
         uint32_t pulse = (val * pwm_max) / _pwm_analogWrite_max;
 #if PRINTER_IS_PRUSA_iX()
@@ -230,8 +227,8 @@ void _hwio_pwm_analogWrite_set_val(int i_pwm, int val) {
             pulse = _pwm_analogWrite_max - pulse;
         }
 #endif
-        hwio_pwm_set_val(config, i_pwm, pulse);
-        _pwm_analogWrite_val[i_pwm] = val;
+        hwio_pwm_set_val(config, value, pulse);
+        value = val;
     }
 }
 
