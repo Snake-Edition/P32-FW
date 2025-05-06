@@ -138,7 +138,6 @@ static uint32_t hwio_beeper_duration_ms = 0;
 /*****************************************************************************
  * private function declarations
  * */
-static void __pwm_set_val(TIM_HandleTypeDef *htim, uint32_t chan, int val);
 static void _hwio_pwm_analogWrite_set_val(int i_pwm, int val);
 static constexpr int is_pwm_id_valid(int i_pwm);
 
@@ -152,16 +151,7 @@ static constexpr int is_pwm_id_valid(int i_pwm) {
     return ((i_pwm >= 0) && (i_pwm < _PWM_CNT));
 }
 
-static void hwio_pwm_set_val(const PWMConfig &config, int &old_value, uint32_t new_value) {
-    uint32_t cmp = __HAL_TIM_GET_COMPARE(config.timer, config.channel);
-
-    if ((old_value ^ new_value) || (cmp != new_value)) {
-        __pwm_set_val(config.timer, config.channel, new_value);
-    }
-}
-
-void __pwm_set_val(TIM_HandleTypeDef *htim, uint32_t pchan, int val) // write pwm output
-{
+static void hwio_pwm_set_val(TIM_HandleTypeDef *htim, uint32_t pchan, int val) {
     // assuming arguments to this function are valid
     volatile uint32_t *ccreg = nullptr;
     volatile uint8_t *ccenable = nullptr;
@@ -226,7 +216,7 @@ void _hwio_pwm_analogWrite_set_val(int i_pwm, int val) {
             pulse = _pwm_analogWrite_max - pulse;
         }
 #endif
-        hwio_pwm_set_val(config, value, pulse);
+        hwio_pwm_set_val(config.timer, config.channel, pulse);
         value = val;
     }
 }
