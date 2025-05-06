@@ -57,6 +57,19 @@ enum {
     HWIO_ERR_UNDEF_ANA_WR, //!< undefined pin analog write
 };
 
+// pwm outputs
+enum {
+    HWIO_PWM_HEATER_BED, // BED PWM
+    HWIO_PWM_HEATER_0, // NOZZLE PWM
+    HWIO_PWM_FAN1, // PRINT FAN?
+    HWIO_PWM_FAN, // NOZZLE FAN?
+#if BOARD_IS_XBUDDY()
+    #if PRINTER_IS_PRUSA_iX()
+    HWIO_PWM_TURBINE = HWIO_PWM_HEATER_BED
+    #endif
+#endif
+};
+
 constexpr const int _PWM_CNT = 4;
 
 } // end anonymous namespace
