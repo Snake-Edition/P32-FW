@@ -135,22 +135,6 @@ static int _pwm_analogWrite_val[_PWM_CNT] = { 0, 0, 0, 0 };
 static float hwio_beeper_vol = 1.0F;
 static uint32_t hwio_beeper_duration_ms = 0;
 
-/*****************************************************************************
- * private function declarations
- * */
-static void _hwio_pwm_analogWrite_set_val(int i_pwm, int val);
-static constexpr int is_pwm_id_valid(int i_pwm);
-
-//--------------------------------------
-// analog output functions
-
-//--------------------------------------
-// pwm output functions
-
-static constexpr int is_pwm_id_valid(int i_pwm) {
-    return ((i_pwm >= 0) && (i_pwm < _PWM_CNT));
-}
-
 static void hwio_pwm_set_val(TIM_HandleTypeDef *htim, uint32_t pchan, int val) {
     // assuming arguments to this function are valid
     volatile uint32_t *ccreg = nullptr;
@@ -185,8 +169,8 @@ static void hwio_pwm_set_val(TIM_HandleTypeDef *htim, uint32_t pchan, int val) {
     }
 }
 
-void _hwio_pwm_analogWrite_set_val(int i_pwm, int new_value) {
-    if (!is_pwm_id_valid(i_pwm)) {
+static void _hwio_pwm_analogWrite_set_val(int i_pwm, int new_value) {
+    if ((i_pwm < 0) || (i_pwm >= _PWM_CNT)) {
         return;
     }
     const PWMConfig &config = pwm_config[i_pwm];
