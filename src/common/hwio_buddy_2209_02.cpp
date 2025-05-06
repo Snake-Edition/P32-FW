@@ -57,54 +57,7 @@ enum {
     HWIO_ERR_UNDEF_ANA_WR, //!< undefined pin analog write
 };
 
-// pwm outputs
-enum {
-    HWIO_PWM_HEATER_BED, // BED PWM
-    HWIO_PWM_HEATER_0, // NOZZLE PWM
-    HWIO_PWM_FAN1, // PRINT FAN?
-    HWIO_PWM_FAN, // NOZZLE FAN?
-#if BOARD_IS_XBUDDY()
-    #if PRINTER_IS_PRUSA_iX()
-    HWIO_PWM_TURBINE = HWIO_PWM_HEATER_BED
-    #endif
-#endif
-};
-
-constexpr const int _PWM_CNT = 4;
-
 } // end anonymous namespace
-
-struct PWMConfig {
-    uint32_t channel;
-    TIM_HandleTypeDef *timer;
-    int max;
-};
-static const PWMConfig pwm_config[] = {
-    [HWIO_PWM_HEATER_BED] = {
-        .channel = TIM_CHANNEL_3,
-        .timer = &htim3,
-#if PRINTER_IS_PRUSA_iX()
-        .max = static_cast<int>(std::round(static_cast<int>(TIM3_default_Period) * (MAX_HEATBREAK_TURBINE_POWER / 100.0))),
-#else
-        .max = TIM3_default_Period,
-#endif
-    },
-    [HWIO_PWM_HEATER_0] = {
-        .channel = TIM_CHANNEL_4,
-        .timer = &htim3,
-        .max = TIM3_default_Period,
-    },
-    [HWIO_PWM_FAN1] = {
-        .channel = TIM_CHANNEL_1,
-        .timer = &htim1,
-        .max = TIM1_default_Period,
-    },
-    [HWIO_PWM_FAN] = {
-        .channel = TIM_CHANNEL_2,
-        .timer = &htim1,
-        .max = TIM1_default_Period,
-    },
-};
 
 #if PRINTER_IS_PRUSA_iX()
 static_assert(std::clamp(MAX_HEATBREAK_TURBINE_POWER, 0, 100) == MAX_HEATBREAK_TURBINE_POWER);
@@ -129,8 +82,6 @@ static const TIM_OC_InitTypeDef sConfigOC_default = {
 
 // buddy pwm output maximum values  as arduino analogWrite
 static constexpr int _pwm_analogWrite_max = 255;
-// buddy fan output values  as arduino analogWrite
-static int _pwm_analogWrite_val[_PWM_CNT] = { 0, 0, 0, 0 };
 
 static float hwio_beeper_vol = 1.0F;
 static uint32_t hwio_beeper_duration_ms = 0;
@@ -166,42 +117,6 @@ static void hwio_pwm_set_val(TIM_HandleTypeDef *htim, uint32_t pchan, int val) {
         *ccenable = 0x1;
     } else {
         *ccenable = 0;
-    }
-}
-
-static void _hwio_pwm_analogWrite_set_val(int i_pwm, int new_value) {
-    if ((i_pwm < 0) || (i_pwm >= _PWM_CNT)) {
-        return;
-    }
-    const PWMConfig &config = pwm_config[i_pwm];
-    int &old_value = _pwm_analogWrite_val[i_pwm];
-
-    switch (i_pwm) {
-    case HWIO_PWM_HEATER_0:
-        thermalManager.nozzle_pwm = new_value;
-        break;
-#if !HAS_REMOTE_BED()
-    case HWIO_PWM_HEATER_BED:
-        thermalManager.bed_pwm = new_value;
-        break;
-#endif
-    }
-
-    if (old_value != new_value) {
-        const int32_t pwm_max = config.max;
-        uint32_t pulse = (new_value * pwm_max) / _pwm_analogWrite_max;
-#if PRINTER_IS_PRUSA_iX()
-        if (i_pwm == HWIO_PWM_TURBINE) {
-            if (pulse < _pwm_turbine_min_threshold) {
-                // if below minimum threshold, set turbine PWM to 0
-                pulse = 0;
-            }
-            // inverting the PWM value for the iX turbine
-            pulse = _pwm_analogWrite_max - pulse;
-        }
-#endif
-        hwio_pwm_set_val(config.timer, config.channel, pulse);
-        old_value = new_value;
     }
 }
 
@@ -391,6 +306,59 @@ int digitalRead(uint32_t marlinPin) {
     }
 }
 
+#if !HAS_REMOTE_BED()
+static void analogWrite_HEATER_BED(int new_value) {
+    thermalManager.bed_pwm = new_value;
+
+    static int old_value = 0;
+    if (old_value != new_value) {
+        static_assert(TIM3_default_Period == _pwm_analogWrite_max);
+        hwio_pwm_set_val(&htim3, TIM_CHANNEL_3, new_value);
+        old_value = new_value;
+    }
+}
+#endif
+
+static void analogWrite_HEATER_0(int new_value) {
+    thermalManager.nozzle_pwm = new_value;
+
+    static int old_value = 0;
+    if (old_value != new_value) {
+        static_assert(TIM3_default_Period == _pwm_analogWrite_max);
+        hwio_pwm_set_val(&htim3, TIM_CHANNEL_4, new_value);
+        old_value = new_value;
+    }
+}
+
+#if (PRINTER_IS_PRUSA_MK4() || PRINTER_IS_PRUSA_iX() || PRINTER_IS_PRUSA_COREONE())
+static void analogWrite_FAN_1(int new_value) {
+    static int old_value = 0;
+    if (old_value != new_value) {
+        static_assert(TIM1_default_Period == _pwm_analogWrite_max);
+        hwio_pwm_set_val(&htim1, TIM_CHANNEL_1, new_value);
+        old_value = new_value;
+    }
+}
+#endif
+
+#if PRINTER_IS_PRUSA_iX()
+static void analogWrite_TURBINE(int new_value) {
+    static int old_value = 0;
+    if (old_value != new_value) {
+        const int32_t pwm_max = static_cast<int>(std::round(static_cast<int>(TIM3_default_Period) * (MAX_HEATBREAK_TURBINE_POWER / 100.0)));
+        uint32_t pulse = (new_value * pwm_max) / _pwm_analogWrite_max;
+        if (pulse < _pwm_turbine_min_threshold) {
+            // if below minimum threshold, set turbine PWM to 0
+            pulse = 0;
+        }
+        // inverting the PWM value for the iX turbine
+        pulse = _pwm_analogWrite_max - pulse;
+        hwio_pwm_set_val(&htim3, TIM_CHANNEL_3, pulse);
+        old_value = new_value;
+    }
+}
+#endif
+
 /**
  * @brief Write digital pin to be used from Marlin
  *
@@ -412,15 +380,15 @@ void digitalWrite(uint32_t marlinPin, uint32_t ulVal) {
 #if HAS_REMOTE_BED()
         return;
 #else
-        _hwio_pwm_analogWrite_set_val(HWIO_PWM_HEATER_BED, ulVal ? _pwm_analogWrite_max : 0);
+        analogWrite_HEATER_BED(ulVal ? _pwm_analogWrite_max : 0);
         return;
 #endif
     case MARLIN_PIN(HEAT0):
-        _hwio_pwm_analogWrite_set_val(HWIO_PWM_HEATER_0, ulVal ? _pwm_analogWrite_max : 0);
+        analogWrite_HEATER_0(ulVal ? _pwm_analogWrite_max : 0);
         return;
     case MARLIN_PIN(FAN1):
 #if (PRINTER_IS_PRUSA_MK4() || PRINTER_IS_PRUSA_iX() || PRINTER_IS_PRUSA_COREONE())
-        _hwio_pwm_analogWrite_set_val(HWIO_PWM_FAN1, ulVal ? 80 : 0);
+        analogWrite_FAN_1(ulVal ? 80 : 0);
 #elif PRINTER_IS_PRUSA_MK3_5()
         // PWM value of 80 roughly translates to 4k RPM, further testing my find better value, thus far this seems precise enough plus it is the value used by MINI which uses the same fans
         Fans::heat_break(0).set_pwm(ulVal ? (config_store().has_alt_fans.get() ? 80 : _pwm_analogWrite_max) : 0);
@@ -494,7 +462,7 @@ void analogWrite(uint32_t ulPin, uint32_t ulValue) {
         case MARLIN_PIN(FAN1):
             Fans::heat_break(0).set_pwm(ulValue);
 #if PRINTER_IS_PRUSA_iX()
-            _hwio_pwm_analogWrite_set_val(HWIO_PWM_TURBINE, ulValue);
+            analogWrite_TURBINE(ulValue);
 #endif
             return;
         case MARLIN_PIN(FAN):
@@ -504,11 +472,11 @@ void analogWrite(uint32_t ulPin, uint32_t ulValue) {
 #if HAS_REMOTE_BED()
             return;
 #else
-            _hwio_pwm_analogWrite_set_val(HWIO_PWM_HEATER_BED, ulValue);
+            analogWrite_HEATER_BED(ulValue);
             return;
 #endif
         case MARLIN_PIN(HEAT0):
-            _hwio_pwm_analogWrite_set_val(HWIO_PWM_HEATER_0, ulValue);
+            analogWrite_HEATER_0(ulValue);
             return;
         default:
             hwio_arduino_error(HWIO_ERR_UNDEF_ANA_WR, ulPin); // error: undefined pin analog write
