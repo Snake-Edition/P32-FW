@@ -1307,13 +1307,6 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
 #endif
 
 /**
- * LED Control Menu
- */
-#if ENABLED(LED_CONTROL_MENU)
-  #error "LED_CONTROL_MENU not supported."
-#endif
-
-/**
  * LED Backlight Timeout
  */
 #if defined(LED_BACKLIGHT_TIMEOUT) && !(EITHER(FYSETC_MINI_12864_2_0, FYSETC_MINI_12864_2_1) && HAS_POWER_SWITCH)
@@ -1984,10 +1977,6 @@ static_assert(   _ARR_TEST(3,0) && _ARR_TEST(3,1) && _ARR_TEST(3,2)
   #ifdef BLOCK_BUFFER_SIZE
     #error "BLOCK_BUFFER_SIZE should not be defined without a planner"
   #endif
-#endif
-
-#if ENABLED(LED_CONTROL_MENU)
-  #error "LED_CONTROL_MENU requires an LCD controller."
 #endif
 
 #if ENABLED(SKEW_CORRECTION)

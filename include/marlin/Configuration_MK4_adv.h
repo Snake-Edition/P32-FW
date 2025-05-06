@@ -636,23 +636,6 @@
 // Add an 'M73' G-code to set the current percentage
 //#define LCD_SET_PROGRESS_MANUALLY
 
-/**
- * LED Control Menu
- * Enable this feature to add LED Control to the LCD menu
- */
-//#define LED_CONTROL_MENU
-#if ENABLED(LED_CONTROL_MENU)
-    #define LED_COLOR_PRESETS // Enable the Preset Color menu option
-    #if ENABLED(LED_COLOR_PRESETS)
-        #define LED_USER_PRESET_RED 255 // User defined RED value
-        #define LED_USER_PRESET_GREEN 128 // User defined GREEN value
-        #define LED_USER_PRESET_BLUE 0 // User defined BLUE value
-        #define LED_USER_PRESET_WHITE 255 // User defined WHITE value
-        #define LED_USER_PRESET_BRIGHTNESS 255 // User defined intensity
-    //#define LED_USER_PRESET_STARTUP       // Have the printer display the user preset color on startup
-    #endif
-#endif // LED_CONTROL_MENU
-
 // @section lcd
 
 /**
