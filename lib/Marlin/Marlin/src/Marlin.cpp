@@ -136,10 +136,6 @@
   #include "feature/runout.h"
 #endif
 
-#if ENABLED(TEMP_STAT_LEDS)
-  #include "feature/leds/tempstat.h"
-#endif
-
 #if HAS_CASE_LIGHT
   #include "feature/caselight.h"
 #endif
@@ -560,10 +556,6 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
     }
   #endif
 
-  #if ENABLED(TEMP_STAT_LEDS)
-    handle_status_leds();
-  #endif
-
   #if ENABLED(MONITOR_DRIVER_STATUS)
     monitor_motor_drivers();
   #endif
@@ -888,14 +880,6 @@ void setup() {
 
   #ifdef Z_ALWAYS_ON
     enable_Z();
-  #endif
-
-  #if PIN_EXISTS(STAT_LED_RED)
-    OUT_WRITE(STAT_LED_RED_PIN, LOW); // OFF
-  #endif
-
-  #if PIN_EXISTS(STAT_LED_BLUE)
-    OUT_WRITE(STAT_LED_BLUE_PIN, LOW); // OFF
   #endif
 
   #if HAS_CASE_LIGHT

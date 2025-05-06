@@ -200,8 +200,6 @@
   #error "BLTOUCH_FORCE_OPEN_DRAIN_MODE is obsolete. Please update your configuration."
 #elif defined(BEEPER)
   #error "BEEPER is now BEEPER_PIN. Please update your pins definitions."
-#elif defined(STAT_LED_RED) || defined(STAT_LED_BLUE)
-  #error "STAT_LED_RED/STAT_LED_BLUE are now STAT_LED_RED_PIN/STAT_LED_BLUE_PIN. Please update your pins definitions."
 #elif defined(EXTRUDER_0_AUTO_FAN_PIN) || defined(EXTRUDER_1_AUTO_FAN_PIN) || defined(EXTRUDER_2_AUTO_FAN_PIN) || defined(EXTRUDER_3_AUTO_FAN_PIN)
   #error "EXTRUDER_[0123]_AUTO_FAN_PIN is now E[0123]_AUTO_FAN_PIN. Please update your Configuration_adv.h."
 #elif defined(min_software_endstops) || defined(max_software_endstops)
@@ -1297,13 +1295,6 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
   #error "TEMP_SENSOR_4 shouldn't be set with only 1 HOTEND."
 #elif TEMP_SENSOR_5 != 0
   #error "TEMP_SENSOR_5 shouldn't be set with only 1 HOTEND."
-#endif
-
-/**
- * Temperature status LEDs
- */
-#if ENABLED(TEMP_STAT_LEDS) && !ANY_PIN(STAT_LED_RED, STAT_LED_BLUE)
-  #error "TEMP_STAT_LEDS requires STAT_LED_RED_PIN or STAT_LED_BLUE_PIN, preferably both."
 #endif
 
 /**
