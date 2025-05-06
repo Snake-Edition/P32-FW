@@ -30,10 +30,6 @@
 
 #include "leds.h"
 
-#if ENABLED(BLINKM)
-  #include "blinkm.h"
-#endif
-
 #if ENABLED(PCA9632)
   #include "pca9632.h"
 #endif
@@ -109,13 +105,6 @@ void LEDLights::set_color(const LEDColor &incol
     }
 
     neo.set_color(neocolor);
-
-  #endif
-
-  #if ENABLED(BLINKM)
-
-    // This variant uses i2c to send the RGB components to the device.
-    blinkm_set_led_color(incol);
 
   #endif
 
