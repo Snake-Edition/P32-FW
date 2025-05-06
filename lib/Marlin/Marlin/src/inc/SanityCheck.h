@@ -1307,13 +1307,6 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
 #endif
 
 /**
- * LED Backlight Timeout
- */
-#if defined(LED_BACKLIGHT_TIMEOUT) && !(EITHER(FYSETC_MINI_12864_2_0, FYSETC_MINI_12864_2_1) && HAS_POWER_SWITCH)
-  #error "LED_BACKLIGHT_TIMEOUT requires a FYSETC Mini Panel and a Power Switch."
-#endif
-
-/**
  * Basic multi hotend duplication mode
  */
 #if ENABLED(MULTI_NOZZLE_DUPLICATION)
@@ -1573,10 +1566,6 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
   + ENABLED(LCD_FOR_MELZI) \
   + ENABLED(ULTI_CONTROLLER) \
   + ENABLED(MKS_MINI_12864) \
-  + ENABLED(FYSETC_MINI_12864_X_X) \
-  + ENABLED(FYSETC_MINI_12864_1_2) \
-  + ENABLED(FYSETC_MINI_12864_2_0) \
-  + ENABLED(FYSETC_MINI_12864_2_1) \
   + ENABLED(CR10_STOCKDISPLAY) \
   + ENABLED(ANET_FULL_GRAPHICS_LCD) \
   + ENABLED(AZSMZ_12864) \
@@ -1595,15 +1584,6 @@ static_assert(COUNT(npp) == XYZ, "NOZZLE_PARK_POINT requires X, Y, and Z values.
 #undef IS_RRD_FG_SC
 #undef IS_U8GLIB_SSD1306
 #undef IS_EXTUI
-
-/**
- * FYSETC Mini 12864 RGB backlighting required
- */
-#if EITHER(FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0)
-  #error "RGB_LED is required for FYSETC_MINI_12864 1.2 and 2.0."
-#elif EITHER(FYSETC_MINI_12864_2_0, FYSETC_MINI_12864_2_1) && DISABLED(LED_USER_PRESET_STARTUP)
-  #error "LED_USER_PRESET_STARTUP is required for FYSETC_MINI_12864 2.x displays."
-#endif
 
 /**
  * Check existing CS pins against enabled TMC SPI drivers.
