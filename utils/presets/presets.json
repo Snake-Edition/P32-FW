@@ -85,6 +85,15 @@
             }
         },
         {
+            "name": "mini-en-uk",
+            "description": "Original Prusa MINI (EN & UK translation)",
+            "cacheVariables": {
+                "PRINTER": "MINI",
+                "BOARD": "BUDDY",
+                "TRANSLATIONS_LIST": "uk"
+            }
+        },
+        {
             "name": "mk4",
             "description": "Original Prusa MK4 with xBuddy 0.2.7c or newer fw compatible, 400-step motors and planetary gearbox",
             "cacheVariables": {

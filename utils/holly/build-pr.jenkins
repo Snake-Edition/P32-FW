@@ -146,6 +146,7 @@ pipeline {
                             'main,mini-en-fr,release,yesboot',
                             'main,mini-en-it,release,yesboot',
                             'main,mini-en-ja,release,yesboot',
+                            'main,mini-en-uk,release,yesboot',
                             'all,mini-en-pl,release,yesboot', // Always build due to largest memory requirement
                             'all,mk3.5,release,yesboot',
                             'all,mk4,release,yesboot',
