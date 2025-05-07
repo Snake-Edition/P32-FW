@@ -328,14 +328,17 @@ set_feature_for_printers_master_board(HAS_LOCAL_BED "COREONE" "MINI" "MK4" "MK3.
 set_feature_for_printers_master_board(HAS_PUPPY_MODULARBED "iX" "XL" "XL_DEV_KIT")
 
 set_feature_for_printers_master_board(HAS_XBUDDY_EXTENSION "COREONE")
-set_feature_for_printers_master_board(HAS_DOOR_SENSOR "COREONE" "MK4") # MK4: check valid FW-HW
+
+# MK4 technically doesn't have door sensor but needs to check valid FW-HW
+set_feature_for_printers_master_board(HAS_DOOR_SENSOR "COREONE" "MK4")
 set_feature_for_printers(HAS_TOOLCHANGER "XL" "XL_DEV_KIT")
 set_feature_for_printers(HAS_SIDE_FSENSOR "iX" "XL" "COREONE")
 set_feature_for_printers(HAS_ADC_SIDE_FSENSOR "XL")
 set_feature_for_printers(HAS_FILAMENT_SENSORS_MENU "XL" "COREONE")
-set_feature_for_printers(HAS_ESP_FLASH_TASK "MK4" "MK3.5" "XL" "MINI" "COREONE") # iX does not need
-                                                                                 # ESP
-# flashing
+
+# iX does not need ESP flashing
+set_feature_for_printers(HAS_ESP_FLASH_TASK "MK4" "MK3.5" "XL" "MINI" "COREONE")
+
 set_feature_for_printers(HAS_EMBEDDED_ESP32 "XL")
 set(PRINTERS_WITH_SIDE_LEDS "XL" "iX" "COREONE")
 set(PRINTERS_WITH_TRANSLATIONS "COREONE" "MK4" "MK3.5" "XL" "MINI")
