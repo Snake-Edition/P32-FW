@@ -228,6 +228,8 @@ void filament_gcodes::M1701_no_parser(const std::optional<float> &fast_load_leng
     filament::set_color_to_load(std::nullopt);
 
     InProgress progress;
+    FSensors_instance().ClrAutoloadSent();
+
     if constexpr (option::has_bowden) {
         config_store().set_filament_type(target_extruder, FilamentType::none);
         M701_no_parser(FilamentType::none, fast_load_length, z_min_pos, RetAndCool_t::Return, target_extruder, 0, std::nullopt, ResumePrint_t::No);
@@ -256,7 +258,6 @@ void filament_gcodes::M1701_no_parser(const std::optional<float> &fast_load_leng
             marlin_server::set_temp_to_display(orig_temp, active_extruder);
             Pause::Instance().perform(Pause::LoadType::unload_from_gears, settings);
             M70X_process_user_response(PreheatStatus::Result::DoneNoFilament, target_extruder);
-            FSensors_instance().ClrAutoloadSent();
         };
 
         if (orig_temp < EXTRUDE_MINTEMP) {
@@ -303,8 +304,6 @@ void filament_gcodes::M1701_no_parser(const std::optional<float> &fast_load_leng
         }
         planner.set_e_position_mm((destination.e = current_position.e = e_pos_to_restore));
     }
-
-    FSensors_instance().ClrAutoloadSent();
 }
 
 void filament_gcodes::M1600_no_parser(FilamentType filament_to_be_loaded, uint8_t target_extruder, RetAndCool_t preheat, AskFilament_t ask_filament, std::optional<Color> color_to_be_loaded) {
