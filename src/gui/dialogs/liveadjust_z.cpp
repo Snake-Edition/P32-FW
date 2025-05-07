@@ -11,7 +11,6 @@
 #include "img_resources.hpp"
 #include <option/has_sheet_profiles.h>
 #include "config_features.h"
-#include "gui_config_printer.hpp"
 #include <guiconfig/guiconfig.h>
 #include <menu_vars.h>
 #include <gui.hpp>

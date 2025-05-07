@@ -4,8 +4,6 @@
 
 #include "../Marlin/src/module/temperature.h"
 
-#include "gui_config_printer.hpp"
-
 const std::pair<int, int> MenuVars::crash_sensitivity_range = {
 #if AXIS_DRIVER_TYPE_X(TMC2209)
     0, 255
