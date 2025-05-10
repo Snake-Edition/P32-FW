@@ -116,6 +116,15 @@ float base_home_pos_fn(AxisEnum axis){
   }
 }
 
+float max_length_fn(AxisEnum axis){
+  switch(axis){
+    case X_AXIS: return X_MAX_POS-X_MIN_POS;
+    case Y_AXIS: return Y_MAX_POS-Y_MIN_POS;
+    case Z_AXIS: return Z_MAX_POS-Z_MIN_POS;
+    default: return 0;
+  }
+}
+
 /**
  * axis_homed
  *   Flags that each linear axis was homed.
@@ -2034,7 +2043,7 @@ float homeaxis_single_run(const AxisEnum axis, const int axis_home_dir, const fe
     }
   #endif // ENABLED(MOVE_BACK_BEFORE_HOMING)
 
-  do_homing_move(axis, 1.5f * max_length(
+  do_homing_move(axis, 1.5f * max_length_fn(
     #if ENABLED(DELTA)
       Z_AXIS
     #else
