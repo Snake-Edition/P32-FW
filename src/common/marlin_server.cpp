@@ -629,7 +629,10 @@ void init(void) {
         ce = config_store().axis_rms_current_ma_E0_.default_val;
     }
 
+    // Set motor current
     marlin_server::enqueue_gcode_printf("M906 X%i Y%i Z%i E%i", cx, cy, cz, ce);
+    // Set max feedrate
+    marlin_server::enqueue_gcode_printf("M203 X%d Y%d", config_store().x_max_feedrate.get(), config_store().y_max_feedrate.get());
 }
 
 void print_fan_spd() {

@@ -515,6 +515,9 @@ struct CurrentStore
 
     StoreItem<restore_z::Position, restore_z::default_position, journal::hash("Restore Z Coordinate After Boot")> restore_z_after_boot;
 
+    StoreItem<int16_t, defaults::x_max_feedrate, journal::hash("X Max Feedrate")> x_max_feedrate;
+    StoreItem<int16_t, defaults::y_max_feedrate, journal::hash("Y Max Feedrate")> y_max_feedrate;
+
     StoreItem<int16_t, defaults::homing_sens_x, journal::hash("Homing Sens X")> homing_sens_x; // X axis homing sensitivity
     StoreItem<int16_t, defaults::homing_sens_y, journal::hash("Homing Sens Y")> homing_sens_y; // Y axis homing sensitivity
 
