@@ -303,6 +303,22 @@ namespace defaults {
 #endif
     };
 
+    inline constexpr int16_t x_max_feedrate {
+#ifdef MINI_I3_MK33
+        200
+#else
+        180
+#endif
+    };
+
+    inline constexpr int16_t y_max_feedrate {
+#ifdef MINI_I3_MK33
+        200
+#else
+        180
+#endif
+    };
+
     inline constexpr int16_t homing_sens_x {
 #if X_DRIVER_TYPE == TMC2209
     #ifdef MINI_I3_MK33

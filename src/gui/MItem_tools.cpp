@@ -708,6 +708,30 @@ void MI_Y_SENSITIVITY_RESET::click(IWindowMenu & /*window_menu*/) {
 }
 
 /* -===============================================(:>- */
+
+static constexpr NumericInputConfig max_feedrate_spin_config = {
+    .min_value = 1,
+    .max_value = 999,
+};
+
+MI_X_MAX_FEEDRATE::MI_X_MAX_FEEDRATE()
+    : WiSpin(config_store().x_max_feedrate.get(), max_feedrate_spin_config, _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
+
+void MI_X_MAX_FEEDRATE::OnClick() {
+    config_store().x_max_feedrate.set(GetVal());
+    marlin_server::enqueue_gcode_printf("M203 X%d", int(GetVal()));
+}
+
+MI_Y_MAX_FEEDRATE::MI_Y_MAX_FEEDRATE()
+    : WiSpin(config_store().y_max_feedrate.get(), max_feedrate_spin_config, _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
+
+void MI_Y_MAX_FEEDRATE::OnClick() {
+    config_store().y_max_feedrate.set(GetVal());
+    marlin_server::enqueue_gcode_printf("M203 Y%d", int(GetVal()));
+}
+
+/* -===============================================(:>- */
+
 MI_X_HOME::MI_X_HOME()
     : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }

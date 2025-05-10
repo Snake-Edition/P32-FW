@@ -461,6 +461,24 @@ protected:
 
 /* -===============================================(:>- */
 
+class MI_X_MAX_FEEDRATE : public WiSpin {
+    constexpr static const char *const label = N_("X Max Feedrate");
+
+public:
+    MI_X_MAX_FEEDRATE();
+    virtual void OnClick() override;
+};
+
+class MI_Y_MAX_FEEDRATE : public WiSpin {
+    constexpr static const char *const label = N_("Y Max Feedrate");
+
+public:
+    MI_Y_MAX_FEEDRATE();
+    virtual void OnClick() override;
+};
+
+/* -===============================================(:>- */
+
 class MI_X_HOME : public IWindowMenuItem {
     constexpr static const char *const label = N_("Home X Axis");
 
