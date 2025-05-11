@@ -583,8 +583,7 @@ MI_TIME_NOW::MI_TIME_NOW()
 /* -===============================================(:>- */
 static const NumericInputConfig bright_spin_config = {
     .min_value = 30,
-    .max_value = 130,
-    .step = 10,
+    .max_value = 150,
 };
 
 MI_BRIGHTNESS::MI_BRIGHTNESS()

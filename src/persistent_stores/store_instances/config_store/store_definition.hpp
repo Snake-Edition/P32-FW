@@ -521,7 +521,7 @@ struct CurrentStore
     StoreItem<int16_t, defaults::homing_sens_x, journal::hash("Homing Sens X")> homing_sens_x; // X axis homing sensitivity
     StoreItem<int16_t, defaults::homing_sens_y, journal::hash("Homing Sens Y")> homing_sens_y; // Y axis homing sensitivity
 
-    StoreItem<int8_t, 100, journal::hash("Brightness")> brightness; // Y axis homing sensitivity
+    StoreItem<uint8_t, 100, journal::hash("Display Brightness")> brightness;
 
     StoreItem<bool, true, journal::hash("Stuck filament detection V2")> stuck_filament_detection;
 
