@@ -7,6 +7,7 @@
 #include <option/has_side_leds.h>
 #include <option/has_chamber_filtration_api.h>
 #include <option/xl_enclosure_support.h>
+#include <option/has_emergency_stop.h>
 
 namespace config_store_ns {
 namespace deprecated_ids {
@@ -78,6 +79,11 @@ namespace deprecated_ids {
     };
 #endif
 
+#if HAS_EMERGENCY_STOP()
+    inline constexpr uint16_t emergency_stop_enable[] {
+        decltype(DeprecatedStore::emergency_stop_enable)::hashed_id,
+    };
+#endif
 } // namespace deprecated_ids
 
 namespace migrations {
@@ -108,6 +114,10 @@ namespace migrations {
     void xl_enclosure_old_api(journal::Backend &backend);
 #endif
 
+#if HAS_EMERGENCY_STOP()
+    void
+    emergency_stop(journal::Backend &backend);
+#endif
 } // namespace migrations
 
 /**
@@ -138,9 +148,13 @@ inline constexpr journal::Backend::MigrationFunction migration_functions[] {
 #endif
 #if HAS_HOTEND_TYPE_SUPPORT()
         { migrations::hotend_type, deprecated_ids::hotend_type_single_hotend },
+
 #endif
 #if HAS_CHAMBER_FILTRATION_API() && XL_ENCLOSURE_SUPPORT()
         { migrations::xl_enclosure_old_api, deprecated_ids::xl_enclosure_old_api_ids },
+#endif
+#if HAS_EMERGENCY_STOP()
+        { migrations::emergency_stop, deprecated_ids::emergency_stop_enable },
 #endif
 };
 

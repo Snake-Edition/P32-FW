@@ -631,7 +631,7 @@ struct CurrentStore
 #endif
 
 #if HAS_EMERGENCY_STOP()
-    StoreItem<bool, true, ItemFlag::features, journal::hash("Emergency stop enable")> emergency_stop_enable;
+    StoreItem<bool, false, ItemFlag::features, journal::hash("Emergency stop enable v2")> emergency_stop_enable;
 #endif
 
 #if HAS_ILI9488_DISPLAY()
@@ -791,6 +791,10 @@ struct DeprecatedStore
     StoreItem<int64_t, defaults::int64_zero, journal::hash("XL Enclosure Filter Timer")> xl_enclosure_filter_timer;
     StoreItem<uint8_t, defaults::uint8_percentage_80, journal::hash("XL Enclosure Fan Manual Setting")> xl_enclosure_fan_manual;
     StoreItem<uint8_t, 10, journal::hash("XL Enclosure Post Print Duration")> xl_enclosure_post_print_duration;
+#endif
+
+#if HAS_EMERGENCY_STOP()
+    StoreItem<bool, true, journal::hash("Emergency stop enable")> emergency_stop_enable;
 #endif
 };
 

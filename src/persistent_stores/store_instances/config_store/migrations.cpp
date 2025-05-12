@@ -320,5 +320,20 @@ namespace migrations {
     }
 #endif
 
+#if HAS_EMERGENCY_STOP()
+    void emergency_stop(journal::Backend &backend) {
+        using NewItem = decltype(CurrentStore::emergency_stop_enable);
+        using OldItem = decltype(DeprecatedStore::emergency_stop_enable);
+
+        OldItem::value_type saved_emergency_enable = NewItem::default_val;
+        auto callback = [&](journal::Backend::ItemHeader header, std::array<uint8_t, journal::Backend::MAX_ITEM_SIZE> &buffer) -> void {
+            if (header.id == OldItem::hashed_id) {
+                memcpy(&saved_emergency_enable, buffer.data(), header.len);
+            }
+        };
+        backend.read_items_for_migrations(callback);
+        backend.save_migration_item<NewItem::value_type>(NewItem::hashed_id, saved_emergency_enable);
+    }
+#endif
 } // namespace migrations
 } // namespace config_store_ns
