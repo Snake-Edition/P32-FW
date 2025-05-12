@@ -71,7 +71,6 @@
 #include <feature/cork/tracker.hpp>
 
 #include <math.h>
-#include "libs/nozzle.h"
 
 #include "gcode/gcode.h"
 #include "gcode/parser.h"

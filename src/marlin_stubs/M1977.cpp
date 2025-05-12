@@ -1,6 +1,6 @@
-#include "libs/nozzle.h"
 #include <marlin_stubs/M1977.hpp>
 
+#include <mapi/parking.hpp>
 #include <buddy/unreachable.hpp>
 #include <client_response.hpp>
 #include <common/fsm_base_types.hpp>
@@ -251,7 +251,7 @@ namespace state {
         Planner::synchronize();
 
 #if PRINTER_IS_PRUSA_iX()
-        nozzle.move_out_of_nozzle_cleaner_area();
+        mapi::move_out_of_nozzle_cleaner_area();
 #endif
 
 #if HAS_ATTACHABLE_ACCELEROMETER()

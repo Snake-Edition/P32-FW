@@ -143,7 +143,6 @@ if(BOARD_IS_MASTER_BOARD)
             Marlin/Marlin/src/libs/crc16.cpp
             Marlin/Marlin/src/libs/hex_print_routines.cpp
             Marlin/Marlin/src/libs/least_squares_fit.cpp
-            Marlin/Marlin/src/libs/nozzle.cpp
             Marlin/Marlin/src/libs/numtostr.cpp
             Marlin/Marlin/src/libs/vector_3.cpp
             Marlin/Marlin/src/module/delta.cpp

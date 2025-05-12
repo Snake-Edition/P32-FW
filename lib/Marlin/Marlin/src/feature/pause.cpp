@@ -56,7 +56,6 @@
   #include "../libs/buzzer.h"
 #endif
 
-#include "../libs/nozzle.h"
 #include "pause.h"
 
 #include <feature/print_status_message/print_status_message_mgr.hpp>

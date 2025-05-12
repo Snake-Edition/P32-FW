@@ -4,6 +4,7 @@
 #include <utils/enum_array.hpp>
 #include <variant>
 
+#include <option/has_nozzle_cleaner.h>
 #include <option/has_wastebin.h>
 #include <buddy/unreachable.hpp>
 
@@ -81,6 +82,12 @@ static constexpr EnumArray<ParkPosition, ParkingPosition, ParkPosition::_cnt> pa
         { ParkPosition::load, ParkingPosition { X_AXIS_LOAD_POS, Y_AXIS_LOAD_POS, Z_AXIS_LOAD_POS } },
 };
 
+#if HAS_NOZZLE_CLEANER()
+void move_out_of_nozzle_cleaner_area();
+#endif
+
 void park_move_with_conditional_home(const ParkingPosition &park_position, ZAction z_action);
+
+void park(const uint8_t z_action, const xyz_pos_t &park = { { XYZ_NOZZLE_PARK_POINT } });
 
 } // namespace mapi

@@ -29,7 +29,6 @@
     #include <gcode_loader.hpp>
 #endif
 
-#include "Marlin/src/libs/nozzle.h"
 #include "Marlin/src/feature/pause.h"
 #include "filament_sensors_handler.hpp"
 #include "safety_timer_stubbed.hpp"

@@ -25,7 +25,6 @@
 #include "G27.hpp"
 
 #include <Marlin/src/gcode/gcode.h>
-#include <Marlin/src/libs/nozzle.h>
 #include <Marlin/src/module/motion.h>
 #include <common/gcode/gcode_parser.hpp>
 #include <common/filament_sensors_handler.hpp>

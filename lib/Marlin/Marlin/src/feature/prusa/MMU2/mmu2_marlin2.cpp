@@ -3,11 +3,11 @@
 #include "mmu2_marlin.h"
 
 #include "mapi/motion.hpp"
+#include "mapi/parking.hpp"
 
 #include "../../inc/MarlinConfig.h"
 #include "../../gcode/gcode.h"
 #include "../../libs/buzzer.h"
-#include "../../libs/nozzle.h"
 #include "../../module/temperature.h"
 #include "../../module/planner.h"
 #include "../../module/stepper/indirection.h"
@@ -124,7 +124,7 @@ void motion_do_blocking_move_to_z(float z, float feedRate_mm_s) {
 
 void nozzle_park() {
     static constexpr xyz_pos_t park_point = { { XYZ_NOZZLE_PARK_POINT_M600 } };
-    nozzle.park(2, park_point);
+    mapi::park(2, park_point);
 }
 
 bool marlin_printingIsActive() {
