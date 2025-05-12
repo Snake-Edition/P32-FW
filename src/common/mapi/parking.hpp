@@ -41,7 +41,7 @@ struct ParkingPosition {
     struct Unchanged {
         constexpr auto operator<=>(const Unchanged &) const = default;
     };
-    using Variant = std::variant<float, Unchanged>;
+    using Variant = std::variant<Unchanged, float>;
 
     static constexpr Variant unchanged = Unchanged {};
     Variant x, y, z;
