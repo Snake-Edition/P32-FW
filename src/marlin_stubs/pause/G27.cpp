@@ -22,8 +22,6 @@
 
 #include "config_features.h"
 
-#include "G27.hpp"
-
 #include <Marlin/src/gcode/gcode.h>
 #include <Marlin/src/module/motion.h>
 #include <common/gcode/gcode_parser.hpp>
@@ -61,39 +59,40 @@ void GcodeSuite::G27() {
         return;
     }
 
-    G27Params params;
-    parser.store_option('P', params.z_action, mapi::ZAction::_cnt);
-    parser.store_option('W', params.where_to_park, mapi::ParkPosition::_cnt);
+    mapi::ParkPosition where_to_park { mapi::ParkPosition::park };
+    xyz_pos_t park_position { NAN, NAN, NAN };
 
-    parser.store_option('X', params.park_position.x);
-    parser.store_option('Y', params.park_position.y);
-    parser.store_option('Z', params.park_position.z);
+    /// Defines how freely will Z move. For documentation see nozzle.cpp::park() or G27 marlin documentation for P parameter;
+    mapi::ZAction z_action { mapi::ZAction::move_to_at_least };
 
-    G27_no_parser(params);
-}
+    parser.store_option('P', z_action, mapi::ZAction::_cnt);
+    parser.store_option('W', where_to_park, mapi::ParkPosition::_cnt);
 
-void G27_no_parser(const G27Params &params) {
-    mapi::ParkingPosition park_position { mapi::park_positions[params.where_to_park] };
+    parser.store_option('X', park_position.x);
+    parser.store_option('Y', park_position.y);
+    parser.store_option('Z', park_position.z);
+
+    mapi::ParkingPosition parking_position { mapi::park_positions[where_to_park] };
     xyz_bool_t do_axis = { { { true, true, true } } };
 
     // If any park position was given, move only specified axes
-    if (!(isnan(params.park_position.x) && isnan(params.park_position.y) && isnan(params.park_position.z))) {
+    if (!(isnan(park_position.x) && isnan(park_position.y) && isnan(park_position.z))) {
         for (uint8_t i = 0; i < 3; i++) {
-            do_axis[i] = !isnan(params.park_position.pos[i]);
-            park_position[i] = do_axis.pos[i] ? params.park_position.pos[i] : current_position.pos[i];
+            do_axis[i] = !isnan(park_position.pos[i]);
+            parking_position[i] = do_axis.pos[i] ? park_position.pos[i] : current_position.pos[i];
         }
     }
 
     // If not homed and only Z clearance is requested, od just that, otherwise home and then park.
     if (axes_need_homing(X_AXIS | Y_AXIS | Z_AXIS)) {
-        if (do_axis == xyz_bool_t { { { false, false, true } } } && params.z_action == mapi::ZAction::move_to_at_least) {
+        if (do_axis == xyz_bool_t { { { false, false, true } } } && z_action == mapi::ZAction::move_to_at_least) {
             // Only Z axis is given in P=0 mode, do Z clearance
-            do_z_clearance(std::get<float>(park_position.z));
+            do_z_clearance(std::get<float>(parking_position.z));
             return;
         }
     }
 
-    mapi::park_move_with_conditional_home(park_position, params.z_action);
+    mapi::park_move_with_conditional_home(parking_position, z_action);
 }
 
 /** @}*/

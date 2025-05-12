@@ -23,7 +23,6 @@
 #include <config_store/store_instance.hpp>
 #include <filament_to_load.hpp>
 #include <Marlin/src/gcode/gcode.h>
-#include <marlin_stubs/pause/G27.hpp>
 #include <mapi/parking.hpp>
 
 #include <option/has_bowden.h>
