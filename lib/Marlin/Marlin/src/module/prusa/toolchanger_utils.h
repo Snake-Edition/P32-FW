@@ -41,7 +41,7 @@ public:
     static constexpr auto PICK_X_OFFSET_1 = -11.8f; ///< Offset from dock_x when tool is being locked [mm]
     static constexpr auto PICK_X_OFFSET_2 = -12.8f; ///< Offset from dock_x when tool is fully locked [mm]
     static constexpr auto PICK_X_OFFSET_3 = -9.9f; ///< Offset from dock_x when tool can be pulled from the dock area [mm]
-    static constexpr auto X_UNLOCK_DISTANCE_MM = PARK_X_OFFSET_1; ///< Unlock move length while dock calibrating [mm]
+    static constexpr auto X_UNLOCK_DISTANCE_MM = PICK_X_OFFSET_3; ///< Unlock move length while dock calibrating [mm]
 
     /// Feedrate for moves around dock
     static float limit_stealth_feedrate(float feedrate);
