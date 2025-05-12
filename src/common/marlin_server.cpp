@@ -2853,7 +2853,7 @@ void retract() {
 void lift_head() {
     const float distance = std::min<float>(
                                std::max<float>({
-                                   Z_NOZZLE_PARK_POINT + current_position.z,
+                                   Z_NOZZLE_PARK_RISE + current_position.z,
 #ifdef Z_NOZZLE_PARK_POINT_MIN
                                    Z_NOZZLE_PARK_POINT_MIN,
 #endif
