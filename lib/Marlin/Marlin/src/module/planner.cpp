@@ -970,6 +970,17 @@ void Planner::quick_stop() {
   delay_before_delivering = 0;
 }
 
+void Planner::quick_stop_and_resume() {
+  if(draining()) return;
+
+  quick_stop();
+  while (PreciseStepping::stopping()) {
+    PreciseStepping::loop();
+  }
+  clear_block_buffer();
+  resume_queuing();
+}
+
 void Planner::resume_queuing() {
   if (PreciseStepping::stopping()) {
     // If stop_pending hasn't been processed yet, do so now before new moves are processed

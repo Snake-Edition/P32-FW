@@ -782,6 +782,10 @@ class Planner {
     // Will implicitly call drain().
     static void quick_stop();
 
+    // Called to force a quick stop of the machine and wait for it to finish
+    // Will wait for the buffers to empty and then resume queuing
+    static void quick_stop_and_resume();
+
     // Return the draining status
     static bool draining() { return draining_buffer; }
 

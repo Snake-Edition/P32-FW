@@ -50,12 +50,7 @@ void EmergencyStop::invoke_emergency() {
     const bool in_quickstoppable_state = marlin_server::printer_idle() || marlin_server::aborting_or_aborted() || marlin_server::finishing_or_finished();
     if (in_quickstoppable_state || !marlin_server::all_axes_homed()) {
         log_info(EmergencyStop, "Quickstop");
-        planner.quick_stop();
-        while (PreciseStepping::stopping()) {
-            PreciseStepping::loop();
-        }
-        planner.clear_block_buffer();
-        planner.resume_queuing();
+        planner.quick_stop_and_resume();
         // We've lost the homing by the quick-stop
         //
         // In case we are in print, we are here because we are still homing /
