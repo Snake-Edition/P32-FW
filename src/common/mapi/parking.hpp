@@ -88,6 +88,6 @@ void move_out_of_nozzle_cleaner_area();
 
 void park_move_with_conditional_home(const ParkingPosition &park_position, ZAction z_action);
 
-void park(const uint8_t z_action, const xyz_pos_t &park = { { XYZ_NOZZLE_PARK_POINT } });
+void park(ZAction z_action, const xyz_pos_t &park = { { XYZ_NOZZLE_PARK_POINT } });
 
 } // namespace mapi
