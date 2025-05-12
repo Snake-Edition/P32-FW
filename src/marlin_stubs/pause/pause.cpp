@@ -653,6 +653,7 @@ void Pause::purge_process([[maybe_unused]] Response response) {
     // Extrude filament to get into hotend
     setPhase(is_unstoppable() ? PhasesLoadUnload::Purging_unstoppable : PhasesLoadUnload::Purging_stoppable, 70);
 
+    planner.synchronize(); // Finish any pending moves before starting the purge
     const auto purge_result = do_e_move_notify_progress_hotextrude(settings.purge_length(), ADVANCED_PAUSE_PURGE_FEEDRATE, 70, 98, StopConditions::All);
     if (purge_result == StopConditions::SideFilamentSensorRunout) {
         runout_during_load();
@@ -661,6 +662,9 @@ void Pause::purge_process([[maybe_unused]] Response response) {
     // Skip retraction on UserStopped or Failed
     if (purge_result != StopConditions::UserStopped && purge_result != StopConditions::Failed) {
         std::ignore = do_e_move_notify_progress_hotextrude(retract_distance, retract_feedrate, 98, 99, StopConditions::UserStopped);
+    } else {
+        // If the user stopped the purge, we need to stop the extruder move
+        planner.quick_stop_and_resume();
     }
 
     config_store().set_filament_type(settings.GetExtruder(), filament::get_type_to_load());
