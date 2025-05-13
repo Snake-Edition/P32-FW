@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <atomic>
+#include <cassert>
 
 /**
  * @brief   SPSC (Single Producer Single Consumer) Atomic Circular Queue class
