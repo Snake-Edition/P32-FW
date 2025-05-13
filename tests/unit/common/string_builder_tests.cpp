@@ -2,6 +2,8 @@
 
 #include <utils/string_builder.hpp>
 
+using Catch::Matchers::Equals;
+
 TEST_CASE("StringBuilder", "[strbuilder]") {
     SECTION("empty init") {
         ArrayStringBuilder<64> b;
