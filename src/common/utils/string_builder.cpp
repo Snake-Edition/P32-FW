@@ -16,11 +16,13 @@ void StringBuilder::init(char *buffer, size_t buffer_size) {
 }
 
 const char *StringBuilder::str() const {
-    if (is_ok()) {
-        return str_nocheck();
-    } else {
+#ifdef _DEBUG
+    if (is_problem()) {
         bsod("StringBuilder overflow");
     }
+#endif
+
+    return str_nocheck();
 }
 
 StringBuilder &StringBuilder::append_char(char ch) {
