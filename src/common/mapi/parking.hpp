@@ -71,6 +71,8 @@ struct ParkingPosition {
             BUDDY_UNREACHABLE();
         }
     }
+
+    bool operator==(const ParkingPosition &) const = default;
 };
 
 static constexpr EnumArray<ParkPosition, ParkingPosition, ParkPosition::_cnt> park_positions {
@@ -90,6 +92,6 @@ void move_out_of_nozzle_cleaner_area();
 
 void park_move_with_conditional_home(const ParkingPosition &park_position, ZAction z_action);
 
-void park(ZAction z_action, const xyz_pos_t &park = { { XYZ_NOZZLE_PARK_POINT } });
+void park(ZAction z_action, const ParkingPosition &park = park_positions[ParkPosition::park]);
 
 } // namespace mapi
