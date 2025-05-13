@@ -1777,6 +1777,32 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
   }
 #endif // HOTENDS
 #if HAS_HEATED_BED
+
+#if PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_MK4() || PRINTER_IS_PRUSA_COREONE()
+constexpr float compensate_bed_temperature(float celsius) {
+  float _offset = 10;
+  float _offset_center = 50;
+  float _offset_start = 40;
+  float _first_koef = (_offset / 2) / (_offset_center - _offset_start);
+  float _second_koef = (_offset / 2) / (100 - _offset_center);
+
+  if (celsius >= _offset_start && celsius <= _offset_center) {
+      celsius = celsius + (_first_koef * (celsius - _offset_start));
+  } else if (celsius > _offset_center && celsius <= 100) {
+      celsius = celsius + (_first_koef * (_offset_center - _offset_start)) + ( _second_koef * ( celsius - ( 100 - _offset_center ) )) ;
+  } else if (celsius > 100) {
+      celsius = celsius + _offset;
+  }
+  return celsius;
+}
+#elif PRINTER_IS_PRUSA_MINI() || PRINTER_IS_PRUSA_XL() || PRINTER_IS_PRUSA_iX() || PRINTER_IS_PRUSA_XL_DEV_KIT()
+constexpr float compensate_bed_temperature(float celsius) {
+  return celsius;
+}
+#else
+#error
+#endif
+
   float scan_thermistor_table_bed(const int raw){
       SCAN_THERMISTOR_TABLE(BED_TEMPTABLE,BED_TEMPTABLE_LEN);
   }
@@ -1785,26 +1811,7 @@ void Temperature::suspend_heatbreak_fan(millis_t ms) {
   float Temperature::analog_to_celsius_bed(const int raw) {
     #if ENABLED(HEATER_BED_USES_THERMISTOR)
       float celsius = scan_thermistor_table_bed(raw);
-      #ifdef BED_OFFSET
-        float _offset = BED_OFFSET;
-        float _offset_center = BED_OFFSET_CENTER;
-        float _offset_start = BED_OFFSET_START;
-        float _first_koef = (_offset / 2) / (_offset_center - _offset_start);
-        float _second_koef = (_offset / 2) / (100 - _offset_center);
-
-        if (celsius >= _offset_start && celsius <= _offset_center)
-        {
-            celsius = celsius + (_first_koef * (celsius - _offset_start));
-        }
-        else if (celsius > _offset_center && celsius <= 100)
-        {
-            celsius = celsius + (_first_koef * (_offset_center - _offset_start)) + ( _second_koef * ( celsius - ( 100 - _offset_center ) )) ;
-        }
-        else if (celsius > 100)
-        {
-            celsius = celsius + _offset;
-        }
-      #endif
+      celsius = compensate_bed_temperature(celsius);
       return celsius;
     #elif HAS_MODULARBED()
       return raw
