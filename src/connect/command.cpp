@@ -403,7 +403,7 @@ Command Command::parse_json_command(CommandId id, char *body, size_t body_size, 
         } else if (is_arg("id", Type::Primitive)) {
             INT_ARG(CancelObject, uint16_t, id, ArgId)
             INT_ARG(UncancelObject, uint16_t, id, ArgId)
-#if PRINTER_IS_PRUSA_COREONE() || defined(UNITTESTS)
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
         } else if (is_arg("chamber.target_temp", Type::Primitive)) {
             SET_VALUE_ARG(PropertyName::ChamberTargetTemp, uint32_t);
         } else if (is_arg("chamber.fan_pwm_target", Type::Primitive)) {

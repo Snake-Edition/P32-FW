@@ -26,6 +26,7 @@
 #endif
 
 #include <option/has_cancel_object.h>
+#include <option/xbuddy_extension_variant_standard.h>
 
 namespace connect_client {
 
@@ -79,7 +80,7 @@ public:
     };
 #endif
 
-#if PRINTER_IS_PRUSA_COREONE() || defined(UNITTESTS)
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     struct ChamberInfo {
         static constexpr int target_temp_unset = 0U; // agreed with the Connect team, that 0 maps to unset values
         uint32_t target_temp = target_temp_unset;
@@ -113,7 +114,7 @@ public:
 #if XL_ENCLOSURE_SUPPORT()
         EnclosureInfo enclosure_info;
 #endif
-#if PRINTER_IS_PRUSA_COREONE() || defined(UNITTESTS)
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
         ChamberInfo chamber_info;
         bool addon_power;
 #endif

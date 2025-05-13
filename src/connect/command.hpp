@@ -4,6 +4,7 @@
 
 #include <common/shared_buffer.hpp>
 #include <option/has_side_leds.h>
+#include <option/xbuddy_extension_variant_standard.h>
 
 #include <cstdint>
 #include <string_view>
@@ -108,7 +109,7 @@ enum class PropertyName {
     NozzleDiameter,
     NozzleHighFlow,
     NozzleHardened,
-#if PRINTER_IS_PRUSA_COREONE() || defined(UNITTESTS)
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     // Note: for now we only want to support the chamber features on Core One.
     // Therefore option HAS_CHAMBER_API is NOT used yet.
     ChamberTargetTemp,

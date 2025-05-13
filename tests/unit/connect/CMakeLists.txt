@@ -89,6 +89,7 @@ add_executable(
 target_include_directories(
   connect_tests
   PRIVATE .
+          include
           ${CMAKE_CURRENT_SOURCE_DIR}/mock
           ${CMAKE_CURRENT_BINARY_DIR}
           ${CMAKE_SOURCE_DIR}/tests/stubs # must be before ${CMAKE_SOURCE_DIR}/include
@@ -206,6 +207,7 @@ add_executable(
 target_include_directories(
   connect_planner_tests
   PRIVATE .
+          include
           ${CMAKE_CURRENT_SOURCE_DIR}/mock
           ${CMAKE_CURRENT_BINARY_DIR}
           ${CMAKE_SOURCE_DIR}/tests/stubs # must be before ${CMAKE_SOURCE_DIR}/include
@@ -298,6 +300,7 @@ add_executable(
 target_include_directories(
   connect_registration_tests
   PRIVATE .
+          include
           ${CMAKE_CURRENT_SOURCE_DIR}/mock
           ${CMAKE_CURRENT_BINARY_DIR}
           ${CMAKE_SOURCE_DIR}/tests/stubs
