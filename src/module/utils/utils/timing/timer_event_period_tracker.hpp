@@ -13,22 +13,21 @@ public:
     static constexpr uint32_t invalid_period = uint32_t(-1);
 
 public:
+    /// Handle capture and/or timer overflow events.
+    /// When using interrupts, it might not always be clear which event happened sooner, so this function has logic to cover that.
+    void handle_multi_event(uint16_t timer_value, bool was_capture, bool was_overflow);
+
     /// Record an event. Typically called from the timer IRQ
     /// \param timer_value value of the timer at the time of the event
+    /// !!! We recommend using handle_multi_event
     inline void handle_event(uint16_t timer_value) {
-        previous_event_timer_val_ = last_event_timer_val_;
-        last_event_timer_val_ = timer_value;
-
-        timer_overflows_between_last_and_previous_event_ = timer_overflows_since_last_event_;
-        timer_overflows_since_last_event_ = 0;
+        handle_multi_event(timer_value, true, false);
     }
 
     /// Process timer overflow. Typically called from the timer overflow IRQ
+    /// !!! We recommend using handle_multi_event
     inline void handle_timer_overflow() {
-        // Prevent overflowing the generation difference counter
-        if (timer_overflows_since_last_event_ != max_timer_overflows) {
-            timer_overflows_since_last_event_++;
-        }
+        handle_multi_event(0, false, true);
     }
 
     /// \returns period between the last two recorded events (in timer ticks), or \p invalid_period if there is not enough data
