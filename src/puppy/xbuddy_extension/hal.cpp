@@ -428,31 +428,56 @@ TimerEventPeriodTracker tim1_cc1;
 TimerEventPeriodTracker tim1_cc2;
 TimerEventPeriodTracker tim1_cc3;
 
-extern "C" void TIM1_UP_IRQHandler() {
-    const uint32_t SR = TIM1->SR;
-    TIM1->SR = SR & ~(TIM_SR_UIF);
-    if (SR & TIM_SR_UIF) {
-        tim1_cc1.handle_timer_overflow();
-        tim1_cc2.handle_timer_overflow();
-        tim1_cc3.handle_timer_overflow();
+// Shared IRQ handler for TIM1 capture and overflow
+void TIM1_IRQHandler() {
+    uint32_t events = 0;
+    uint32_t CCR1 = 0;
+    uint32_t CCR2 = 0;
+    uint32_t CCR3 = 0;
+
+    // Rinse and repeat if there were new events during data capture
+    // If overflow happened during reading out the CCR registers, we need to report it correctly as a simultaneous event to the PeriodTracker
+    while (true) {
+        const auto prev_events = events;
+        events |= TIM1->SR & (TIM_SR_CC1IF | TIM_SR_CC2IF | TIM_SR_CC3IF | TIM_SR_UIF);
+        if (events == prev_events) {
+            break;
+        }
+
+        // Read out the CCR registers AFTER we've read whether there was an capture (so after we are sure that they contain valid data)
+        // Reading out CCRx registers clears the CCxIF flags, so we need to only read them if we are going to handle them to prevent losing the IF flags
+        if (events & TIM_SR_CC1IF) {
+            CCR1 = TIM1->CCR1;
+        }
+
+        if (events & TIM_SR_CC2IF) {
+            CCR2 = TIM1->CCR2;
+        }
+
+        if (events & TIM_SR_CC3IF) {
+            CCR3 = TIM1->CCR3;
+        }
     }
+
+    // Clear out the flags in the SR that we know we will be handling
+    // The SR registers are rc_w0, meaning writing 1 has no effect and writing 0 clears the register
+    // This is the right and safe way to only clear the flags that we want
+    TIM1->SR = ~events;
+
+    // TODO: we could possibly implement CCxOF detection that would indicate that we have missed processing a capture (edge)
+
+    const bool was_overflow = (events & TIM_SR_UIF);
+    tim1_cc1.handle_multi_event(CCR1, events & TIM_SR_CC1IF, was_overflow);
+    tim1_cc2.handle_multi_event(CCR2, events & TIM_SR_CC2IF, was_overflow);
+    tim1_cc3.handle_multi_event(CCR3, events & TIM_SR_CC3IF, was_overflow);
+}
+
+extern "C" void TIM1_UP_IRQHandler() {
+    TIM1_IRQHandler();
 }
 
 extern "C" void TIM1_CC_IRQHandler() {
-    const uint32_t SR = TIM1->SR;
-    TIM1->SR = SR & ~(TIM_SR_CC1IF | TIM_SR_CC2IF | TIM_SR_CC3IF);
-
-    // Called when there is an edge detected on the input pins -> those are our events that we are tracking
-    // CCRx then holds timer value at the time of the event
-    if (SR & TIM_SR_CC1IF) {
-        tim1_cc1.handle_event(TIM1->CCR1);
-    }
-    if (SR & TIM_SR_CC2IF) {
-        tim1_cc2.handle_event(TIM1->CCR2);
-    }
-    if (SR & TIM_SR_CC3IF) {
-        tim1_cc3.handle_event(TIM1->CCR3);
-    }
+    TIM1_IRQHandler();
 }
 
 I2C_HandleTypeDef hi2c;
