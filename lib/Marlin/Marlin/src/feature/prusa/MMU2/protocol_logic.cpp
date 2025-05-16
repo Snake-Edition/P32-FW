@@ -41,6 +41,7 @@ const Register ProtocolLogic::regs8Addrs[ProtocolLogic::regs8Count] PROGMEM = {
 const Register ProtocolLogic::regs16Addrs[ProtocolLogic::regs16Count] PROGMEM = {
     Register::MMU_Errors, // MMU errors - aka statistics
     Register::Get_Pulley_Position, // Pulley position [mm]
+    Register::Bowden_Length, // @@TODO ideally read this only once at start
 };
 
 const Register ProtocolLogic::initRegs8Addrs[ProtocolLogic::initRegs8Count] PROGMEM = {

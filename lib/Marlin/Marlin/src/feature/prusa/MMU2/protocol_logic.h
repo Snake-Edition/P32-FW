@@ -197,6 +197,10 @@ public:
         return mmuFwVersion[2];
     }
 
+    inline uint16_t BowdenLength() const {
+        return regs16[2];
+    }
+
     /// Current number of retry attempts left
     constexpr uint8_t RetryAttempts() const { return retryAttempts; }
 
@@ -412,10 +416,10 @@ private:
     uint8_t regs8[regs8Count] = { 0, 0, 0 };
 
     // 16bit registers
-    static constexpr uint8_t regs16Count = 2;
+    static constexpr uint8_t regs16Count = 3;
     static_assert(regs16Count > 0); // code is not ready for empty lists of registers
     static const Register regs16Addrs[regs16Count] PROGMEM;
-    uint16_t regs16[regs16Count] = { 0, 0 };
+    uint16_t regs16[regs16Count] = { 0, 0, 360 };
 
     // 8bit init values to be sent to the MMU after line up
     static constexpr uint8_t initRegs8Count = 2;

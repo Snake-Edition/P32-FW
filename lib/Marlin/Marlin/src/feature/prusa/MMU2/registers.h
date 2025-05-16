@@ -39,6 +39,7 @@ enum class Register : uint8_t {
     Set_Get_Selector_iRun = 0x1F,
     Set_Get_Idler_iRun = 0x20,
     Reserved = 0x21,
+    Bowden_Length = 0x22,
 };
 
 } // namespace MMU2

@@ -16,6 +16,7 @@
 #include <option/has_toolchanger.h>
 #include <option/has_side_fsensor.h>
 #include <option/has_modular_bed.h>
+#include <option/has_mmu2.h>
 #include <common/extended_printer_type.hpp>
 #include "MItem_basic_selftest.hpp"
 #include "printers.h"
@@ -66,6 +67,13 @@ using ScreenMenuHardware__ = ScreenMenu<GuiDefaults::MenuFooter,
 #endif
 #if HAS_SHEET_PROFILES()
     MI_STEEL_SHEETS,
+#endif
+
+// ================================
+// MMU related
+// ================================
+#if HAS_MMU2()
+    MI_HW_MMU,
 #endif
 
     // ================================

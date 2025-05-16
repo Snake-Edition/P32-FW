@@ -260,6 +260,8 @@ public:
         printerButtonOperation = Buttons::NoButton;
     }
 
+    inline uint16_t BowdenLength() const { return logic.BowdenLength(); }
+
     CommandInProgressManager commandInProgressManager;
 
 #ifndef UNITTEST

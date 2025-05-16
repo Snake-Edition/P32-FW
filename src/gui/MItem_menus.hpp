@@ -11,6 +11,7 @@
 #include <option/developer_mode.h>
 #include <option/has_translations.h>
 #include <option/has_chamber_filtration_api.h>
+#include <option/has_mmu2.h>
 #include <img_resources.hpp>
 #include <ScreenFactory.hpp>
 
@@ -199,4 +200,13 @@ public:
 
 #if HAS_CHAMBER_FILTRATION_API()
 using MI_CHAMBER_FILTRATION = MI_SCREEN<N_("Chamber Filtration"), class ScreenChamberFiltration>;
+#endif
+
+#if HAS_MMU2()
+/// MMU HW settings submenu
+class MI_HW_MMU final : public IWindowMenuItem {
+public:
+    MI_HW_MMU();
+    void click(IWindowMenu &) override;
+};
 #endif

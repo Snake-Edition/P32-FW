@@ -10,3 +10,7 @@ endif()
 if(HAS_CANCEL_OBJECT)
   target_sources(firmware PRIVATE screen_cancel_objects.cpp)
 endif()
+
+if(HAS_MMU2)
+  target_sources(firmware PRIVATE screen_hw_mmu.cpp)
+endif()
