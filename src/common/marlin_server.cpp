@@ -633,6 +633,11 @@ void init(void) {
     marlin_server::enqueue_gcode_printf("M906 X%i Y%i Z%i E%i", cx, cy, cz, ce);
     // Set max feedrate
     marlin_server::enqueue_gcode_printf("M203 X%d Y%d", config_store().x_max_feedrate.get(), config_store().y_max_feedrate.get());
+    // Set StealthChop
+    marlin_server::enqueue_gcode_printf("M569 X S%i", (int)config_store().stealth_chop_x.get());
+    marlin_server::enqueue_gcode_printf("M569 Y S%i", (int)config_store().stealth_chop_y.get());
+    marlin_server::enqueue_gcode_printf("M569 Z S%i", (int)config_store().stealth_chop_z.get());
+    marlin_server::enqueue_gcode_printf("M569 E S%i", (int)config_store().stealth_chop_e.get());
 }
 
 void print_fan_spd() {

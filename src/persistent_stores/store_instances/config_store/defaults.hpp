@@ -342,6 +342,30 @@ namespace defaults {
 #endif
     };
 
+    inline constexpr int16_t stealth_chop_x {
+
+#ifdef MINI_I3_MK33
+        false
+#elif MINI_COREXY
+        false
+#else
+        true
+#endif
+    };
+
+    inline constexpr int16_t stealth_chop_y {
+        stealth_chop_x
+    };
+
+    inline constexpr int16_t stealth_chop_z {
+
+        true
+    };
+
+    inline constexpr int16_t stealth_chop_e {
+        false
+    };
+
     inline constexpr HotendType hotend_type {
 #if PRINTER_IS_PRUSA_iX() || PRINTER_IS_PRUSA_COREONE()
         HotendType::stock_with_sock

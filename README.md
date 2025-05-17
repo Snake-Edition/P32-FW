@@ -42,6 +42,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
     1. steps/mm
     1. direction
     1. current
+    1. stealth / strong mode (StealthChop / SpreadCycle)
     1. max. feedrate (for X and Y only)
 23. **Adjustable filament load length**: Different extruders need different load length.
 24. **Adjustable homing sensitivity**: X and Y homing sensitivity can be changed in menu and saved.
