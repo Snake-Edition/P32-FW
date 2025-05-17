@@ -461,6 +461,48 @@ protected:
 
 /* -===============================================(:>- */
 
+class MI_X_STEALTH : public WI_ICON_SWITCH_OFF_ON_t {
+    constexpr static const char *const label = N_("X Strong mode");
+
+public:
+    MI_X_STEALTH();
+
+protected:
+    virtual void OnChange(size_t old_index) override;
+};
+
+class MI_Y_STEALTH : public WI_ICON_SWITCH_OFF_ON_t {
+    constexpr static const char *const label = N_("Y Strong mode");
+
+public:
+    MI_Y_STEALTH();
+
+protected:
+    virtual void OnChange(size_t old_index) override;
+};
+
+class MI_Z_STEALTH : public WI_ICON_SWITCH_OFF_ON_t {
+    constexpr static const char *const label = N_("Z Strong mode");
+
+public:
+    MI_Z_STEALTH();
+
+protected:
+    virtual void OnChange(size_t old_index) override;
+};
+
+class MI_E_STEALTH : public WI_ICON_SWITCH_OFF_ON_t {
+    constexpr static const char *const label = N_("E Strong mode");
+
+public:
+    MI_E_STEALTH();
+
+protected:
+    virtual void OnChange(size_t old_index) override;
+};
+
+/* -===============================================(:>- */
+
 class MI_X_MAX_FEEDRATE : public WiSpin {
     constexpr static const char *const label = N_("X Max Feedrate");
 

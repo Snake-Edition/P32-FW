@@ -708,6 +708,39 @@ void MI_Y_SENSITIVITY_RESET::click(IWindowMenu & /*window_menu*/) {
 
 /* -===============================================(:>- */
 
+MI_X_STEALTH::MI_X_STEALTH()
+    : WI_ICON_SWITCH_OFF_ON_t(stealth_chop_x ? 0 : 1, _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
+
+void MI_X_STEALTH::OnChange(size_t /*old_index*/) {
+    stealth_chop_x = !index;
+    marlin_server::enqueue_gcode_printf("M569 X%s", stealth_chop_x ? "S1" : "S0");
+}
+
+MI_Y_STEALTH::MI_Y_STEALTH()
+    : WI_ICON_SWITCH_OFF_ON_t(stealth_chop_y ? 0 : 1, _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
+
+void MI_Y_STEALTH::OnChange(size_t /*old_index*/) {
+    stealth_chop_y = !index;
+    marlin_server::enqueue_gcode_printf("M569 Y%s", stealth_chop_y ? "S1" : "S0");
+}
+
+MI_Z_STEALTH::MI_Z_STEALTH()
+    : WI_ICON_SWITCH_OFF_ON_t(stealth_chop_z ? 0 : 1, _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
+
+void MI_Z_STEALTH::OnChange(size_t /*old_index*/) {
+    stealth_chop_z = !index;
+    marlin_server::enqueue_gcode_printf("M569 Z%s", stealth_chop_z ? "S1" : "S0");
+}
+
+MI_E_STEALTH::MI_E_STEALTH()
+    : WI_ICON_SWITCH_OFF_ON_t(stealth_chop_e ? 0 : 1, _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
+
+void MI_E_STEALTH::OnChange(size_t /*old_index*/) {
+    stealth_chop_e = !index;
+    marlin_server::enqueue_gcode_printf("M569 E%s", stealth_chop_e ? "S1" : "S0");
+}
+/* -===============================================(:>- */
+
 static constexpr NumericInputConfig max_feedrate_spin_config = {
     .min_value = 1,
     .max_value = 999,
