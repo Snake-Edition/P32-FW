@@ -194,9 +194,7 @@ void continue_snake() {
         return; // Stop when submenu is finished
     }
 
-    if (!snake_config.auto_continue
-        && (snake_config.last_action != get_first_action() || get_test_result(get_next_action(get_first_action()), Tool::_all_tools) == TestResult_Passed)) {
-
+    if (!snake_config.auto_continue) {
         Response resp = Response::Stop;
         if (is_multitool() && has_submenu(snake_config.last_action) && snake_config.last_tool != get_last_enabled_tool()) {
             resp = MsgBoxQuestion(_("FINISH remaining calibrations without proceeding to other tests, or perform ALL Calibrations and Tests?\n\nIf you QUIT, all data up to this point is saved."), { Response::Finish, Response::All, Response::Quit }, 2);
@@ -400,6 +398,7 @@ void ScreenMenuSTSWizard::windowEvent(window_t *sender, GUI_event_t event, void 
         MsgBoxInfo(_("Before you continue, make sure the print sheet is installed on the heatbed."), Responses_Ok);
 
         do_snake(get_first_action());
+        snake_config.auto_continue = true;
         return;
     }
 
