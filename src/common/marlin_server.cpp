@@ -980,8 +980,9 @@ static void idle(void) {
     AutoRestore _ar(idle_running, true);
 
 #if HAS_EMERGENCY_STOP()
-    // During printing, possibly block anytime
-    if (is_printing_state(server.print_state)) {
+    // During printing, possibly block anytime, with exception of Load Unload sequence
+    // In case there would be planned unsafe moves, there is another buddy::emergency_stop().maybe_block() directly in planner
+    if (is_printing_state(server.print_state) && !fsm_states.is_active(ClientFSM::Load_unload)) {
         buddy::emergency_stop().maybe_block();
     }
 #endif
