@@ -295,13 +295,8 @@ string_view_utf8 I_MI_STS::get_filled_menu_item_label(Action action) {
 }
 
 I_MI_STS::I_MI_STS(Action action)
-    : IWindowMenuItem(get_filled_menu_item_label(action), get_icon(action, Tool::_all_tools), is_enabled_t::yes, get_mainitem_hidden_state(action), get_expands(action))
+    : IWindowMenuItem(get_filled_menu_item_label(action), nullptr, is_enabled_t::yes, get_mainitem_hidden_state(action), get_expands(action))
     , action(action) {
-    if (is_multitool()) {
-        set_icon_position(IconPosition::right);
-    } else {
-        set_icon_position(IconPosition::replaces_extends);
-    }
     if (!are_previous_completed(action)) {
         set_color_scheme(&not_yet_ready_scheme);
     }
@@ -315,8 +310,17 @@ void I_MI_STS::click(IWindowMenu &) {
     }
 }
 
+void I_MI_STS::Loop() {
+    SetIconId(get_icon(action, Tool::_all_tools));
+    if (is_multitool()) {
+        set_icon_position(IconPosition::right);
+    } else {
+        set_icon_position(IconPosition::replaces_extends);
+    }
+}
+
 I_MI_STS_SUBMENU::I_MI_STS_SUBMENU(const char *label, Action action, Tool tool)
-    : IWindowMenuItem(_(label), get_icon(action, tool), is_enabled_t::yes, get_subitem_hidden_state(tool))
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, get_subitem_hidden_state(tool))
     , action(action)
     , tool(tool) {
     set_icon_position(IconPosition::right);
@@ -324,6 +328,10 @@ I_MI_STS_SUBMENU::I_MI_STS_SUBMENU(const char *label, Action action, Tool tool)
 
 void I_MI_STS_SUBMENU::click(IWindowMenu &) {
     do_snake(action, tool);
+}
+
+void I_MI_STS_SUBMENU::Loop() {
+    SetIconId(get_icon(action, tool));
 }
 
 namespace SelftestSnake {

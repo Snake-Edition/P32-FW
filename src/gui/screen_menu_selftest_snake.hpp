@@ -16,6 +16,7 @@ public:
     static constexpr size_t max_label_len { 66 }; ///< Buffer for label, needs to fit all languages
     I_MI_STS(Action action);
     void click(IWindowMenu &) override;
+    void Loop() override;
 
 private:
     const Action action;
@@ -31,6 +32,7 @@ class I_MI_STS_SUBMENU : public IWindowMenuItem {
 public:
     I_MI_STS_SUBMENU(const char *label, Action action, Tool tool);
     void click(IWindowMenu &window_menu) override;
+    void Loop() override;
 
 private:
     const Action action;
