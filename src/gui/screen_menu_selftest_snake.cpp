@@ -295,8 +295,8 @@ string_view_utf8 I_MI_STS::get_filled_menu_item_label(Action action) {
 }
 
 I_MI_STS::I_MI_STS(Action action)
-    : IWindowMenuItem(get_filled_menu_item_label(action),
-        get_icon(action, Tool::_all_tools), is_enabled_t::yes, get_mainitem_hidden_state(action), get_expands(action)) {
+    : IWindowMenuItem(get_filled_menu_item_label(action), get_icon(action, Tool::_all_tools), is_enabled_t::yes, get_mainitem_hidden_state(action), get_expands(action))
+    , action(action) {
     if (is_multitool()) {
         set_icon_position(IconPosition::right);
     } else {
@@ -307,7 +307,7 @@ I_MI_STS::I_MI_STS(Action action)
     }
 }
 
-void I_MI_STS::do_click([[maybe_unused]] IWindowMenu &window_menu, Action action) {
+void I_MI_STS::click(IWindowMenu &) {
     if (!has_submenu(action) || !is_multitool()) {
         do_snake(action);
     } else {
@@ -316,11 +316,13 @@ void I_MI_STS::do_click([[maybe_unused]] IWindowMenu &window_menu, Action action
 }
 
 I_MI_STS_SUBMENU::I_MI_STS_SUBMENU(const char *label, Action action, Tool tool)
-    : IWindowMenuItem(_(label), get_icon(action, tool), is_enabled_t::yes, get_subitem_hidden_state(tool)) {
+    : IWindowMenuItem(_(label), get_icon(action, tool), is_enabled_t::yes, get_subitem_hidden_state(tool))
+    , action(action)
+    , tool(tool) {
     set_icon_position(IconPosition::right);
 }
 
-void I_MI_STS_SUBMENU::do_click([[maybe_unused]] IWindowMenu &window_menu, Tool tool, Action action) {
+void I_MI_STS_SUBMENU::click(IWindowMenu &) {
     do_snake(action, tool);
 }
 

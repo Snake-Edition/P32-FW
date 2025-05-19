@@ -6,6 +6,7 @@
 #include <utility_extensions.hpp>
 #include <selftest_snake_config.hpp>
 #include <printers.h>
+#include <meta_utils.hpp>
 
 namespace SelftestSnake {
 static_assert(Action::_first != Action::_last, "Edge case not handled");
@@ -14,42 +15,34 @@ class I_MI_STS : public IWindowMenuItem {
 public:
     static constexpr size_t max_label_len { 66 }; ///< Buffer for label, needs to fit all languages
     I_MI_STS(Action action);
-    void do_click(IWindowMenu &window_menu, Action action);
+    void click(IWindowMenu &) override;
 
 private:
+    const Action action;
+
     string_view_utf8 get_filled_menu_item_label(Action action);
     char label_buffer[max_label_len];
 };
 
-template <Action action>
-class MI_STS : public I_MI_STS {
-public:
-    MI_STS()
-        : I_MI_STS(action) {}
-
-protected:
-    void click(IWindowMenu &window_menu) override {
-        do_click(window_menu, action);
-    }
-};
+template <Action action_>
+using MI_STS = WithConstructorArgs<I_MI_STS, action_>;
 
 class I_MI_STS_SUBMENU : public IWindowMenuItem {
 public:
     I_MI_STS_SUBMENU(const char *label, Action action, Tool tool);
-    void do_click(IWindowMenu &window_menu, Tool tool, Action action);
+    void click(IWindowMenu &window_menu) override;
+
+private:
+    const Action action;
+    const Tool tool;
 };
 
-template <Tool tool, Action action>
-    requires SubmenuActionC<action>
+template <Tool tool_, Action action_>
+    requires SubmenuActionC<action_>
 class MI_STS_SUBMENU : public I_MI_STS_SUBMENU {
 public:
     MI_STS_SUBMENU()
-        : I_MI_STS_SUBMENU(get_submenu_label(tool, action), action, tool) {}
-
-protected:
-    void click(IWindowMenu &window_menu) override {
-        do_click(window_menu, tool, action);
-    }
+        : I_MI_STS_SUBMENU(get_submenu_label(tool_, action_), action_, tool_) {}
 };
 
 bool is_menu_draw_enabled(window_t *window);
