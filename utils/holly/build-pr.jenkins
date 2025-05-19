@@ -375,7 +375,7 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts artifacts: 'error-codes-report.txt, translations-report.txt'
+                            archiveArtifacts artifacts: 'error-codes-report.txt, translations-report.txt, Prusa-Firmware-Buddy.pot'
                         }
                     }
                 }
