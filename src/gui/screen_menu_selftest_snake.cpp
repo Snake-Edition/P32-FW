@@ -91,36 +91,23 @@ const img::Resource *get_icon(Action action, Tool tool) {
 }
 
 struct SnakeConfig {
-    enum class State {
-        reset,
-        first,
-        not_first,
-    };
-
     void reset() {
-        break_after_submenu = false;
-        in_progress = false;
+        *this = {};
         last_action = get_last_action();
-        last_tool = Tool::_first;
-        state = State::reset;
     }
 
     void next(Action action, Tool tool) {
         in_progress = true;
         last_action = action;
         last_tool = tool;
-        if (state == State::reset) {
-            state = State::first;
-        } else if (state == State::first) {
-            state = State::not_first;
-        }
     }
 
+    bool in_progress { false }; ///< Is snake currently running?
     bool break_after_submenu { false }; ///< User selected to do one submenu and then stop
-    bool in_progress { false };
-    Action last_action { Action::_last };
+    bool auto_continue { false }; ///< Automatically continue, don't ask user for confirmation
+
+    Action last_action { Action::_last }; ///< Last action that we'have done
     Tool last_tool { Tool::_first };
-    State state { State::reset };
 };
 
 } // namespace
@@ -175,7 +162,7 @@ void do_snake(Action action, Tool tool = Tool::_first) {
     }
 
     if (has_submenu(action)) {
-        if (snake_config.state == SnakeConfig::State::reset || tool == Tool::_first) { // Ask only for first tool or if it is selected in submenu
+        if (!snake_config.in_progress || tool == Tool::_first) { // Ask only for first tool or if it is selected in submenu
             ask_config(action);
         }
         marlin_client::test_start_with_data(get_test_mask(action), get_tool_mask(tool));
@@ -207,7 +194,7 @@ void continue_snake() {
         return; // Stop when submenu is finished
     }
 
-    if (snake_config.state == SnakeConfig::State::first // ran only one action so far
+    if (!snake_config.auto_continue
         && (snake_config.last_action != get_first_action() || get_test_result(get_next_action(get_first_action()), Tool::_all_tools) == TestResult_Passed)) {
 
         Response resp = Response::Stop;
@@ -221,6 +208,9 @@ void continue_snake() {
             snake_config.reset();
             return; // stop after running the first one
         }
+
+        // Do not ask again
+        snake_config.auto_continue = true;
     }
 
     if (!is_multitool()
