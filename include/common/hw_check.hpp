@@ -22,8 +22,8 @@ enum class HWCheckType : uint8_t {
     gcode_compatibility,
 #endif
     gcode_level,
-
-    _last = gcode_level
+    input_shaper,
+    _last = input_shaper,
 };
 
 static constexpr size_t hw_check_type_count = static_cast<size_t>(HWCheckType::_last) + 1;
@@ -36,4 +36,5 @@ static constexpr EnumArray<HWCheckType, const char *, hw_check_type_count> hw_ch
         { HWCheckType::gcode_compatibility, N_("G-Code Compatibility") },
 #endif
         { HWCheckType::gcode_level, N_("G-Code Level") },
+        { HWCheckType::input_shaper, N_("Input Shaper") },
 };

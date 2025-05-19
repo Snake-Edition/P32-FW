@@ -35,6 +35,7 @@ MsgBoxInvalidPrinter::MsgBoxInvalidPrinter(Rect16 rect, const string_view_utf8 &
 #if HAS_MMU2()
             { this, _("Nozzle flow rate doesn't match"), valid_printer_settings.nozzle_flow_mismatch },
 #endif
+            { this, _("G-code not sliced for input shaping"), valid_printer_settings.sliced_without_input_shaper },
     })
     , unsupported_features(this,
           (HAS_LARGE_DISPLAY() ? _("Following features are required:") : _("Features required:")),

@@ -107,6 +107,7 @@ public:
         Feature gcode_compatibility_mode { config_store().hw_check_gcode_compatibility.get() };
 #endif
         Feature outdated_firmware { config_store().hw_check_firmware.get() }; // M115 Ux.yy.z disagrees (TODO: Separate EEVAR?)
+        Feature sliced_without_input_shaper { config_store().hw_check_input_shaper.get() }; // G-code sliced with a profile that has input shaper
         bool unsupported_features { false };
         char unsupported_features_text[37] { "" };
         void add_unsupported_feature(const char *feature, size_t length);
@@ -141,6 +142,7 @@ private:
 #if EXTRUDERS > 1
     std::optional<float> filament_wipe_tower_g = { std::nullopt }; ///< Grams of filament used for wipe tower
 #endif
+    bool sliced_with_input_shaper_ = false; ///< True if gcode was sliced with input shaper
     bool has_preview_thumbnail_; ///< True if gcode has preview thumbnail
     bool has_progress_thumbnail_; ///< True if gcode has progress thumbnail
     bool filament_described; ///< Filament info was found in gcode's comments

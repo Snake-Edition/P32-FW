@@ -477,11 +477,10 @@ struct CurrentStore
     StoreItem<HWCheckSeverity, defaults::hw_check_severity, ItemFlag::features, journal::hash("HW Check Model")> hw_check_model;
     StoreItem<HWCheckSeverity, defaults::hw_check_severity, ItemFlag::features, journal::hash("HW Check Firmware")> hw_check_firmware;
     StoreItem<HWCheckSeverity, defaults::hw_check_severity, ItemFlag::features, journal::hash("HW Check G-code")> hw_check_gcode_level;
-
+    StoreItem<HWCheckSeverity, defaults::hw_check_severity, ItemFlag::features, journal::hash("HW Check Input Shaper")> hw_check_input_shaper;
 #if HAS_GCODE_COMPATIBILITY()
     StoreItem<HWCheckSeverity, defaults::hw_check_severity, ItemFlag::features, journal::hash("HW Check Compatibility")> hw_check_gcode_compatibility;
 #endif
-
     template <typename F>
     auto visit_hw_check(HWCheckType type, const F &visitor) {
         switch (type) {
@@ -498,6 +497,8 @@ struct CurrentStore
         case HWCheckType::gcode_level:
             return visitor(hw_check_gcode_level);
 
+        case HWCheckType::input_shaper:
+            return visitor(hw_check_input_shaper);
 #if HAS_GCODE_COMPATIBILITY()
         case HWCheckType::gcode_compatibility:
             return visitor(hw_check_gcode_compatibility);

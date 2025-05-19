@@ -92,6 +92,7 @@ void GCodeInfo::load(IGcodeReader &reader) {
     // scan info G-codes and comments
     valid_printer_settings = ValidPrinterSettings(); // reset to valid state
     per_extruder_info = {}; // Reset extruder info
+    sliced_with_input_shaper_ = false; // Reset input shaper flag
 #if EXTRUDERS > 1
     filament_wipe_tower_g = std::nullopt;
 #endif
@@ -129,6 +130,10 @@ void GCodeInfo::load(IGcodeReader &reader) {
 
             parse_gcode(buffer.line, gcode_counter);
         }
+        // If we didnt find any M862.6 "Input Shaper" command, we assume that the gcode was not sliced with input shaper.
+        if (!sliced_with_input_shaper_) {
+            valid_printer_settings.sliced_without_input_shaper.fail();
+        }
     }
 
     is_loaded_ = true;
@@ -151,6 +156,7 @@ void GCodeInfo::reset_info() {
     has_progress_thumbnail_ = false;
     filament_described = false;
     valid_printer_settings = ValidPrinterSettings();
+    sliced_with_input_shaper_ = false;
     per_extruder_info.fill({});
     printing_time[0] = 0;
     error_str_ = {};
@@ -227,7 +233,8 @@ bool GCodeInfo::ValidPrinterSettings::is_valid(bool is_tools_mapping_possible) c
 #endif
         && !unsupported_features
         && (is_tools_mapping_possible // if is_possible -> always true -> handled by tools_mapping screen
-            || (wrong_tools.is_valid() && wrong_nozzle_diameter.is_valid() && nozzle_not_hardened.is_valid() && nozzle_not_high_flow.is_valid()));
+            || (wrong_tools.is_valid() && wrong_nozzle_diameter.is_valid() && nozzle_not_hardened.is_valid() && nozzle_not_high_flow.is_valid()))
+        && sliced_without_input_shaper.is_valid();
 }
 
 bool GCodeInfo::ValidPrinterSettings::is_fatal(bool is_tools_mapping_possible) const {
@@ -239,7 +246,8 @@ bool GCodeInfo::ValidPrinterSettings::is_fatal(bool is_tools_mapping_possible) c
         || nozzle_flow_mismatch.is_fatal()
 #endif
         || (!is_tools_mapping_possible // if is_possible -> always false -> handled by tools_mapping screen
-            && (wrong_tools.is_fatal() || wrong_nozzle_diameter.is_fatal() || nozzle_not_hardened.is_fatal() || nozzle_not_high_flow.is_fatal()));
+            && (wrong_tools.is_fatal() || wrong_nozzle_diameter.is_fatal() || nozzle_not_hardened.is_fatal() || nozzle_not_high_flow.is_fatal()))
+        || sliced_without_input_shaper.is_fatal();
 }
 
 bool GCodeInfo::is_up_to_date(const char *new_version_string) {
@@ -426,6 +434,9 @@ void GCodeInfo::parse_m862(GcodeBuffer::String cmd) {
                     break;
                 }
 #endif
+                if (compare(feature, "Input Shaper")) {
+                    sliced_with_input_shaper_ = true;
+                }
 
                 if (!find(feature)) {
                     valid_printer_settings.add_unsupported_feature(feature.begin, feature.end - feature.begin);
