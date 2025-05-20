@@ -35,21 +35,52 @@ ParkingPosition ParkingPosition::from_xyz_pos(const xyz_pos_t &pos) {
 }
 
 #if HAS_NOZZLE_CLEANER()
-static void move_out_of_nozzle_cleaner_area_if_needed(const feedRate_t &feedrate, bool destination_in_wastebin_area) {
-    const bool start_in_wastebin_area = current_position.x > (X_NOZZLE_PARK_POINT + 1) && current_position.y > Y_WASTEBIN_SAFE_POINT;
+static void pre_park_move_pattern(const feedRate_t &feedrate, const xy_pos_t &destination) {
+    static constexpr float x_border_point = X_NOZZLE_PARK_POINT + 1;
 
-    // First move to the right edge (the safe way to cross over the v-blade)
-    if (destination_in_wastebin_area || start_in_wastebin_area) {
-        do_blocking_move_to_x(X_WASTEBIN_POINT, feedrate);
-    }
-    // If we are in the wastebin area, and need to move somewhere else OR we are somewhere else and need to move to the wastebin area, go through the safe point
-    if (destination_in_wastebin_area != start_in_wastebin_area) {
-        do_blocking_move_to_y(Y_WASTEBIN_SAFE_POINT, feedrate);
+    const bool start_in_rear_area = current_position.y > Y_WASTEBIN_SAFE_POINT;
+    const bool destination_in_rear_area = destination.y > Y_WASTEBIN_SAFE_POINT;
+
+    const bool start_in_wastebin_area = start_in_rear_area && current_position.x > x_border_point;
+    const bool destination_in_wastebin_area = destination_in_rear_area && destination.x > x_border_point;
+
+    if (start_in_rear_area != destination_in_rear_area) {
+        if (start_in_wastebin_area || destination_in_wastebin_area) {
+            do_blocking_move_to_x(X_WASTEBIN_POINT, feedrate);
+            if (destination_in_wastebin_area) {
+                do_blocking_move_to_y(Y_WASTEBIN_POINT, feedrate);
+            } else {
+                do_blocking_move_to_y(Y_WASTEBIN_SAFE_POINT, feedrate);
+            }
+        } else {
+            if (start_in_rear_area) {
+                do_blocking_move_to_y(Y_WASTEBIN_SAFE_POINT, feedrate);
+            } else {
+                do_blocking_move_to_xy(destination.x, Y_WASTEBIN_SAFE_POINT, feedrate);
+            }
+        }
+    } else if (start_in_rear_area) {
+        if (start_in_wastebin_area != destination_in_wastebin_area) {
+            if (start_in_wastebin_area) {
+                do_blocking_move_to_x(X_WASTEBIN_POINT, feedrate);
+                do_blocking_move_to_y(Y_WASTEBIN_SAFE_POINT, feedrate);
+                do_blocking_move_to_x(destination.x, feedrate);
+            } else {
+                do_blocking_move_to_y(Y_WASTEBIN_SAFE_POINT, feedrate);
+                do_blocking_move_to_x(X_WASTEBIN_POINT, feedrate);
+                do_blocking_move_to_y(Y_WASTEBIN_POINT, feedrate);
+            }
+        } else if (start_in_wastebin_area) {
+            do_blocking_move_to_x(destination.x, feedrate);
+        } else {
+            do_blocking_move_to_y(Y_WASTEBIN_SAFE_POINT, feedrate);
+            do_blocking_move_to_x(destination.x, feedrate);
+        }
     }
 }
 
 void move_out_of_nozzle_cleaner_area() {
-    move_out_of_nozzle_cleaner_area_if_needed(NOZZLE_PARK_XY_FEEDRATE, false);
+    pre_park_move_pattern(NOZZLE_PARK_XY_FEEDRATE, { X_WASTEBIN_POINT, Y_WASTEBIN_SAFE_POINT });
 }
 #endif
 
@@ -63,20 +94,6 @@ void park_move_with_conditional_home(const ParkingPosition &park_position, ZActi
         GcodeSuite::G28_no_parser(do_axis.x, do_axis.y, do_axis.z, { .only_if_needed = true, .z_raise = 3 });
     }
     park(z_action, park_position);
-}
-
-/**
- * Simple helper function doing blocking move so that it avoids nozzle cleaner.
- * It should be used whenever there is a reasonably high probability of head
- * moving closely around nozzle cleaner
- */
-static void move_around_nozzle_cleaner_to_xy(const xy_pos_t &destination, const feedRate_t &feedrate) {
-#if HAS_NOZZLE_CLEANER()
-    const bool destination_in_wastebin_area = destination.x > (X_NOZZLE_PARK_POINT + 1) && destination.y > Y_WASTEBIN_SAFE_POINT;
-    move_out_of_nozzle_cleaner_area_if_needed(feedrate, destination_in_wastebin_area);
-#endif
-
-    do_blocking_move_to_xy(destination, feedrate);
 }
 
 void park(ZAction z_action, const ParkingPosition &park /* = park_positions[ParkPosition::park]*/) {
@@ -100,13 +117,12 @@ void park(ZAction z_action, const ParkingPosition &park /* = park_positions[Park
         }
     }
 
-#ifdef X_NOZZLE_PRE_PARK_POINT
-    if (park == park_positions[ParkPosition::park]) {
-        xy_pos_t pre_park { { { X_NOZZLE_PRE_PARK_POINT, std::min(current_position.y, static_cast<float>(Y_WASTEBIN_SAFE_POINT)) } } };
-        move_around_nozzle_cleaner_to_xy(pre_park, fr_xy);
-    }
+    const xy_pos_t park_destination = park.to_xyz_pos(current_position);
+#if HAS_NOZZLE_CLEANER()
+    pre_park_move_pattern(fr_xy, park_destination);
 #endif
-    move_around_nozzle_cleaner_to_xy(park.to_xyz_pos(current_position), fr_xy);
+    do_blocking_move_to_xy(park_destination, fr_xy);
+
     report_current_position();
 }
 
