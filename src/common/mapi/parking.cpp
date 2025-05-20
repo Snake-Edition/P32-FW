@@ -80,23 +80,11 @@ void move_out_of_nozzle_cleaner_area() {
 }
 #endif
 
-void park_move_with_conditional_home(const ParkingPosition &park_position, ZAction z_action) {
-    const xyz_bool_t do_axis {
-        .x = (park_position.x != mapi::ParkingPosition::unchanged),
-        .y = (park_position.y != mapi::ParkingPosition::unchanged),
-        .z = (park_position.z != mapi::ParkingPosition::unchanged) && z_action == mapi::ZAction::absolute_move
-    };
-    if (axes_need_homing(X_AXIS | Y_AXIS | Z_AXIS)) {
-        GcodeSuite::G28_no_parser(do_axis.x, do_axis.y, do_axis.z, { .only_if_needed = true, .z_raise = 3 });
-    }
-    park(z_action, park_position);
-}
-
-void park(ZAction z_action, const ParkingPosition &park /* = park_positions[ParkPosition::park]*/) {
+void park(ZAction z_action, const ParkingPosition &parking_position) {
     static constexpr feedRate_t fr_xy = NOZZLE_PARK_XY_FEEDRATE, fr_z = NOZZLE_PARK_Z_FEEDRATE;
 
-    if (park.z != ParkingPosition::unchanged) {
-        const float z = std::get<float>(park.z);
+    if (parking_position.z != ParkingPosition::unchanged) {
+        const float z = std::get<float>(parking_position.z);
         switch (z_action) {
         case mapi::ZAction::move_to_at_least: // Raise to at least the Z-park height
             do_blocking_move_to_z(_MAX(z, current_position.z), fr_z);
@@ -113,13 +101,26 @@ void park(ZAction z_action, const ParkingPosition &park /* = park_positions[Park
         }
     }
 
-    const xy_pos_t park_destination = park.to_xyz_pos(current_position);
+    const xy_pos_t park_destination = parking_position.to_xyz_pos(current_position);
 #if HAS_NOZZLE_CLEANER()
     pre_park_move_pattern(fr_xy, park_destination);
 #endif
     do_blocking_move_to_xy(park_destination, fr_xy);
 
     report_current_position();
+}
+
+void home_and_park(ZAction z_action, const ParkingPosition &parking_position) {
+    const xyz_bool_t do_axis {
+        .x = (parking_position.x != mapi::ParkingPosition::unchanged),
+        .y = (parking_position.y != mapi::ParkingPosition::unchanged),
+        .z = (parking_position.z != mapi::ParkingPosition::unchanged) && z_action == mapi::ZAction::absolute_move
+    };
+    if (axes_need_homing(X_AXIS | Y_AXIS | Z_AXIS)) {
+        GcodeSuite::G28_no_parser(do_axis.x, do_axis.y, do_axis.z, { .only_if_needed = true, .z_raise = 3 });
+    }
+
+    park(z_action, parking_position);
 }
 
 } // namespace mapi

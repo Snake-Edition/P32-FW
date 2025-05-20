@@ -91,7 +91,7 @@ void GcodeSuite::G27() {
         }
     }
 
-    mapi::park_move_with_conditional_home(parking_position, z_action);
+    mapi::home_and_park(z_action, parking_position);
 }
 
 /** @}*/

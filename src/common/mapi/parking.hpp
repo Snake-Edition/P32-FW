@@ -90,8 +90,8 @@ static constexpr EnumArray<ParkPosition, ParkingPosition, ParkPosition::_cnt> pa
 void move_out_of_nozzle_cleaner_area();
 #endif
 
-void park_move_with_conditional_home(const ParkingPosition &park_position, ZAction z_action);
+void park(ZAction z_action, const ParkingPosition &parking_position = park_positions[ParkPosition::park]);
 
-void park(ZAction z_action, const ParkingPosition &park = park_positions[ParkPosition::park]);
+void home_and_park(ZAction z_action, const ParkingPosition &parking_position = park_positions[ParkPosition::park]);
 
 } // namespace mapi
