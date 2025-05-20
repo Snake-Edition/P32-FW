@@ -600,8 +600,6 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   endstops.enable(true); // Enable endstops for next homing move
 
   #define _UNSAFE(A) (homeZ && TERN0(Z_SAFE_HOMING, axes_should_home(_BV(A##_AXIS))))
-  #define _DOAXIS(A, V) ((V) && (flags.only_if_needed ? axes_should_home(_BV(A##_AXIS)) : true))
-
   const bool homeZ = TERN0(HAS_Z_AXIS, Z),
               NUM_AXIS_LIST(              // Other axes should be homed before Z safe-homing
                 needX = _UNSAFE(X), needY = _UNSAFE(Y), needZ = false, // UNUSED
@@ -620,21 +618,25 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
                   homeX == homeX, && homeY == homeX, && homeZ == homeX,
                 && homeI == homeX, && homeJ == homeX, && homeK == homeX,
                 && homeU == homeX, && homeV == homeX, && homeW == homeX
-              ),
-              NUM_AXIS_LIST(
-                doX = _DOAXIS(X, home_all || homeX),
-                doY = _DOAXIS(Y, home_all || homeY),
-                doZ = _DOAXIS(Z, home_all || homeZ),
-                doI = _DOAXIS(I, home_all || homeI),
-                doJ = _DOAXIS(J, home_all || homeJ),
-                doK = _DOAXIS(K, home_all || homeK),
-                doU = _DOAXIS(U, home_all || homeU),
-                doV = _DOAXIS(V, home_all || homeV),
-                doW = _DOAXIS(W, home_all || homeW)
               );
-
   #undef _UNSAFE
+
+  #define _DOAXIS(A, V) ((V) && (flags.only_if_needed ? axes_should_home(_BV(A##_AXIS)) : true))
+  bool NUM_AXIS_LIST(
+    doX = _DOAXIS(X, home_all || homeX),
+    doY = _DOAXIS(Y, home_all || homeY),
+    doZ = _DOAXIS(Z, home_all || homeZ),
+    doI = _DOAXIS(I, home_all || homeI),
+    doJ = _DOAXIS(J, home_all || homeJ),
+    doK = _DOAXIS(K, home_all || homeK),
+    doU = _DOAXIS(U, home_all || homeU),
+    doV = _DOAXIS(V, home_all || homeV),
+    doW = _DOAXIS(W, home_all || homeW)
+  );
   #undef _DOAXIS
+
+  doX = doX || (ENABLED(CODEPENDENT_XY_HOMING) && doY);
+  doY = doY || (ENABLED(CODEPENDENT_XY_HOMING) && doX);
 
   #if HAS_Z_AXIS
     UNUSED(needZ); UNUSED(homeZZ);
@@ -707,12 +709,12 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   #endif /*ENABLED(PRUSA_TOOLCHANGER)*/
 
   // Home Y (before X)
-  if (ENABLED(HOME_Y_BEFORE_X) && !failed && (doY || TERN0(CODEPENDENT_XY_HOMING, doX))) {
+  if (ENABLED(HOME_Y_BEFORE_X) && !failed && doY) {
     failed = !homeaxis(Y_AXIS, fr_mm_s, false, reenable_wt_Y, flags.can_calibrate);
   }
 
   // Home X
-  if (!failed && (doX || (doY && ENABLED(CODEPENDENT_XY_HOMING) && DISABLED(HOME_Y_BEFORE_X)))) {
+  if (!failed && doX) {
     failed = !homeaxis(X_AXIS, fr_mm_s, false, reenable_wt_X, flags.can_calibrate);
   }
 
@@ -723,7 +725,7 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
   #if HAS_PRECISE_HOMING_COREXY()
     // absolute refinement requires both axes to be already probed
-    if (!failed && ( doX || ENABLED(CODEPENDENT_XY_HOMING)) && doY && !flags.no_refine) {
+    if (!failed && doX && doY && !flags.no_refine) {
       #if DISABLED(PRUSA_TOOLCHANGER)
         // skip refinement without data if we're not allowed to calibrate
         const bool do_refine = (corexy_home_is_calibrated() || flags.can_calibrate || flags.force_calibrate);
