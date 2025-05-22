@@ -29,6 +29,10 @@
 #include <option/has_bowden.h>
 #include <option/has_human_interactions.h>
 #include <option/has_wastebin.h>
+#include <option/has_auto_retract.h>
+#if HAS_AUTO_RETRACT()
+    #include <feature/auto_retract/auto_retract.hpp>
+#endif
 
 uint filament_gcodes::InProgress::lock = 0;
 
@@ -134,8 +138,11 @@ void filament_gcodes::M702_no_parser(std::optional<float> unload_length, float z
     if (marlin_server::printer_paused()) {
         marlin_server::unpause_nozzle(target_extruder);
     }
-
+#if HAS_AUTO_RETRACT()
+    if (op_preheat && !buddy::auto_retract().is_retracted(hotend_from_extruder(target_extruder))) {
+#else
     if (op_preheat) {
+#endif
         PreheatData data = PreheatData::make(PreheatMode::Unload, target_extruder, *op_preheat); // TODO do I need PreheatMode::Unload_askUnloaded
         // avoid preheating bed in this case
         auto preheat_ret = preheat(data, target_extruder, PreheatBehavior::force_preheat_only_extruder());

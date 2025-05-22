@@ -287,6 +287,11 @@ bool Pause::should_park() {
 }
 
 bool Pause::is_target_temperature_safe() {
+#if HAS_AUTO_RETRACT()
+    if (load_type == LoadType::unload && auto_retract().is_retracted(hotend_from_extruder(active_extruder))) {
+        return true; // Its safe to unload even if the temp is too low if we are retracted
+    }
+#endif
     if (!DEBUGGING(DRYRUN) && thermalManager.targetTooColdToExtrude(active_extruder)) {
         SERIAL_ECHO_MSG(MSG_ERR_HOTEND_TOO_COLD);
         return false;
