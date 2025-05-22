@@ -109,6 +109,17 @@ extern int16_t feedrate_percentage;
   constexpr uint8_t active_extruder = 0;
 #endif
 
+/**
+ * Gets hotend index associated with a given extruder index.
+ */
+ inline uint8_t hotend_from_extruder([[maybe_unused]] const uint8_t e) {
+  #if HOTENDS > 1
+    return e;
+  #else
+    return 0;
+  #endif
+}
+
 FORCE_INLINE float pgm_read_any(const float *p) { return pgm_read_float(p); }
 FORCE_INLINE signed char pgm_read_any(const signed char *p) { return pgm_read_byte(p); }
 
