@@ -87,8 +87,10 @@ namespace {
     // Don't send telemetry more often than this even if things change.
     const constexpr Duration TELEMETRY_INTERVAL_MIN = 750;
 #if WEBSOCKET()
-    // Max of 2 minutes of telemetry silence.
-    const constexpr Duration TELEMETRY_INTERVAL_LONG = 2 * 60 * 1000;
+    // ~~~Max of 2 minutes of telemetry silence.~~~
+    //
+    // Switching to 4 seconds for expreminent too.
+    const constexpr Duration TELEMETRY_INTERVAL_LONG = 1000 * 4;
 #else
     // Telemetry every 4 seconds. We may want to have something more clever later on.
     const constexpr Duration TELEMETRY_INTERVAL_LONG = 1000 * 4;
