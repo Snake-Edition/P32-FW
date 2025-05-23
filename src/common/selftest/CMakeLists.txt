@@ -12,6 +12,7 @@ target_sources(
           selftest_heater.cpp
           selftest_heaters_interface.cpp
           selftest_part.cpp
+          selftest_result_evaluation.cpp
           selftest_revise_printer_setup.cpp
           selftest_tool_helper.cpp
   )

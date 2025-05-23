@@ -1,6 +1,6 @@
 #include "selftest_snake_config.hpp"
 #include <selftest_types.hpp>
-#include <screen_menu_selftest_snake_result_parsing.hpp>
+#include <selftest_result_evaluation.hpp>
 #include <config_store/store_instance.hpp>
 
 namespace SelftestSnake {

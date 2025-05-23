@@ -14,8 +14,8 @@
 #include "client_response.hpp"
 #include "printers.h"
 #include "RAII.hpp"
-#include "box_unfinished_selftest.hpp"
 #include "window_msgbox_wrong_printer.hpp"
+#include <selftest_result_evaluation.hpp>
 #include <option/has_toolchanger.h>
 #include <option/has_mmu2.h>
 #include <device/board.h>

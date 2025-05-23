@@ -139,8 +139,7 @@ endif()
 if(HAS_SELFTEST)
   add_subdirectory(wizard)
   target_sources(
-    firmware PRIVATE box_unfinished_selftest.cpp screen_menu_selftest_snake.cpp ScreenSelftest.cpp
-                     selftest_frame.cpp
+    firmware PRIVATE screen_menu_selftest_snake.cpp ScreenSelftest.cpp selftest_frame.cpp
     )
 endif()
 

@@ -1,12 +1,10 @@
 #pragma once
-#include <inc/Conditionals_LCD.h>
-#include <option/has_toolchanger.h>
 #include <selftest_snake_config.hpp>
-#if HAS_TOOLCHANGER()
-    #include <module/prusa/toolchanger.h>
-#endif
+#include <inc/Conditionals_LCD.h>
+#include <printers.h>
 
 namespace SelftestSnake {
+
 constexpr TestResult evaluate_results(std::same_as<TestResult> auto... results) {
     static_assert(sizeof...(results) > 0, "Pass at least one result");
 
@@ -41,4 +39,10 @@ constexpr TestResult merge_hotends(Tool tool, stdext::inplace_function<TestResul
         return evaluate(std::to_underlying(tool));
     }
 }
+
 }; // namespace SelftestSnake
+
+/**
+ *  Check if all essential selftest passed
+ */
+bool is_selftest_successfully_completed();

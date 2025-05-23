@@ -1,6 +1,6 @@
 #include "selftest_snake_config.hpp"
 #include <selftest_types.hpp>
-#include <screen_menu_selftest_snake_result_parsing.hpp>
+#include <selftest_result_evaluation.hpp>
 #include <option/has_toolchanger.h>
 #include <config_store/store_instance.hpp>
 #if HAS_TOOLCHANGER()

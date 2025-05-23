@@ -53,7 +53,8 @@
 #endif
 
 #include <crash_dump/crash_dump_handlers.hpp>
-#include "box_unfinished_selftest.hpp"
+#include <selftest_result_evaluation.hpp>
+#include <find_error.hpp>
 #include <transfers/transfer_file_check.hpp>
 #include <guiconfig/guiconfig.h>
 
@@ -352,7 +353,10 @@ void screen_home_data_t::on_enter() {
     static bool first_time_check_st { true };
     if (first_time_check_st) {
         first_time_check_st = false;
-        warn_unfinished_selftest_msgbox();
+        if (!is_selftest_successfully_completed()) {
+            const auto &error = find_error(ErrCode::CONNECT_UNFINISHED_SELFTEST);
+            MsgBoxWarning(_(error.err_text), Responses_Ok);
+        }
     }
 #endif
 

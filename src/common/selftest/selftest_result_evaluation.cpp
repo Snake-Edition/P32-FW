@@ -1,22 +1,22 @@
-#include "box_unfinished_selftest.hpp"
+#include <selftest_result_evaluation.hpp>
 #include <selftest_result_type.hpp>
-#include "printers.h"
-#include <option/has_selftest.h>
-#include <option/has_sheet_profiles.h>
-#include <config_store/store_instance.hpp>
 #include <option/has_switched_fan_test.h>
-#include <option/has_toolchanger.h>
-#include <find_error.hpp>
+#include <option/has_gearbox_alignment.h>
+#include <option/has_selftest.h>
 
+#include <option/has_toolchanger.h>
 #if HAS_TOOLCHANGER()
     #include <module/prusa/toolchanger.h>
 #endif /* HAS_TOOLCHANGER() */
 
+#include <option/has_sheet_profiles.h>
 #if HAS_SHEET_PROFILES()
     #include <common/SteelSheets.hpp>
-#endif
+#endif /* HAS_SHEET_PROFILES() */
 
-bool selftest_warning_selftest_finished() {
+#include <config_store/store_instance.hpp>
+
+bool is_selftest_successfully_completed() {
 #if DEVELOPER_MODE() || !HAS_SELFTEST() || PRINTER_IS_PRUSA_iX()
     return true;
 #endif
@@ -118,11 +118,4 @@ bool selftest_warning_selftest_finished() {
     assert(false && "Not yet implemented");
     return false;
 #endif
-}
-
-void warn_unfinished_selftest_msgbox() {
-    if (!selftest_warning_selftest_finished()) {
-        const auto &error = find_error(ErrCode::CONNECT_UNFINISHED_SELFTEST);
-        MsgBoxWarning(_(error.err_text), Responses_Ok);
-    }
 }
