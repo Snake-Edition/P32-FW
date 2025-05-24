@@ -373,6 +373,14 @@ public:
 };
 #endif
 
+class MI_DISPLAY_REINIT_TIMEOUT : public WiSpin {
+    constexpr static const char *const label = N_("Display Reinit Timeout");
+
+public:
+    MI_DISPLAY_REINIT_TIMEOUT();
+    virtual void OnClick() override;
+};
+
 class MI_SKEW_XY : public WiSpin {
     constexpr static const char *const label = N_("Skew XY");
 

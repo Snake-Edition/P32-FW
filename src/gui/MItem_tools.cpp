@@ -591,6 +591,21 @@ MI_BRIGHTNESS::MI_BRIGHTNESS()
 void MI_BRIGHTNESS::OnClick() {
     config_store().brightness.set(GetVal());
 }
+
+static const NumericInputConfig display_reinit_timeout_spin_config = {
+    .min_value = 0,
+    .max_value = 256,
+    .special_value = 0, //< turn timeout off
+    .unit = Unit::second,
+};
+
+MI_DISPLAY_REINIT_TIMEOUT::MI_DISPLAY_REINIT_TIMEOUT()
+    : WiSpin(config_store().display_reinit_timeout.get(), display_reinit_timeout_spin_config, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
+
+void MI_DISPLAY_REINIT_TIMEOUT::OnClick() {
+    config_store().display_reinit_timeout.set(GetVal());
+}
+
 /* -===============================================(:>- */
 #endif
 
