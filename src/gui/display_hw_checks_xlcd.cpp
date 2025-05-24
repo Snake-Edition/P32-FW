@@ -41,7 +41,11 @@ void check_lcd() {
 } // anonymous namespace
 
 void lcd::communication_check() {
-    const uint32_t min_check_period_ms = 2048; // both touch and display
+    const uint32_t min_check_period_ms = 1000 * config_store().display_reinit_timeout.get(); // both touch and display
+    if (min_check_period_ms == 0) {
+        return;
+    }
+
     static uint32_t last_touch_check_ms = ticks_ms();
 
     uint32_t now = ticks_ms();

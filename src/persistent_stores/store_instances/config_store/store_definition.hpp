@@ -527,6 +527,7 @@ struct CurrentStore
     StoreItem<bool, defaults::stealth_chop_e, journal::hash("Stealth E")> stealth_chop_e;
 
     StoreItem<uint8_t, 100, journal::hash("Display Brightness")> brightness;
+    StoreItem<uint8_t, 2, journal::hash("Display Reinit Timeout")> display_reinit_timeout; // reinit time in seconds
 
     StoreItem<bool, true, journal::hash("Stuck filament detection V2")> stuck_filament_detection;
 
