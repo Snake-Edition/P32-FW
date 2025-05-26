@@ -59,23 +59,16 @@ void GcodeSuite::G27() {
         return;
     }
 
-    std::optional<mapi::ParkPosition> where_to_park;
-    parser.store_option('W', where_to_park, mapi::ParkPosition::_cnt);
-
     mapi::ZAction z_action { mapi::ZAction::move_to_at_least };
     parser.store_option('P', z_action, mapi::ZAction::_cnt);
 
     mapi::ParkingPosition parking_position;
-    if (where_to_park) {
+    if (auto where_to_park = parser.option<mapi::ParkPosition>('W', mapi::ParkPosition::_cnt)) {
         parking_position = mapi::park_positions[*where_to_park];
     } else {
-        bool axis_specified = false;
-        auto parse_axis = [&](char letter, mapi::ParkingPosition::Variant &axis) {
-            float val = 0.0f;
-            auto res = parser.store_option(letter, val);
-            if (res) {
-                axis = val;
-                axis_specified = true;
+        auto parse_axis = [&parser](char letter, mapi::ParkingPosition::Variant &axis) {
+            if (auto res = parser.option<float>(letter)) {
+                axis = *res;
             }
         };
 
@@ -83,7 +76,8 @@ void GcodeSuite::G27() {
         parse_axis('Y', parking_position.y);
         parse_axis('Z', parking_position.z);
 
-        if (!axis_specified) {
+        // If no axis has been specified (comparing against a position with all axes unchanged)
+        if (parking_position == mapi::ParkingPosition {}) {
             parking_position = mapi::park_positions[mapi::ParkPosition::park];
         }
     }

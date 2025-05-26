@@ -46,6 +46,8 @@ struct ParkingPosition {
     static constexpr Variant unchanged = Unchanged {};
     Variant x, y, z;
 
+    constexpr auto operator<=>(const ParkingPosition &) const = default;
+
     // Synchronizes this provided position and provides appropriate xyz_pos_t
     xyz_pos_t to_xyz_pos(const xyz_pos_t &pos) const;
 
