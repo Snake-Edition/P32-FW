@@ -16,7 +16,7 @@ enum class ZAction : uint16_t {
     relative_move,
     relative_move_skip_xy, // TODO not implemented
     no_move,
-    _cnt
+    _last = no_move
 };
 
 enum class ParkPosition : uint8_t {

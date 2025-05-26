@@ -85,17 +85,18 @@ void park(ZAction z_action, const ParkingPosition &park /* = park_positions[Park
     if (park.z != ParkingPosition::unchanged) {
         const float z = std::get<float>(park.z);
         switch (z_action) {
+        case mapi::ZAction::move_to_at_least: // Raise to at least the Z-park height
+            do_blocking_move_to_z(_MAX(z, current_position.z), fr_z);
+            break;
         case ZAction::absolute_move: // Go to Z-park height
             do_blocking_move_to_z(z, fr_z);
             break;
-
         case ZAction::relative_move: // Raise by Z-park height
             do_blocking_move_to_z(_MIN(current_position.z + z, Z_MAX_POS), fr_z);
             break;
+        case ZAction::relative_move_skip_xy: // TODO: Not implemented yet
         case ZAction::no_move: /// No Z move, just XY park
             break;
-        default: // Raise to at least the Z-park height
-            do_blocking_move_to_z(_MAX(z, current_position.z), fr_z);
         }
     }
 

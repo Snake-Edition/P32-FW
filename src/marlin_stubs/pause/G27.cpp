@@ -60,7 +60,7 @@ void GcodeSuite::G27() {
     }
 
     mapi::ZAction z_action { mapi::ZAction::move_to_at_least };
-    parser.store_option('P', z_action, mapi::ZAction::_cnt);
+    parser.store_option('P', z_action, static_cast<uint32_t>(mapi::ZAction::_last) + 1);
 
     mapi::ParkingPosition parking_position;
     if (auto where_to_park = parser.option<mapi::ParkPosition>('W', mapi::ParkPosition::_cnt)) {
