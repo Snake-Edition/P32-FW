@@ -23,3 +23,9 @@ target_include_directories(
   printer_model_tests PUBLIC ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include
   )
 add_catch_test(printer_model_tests)
+
+# progress mapper
+add_executable(progress_mapper_tests progress_mapper_tests.cpp)
+target_compile_definitions(progress_mapper_tests PUBLIC NDEBUG) # Disable assert failures
+target_link_libraries(progress_mapper_tests buddy_utils)
+add_catch_test(progress_mapper_tests)
