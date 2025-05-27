@@ -47,16 +47,12 @@ static void pre_park_move_pattern(const feedRate_t &feedrate, const xy_pos_t &de
     if (start_in_rear_area != destination_in_rear_area) {
         if (start_in_wastebin_area || destination_in_wastebin_area) {
             do_blocking_move_to_x(X_WASTEBIN_POINT, feedrate);
-            if (destination_in_wastebin_area) {
-                do_blocking_move_to_y(Y_WASTEBIN_POINT, feedrate);
-            } else {
-                do_blocking_move_to_y(Y_WASTEBIN_SAFE_POINT, feedrate);
-            }
+            do_blocking_move_to_y(destination.y, feedrate);
         } else {
             if (start_in_rear_area) {
-                do_blocking_move_to_y(Y_WASTEBIN_SAFE_POINT, feedrate);
+                do_blocking_move_to_y(destination.y, feedrate);
             } else {
-                do_blocking_move_to_xy(destination.x, Y_WASTEBIN_SAFE_POINT, feedrate);
+                do_blocking_move_to_x(destination.x, feedrate);
             }
         }
     } else if (start_in_rear_area) {
@@ -68,7 +64,7 @@ static void pre_park_move_pattern(const feedRate_t &feedrate, const xy_pos_t &de
             } else {
                 do_blocking_move_to_y(Y_WASTEBIN_SAFE_POINT, feedrate);
                 do_blocking_move_to_x(X_WASTEBIN_POINT, feedrate);
-                do_blocking_move_to_y(Y_WASTEBIN_POINT, feedrate);
+                do_blocking_move_to_y(destination.y, feedrate);
             }
         } else if (start_in_wastebin_area) {
             do_blocking_move_to_x(destination.x, feedrate);
