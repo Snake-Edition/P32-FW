@@ -49,6 +49,7 @@
 #include <common/mapi/parking.hpp>
 #include <feature/ramming/ramming_sequence.hpp>
 #include <utils/progress.hpp>
+#include <buddy/unreachable.hpp>
 
 #include <option/has_human_interactions.h>
 #include <option/has_mmu2.h>
@@ -87,26 +88,24 @@ GCodeLoader nozzle_cleaner_gcode_loader;
 
 using namespace buddy;
 
+/// During its lifetime, automatically reports progress based on the current FSM state (thanks to ProgressMapper) and value of the specified marlin variable (hooks into marlin idle())
 class PauseFsmNotifier : public CallbackHookGuard<> {
 
 public:
-    PauseFsmNotifier(Pause &pause, float min, float max, ProgressPercent progress_min, ProgressPercent progress_max, const MarlinVariable<float> &var)
-        : CallbackHookGuard<> { marlin_server::idle_hook_point,
-            [this, &var] {
-                if (auto mode = pause_.get_mode()) {
-                    const auto progress = span_.map(to_normalized_progress(min_, max_, var.get()));
-                    const auto data = fsm::serialize_data(FSMLoadUnloadData { .mode = *mode, .progress = progress });
-                    marlin_server::fsm_change(pause_.getPhase(), data);
-                }
-            } }
+    PauseFsmNotifier(Pause &pause, float min, float max, [[maybe_unused]] ProgressPercent progress_min, [[maybe_unused]] ProgressPercent progress_max, const MarlinVariable<float> &var)
+        : CallbackHookGuard<>(marlin_server::idle_hook_point, [this, &var] {
+            if (auto mode = pause_.get_mode()) {
+                const auto progress = pause_.progress_mapper.update_progress(pause_.get_state(), to_normalized_progress(min_, max_, var.get()));
+                const auto data = fsm::serialize_data(FSMLoadUnloadData { .mode = *mode, .progress = progress });
+                marlin_server::fsm_change(pause_.getPhase(), data);
+            }
+        })
         , pause_(pause)
-        , span_(progress_min, progress_max)
         , min_(min)
         , max_(max) {}
 
 private:
     Pause &pause_;
-    ProgressSpan span_;
     float min_, max_;
 };
 
@@ -153,7 +152,10 @@ PausePrivatePhase::PausePrivatePhase()
 void PausePrivatePhase::setPhase(PhasesLoadUnload ph, uint8_t progress) {
     phase = ph;
     if (load_unload_mode) {
-        marlin_server::fsm_change(phase, fsm::serialize_data(FSMLoadUnloadData { .mode = *load_unload_mode, .progress = progress }));
+        log_info(MarlinServer, "setPhase %i %i", int(ph), int(state));
+        // Do not call progress_mapper.update_progress() here. We want to completely skip states that do nothing and remap the remaining progress
+        // If we update progress here, the phase would be included in the progress mapping
+        marlin_server::fsm_change(phase, fsm::serialize_data(FSMLoadUnloadData { .mode = *load_unload_mode, .progress = progress_mapper.current_progress() }));
     }
 }
 
@@ -369,6 +371,8 @@ void Pause::plan_e_move(const float &length, const feedRate_t &fr_mm_s) {
 }
 
 void Pause::start_process([[maybe_unused]] Response response) {
+    setup_progress_mapper();
+
     switch (load_type) {
     case LoadType::load:
     case LoadType::autoload:
@@ -1485,6 +1489,76 @@ void Pause::handle_help(Response response) {
         marlin_server::set_warning(WarningType::FilamentSensorsDisabled);
         config_store().show_fsensors_disabled_warning_after_print.set(true);
     }
+}
+
+void Pause::setup_progress_mapper() {
+    using LoadState = PausePrivatePhase::LoadState;
+    using WorkflowStep = ProgressMapperWorkflowStep<LoadState>;
+
+    const ProgressMapperWorkflow<LoadState> *result = nullptr;
+
+    switch (load_type) {
+    case LoadType::load_to_gears: {
+        constexpr static ProgressMapperWorkflowArray workflow { std::to_array<WorkflowStep>({
+            { LoadState::load_to_gears, 1 },
+        }) };
+        result = &workflow;
+        break;
+    }
+
+    case LoadType::load:
+    case LoadType::autoload: {
+        constexpr static ProgressMapperWorkflowArray workflow { std::to_array<WorkflowStep>({
+            { LoadState::wait_temp, 3 },
+            { LoadState::long_load, 1 },
+            { LoadState::purge, 1 },
+        }) };
+        result = &workflow;
+        break;
+    }
+
+    case LoadType::load_purge: {
+        constexpr static ProgressMapperWorkflowArray workflow { std::to_array<WorkflowStep>({
+            { LoadState::wait_temp, 3 },
+            { LoadState::purge, 1 },
+        }) };
+        result = &workflow;
+        break;
+    }
+
+    case LoadType::unload:
+    case LoadType::unload_confirm:
+    case LoadType::filament_stuck: {
+        constexpr static ProgressMapperWorkflowArray workflow { std::to_array<WorkflowStep>({
+            // FIXME wait_temp is only for load { LoadState::wait_temp, 3 },
+            { LoadState::ram_sequence, 2 },
+            { LoadState::unload, 1 },
+        }) };
+        result = &workflow;
+        break;
+    }
+
+    case LoadType::unload_from_gears: {
+        constexpr static ProgressMapperWorkflowArray workflow { std::to_array<WorkflowStep>({
+            { LoadState::unload_from_gears, 1 },
+        }) };
+        result = &workflow;
+        break;
+    }
+
+    case LoadType::filament_change: {
+        constexpr static ProgressMapperWorkflowArray workflow { std::to_array<WorkflowStep>({
+            // FIXME wait_temp is only for load { LoadState::wait_temp, 3 },
+            { LoadState::ram_sequence, 1 },
+            { LoadState::long_load, 2 },
+            { LoadState::purge, 1 },
+        }) };
+        result = &workflow;
+        break;
+    }
+    };
+
+    progress_mapper.setup(*result);
 }
 
 /*****************************************************************************/

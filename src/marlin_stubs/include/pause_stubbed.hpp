@@ -21,11 +21,15 @@
 #include <option/has_nozzle_cleaner.h>
 #include <option/has_side_fsensor.h>
 
+#include <utils/progress_mapper.hpp>
+
 // @brief With Z unhomed, ensure that it is at least amount_mm above bed.
 void unhomed_z_lift(float amount_mm);
 
 class PausePrivatePhase : public IPause {
-protected:
+    friend class PauseFsmNotifier;
+
+public:
     /**
      * @brief Phase inside the load/unload process
      * @details This represents the current state inside one load/unload process.
@@ -83,6 +87,7 @@ private:
 
 protected:
     LoadState state { LoadState::unload_start };
+    ProgressMapper<LoadState> progress_mapper;
 
     PausePrivatePhase();
     void setPhase(PhasesLoadUnload ph, uint8_t progress = 0);
@@ -188,6 +193,7 @@ private:
     bool is_unstoppable() const;
     LoadUnloadMode get_load_unload_mode();
     bool should_park();
+    void setup_progress_mapper();
 
     void start_process(Response response);
     void unload_start_process(Response response);
