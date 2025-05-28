@@ -1599,40 +1599,60 @@ void media_print_loop() {
 /// The SFN of the file could have been changed by the user during the pause (for example by re-uploading a damaged file).
 /// BFW-5775
 void update_sfn() {
+    // Put into one struct so that we can squeeze it through a std::inplace_function capture
+    struct {
+        MutablePath filepath_sfn;
+        const char *lfn;
+        bool found = false;
+    } d;
+
     // Copy the current SFN + LFN from marlin vars
-    MutablePath filepath_sfn;
-    marlin_vars().media_SFN_path.copy_to(filepath_sfn.get_buffer(), filepath_sfn.maximum_length());
-    log_info(MarlinServer, "Old SFN: %s", filepath_sfn.get());
+    marlin_vars().media_SFN_path.copy_to(d.filepath_sfn.get_buffer(), d.filepath_sfn.maximum_length());
+    log_info(MarlinServer, "Old SFN: %s", d.filepath_sfn.get());
 
     // Pop filename, leave path only
-    filepath_sfn.pop();
+    d.filepath_sfn.pop();
 
     // This is done on the marlin thread, so we can keep using the pointer
-    const char *lfn = marlin_vars().media_LFN.get_ptr();
+    d.lfn = marlin_vars().media_LFN.get_ptr();
 
-    DIR *dir = opendir(filepath_sfn.get());
-    if (!dir) {
-        return;
-    }
-    ScopeGuard dir_guard([&] { closedir(dir); });
-
-    struct dirent *ent;
-    while ((ent = readdir(dir))) {
-        if ((strcasecmp(ent->d_name, lfn) == 0) || (strcasecmp(ent->lfn, lfn) == 0)) {
-            break;
+    // Do this in the async job thread to prevent blocking Marlin on I/O and possibly causing a watchdog reset
+    AsyncJob async_job;
+    async_job.issue([&d](AsyncJobExecutionControl &) {
+        DIR *dir = opendir(d.filepath_sfn.get());
+        if (!dir) {
+            return;
         }
-    }
-    if (!ent) {
-        return;
+        ScopeGuard dir_guard([&] { closedir(dir); });
+
+        struct dirent *ent;
+        while ((ent = readdir(dir))) {
+            if ((strcasecmp(ent->d_name, d.lfn) == 0) || (strcasecmp(ent->lfn, d.lfn) == 0)) {
+                break;
+            }
+        }
+
+        if (!ent) {
+            return;
+        }
+
+        d.found = true;
+        d.filepath_sfn.push(ent->d_name);
+    });
+
+    while (async_job.is_active()) {
+        ::idle(true, true);
     }
 
-    // Store the new SFN
-    filepath_sfn.push(ent->d_name);
-    log_info(MarlinServer, "New SFN: %s", filepath_sfn.get());
+    // We haven't found the file -> do nothing. Fail open is sorted out later in the code.
+    if (!d.found) {
+        return;
+    }
 
     // Update the relevant variables
-    marlin_vars().media_SFN_path.set(filepath_sfn.get());
-    GCodeInfo::getInstance().set_gcode_file(filepath_sfn.get(), lfn);
+    log_info(MarlinServer, "New SFN: %s", d.filepath_sfn.get());
+    marlin_vars().media_SFN_path.set(d.filepath_sfn.get());
+    GCodeInfo::getInstance().set_gcode_file(d.filepath_sfn.get(), d.lfn);
 }
 
 void print_resume(void) {
