@@ -36,6 +36,9 @@ ParkingPosition ParkingPosition::from_xyz_pos(const xyz_pos_t &pos) {
 
 #if HAS_NOZZLE_CLEANER()
 /**
+ * Does the extra parking moves except the last one to move in the correct
+ * directions and avoid the nozzle cleaner.
+ *
  *  RearArea = WasteArea + NoWasteLand         │ X_NOZZLE_PARK_POINT
  *                                             ▼
  * ┌────────────────NO─WASTE─LAND────────────────┬─────────WASTE─AREA─────────┐
