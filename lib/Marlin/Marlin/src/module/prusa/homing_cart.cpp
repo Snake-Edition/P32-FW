@@ -372,7 +372,9 @@ float home_axis_precise(AxisEnum axis, int axis_home_dir, bool can_calibrate, fl
 
     PrintStatusMessageGuard status_guard;
 
-    for (int try_nr = 0; try_nr < tries; ++try_nr) {
+    bool success = false;
+    int try_nr = 0;
+    for (; try_nr < tries; ++try_nr) {
         SERIAL_ECHO_START();
         SERIAL_ECHOPAIR("== Precise Homing axis ", axis_codes[axis]);
         SERIAL_ECHOPAIR(" try ", try_nr);
@@ -420,21 +422,25 @@ float home_axis_precise(AxisEnum axis, int axis_home_dir, bool can_calibrate, fl
             SERIAL_ECHOLN("failed.");
             status_guard.update<PrintStatusMessage::homing_retrying>({ .axis = axis });
             homing_failed_update_divisor(axis);
+
         } else if (std::abs(calibration_offset) <= perfect_offset) {
             SERIAL_ECHOLN("perfect.");
-            save_divisor_to_eeprom(try_nr, axis);
-            return probe_offset;
+            success = true;
+            break;
+
         } else if ((std::abs(calibration_offset) <= acceptable_offset)) {
             SERIAL_ECHOLN("acceptable.");
             if (try_nr >= accept_perfect_only_tries) {
-                save_divisor_to_eeprom(try_nr, axis);
-                return probe_offset;
+                success = true;
+                break;
             }
+
             if (first_acceptable) {
                 status_guard.update<PrintStatusMessage::homing_refining>({ .axis = axis });
                 homing_failed_update_divisor(axis);
             }
             first_acceptable = true;
+
         } else {
             SERIAL_ECHOLN("bad.");
             if (can_calibrate) {
@@ -445,6 +451,12 @@ float home_axis_precise(AxisEnum axis, int axis_home_dir, bool can_calibrate, fl
         }
     }
 
-    SERIAL_ERROR_MSG("Precise homing runs out of tries to get acceptable probe.");
+    if (success) {
+        save_divisor_to_eeprom(try_nr, axis);
+    } else {
+        SERIAL_ERROR_MSG("Precise homing runs out of tries to get acceptable probe.");
+    }
+
+    // What about some failure reporting, hm?
     return probe_offset;
 }
