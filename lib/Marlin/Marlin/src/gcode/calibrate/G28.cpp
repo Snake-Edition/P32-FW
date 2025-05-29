@@ -107,6 +107,10 @@
   #include <feature/ceiling_clearance/ceiling_clearance.hpp>
 #endif
 
+#if HAS_PRECISE_HOMING_COREXY()
+bool corexy_refine_during_G28(float fr_mm_s, const G28Flags &flags, PrintStatusMessageGuard &statusGuard);
+#endif
+
 #if ENABLED(QUICK_HOME)
 
   static void quick_home_xy() {
@@ -754,64 +758,8 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
       #endif
 
       if (do_refine) {
-        // Do a quick move to the home position. Refinement can now be done separately to the imprecise homing and the head can be anywhere
-        // The position taken from corexy_rehome_and_phase
-        do_blocking_move_to_xy(
-          (base_home_pos(X_AXIS) - XY_HOMING_ORIGIN_OFFSET * X_HOME_DIR),
-          (base_home_pos(Y_AXIS) - XY_HOMING_ORIGIN_OFFSET * Y_HOME_DIR)
-        );
+        failed |= !corexy_refine_during_G28(fr_mm_s, flags, statusGuard);
 
-        // Do not handle feedrate defaults again within precise homing: do it here
-        const float xy_mm_s = fr_mm_s ? fr_mm_s : homing_feedrate(A_AXIS);
-
-        for (size_t retry = 0; !planner.draining(); ++retry) {
-          #if HAS_TRINAMIC && defined(XY_HOMING_MEASURE_SENS_MIN)
-          // re/calibrate optimal measurement sensitivity first
-          if (flags.force_calibrate || !corexy_sens_is_calibrated()
-            || (retry && (retry % PRECISE_HOMING_SENS_TRY_RECAL) == 0)) {
-            statusGuard.update<PrintStatusMessage::recalibrating_home>({});
-
-            if (!corexy_sens_calibrate(xy_mm_s)) {
-              failed = true;
-              break;
-            }
-            if (!corexy_rehome_xy(xy_mm_s)) {
-              failed = true;
-              break;
-            }
-          }
-          #endif
-
-          CoreXYCalibrationMode mode =
-            ( flags.force_calibrate ? CoreXYCalibrationMode::force
-              : flags.can_calibrate ? CoreXYCalibrationMode::on_demand
-              : CoreXYCalibrationMode::disallow );
-
-          if (mode == CoreXYCalibrationMode::on_demand && corexy_home_is_unstable()) {
-            // automatically recalibrate when allowed and unstable
-            mode = CoreXYCalibrationMode::force;
-          }
-
-          failed = !corexy_home_refine(xy_mm_s, mode);
-          if (!failed && (!corexy_home_is_unstable() || !corexy_home_is_calibrated())) {
-            // Mark the axes as precisely homed
-            axes_home_level[X_AXIS] = AxisHomeLevel::full;
-            axes_home_level[Y_AXIS] = AxisHomeLevel::full;
-
-            // successfully homed
-            break;
-          }
-          if (retry >= PRECISE_HOMING_COREXY_RETRIES) {
-            // allow homing to continue after enough retries even if the home is unstable
-            break;
-          }
-
-          // instead of blindly retrying internally on the same location, move the gantry
-          if (!corexy_rehome_xy(xy_mm_s)) {
-            failed = true;
-            break;
-          }
-        }
         if (failed && !planner.draining()) {
           homing_failed([]() { fatal_error(ErrCode::ERR_MECHANICAL_PRECISE_REFINEMENT_FAILED); });
         }
@@ -989,3 +937,70 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
   return !failed;
 }
+
+#if HAS_PRECISE_HOMING_COREXY()
+bool corexy_refine_during_G28(float fr_mm_s, const G28Flags &flags, PrintStatusMessageGuard &statusGuard) {
+  // Do a quick move to the home position. Refinement can now be done separately to the imprecise homing and the head can be anywhere
+  // The position taken from corexy_rehome_and_phase
+  do_blocking_move_to_xy(
+    (base_home_pos(X_AXIS) - XY_HOMING_ORIGIN_OFFSET * X_HOME_DIR),
+    (base_home_pos(Y_AXIS) - XY_HOMING_ORIGIN_OFFSET * Y_HOME_DIR)
+  );
+
+  bool failed = false;
+
+  // Do not handle feedrate defaults again within precise homing: do it here
+  const float xy_mm_s = fr_mm_s ? fr_mm_s : homing_feedrate(A_AXIS);
+
+  for (size_t retry = 0; !planner.draining(); ++retry) {
+    #if HAS_TRINAMIC && defined(XY_HOMING_MEASURE_SENS_MIN)
+    // re/calibrate optimal measurement sensitivity first
+    if (flags.force_calibrate || !corexy_sens_is_calibrated()
+      || (retry && (retry % PRECISE_HOMING_SENS_TRY_RECAL) == 0)) {
+      statusGuard.update<PrintStatusMessage::recalibrating_home>({});
+
+      if (!corexy_sens_calibrate(xy_mm_s)) {
+        failed = true;
+        break;
+      }
+      if (!corexy_rehome_xy(xy_mm_s)) {
+        failed = true;
+        break;
+      }
+    }
+    #endif
+
+    CoreXYCalibrationMode mode =
+      ( flags.force_calibrate ? CoreXYCalibrationMode::force
+        : flags.can_calibrate ? CoreXYCalibrationMode::on_demand
+        : CoreXYCalibrationMode::disallow );
+
+    if (mode == CoreXYCalibrationMode::on_demand && corexy_home_is_unstable()) {
+      // automatically recalibrate when allowed and unstable
+      mode = CoreXYCalibrationMode::force;
+    }
+
+    failed = !corexy_home_refine(xy_mm_s, mode);
+    if (!failed && (!corexy_home_is_unstable() || !corexy_home_is_calibrated())) {
+      // Mark the axes as precisely homed
+      axes_home_level[X_AXIS] = AxisHomeLevel::full;
+      axes_home_level[Y_AXIS] = AxisHomeLevel::full;
+
+      // successfully homed
+      break;
+    }
+    if (retry >= PRECISE_HOMING_COREXY_RETRIES) {
+      // allow homing to continue after enough retries even if the home is unstable
+      break;
+    }
+
+    // instead of blindly retrying internally on the same location, move the gantry
+    if (!corexy_rehome_xy(xy_mm_s)) {
+      failed = true;
+      break;
+    }
+  }
+
+  return !failed;
+}
+#endif
