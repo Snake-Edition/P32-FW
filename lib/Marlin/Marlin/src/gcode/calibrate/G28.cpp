@@ -708,18 +708,21 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   }
   #endif /*ENABLED(PRUSA_TOOLCHANGER)*/
 
+  const bool do_x_imprecise = doX && (!flags.only_if_needed || !is_axis_homed(X_AXIS, AxisHomeLevel::imprecise));
+  const bool do_y_imprecise = doY && (!flags.only_if_needed || !is_axis_homed(Y_AXIS, AxisHomeLevel::imprecise));
+
   // Home Y (before X)
-  if (ENABLED(HOME_Y_BEFORE_X) && !failed && doY) {
+  if (ENABLED(HOME_Y_BEFORE_X) && !failed && do_y_imprecise) {
     failed = !homeaxis(Y_AXIS, fr_mm_s, false, reenable_wt_Y, flags.can_calibrate);
   }
 
   // Home X
-  if (!failed && doX) {
+  if (!failed && do_x_imprecise) {
     failed = !homeaxis(X_AXIS, fr_mm_s, false, reenable_wt_X, flags.can_calibrate);
   }
 
   // Home Y (after X)
-  if (DISABLED(HOME_Y_BEFORE_X) && !failed && doY) {
+  if (DISABLED(HOME_Y_BEFORE_X) && !failed && do_y_imprecise) {
     failed = !homeaxis(Y_AXIS, fr_mm_s, false, reenable_wt_Y, flags.can_calibrate);
   }
 
