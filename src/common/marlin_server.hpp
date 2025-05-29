@@ -236,7 +236,7 @@ inline Response get_response_from_phase(FSMAndPhase fsm_and_phase) {
 }
 
 /// idles() for FSM response for the given phase and then \returns it
-Response wait_for_response(FSMAndPhase fsm_and_phase);
+Response wait_for_response(FSMAndPhase fsm_and_phase, uint32_t timeout_ms = 0);
 
 /// Replacement for the FSM_Notifier. Hooked callbacks will get called in marlin idle()
 extern CallbackHookPoint<> idle_hook_point;
@@ -276,7 +276,7 @@ void clear_warning(WarningType type);
 bool is_warning_active(WarningType type);
 
 /// Displays a warning and blockingly waits for the response
-Response prompt_warning(WarningType type);
+Response prompt_warning(WarningType type, uint32_t timeout_ms = 0);
 
 #if ENABLED(AXIS_MEASURE)
 // Sets length of X and Y axes for crash recovery

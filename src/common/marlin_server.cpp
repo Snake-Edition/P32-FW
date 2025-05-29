@@ -549,9 +549,9 @@ bool is_warning_active(WarningType type) {
     return warning_flags.test(std::to_underlying(type));
 }
 
-Response prompt_warning(WarningType type) {
+Response prompt_warning(WarningType type, uint32_t timeout_ms) {
     set_warning(type);
-    const Response r = wait_for_response(warning_type_phase(type));
+    const Response r = wait_for_response(warning_type_phase(type), timeout_ms);
     clear_warning(type);
     return r;
 }
@@ -3472,7 +3472,7 @@ FSMResponseVariant get_response_variant_from_phase(FSMAndPhase fsm_and_phase) {
     }
 }
 
-Response wait_for_response(FSMAndPhase fsm_and_phase) {
+Response wait_for_response(FSMAndPhase fsm_and_phase, uint32_t timeout_ms) {
     // Warning phase response is consumed in marlin_server::handle_warnings
     assert(fsm_and_phase != PhasesWarning::Warning);
 
@@ -3484,9 +3484,15 @@ Response wait_for_response(FSMAndPhase fsm_and_phase) {
         bsod("wait_for_response inside cycle");
     }
 
+    const auto wait_start = ticks_ms();
+
     while (true) {
         if (auto r = get_response_from_phase(fsm_and_phase); r != Response::_none) {
             return r;
+        }
+
+        if (timeout_ms && ticks_diff(ticks_ms(), wait_start) > int32_t(timeout_ms)) {
+            return Response::_none;
         }
 
         // The second true - don't disable steppers. If we are sitting in some
