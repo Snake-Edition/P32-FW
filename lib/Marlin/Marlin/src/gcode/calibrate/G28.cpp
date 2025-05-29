@@ -348,9 +348,7 @@ void GcodeSuite::G28() {
   #if ENABLED(DETECT_PRINT_SHEET)
     flags.check_sheet = !parser.boolval('P');
   #endif
-  #if HAS_PRECISE_HOMING_COREXY()
-    flags.no_refine = parser.seen('I'); // do not perform precise refinement
-  #endif
+  flags.precise = !parser.seen('I'); // do not perform precise refinement
 
   #if ENABLED(CRASH_RECOVERY)
     bool all_axes = (!X && !Y && !Z) || (X && Y && Z);
@@ -725,7 +723,7 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
   #if HAS_PRECISE_HOMING_COREXY()
     // absolute refinement requires both axes to be already probed
-    if (!failed && doX && doY && !flags.no_refine) {
+    if (!failed && doX && doY && flags.precise) {
       #if DISABLED(PRUSA_TOOLCHANGER)
         // skip refinement without data if we're not allowed to calibrate
         const bool do_refine = (corexy_home_is_calibrated() || flags.can_calibrate || flags.force_calibrate);

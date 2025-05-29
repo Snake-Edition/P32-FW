@@ -295,9 +295,11 @@ struct G28Flags {
   #if ENABLED(MARLIN_DEV_MODE)
     bool simulate = false;
   #endif
-  #if HAS_PRECISE_HOMING_COREXY()
-    bool no_refine = false;
-  #endif
+
+  /// Require the homing to be precise (if false, only guarantees 'imprecise' homing, which might be faster, but is not suitable for printing)
+  /// Relates to HAS_PRECISE_HOMING_COREXY
+  bool precise = true;
+
   #if ENABLED(DETECT_PRINT_SHEET)
     bool check_sheet = false;
   #endif
