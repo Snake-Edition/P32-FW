@@ -919,7 +919,6 @@ void Pause::stop_process([[maybe_unused]] Response response) {
 
     planner.resume_queuing();
     set_all_unhomed();
-    set_all_unknown();
     xyze_pos_t real_current_position;
     planner.get_axis_position_mm(static_cast<xyz_pos_t &>(real_current_position));
     real_current_position[E_AXIS] = 0;

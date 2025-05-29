@@ -106,7 +106,7 @@ public:
     using Counter = Crash_s_Counters::Counter;
 
     uint16_t segments_finished;
-    uint8_t crash_axis_known_position; /// axis state before crashing
+    AxesHomeLevel crash_axes_home_level; /// axis state before crashing
     bool leveling_active; /// state of MBL before crashing
     RecoverFlags recover_flags; /// instruction replay flags before crashing
     feedRate_t fr_mm_s; /// Replay feedrate

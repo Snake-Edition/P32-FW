@@ -1104,7 +1104,6 @@ void quick_stop() {
     planner.quick_stop();
     disable_all_steppers();
     set_all_unhomed();
-    set_all_unknown();
     server.flags |= MARLIN_SFLG_STOPPED;
 }
 
@@ -2899,7 +2898,7 @@ void lift_head() {
         - current_position.z;
     static_assert(Z_NOZZLE_PARK_POINT > 0);
 
-    if (TEST(axis_known_position, Z_AXIS)) {
+    if (axes_home_level.is_homed(Z_AXIS, AxisHomeLevel::imprecise)) {
         // Do prepare_move_to_destination, as it segments the move and thus allows better emergency_stop
         AutoRestore _ar(feedrate_mm_s, MMM_TO_MMS(HOMING_FEEDRATE_INVERTED_Z));
         destination = current_position;

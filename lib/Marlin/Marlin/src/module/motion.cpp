@@ -24,6 +24,8 @@
  * motion.cpp
  */
 
+#include <array>
+
 #include "motion.h"
 #include "bsod.h"
 #include "endstops.h"
@@ -114,16 +116,7 @@ XYZ_CONSTS(float, max_length,     MAX_LENGTH);
 XYZ_CONSTS(float, home_bump_mm,   HOME_BUMP_MM);
 XYZ_CONSTS(signed char, home_dir, HOME_DIR);
 
-/**
- * axis_homed
- *   Flags that each linear axis was homed.
- *   XYZ on cartesian, ABC on delta, ABZ on SCARA.
- *
- * axis_known_position
- *   Flags that the position is known in each linear axis. Set when homed.
- *   Cleared whenever a stepper powers off, potentially losing its position.
- */
-uint8_t axis_homed, axis_known_position; // = 0
+AxesHomeLevel axes_home_level = AxesHomeLevel::no_axes_homed;
 
 // Relative Mode. Enable with G91, disable with G90.
 bool relative_mode; // = false;
@@ -497,7 +490,7 @@ void do_blocking_move_to_xy_z(const xy_pos_t &raw, const float &z, const feedRat
     if (!lower_allowed) NOLESS(zdest, current_position.z);
     NOMORE(zdest, Z_MAX_POS);
 
-    if (TEST(axis_known_position, Z_AXIS)) {
+    if (axes_home_level.is_homed(Z_AXIS, AxisHomeLevel::imprecise)) {
       // axis position is known: perform a regular move
       do_blocking_move_to_z(zdest);
     } else if (zdest != current_position.z) {
@@ -745,17 +738,19 @@ void prepare_move_to_destination(const MoveHints &hints) {
   current_position = destination;
 }
 
-uint8_t axes_need_homing(uint8_t axis_bits/*=0x07*/) {
-  #if ENABLED(HOME_AFTER_DEACTIVATE)
-    #define HOMED_FLAGS axis_known_position
-  #else
-    #define HOMED_FLAGS axis_homed
-  #endif
-  return axis_bits & ~HOMED_FLAGS;
+uint8_t axes_need_homing(uint8_t axis_bits/*=0x07*/, AxisHomeLevel required_level) {
+  uint8_t result = 0;
+  for(uint8_t i = 0; i < axes_home_level.size(); i++) {
+    const uint8_t bit = (1 << i);
+    if((axis_bits & bit) && (axes_home_level[i] < required_level)) {
+      result |= bit;
+    }
+  }
+  return result;
 }
 
-bool axis_unhomed_error(uint8_t axis_bits/*=0x07*/) {
-  if ((axis_bits = axes_need_homing(axis_bits))) {
+bool axis_unhomed_error(uint8_t axis_bits/*=0x07*/, AxisHomeLevel required_level) {
+  if ((axis_bits = axes_need_homing(axis_bits, required_level))) {
     PGM_P home_first = GET_TEXT(MSG_HOME_FIRST);
     char msg[strlen_P(home_first)+1];
     sprintf_P(msg, home_first,
@@ -941,7 +936,7 @@ void do_homing_move_axis_rel(const AxisEnum axis, const float distance, const fe
   if (planner.draining())
     return;
 
-  CBI(axis_known_position, axis);
+  axes_home_level[axis] = AxisHomeLevel::not_homed;
   current_position[axis] = 0;
   sync_plan_position();
   current_position[axis] = distance;
@@ -1144,8 +1139,8 @@ void set_axis_is_at_home(const AxisEnum axis, [[maybe_unused]] bool homing_z_wit
   // ensure we're not within an aborted move: caller needs to check!
   assert(!planner.draining());
 
-  SBI(axis_known_position, axis);
-  SBI(axis_homed, axis);
+  // TODO: This should only set to imprecise, we should get to precise after refinement
+  axes_home_level[axis] = AxisHomeLevel::full;
 
   #if ENABLED(DUAL_X_CARRIAGE)
     if (axis == X_AXIS && (active_extruder == 1 || dual_x_carriage_mode == DXC_DUPLICATION_MODE)) {
@@ -1260,8 +1255,7 @@ void set_axis_is_at_home(const AxisEnum axis, [[maybe_unused]] bool homing_z_wit
 void set_axis_is_not_at_home(const AxisEnum axis) {
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> set_axis_is_not_at_home(", axis_codes[axis], ")");
 
-  CBI(axis_known_position, axis);
-  CBI(axis_homed, axis);
+  axes_home_level[axis] = AxisHomeLevel::not_homed;
 
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("<<< set_axis_is_not_at_home(", axis_codes[axis], ")");
 
@@ -1339,7 +1333,7 @@ bool homeaxis(const AxisEnum axis, const feedRate_t fr_mm_s, bool invert_home_di
   void (*enable_wavetable)(AxisEnum), [[maybe_unused]] bool can_calibrate, bool homing_z_with_probe) {
 
   // clear the axis state while running
-  CBI(axis_known_position, axis);
+  axes_home_level[axis] = AxisHomeLevel::not_homed;
 
   #if ENABLED(CRASH_RECOVERY)
     crash_s.not_for_replay();

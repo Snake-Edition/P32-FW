@@ -90,8 +90,8 @@ LoopResult CSelftestPart_Axis::wait(int8_t dir) {
     report_current_position();
 
     // Tool offset was just trashed, moreover this home was not intended to be precise
-    CBI(axis_known_position, X_AXIS);
-    CBI(axis_known_position, Y_AXIS);
+    axes_home_level[X_AXIS] = AxisHomeLevel::not_homed;
+    axes_home_level[Y_AXIS] = AxisHomeLevel::not_homed;
 
     int32_t endPos_usteps = stepper.position((AxisEnum)config.axis);
     int32_t length_usteps = dir * (endPos_usteps - m_StartPos_usteps);
@@ -188,7 +188,7 @@ LoopResult CSelftestPart_Axis::stateHomeZ() {
 #endif
 
     // We have Z safe homing enabled, so trash Z position and re-home without calibrations
-    CBI(axis_known_position, Z_AXIS);
+    axes_home_level[Z_AXIS] = AxisHomeLevel::not_homed;
     queue.enqueue_one_now("G28 I O D P");
 
     return LoopResult::RunNext;

@@ -410,8 +410,8 @@ bool PrusaToolChanger::check_skipped_step() {
     #if ENABLED(CRASH_RECOVERY)
     if (crash_s.get_state() == Crash_s::TRIGGERED_TOOLCRASH) {
         // Force rehome
-        CBI(axis_known_position, X_AXIS);
-        CBI(axis_known_position, Y_AXIS);
+        axes_home_level[X_AXIS] = AxisHomeLevel::not_homed;
+        axes_home_level[Y_AXIS] = AxisHomeLevel::not_homed;
         if (ensure_safe_move()) {
             crash_s.set_state(Crash_s::REPEAT_WAIT); // Has to go through WAIT to PRINTING
             crash_s.set_state(Crash_s::PRINTING);
@@ -730,16 +730,16 @@ bool PrusaToolChanger::align_locks() {
     } else {
         // A bit back in case the carriage is near tool
         do_homing_move(Y_AXIS, SAFE_Y_WITHOUT_TOOL - DOCK_DEFAULT_Y_MM);
-        CBI(axis_known_position, Y_AXIS); // Needs homing after
+        axes_home_level[Y_AXIS] = AxisHomeLevel::not_homed; // Needs homing after
     }
     planner.synchronize();
 
     // Bump right edge
     if (!homeaxis(X_AXIS, 0, true)) {
-        CBI(axis_known_position, X_AXIS); // Needs homing
+        axes_home_level[X_AXIS] = AxisHomeLevel::not_homed; // Needs homing
         return false; // Failed to bump right edge
     }
-    CBI(axis_known_position, X_AXIS); // Needs homing after
+    axes_home_level[X_AXIS] = AxisHomeLevel::not_homed; // Needs homing after
     current_position.x = X_MAX_POS;
     sync_plan_position();
 

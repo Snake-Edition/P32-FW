@@ -319,7 +319,7 @@ void GcodeSuite::G29() {
                 // calib_Z does not have its own holder - we have to handle that
                 marlin_server::FSM_Holder _fsm(PhasesSelftest::CalibZ);
                 selftest::calib_Z(true);
-                assert(!TEST(axis_homed, Z_AXIS));
+                assert(!axes_home_level.is_homed(Z_AXIS, AxisHomeLevel::imprecise));
                 continue;
             }
         }

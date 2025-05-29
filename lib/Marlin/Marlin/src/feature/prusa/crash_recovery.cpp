@@ -80,7 +80,7 @@ void Crash_s::stop_and_save() {
     } else {
         leveling_active = planner.leveling_active;
     }
-    crash_axis_known_position = axis_known_position;
+    crash_axes_home_level = axes_home_level;
     // TODO: this is incomplete, as some of the planner state is ahead of the stepper state
     //       marlin state is also not saved, notably: absolute/relative axis state
     // marlin_server.motion_param.save();
@@ -220,7 +220,7 @@ void Crash_s::set_state(state_t new_state) {
         }
 
         toolchange_event = true;
-        crash_axis_known_position = axis_known_position; // Needed for powerpanic
+        crash_axes_home_level = axes_home_level; // Needed for powerpanic
         check_and_set_sdpos(queue.get_current_sdpos());
         break;
 
@@ -230,7 +230,7 @@ void Crash_s::set_state(state_t new_state) {
         }
 
         toolchange_event = false;
-        crash_axis_known_position = axis_known_position; // Needed for powerpanic
+        crash_axes_home_level = axes_home_level; // Needed for powerpanic
         check_and_set_sdpos(queue.get_current_sdpos());
         break;
 

@@ -31,27 +31,77 @@
 #include "../inc/MarlinConfig.h"
 
 #include <inplace_function.hpp>
+#include <array>
+#include <span>
 
 #if HAS_BED_PROBE
   #include "probe.h"
 #endif
 #include <option/has_wastebin.h>
 
-#if IS_SCARA
-  #include "scara.h"
-#endif
+// Axis homed and known-position states
+static constexpr uint8_t xyz_bits = _BV(X_AXIS) | _BV(Y_AXIS) | _BV(Z_AXIS);
 
 struct MoveHints {
   bool is_printing_move = false;      // The move is a printing move and should possibly count into max printed Z
 };
 
-// Axis homed and known-position states
-extern uint8_t axis_homed, axis_known_position;
-static constexpr uint8_t xyz_bits = _BV(X_AXIS) | _BV(Y_AXIS) | _BV(Z_AXIS);
-FORCE_INLINE bool all_axes_homed() { return (axis_homed & xyz_bits) == xyz_bits; }
-FORCE_INLINE bool all_axes_known() { return (axis_known_position & xyz_bits) == xyz_bits; }
-FORCE_INLINE void set_all_unhomed() { axis_homed = 0; }
-FORCE_INLINE void set_all_unknown() { axis_known_position = 0; }
+enum class AxisHomeLevel : uint8_t {
+  /// The axis it not homed at all, we could be anywhere
+  not_homed,
+
+  /// The axis is homed imprecisely (say +- 1mm). Good enough for some operations, not good enough for printing
+  imprecise,
+
+  /// The axis is homed as precisely as the printer allows
+  full
+};
+
+struct AxesHomeLevel : public std::array<AxisHomeLevel, 3> {
+
+public:
+  // Inherit parent constructors and assign operators
+  using array::array;
+  using array::operator=;
+  
+  AxesHomeLevel(const array &data) : array(data) {}
+
+  static constexpr array no_axes_homed{AxisHomeLevel::not_homed, AxisHomeLevel::not_homed, AxisHomeLevel::not_homed};
+
+  /// \returns whether a single axis is homed to the required level
+  constexpr bool is_homed(AxisEnum axis, AxisHomeLevel required_level) const {
+    return at(std::to_underlying(axis)) >= required_level;
+  }
+
+  /// \returns whether all axes in the list are homed to the required level
+  constexpr inline bool is_homed(std::span<const AxisEnum> axes, AxisHomeLevel required_level) const {
+    for(auto axis : axes) {
+      if(!is_homed(axis, required_level)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// \returns whether all axes in the list are homed to the required level
+  constexpr inline bool is_homed(std::initializer_list<AxisEnum> axes, AxisHomeLevel required_level) const {
+    return is_homed(std::span(axes), required_level);
+  }
+
+  /// \returns whether all axes are homed to a required level
+  constexpr bool is_homed(AxisHomeLevel required_level) const {
+    return is_homed({X_AXIS, Y_AXIS, Z_AXIS}, required_level);
+  }
+
+};
+
+/// To what degree are the individual axes homed
+extern AxesHomeLevel axes_home_level;
+
+inline bool all_axes_homed(AxisHomeLevel required_level = AxisHomeLevel::imprecise) { return axes_home_level.is_homed(required_level); }
+inline bool all_axes_known(AxisHomeLevel required_level = AxisHomeLevel::imprecise) { return axes_home_level.is_homed(required_level); }
+
+inline void set_all_unhomed() { axes_home_level = AxesHomeLevel::no_axes_homed; }
 
 FORCE_INLINE bool homing_needed() {
   return !(
@@ -264,8 +314,8 @@ void restore_feedrate_and_scaling();
 // Homing
 //
 
-uint8_t axes_need_homing(uint8_t axis_bits=0x07);
-bool axis_unhomed_error(uint8_t axis_bits=0x07);
+uint8_t axes_need_homing(uint8_t axis_bits=0x07, AxisHomeLevel required_level = AxisHomeLevel::imprecise);
+bool axis_unhomed_error(uint8_t axis_bits=0x07, AxisHomeLevel required_level = AxisHomeLevel::imprecise);
 
 static inline bool axes_should_home(uint8_t axis_bits=0x07) { return axes_need_homing(axis_bits); }
 static inline bool homing_needed_error(uint8_t axis_bits=0x07) { return axis_unhomed_error(axis_bits); }

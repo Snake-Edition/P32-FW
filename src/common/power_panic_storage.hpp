@@ -116,13 +116,13 @@ struct state_crash_t {
     xyze_pos_t crash_current_position; /// absolute logical XYZE position of the crash location
     abce_pos_t crash_position; /// absolute physical ABCE position of the crash location
     uint16_t segments_finished = 0;
-    uint8_t axis_known_position; /// axis state before crashing
     uint8_t leveling_active; /// state of MBL before crashing
+    AxesHomeLevel axes_home_level; /// axis state before crashing
+    Crash_s::RecoverFlags recover_flags; /// instruction replay flags
+    uint8_t _padding[1]; // Silence the compiler
     feedRate_t fr_mm_s; /// current move feedrate
     Crash_s_Counters::Data counters;
-    Crash_s::RecoverFlags recover_flags; /// instruction replay flags
-
-    uint8_t _padding[1]; // silence warning
+    uint8_t _padding2[2]; // Silence the compiler
 };
 
 // print progress data
@@ -209,7 +209,7 @@ struct runtime_state_t {
     bool nested_fault;
     PPState orig_state; // state that was active when power panic was triggered
     char media_SFN_path[FILE_PATH_MAX_LEN]; // temporary buffer
-    uint8_t orig_axis_known_position;
+    AxesHomeLevel orig_axes_home_level;
     uint32_t fault_stamp; // time since acFault trigger
 };
 /// Runtime state of the power panic, runtime means that is not persisted on restart, just on PP save/resume

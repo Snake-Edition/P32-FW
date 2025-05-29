@@ -112,8 +112,8 @@
   static void quick_home_xy() {
 
     // Pretend the current position is 0,0
-    CBI(axis_known_position, X_AXIS);
-    CBI(axis_known_position, Y_AXIS);
+    axes_home_level[X_AXIS] = AxisHomeLevel::not_homed;
+    axes_home_level[Y_AXIS] = AxisHomeLevel::not_homed;
     current_position.set(0.0, 0.0);
     sync_plan_position();
 

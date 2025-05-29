@@ -389,7 +389,7 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
           #if _DEBUG && !BOARD_IS_DWARF()
           // Report steppers being disabled to the user
           // Skip if position not trusted to avoid warnings when position is not important
-          if(axis_known_position) {
+          if(axes_home_level != AxesHomeLevel::no_axes_homed) {
             /// @note Hacky link from marlin_server which cannot be included here.
             /// @todo Remove when stepper timeout screen is solved properly.
             extern void marlin_server_steppers_timeout_warning();

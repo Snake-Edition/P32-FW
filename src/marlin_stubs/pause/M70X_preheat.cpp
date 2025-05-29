@@ -201,7 +201,7 @@ void filament_gcodes::M1700_no_parser(const M1700Args &args) {
     if (filament == FilamentType::none) {
         thermalManager.set_fan_speed(0, 0);
 
-    } else if ((axis_homed & _BV(Z_AXIS)) != _BV(Z_AXIS)) {
+    } else if (!axes_home_level.is_homed(Z_AXIS, AxisHomeLevel::imprecise)) {
         unhomed_z_lift(10);
     }
 

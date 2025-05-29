@@ -324,11 +324,7 @@ void resume_loop() {
         assert(!planner.leveling_active);
         current_position[Z_AXIS] = state_buf.planner.z_position;
         planner.set_position_mm(current_position);
-        if (TEST(state_buf.crash.axis_known_position, Z_AXIS)) {
-            SBI(axis_known_position, Z_AXIS);
-            SBI(axis_homed, Z_AXIS);
-        }
-
+        axes_home_level[Z_AXIS] = state_buf.crash.axes_home_level[Z_AXIS];
         planner.max_printed_z = state_buf.planner.max_printed_z;
 
         // canceled objects
@@ -368,7 +364,7 @@ void resume_loop() {
 
         if (state_buf.crash.recover_flags & Crash_s::RECOVER_AXIS_STATE) {
             // lift and rehome
-            if (TEST(state_buf.crash.axis_known_position, X_AXIS) || TEST(state_buf.crash.axis_known_position, Y_AXIS)) {
+            if (state_buf.crash.axes_home_level.is_homed(X_AXIS, AxisHomeLevel::imprecise) || state_buf.crash.axes_home_level.is_homed(Y_AXIS, AxisHomeLevel::imprecise)) {
                 float z_dist = current_position[Z_AXIS] - state_buf.crash.crash_current_position[Z_AXIS];
                 float z_lift = z_dist < Z_HOMING_HEIGHT ? Z_HOMING_HEIGHT - z_dist : 0;
                 char cmd_buf[24];
@@ -426,7 +422,7 @@ void resume_loop() {
         }
 
         // unpark only if the position was known
-        if (TEST(state_buf.crash.axis_known_position, X_AXIS) && TEST(state_buf.crash.axis_known_position, Y_AXIS)) {
+        if (state_buf.crash.axes_home_level.is_homed({ X_AXIS, Y_AXIS }, AxisHomeLevel::imprecise)) {
             plan_park_move_to_xyz(state_buf.crash.crash_current_position, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE, Segmented::yes);
         }
 
@@ -658,7 +654,7 @@ void panic_loop() {
 #endif
 
         // align the Z axis by lifting as little as sensibly possible
-        if (TEST(runtime_state.orig_axis_known_position, Z_AXIS) && TEST(state_buf.crash.axis_known_position, Z_AXIS)) {
+        if (runtime_state.orig_axes_home_level.is_homed(Z_AXIS, AxisHomeLevel::imprecise) && state_buf.crash.axes_home_level.is_homed(Z_AXIS, AxisHomeLevel::imprecise)) {
             if (!runtime_state.nested_fault || current_position[Z_AXIS] != state_buf.planner.z_position) {
                 log_debug(PowerPanic, "Z MSCNT start: %d", stepperZ.MSCNT());
 
@@ -741,9 +737,14 @@ void panic_loop() {
         Odometer_s::instance().force_to_eeprom();
 
         /// Bitmask of axes that are needed to move
-        static constexpr uint8_t test_axes = ENABLED(COREXY) ? (_BV(X_AXIS) | _BV(Y_AXIS)) : _BV(X_AXIS);
+        static constexpr std::array test_axes
+#if ENABLED(COREXY)
+            { X_AXIS, Y_AXIS };
+#else
+            { X_AXIS };
+#endif
 
-        if ((state_buf.crash.axis_known_position & test_axes) == test_axes) {
+        if (state_buf.crash.axes_home_level.is_homed(test_axes, AxisHomeLevel::imprecise)) {
 #if ENABLED(XY_LINKED_ENABLE) && DISABLED(COREXY)
             // XBuddy has XY-EN linked, so the following move will indirectly enable Y.
             // In order to conserve power and keep Y disabled, set the chopper off time via SPI instead.
@@ -760,7 +761,7 @@ void panic_loop() {
             } else
 #endif /*HAS_TOOLCHANGER()*/
             {
-                if ((runtime_state.orig_axis_known_position & test_axes) == test_axes) {
+                if (runtime_state.orig_axes_home_level.is_homed(test_axes, AxisHomeLevel::imprecise)) {
                     // axis position is currently known, move to the closest endpoint
 #if ENABLED(COREXY)
                     if (std::min(current_position.x - print_rect.a.x, print_rect.b.x - current_position.x)
@@ -859,7 +860,7 @@ void ac_fault_isr() {
 #if HAS_REMOTE_BED()
     remote_bed::safe_state();
 #endif
-    runtime_state.orig_axis_known_position = axis_known_position;
+    runtime_state.orig_axes_home_level = axes_home_level;
     disable_XY();
     buddy::hw::hsUSBEnable.write(buddy::hw::Pin::State::high);
 #if HAS_EMBEDDED_ESP32()
@@ -875,7 +876,7 @@ void ac_fault_isr() {
     if (!state_buf.planner.was_crashed) {
         // fault occurred outside of a crash: trigger one now to update the crash position
         crash_s.set_state(Crash_s::TRIGGERED_AC_FAULT);
-        crash_s.crash_axis_known_position = runtime_state.orig_axis_known_position;
+        crash_s.crash_axes_home_level = runtime_state.orig_axes_home_level;
     }
 
     if (!runtime_state.nested_fault) {
@@ -904,7 +905,7 @@ void ac_fault_isr() {
         }
         state_buf.crash.crash_position = crash_s.crash_position;
         state_buf.crash.segments_finished = crash_s.segments_finished;
-        state_buf.crash.axis_known_position = crash_s.crash_axis_known_position;
+        state_buf.crash.axes_home_level = crash_s.crash_axes_home_level;
         state_buf.crash.leveling_active = crash_s.leveling_active;
         state_buf.crash.recover_flags = crash_s.recover_flags;
         state_buf.crash.fr_mm_s = crash_s.fr_mm_s;
