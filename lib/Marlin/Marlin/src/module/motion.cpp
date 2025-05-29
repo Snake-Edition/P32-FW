@@ -1369,74 +1369,69 @@ bool homeaxis(const AxisEnum axis, const feedRate_t fr_mm_s, bool invert_home_di
     auto loadcellPrecisionEnabler = Loadcell::HighPrecisionEnabler(loadcell, axis == Z_AXIS);
   #endif
 
-  #ifdef HOMING_MAX_ATTEMPTS
-    float (*min_diff)(uint8_t) = invert_home_dir ? axis_home_invert_min_diff : axis_home_min_diff;
-    float (*max_diff)(uint8_t) = invert_home_dir ? axis_home_invert_max_diff : axis_home_max_diff;
+  float (*min_diff)(uint8_t) = invert_home_dir ? axis_home_invert_min_diff : axis_home_min_diff;
+  float (*max_diff)(uint8_t) = invert_home_dir ? axis_home_invert_max_diff : axis_home_max_diff;
 
-    float probe_offset;
-    for(size_t attempt = 0;;) {
-      #if HAS_PRECISE_HOMING()
-        if ((axis == X_AXIS || axis == Y_AXIS) && !invert_home_dir) {
-          probe_offset = home_axis_precise(axis, axis_home_dir, can_calibrate, fr_mm_s);
-          attempt = HOMING_MAX_ATTEMPTS; // call home_axis_precise() just once
-        }
-        else
-      #endif
-        {
-          if (attempt > 0 && axis == Z_AXIS) {
-            // Z has no move back and after the first attempt we might be left too close on the
-            // build plate (for example, with a loadcell we're _on_ the plate). Move back now before
-            // we attempt to probe again so that we can zero the sensor again.
-            float bump = axis_home_dir * (
-              #if HOMING_Z_WITH_PROBE
-                (axis == Z_AXIS && homing_z_with_probe && (Z_HOME_BUMP_MM)) ? _MAX(Z_CLEARANCE_BETWEEN_PROBES, Z_HOME_BUMP_MM) :
-              #endif
-              home_bump_mm(axis)
-            );
-            current_position[axis] -= bump;
-            line_to_current_position(fr_mm_s ? fr_mm_s : homing_feedrate(Z_AXIS));
-            planner.synchronize();
-          }
-
-          probe_offset = homeaxis_single_run(axis, axis_home_dir, fr_mm_s, invert_home_dir, homing_z_with_probe, attempt) * static_cast<float>(axis_home_dir);
-        }
-      if (planner.draining()) {
-        // move intentionally aborted, do not retry/kill
-        return true;
+  float probe_offset;
+  for(size_t attempt = 0;;) {
+    #if HAS_PRECISE_HOMING()
+      if ((axis == X_AXIS || axis == Y_AXIS) && !invert_home_dir) {
+        probe_offset = home_axis_precise(axis, axis_home_dir, can_calibrate, fr_mm_s);
+        attempt = HOMING_MAX_ATTEMPTS; // call home_axis_precise() just once
       }
-
-      // check if the offset is acceptable
-      bool in_range = min_diff(axis) <= probe_offset && probe_offset <= max_diff(axis);
-      metric_record_custom(&metric_home_diff, ",ax=%u,ok=%u v=%.3f,n=%u", (unsigned)axis, (unsigned)in_range, probe_offset, (unsigned)attempt);
-      if (in_range) break; // OK offset in range
-
-      // check whether we should try again
-      if (++attempt >= HOMING_MAX_ATTEMPTS) {
-        // not OK run out attempts
-        set_axis_is_not_at_home(axis);
-        
-        if (!HomingReporter::block_red_screen()) {
-          static constexpr std::array error_codes {
-            ErrCode::ERR_ELECTRO_HOMING_ERROR_X,
-            ErrCode::ERR_ELECTRO_HOMING_ERROR_Y,
-            ErrCode::ERR_ELECTRO_HOMING_ERROR_Z
-          };
-
-          homing_failed([code = error_codes[std::min(static_cast<size_t>(axis), error_codes.size() - 1)]]() { fatal_error(code); }, orig_crash, axis == Z_AXIS);
+      else
+    #endif
+      {
+        if (attempt > 0 && axis == Z_AXIS) {
+          // Z has no move back and after the first attempt we might be left too close on the
+          // build plate (for example, with a loadcell we're _on_ the plate). Move back now before
+          // we attempt to probe again so that we can zero the sensor again.
+          float bump = axis_home_dir * (
+            #if HOMING_Z_WITH_PROBE
+              (axis == Z_AXIS && homing_z_with_probe && (Z_HOME_BUMP_MM)) ? _MAX(Z_CLEARANCE_BETWEEN_PROBES, Z_HOME_BUMP_MM) :
+            #endif
+            home_bump_mm(axis)
+          );
+          current_position[axis] -= bump;
+          line_to_current_position(fr_mm_s ? fr_mm_s : homing_feedrate(Z_AXIS));
+          planner.synchronize();
         }
 
-        return false;
+        probe_offset = homeaxis_single_run(axis, axis_home_dir, fr_mm_s, invert_home_dir, homing_z_with_probe, attempt) * static_cast<float>(axis_home_dir);
       }
-
-      if((axis == X_AXIS || axis == Y_AXIS) && !invert_home_dir){
-        //print only for normal homing, messages from precise homing are taken care inside precise homing
-        ui.status_printf_P(0,"%c axis homing failed, retrying", axis_codes[axis]);
-      }
+    if (planner.draining()) {
+      // move intentionally aborted, do not retry/kill
+      return true;
     }
-  #else // HOMING_MAX_ATTEMPTS
-    homeaxis_single_run(axis, axis_home_dir);
-  #endif // HOMING_MAX_ATTEMPTS
 
+    // check if the offset is acceptable
+    bool in_range = min_diff(axis) <= probe_offset && probe_offset <= max_diff(axis);
+    metric_record_custom(&metric_home_diff, ",ax=%u,ok=%u v=%.3f,n=%u", (unsigned)axis, (unsigned)in_range, probe_offset, (unsigned)attempt);
+    if (in_range) break; // OK offset in range
+
+    // check whether we should try again
+    if (++attempt >= HOMING_MAX_ATTEMPTS) {
+      // not OK run out attempts
+      set_axis_is_not_at_home(axis);
+      
+      if (!HomingReporter::block_red_screen()) {
+        static constexpr std::array error_codes {
+          ErrCode::ERR_ELECTRO_HOMING_ERROR_X,
+          ErrCode::ERR_ELECTRO_HOMING_ERROR_Y,
+          ErrCode::ERR_ELECTRO_HOMING_ERROR_Z
+        };
+
+        homing_failed([code = error_codes[std::min(static_cast<size_t>(axis), error_codes.size() - 1)]]() { fatal_error(code); }, orig_crash, axis == Z_AXIS);
+      }
+
+      return false;
+    }
+
+    if((axis == X_AXIS || axis == Y_AXIS) && !invert_home_dir){
+      //print only for normal homing, messages from precise homing are taken care inside precise homing
+      ui.status_printf_P(0,"%c axis homing failed, retrying", axis_codes[axis]);
+    }
+  }
   #ifdef HOMING_BACKOFF_POST_MM
     constexpr xyz_float_t endstop_backoff = HOMING_BACKOFF_POST_MM;
     const float backoff_mm = endstop_backoff[
