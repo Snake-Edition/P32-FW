@@ -175,7 +175,12 @@ static PhasesInputShaperCalibration parking(Context &context) {
 
     // Home if not homed
     if (!all_axes_known()) {
-        GcodeSuite::G28_no_parser(true, true, true, { .only_if_needed = true, .z_raise = 0 });
+        GcodeSuite::G28_no_parser(true, true, true,
+            {
+                .only_if_needed = true,
+                .z_raise = 0,
+                .precise = false, // We don't need precise position for this procedure
+            });
     }
 
 #if HAS_REMOTE_ACCELEROMETER()

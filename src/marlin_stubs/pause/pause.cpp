@@ -1288,7 +1288,12 @@ void Pause::park_nozzle_and_notify() {
     if (XY_len != 0) {
 #if CORE_IS_XY
         if (axes_need_homing(_BV(X_AXIS) | _BV(Y_AXIS))) {
-            GcodeSuite::G28_no_parser(true, true, false, { .z_raise = 0 });
+            GcodeSuite::G28_no_parser(true, true, false,
+                {
+                    .only_if_needed = true,
+                    .z_raise = 0,
+                    .precise = false, // We don't need precise position for this procedure
+                });
 
             // We have moved both axes, go to park position if not requested otherwise
             static constexpr xyz_pos_t park = XYZ_NOZZLE_PARK_POINT_M600;
@@ -1310,8 +1315,13 @@ void Pause::park_nozzle_and_notify() {
         // Should not affect other operations than Load/Unload/Change filament run from home screen without homing. We are homed during print
         LOOP_XY(axis) {
             // TODO: make homeaxis non-blocking to allow quick_stop
-            if (!isnan(settings.park_pos.pos[axis]) && axes_need_homing(_BV(axis))) {
-                GcodeSuite::G28_no_parser(axis == X_AXIS, axis == Y_AXIS, false, { .z_raise = 0 });
+            if (!isnan(settings.park_pos.pos[axis])) {
+                GcodeSuite::G28_no_parser(axis == X_AXIS, axis == Y_AXIS, false,
+                    {
+                        .only_if_needed = true,
+                        .z_raise = 0,
+                        .precise = false, // We don't need precise position for this procedure
+                    });
             }
             if (check_user_stop(getResponse())) {
                 return;
@@ -1348,11 +1358,12 @@ void Pause::unpark_nozzle_and_notify() {
 
     // home the axis if it is not homed
     // we can move only one axis during parking and not home the other one and then unpark and move the not homed one, so we need to home it
-    LOOP_XY(axis) {
-        if (!isnan(settings.park_pos.pos[axis]) && axes_need_homing(_BV(axis))) {
-            GcodeSuite::G28_no_parser(axis == X_AXIS, axis == Y_AXIS, false, { .z_raise = 0 });
-        }
-    }
+    GcodeSuite::G28_no_parser(!isnan(settings.park_pos.pos[X_AXIS]), !isnan(settings.park_pos.pos[Y_AXIS]), false,
+        {
+            .only_if_needed = true,
+            .z_raise = 0,
+            .precise = false, // We don't need precise position for this procedure
+        });
 
     {
         PauseFsmExplicitProgressNotifier N(*this, begin_pos, end_pos, 0, parkMoveXYPercent(Z_len, XY_len), marlin_vars().native_pos[x_greater_than_y ? MARLIN_VAR_INDEX_X : MARLIN_VAR_INDEX_Y]);

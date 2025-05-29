@@ -52,7 +52,11 @@ static void setup_gcode_compatibility(const PrinterModelInfo *gcode_printer) {
             thermalManager.setTargetBed(100);
 
             // Home so that we can set the bed to correct postion
-            GcodeSuite::G28_no_parser(true, true, true, { .only_if_needed = true });
+            GcodeSuite::G28_no_parser(true, true, true,
+                {
+                    .only_if_needed = true,
+                    .precise = false, // We don't need to be precisely homed for this
+                });
 
             // Move the bed up to reduce chamber volume
             do_blocking_move_to_z(10);

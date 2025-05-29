@@ -143,7 +143,12 @@ void home_if_needed_and_park(ZAction z_action, const ParkingPosition &parking_po
         .z = (parking_position.z != mapi::ParkingPosition::unchanged) && z_action == mapi::ZAction::absolute_move
     };
     if (axes_need_homing(X_AXIS | Y_AXIS | Z_AXIS)) {
-        GcodeSuite::G28_no_parser(do_axis.x, do_axis.y, do_axis.z, { .only_if_needed = true, .z_raise = 3 });
+        GcodeSuite::G28_no_parser(do_axis.x, do_axis.y, do_axis.z,
+            {
+                .only_if_needed = true,
+                .z_raise = 3,
+                .precise = false, // We don't need precise position for parking
+            });
     }
 
     park(z_action, parking_position);

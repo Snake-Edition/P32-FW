@@ -1313,7 +1313,11 @@ void GcodeSuite::M959() {
     SERIAL_ECHOLNPAIR("Running: ", parser.get_command());
 
     if (!parser.seen('D')) {
-        GcodeSuite::G28_no_parser(true, true, true, { .only_if_needed = true, });
+        GcodeSuite::G28_no_parser(true, true, true,
+            {
+                .only_if_needed = true,
+                .precise = false, // We don't need precise position for this procedure
+            });
 
         current_position[X_AXIS] = X_BED_SIZE / 2;
         current_position[Y_AXIS] = Y_BED_SIZE / 2;
