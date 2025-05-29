@@ -16,6 +16,7 @@ enum class Response : uint8_t {
     Abort_invalidate_test, // when used in selftest, ignored by PartHandler, must be handled in test. This behavior allows to run additional code before abort
     Adjust,
     All,
+    Always,
     Back,
     Calibrate,
     Cancel,

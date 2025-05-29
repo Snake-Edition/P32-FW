@@ -16,6 +16,8 @@ inline constexpr const char *get_response_text(Response response) {
         return N_("Adjust");
     case Response::All:
         return N_("ALL");
+    case Response::Always:
+        return N_("ALWAYS");
     case Response::Back:
         return N_("BACK");
     case Response::Calibrate:

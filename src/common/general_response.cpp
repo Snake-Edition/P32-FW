@@ -12,6 +12,7 @@ static constexpr EnumArray<Response, const char *, Response::_count> response_st
     R(Abort_invalidate_test),
     R(Adjust),
     R(All),
+    R(Always),
     R(Back),
     R(Calibrate),
     R(Cancel),
