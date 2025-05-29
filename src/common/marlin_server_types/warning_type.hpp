@@ -6,6 +6,7 @@
 #include <option/has_chamber_filtration_api.h>
 #include <option/xbuddy_extension_variant_standard.h>
 #include <option/has_selftest.h>
+#include <option/has_precise_homing_corexy.h>
 
 enum class WarningType : uint32_t {
 #if HAS_EMERGENCY_STOP()
@@ -86,6 +87,9 @@ enum class WarningType : uint32_t {
 #endif
 #if HAS_CEILING_CLEARANCE()
     CeilingClearanceViolation,
+#endif
+#if HAS_PRECISE_HOMING_COREXY()
+    HomingCalibrationNeeded,
 #endif
     AccelerometerCommunicationFailed,
     _last = AccelerometerCommunicationFailed,

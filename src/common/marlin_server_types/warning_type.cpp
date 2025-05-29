@@ -65,6 +65,11 @@ constexpr PhasesWarning warning_type_phase_constexpr(WarningType warning) {
         return PhasesWarning::CeilingClearanceViolation;
 #endif
 
+#if HAS_PRECISE_HOMING_COREXY()
+    case WarningType::HomingCalibrationNeeded:
+        return PhasesWarning::HomingCalibrationNeeded;
+#endif
+
         //
     }
 }

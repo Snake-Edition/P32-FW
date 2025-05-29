@@ -944,6 +944,23 @@ bool corexy_calibrate_homing_during_G28(float xy_mm_s, const G28Flags &flags) {
   if (!flags.can_calibrate) {
     return false;
   }
+
+  // Prompt the user that we would like to do the calibration (if the calibration was not triggered from gcode)
+  if(!flags.force_calibrate) {
+    switch(marlin_server::prompt_warning(WarningType::HomingCalibrationNeeded, 60'000)) {
+
+    case Response::Calibrate:
+    case Response::_none: // In case of timeout
+    default: // To stop the compiler from complaining
+      // Do the calibration, so continue
+      break;
+
+    case Response::Skip:
+      // User decided to not do the calibration at his own risk -> consider the point refined
+      return true;
+
+    }
+  }
       
   PrintStatusMessageGuard status_guard;
   status_guard.update<PrintStatusMessage::recalibrating_home>({});

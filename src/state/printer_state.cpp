@@ -627,6 +627,11 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
     case WarningType::CeilingClearanceViolation:
         return ErrCode::ERR_MECHANICAL_CEILING_CLEARANCE_VIOLATION;
 #endif
+
+#if HAS_PRECISE_HOMING_COREXY()
+    case WarningType::HomingCalibrationNeeded:
+        return ErrCode::ERR_MECHANICAL_HOMING_CALIBRATION_NEEDED;
+#endif
     }
 
     assert(false);
