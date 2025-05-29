@@ -532,7 +532,7 @@ void Pause::await_filament_process([[maybe_unused]] Response response) {
 
     // Either side sensor not working or it has filament, go to loading
     if (!FSensors_instance().no_filament_surely(LogicalFilamentSensor::side)) {
-        mapi::home_and_park(mapi::ZAction::no_move, mapi::park_positions[mapi::ParkPosition::load]);
+        mapi::home_if_needed_and_park(mapi::ZAction::no_move, mapi::park_positions[mapi::ParkPosition::load]);
         if (settings.extruder_mmu_rework) {
             set_timed(LoadState::assist_insertion);
         } else {
@@ -626,7 +626,7 @@ void Pause::load_to_gears_process([[maybe_unused]] Response response) { // slow 
 
 void Pause::move_to_purge_process([[maybe_unused]] Response response) {
     if constexpr (option::has_side_fsensor) {
-        mapi::home_and_park(mapi::ZAction::no_move, mapi::park_positions[mapi::ParkPosition::purge]);
+        mapi::home_if_needed_and_park(mapi::ZAction::no_move, mapi::park_positions[mapi::ParkPosition::purge]);
     }
     set(LoadState::load_wait_temp);
 }

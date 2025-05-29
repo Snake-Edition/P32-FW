@@ -91,7 +91,7 @@ void GcodeSuite::G27() {
         }
     }
 
-    mapi::home_and_park(z_action, parking_position);
+    mapi::home_if_needed_and_park(z_action, parking_position);
 }
 
 /** @}*/

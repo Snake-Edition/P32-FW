@@ -110,7 +110,7 @@ void park(ZAction z_action, const ParkingPosition &parking_position) {
     report_current_position();
 }
 
-void home_and_park(ZAction z_action, const ParkingPosition &parking_position) {
+void home_if_needed_and_park(ZAction z_action, const ParkingPosition &parking_position) {
     const xyz_bool_t do_axis {
         .x = (parking_position.x != mapi::ParkingPosition::unchanged),
         .y = (parking_position.y != mapi::ParkingPosition::unchanged),

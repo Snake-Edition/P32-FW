@@ -92,6 +92,6 @@ void move_out_of_nozzle_cleaner_area();
 
 void park(ZAction z_action, const ParkingPosition &parking_position = park_positions[ParkPosition::park]);
 
-void home_and_park(ZAction z_action, const ParkingPosition &parking_position = park_positions[ParkPosition::park]);
+void home_if_needed_and_park(ZAction z_action, const ParkingPosition &parking_position = park_positions[ParkPosition::park]);
 
 } // namespace mapi
