@@ -35,6 +35,29 @@ ParkingPosition ParkingPosition::from_xyz_pos(const xyz_pos_t &pos) {
 }
 
 #if HAS_NOZZLE_CLEANER()
+/**
+ *  RearArea = WasteArea + NoWasteLand         │ X_NOZZLE_PARK_POINT
+ *                                             ▼
+ * ┌────────────────NO─WASTE─LAND────────────────┬─────────WASTE─AREA─────────┐
+ * │                                         .  .│                            │
+ * │                                         .  .│                        * ◄─┼────X,Y_WASTEBIN_POINT
+ * │                                         .  .│                            │
+ * │                                         .  .│    ╲‾‾╲        ╱‾‾╱=>      │
+ * │                                         ....│      ╲  ╲      |  |        │
+ * │                                             │        ╲__╲    ╲ˍˍ╲=>      │
+ * │                                             │                            │
+ * ├─────────────────────────────────────────────┴────────────────────────────┤ ◄── Y_WASTEBIN_SAFE_POINT
+ * │                                                                          │
+ * │   _____  _____  _____ _   _ _______            _____  ______             │
+ * │  |  __ \|  __ \|_   _| \ | |__   __|     /\   |  __ \|  ____|   /\       │
+ * │  | |__) | |__) | | | |  \| |  | |       /  \  | |__) | |__     /  \      │
+ * │  |  ___/|  _  /  | | | . ` |  | |      / /\ \ |  _  /|  __|   / /\ \     │
+ * │  | |    | | \ \ _| |_| |\  |  | |     / ____ \| | \ \| |____ / ____ \    │        ▲
+ * │  |_|    |_|  \_\_____|_| \_|  |_|    /_/    \_\_|  \_\______/_/    \_\   │        | Y
+ * │                                                                          │        |
+ * │                                                                          │        |      X
+ * └──────────────────────────────────────────────────────────────────────────┘        O ──────►
+ */
 static void pre_park_move_pattern(const feedRate_t &feedrate, const xy_pos_t &destination) {
     static constexpr float x_border_point = X_NOZZLE_PARK_POINT + 1;
 
@@ -44,35 +67,35 @@ static void pre_park_move_pattern(const feedRate_t &feedrate, const xy_pos_t &de
     const bool start_in_wastebin_area = start_in_rear_area && current_position.x > x_border_point;
     const bool destination_in_wastebin_area = destination_in_rear_area && destination.x > x_border_point;
 
-    if (start_in_rear_area != destination_in_rear_area) {
-        if (start_in_wastebin_area || destination_in_wastebin_area) {
+    if (start_in_rear_area != destination_in_rear_area) { // One in the rear, other in print area
+        if (start_in_wastebin_area || destination_in_wastebin_area) { // One in waste area, other in print area
             do_blocking_move_to_x(X_WASTEBIN_POINT, feedrate);
             do_blocking_move_to_y(destination.y, feedrate);
-        } else {
-            if (start_in_rear_area) {
+        } else { // One in no-waste land, other in print area
+            if (start_in_rear_area) { // Start in no-waste land, end in print area
                 do_blocking_move_to_y(destination.y, feedrate);
-            } else {
+            } else { // Start in print area, end in no-waste land
                 do_blocking_move_to_x(destination.x, feedrate);
             }
         }
-    } else if (start_in_rear_area) {
-        if (start_in_wastebin_area != destination_in_wastebin_area) {
-            if (start_in_wastebin_area) {
+    } else if (start_in_rear_area) { // Both in the rear area
+        if (start_in_wastebin_area != destination_in_wastebin_area) { // One in waste area, other in no-waste land
+            if (start_in_wastebin_area) { // Start in waste area, end in no-waste land
                 do_blocking_move_to_x(X_WASTEBIN_POINT, feedrate);
                 do_blocking_move_to_y(Y_WASTEBIN_SAFE_POINT, feedrate);
                 do_blocking_move_to_x(destination.x, feedrate);
-            } else {
+            } else { // Start in no-waste land, end in waste area
                 do_blocking_move_to_y(Y_WASTEBIN_SAFE_POINT, feedrate);
                 do_blocking_move_to_x(X_WASTEBIN_POINT, feedrate);
                 do_blocking_move_to_y(destination.y, feedrate);
             }
-        } else if (start_in_wastebin_area) {
+        } else if (start_in_wastebin_area) { // Both in waste area
             do_blocking_move_to_x(destination.x, feedrate);
-        } else {
+        } else { // Both in no-waste land
             do_blocking_move_to_y(Y_WASTEBIN_SAFE_POINT, feedrate);
             do_blocking_move_to_x(destination.x, feedrate);
         }
-    }
+    } // Both in print area, no need to pre-park move
 }
 
 void move_out_of_nozzle_cleaner_area() {
