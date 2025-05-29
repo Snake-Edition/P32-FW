@@ -597,7 +597,9 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
   endstops.enable(true); // Enable endstops for next homing move
 
-  #define _UNSAFE(A) (homeZ && TERN0(Z_SAFE_HOMING, axes_should_home(_BV(A##_AXIS))))
+  const AxisHomeLevel required_home_level = flags.precise ? AxisHomeLevel::full : AxisHomeLevel::imprecise;
+
+  #define _UNSAFE(A) (homeZ && TERN0(Z_SAFE_HOMING, !is_axis_homed(A##_AXIS, required_home_level)))
   const bool homeZ = TERN0(HAS_Z_AXIS, Z),
               NUM_AXIS_LIST(              // Other axes should be homed before Z safe-homing
                 needX = _UNSAFE(X), needY = _UNSAFE(Y), needZ = false, // UNUSED
