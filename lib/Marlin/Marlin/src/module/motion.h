@@ -326,7 +326,7 @@ static inline bool homing_needed_error(uint8_t axis_bits=0x07) { return axis_unh
   #define MOTION_CONDITIONS IsRunning()
 #endif
 
-void set_axis_is_at_home(const AxisEnum axis, bool homing_z_with_probe = true);
+void set_axis_is_at_home(const AxisEnum axis, AxisHomeLevel level, bool homing_z_with_probe = true);
 
 void set_axis_is_not_at_home(const AxisEnum axis);
 

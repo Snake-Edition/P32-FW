@@ -766,6 +766,10 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
           failed = !corexy_home_refine(xy_mm_s, mode);
           if (!failed && (!corexy_home_is_unstable() || !corexy_home_is_calibrated())) {
+            // Mark the axes as precisely homed
+            axes_home_level[X_AXIS] = AxisHomeLevel::full;
+            axes_home_level[Y_AXIS] = AxisHomeLevel::full;
+
             // successfully homed
             break;
           }

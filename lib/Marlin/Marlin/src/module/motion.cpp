@@ -1133,14 +1133,13 @@ void prepare_move_to(const xyze_pos_t &target, feedRate_t fr_mm_s, PrepareMoveHi
  *
  * @param homing_z_with_probe false when sensorless homing was used instead of probe
  */
-void set_axis_is_at_home(const AxisEnum axis, [[maybe_unused]] bool homing_z_with_probe) {
+void set_axis_is_at_home(const AxisEnum axis, AxisHomeLevel level, [[maybe_unused]] bool homing_z_with_probe) {
   if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR(">>> set_axis_is_at_home(", axis_codes[axis], ")");
 
   // ensure we're not within an aborted move: caller needs to check!
   assert(!planner.draining());
 
-  // TODO: This should only set to imprecise, we should get to precise after refinement
-  axes_home_level[axis] = AxisHomeLevel::full;
+  axes_home_level[axis] = level; 
 
   #if ENABLED(DUAL_X_CARRIAGE)
     if (axis == X_AXIS && (active_extruder == 1 || dual_x_carriage_mode == DXC_DUPLICATION_MODE)) {
@@ -1700,35 +1699,24 @@ float homeaxis_single_run(const AxisEnum axis, const int axis_home_dir, const fe
     if (planner.draining() || planner.quick_stop_count != initial_quick_stop_count)
       return NAN;
 
-  #if IS_SCARA
+  if (!invert_home_dir) {
+    bool is_homed_precisely = false;
+    if(axis == Z_AXIS) {
+      // Z is homed precisely only if we used probe (so banging against the ceiling is not considered precise homing)
+      is_homed_precisely = (!HOMING_Z_WITH_PROBE || homing_z_with_probe);
 
-    set_axis_is_at_home(axis);
-    sync_plan_position();
-
-  #elif ENABLED(DELTA)
-
-    // Delta has already moved all three towers up in G28
-    // so here it re-homes each tower in turn.
-    // Delta homing treats the axes as normal linear axes.
-
-    // retrace by the amount specified in delta_endstop_adj + additional dist in order to have minimum steps
-    if (delta_endstop_adj[axis] * Z_HOME_DIR <= 0) {
-      if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("delta_endstop_adj:");
-      do_homing_move(axis, delta_endstop_adj[axis] - (MIN_STEPS_PER_SEGMENT + 1) * planner.mm_per_step[axis] * Z_HOME_DIR, 0, false, homing_z_with_probe);
+    } else {
+      // If precise homing is enabled, there will be a precise refinement done in a separate function
+      is_homed_precisely = (!HAS_PRECISE_HOMING() && !HAS_PRECISE_HOMING_COREXY());
     }
 
-  #else // CARTESIAN / CORE
+    set_axis_is_at_home(axis, is_homed_precisely ? AxisHomeLevel::full : AxisHomeLevel::imprecise, homing_z_with_probe);
+  }
+  sync_plan_position();
 
-    if (!invert_home_dir) {
-      set_axis_is_at_home(axis, homing_z_with_probe);
-    }
-    sync_plan_position();
+  destination[axis] = current_position[axis];
 
-    destination[axis] = current_position[axis];
-
-    if (DEBUGGING(LEVELING)) DEBUG_POS("> AFTER set_axis_is_at_home", current_position);
-
-  #endif
+  if (DEBUGGING(LEVELING)) DEBUG_POS("> AFTER set_axis_is_at_home", current_position);
 
   // Put away the Z probe
   #if HOMING_Z_WITH_PROBE

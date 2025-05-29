@@ -453,6 +453,10 @@ float home_axis_precise(AxisEnum axis, int axis_home_dir, bool can_calibrate, fl
 
     if (success) {
         save_divisor_to_eeprom(try_nr, axis);
+
+        // Mark the axis as precisely homed
+        axes_home_level[axis] = AxisHomeLevel::full;
+
     } else {
         SERIAL_ERROR_MSG("Precise homing runs out of tries to get acceptable probe.");
     }
