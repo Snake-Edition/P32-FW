@@ -514,7 +514,7 @@ struct XYZval {
   FI XYZval<float>  asNative()                   const { XYZval<float> o = asFloat(); toNative(o);  return o; }
 
   // In-place cast to types having fewer fields
-  FI operator const XYval<T>()                   const { return XYval<T>{x, y}; }
+  FI operator XYval<T>()                         const { return XYval<T>{x, y}; }
 
   // Cast to a type with more fields by making a new object
   FI operator       XYZEval<T>()                 const { return NUM_AXIS_ARRAY(x, y, z, i, j, k, u, v, w); }
