@@ -103,19 +103,19 @@ inline constexpr const char *get_response_text(Response response) {
     case Response::Heatup:
         return N_("HEATUP");
     case Response::Postpone5Days:
-        return "POSTPONE";
+        return N_("POSTPONE");
     case Response::PRINT:
-        return "PRINT";
+        return N_("PRINT");
     case Response::Tool1:
-        return "Tool1";
+        return N_("Tool1");
     case Response::Tool2:
-        return "Tool2";
+        return N_("Tool2");
     case Response::Tool3:
-        return "Tool3";
+        return N_("Tool3");
     case Response::Tool4:
-        return "Tool4";
+        return N_("Tool4");
     case Response::Tool5:
-        return "Tool5";
+        return N_("Tool5");
 
     case Response::_count:
         break;
