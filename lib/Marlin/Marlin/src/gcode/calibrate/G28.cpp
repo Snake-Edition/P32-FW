@@ -366,6 +366,73 @@ void GcodeSuite::G28() {
 /** @}*/
 
 bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
+  struct AxisHomingRequirement {
+    /// Initial home level of the axis at homing start
+    AxisHomeLevel initial_level = AxisHomeLevel::not_homed;
+
+    AxisHomeLevel required_level = AxisHomeLevel::not_homed;
+
+    /// Whether the homing is optional or enforced
+    bool force = false;
+
+    void expand(const AxisHomingRequirement &other, bool condition = true) {
+      if(condition) {
+        required_level = std::max(required_level, other.required_level);
+        force |= other.force;
+      }
+    }
+  };
+  std::array<AxisHomingRequirement, 3> requirements;
+
+  /// \returns whether there should be any homing done for the specified axis during the G28
+  const auto should_home_at_all = [&](AxisEnum axis) {
+    const auto &r = requirements[axis];
+    return r.force || (r.initial_level < r.required_level);
+  };
+
+  /// \returns whether the axis should be homed to (or above) the specified level during the G28
+  /// In some cases, the G28 might only require precise refinement and not base homing,
+  // at which point should_home_to_level(imprecise) would be false and should_home_to_level(full) would be true
+  const auto should_home_to_level = [&](AxisEnum axis, AxisHomeLevel to_level = AxisHomeLevel::full) {
+    const auto &r = requirements[axis];
+    return (to_level <= r.required_level) && (r.force || r.initial_level < to_level);
+  };
+
+  // Setup basic requirements
+  {
+    const AxisHomingRequirement req {
+      .required_level = (flags.precise ? AxisHomeLevel::full : AxisHomeLevel::imprecise),
+      .force = !flags.only_if_needed,
+    };
+
+    for(uint8_t i = 0; i < axes_home_level.size(); i++) {
+      requirements[i].initial_level = axes_home_level[i];
+    }
+
+    requirements[X_AXIS].expand(req, X);
+    requirements[Y_AXIS].expand(req, Y);
+    requirements[Z_AXIS].expand(req, Z);
+  }
+
+  // On Z_SAFE_HOMING, if we need to home Z, we need to have X and Y homed as well
+  if(ENABLED(Z_SAFE_HOMING) && should_home_at_all(Z_AXIS)) {
+    static constexpr AxisHomingRequirement req {AxisHomeLevel::imprecise };
+    requirements[X_AXIS].expand(req);
+    requirements[Y_AXIS].expand(req);
+  }
+
+  // On CODEPENDENT_XY_HOMING, we need to home both axes
+  if constexpr(ENABLED(CODEPENDENT_XY_HOMING)) {
+    requirements[X_AXIS].expand(requirements[Y_AXIS]);
+    requirements[Y_AXIS] = requirements[X_AXIS];
+  }
+
+  // Precise COREXY homing is XY codependent, even if the imprecise homing isn't
+  if(HAS_PRECISE_HOMING_COREXY() && (should_home_to_level(X_AXIS, AxisHomeLevel::full) || should_home_to_level(Y_AXIS, AxisHomeLevel::full))) {
+    requirements[X_AXIS].expand(requirements[Y_AXIS]);
+    requirements[Y_AXIS] = requirements[X_AXIS];
+  }
+
   #if ENABLED(MARLIN_DEV_MODE)
     if (flags.simulate) {
       planner.synchronize();
@@ -597,59 +664,12 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
   endstops.enable(true); // Enable endstops for next homing move
 
-  const AxisHomeLevel required_home_level = flags.precise ? AxisHomeLevel::full : AxisHomeLevel::imprecise;
-
-  #define _UNSAFE(A) (homeZ && TERN0(Z_SAFE_HOMING, !is_axis_homed(A##_AXIS, required_home_level)))
-  const bool homeZ = TERN0(HAS_Z_AXIS, Z),
-              NUM_AXIS_LIST(              // Other axes should be homed before Z safe-homing
-                needX = _UNSAFE(X), needY = _UNSAFE(Y), needZ = false, // UNUSED
-                needI = _UNSAFE(I), needJ = _UNSAFE(J), needK = _UNSAFE(K),
-                needU = _UNSAFE(U), needV = _UNSAFE(V), needW = _UNSAFE(W)
-              ),
-              NUM_AXIS_LIST(              // Home each axis if needed or flagged
-                homeX = needX || X,
-                homeY = needY || Y,
-                homeZZ = homeZ,
-                homeI = needI || parser.seen_test(AXIS4_NAME), homeJ = needJ || parser.seen_test(AXIS5_NAME),
-                homeK = needK || parser.seen_test(AXIS6_NAME), homeU = needU || parser.seen_test(AXIS7_NAME),
-                homeV = needV || parser.seen_test(AXIS8_NAME), homeW = needW || parser.seen_test(AXIS9_NAME)
-              ),
-              home_all = NUM_AXIS_GANG(   // Home-all if all or none are flagged
-                  homeX == homeX, && homeY == homeX, && homeZ == homeX,
-                && homeI == homeX, && homeJ == homeX, && homeK == homeX,
-                && homeU == homeX, && homeV == homeX, && homeW == homeX
-              );
-  #undef _UNSAFE
-
-  #define _DOAXIS(A, V) ((V) && (flags.only_if_needed ? axes_should_home(_BV(A##_AXIS)) : true))
-  bool NUM_AXIS_LIST(
-    doX = _DOAXIS(X, home_all || homeX),
-    doY = _DOAXIS(Y, home_all || homeY),
-    doZ = _DOAXIS(Z, home_all || homeZ),
-    doI = _DOAXIS(I, home_all || homeI),
-    doJ = _DOAXIS(J, home_all || homeJ),
-    doK = _DOAXIS(K, home_all || homeK),
-    doU = _DOAXIS(U, home_all || homeU),
-    doV = _DOAXIS(V, home_all || homeV),
-    doW = _DOAXIS(W, home_all || homeW)
-  );
-  #undef _DOAXIS
-
-  doX = doX || (ENABLED(CODEPENDENT_XY_HOMING) && doY);
-  doY = doY || (ENABLED(CODEPENDENT_XY_HOMING) && doX);
-
-  #if HAS_Z_AXIS
-    UNUSED(needZ); UNUSED(homeZZ);
-  #else
-    constexpr bool doZ = false;
-  #endif
-
   TERN_(HOME_Z_FIRST, if (!failed && doZ) failed = !homeaxis(Z_AXIS));
 
   const bool seenR = !isnan(flags.z_raise);
   const float z_homing_height = seenR ? flags.z_raise : Z_HOMING_HEIGHT;
 
-  if (!failed && z_homing_height && (seenR || NUM_AXIS_GANG(doX, || doY, || TERN0(Z_SAFE_HOMING, doZ), || doI, || doJ, || doK, || doU, || doV, || doW))) {
+  if (!failed && z_homing_height && (seenR || should_home_at_all(X_AXIS) || should_home_at_all(Y_AXIS) || TERN0(Z_SAFE_HOMING, should_home_at_all(Z_AXIS)))) {
     // Raise Z before homing any other axes and z is not already high enough (never lower z)
     if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Raise Z (before homing) by ", z_homing_height);
     const auto trigger_states = do_z_clearance(z_homing_height);
@@ -657,14 +677,17 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
     // If we have the Z homed and trigger an endstop, that means that we have homed wrong.
     // Letting this continue could lead to collision with the print or with the bedsheet, so rather raise a redscreen.
     // BFW-5334
-    if((trigger_states & (1 << EndstopEnum::Z_MAX)) && !doZ && !axes_need_homing(_BV(Z_AXIS))) {
+    if((trigger_states & (1 << EndstopEnum::Z_MAX)) && !should_home_at_all(Z_AXIS) && axes_home_level.is_homed(Z_AXIS, AxisHomeLevel::imprecise)) {
       raise_redscreen(ErrCode::ERR_UNDEF, "Unexpected Z MAX endstop trigger", "G28");
     }
     TERN_(BLTOUCH, bltouch.init());
   }
 
   // Diagonal move first if both are homing
-  TERN_(QUICK_HOME, if (!failed && doX && doY) quick_home_xy());
+  #if ENABLED(QUICK_HOME)
+    if (!failed && should_home_to_level(X_AXIS, AxisHomeLevel::imprecise) && should_home_to_level(Y_AXIS, AxisHomeLevel::imprecise))
+      quick_home_xy();
+  #endif
 
 #if HAS_TRINAMIC && defined(HAS_TMC_WAVETABLE)
   // Only allow wavetable change if homing performs a backoff. This backoff is made in the way that it ends on stepper zero-position, so that re-enabling wavetable is safe.
@@ -674,8 +697,8 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   #endif
   #ifdef HOMING_BACKOFF_POST_MM
     constexpr xyz_float_t homing_backoff = HOMING_BACKOFF_POST_MM;
-    wavetable_off_X = (homing_backoff[X] > 0.0f) && doX;
-    wavetable_off_Y = (homing_backoff[Y] > 0.0f) && doY;
+    wavetable_off_X = (homing_backoff[X] > 0.0f) && should_home_at_all(X_AXIS);
+    wavetable_off_Y = (homing_backoff[Y] > 0.0f) && should_home_at_all(Y_AXIS);
   #endif
   void (*reenable_wt_X)(AxisEnum) = wavetable_off_X ? reenable_wavetable : NULL;
   void (*reenable_wt_Y)(AxisEnum) = wavetable_off_Y ? reenable_wavetable : NULL;
@@ -693,7 +716,7 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 #endif
 
   #if ENABLED(PRUSA_TOOLCHANGER)
-  if (!failed && doX && doY) {
+  if (!failed && should_home_at_all(X_AXIS) && should_home_at_all(Y_AXIS)) {
     // Bump right edge to align toolchanger locking plates
     if (!prusa_toolchanger.align_locks()) {
       ui.status_printf_P(0, "Toolchanger lock alignment failed");
@@ -708,27 +731,24 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   }
   #endif /*ENABLED(PRUSA_TOOLCHANGER)*/
 
-  const bool do_x_imprecise = doX && (!flags.only_if_needed || !is_axis_homed(X_AXIS, AxisHomeLevel::imprecise));
-  const bool do_y_imprecise = doY && (!flags.only_if_needed || !is_axis_homed(Y_AXIS, AxisHomeLevel::imprecise));
-
   // Home Y (before X)
-  if (ENABLED(HOME_Y_BEFORE_X) && !failed && do_y_imprecise) {
+  if (ENABLED(HOME_Y_BEFORE_X) && !failed && should_home_to_level(Y_AXIS, AxisHomeLevel::imprecise)) {
     failed = !homeaxis(Y_AXIS, fr_mm_s, false, reenable_wt_Y, flags.can_calibrate);
   }
 
   // Home X
-  if (!failed && do_x_imprecise) {
+  if (!failed && should_home_to_level(X_AXIS, AxisHomeLevel::imprecise)) {
     failed = !homeaxis(X_AXIS, fr_mm_s, false, reenable_wt_X, flags.can_calibrate);
   }
 
   // Home Y (after X)
-  if (DISABLED(HOME_Y_BEFORE_X) && !failed && do_y_imprecise) {
+  if (DISABLED(HOME_Y_BEFORE_X) && !failed && should_home_to_level(Y_AXIS, AxisHomeLevel::imprecise)) {
     failed = !homeaxis(Y_AXIS, fr_mm_s, false, reenable_wt_Y, flags.can_calibrate);
   }
 
   #if HAS_PRECISE_HOMING_COREXY()
     // absolute refinement requires both axes to be already probed
-    if (!failed && doX && doY && flags.precise) {
+    if (!failed && (should_home_to_level(X_AXIS, AxisHomeLevel::full) || should_home_to_level(Y_AXIS, AxisHomeLevel::full))) {
       #if DISABLED(PRUSA_TOOLCHANGER)
         // skip refinement without data if we're not allowed to calibrate
         const bool do_refine = (corexy_home_is_calibrated() || flags.can_calibrate || flags.force_calibrate);
@@ -798,7 +818,7 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
   // Home Z last if homing towards the bed
   #if HAS_Z_AXIS && DISABLED(HOME_Z_FIRST)
-    if (!failed && doZ) {
+    if (!failed && should_home_at_all(Z_AXIS)) {
       #if EITHER(Z_MULTI_ENDSTOPS, Z_STEPPER_AUTO_ALIGN)
         stepper.set_all_z_lock(false);
         stepper.set_separate_multi_axis(false);
@@ -959,7 +979,7 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
   report_current_position();
 
-  if (ENABLED(NANODLP_Z_SYNC) && (doZ || ENABLED(NANODLP_ALL_AXIS)))
+  if (ENABLED(NANODLP_Z_SYNC) && (should_home_at_all(Z_AXIS) || ENABLED(NANODLP_ALL_AXIS)))
     SERIAL_ECHOLNPGM(STR_Z_MOVE_COMP);
 
   TERN_(FULL_REPORT_TO_HOST_FEATURE, set_and_report_grblstate(old_grblstate));
