@@ -951,7 +951,7 @@ class ClientResponses {
             { PhasesWarning::CeilingClearanceViolation, { Response::Continue, Response::Abort } },
 #endif
 #if HAS_PRECISE_HOMING_COREXY()
-            { PhasesWarning::HomingCalibrationNeeded, { Response::Calibrate, Response::Skip } },
+            { PhasesWarning::HomingCalibrationNeeded, { Response::Calibrate, Response::Skip, Response::Always, Response::Never } },
 #endif
             { PhasesWarning::MetricsConfigChangePrompt, { Response::Yes, Response::No } },
     };

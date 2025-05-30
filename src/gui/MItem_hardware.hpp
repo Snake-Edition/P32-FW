@@ -84,3 +84,14 @@ protected:
     virtual void OnChange(size_t old_index) override;
 };
 #endif
+
+#if HAS_PRECISE_HOMING_COREXY()
+/// Option whether we should automatically calibrate precise homing when needed
+class MI_AUTO_PRECISE_HOMING_CALIBRATION : public MenuItemSwitch {
+public:
+    MI_AUTO_PRECISE_HOMING_CALIBRATION();
+
+protected:
+    virtual void OnChange(size_t) override;
+};
+#endif

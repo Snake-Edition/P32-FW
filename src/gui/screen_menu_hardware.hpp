@@ -83,6 +83,9 @@ using ScreenMenuHardware__ = ScreenMenu<GuiDefaults::MenuFooter,
     MI_CHECK_MANUAL_VENT_STATE,
 #endif
     MI_HARDWARE_G_CODE_CHECKS,
+#if HAS_PRECISE_HOMING_COREXY()
+    MI_AUTO_PRECISE_HOMING_CALIBRATION,
+#endif
 #if HAS_ILI9488_DISPLAY()
     MI_DISPLAY_BAUDRATE,
 #endif

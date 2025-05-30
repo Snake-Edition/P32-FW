@@ -101,6 +101,7 @@
 #include <scope_guard.hpp>
 #include <marlin_server.hpp>
 #include <feature/print_status_message/print_status_message_guard.hpp>
+#include <config_store/store_instance.hpp>
 
 #include <option/has_ceiling_clearance.h>
 #if HAS_CEILING_CLEARANCE()
@@ -945,21 +946,38 @@ bool corexy_calibrate_homing_during_G28(float xy_mm_s, const G28Flags &flags) {
     return false;
   }
 
+  Tristate calibration_approved = flags.force_calibrate ? Tristate::yes : config_store().auto_recalibrate_precise_homing.get();
+
   // Prompt the user that we would like to do the calibration (if the calibration was not triggered from gcode)
-  if(!flags.force_calibrate) {
+  if(calibration_approved == Tristate::other) {
     switch(marlin_server::prompt_warning(WarningType::HomingCalibrationNeeded, 60'000)) {
 
     case Response::Calibrate:
     case Response::_none: // In case of timeout
     default: // To stop the compiler from complaining
-      // Do the calibration, so continue
+      calibration_approved = Tristate::yes;
       break;
 
     case Response::Skip:
-      // User decided to not do the calibration at his own risk -> consider the point refined
-      return true;
+      calibration_approved = Tristate::no;
+      break;
+
+    case Response::Always:
+      calibration_approved = Tristate::yes;
+      config_store().auto_recalibrate_precise_homing.set(Tristate::yes);
+      break;
+
+    case Response::Never:
+      calibration_approved = Tristate::no;
+      config_store().auto_recalibrate_precise_homing.set(Tristate::no);
+      break;
 
     }
+  }
+
+  if(!calibration_approved) {
+    // User decided to not do the calibration at his own risk -> consider the point refined
+    return true;
   }
       
   PrintStatusMessageGuard status_guard;

@@ -148,3 +148,19 @@ void MI_CHECK_MANUAL_VENT_STATE::OnChange([[maybe_unused]] size_t old_index) {
     config_store().check_manual_vent_state.set(value());
 }
 #endif
+
+#if HAS_PRECISE_HOMING_COREXY()
+constexpr const EnumArray<Tristate::Value, const char *, 3> ask_always_never_texts {
+    { Tristate::no, N_("Never") },
+    { Tristate::yes, N_("Auto") },
+    { Tristate::other, N_("Ask") },
+};
+
+MI_AUTO_PRECISE_HOMING_CALIBRATION::MI_AUTO_PRECISE_HOMING_CALIBRATION()
+    : MenuItemSwitch(_("Homing Calibration"), ask_always_never_texts, config_store().auto_recalibrate_precise_homing.get().value) {
+}
+
+void MI_AUTO_PRECISE_HOMING_CALIBRATION::OnChange(size_t) {
+    config_store().auto_recalibrate_precise_homing.set(static_cast<Tristate::Value>(get_index()));
+}
+#endif
