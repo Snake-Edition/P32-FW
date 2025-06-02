@@ -9,7 +9,7 @@
 #include <window_icon.hpp>
 
 inline constexpr auto rect_screen = WizardDefaults::RectSelftestFrame;
-inline constexpr auto rect_radio = WizardDefaults::RectRadioButton(0);
+inline constexpr auto rect_radio = WizardDefaults::RectRadioButton(1);
 inline constexpr auto rect_frame = Rect16 {
     rect_screen.Left() + WizardDefaults::MarginLeft,
     rect_screen.Top() + WizardDefaults::row_0,
