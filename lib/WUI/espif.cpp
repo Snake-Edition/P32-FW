@@ -90,6 +90,7 @@ enum ESPIFOperatingMode {
     ESPIF_WRONG_FW,
     ESPIF_FLASHING_ERROR_NOT_CONNECTED,
     ESPIF_FLASHING_ERROR_OTHER,
+    ESPIF_ERROR,
 };
 
 enum MessageType {
@@ -193,6 +194,7 @@ static bool is_running(ESPIFOperatingMode mode) {
     case ESPIF_FLASHING_ERROR_OTHER:
     case ESPIF_WRONG_FW:
     case ESPIF_SCANNING_MODE:
+    case ESPIF_ERROR:
         return false;
     case ESPIF_WAIT_INIT:
     case ESPIF_NEED_AP:
@@ -210,6 +212,7 @@ static bool can_recieve_data(ESPIFOperatingMode mode) {
     case ESPIF_UNINITIALIZED_MODE:
     case ESPIF_FLASHING_ERROR_OTHER:
     case ESPIF_WRONG_FW:
+    case ESPIF_ERROR:
         return false;
     case ESPIF_FLASHING_ERROR_NOT_CONNECTED:
     case ESPIF_WAIT_INIT:
@@ -891,8 +894,17 @@ err_t espif_join_ap(const char *ssid, const char *pass) {
 
     err_t err = espif_tx_msg_clientconfig_v2(ssid, pass);
 
-    if (err == ERR_OK) {
+    switch (err) {
+    case ERR_OK:
         esp_operating_mode = ESPIF_CONNECTING_AP;
+        break;
+    case ERR_MEM:
+        // Wait in error state for another reset, done by the wui.cpp on too
+        // long inactivity. Once it resets us, we'll try again from the start.
+        esp_operating_mode = ESPIF_ERROR;
+        break;
+    default:
+        break;
     }
 
     return err;
@@ -994,6 +1006,8 @@ EspFwState esp_fw_state() {
         return EspFwState::WrongVersion;
     case ESPIF_SCANNING_MODE:
         return EspFwState::Scanning;
+    case ESPIF_ERROR:
+        return EspFwState::Unknown;
     }
     assert(0);
     return EspFwState::NoEsp;
@@ -1008,6 +1022,7 @@ EspLinkState esp_link_state() {
     case ESPIF_FLASHING_ERROR_NOT_CONNECTED:
     case ESPIF_FLASHING_ERROR_OTHER:
     case ESPIF_SCANNING_MODE:
+    case ESPIF_ERROR:
         return EspLinkState::Init;
     case ESPIF_NEED_AP:
     case ESPIF_CONNECTING_AP:
