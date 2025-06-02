@@ -350,8 +350,13 @@ void GcodeSuite::G28() {
   #endif
   flags.precise = !parser.seen('I'); // do not perform precise refinement
 
+  // No axes were specified -> interpret as home all
+  if(!X && !Y && !Z) {
+    X = Y = Z = true;
+  }
+  
   #if ENABLED(CRASH_RECOVERY)
-    bool all_axes = (!X && !Y && !Z) || (X && Y && Z);
+    const bool all_axes = (X && Y && Z);
     if (all_axes) {
       // Skip all recovery when homing all axes
       crash_s.set_gcode_replay_flags(Crash_s::RECOVER_NONE);
@@ -433,6 +438,13 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
     requirements[Y_AXIS] = requirements[X_AXIS];
   }
 
+  // Home (O)nly if position is unknown with respect to the required axes
+  if (!should_home_at_all(X_AXIS) && !should_home_at_all(Y_AXIS) && !should_home_at_all(Z_AXIS)) {
+    if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("> homing not needed, skip");
+    return true;
+  }
+
+
   #if ENABLED(MARLIN_DEV_MODE)
     if (flags.simulate) {
       planner.synchronize();
@@ -465,22 +477,6 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   #if ENABLED(LASER_FEATURE)
     planner.laser_inline.status.isPowered = false;
   #endif
-
-  // Home (O)nly if position is unknown with respect to the required axes
-  uint8_t required_axis_bits = 0;
-  if(X) SBI(required_axis_bits, X_AXIS);
-  if(Y) SBI(required_axis_bits, Y_AXIS);
-  if(Z) SBI(required_axis_bits, Z_AXIS);
-  if(!X && !Y && !Z) {
-    // None specified -> need all
-    SBI(required_axis_bits, X_AXIS);
-    SBI(required_axis_bits, Y_AXIS);
-    SBI(required_axis_bits, Z_AXIS);
-  }
-  if (!axes_should_home(required_axis_bits) && flags.only_if_needed) {
-    if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("> homing not needed, skip");
-    return true;
-  }
 
   #if ENABLED(FULL_REPORT_TO_HOST_FEATURE)
     const M_StateEnum old_grblstate = M_State_grbl;
