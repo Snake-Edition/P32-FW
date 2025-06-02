@@ -171,7 +171,7 @@ std::optional<uint8_t> evaluate_calibration_result(const CalibrationResult &cali
 
     float reduction = 0.0f;
     for (const auto [forward, backward] : calibration_result) {
-        if (forward >= 1.f || backward >= 1.f) {
+        if (forward > 1.f || backward > 1.f) {
             return std::nullopt;
         }
 
