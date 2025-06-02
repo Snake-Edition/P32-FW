@@ -373,7 +373,7 @@ void GcodeSuite::M972() {
     auto result = phase_stepping::calibrate_axis(axis, hooks);
 
     if (!result.has_value()) {
-        SERIAL_ECHO(result.error());
+        SERIAL_ECHO(to_string(result.error()));
         print_error("Calibration failed");
         return;
     }

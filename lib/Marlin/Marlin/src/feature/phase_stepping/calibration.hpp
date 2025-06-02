@@ -116,13 +116,24 @@ public:
     virtual ContinueOrAbort on_idle() = 0;
 };
 
+enum class CalibrateAxisError : uint8_t {
+    aborted,
+    speed_sweep_movement_failed,
+    param_sweep_movement_failed,
+    no_peaks_found,
+    cannot_find_peaks_in_phase_sweep,
+    magnitude_out_of_bounds,
+};
+
+const char *to_string(CalibrateAxisError);
+
 /**
  * Assuming the printer is homed, calibrate given axis. The progress is reported
  * via hooks. The routine is blocking.
  *
  * Returns an array with forward and backward calibration
  */
-std::expected<std::array<MotorPhaseCorrection, 2>, const char *>
+std::expected<std::array<MotorPhaseCorrection, 2>, CalibrateAxisError>
 calibrate_axis(AxisEnum axis, CalibrateAxisHooks &hooks);
 
 } // namespace phase_stepping
