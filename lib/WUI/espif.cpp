@@ -781,6 +781,11 @@ static void uart_input(uint8_t *data, size_t size, struct netif *netif) {
                     rx_buff = nullptr;
                     state = Intron;
                     break;
+                } else {
+                    // We've passed the ownership to netif->input, it'll free
+                    // it. Forget about it on our side, so we never ever touch
+                    // it by accident.
+                    rx_buff = rx_buff_cur = nullptr;
                 }
                 seen_pong = true;
                 state = Intron;
