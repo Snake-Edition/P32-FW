@@ -10,6 +10,7 @@
 #include <window_icon.hpp>
 #include <window_progress.hpp>
 #include <window_text.hpp>
+#include <Marlin/src/feature/phase_stepping/calibration.hpp>
 
 namespace {
 #if PRINTER_IS_PRUSA_XL()
@@ -33,7 +34,6 @@ constexpr const char *txt_homing { N_("Homing") };
 constexpr const char *txt_calibrating { N_("Running the phase stepping calibration to reduce vibrations. Please wait...") };
 constexpr const char *txt_calibrating_x { N_("Calibrating X motor") };
 constexpr const char *txt_calibrating_y { N_("Calibrating Y motor") };
-constexpr const char *txt_calibration_error { N_("Calibration failed with error.") };
 
 namespace frame {
 
@@ -212,10 +212,47 @@ namespace frame {
         }
     };
 
-    class CalibrationError final : public CenteredStaticText {
+    class CalibrationError final {
+    private:
+        window_text_t text;
+        window_text_t detail;
+
+        static constexpr uint16_t padding = 20;
+
+        static constexpr Rect16 text_rect {
+            ScreenPhaseStepping::get_inner_frame_rect().Left() + padding,
+            ScreenPhaseStepping::get_inner_frame_rect().Top() + padding,
+            ScreenPhaseStepping::get_inner_frame_rect().Width() - 2 * padding,
+            height(GuiDefaults::DefaultFont),
+        };
+
+        static constexpr Rect16 detail_rect {
+            text_rect.Left(),
+            text_rect.Bottom() + padding,
+            text_rect.Width(),
+            2 * height(GuiDefaults::DefaultFont),
+        };
+
     public:
         explicit CalibrationError(window_t *parent)
-            : CenteredStaticText { parent, _(txt_calibration_error) } {
+            : text {
+                parent,
+                text_rect,
+                is_multiline::yes,
+                is_closed_on_click_t::no,
+                _("Calibration failed with error:"),
+            }
+            , detail {
+                parent,
+                detail_rect,
+                is_multiline::yes,
+                is_closed_on_click_t::no,
+            } {
+        }
+
+        void update(const fsm::PhaseData &data) {
+            const auto error = static_cast<phase_stepping::CalibrateAxisError>(data[0]);
+            detail.SetText(string_view_utf8::MakeCPUFLASH(to_string(error)));
         }
     };
 

@@ -32,6 +32,7 @@ struct Context {
     CalibrationResult calibration_result_y;
     uint8_t reduction_x;
     uint8_t reduction_y;
+    phase_stepping::CalibrateAxisError error;
 };
 
 using marlin_server::wait_for_response;
@@ -45,6 +46,7 @@ private:
 public:
     CalibrationResult calibration_result;
     State state = State::error;
+    phase_stepping::CalibrateAxisError error;
 
     explicit CalibrateAxisHooks(PhasesPhaseStepping phase)
         : phase { phase } {
@@ -89,6 +91,8 @@ void calibration_helper(AxisEnum axis, CalibrateAxisHooks &hooks) {
     auto result = phase_stepping::calibrate_axis(axis, hooks);
     if (result.has_value()) {
         phase_stepping::save_to_persistent_storage_without_enabling(axis);
+    } else {
+        hooks.error = result.error();
     }
 }
 
@@ -331,6 +335,7 @@ namespace state {
         calibration_helper(AxisEnum::X_AXIS, hooks);
         switch (hooks.state) {
         case State::error:
+            context.error = hooks.error;
             return PhasesPhaseStepping::calib_error;
         case State::finished:
             context.calibration_result_x = hooks.calibration_result;
@@ -346,6 +351,7 @@ namespace state {
         calibration_helper(AxisEnum::Y_AXIS, hooks);
         switch (hooks.state) {
         case State::error:
+            context.error = hooks.error;
             return PhasesPhaseStepping::calib_error;
         case State::finished:
             context.calibration_result_y = hooks.calibration_result;
@@ -380,8 +386,14 @@ namespace state {
         return fail_helper(PhasesPhaseStepping::calib_nok);
     }
 
-    PhasesPhaseStepping calib_error() {
-        marlin_server::fsm_change(PhasesPhaseStepping::calib_error);
+    PhasesPhaseStepping calib_error(Context &context) {
+        const fsm::PhaseData data {
+            static_cast<uint8_t>(context.error),
+            0,
+            0,
+            0,
+        };
+        marlin_server::fsm_change(PhasesPhaseStepping::calib_error, data);
         return fail_helper(PhasesPhaseStepping::calib_error);
     }
 
@@ -410,7 +422,7 @@ PhasesPhaseStepping get_next_phase(Context &context, const PhasesPhaseStepping p
     case PhasesPhaseStepping::calib_y:
         return state::calib_y(context);
     case PhasesPhaseStepping::calib_error:
-        return state::calib_error();
+        return state::calib_error(context);
     case PhasesPhaseStepping::calib_nok:
         return state::calib_nok();
     case PhasesPhaseStepping::calib_ok:
