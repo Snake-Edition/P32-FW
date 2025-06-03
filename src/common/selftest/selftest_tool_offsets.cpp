@@ -5,6 +5,7 @@
 #include "selftest_tool_helper.hpp"
 #include "Marlin/src/module/temperature.h"
 #include "fanctl.hpp"
+#include <marlin_stubs/G425.hpp>
 
 using namespace selftest;
 LOG_COMPONENT_REF(Selftest);
@@ -205,8 +206,20 @@ LoopResult CSelftestPart_ToolOffsets::state_wait_stable_temp() {
 
 LoopResult CSelftestPart_ToolOffsets::state_calibrate() {
     IPartHandler::SetFsmPhase(PhasesSelftest::ToolOffsets_wait_calibrate);
-    marlin_server::enqueue_gcode("G425");
+    return LoopResult::RunNext;
+}
+
+/**
+ * This state exists just because full_calibration() is a blocking call and we need to update FSM state
+ * to let the user know that calibration is in progress.
+ * The issue is that the fsm takes update after returning from a state function, so we cannot do it in one state.
+ */
+LoopResult CSelftestPart_ToolOffsets::state_finish_calibration() {
+    bool calibration_success = full_calibration();
     marlin_server::enqueue_gcode_printf("M18 S%d", DEFAULT_STEPPER_DEACTIVE_TIME);
+    if (!calibration_success) {
+        return LoopResult::Fail;
+    }
     return LoopResult::RunNext;
 }
 

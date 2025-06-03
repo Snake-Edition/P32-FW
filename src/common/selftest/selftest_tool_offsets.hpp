@@ -21,6 +21,7 @@ public:
     LoopResult state_ask_user_install_pin();
     LoopResult state_wait_stable_temp();
     LoopResult state_calibrate();
+    LoopResult state_finish_calibration();
     LoopResult state_final_park();
     LoopResult state_ask_user_remove_pin();
 
