@@ -754,6 +754,13 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
       #endif
 
       if (do_refine) {
+        // Do a quick move to the home position. Refinement can now be done separately to the imprecise homing and the head can be anywhere
+        // The position taken from corexy_rehome_and_phase
+        do_blocking_move_to_xy(
+          (base_home_pos(X_AXIS) - XY_HOMING_ORIGIN_OFFSET * X_HOME_DIR),
+          (base_home_pos(Y_AXIS) - XY_HOMING_ORIGIN_OFFSET * Y_HOME_DIR)
+        );
+
         // Do not handle feedrate defaults again within precise homing: do it here
         const float xy_mm_s = fr_mm_s ? fr_mm_s : homing_feedrate(A_AXIS);
 
