@@ -723,10 +723,9 @@ PrintPreview::Result PrintPreview::Loop() {
             if ((skip_if_able >= marlin_server::PreviewSkipIfAble::tool_mapping) && PrintPreview::check_tools_mapping_validity(tool_mapper, spool_join, gcode_info).all_ok()) {
                 // we can skip tools mapping if there is not warning/error in global tools mapping
                 ChangeState(State::done);
-                break;
+            } else {
+                ChangeState(State::tools_mapping_wait_user);
             }
-
-            ChangeState(State::tools_mapping_wait_user);
 
             // start preheating bed to save time in absorbing heat
             if (GCodeInfo::getInstance().get_bed_preheat_temp().has_value()) {
