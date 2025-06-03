@@ -795,6 +795,13 @@ static void cycle() {
         _server_print_loop(); // we need call print loop here because it must be processed while blocking commands (M109)
     }
 
+    // Clear temporary print status messages that have timed out -
+    // but only if the printer isn't paused.
+    // [BFW-6485] People like to use M117 (show message) before M601
+    if (!is_extended_paused_state(server.print_state)) {
+        print_status_message().clear_timed_out_temporary();
+    }
+
     FSM_notifier::SendNotification();
 
     print_fan_spd();

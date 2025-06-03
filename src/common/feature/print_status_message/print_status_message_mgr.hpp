@@ -24,7 +24,7 @@ public:
 
 public:
     /// \returns current message to be shown
-    Record current_message();
+    Record current_message() const;
 
     /// Shows a temporary message for the specified duration. Overrides previous temporary message.
     /// To be called only from the marlin thread.
@@ -37,6 +37,9 @@ public:
 
     /// Clears the temporary message
     void clear_temporary();
+
+    /// Clears a temporary message that has already timed out
+    void clear_timed_out_temporary();
 
     /// Walks the history from the oldest item to the newest, calling \param callback for each item
     /// Stops iteration if the callback returns false.

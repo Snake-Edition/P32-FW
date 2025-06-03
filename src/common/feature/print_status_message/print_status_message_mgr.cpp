@@ -8,15 +8,11 @@ PrintStatusMessageManager &print_status_message() {
     return print_status_message_instance;
 }
 
-PrintStatusMessageManager::Record PrintStatusMessageManager::current_message() {
+PrintStatusMessageManager::Record PrintStatusMessageManager::current_message() const {
     std::scoped_lock mutex_guard(mutex_);
 
     if (temporary_message_.data) {
-        if (ticks_diff(ticks_ms(), temporary_message_.end_time_ms) >= 0) {
-            temporary_message_ = {};
-        } else {
-            return temporary_message_.data;
-        }
+        return temporary_message_.data;
     }
 
     auto guard = active_guard_;
@@ -42,6 +38,13 @@ void PrintStatusMessageManager::show_temporary(const Message &msg, uint32_t dura
         .end_time_ms = ticks_ms() + duration_ms,
     };
     add_history_item_nolock(temporary_message_.data);
+}
+
+void PrintStatusMessageManager::clear_timed_out_temporary() {
+    std::scoped_lock guard(mutex_);
+    if (temporary_message_.data && ticks_diff(ticks_ms(), temporary_message_.end_time_ms) >= 0) {
+        temporary_message_.data = {};
+    }
 }
 
 void PrintStatusMessageManager::clear_temporary() {
