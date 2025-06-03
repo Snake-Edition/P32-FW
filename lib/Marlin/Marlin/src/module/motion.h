@@ -103,16 +103,6 @@ inline bool all_axes_known(AxisHomeLevel required_level = AxisHomeLevel::impreci
 
 inline void set_all_unhomed() { axes_home_level = AxesHomeLevel::no_axes_homed; }
 
-FORCE_INLINE bool homing_needed() {
-  return !(
-    #if ENABLED(HOME_AFTER_DEACTIVATE)
-      all_axes_known()
-    #else
-      all_axes_homed()
-    #endif
-  );
-}
-
 // Error margin to work around float imprecision
 constexpr float slop = 0.0001;
 
@@ -317,7 +307,6 @@ void restore_feedrate_and_scaling();
 uint8_t axes_need_homing(uint8_t axis_bits=0x07, AxisHomeLevel required_level = AxisHomeLevel::imprecise);
 bool axis_unhomed_error(uint8_t axis_bits=0x07, AxisHomeLevel required_level = AxisHomeLevel::imprecise);
 
-static inline bool axes_should_home(uint8_t axis_bits=0x07) { return axes_need_homing(axis_bits); }
 static inline bool homing_needed_error(uint8_t axis_bits=0x07) { return axis_unhomed_error(axis_bits); }
 
 #if ENABLED(NO_MOTION_BEFORE_HOMING)
