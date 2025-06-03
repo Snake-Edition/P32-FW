@@ -1223,7 +1223,15 @@ void print_start(const char *filename, const GCodeReaderPosition &resume_pos, ma
         strlcpy(filepath_sfn.data(), filename, filepath_sfn.size());
 
         std::array<char, FILE_NAME_BUFFER_LEN> filename_lfn;
-        get_LFN(filename_lfn.data(), filename_lfn.size(), filepath_sfn.data());
+
+        // Do this in the async job thread to prevent blocking Marlin on I/O and possibly causing a watchdog reset
+        AsyncJob async_job;
+        async_job.issue([&](AsyncJobExecutionControl &) {
+            get_LFN(filename_lfn.data(), filename_lfn.size(), filepath_sfn.data());
+        });
+        while (async_job.is_active()) {
+            ::idle(true, true);
+        }
 
         // Update marlin vars
         {
