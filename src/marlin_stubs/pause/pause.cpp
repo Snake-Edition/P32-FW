@@ -662,12 +662,13 @@ void Pause::purge_process([[maybe_unused]] Response response) {
         runout_during_load();
         return;
     }
-    // Skip retraction on UserStopped or Failed
-    if (purge_result != StopConditions::UserStopped && purge_result != StopConditions::Failed) {
-        std::ignore = do_e_move_notify_progress_hotextrude(retract_distance, retract_feedrate, 98, 99, StopConditions::UserStopped);
-    } else {
-        // If the user stopped the purge, we need to stop the extruder move
+    // If the user stopped the purge, we need to stop the extruder move
+    if (purge_result == StopConditions::UserStopped) {
         planner.quick_stop_and_resume();
+    }
+    // Skip retraction if Failed
+    if (purge_result != StopConditions::Failed) {
+        std::ignore = do_e_move_notify_progress_hotextrude(retract_distance, retract_feedrate, 98, 99, StopConditions::UserStopped);
     }
 
     config_store().set_filament_type(settings.GetExtruder(), filament::get_type_to_load());
