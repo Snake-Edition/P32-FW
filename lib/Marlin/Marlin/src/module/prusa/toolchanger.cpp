@@ -155,13 +155,19 @@ static void plan_dock2pos(const float arc_r, const xy_pos_t pos, const xy_pos_t 
 } // namespace arc_move
 
 bool PrusaToolChanger::can_move_safely() {
-    return !axis_unhomed_error(_BV(X_AXIS) | _BV(Y_AXIS));
+    // Toolchange requires precise homing, otherwise we might not hit the docks right
+    return !axis_unhomed_error(_BV(X_AXIS) | _BV(Y_AXIS), AxisHomeLevel::full);
 }
 
 bool PrusaToolChanger::ensure_safe_move() {
     if (!can_move_safely()) {
         // in case XY is not homed, home it first
-        if (!GcodeSuite::G28_no_parser(true, true, false, { .z_raise = 0 })) {
+        if (!GcodeSuite::G28_no_parser(true, true, false,
+                {
+                    .only_if_needed = true,
+                    .z_raise = 0,
+                    .precise = true, // Toolchange requires precise homing, otherwise we might not hit the docks right
+                })) {
             return false;
         }
     }
