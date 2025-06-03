@@ -73,4 +73,22 @@ inline bool is_resuming_state(State state) {
     return (state == State::Resuming_BufferData) || (state == State::Resuming_Begin) || (state == State::Resuming_Reheating) || (state == State::Resuming_UnparkHead_XY) || (state == State::Resuming_UnparkHead_ZE);
 }
 
+inline bool is_extended_paused_state(State state) {
+    switch (state) {
+    case State::Paused:
+    case State::Pausing_Begin:
+    case State::Pausing_Failed_Code:
+    case State::Pausing_WaitIdle:
+    case State::Pausing_ParkHead:
+    case State::Resuming_BufferData:
+    case State::Resuming_Begin:
+    case State::Resuming_Reheating:
+    case State::Resuming_UnparkHead_XY:
+    case State::Resuming_UnparkHead_ZE:
+        return true;
+    default:
+        return false;
+    }
+}
+
 } // namespace marlin_server
