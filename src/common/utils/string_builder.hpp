@@ -76,6 +76,9 @@ public:
         return reinterpret_cast<const uint8_t *>(buffer_start_);
     }
 
+private:
+    StringBuilder &finalize_append();
+
 public:
     StringBuilder &append_char(char ch);
 
