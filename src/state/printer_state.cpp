@@ -631,6 +631,9 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
 #if HAS_PRECISE_HOMING_COREXY()
     case WarningType::HomingCalibrationNeeded:
         return ErrCode::ERR_MECHANICAL_HOMING_CALIBRATION_NEEDED;
+
+    case WarningType::HomingRefinementFailed:
+        return ErrCode::ERR_MECHANICAL_PRECISE_REFINEMENT_FAILED;
 #endif
     }
 

@@ -68,6 +68,9 @@ constexpr PhasesWarning warning_type_phase_constexpr(WarningType warning) {
 #if HAS_PRECISE_HOMING_COREXY()
     case WarningType::HomingCalibrationNeeded:
         return PhasesWarning::HomingCalibrationNeeded;
+
+    case WarningType::HomingRefinementFailed:
+        return PhasesWarning::HomingRefinementFailed;
 #endif
 
         //

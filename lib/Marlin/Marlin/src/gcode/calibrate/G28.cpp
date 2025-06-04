@@ -102,6 +102,7 @@
 #include <marlin_server.hpp>
 #include <feature/print_status_message/print_status_message_guard.hpp>
 #include <config_store/store_instance.hpp>
+#include <buddy/unreachable.hpp>
 
 #include <option/has_ceiling_clearance.h>
 #if HAS_CEILING_CLEARANCE()
@@ -758,12 +759,9 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
         const bool do_refine = true;
       #endif
 
-      if (do_refine) {
+      if(do_refine) {
         failed |= !corexy_refine_during_G28(fr_mm_s, flags);
 
-        if (failed && !planner.draining()) {
-          homing_failed([]() { fatal_error(ErrCode::ERR_MECHANICAL_PRECISE_REFINEMENT_FAILED); });
-        }
       }
     }
   #endif
@@ -940,10 +938,16 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 }
 
 #if HAS_PRECISE_HOMING_COREXY()
-bool corexy_calibrate_homing_during_G28(float xy_mm_s, const G28Flags &flags) {
+enum class RefineResult {
+  success,
+  hard_fail, ///< Failed hard, cannot recover
+  refine_fail, ///< Failed to refine, but could potentially continue unrefined
+};
+
+RefineResult corexy_calibrate_homing_during_G28(float xy_mm_s, const G28Flags &flags) {
   // We cannot calibrate -> this are bad, abort
   if (!flags.can_calibrate) {
-    return false;
+    return RefineResult::refine_fail;
   }
 
   Tristate calibration_approved = flags.force_calibrate ? Tristate::yes : config_store().auto_recalibrate_precise_homing.get();
@@ -981,7 +985,7 @@ bool corexy_calibrate_homing_during_G28(float xy_mm_s, const G28Flags &flags) {
 
   if(!calibration_approved) {
     // User decided to not do the calibration at his own risk -> consider the point refined
-    return true;
+    return RefineResult::success;
   }
       
   PrintStatusMessageGuard status_guard;
@@ -990,23 +994,23 @@ bool corexy_calibrate_homing_during_G28(float xy_mm_s, const G28Flags &flags) {
 #if HAS_TRINAMIC && defined(XY_HOMING_MEASURE_SENS_MIN)
   // Try calibrating motor sensitivity before calibration
   if (!corexy_sens_calibrate(xy_mm_s)) {
-    return false;
+    return RefineResult::hard_fail;
   }
 
   // After calibrating sensitivity, we need to rehome
   if (!corexy_rehome_xy(xy_mm_s)) {
-    return false;
+    return RefineResult::hard_fail;
   }
 #endif
 
   if (!corexy_home_refine(xy_mm_s, CoreXYCalibrationMode::force)) {
-    return false;
+    return RefineResult::refine_fail;
   }
 
-  return true;
+  return RefineResult::success;
 }
 
-bool corexy_refine_during_G28(float fr_mm_s, const G28Flags &flags) {
+RefineResult corexy_refine_during_G28_once(float fr_mm_s, const G28Flags &flags) {
   // Do a quick move to the home position. Refinement can now be done separately to the imprecise homing and the head can be anywhere
   // The position taken from corexy_rehome_and_phase
   do_blocking_move_to_xy(
@@ -1021,7 +1025,7 @@ bool corexy_refine_during_G28(float fr_mm_s, const G28Flags &flags) {
     // Retry the refinement a few times 
     for (uint8_t retry = 0; retry < PRECISE_HOMING_COREXY_RETRIES; retry++) {  
       if (planner.draining()) {
-        return false;
+        return RefineResult::hard_fail;
       }
 
       if (corexy_home_refine(fr_mm_s, CoreXYCalibrationMode::disallow)) {
@@ -1049,17 +1053,58 @@ bool corexy_refine_during_G28(float fr_mm_s, const G28Flags &flags) {
           break; // Break out of the loop -> trigger calibration
         }
 
-        return true;
+        return RefineResult::success;
       }
 
       // instead of blindly retrying internally on the same location, move the gantry
       if (!corexy_rehome_xy(fr_mm_s)) {
-        return false;
+        return RefineResult::hard_fail;
       }
     }
   }
 
   // If we've exhausted retries, force calibration
   return corexy_calibrate_homing_during_G28(fr_mm_s, flags);
+}
+
+bool corexy_refine_during_G28(float fr_mm_s, const G28Flags &flags) {
+  while (true) {
+    switch(corexy_refine_during_G28_once(fr_mm_s, flags)) {
+      
+      case RefineResult::success:
+        return true;
+
+      case RefineResult::hard_fail:
+        return false;
+
+      case RefineResult::refine_fail:
+        break;
+    }
+
+    if(planner.draining()) {
+      // We're quick stopping, do not repeat
+      return false;
+    }
+
+    const auto prompt_result = marlin_server::prompt_warning(WarningType::HomingRefinementFailed);
+    switch(prompt_result) {
+
+    case Response::Retry:
+      continue;
+
+    case Response::Abort:
+      marlin_server::quick_stop();
+      marlin_server::print_abort();
+      return false;
+
+    case Response::Ignore:
+      // The user decided to ignore the problem at his own risk, consider the homing calibrated for now
+      return true;
+
+    default:
+      BUDDY_UNREACHABLE();
+
+    }
+  }
 }
 #endif
