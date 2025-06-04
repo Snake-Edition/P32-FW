@@ -975,6 +975,10 @@ bool corexy_calibrate_homing_during_G28(float xy_mm_s, const G28Flags &flags) {
     }
   }
 
+  // Regardless of whether the calibration will run or not, reset homing instability history
+  // In both cases, we want a clean slate so that the user is not bothered with "please recalibrate" right away
+  config_store().precise_homing_instability_history.set(0);
+
   if(!calibration_approved) {
     // User decided to not do the calibration at his own risk -> consider the point refined
     return true;
@@ -1021,12 +1025,29 @@ bool corexy_refine_during_G28(float fr_mm_s, const G28Flags &flags) {
       }
 
       if (corexy_home_refine(fr_mm_s, CoreXYCalibrationMode::disallow)) {
-        // Successfully refined the home -> we're done
-        // TODO: Track corexy_home_is_unstable()
+        // Successfully refined the home
 
         // Mark the axes as precisely homed
         axes_home_level[X_AXIS] = AxisHomeLevel::full;
         axes_home_level[Y_AXIS] = AxisHomeLevel::full;
+
+        // Record whether the refinement found a stable home
+        config_store().precise_homing_instability_history.transform([is_unstable = corexy_home_is_unstable()] (auto val) {
+          return (val << 1) | is_unstable;
+        });
+
+        // If at least history_threshold out of last history_window refinements were unstable, trigger calibration
+        static constexpr auto history_threshold = 6;
+        static constexpr auto history_window = 10;
+
+        // Check that we have the requested history window actually stored
+        using History = decltype(config_store_ns::CurrentStore::precise_homing_instability_history)::value_type;
+        static_assert(history_window <= sizeof(History) * 8);
+        static constexpr History history_mask = ((1 << history_window) - 1);
+
+        if(std::popcount(static_cast<History>(config_store().precise_homing_instability_history.get() & history_mask)) >= history_threshold) {
+          break; // Break out of the loop -> trigger calibration
+        }
 
         return true;
       }
