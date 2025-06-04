@@ -73,7 +73,7 @@ private:
     uint8_t brightness { 255 };
 
     SideStripState state = SideStripState::off;
-    uint32_t active_timestamp_ms; // Timestamp of the last activity for idle dimming
+    uint32_t active_timestamp_ms = 0; // Timestamp of the last activity for idle dimming
     std::optional<CustomColorState> custom_color;
 };
 

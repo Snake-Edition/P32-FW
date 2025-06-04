@@ -31,7 +31,7 @@ void SideStripHandler::set_custom_color(ColorRGBW color, uint32_t duration_ms, u
 
 void SideStripHandler::update() {
     std::lock_guard lock(mutex);
-    uint32_t time_ms = ticks_ms();
+    const uint32_t time_ms = ticks_ms();
 
     auto &controller = controller_instance();
     if (custom_color && time_ms - custom_color->start_ms < custom_color->duration_ms) {
@@ -39,9 +39,11 @@ void SideStripHandler::update() {
     } else {
         custom_color.reset();
 
-        if (!dimming_enabled || time_ms - active_timestamp_ms < active_timeout_ms) {
+        if (!dimming_enabled || (active_timestamp_ms != 0 && time_ms - active_timestamp_ms < active_timeout_ms)) {
             change_state(SideStripState::active);
         } else {
+            // Clear to prevent overflow bugs
+            active_timestamp_ms = 0;
             change_state(SideStripState::idle);
         }
     }
