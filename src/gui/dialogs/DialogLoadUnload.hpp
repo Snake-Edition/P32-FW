@@ -53,8 +53,6 @@ private:
     std::optional<PhasesLoadUnload> current_phase = std::nullopt;
     RadioButtonFSM radio;
 
-    void set_progress_percent(uint8_t val);
-
 public:
     void Change(fsm::BaseData data) override final;
 
@@ -80,7 +78,6 @@ public:
 
 protected:
     void notice_update(uint16_t errCode, const char *errTitle, const char *errDesc, ErrType type);
-    float deserialize_progress(fsm::PhaseData data) const;
     void phaseEnter();
 
 private:
@@ -99,7 +96,7 @@ private:
     window_text_t filament_type_text;
     window_colored_rect filament_color_icon;
 
-    LoadUnloadMode mode;
+    LoadUnloadMode mode = static_cast<LoadUnloadMode>(-1); // Set to some invalid value by default
 
     // Needs to be held in memory because we're rendering the name from it
     FilamentTypeParameters filament_type_parameters;
