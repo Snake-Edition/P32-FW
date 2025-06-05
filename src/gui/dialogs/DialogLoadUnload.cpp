@@ -442,7 +442,7 @@ void DialogLoadUnload::Change(fsm::BaseData base_data) {
 
     // Must be after the notice code, some phases do not use FSMLoadUnloadData
     auto deserialized_data = fsm::deserialize_data<FSMLoadUnloadData>(data);
-    title.SetText(get_name(deserialized_data.mode));
+    title.SetText(_(get_name(deserialized_data.mode)));
     progress_bar.SetProgressPercent(deserialized_data.progress);
     progress_number.SetValue(deserialized_data.progress);
     mode = deserialized_data.mode;
@@ -478,24 +478,24 @@ void DialogLoadUnload::notice_update(uint16_t errCode, const char *errTitle, con
     notice_qr.set_error_code(ErrCode(errCode));
 }
 
-string_view_utf8 DialogLoadUnload::get_name(LoadUnloadMode mode) {
+const char *DialogLoadUnload::get_name(LoadUnloadMode mode) {
     switch (mode) {
     case LoadUnloadMode::Change:
-        return _("Changing filament");
+        return N_("Changing filament");
     case LoadUnloadMode::Load:
-        return _("Loading filament");
+        return N_("Loading filament");
     case LoadUnloadMode::Unload:
-        return _("Unloading filament");
+        return N_("Unloading filament");
     case LoadUnloadMode::FilamentStuck:
-        return _("Reloading filament");
+        return N_("Reloading filament");
     case LoadUnloadMode::Purge:
-        return _("Purging filament");
+        return N_("Purging filament");
     case LoadUnloadMode::Test:
-        return _("Testing filament");
+        return N_("Testing filament");
     case LoadUnloadMode::Cut:
-        return _("Cutting filament");
+        return N_("Cutting filament");
     case LoadUnloadMode::Eject:
-        return _("Ejecting filament");
+        return N_("Ejecting filament");
     }
     BUDDY_UNREACHABLE();
 }
