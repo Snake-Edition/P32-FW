@@ -1974,6 +1974,17 @@ calibrate_single_harmonic(AxisEnum axis, const AxisCalibrationConfig &calib_conf
         CalibrationResult { backward_mag.mag_value, backward_pha, backward_mag.score } } };
 }
 
+static bool makes_improvement(const CalibrationResult &r) {
+    return r.score <= 1.f;
+}
+
+static bool has_impact(const CalibrationResult &r) {
+    // If the magnitude yields phase shift less than one we consider it to be
+    // negligible.
+    static const float threshold = 1.f / opts::MOTOR_PERIOD / opts::SIN_FRACTION;
+    return r.params.mag >= threshold;
+}
+
 std::expected<std::array<MotorPhaseCorrection, 2>, CalibrateAxisError>
 phase_stepping::calibrate_axis(AxisEnum axis, CalibrateAxisHooks &hooks) {
 
@@ -2020,6 +2031,15 @@ phase_stepping::calibrate_axis(AxisEnum axis, CalibrateAxisHooks &hooks) {
             }
 
             auto [f_result, b_result] = *calib_res;
+
+            // Motor might not have a defect on the current harmonics or the
+            // driver resolution might not be enough to fix it. In that case,
+            // we don't want measurement error to trigger false negative.
+            for (auto *res : { &f_result, &b_result }) {
+                if (!has_impact(*res) && !makes_improvement(*res)) {
+                    res->score = 1.f; // No impact, no improvement
+                }
+            }
 
             result[0][harmonic_speed.harmonic] = f_result.params;
             result[1][harmonic_speed.harmonic] = b_result.params;
