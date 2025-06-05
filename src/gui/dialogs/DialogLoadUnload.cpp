@@ -427,8 +427,8 @@ void DialogLoadUnload::Change(fsm::BaseData base_data) {
     #endif
         current_phase = phase;
 
-        // This early return is important. MMU notice uses a custom data structure, not ProgressSerializerLoadUnload
-        // So if we don't return, the following ProgressSerializerLoadUnload will return garbage
+        // This early return is important. MMU notice uses a custom data structure, not FSMLoadUnloadData
+        // So if we don't return, the following FSMLoadUnloadData will return garbage
         return;
     }
 
@@ -441,7 +441,7 @@ void DialogLoadUnload::Change(fsm::BaseData base_data) {
 #endif
 
     // Must be after the notice code, some phases do not use FSMLoadUnloadData
-    auto deserialized_data = ProgressSerializerLoadUnload(data);
+    auto deserialized_data = fsm::deserialize_data<FSMLoadUnloadData>(data);
     title.SetText(get_name(deserialized_data.mode));
     progress_bar.SetProgressPercent(deserialized_data.progress);
     progress_number.SetValue(deserialized_data.progress);

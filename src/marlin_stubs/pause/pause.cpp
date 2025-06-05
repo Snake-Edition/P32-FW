@@ -97,8 +97,7 @@ public:
     virtual fsm::PhaseData serialize(uint8_t progress) override {
         std::optional<LoadUnloadMode> mode = pause.get_mode();
         if (mode) {
-            ProgressSerializerLoadUnload serializer(*mode, progress);
-            return serializer.Serialize();
+            return fsm::serialize_data(FSMLoadUnloadData { .mode = *mode, .progress = progress });
         }
 
         assert("unknown LoadUnloadMode");
@@ -149,8 +148,7 @@ PausePrivatePhase::PausePrivatePhase()
 void PausePrivatePhase::setPhase(PhasesLoadUnload ph, uint8_t progress) {
     phase = ph;
     if (load_unload_mode) {
-        ProgressSerializerLoadUnload serializer(*load_unload_mode, progress);
-        marlin_server::fsm_change(phase, serializer.Serialize());
+        marlin_server::fsm_change(phase, fsm::serialize_data(FSMLoadUnloadData { .mode = *load_unload_mode, .progress = progress }));
     }
 }
 
