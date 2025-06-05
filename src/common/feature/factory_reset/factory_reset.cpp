@@ -13,6 +13,8 @@
 #include <freertos/critical_section.hpp>
 #include <config_store/store_definition.hpp>
 #include <option/bootloader.h>
+#include <gui.hpp>
+#include <sound.hpp>
 
 #include <option/has_phase_stepping.h>
 #if HAS_PHASE_STEPPING()
@@ -51,12 +53,19 @@ extern osThreadId displayTaskHandle;
         .type = MsgBoxType::warning,
         .text = _("Performing factory reset.\nDo not turn off the printer."),
         .responses = Responses_NONE,
-        .loop_callback = [] {
+        .loop_callback = [&] {
+            // Force screen update; it might not always happen in gui_loop thanks to timers
+            Screens::Access()->Draw();
+
             // Close the dialog immediately (but it will keep being displayed because we dont't redraw the screen)
             Screens::Access()->Close();
         },
     }
         .exec();
+
+    // Stop any sound plays. We will be entering a critical section and don't want to hear a long beep during all that wiping
+    Sound_Stop();
+    Sound_Update1ms();
 
 #if HAS_PHASE_STEPPING()
     // Phase stepping is a calibration that is stored on xFlash, not in the config store -> it needs special handling
