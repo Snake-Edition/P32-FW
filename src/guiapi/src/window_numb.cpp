@@ -58,8 +58,10 @@ void window_numb_t::SetFormat(const char *frmt) {
 }
 
 void window_numb_t::SetValue(float val) {
-    setValue(val);
-    Invalidate();
+    if (value != val) {
+        setValue(val);
+        Invalidate();
+    }
 }
 
 void window_numb_t::setValue(float val) {
