@@ -36,7 +36,7 @@
 #endif
 
 #if HAS_PHASE_STEPPING_CALIBRATION()
-    #include "screen_phase_stepping.hpp"
+    #include "screen_phase_stepping_calibration.hpp"
 #endif
 
 #if HAS_INPUT_SHAPER_CALIBRATION()

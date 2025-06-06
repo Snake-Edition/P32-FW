@@ -206,7 +206,7 @@ if(HAS_COLDPULL)
 endif()
 
 if(HAS_PHASE_STEPPING_CALIBRATION)
-  target_sources(firmware PRIVATE screen_phase_stepping.cpp)
+  target_sources(firmware PRIVATE screen_phase_stepping_calibration.cpp)
 endif()
 
 if(CONNECT)
