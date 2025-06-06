@@ -493,7 +493,7 @@ extern "C" void main_cpp(void) {
     buddy::hw::io_expander2.initialize();
 #endif
 
-    osThreadCCMDef(defaultTask, StartDefaultTask, TASK_PRIORITY_DEFAULT_TASK, 0, 1152);
+    osThreadCCMDef(defaultTask, StartDefaultTask, TASK_PRIORITY_DEFAULT_TASK, 0, 1160);
     defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
 #if ENABLED(POWER_PANIC)
