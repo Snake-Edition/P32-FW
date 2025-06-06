@@ -1263,18 +1263,10 @@ void Pause::park_nozzle_and_notify() {
         }
 #endif /*CORE_IS_XY*/
 
-        if (x_greater_than_y) {
-            PauseFsmNotifier N(*this, begin_pos, end_pos, parkMoveZPercent(Z_len, XY_len), 100, marlin_vars().native_pos[MARLIN_VAR_INDEX_X]); // from Z% to 100%
-            plan_park_move_to_xyz(settings.park_pos, NOZZLE_PARK_XY_FEEDRATE, Z_feedrate, Segmented::yes);
-            if (wait_for_motion_finish_stoppable() == StopConditions::UserStopped) {
-                return;
-            }
-        } else {
-            PauseFsmNotifier N(*this, begin_pos, end_pos, parkMoveZPercent(Z_len, XY_len), 100, marlin_vars().native_pos[MARLIN_VAR_INDEX_Y]); // from Z% to 100%
-            plan_park_move_to_xyz(settings.park_pos, NOZZLE_PARK_XY_FEEDRATE, Z_feedrate, Segmented::yes);
-            if (wait_for_motion_finish_stoppable() == StopConditions::UserStopped) {
-                return;
-            }
+        PauseFsmNotifier N(*this, begin_pos, end_pos, parkMoveZPercent(Z_len, XY_len), 100, marlin_vars().native_pos[x_greater_than_y ? MARLIN_VAR_INDEX_X : MARLIN_VAR_INDEX_Y]); // from Z% to 100%
+        plan_park_move_to_xyz(settings.park_pos, NOZZLE_PARK_XY_FEEDRATE, Z_feedrate, Segmented::yes);
+        if (wait_for_motion_finish_stoppable() == StopConditions::UserStopped) {
+            return;
         }
     }
 
@@ -1303,11 +1295,8 @@ void Pause::unpark_nozzle_and_notify() {
         }
     }
 
-    if (x_greater_than_y) {
-        PauseFsmNotifier N(*this, begin_pos, end_pos, 0, parkMoveXYPercent(Z_len, XY_len), marlin_vars().native_pos[MARLIN_VAR_INDEX_X]);
-        do_blocking_move_to_xy(settings.resume_pos, NOZZLE_UNPARK_XY_FEEDRATE);
-    } else {
-        PauseFsmNotifier N(*this, begin_pos, end_pos, 0, parkMoveXYPercent(Z_len, XY_len), marlin_vars().native_pos[MARLIN_VAR_INDEX_Y]);
+    {
+        PauseFsmNotifier N(*this, begin_pos, end_pos, 0, parkMoveXYPercent(Z_len, XY_len), marlin_vars().native_pos[x_greater_than_y ? MARLIN_VAR_INDEX_X : MARLIN_VAR_INDEX_Y]);
         do_blocking_move_to_xy(settings.resume_pos, NOZZLE_UNPARK_XY_FEEDRATE);
     }
 
