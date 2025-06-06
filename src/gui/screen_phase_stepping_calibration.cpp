@@ -240,7 +240,7 @@ namespace frame {
                 text_rect,
                 is_multiline::yes,
                 is_closed_on_click_t::no,
-                _("Calibration failed with error:"),
+                _("Calibration failed with error."),
             }
             , detail {
                 parent,
@@ -252,7 +252,7 @@ namespace frame {
 
         void update(const fsm::PhaseData &data) {
             const auto error = static_cast<phase_stepping::CalibrateAxisError>(data[0]);
-            detail.SetText(string_view_utf8::MakeCPUFLASH(to_string(error)));
+            detail.SetText(_(to_string(error)));
         }
     };
 

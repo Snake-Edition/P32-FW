@@ -1,6 +1,7 @@
 #include "calibration.hpp"
 #include "phase_stepping.hpp"
 #include "calibration_config.hpp"
+#include "i18n.h"
 
 #include <buddy/unreachable.hpp>
 #include <logging/log.hpp>
@@ -2063,17 +2064,17 @@ phase_stepping::calibrate_axis(AxisEnum axis, CalibrateAxisHooks &hooks) {
 const char *phase_stepping::to_string(CalibrateAxisError err) {
     switch (err) {
     case CalibrateAxisError::aborted:
-        return "aborted";
+        return N_("Aborted.");
     case CalibrateAxisError::speed_sweep_movement_failed:
-        return "speed sweep movement failed";
+        return N_("Speed sweep movement failed.");
     case CalibrateAxisError::param_sweep_movement_failed:
-        return "param sweep movement failed";
+        return N_("Param sweep movement failed.");
     case CalibrateAxisError::no_peaks_found:
-        return "no peaks found";
+        return N_("No peaks found.");
     case CalibrateAxisError::cannot_find_peaks_in_phase_sweep:
-        return "cannot_find_peaks_in_phase_sweep";
+        return N_("Cannot find peaks in phase sweep.");
     case CalibrateAxisError::magnitude_out_of_bounds:
-        return "magnitude out of bounds";
+        return N_("Magnitude out of bounds.");
     }
     BUDDY_UNREACHABLE();
 }
