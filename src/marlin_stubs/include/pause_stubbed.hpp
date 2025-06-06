@@ -86,7 +86,6 @@ protected:
 
     PausePrivatePhase();
     void setPhase(PhasesLoadUnload ph, uint8_t progress = 0);
-    PhasesLoadUnload getPhase() const;
 
     // auto restores temp turned off by safety timer,
     // it is also restored by SafetyTimer on any user click
@@ -108,6 +107,10 @@ protected:
     void clrRestoreTemp();
 
 public:
+    inline PhasesLoadUnload getPhase() const {
+        return phase;
+    }
+
     constexpr uint8_t getPhaseIndex() const {
         return GetPhaseIndex(phase);
     }

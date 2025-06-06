@@ -48,6 +48,7 @@
 #include <common/marlin_client.hpp>
 #include <common/mapi/parking.hpp>
 #include <feature/ramming/ramming_sequence.hpp>
+#include <utils/progress.hpp>
 
 #include <option/has_human_interactions.h>
 #include <option/has_mmu2.h>
@@ -86,23 +87,27 @@ GCodeLoader nozzle_cleaner_gcode_loader;
 
 using namespace buddy;
 
-class PauseFsmNotifier : public marlin_server::FSM_notifier {
-    Pause &pause;
+class PauseFsmNotifier : public CallbackHookGuard<> {
 
 public:
-    PauseFsmNotifier(Pause &p, float min, float max, uint8_t progress_min, uint8_t progress_max, const MarlinVariable<float> &var_id)
-        : FSM_notifier(ClientFSM::Load_unload, p.getPhaseIndex(), min, max, progress_min, progress_max, var_id)
-        , pause(p) {}
+    PauseFsmNotifier(Pause &pause, float min, float max, ProgressPercent progress_min, ProgressPercent progress_max, const MarlinVariable<float> &var)
+        : CallbackHookGuard<> { marlin_server::idle_hook_point,
+            [this, &var] {
+                if (auto mode = pause_.get_mode()) {
+                    const auto progress = span_.map(to_normalized_progress(min_, max_, var.get()));
+                    const auto data = fsm::serialize_data(FSMLoadUnloadData { .mode = *mode, .progress = progress });
+                    marlin_server::fsm_change(pause_.getPhase(), data);
+                }
+            } }
+        , pause_(pause)
+        , span_(progress_min, progress_max)
+        , min_(min)
+        , max_(max) {}
 
-    virtual fsm::PhaseData serialize(uint8_t progress) override {
-        std::optional<LoadUnloadMode> mode = pause.get_mode();
-        if (mode) {
-            return fsm::serialize_data(FSMLoadUnloadData { .mode = *mode, .progress = progress });
-        }
-
-        assert("unknown LoadUnloadMode");
-        return { {} };
-    }
+private:
+    Pause &pause_;
+    ProgressSpan span_;
+    float min_, max_;
 };
 
 PauseMenuResponse pause_menu_response;
@@ -151,8 +156,6 @@ void PausePrivatePhase::setPhase(PhasesLoadUnload ph, uint8_t progress) {
         marlin_server::fsm_change(phase, fsm::serialize_data(FSMLoadUnloadData { .mode = *load_unload_mode, .progress = progress }));
     }
 }
-
-PhasesLoadUnload PausePrivatePhase::getPhase() const { return phase; }
 
 Response PausePrivatePhase::getResponse() {
     const Response ret = marlin_server::get_response_from_phase(phase);
