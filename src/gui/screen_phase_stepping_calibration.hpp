@@ -6,13 +6,13 @@
 
 static_assert(HAS_PHASE_STEPPING_CALIBRATION());
 
-class ScreenPhaseStepping : public ScreenFSM {
+class ScreenPhaseSteppingCalibration : public ScreenFSM {
 private:
     RadioButtonFSM radio;
 
 public:
-    ScreenPhaseStepping();
-    ~ScreenPhaseStepping();
+    ScreenPhaseSteppingCalibration();
+    ~ScreenPhaseSteppingCalibration();
 
     static constexpr Rect16 get_inner_frame_rect() {
         return GuiDefaults::RectScreenBody - GuiDefaults::GetButtonRect(GuiDefaults::RectScreenBody).Height();

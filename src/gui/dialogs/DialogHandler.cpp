@@ -176,7 +176,7 @@ using FSMDisplayConfig = FSMDisplayConfigDef<
     FSMScreenDef<ClientFSM::ColdPull, ScreenColdPull>,
 #endif
 #if HAS_PHASE_STEPPING_CALIBRATION()
-    FSMScreenDef<ClientFSM::PhaseSteppingCalibration, ScreenPhaseStepping>,
+    FSMScreenDef<ClientFSM::PhaseSteppingCalibration, ScreenPhaseSteppingCalibration>,
 #endif
 #if HAS_INPUT_SHAPER_CALIBRATION()
     FSMScreenDef<ClientFSM::InputShaperCalibration, ScreenInputShaperCalibration>,
