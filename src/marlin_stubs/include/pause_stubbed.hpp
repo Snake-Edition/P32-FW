@@ -90,7 +90,7 @@ protected:
     ProgressMapper<LoadState> progress_mapper;
 
     PausePrivatePhase();
-    void setPhase(PhasesLoadUnload ph, uint8_t progress = 0);
+    void setPhase(PhasesLoadUnload ph);
 
     // auto restores temp turned off by safety timer,
     // it is also restored by SafetyTimer on any user click
@@ -345,7 +345,7 @@ private:
     void handle_help(Response response);
 
     /// @returns false if ramming was unsuccessful (temperature not safe or user stopped the action)
-    bool ram_filament(uint8_t progress_percent);
+    bool ram_filament();
 
     void unload_filament();
 
