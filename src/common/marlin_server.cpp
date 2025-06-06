@@ -804,7 +804,6 @@ static void cycle() {
         print_status_message().clear_timed_out_temporary();
     }
 
-    FSM_notifier::SendNotification();
     idle_hook_point.call_all();
 
     print_fan_spd();
@@ -3445,65 +3444,6 @@ static void _server_set_var(const Request &request) {
 
     // if we got here, no variable was set, return error
     bsod("unimplemented _server_set_var for var_id %i", (int)variable_identifier);
-}
-
-/*****************************************************************************/
-// FSM_notifier
-FSM_notifier::data FSM_notifier::s_data;
-FSM_notifier *FSM_notifier::activeInstance = nullptr;
-
-FSM_notifier::FSM_notifier(ClientFSM type, uint8_t phase, float min, float max,
-    uint8_t progress_min, uint8_t progress_max, const MarlinVariable<float> &var_id)
-    : temp_data(s_data) {
-    s_data.type = type;
-    s_data.phase = phase;
-    s_data.scale = static_cast<float>(progress_max - progress_min) / (max - min);
-    s_data.offset = -min * s_data.scale + static_cast<float>(progress_min);
-    s_data.progress_min = progress_min;
-    s_data.progress_max = progress_max;
-    s_data.var_id = &var_id;
-    s_data.last_progress_sent = std::nullopt;
-    activeInstance = this;
-}
-
-// static method
-// notifies clients about progress rise
-// scales "bound" variable via following formula to calculate progress
-// x = (actual - s_data.min) * s_data.scale + s_data.progress_min;
-// x = actual * s_data.scale - s_data.min * s_data.scale + s_data.progress_min;
-// s_data.offset == -s_data.min * s_data.scale + s_data.progress_min
-// simplified formula
-// x = actual * s_data.scale + s_data.offset;
-void FSM_notifier::SendNotification() {
-    if (!activeInstance) {
-        return;
-    }
-    if (s_data.type == ClientFSM::_none) {
-        return;
-    }
-
-    float actual = *s_data.var_id;
-    actual = actual * s_data.scale + s_data.offset;
-
-    int progress = static_cast<int>(actual); // int - must be signed
-    if (progress < s_data.progress_min) {
-        progress = s_data.progress_min;
-    }
-    if (progress > s_data.progress_max) {
-        progress = s_data.progress_max;
-    }
-
-    // after first sent, progress can only rise
-    // no value: comparison returns true
-    if (progress > s_data.last_progress_sent) {
-        s_data.last_progress_sent = progress;
-        fsm_change(FSMAndPhase(s_data.type, s_data.phase), activeInstance->serialize(progress));
-    }
-}
-
-FSM_notifier::~FSM_notifier() {
-    s_data = temp_data;
-    activeInstance = nullptr;
 }
 
 FSMResponseVariant get_response_variant_from_phase(FSMAndPhase fsm_and_phase) {
