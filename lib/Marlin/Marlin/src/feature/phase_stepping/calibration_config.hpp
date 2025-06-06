@@ -17,8 +17,8 @@ struct AxisCalibrationConfig {
 
     float peak_speed_shift = 0.9f;
 
-    float min_magnitude = 0.002f;
-    float max_magnitude = 0.1f;
+    float min_magnitude = 0.008f;
+    float max_magnitude = 0.4f;
     float magnitude_quotient = 2.f;
 
     float analysis_window_size_seconds = 0.1f;
