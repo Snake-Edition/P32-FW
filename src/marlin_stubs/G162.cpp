@@ -11,6 +11,7 @@
 #include "printers.h"
 #include <marlin_server.hpp>
 #include <RAII.hpp>
+#include <utils/progress.hpp>
 
 #include <option/has_loadcell.h>
 #if HAS_LOADCELL()
@@ -97,7 +98,12 @@ static void safe_move_down() {
 
     AutoRestore _se(soft_endstops_enabled, false);
     TemporaryGlobalEndstopsState _ess(true);
-    marlin_server::FSM_notifier _fsmn(ClientFSM::Selftest, GetPhaseIndex(PhasesSelftest::CalibZ), current_position.z, target_Z, 0, 100, marlin_vars().native_pos[MARLIN_VAR_INDEX_Z]);
+    CallbackHookGuard cb { marlin_server::idle_hook_point,
+        [&]() {
+            // FSMAndPhase(ClientFSM::Load_unload, pause.getPhaseIndex())
+            ProgressPercent progress = ProgressSpan { 0, 100 }.map(to_normalized_progress(current_position.z, target_Z, marlin_vars().native_pos[MARLIN_VAR_INDEX_Z]));
+            marlin_server::fsm_change(FSMAndPhase(ClientFSM::Selftest, GetPhaseIndex(PhasesSelftest::CalibZ)), { progress });
+        } };
 
     if (do_homing_move(AxisEnum::Z_AXIS, target_Z - current_position.z, MMM_TO_MMS(HOMING_FEEDRATE_INVERTED_Z))) {
         // endstop triggered, raise the nozzle
