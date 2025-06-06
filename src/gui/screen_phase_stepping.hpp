@@ -2,6 +2,9 @@
 
 #include "screen_fsm.hpp"
 #include "radio_button_fsm.hpp"
+#include <option/has_phase_stepping_calibration.h>
+
+static_assert(HAS_PHASE_STEPPING_CALIBRATION());
 
 class ScreenPhaseStepping : public ScreenFSM {
 private:

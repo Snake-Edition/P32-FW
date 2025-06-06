@@ -8,6 +8,7 @@
 #include <option/has_mmu2.h>
 #include <option/has_dwarf.h>
 #include <option/has_input_shaper_calibration.h>
+#include <option/has_phase_stepping_calibration.h>
 #include <option/xl_enclosure_support.h>
 #include <option/has_uneven_bed_prompt.h>
 #include <config_store/store_instance.hpp>
@@ -201,8 +202,8 @@ DeviceState get_state(bool ready) {
 #if HAS_COLDPULL()
     case ClientFSM::ColdPull:
 #endif
-#if HAS_PHASE_STEPPING()
-    case ClientFSM::PhaseStepping:
+#if HAS_PHASE_STEPPING_CALIBRATION()
+    case ClientFSM::PhaseSteppingCalibration:
 #endif
 #if HAS_INPUT_SHAPER_CALIBRATION()
     case ClientFSM::InputShaperCalibration:
@@ -398,8 +399,8 @@ StateWithDialog get_state_with_dialog(bool ready) {
 #if HAS_COLDPULL()
     case ClientFSM::ColdPull:
 #endif
-#if HAS_PHASE_STEPPING()
-    case ClientFSM::PhaseStepping:
+#if HAS_PHASE_STEPPING_CALIBRATION()
+    case ClientFSM::PhaseSteppingCalibration:
 #endif
 #if HAS_INPUT_SHAPER_CALIBRATION()
     case ClientFSM::InputShaperCalibration:

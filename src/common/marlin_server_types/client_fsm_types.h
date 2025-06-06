@@ -5,7 +5,7 @@
 #include <option/has_toolchanger.h>
 #include <option/has_loadcell.h>
 #include <option/has_selftest.h>
-#include <option/has_phase_stepping.h>
+#include <option/has_phase_stepping_calibration.h>
 #include <option/has_coldpull.h>
 #include <option/has_input_shaper_calibration.h>
 #include <option/has_belt_tuning.h>
@@ -45,8 +45,8 @@ enum class ClientFSM : uint8_t {
     #if HAS_COLDPULL()
     ColdPull,
     #endif
-    #if HAS_PHASE_STEPPING()
-    PhaseStepping,
+    #if HAS_PHASE_STEPPING_CALIBRATION()
+    PhaseSteppingCalibration,
     #endif
     #if HAS_INPUT_SHAPER_CALIBRATION()
     InputShaperCalibration,

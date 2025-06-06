@@ -28,7 +28,7 @@
 #include <option/has_loadcell.h>
 #include <option/has_mmu2.h>
 #include <option/has_nfc.h>
-#include <option/has_phase_stepping.h>
+#include <option/has_phase_stepping_calibration.h>
 #include <option/has_selftest.h>
 #include <option/has_toolchanger.h>
 #include <option/xl_enclosure_support.h>
@@ -489,7 +489,7 @@ enum class PhasesColdPull : PhaseUnderlyingType {
 constexpr inline ClientFSM client_fsm_from_phase(PhasesColdPull) { return ClientFSM::ColdPull; }
 #endif
 
-#if HAS_PHASE_STEPPING()
+#if HAS_PHASE_STEPPING_CALIBRATION()
 enum class PhasesPhaseStepping : PhaseUnderlyingType {
     restore_defaults,
     intro,
@@ -508,7 +508,7 @@ enum class PhasesPhaseStepping : PhaseUnderlyingType {
     finish,
     _last = finish,
 };
-constexpr inline ClientFSM client_fsm_from_phase(PhasesPhaseStepping) { return ClientFSM::PhaseStepping; }
+constexpr inline ClientFSM client_fsm_from_phase(PhasesPhaseStepping) { return ClientFSM::PhaseSteppingCalibration; }
 #endif
 
 #if HAS_INPUT_SHAPER_CALIBRATION()
@@ -968,7 +968,7 @@ class ClientResponses {
     static_assert(std::size(ClientResponses::ColdPullResponses) == CountPhases<PhasesColdPull>());
 #endif
 
-#if HAS_PHASE_STEPPING()
+#if HAS_PHASE_STEPPING_CALIBRATION()
     static constexpr EnumArray<PhasesPhaseStepping, PhaseResponses, CountPhases<PhasesPhaseStepping>()> phase_stepping_calibration_responses {
         { PhasesPhaseStepping::restore_defaults, { Response::Ok } },
             { PhasesPhaseStepping::intro, { Response::Continue, Response::Abort } },
@@ -1072,8 +1072,8 @@ class ClientResponses {
 #if HAS_COLDPULL()
             { ClientFSM::ColdPull, ColdPullResponses },
 #endif
-#if HAS_PHASE_STEPPING()
-            { ClientFSM::PhaseStepping, phase_stepping_calibration_responses },
+#if HAS_PHASE_STEPPING_CALIBRATION()
+            { ClientFSM::PhaseSteppingCalibration, phase_stepping_calibration_responses },
 #endif
 #if HAS_INPUT_SHAPER_CALIBRATION()
             { ClientFSM::InputShaperCalibration, input_shaper_calibration_responses },

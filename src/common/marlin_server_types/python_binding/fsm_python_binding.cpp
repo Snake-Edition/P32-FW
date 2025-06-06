@@ -137,7 +137,7 @@ NB_MODULE(marlin_server_types_python_module_impl, m) {
 
     export_enum<Response>(m, "FSMResponse");
 
-#if HAS_PHASE_STEPPING()
+#if HAS_PHASE_STEPPING_CALIBRATION()
     export_enum<PhasesPhaseStepping>(m, "PhasesPhaseStepping");
     export_phase_responses<PhasesPhaseStepping>(m, "phases_phase_stepping_responses_data");
 #endif

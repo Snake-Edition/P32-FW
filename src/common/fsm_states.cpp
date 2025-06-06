@@ -1,6 +1,6 @@
 #include <common/fsm_states.hpp>
 
-#include <option/has_phase_stepping.h>
+#include <option/has_phase_stepping_calibration.h>
 #include <option/has_input_shaper_calibration.h>
 #include <option/has_door_sensor_calibration.h>
 #include <logging/log.hpp>
@@ -42,8 +42,8 @@ static constexpr uint32_t score(ClientFSM fsm_type) {
     case ClientFSM::ColdPull:
 #endif
     case ClientFSM::NetworkSetup:
-#if HAS_PHASE_STEPPING()
-    case ClientFSM::PhaseStepping:
+#if HAS_PHASE_STEPPING_CALIBRATION()
+    case ClientFSM::PhaseSteppingCalibration:
 #endif
 #if HAS_INPUT_SHAPER_CALIBRATION()
     case ClientFSM::InputShaperCalibration:

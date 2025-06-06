@@ -11,7 +11,7 @@
 #include "window_dlg_warning.hpp"
 #include <screen_network_setup.hpp>
 #include <option/has_gearbox_alignment.h>
-#include <option/has_phase_stepping.h>
+#include <option/has_phase_stepping_calibration.h>
 #include <option/has_input_shaper_calibration.h>
 #include <option/has_coldpull.h>
 #include <option/has_door_sensor_calibration.h>
@@ -35,7 +35,7 @@
     #include "screen_printing_serial.hpp"
 #endif
 
-#if HAS_PHASE_STEPPING()
+#if HAS_PHASE_STEPPING_CALIBRATION()
     #include "screen_phase_stepping.hpp"
 #endif
 
@@ -175,8 +175,8 @@ using FSMDisplayConfig = FSMDisplayConfigDef<
 #if HAS_COLDPULL()
     FSMScreenDef<ClientFSM::ColdPull, ScreenColdPull>,
 #endif
-#if HAS_PHASE_STEPPING()
-    FSMScreenDef<ClientFSM::PhaseStepping, ScreenPhaseStepping>,
+#if HAS_PHASE_STEPPING_CALIBRATION()
+    FSMScreenDef<ClientFSM::PhaseSteppingCalibration, ScreenPhaseStepping>,
 #endif
 #if HAS_INPUT_SHAPER_CALIBRATION()
     FSMScreenDef<ClientFSM::InputShaperCalibration, ScreenInputShaperCalibration>,
