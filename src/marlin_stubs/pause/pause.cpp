@@ -464,11 +464,11 @@ void Pause::load_start_process([[maybe_unused]] Response response) {
         // if filament is not present we want to break and not set loaded filament
         // we have already loaded the filament in gear, now just wait for temperature to rise
         config_store().set_filament_type(settings.GetExtruder(), filament::get_type_to_load());
-        set(LoadState::wait_temp);
+        set(LoadState::load_wait_temp);
         handle_filament_removal(LoadState::filament_push_ask);
         break;
     case LoadType::load_purge:
-        set(LoadState::wait_temp);
+        set(LoadState::load_wait_temp);
         break;
     default:
         if (option::has_side_fsensor && settings.extruder_mmu_rework) {
@@ -629,10 +629,10 @@ void Pause::move_to_purge_process([[maybe_unused]] Response response) {
     if constexpr (option::has_side_fsensor) {
         mapi::park_move_with_conditional_home(mapi::park_positions[mapi::ParkPosition::purge], mapi::ZAction::no_move);
     }
-    set(LoadState::wait_temp);
+    set(LoadState::load_wait_temp);
 }
 
-void Pause::wait_temp_process([[maybe_unused]] Response response) {
+void Pause::load_wait_temp_process([[maybe_unused]] Response response) {
     RestoreTemp();
     if (ensureSafeTemperatureNotifyProgress()) { // blocking -> checks for user stop
         if (load_type == LoadType::load_purge) {
@@ -1559,7 +1559,7 @@ void Pause::setup_progress_mapper() {
     case LoadType::load:
     case LoadType::autoload: {
         constexpr static ProgressMapperWorkflowArray workflow { std::to_array<WorkflowStep>({
-            { LoadState::wait_temp, 3 },
+            { LoadState::load_wait_temp, 3 },
                 { LoadState::long_load, 1 },
                 { LoadState::purge, 1 },
 #if HAS_AUTO_RETRACT()
@@ -1572,7 +1572,7 @@ void Pause::setup_progress_mapper() {
 
     case LoadType::load_purge: {
         constexpr static ProgressMapperWorkflowArray workflow { std::to_array<WorkflowStep>({
-            { LoadState::wait_temp, 3 },
+            { LoadState::load_wait_temp, 3 },
                 { LoadState::purge, 1 },
 #if HAS_AUTO_RETRACT()
                 { LoadState::auto_retract, 1 },
