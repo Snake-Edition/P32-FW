@@ -291,7 +291,7 @@ private:
     /// Extrudes \p length .
     void plan_e_move(const float &length, const feedRate_t &fr_mm_s);
 
-    bool ensureSafeTemperatureNotifyProgress(uint8_t progress_min, uint8_t progress_max);
+    bool ensureSafeTemperatureNotifyProgress();
 
     /// Generally a bit mask of conditions which are checked in wait_for_motion_finish_stoppable.
     /// If any of the conditions occurs during waiting for the planned motion to finish,
@@ -321,15 +321,15 @@ private:
 
     /// Moves the extruder by \p length . Notifies the FSM about progress.
     /// @returns any of the \ref StopConditions if the move has been interrupted or StopConditions::Accomplished if the move has been successfully finished
-    [[nodiscard]] StopConditions do_e_move_notify_progress(const float &length, const feedRate_t &fr_mm_s, uint8_t progress_min, uint8_t progress_max, StopConditions check_for);
+    [[nodiscard]] StopConditions do_e_move_notify_progress(const float &length, const feedRate_t &fr_mm_s, StopConditions check_for);
 
     /// Moves the extruder by \p length . Does not mind the hotend being cold. Notifies the FSM about progress.
     /// @returns any of the \ref StopConditions if the move has been interrupted or StopConditions::Accomplished if the move has been successfully finished
-    [[nodiscard]] StopConditions do_e_move_notify_progress_coldextrude(const float &length, const feedRate_t &fr_mm_s, uint8_t progress_min, uint8_t progress_max, StopConditions check_for);
+    [[nodiscard]] StopConditions do_e_move_notify_progress_coldextrude(const float &length, const feedRate_t &fr_mm_s, StopConditions check_for);
 
     /// Moves the extruder by \p length . Heats up for the move if necessary. Notifies the FSM about progress.
     /// @returns any of the \ref StopConditions if the move has been interrupted or StopConditions::Accomplished if the move has been successfully finished
-    [[nodiscard]] StopConditions do_e_move_notify_progress_hotextrude(const float &length, const feedRate_t &fr_mm_s, uint8_t progress_min, uint8_t progress_max, StopConditions check_for);
+    [[nodiscard]] StopConditions do_e_move_notify_progress_hotextrude(const float &length, const feedRate_t &fr_mm_s, StopConditions check_for);
 
     bool check_user_stop(Response response); //< stops motion and fsm and returns true it user triggered stop
 

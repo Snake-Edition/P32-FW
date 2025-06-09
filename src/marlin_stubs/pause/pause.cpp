@@ -99,7 +99,7 @@ static void report_progress(Pause &pause, ProgressPercent progress) {
 class PauseFsmNotifier : public CallbackHookGuard<> {
 
 public:
-    PauseFsmNotifier(Pause &pause, float min, float max, [[maybe_unused]] ProgressPercent progress_min, [[maybe_unused]] ProgressPercent progress_max, const MarlinVariable<float> &var)
+    PauseFsmNotifier(Pause &pause, float min, float max, const MarlinVariable<float> &var)
         : CallbackHookGuard<>(marlin_server::idle_hook_point, [this, &var] {
             const auto progress = pause_.progress_mapper.update_progress(pause_.get_state(), to_normalized_progress(min_, max_, var.get()));
             report_progress(pause_, progress);
@@ -327,7 +327,7 @@ bool Pause::is_target_temperature_safe() {
     }
 }
 
-bool Pause::ensureSafeTemperatureNotifyProgress(uint8_t progress_min, uint8_t progress_max) {
+bool Pause::ensureSafeTemperatureNotifyProgress() {
     if (!is_target_temperature_safe()) {
         return false;
     }
@@ -339,7 +339,7 @@ bool Pause::ensureSafeTemperatureNotifyProgress(uint8_t progress_min, uint8_t pr
     setPhase(is_unstoppable() ? PhasesLoadUnload::WaitingTemp_unstoppable : PhasesLoadUnload::WaitingTemp_stoppable);
 
     PauseFsmNotifier N(*this, Temperature::degHotend(active_extruder),
-        Temperature::degTargetHotend(active_extruder) - heating_phase_min_hotend_diff, progress_min, progress_max, marlin_vars().hotend(active_extruder).temp_nozzle);
+        Temperature::degTargetHotend(active_extruder) - heating_phase_min_hotend_diff, marlin_vars().hotend(active_extruder).temp_nozzle);
 
     // Wait until temperature is close
     while (Temperature::degHotend(active_extruder) < (Temperature::degTargetHotend(active_extruder) - heating_phase_min_hotend_diff)) {
@@ -357,33 +357,33 @@ bool Pause::ensureSafeTemperatureNotifyProgress(uint8_t progress_min, uint8_t pr
     return true;
 }
 
-[[nodiscard]] Pause::StopConditions Pause::do_e_move_notify_progress(const float &length, const feedRate_t &fr_mm_s, uint8_t progress_min, uint8_t progress_max, StopConditions check_for) {
-    PauseFsmNotifier N(*this, current_position.e, current_position.e + length, progress_min, progress_max, marlin_vars().native_pos[MARLIN_VAR_INDEX_E]);
+[[nodiscard]] Pause::StopConditions Pause::do_e_move_notify_progress(const float &length, const feedRate_t &fr_mm_s, StopConditions check_for) {
+    PauseFsmNotifier N(*this, current_position.e, current_position.e + length, marlin_vars().native_pos[MARLIN_VAR_INDEX_E]);
 
     mapi::extruder_move(length, fr_mm_s);
 
     return wait_for_motion_finish_stoppable(check_for);
 }
 
-[[nodiscard]] Pause::StopConditions Pause::do_e_move_notify_progress_coldextrude(const float &length, const feedRate_t &fr_mm_s, uint8_t progress_min, uint8_t progress_max, StopConditions check_for) {
+[[nodiscard]] Pause::StopConditions Pause::do_e_move_notify_progress_coldextrude(const float &length, const feedRate_t &fr_mm_s, StopConditions check_for) {
 #if ENABLED(PREVENT_COLD_EXTRUSION)
     AutoRestore<bool> CE(thermalManager.allow_cold_extrude);
     thermalManager.allow_cold_extrude = true;
 #endif
-    return do_e_move_notify_progress(length, fr_mm_s, progress_min, progress_max, check_for);
+    return do_e_move_notify_progress(length, fr_mm_s, check_for);
 }
 
-[[nodiscard]] Pause::StopConditions Pause::do_e_move_notify_progress_hotextrude(const float &length, const feedRate_t &fr_mm_s, uint8_t progress_min, uint8_t progress_max, StopConditions check_for) {
+[[nodiscard]] Pause::StopConditions Pause::do_e_move_notify_progress_hotextrude(const float &length, const feedRate_t &fr_mm_s, StopConditions check_for) {
     PhasesLoadUnload last_ph = getPhase();
 
-    if (!ensureSafeTemperatureNotifyProgress(0, 100)) {
+    if (!ensureSafeTemperatureNotifyProgress()) {
         return StopConditions::Failed;
     }
 
     // Restore phase after possible heatup GUI
     setPhase(last_ph);
 
-    return do_e_move_notify_progress(length, fr_mm_s, progress_min, progress_max, check_for);
+    return do_e_move_notify_progress(length, fr_mm_s, check_for);
 }
 
 void Pause::plan_e_move(const float &length, const feedRate_t &fr_mm_s) {
@@ -528,7 +528,7 @@ void Pause::await_filament_process([[maybe_unused]] Response response) {
 void Pause::runout_during_load_process([[maybe_unused]] Response response) {
     setPhase(PhasesLoadUnload::Ejecting_unstoppable);
     // unload immediately - we even cannot perform ramming as it would have consumed even more filament
-    std::ignore = do_e_move_notify_progress_coldextrude(-std::abs(settings.unload_length), (FILAMENT_CHANGE_UNLOAD_FEEDRATE), 51, 99, StopConditions::Accomplished);
+    std::ignore = do_e_move_notify_progress_coldextrude(-std::abs(settings.unload_length), (FILAMENT_CHANGE_UNLOAD_FEEDRATE), StopConditions::Accomplished);
 
     // retry loading (similar to eject_process' final stages)
     switch (load_type) {
@@ -586,7 +586,7 @@ void Pause::assist_insertion_process([[maybe_unused]] Response response) {
 void Pause::load_to_gears_process([[maybe_unused]] Response response) { // slow load
     setPhase(is_unstoppable() ? PhasesLoadUnload::LoadingToGears_unstoppable : PhasesLoadUnload::LoadingToGears_stoppable);
 
-    const auto result = do_e_move_notify_progress_coldextrude(settings.slow_load_length, FILAMENT_CHANGE_SLOW_LOAD_FEEDRATE, 10, 30, StopConditions::All);
+    const auto result = do_e_move_notify_progress_coldextrude(settings.slow_load_length, FILAMENT_CHANGE_SLOW_LOAD_FEEDRATE, StopConditions::All);
 
     if (result == StopConditions::SideFilamentSensorRunout) { // TODO method without param using actual phase
         set(LoadState::runout_during_load);
@@ -616,7 +616,7 @@ void Pause::move_to_purge_process([[maybe_unused]] Response response) {
 
 void Pause::wait_temp_process([[maybe_unused]] Response response) {
     RestoreTemp();
-    if (ensureSafeTemperatureNotifyProgress(30, 50)) { // blocking -> checks for user stop
+    if (ensureSafeTemperatureNotifyProgress()) { // blocking -> checks for user stop
         if (load_type == LoadType::load_purge) {
             set(LoadState::purge);
         } else {
@@ -636,7 +636,7 @@ void Pause::long_load_process([[maybe_unused]] Response response) {
         planner.apply_settings(s);
     }
 
-    auto move_e_progress = do_e_move_notify_progress_hotextrude(settings.fast_load_length, FILAMENT_CHANGE_FAST_LOAD_FEEDRATE, 50, 70, StopConditions::All);
+    auto move_e_progress = do_e_move_notify_progress_hotextrude(settings.fast_load_length, FILAMENT_CHANGE_FAST_LOAD_FEEDRATE, StopConditions::All);
 
     {
         auto s = planner.user_settings;
@@ -666,7 +666,7 @@ void Pause::purge_process([[maybe_unused]] Response response) {
     setPhase(is_unstoppable() ? PhasesLoadUnload::Purging_unstoppable : PhasesLoadUnload::Purging_stoppable);
 
     planner.synchronize(); // Finish any pending moves before starting the purge
-    const auto purge_result = do_e_move_notify_progress_hotextrude(settings.purge_length(), ADVANCED_PAUSE_PURGE_FEEDRATE, 70, 98, StopConditions::All);
+    const auto purge_result = do_e_move_notify_progress_hotextrude(settings.purge_length(), ADVANCED_PAUSE_PURGE_FEEDRATE, StopConditions::All);
     if (purge_result == StopConditions::SideFilamentSensorRunout) {
         set(LoadState::runout_during_load);
         return;
@@ -677,7 +677,7 @@ void Pause::purge_process([[maybe_unused]] Response response) {
     }
     // Skip retraction if Failed
     if (purge_result != StopConditions::Failed) {
-        std::ignore = do_e_move_notify_progress_hotextrude(retract_distance, retract_feedrate, 98, 99, StopConditions::UserStopped);
+        std::ignore = do_e_move_notify_progress_hotextrude(retract_distance, retract_feedrate, StopConditions::UserStopped);
     }
 
     config_store().set_filament_type(settings.GetExtruder(), filament::get_type_to_load());
@@ -1024,7 +1024,7 @@ void Pause::unload_from_gears_process([[maybe_unused]] Response response) {
     setPhase(PhasesLoadUnload::Unloading_stoppable);
 
     // unload cannot cause a runout -> safe to ignore the result
-    std::ignore = do_e_move_notify_progress_coldextrude(-settings.slow_load_length * (float)1.5, FILAMENT_CHANGE_FAST_LOAD_FEEDRATE, 0, 100, StopConditions::UserStopped);
+    std::ignore = do_e_move_notify_progress_coldextrude(-settings.slow_load_length * (float)1.5, FILAMENT_CHANGE_FAST_LOAD_FEEDRATE, StopConditions::UserStopped);
     set(LoadState::unload_finish_or_change);
 }
 
@@ -1430,7 +1430,7 @@ void Pause::filament_change(const pause::Settings &settings_, bool is_filament_s
 }
 
 bool Pause::ram_filament() {
-    if (!ensureSafeTemperatureNotifyProgress(0, 50)) {
+    if (!ensureSafeTemperatureNotifyProgress()) {
         return false;
     }
 
@@ -1468,7 +1468,7 @@ void Pause::unload_filament() {
     const float remaining_unload_length = std::max<float>(std::abs(settings.unload_length) - ram_retracted_distance, 0);
 
     // At this point, we are already rammed (so the filament is out of the nozzle), so we do not need to enforce nozzle temp
-    std::ignore = do_e_move_notify_progress_coldextrude(-remaining_unload_length, (FILAMENT_CHANGE_UNLOAD_FEEDRATE), 51, 99, StopConditions::UserStopped);
+    std::ignore = do_e_move_notify_progress_coldextrude(-remaining_unload_length, (FILAMENT_CHANGE_UNLOAD_FEEDRATE), StopConditions::UserStopped);
 
     {
         auto s = planner.user_settings;
@@ -1619,7 +1619,7 @@ Pause::FSM_HolderLoadUnload::~FSM_HolderLoadUnload() {
     const float min_layer_h = 0.05f;
     // do not unpark and wait for temp if not homed or z park len is 0
     if (!axes_need_homing() && pause.settings.resume_pos.z != NAN && std::abs(current_position.z - pause.settings.resume_pos.z) >= min_layer_h && (marlin_client::is_printing() || marlin_client::is_paused())) {
-        if (!pause.ensureSafeTemperatureNotifyProgress(0, 100)) {
+        if (!pause.ensureSafeTemperatureNotifyProgress()) {
             return;
         }
         pause.unpark_nozzle_and_notify();
