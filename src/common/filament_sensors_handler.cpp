@@ -201,7 +201,7 @@ void FilamentSensors::reconfigure_sensors_if_needed(bool force) {
         This can change in the future but needs some thought on printer's behaviour in such case (e.g. filament is already in extruder, there is no need for parking movement) */
     ls[LFS::autoload] = side_fs ?: nullptr;
 #elif PRINTER_IS_PRUSA_COREONE()
-    ls[LFS::autoload] = side_fs ?: extruder_fs;
+    ls[LFS::autoload] = side_fs && side_fs->is_enabled() ? side_fs : extruder_fs;
     if (has_mmu) {
         ls[LFS::autoload] = nullptr;
     }
