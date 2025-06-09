@@ -35,6 +35,7 @@ GCodeQueue queue;
 #include "../Marlin.h"
 #include "serial_printing.hpp"
 #include <gcode/inject_queue.hpp>
+#include <feature/cork/tracker.hpp>
 
 /**
  * GCode line number handling. Hosts may opt to include line numbers when
@@ -105,6 +106,7 @@ bool GCodeQueue::has_commands_queued() {
 void GCodeQueue::clear() {
   sdpos = last_executed_sdpos;
   index_r = index_w = length = 0;
+  buddy::cork::tracker.clear();
 }
 
 /**

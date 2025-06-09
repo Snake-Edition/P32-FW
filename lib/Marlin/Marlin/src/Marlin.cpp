@@ -68,6 +68,8 @@
 #include "module/stepper/indirection.h"
 #include "feature/motordriver_util.h"
 
+#include <feature/cork/tracker.hpp>
+
 #include <math.h>
 #include "libs/nozzle.h"
 
@@ -684,6 +686,7 @@ void stop() {
 
   if (IsRunning()) {
     queue.stop();
+    buddy::cork::tracker.clear();
     SERIAL_ERROR_MSG(MSG_ERR_STOPPED);
     LCD_MESSAGEPGM(MSG_STOPPED);
     safe_delay(350);       // allow enough time for messages to get out before stopping

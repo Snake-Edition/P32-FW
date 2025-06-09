@@ -87,7 +87,6 @@ public:
 
   /**
    * Enqueue one or many commands to run from program memory.
-   * Aborts the current queue, if any.
    * Note: process_injected_command() will process them.
    */
   static void inject_P(ConstexprString pgcode);

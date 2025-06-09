@@ -148,6 +148,7 @@ void M9150(); //< Set stealth mode
 
 void M9200(); //< Re-load IS settings from config store
 void M9201(); //< Reset to default motion parameters (accelerations, feedrates, ...)
+void M9933(); //< Cork for tracking when gcode finished executing
 
 #if HAS_TOOLCHANGER()
 void P0(); //< Tool park
