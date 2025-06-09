@@ -28,6 +28,7 @@ void unhomed_z_lift(float amount_mm);
 
 class PausePrivatePhase : public IPause {
     friend class PauseFsmNotifier;
+    friend class PauseFsmDurationNotifier;
 
 public:
     /**

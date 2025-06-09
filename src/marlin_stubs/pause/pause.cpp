@@ -48,6 +48,7 @@
 #include <common/marlin_client.hpp>
 #include <common/mapi/parking.hpp>
 #include <feature/ramming/ramming_sequence.hpp>
+#include <feature/ramming/standard_ramming_sequence.hpp>
 #include <utils/progress.hpp>
 #include <buddy/unreachable.hpp>
 
@@ -111,6 +112,23 @@ public:
 private:
     Pause &pause_;
     float min_, max_;
+};
+
+/// Same as PauseFSMNotifier, but ties the progress to elapsed time instead of marlin variable
+class PauseFsmDurationNotifier : public CallbackHookGuard<> {
+
+public:
+    PauseFsmDurationNotifier(Pause &pause, uint32_t duration_ms)
+        : CallbackHookGuard<>(marlin_server::idle_hook_point, [this, duration_ms] {
+            const auto progress = pause_.progress_mapper.update_progress(pause_.get_state(), to_normalized_progress(0, duration_ms, ticks_ms() - start_ms_));
+            report_progress(pause_, progress);
+        })
+        , pause_(pause)
+        , start_ms_(ticks_ms()) {}
+
+private:
+    Pause &pause_;
+    uint32_t start_ms_;
 };
 
 // TODO Removeme; only for parking moves, which are not part of the actual FSM, so they cannot use the ProgressMapper
@@ -959,6 +977,7 @@ void Pause::filament_stuck_ask_process(Response response) {
 #if HAS_AUTO_RETRACT()
 void Pause::auto_retract_process([[maybe_unused]] Response response) {
     setPhase(PhasesLoadUnload::AutoRetracting);
+    PauseFsmDurationNotifier progress_notifier(*this, standard_ramming_sequence(StandardRammingSequence::auto_retract, marlin_vars().active_hotend_id()).duration_estimate_ms());
     auto_retract().maybe_retract_from_nozzle();
     set(LoadState::_finished);
 }
@@ -1455,6 +1474,7 @@ bool Pause::ram_filament() {
         break;
     }
 
+    PauseFsmDurationNotifier notifier(*this, ramming_sequence->duration_estimate_ms());
     ram_retracted_distance = ramming_sequence->retracted_distance();
     ramming_sequence->execute([this] {
         return !check_user_stop(getResponse());
