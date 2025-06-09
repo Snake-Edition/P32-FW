@@ -765,6 +765,8 @@ static void cycle() {
     buddy::xbuddy_extension().step();
 #endif
 
+    idle_hook_point.call_all();
+
     if (is_cycle_running) {
         return;
     }
@@ -803,8 +805,6 @@ static void cycle() {
     if (!is_extended_paused_state(server.print_state)) {
         print_status_message().clear_timed_out_temporary();
     }
-
-    idle_hook_point.call_all();
 
     print_fan_spd();
 
