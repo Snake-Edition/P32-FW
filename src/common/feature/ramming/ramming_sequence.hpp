@@ -30,6 +30,11 @@ public:
         return retracted_distance_;
     }
 
+    /// \returns estimated duration of the sequence in milliseconds
+    constexpr auto duration_estimate_ms() const {
+        return duration_estimate_ms_;
+    }
+
     using InterruptCallback = stdext::inplace_function<bool()>;
 
     /// Blockingly executes the ramming sequence. Stops if \param callback returns false.
@@ -47,6 +52,7 @@ protected:
 
     consteval void init(const Steps &steps) {
         steps_ = steps;
+        duration_estimate_ms_ = 0;
 
         retracted_distance_ = 0;
         for (const Step &step : steps) {
@@ -57,12 +63,17 @@ protected:
             if (retracted_distance_ < 0) {
                 retracted_distance_ = 0;
             }
+
+            // std::abs is not constexpr :(
+            const auto step_duration_estimate = int32_t(step.e) * 60'000 / step.fr_mm_min;
+            duration_estimate_ms_ += (step_duration_estimate < 0) ? -step_duration_estimate : step_duration_estimate;
         }
     }
 
 private:
     Steps steps_;
-    EDistance retracted_distance_;
+    EDistance retracted_distance_ = 0;
+    uint16_t duration_estimate_ms_ = 0;
 };
 
 template <size_t step_count_>
