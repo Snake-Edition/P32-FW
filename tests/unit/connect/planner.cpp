@@ -191,17 +191,24 @@ TEST_CASE("Submit gcode") {
     REQUIRE(test.printer.submitted_gcodes.size() == 0);
 
     // The gcode is processed as part of sleep.
-    //
-    // The sleep doesn't get around to sleeping in fact.
-    REQUIRE(test.consume_sleep() == 0);
+    REQUIRE(test.consume_sleep() == 500);
 
     // Processed as part of the short-circuited sleep.
-    test.event_type(EventType::Finished);
-    REQUIRE(test.printer.submitted_gcodes.size() == 3);
+    REQUIRE(test.printer.submitted_gcodes.size() == 4);
 
     REQUIRE(test.printer.submitted_gcodes[0] == "M100");
     REQUIRE(test.printer.submitted_gcodes[1] == "M200 X10 Y20");
     REQUIRE(test.printer.submitted_gcodes[2] == "M300");
+    // The "Cork" added for waiting
+    REQUIRE(strncmp(test.printer.submitted_gcodes[3].c_str(), "M9933 C", 7) == 0);
+
+    // This marks _all_ corks as done. In reality, it would do just the right
+    // one, but we would have to parse the gcode here and that would complicate
+    // the test here.
+    buddy::cork::tracker.clear();
+
+    REQUIRE(test.consume_sleep() == 0);
+    test.event_type(EventType::Finished);
 }
 
 TEST_CASE("Background command resubmit") {

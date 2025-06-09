@@ -85,6 +85,7 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/lib/Middlewares/Third_Party/LwIP/src/core/memp.c
   ${CMAKE_SOURCE_DIR}/lib/Middlewares/Third_Party/LwIP/src/core/netif.c
   ${CMAKE_SOURCE_DIR}/lib/Middlewares/Third_Party/LwIP/src/netif/ethernet.c
+  ${CMAKE_SOURCE_DIR}/src/common/feature/cork/tracker.cpp
   )
 target_include_directories(
   connect_tests
@@ -113,6 +114,7 @@ target_include_directories(
           ${CMAKE_SOURCE_DIR}/lib/Middlewares/Third_Party/LwIP/src/include
           ${CMAKE_SOURCE_DIR}/lib/Middlewares/Third_Party/LwIP/system
           ${CMAKE_SOURCE_DIR}/lib/libbgcode/src/LibBGCode
+          ${CMAKE_SOURCE_DIR}/lib/Marlin/Marlin/src/
           ${CMAKE_BINARY_DIR}/lib/libbgcode/src/
   )
 target_link_libraries(connect_tests mbedTLS bgcode_core)
@@ -152,6 +154,7 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/src/common/stat_retry.cpp
   ${CMAKE_SOURCE_DIR}/src/common/random_sw.cpp
   ${CMAKE_SOURCE_DIR}/src/common/general_response.cpp
+  ${CMAKE_SOURCE_DIR}/src/common/utils/string_builder.cpp
   ${CMAKE_SOURCE_DIR}/src/connect/background.cpp
   ${CMAKE_SOURCE_DIR}/src/connect/planner.cpp
   ${CMAKE_SOURCE_DIR}/src/connect/command.cpp
@@ -203,6 +206,7 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/lib/Middlewares/Third_Party/LwIP/src/core/memp.c
   ${CMAKE_SOURCE_DIR}/lib/Middlewares/Third_Party/LwIP/src/core/netif.c
   ${CMAKE_SOURCE_DIR}/lib/Middlewares/Third_Party/LwIP/src/netif/ethernet.c
+  ${CMAKE_SOURCE_DIR}/src/common/feature/cork/tracker.cpp
   )
 target_include_directories(
   connect_planner_tests
@@ -220,6 +224,7 @@ target_include_directories(
           ${CMAKE_SOURCE_DIR}/src/common/utils
           ${CMAKE_SOURCE_DIR}/src/gui
           ${CMAKE_SOURCE_DIR}/src
+          ${CMAKE_SOURCE_DIR}/src/lang
           ${CMAKE_SOURCE_DIR}/src/puppy/xbuddy_extension_shared
           ${CMAKE_SOURCE_DIR}/lib/jsmn
           ${CMAKE_SOURCE_DIR}/lib/WUI
@@ -228,6 +233,7 @@ target_include_directories(
           ${CMAKE_SOURCE_DIR}/lib/Middlewares/Third_Party/LwIP/src/include
           ${CMAKE_SOURCE_DIR}/lib/Middlewares/Third_Party/LwIP/system
           ${CMAKE_SOURCE_DIR}/lib/libbgcode/src/LibBGCode
+          ${CMAKE_SOURCE_DIR}/lib/Marlin/Marlin/src/
           ${CMAKE_BINARY_DIR}/lib/libbgcode/src/
   )
 add_dependencies(connect_planner_tests generate-httpc-automata-tests-connect)
@@ -252,6 +258,7 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/src/common/stat_retry.cpp
   ${CMAKE_SOURCE_DIR}/src/common/segmented_json.cpp
   ${CMAKE_SOURCE_DIR}/src/common/random_sw.cpp
+  ${CMAKE_SOURCE_DIR}/src/common/utils/string_builder.cpp
   ${CMAKE_SOURCE_DIR}/src/connect/background.cpp
   ${CMAKE_SOURCE_DIR}/src/connect/json_out.cpp
   ${CMAKE_SOURCE_DIR}/src/connect/planner.cpp
@@ -292,6 +299,7 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/lib/Middlewares/Third_Party/LwIP/src/core/memp.c
   ${CMAKE_SOURCE_DIR}/lib/Middlewares/Third_Party/LwIP/src/core/netif.c
   ${CMAKE_SOURCE_DIR}/lib/Middlewares/Third_Party/LwIP/src/netif/ethernet.c
+  ${CMAKE_SOURCE_DIR}/src/common/feature/cork/tracker.cpp
   registrator.cpp
   time_mock.cpp
   partial_file_mock.cpp
@@ -307,6 +315,7 @@ target_include_directories(
           ${CMAKE_BINARY_DIR}/include
           ${CMAKE_SOURCE_DIR}/include
           ${CMAKE_SOURCE_DIR}/src
+          ${CMAKE_SOURCE_DIR}/src/lang
           ${CMAKE_SOURCE_DIR}/src/common
           ${CMAKE_SOURCE_DIR}/src/common/http
           ${CMAKE_SOURCE_DIR}/src/common/marlin_server_types
@@ -320,6 +329,7 @@ target_include_directories(
           ${CMAKE_SOURCE_DIR}/lib/Middlewares/Third_Party/LwIP/src/include
           ${CMAKE_SOURCE_DIR}/lib/Middlewares/Third_Party/LwIP/system
           ${CMAKE_SOURCE_DIR}/lib/libbgcode/src/LibBGCode
+          ${CMAKE_SOURCE_DIR}/lib/Marlin/Marlin/src/
           ${CMAKE_BINARY_DIR}/lib/libbgcode/src/
   )
 add_dependencies(connect_registration_tests generate-httpc-automata-tests-connect)

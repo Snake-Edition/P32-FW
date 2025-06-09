@@ -681,7 +681,7 @@ void Planner::command(const Command &command, const ProcessingOtherCommand &) {
 void Planner::command(const Command &command, const Gcode &gcode) {
     background_command = BackgroundCommand {
         command.id,
-        BackgroundGcode {
+        BackgroundGcodeContent {
             gcode.gcode,
             gcode.size,
             0,
