@@ -199,14 +199,18 @@ void FilamentSensors::reconfigure_sensors_if_needed(bool force) {
     /**  iX can behave a little bit differently when autoloading thanks to it being outside of user's reach. The head will move during autohoming and could cause harm to person having hands within head's space.
         If the autoload would be triggered by extruder fs it could mean that user is trying to insert filament while manipulating with head itself, an action that could cause harm.
         This can change in the future but needs some thought on printer's behaviour in such case (e.g. filament is already in extruder, there is no need for parking movement) */
-    ls[LFS::autoload] = side_fs ?: nullptr;
+    ls[LFS::autoload] = side_fs;
 #elif PRINTER_IS_PRUSA_COREONE()
     ls[LFS::autoload] = side_fs && side_fs->is_enabled() ? side_fs : extruder_fs;
+#else
+    ls[LFS::autoload] = extruder_fs;
+#endif
+
+#if HAS_MMU2()
     if (has_mmu) {
+        // No autoload with MMU
         ls[LFS::autoload] = nullptr;
     }
-#else
-    ls[LFS::autoload] = has_mmu ? nullptr : extruder_fs;
 #endif
 }
 
