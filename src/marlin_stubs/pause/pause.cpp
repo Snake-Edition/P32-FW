@@ -88,17 +88,21 @@ GCodeLoader nozzle_cleaner_gcode_loader;
 
 using namespace buddy;
 
+static void report_progress(Pause &pause, ProgressPercent progress) {
+    if (auto mode = pause.get_mode()) {
+        const auto data = fsm::serialize_data(FSMLoadUnloadData { .mode = *mode, .progress = progress });
+        marlin_server::fsm_change(pause.getPhase(), data);
+    }
+}
+
 /// During its lifetime, automatically reports progress based on the current FSM state (thanks to ProgressMapper) and value of the specified marlin variable (hooks into marlin idle())
 class PauseFsmNotifier : public CallbackHookGuard<> {
 
 public:
     PauseFsmNotifier(Pause &pause, float min, float max, [[maybe_unused]] ProgressPercent progress_min, [[maybe_unused]] ProgressPercent progress_max, const MarlinVariable<float> &var)
         : CallbackHookGuard<>(marlin_server::idle_hook_point, [this, &var] {
-            if (auto mode = pause_.get_mode()) {
-                const auto progress = pause_.progress_mapper.update_progress(pause_.get_state(), to_normalized_progress(min_, max_, var.get()));
-                const auto data = fsm::serialize_data(FSMLoadUnloadData { .mode = *mode, .progress = progress });
-                marlin_server::fsm_change(pause_.getPhase(), data);
-            }
+            const auto progress = pause_.progress_mapper.update_progress(pause_.get_state(), to_normalized_progress(min_, max_, var.get()));
+            report_progress(pause_, progress);
         })
         , pause_(pause)
         , min_(min)
@@ -107,6 +111,26 @@ public:
 private:
     Pause &pause_;
     float min_, max_;
+};
+
+// TODO Removeme; only for parking moves, which are not part of the actual FSM, so they cannot use the ProgressMapper
+class PauseFsmExplicitProgressNotifier : public CallbackHookGuard<> {
+
+public:
+    PauseFsmExplicitProgressNotifier(Pause &pause, float min, float max, ProgressPercent progress_min, ProgressPercent progress_max, const MarlinVariable<float> &var)
+        : CallbackHookGuard<>(marlin_server::idle_hook_point, [this, &var] {
+            const auto progress = progress_span_.map(to_normalized_progress(min_, max_, var.get()));
+            report_progress(pause_, progress);
+        })
+        , pause_(pause)
+        , min_(min)
+        , max_(max)
+        , progress_span_(progress_min, progress_max) {}
+
+private:
+    Pause &pause_;
+    float min_, max_;
+    ProgressSpan progress_span_;
 };
 
 PauseMenuResponse pause_menu_response;
@@ -1214,12 +1238,12 @@ void Pause::park_nozzle_and_notify() {
         }
     }
 
-    // move by z_lift, scope for PauseFsmNotifier
+    // move by z_lift, scope for PauseFsmExplicitProgressNotifier
     if (isfinite(target_Z)) {
         if (axes_need_homing(_BV(Z_AXIS))) {
             unhomed_z_lift(target_Z);
         } else {
-            PauseFsmNotifier N(*this, current_position.z, target_Z, 0, parkMoveZPercent(Z_len, XY_len), marlin_vars().native_pos[MARLIN_VAR_INDEX_Z]);
+            PauseFsmExplicitProgressNotifier N(*this, current_position.z, target_Z, 0, parkMoveZPercent(Z_len, XY_len), marlin_vars().native_pos[MARLIN_VAR_INDEX_Z]);
             log_info(MarlinServer, "Parking");
             plan_park_move_to(current_position.x, current_position.y, target_Z, NOZZLE_PARK_XY_FEEDRATE, Z_feedrate, Segmented::yes);
             log_info(MarlinServer, "Park done");
@@ -1267,7 +1291,7 @@ void Pause::park_nozzle_and_notify() {
         }
 #endif /*CORE_IS_XY*/
 
-        PauseFsmNotifier N(*this, begin_pos, end_pos, parkMoveZPercent(Z_len, XY_len), 100, marlin_vars().native_pos[x_greater_than_y ? MARLIN_VAR_INDEX_X : MARLIN_VAR_INDEX_Y]); // from Z% to 100%
+        PauseFsmExplicitProgressNotifier N(*this, begin_pos, end_pos, parkMoveZPercent(Z_len, XY_len), 100, marlin_vars().native_pos[x_greater_than_y ? MARLIN_VAR_INDEX_X : MARLIN_VAR_INDEX_Y]); // from Z% to 100%
         plan_park_move_to_xyz(settings.park_pos, NOZZLE_PARK_XY_FEEDRATE, Z_feedrate, Segmented::yes);
         if (wait_for_motion_finish_stoppable() == StopConditions::UserStopped) {
             return;
@@ -1300,7 +1324,7 @@ void Pause::unpark_nozzle_and_notify() {
     }
 
     {
-        PauseFsmNotifier N(*this, begin_pos, end_pos, 0, parkMoveXYPercent(Z_len, XY_len), marlin_vars().native_pos[x_greater_than_y ? MARLIN_VAR_INDEX_X : MARLIN_VAR_INDEX_Y]);
+        PauseFsmExplicitProgressNotifier N(*this, begin_pos, end_pos, 0, parkMoveXYPercent(Z_len, XY_len), marlin_vars().native_pos[x_greater_than_y ? MARLIN_VAR_INDEX_X : MARLIN_VAR_INDEX_Y]);
         do_blocking_move_to_xy(settings.resume_pos, NOZZLE_UNPARK_XY_FEEDRATE);
     }
 
@@ -1315,7 +1339,7 @@ void Pause::unpark_nozzle_and_notify() {
         planner.apply_leveling(resume_pos_adj);
 #endif
 
-        PauseFsmNotifier N(*this, current_position.z, resume_pos_adj.z, parkMoveXYPercent(Z_len, XY_len), 100, marlin_vars().native_pos[MARLIN_VAR_INDEX_Z]); // from XY% to 100%
+        PauseFsmExplicitProgressNotifier N(*this, current_position.z, resume_pos_adj.z, parkMoveXYPercent(Z_len, XY_len), 100, marlin_vars().native_pos[MARLIN_VAR_INDEX_Z]); // from XY% to 100%
         // FIXME: use a beter movement api when available
         do_blocking_move_to_z(resume_pos_adj.z, feedRate_t(NOZZLE_PARK_Z_FEEDRATE), Segmented::yes);
         // But since the plan_park_move_to overrides the current position values (which are by default in
