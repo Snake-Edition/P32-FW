@@ -824,9 +824,7 @@ void Pause::load_prime_process([[maybe_unused]] Response response) {
 #if HAS_AUTO_RETRACT()
     if (!marlin_server::is_printing()) {
         // Only retract from nozzle outside printing
-        setPhase(PhasesLoadUnload::AutoRetracting);
-        auto_retract().maybe_retract_from_nozzle();
-        set(LoadState::_finished);
+        set(LoadState::auto_retract);
         return;
     }
 #endif
@@ -955,6 +953,14 @@ void Pause::filament_stuck_ask_process(Response response) {
     if (response == Response::Unload) {
         set(LoadState::ram_sequence);
     }
+}
+#endif
+
+#if HAS_AUTO_RETRACT()
+void Pause::auto_retract_process([[maybe_unused]] Response response) {
+    setPhase(PhasesLoadUnload::AutoRetracting);
+    auto_retract().maybe_retract_from_nozzle();
+    set(LoadState::_finished);
 }
 #endif
 
@@ -1534,8 +1540,11 @@ void Pause::setup_progress_mapper() {
     case LoadType::autoload: {
         constexpr static ProgressMapperWorkflowArray workflow { std::to_array<WorkflowStep>({
             { LoadState::wait_temp, 3 },
-            { LoadState::long_load, 1 },
-            { LoadState::purge, 1 },
+                { LoadState::long_load, 1 },
+                { LoadState::purge, 1 },
+#if HAS_AUTO_RETRACT()
+                { LoadState::auto_retract, 1 },
+#endif
         }) };
         result = &workflow;
         break;
@@ -1544,7 +1553,10 @@ void Pause::setup_progress_mapper() {
     case LoadType::load_purge: {
         constexpr static ProgressMapperWorkflowArray workflow { std::to_array<WorkflowStep>({
             { LoadState::wait_temp, 3 },
-            { LoadState::purge, 1 },
+                { LoadState::purge, 1 },
+#if HAS_AUTO_RETRACT()
+                { LoadState::auto_retract, 1 },
+#endif
         }) };
         result = &workflow;
         break;
@@ -1574,8 +1586,11 @@ void Pause::setup_progress_mapper() {
         constexpr static ProgressMapperWorkflowArray workflow { std::to_array<WorkflowStep>({
             // FIXME wait_temp is only for load { LoadState::wait_temp, 3 },
             { LoadState::ram_sequence, 1 },
-            { LoadState::long_load, 2 },
-            { LoadState::purge, 1 },
+                { LoadState::long_load, 2 },
+                { LoadState::purge, 1 },
+#if HAS_AUTO_RETRACT()
+                { LoadState::auto_retract, 1 },
+#endif
         }) };
         result = &workflow;
         break;

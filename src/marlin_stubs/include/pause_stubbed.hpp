@@ -41,6 +41,9 @@ public:
 #if HAS_LOADCELL()
         filament_stuck_ask,
 #endif
+#if HAS_AUTO_RETRACT()
+        auto_retract,
+#endif
         ram_sequence,
         unload,
         unloaded_ask,
@@ -200,6 +203,9 @@ private:
 #if HAS_LOADCELL()
     void filament_stuck_ask_process(Response response);
 #endif
+#if HAS_AUTO_RETRACT()
+    void auto_retract_process(Response response);
+#endif
     void ram_sequence_process(Response response);
     void unload_process(Response response);
     void unloaded_ask_process(Response response);
@@ -240,6 +246,9 @@ private:
             { LoadState::unload_start, &Pause::unload_start_process },
 #if HAS_LOADCELL()
             { LoadState::filament_stuck_ask, &Pause::filament_stuck_ask_process },
+#endif
+#if HAS_AUTO_RETRACT()
+            { LoadState::auto_retract, &Pause::auto_retract_process },
 #endif
             { LoadState::ram_sequence, &Pause::ram_sequence_process },
             { LoadState::unload, &Pause::unload_process },
