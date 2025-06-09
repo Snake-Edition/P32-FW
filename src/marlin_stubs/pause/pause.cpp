@@ -644,6 +644,14 @@ void Pause::load_wait_temp_process([[maybe_unused]] Response response) {
     handle_filament_removal(LoadState::filament_push_ask);
 }
 
+void Pause::unload_wait_temp_process([[maybe_unused]] Response response) {
+    if (!ensureSafeTemperatureNotifyProgress()) {
+        return;
+    }
+
+    set(LoadState::ram_sequence);
+}
+
 void Pause::long_load_process([[maybe_unused]] Response response) {
     setPhase(is_unstoppable() ? PhasesLoadUnload::Loading_unstoppable : PhasesLoadUnload::Loading_stoppable);
 
@@ -959,7 +967,7 @@ void Pause::unload_start_process([[maybe_unused]] Response response) {
         break;
 
     default:
-        set(LoadState::ram_sequence);
+        set(LoadState::unload_wait_temp);
         break;
     }
 }
@@ -969,7 +977,7 @@ void Pause::filament_stuck_ask_process(Response response) {
     setPhase(PhasesLoadUnload::FilamentStuck);
 
     if (response == Response::Unload) {
-        set(LoadState::ram_sequence);
+        set(LoadState::unload_wait_temp);
     }
 }
 #endif
@@ -1586,7 +1594,7 @@ void Pause::setup_progress_mapper() {
     case LoadType::unload_confirm:
     case LoadType::filament_stuck: {
         constexpr static ProgressMapperWorkflowArray workflow { std::to_array<WorkflowStep>({
-            // FIXME wait_temp is only for load { LoadState::wait_temp, 3 },
+            { LoadState::unload_wait_temp, 3 },
             { LoadState::ram_sequence, 2 },
             { LoadState::unload, 1 },
         }) };
@@ -1604,8 +1612,8 @@ void Pause::setup_progress_mapper() {
 
     case LoadType::filament_change: {
         constexpr static ProgressMapperWorkflowArray workflow { std::to_array<WorkflowStep>({
-            // FIXME wait_temp is only for load { LoadState::wait_temp, 3 },
-            { LoadState::ram_sequence, 1 },
+            { LoadState::unload_wait_temp, 3 },
+                { LoadState::ram_sequence, 1 },
                 { LoadState::long_load, 2 },
                 { LoadState::purge, 1 },
 #if HAS_AUTO_RETRACT()

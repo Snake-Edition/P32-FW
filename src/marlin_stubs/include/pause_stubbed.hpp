@@ -62,6 +62,7 @@ public:
         load_to_gears,
         move_to_purge,
         load_wait_temp,
+        unload_wait_temp,
         long_load,
         purge,
         color_correct_ask,
@@ -224,6 +225,7 @@ private:
     void load_to_gears_process(Response response);
     void move_to_purge_process(Response response);
     void load_wait_temp_process(Response response);
+    void unload_wait_temp_process(Response response);
     void long_load_process(Response response);
     void purge_process(Response response);
     void color_correct_ask_process(Response response);
@@ -268,6 +270,7 @@ private:
             { LoadState::load_to_gears, &Pause::load_to_gears_process },
             { LoadState::move_to_purge, &Pause::move_to_purge_process },
             { LoadState::load_wait_temp, &Pause::load_wait_temp_process },
+            { LoadState::unload_wait_temp, &Pause::unload_wait_temp_process },
             { LoadState::long_load, &Pause::long_load_process },
             { LoadState::purge, &Pause::purge_process },
             { LoadState::color_correct_ask, &Pause::color_correct_ask_process },
