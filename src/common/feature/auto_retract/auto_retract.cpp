@@ -8,6 +8,7 @@
 #include <filament_sensors_handler.hpp>
 #include <logging/log.hpp>
 #include <feature/print_status_message/print_status_message_guard.hpp>
+#include <marlin_server.hpp>
 
 #include <option/has_mmu2.h>
 #if HAS_MMU2()
@@ -66,13 +67,31 @@ void AutoRetract::maybe_retract_from_nozzle() {
         return;
     }
 
+    // Finish all pending movements so that the progress reporting is nice
+    planner.synchronize();
+
     PrintStatusMessageGuard psm_guard;
     psm_guard.update<PrintStatusMessage::Type::auto_retracting>({});
 
     const auto orig_e_position = planner.get_position_msteps().e;
     const auto orig_current_e_position = current_position.e;
 
-    standard_ramming_sequence(StandardRammingSequence::auto_retract, hotend).execute();
+    {
+        const auto &sequence = standard_ramming_sequence(StandardRammingSequence::auto_retract, hotend);
+        struct {
+            uint32_t start_time;
+            float progress_coef;
+        } progress_data {
+            ticks_ms(),
+            100.0f / sequence.duration_estimate_ms(),
+        };
+
+        CallbackHookGuard progress_guard(marlin_server::idle_hook_point, [&] {
+            const float progress = std::min((ticks_ms() - progress_data.start_time) * progress_data.progress_coef, 100.0f);
+            psm_guard.update<PrintStatusMessage::Type::auto_retracting>({ progress });
+        });
+        sequence.execute();
+    }
 
     // "Fake" original extruder position - we are interrupting various movements by this function,
     // firmware gets very confused if the current position changes while it is planning a move

@@ -100,7 +100,7 @@ struct PrintStatusMessage {
         TypeRecord<Type::waiting_for_chamber_temp, PrintStatusMessageDataProgress>,
 #endif
 #if HAS_AUTO_RETRACT()
-        TypeRecord<Type::auto_retracting, std::monostate>,
+        TypeRecord<Type::auto_retracting, PrintStatusMessageDataProgress>,
 #endif
 
         TypeRecord<Type::none, std::monostate>>;
