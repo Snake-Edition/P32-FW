@@ -25,6 +25,9 @@ PhaseData serialize_data(const T &t) {
 
     PhaseData result;
     memcpy(result.data(), &t, sizeof(T));
+    if constexpr (sizeof(T) < sizeof(PhaseData)) {
+        memset(result.data() + sizeof(T), 0, sizeof(PhaseData) - sizeof(T));
+    }
     return result;
 }
 
