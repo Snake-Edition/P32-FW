@@ -81,8 +81,7 @@ void PrintStatusMessageFormatterBuddy::format(StringBuilder &target, const Messa
         break;
     }
 
-    case Message::Type::dwelling:
-    case Message::Type::absorbing_heat: {
+    case Message::Type::dwelling: {
         const auto d = std::get<PrintStatusMessageDataProgress>(msg.data);
         const int val = (int)d.current;
         target.append_printf("\n%i:%02i", val / 60, val % 60);
@@ -101,12 +100,13 @@ void PrintStatusMessageFormatterBuddy::format(StringBuilder &target, const Messa
     }
 
 #if HAS_AUTO_RETRACT()
-    case Message::Type::auto_retracting: {
+    case Message::Type::auto_retracting:
+#endif
+    case Message::Type::absorbing_heat: {
         const auto d = std::get<PrintStatusMessageDataProgress>(msg.data);
         target.append_printf("\n%i %%", (int)std::round(d.current));
         break;
     }
-#endif
 
     case Message::Type::none:
     case Message::Type::_cnt:

@@ -3277,9 +3277,7 @@ void Temperature::isr() {
         }
 
         SkippableGCode::Guard skippable_operation;
-
-        static constexpr uint32_t message_interval = 1000;
-        uint32_t last_message_timestamp = millis() - message_interval;
+        PrintStatusMessageGuard status_guard;
 
         const float start_diff = temp_bed.target - bed_frame_est_celsius;
         while (abs(temp_bed.target - bed_frame_est_celsius) > 0.5f && !skippable_operation.is_skip_requested()) {
@@ -3290,10 +3288,7 @@ void Temperature::isr() {
 
             idle(true, true);
 
-            if (millis() - last_message_timestamp > message_interval) {
-                MarlinUI::status_printf_P(0, "Absorbing heat\n%u%%", 100 - static_cast<uint8_t>((temp_bed.target - bed_frame_est_celsius) / start_diff * 100));
-                last_message_timestamp = millis();
-            }
+            status_guard.update<PrintStatusMessage::absorbing_heat>({ .current = 100 - (temp_bed.target - bed_frame_est_celsius) / start_diff * 100, .target = 100 });
         }
 
         MarlinUI::reset_status();
