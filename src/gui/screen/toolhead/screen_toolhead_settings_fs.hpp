@@ -6,13 +6,6 @@
 
 namespace screen_toolhead_settings {
 
-class MI_FS_SPAN : public MI_TOOLHEAD_SPECIFIC_SPIN {
-public:
-    MI_FS_SPAN(Toolhead toolhead = default_toolhead);
-    float read_value_impl(ToolheadIndex ix) final;
-    void store_value_impl(ToolheadIndex ix, float set) final;
-};
-
 class MI_FS_REF : public MI_TOOLHEAD_SPECIFIC_SPIN {
 public:
     MI_FS_REF(Toolhead toolhead = default_toolhead);
@@ -21,13 +14,6 @@ public:
 };
 
 #if HAS_ADC_SIDE_FSENSOR()
-class MI_SIDE_FS_SPAN : public MI_TOOLHEAD_SPECIFIC_SPIN {
-public:
-    MI_SIDE_FS_SPAN(Toolhead toolhead = default_toolhead);
-    float read_value_impl(ToolheadIndex ix) final;
-    void store_value_impl(ToolheadIndex ix, float set) final;
-};
-
 class MI_SIDE_FS_REF : public MI_TOOLHEAD_SPECIFIC_SPIN {
 public:
     MI_SIDE_FS_REF(Toolhead toolhead = default_toolhead);
@@ -38,11 +24,9 @@ public:
 
 using ScreenToolheadDetailFS_ = ScreenMenu<EFooter::Off,
     MI_RETURN,
-    MI_FS_SPAN,
     MI_FS_REF
 #if HAS_ADC_SIDE_FSENSOR()
     ,
-    MI_SIDE_FS_SPAN,
     MI_SIDE_FS_REF
 #endif
     >;
