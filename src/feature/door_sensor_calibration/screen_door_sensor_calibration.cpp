@@ -98,12 +98,12 @@ public:
         } {}
 };
 
-class FrameTightenScrewQuarter final : FrameTextWithQR {
+class FrameLoosenScrewQuarter final : FrameTextWithQR {
 public:
-    FrameTightenScrewQuarter(window_t *parent)
+    FrameLoosenScrewQuarter(window_t *parent)
         : FrameTextWithQR {
             parent,
-            _("Open the door and tighten the tensioning screw by about a quarter turn. Then close the door and confirm."),
+            _("Open the door and loosen the tensioning screw by about a quarter turn. Then close the door and confirm."),
             WizardDefaults::row_1,
             "http://prusa.io/core-door-sensor-calibration",
         } {}
@@ -132,7 +132,7 @@ using Frames = FrameDefinitionList<ScreenDoorSensorCalibration::FrameStorage,
     FrameDefinition<PhaseDoorSensorCalibration::confirm_open, FrameConfirmOpen>,
     FrameDefinition<PhaseDoorSensorCalibration::loosen_screw_half, FrameLoosenScrewHalf>,
     FrameDefinition<PhaseDoorSensorCalibration::finger_test, FrameFingerTest>,
-    FrameDefinition<PhaseDoorSensorCalibration::tighten_screw_quarter, FrameTightenScrewQuarter>,
+    FrameDefinition<PhaseDoorSensorCalibration::loosen_screw_quarter, FrameLoosenScrewQuarter>,
     FrameDefinition<PhaseDoorSensorCalibration::done, FrameDone>>;
 
 } /* namespace */

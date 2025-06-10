@@ -606,7 +606,7 @@ enum class PhaseDoorSensorCalibration : PhaseUnderlyingType {
     confirm_open,
     loosen_screw_half,
     finger_test,
-    tighten_screw_quarter,
+    loosen_screw_quarter,
     done,
     finish,
     _last = finish,
@@ -1047,7 +1047,7 @@ class ClientResponses {
         { PhaseDoorSensorCalibration::confirm_open, { Response::Continue, Response::Abort } },
         { PhaseDoorSensorCalibration::loosen_screw_half, { Response::Continue, Response::Abort } },
         { PhaseDoorSensorCalibration::finger_test, { Response::Continue, Response::Abort } },
-        { PhaseDoorSensorCalibration::tighten_screw_quarter, { Response::Continue, Response::Abort } },
+        { PhaseDoorSensorCalibration::loosen_screw_quarter, { Response::Continue, Response::Abort } },
         { PhaseDoorSensorCalibration::done, { Response::Continue } },
         { PhaseDoorSensorCalibration::finish, {} },
     };
