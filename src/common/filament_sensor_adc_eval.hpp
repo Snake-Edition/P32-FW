@@ -28,8 +28,7 @@ static constexpr int32_t upper_limit =
  * @param filtered_value current filtered value from ADC
  * @param fs_ref_nins_value Reference value with filament NOT inserted
  * @param fs_ref_ins_value Reference value with filament inserted
- * @param fs_value_span configured span of fsensor
  */
-FilamentSensorState evaluate_state(int32_t filtered_value, int32_t fs_ref_nins_value, int32_t fs_ref_ins_value, int32_t fs_value_span);
+FilamentSensorState evaluate_state(int32_t filtered_value, int32_t fs_ref_nins_value, int32_t fs_ref_ins_value, FilamentSensorState previous_state);
 
 } // namespace FSensorADCEval
