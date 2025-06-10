@@ -33,6 +33,7 @@ inline constexpr const char *printer = "printer_model";
 inline constexpr const char *m862 = "M862";
 inline constexpr const char *m115 = "M115";
 inline constexpr const char *m555 = "M555";
+inline constexpr const char *m486 = "M486";
 inline constexpr const char *m140_set_bed_temp = "M140";
 inline constexpr const char *m190_wait_bed_temp = "M190";
 inline constexpr const char *m104_set_hotend_temp = "M104";

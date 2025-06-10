@@ -534,6 +534,15 @@ void GCodeInfo::parse_gcode(GcodeBuffer::String cmd, uint32_t &gcode_counter) {
         }
     }
 
+    else if (cmd.skip_gcode(gcode_info::m486)) {
+        // Do not count M486 towards search_first_x_gcodes limit
+        // M486 is emiited multiple times for each object in the gcode
+        // Meaning that if the gcode has enough objects, we would drain the limit
+        // without ever getting to the checks
+        // BFW-7269
+        gcode_counter--;
+    }
+
     else if (cmd.skip_gcode(gcode_info::m555)) {
         parse_m555(cmd);
     }
