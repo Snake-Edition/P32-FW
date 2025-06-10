@@ -2874,6 +2874,9 @@ uint32_t media_position() {
 }
 
 void set_media_position(uint32_t set) {
+    // Both sdpos and last_executed_sdpos are needed to be set cause if any gcode is queued and sdpos is invalid while lastExecutedSdpos is not,
+    // it is overridden and therefore lost. (This was happening during PP when the print was paused)
+    queue.sdpos = set;
     queue.last_executed_sdpos = set;
 }
 
