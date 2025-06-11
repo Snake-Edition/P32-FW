@@ -220,7 +220,7 @@ void MenuMultiFilamentChange::carry_out_changes() {
     }
 
     // Wait for all changes to finish
-    while (queue.has_commands_queued() || planner.processing()) {
+    while (marlin_vars().is_processing.get()) {
         gui::TickLoop();
         DialogHandler::Access().Loop();
         gui_loop();

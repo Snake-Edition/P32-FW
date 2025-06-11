@@ -336,7 +336,7 @@ void I_MI_STS_SUBMENU::Loop() {
 
 namespace SelftestSnake {
 void do_menu_event(window_t *receiver, [[maybe_unused]] window_t *sender, GUI_event_t event, [[maybe_unused]] void *param, Action action, bool is_submenu) {
-    if (receiver->GetFirstDialog() || event != GUI_event_t::LOOP || !snake_config.in_progress || SelftestInstance().IsInProgress() || queue.has_commands_queued()) {
+    if (receiver->GetFirstDialog() || event != GUI_event_t::LOOP || !snake_config.in_progress || SelftestInstance().IsInProgress() || marlin_vars().is_processing.get()) {
         // G-code selftests may take a few ticks to execute, do not continue snake while gcode is still in the queue or in progress (no operation gcode is enqueued behind it)
         return;
     }
