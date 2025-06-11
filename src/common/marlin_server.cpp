@@ -2127,7 +2127,9 @@ static void _server_print_loop(void) {
             }
         }
 #if HAS_MANUAL_CHAMBER_VENTS()
-        buddy::chamber().check_vent_state();
+        if (config_store().check_manual_vent_state.get()) {
+            buddy::chamber().check_vent_state();
+        }
 #endif
 #if HAS_CHAMBER_FILTRATION_API()
         buddy::chamber_filtration().check_filter_expiration();
