@@ -5,6 +5,7 @@
 #include <option/has_side_fsensor.h>
 #include <option/has_toolchanger.h>
 #include <option/has_emergency_stop.h>
+#include <option/has_manual_chamber_vents.h>
 #include <common/extended_printer_type.hpp>
 #include <gui/menu_item/menu_item_select_menu.hpp>
 
@@ -68,6 +69,16 @@ class MI_EMERGENCY_STOP_ENABLE : public WI_ICON_SWITCH_OFF_ON_t {
 
 public:
     MI_EMERGENCY_STOP_ENABLE();
+
+protected:
+    virtual void OnChange(size_t old_index) override;
+};
+#endif
+
+#if HAS_MANUAL_CHAMBER_VENTS()
+class MI_CHECK_MANUAL_VENT_STATE : public WI_ICON_SWITCH_OFF_ON_t {
+public:
+    MI_CHECK_MANUAL_VENT_STATE();
 
 protected:
     virtual void OnChange(size_t old_index) override;
