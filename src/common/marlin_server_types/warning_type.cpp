@@ -71,6 +71,9 @@ constexpr PhasesWarning warning_type_phase_constexpr(WarningType warning) {
 
     case WarningType::HomingRefinementFailed:
         return PhasesWarning::HomingRefinementFailed;
+
+    case WarningType::HomingRefinementFailedNoRetry:
+        return PhasesWarning::HomingRefinementFailedNoRetry;
 #endif
 
         //

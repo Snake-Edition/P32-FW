@@ -942,12 +942,13 @@ enum class RefineResult {
   success,
   hard_fail, ///< Failed hard, cannot recover
   refine_fail, ///< Failed to refine, but could potentially continue unrefined
+  refine_fail_no_retry, ///< Failed to refine, could potentially continue unredinfed 
 };
 
 RefineResult corexy_calibrate_homing_during_G28(float xy_mm_s, const G28Flags &flags) {
   // We cannot calibrate -> this are bad, abort
   if (!flags.can_calibrate) {
-    return RefineResult::refine_fail;
+    return RefineResult::refine_fail_no_retry;
   }
 
   Tristate calibration_approved = flags.force_calibrate ? Tristate::yes : config_store().auto_recalibrate_precise_homing.get();
@@ -1069,6 +1070,7 @@ RefineResult corexy_refine_during_G28_once(float fr_mm_s, const G28Flags &flags)
 
 bool corexy_refine_during_G28(float fr_mm_s, const G28Flags &flags) {
   while (true) {
+    bool no_retry = false;
     switch(corexy_refine_during_G28_once(fr_mm_s, flags)) {
       
       case RefineResult::success:
@@ -1079,6 +1081,10 @@ bool corexy_refine_during_G28(float fr_mm_s, const G28Flags &flags) {
 
       case RefineResult::refine_fail:
         break;
+
+      case RefineResult::refine_fail_no_retry:
+        no_retry = true;
+        break;
     }
 
     if(planner.draining()) {
@@ -1086,7 +1092,7 @@ bool corexy_refine_during_G28(float fr_mm_s, const G28Flags &flags) {
       return false;
     }
 
-    const auto prompt_result = marlin_server::prompt_warning(WarningType::HomingRefinementFailed);
+    const auto prompt_result = marlin_server::prompt_warning(no_retry ? WarningType::HomingRefinementFailedNoRetry : WarningType::HomingRefinementFailed);
     switch(prompt_result) {
 
     case Response::Retry:

@@ -462,6 +462,7 @@ enum class PhasesWarning : PhaseUnderlyingType {
 #if HAS_PRECISE_HOMING_COREXY()
     HomingCalibrationNeeded,
     HomingRefinementFailed,
+    HomingRefinementFailedNoRetry,
 #endif
 
     /// Shown when the M334 is attempting to change metrics configuration, prompting the user to confirm the change (security reasons)
@@ -954,6 +955,7 @@ class ClientResponses {
 #if HAS_PRECISE_HOMING_COREXY()
             { PhasesWarning::HomingCalibrationNeeded, { Response::Calibrate, Response::Skip, Response::Always, Response::Never } },
             { PhasesWarning::HomingRefinementFailed, { Response::Retry, Response::Abort, Response::Ignore } },
+            { PhasesWarning::HomingRefinementFailedNoRetry, { Response::Abort, Response::Ignore } },
 #endif
             { PhasesWarning::MetricsConfigChangePrompt, { Response::Yes, Response::No } },
     };
