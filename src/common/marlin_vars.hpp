@@ -358,6 +358,8 @@ public:
     MarlinVariable<uint8_t> gqueue; // number of commands in gcode queue
     MarlinVariable<uint8_t> pqueue; // number of commands in planner queue
     MarlinVariable<bool> inject_queue_empty; // is inject queue empty
+    MarlinVariable<bool> is_processing; ///< true if any gcode being executed or in the queue
+
     MarlinVariable<uint8_t> sd_percent_done; // card.percentDone() [%]
     MarlinVariable<uint8_t> media_inserted; // media_is_inserted()
     MarlinVariable<uint8_t> fan_check_enabled; // fan_check [on/off]
