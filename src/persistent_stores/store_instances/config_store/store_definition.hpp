@@ -270,44 +270,32 @@ struct CurrentStore
     // value span: minimal difference of raw values between the two states of the filament sensor
     StoreItem<int32_t, defaults::extruder_fs_ref_nins_value, ItemFlag::calibrations, journal::hash("Extruder FS Ref Value 0")> extruder_fs_ref_nins_value_0;
     StoreItem<int32_t, defaults::extruder_fs_ref_ins_value, ItemFlag::calibrations, journal::hash("Extruder FS INS Ref Value 0")> extruder_fs_ref_ins_value_0;
-    StoreItem<uint32_t, defaults::extruder_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Extruder FS Value Span 0")> extruder_fs_value_span_0;
 #if HOTENDS > 1 // for now only doing one ifdef for simplicity
     StoreItem<int32_t, defaults::extruder_fs_ref_nins_value, ItemFlag::calibrations, journal::hash("Extruder FS Ref Value 1")> extruder_fs_ref_nins_value_1;
     StoreItem<int32_t, defaults::extruder_fs_ref_ins_value, ItemFlag::calibrations, journal::hash("Extruder FS INS Ref Value 1")> extruder_fs_ref_ins_value_1;
-    StoreItem<uint32_t, defaults::extruder_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Extruder FS Value Span 1")> extruder_fs_value_span_1;
     StoreItem<int32_t, defaults::extruder_fs_ref_nins_value, ItemFlag::calibrations, journal::hash("Extruder FS Ref Value 2")> extruder_fs_ref_nins_value_2;
     StoreItem<int32_t, defaults::extruder_fs_ref_ins_value, ItemFlag::calibrations, journal::hash("Extruder FS INS Ref Value 2")> extruder_fs_ref_ins_value_2;
-    StoreItem<uint32_t, defaults::extruder_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Extruder FS Value Span 2")> extruder_fs_value_span_2;
     StoreItem<int32_t, defaults::extruder_fs_ref_nins_value, ItemFlag::calibrations, journal::hash("Extruder FS Ref Value 3")> extruder_fs_ref_nins_value_3;
     StoreItem<int32_t, defaults::extruder_fs_ref_ins_value, ItemFlag::calibrations, journal::hash("Extruder FS INS Ref Value 3")> extruder_fs_ref_ins_value_3;
-    StoreItem<uint32_t, defaults::extruder_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Extruder FS Value Span 3")> extruder_fs_value_span_3;
     StoreItem<int32_t, defaults::extruder_fs_ref_nins_value, ItemFlag::calibrations, journal::hash("Extruder FS Ref Value 4")> extruder_fs_ref_nins_value_4;
     StoreItem<int32_t, defaults::extruder_fs_ref_ins_value, ItemFlag::calibrations, journal::hash("Extruder FS INS Ref Value 4")> extruder_fs_ref_ins_value_4;
-    StoreItem<uint32_t, defaults::extruder_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Extruder FS Value Span 4")> extruder_fs_value_span_4;
     StoreItem<int32_t, defaults::extruder_fs_ref_nins_value, ItemFlag::calibrations, journal::hash("Extruder FS Ref Value 5")> extruder_fs_ref_nins_value_5;
     StoreItem<int32_t, defaults::extruder_fs_ref_ins_value, ItemFlag::calibrations, journal::hash("Extruder FS INS Ref Value 5")> extruder_fs_ref_ins_value_5;
-    StoreItem<uint32_t, defaults::extruder_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Extruder FS Value Span 5")> extruder_fs_value_span_5;
 #endif
 
 #if HAS_ADC_SIDE_FSENSOR() // for now not ifdefing per-extruder as well for simplicity
     StoreItem<int32_t, defaults::side_fs_ref_nins_value, ItemFlag::calibrations, journal::hash("Side FS Ref Value 0")> side_fs_ref_nins_value_0;
     StoreItem<int32_t, defaults::side_fs_ref_ins_value, ItemFlag::calibrations, journal::hash("Side FS Ref INS Value 0")> side_fs_ref_ins_value_0;
-    StoreItem<uint32_t, defaults::side_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Side FS Value Span 0")> side_fs_value_span_0;
     StoreItem<int32_t, defaults::side_fs_ref_nins_value, ItemFlag::calibrations, journal::hash("Side FS Ref Value 1")> side_fs_ref_nins_value_1;
     StoreItem<int32_t, defaults::side_fs_ref_ins_value, ItemFlag::calibrations, journal::hash("Side FS Ref INS Value 1")> side_fs_ref_ins_value_1;
-    StoreItem<uint32_t, defaults::side_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Side FS Value Span 1")> side_fs_value_span_1;
     StoreItem<int32_t, defaults::side_fs_ref_nins_value, ItemFlag::calibrations, journal::hash("Side FS Ref Value 2")> side_fs_ref_nins_value_2;
     StoreItem<int32_t, defaults::side_fs_ref_ins_value, ItemFlag::calibrations, journal::hash("Side FS Ref INS Value 2")> side_fs_ref_ins_value_2;
-    StoreItem<uint32_t, defaults::side_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Side FS Value Span 2")> side_fs_value_span_2;
     StoreItem<int32_t, defaults::side_fs_ref_nins_value, ItemFlag::calibrations, journal::hash("Side FS Ref Value 3")> side_fs_ref_nins_value_3;
     StoreItem<int32_t, defaults::side_fs_ref_ins_value, ItemFlag::calibrations, journal::hash("Side FS Ref INS Value 3")> side_fs_ref_ins_value_3;
-    StoreItem<uint32_t, defaults::side_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Side FS Value Span 3")> side_fs_value_span_3;
     StoreItem<int32_t, defaults::side_fs_ref_nins_value, ItemFlag::calibrations, journal::hash("Side FS Ref Value 4")> side_fs_ref_nins_value_4;
     StoreItem<int32_t, defaults::side_fs_ref_ins_value, ItemFlag::calibrations, journal::hash("Side FS Ref INS Value 4")> side_fs_ref_ins_value_4;
-    StoreItem<uint32_t, defaults::side_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Side FS Value Span 4")> side_fs_value_span_4;
     StoreItem<int32_t, defaults::side_fs_ref_nins_value, ItemFlag::calibrations, journal::hash("Side FS Ref Value 5")> side_fs_ref_nins_value_5;
     StoreItem<int32_t, defaults::side_fs_ref_ins_value, ItemFlag::calibrations, journal::hash("Side FS Ref INS Value 5")> side_fs_ref_ins_value_5;
-    StoreItem<uint32_t, defaults::side_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Side FS Value Span 5")> side_fs_value_span_5;
 #endif
 
 #if HAS_MMU2()
@@ -321,16 +309,12 @@ struct CurrentStore
     int32_t get_extruder_fs_ref_ins_value(uint8_t index);
     void set_extruder_fs_ref_nins_value(uint8_t index, int32_t value);
     void set_extruder_fs_ref_ins_value(uint8_t index, int32_t value);
-    uint32_t get_extruder_fs_value_span(uint8_t index);
-    void set_extruder_fs_value_span(uint8_t index, uint32_t value);
 
 #if HAS_ADC_SIDE_FSENSOR()
     int32_t get_side_fs_ref_nins_value(uint8_t index);
     int32_t get_side_fs_ref_ins_value(uint8_t index);
     void set_side_fs_ref_nins_value(uint8_t index, int32_t value);
     void set_side_fs_ref_ins_value(uint8_t index, int32_t value);
-    uint32_t get_side_fs_value_span(uint8_t index);
-    void set_side_fs_value_span(uint8_t index, uint32_t value);
 #endif
 
     StoreItem<uint16_t, defaults::print_progress_time, ItemFlag::user_interface, journal::hash("Print Progress Time")> print_progress_time; // screen progress time in seconds
@@ -829,6 +813,23 @@ struct DeprecatedStore
     StoreItem<uint8_t, 255, journal::hash("Chamber LEDs PWM with Camera")> side_leds_max_brightness_with_camera;
     #endif
 #endif
+
+    /*
+        Having these guys in the comments is actually engouh for the scraper to find the journal hash
+
+        StoreItem<uint32_t, defaults::extruder_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Extruder FS Value Span 0")> extruder_fs_value_span_0;
+        StoreItem<uint32_t, defaults::extruder_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Extruder FS Value Span 1")> extruder_fs_value_span_1;
+        StoreItem<uint32_t, defaults::extruder_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Extruder FS Value Span 2")> extruder_fs_value_span_2;
+        StoreItem<uint32_t, defaults::extruder_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Extruder FS Value Span 3")> extruder_fs_value_span_3;
+        StoreItem<uint32_t, defaults::extruder_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Extruder FS Value Span 4")> extruder_fs_value_span_4;
+        StoreItem<uint32_t, defaults::extruder_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Extruder FS Value Span 5")> extruder_fs_value_span_5;
+        StoreItem<uint32_t, defaults::side_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Side FS Value Span 0")> side_fs_value_span_0;
+        StoreItem<uint32_t, defaults::side_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Side FS Value Span 1")> side_fs_value_span_1;
+        StoreItem<uint32_t, defaults::side_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Side FS Value Span 2")> side_fs_value_span_2;
+        StoreItem<uint32_t, defaults::side_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Side FS Value Span 3")> side_fs_value_span_3;
+        StoreItem<uint32_t, defaults::side_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Side FS Value Span 4")> side_fs_value_span_4;
+        StoreItem<uint32_t, defaults::side_fs_value_span, ItemFlag::calibrations | ItemFlag::dev_items, journal::hash("Side FS Value Span 5")> side_fs_value_span_5;
+        */
 };
 
 } // namespace config_store_ns

@@ -321,62 +321,6 @@ void CurrentStore::set_extruder_fs_ref_ins_value([[maybe_unused]] uint8_t index,
 #endif
 }
 
-uint32_t CurrentStore::get_extruder_fs_value_span([[maybe_unused]] uint8_t index) {
-#if HOTENDS <= 1
-    assert(index == 0);
-    return extruder_fs_value_span_0.get();
-#else
-    switch (index) {
-    case 0:
-        return extruder_fs_value_span_0.get();
-    case 1:
-        return extruder_fs_value_span_1.get();
-    case 2:
-        return extruder_fs_value_span_2.get();
-    case 3:
-        return extruder_fs_value_span_3.get();
-    case 4:
-        return extruder_fs_value_span_4.get();
-    case 5:
-        return extruder_fs_value_span_5.get();
-    default:
-        assert(false && "invalid index");
-        return 0;
-    }
-#endif
-}
-
-void CurrentStore::set_extruder_fs_value_span([[maybe_unused]] uint8_t index, uint32_t value) {
-#if HOTENDS <= 1
-    assert(index == 0);
-    extruder_fs_value_span_0.set(value);
-#else
-    switch (index) {
-    case 0:
-        extruder_fs_value_span_0.set(value);
-        break;
-    case 1:
-        extruder_fs_value_span_1.set(value);
-        break;
-    case 2:
-        extruder_fs_value_span_2.set(value);
-        break;
-    case 3:
-        extruder_fs_value_span_3.set(value);
-        break;
-    case 4:
-        extruder_fs_value_span_4.set(value);
-        break;
-    case 5:
-        extruder_fs_value_span_5.set(value);
-        break;
-    default:
-        assert(false && "invalid index");
-        return;
-    }
-#endif
-}
-
 #if HAS_ADC_SIDE_FSENSOR()
 int32_t CurrentStore::get_side_fs_ref_nins_value(uint8_t index) {
     switch (index) {
@@ -463,52 +407,6 @@ void CurrentStore::set_side_fs_ref_ins_value(uint8_t index, int32_t value) {
         break;
     case 5:
         side_fs_ref_ins_value_5.set(value);
-        break;
-    default:
-        assert(false && "invalid index");
-        return;
-    }
-}
-
-uint32_t CurrentStore::get_side_fs_value_span(uint8_t index) {
-    switch (index) {
-    case 0:
-        return side_fs_value_span_0.get();
-    case 1:
-        return side_fs_value_span_1.get();
-    case 2:
-        return side_fs_value_span_2.get();
-    case 3:
-        return side_fs_value_span_3.get();
-    case 4:
-        return side_fs_value_span_4.get();
-    case 5:
-        return side_fs_value_span_5.get();
-    default:
-        assert(false && "invalid index");
-        return 0;
-    }
-}
-
-void CurrentStore::set_side_fs_value_span(uint8_t index, uint32_t value) {
-    switch (index) {
-    case 0:
-        side_fs_value_span_0.set(value);
-        break;
-    case 1:
-        side_fs_value_span_1.set(value);
-        break;
-    case 2:
-        side_fs_value_span_2.set(value);
-        break;
-    case 3:
-        side_fs_value_span_3.set(value);
-        break;
-    case 4:
-        side_fs_value_span_4.set(value);
-        break;
-    case 5:
-        side_fs_value_span_5.set(value);
         break;
     default:
         assert(false && "invalid index");

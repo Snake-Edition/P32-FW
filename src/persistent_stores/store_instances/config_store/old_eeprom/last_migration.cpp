@@ -221,28 +221,17 @@ void migrate(old_eeprom::current::vars_body_t &body, journal::Backend &backend) 
     migrate_one(journal::hash("Extruder FS Ref Value 0"), body.FS_REF_VAL_0);
     migrate_one(journal::hash("Extruder FS Value Span 0"), body.FS_VAL_SPAN_0);
     migrate_one(journal::hash("Extruder FS Ref Value 1"), body.FS_REF_VALUE_1);
-    migrate_one(journal::hash("Extruder FS Value Span 1"), body.FS_VALUE_SPAN_1);
     migrate_one(journal::hash("Extruder FS Ref Value 2"), body.FS_REF_VALUE_2);
-    migrate_one(journal::hash("Extruder FS Value Span 2"), body.FS_VALUE_SPAN_2);
     migrate_one(journal::hash("Extruder FS Ref Value 3"), body.FS_REF_VALUE_3);
-    migrate_one(journal::hash("Extruder FS Value Span 3"), body.FS_VALUE_SPAN_3);
     migrate_one(journal::hash("Extruder FS Ref Value 4"), body.FS_REF_VALUE_4);
-    migrate_one(journal::hash("Extruder FS Value Span 4"), body.FS_VALUE_SPAN_4);
     migrate_one(journal::hash("Extruder FS Ref Value 5"), body.FS_REF_VALUE_5);
-    migrate_one(journal::hash("Extruder FS Value Span 5"), body.FS_VALUE_SPAN_5);
 
     migrate_one(journal::hash("Side FS Ref Value 0"), body.EEVAR_SIDE_FS_REF_VALUE_0);
-    migrate_one(journal::hash("Side FS Value Span 0"), body.EEVAR_SIDE_FS_VALUE_SPAN_0);
     migrate_one(journal::hash("Side FS Ref Value 1"), body.EEVAR_SIDE_FS_REF_VALUE_1);
-    migrate_one(journal::hash("Side FS Value Span 1"), body.EEVAR_SIDE_FS_REF_VALUE_1);
     migrate_one(journal::hash("Side FS Ref Value 2"), body.EEVAR_SIDE_FS_REF_VALUE_2);
-    migrate_one(journal::hash("Side FS Value Span 2"), body.EEVAR_SIDE_FS_VALUE_SPAN_2);
     migrate_one(journal::hash("Side FS Ref Value 3"), body.EEVAR_SIDE_FS_REF_VALUE_3);
-    migrate_one(journal::hash("Side FS Value Span 3"), body.EEVAR_SIDE_FS_VALUE_SPAN_3);
     migrate_one(journal::hash("Side FS Ref Value 4"), body.EEVAR_SIDE_FS_REF_VALUE_4);
-    migrate_one(journal::hash("Side FS Value Span 4"), body.EEVAR_SIDE_FS_VALUE_SPAN_4);
     migrate_one(journal::hash("Side FS Ref Value 5"), body.EEVAR_SIDE_FS_REF_VALUE_5);
-    migrate_one(journal::hash("Side FS Value Span 5"), body.EEVAR_SIDE_FS_VALUE_SPAN_5);
 
     migrate_one(journal::hash("Print Progress Time"), body.PRINT_PROGRESS_TIME);
     migrate_one(journal::hash("TMC Wavetable Enabled"), body.TMC_WAVETABLE_ENABLE);
