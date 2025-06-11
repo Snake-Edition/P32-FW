@@ -70,7 +70,6 @@ typedef struct _marlin_vars_t {
     // 1B base types
     uint8_t motion; // motion (bit0-X, bit1-Y, bit2-Z, bit3-E)
     uint8_t gqueue; // number of commands in gcode queue
-    uint8_t pqueue; // number of commands in planner queue
     uint8_t print_fan_speed; // print fan speed [0..255]
     uint8_t wait_heat; // wait_for_heatup
     uint8_t wait_user; // wait_for_user

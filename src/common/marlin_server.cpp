@@ -3107,7 +3107,6 @@ static void _server_update_vars() {
 
     marlin_vars().gqueue = queue.length;
     marlin_vars().inject_queue_empty = inject_queue.is_empty();
-    marlin_vars().pqueue = planner.movesplanned();
     marlin_vars().is_processing = is_processing();
 
     // Get native position
