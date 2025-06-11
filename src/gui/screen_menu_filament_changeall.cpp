@@ -160,12 +160,7 @@ void MenuMultiFilamentChange::carry_out_changes() {
     // Lift Z to prevent unparking and parking of each tool
     marlin_client::gcode("G27 P0 Z40");
 
-    // Wait for Z to finish
-    gui_dlg_wait([] {
-        if (!(queue.has_commands_queued() || planner.processing())) {
-            Screens::Access()->Close();
-        }
-    });
+    window_dlg_wait_t::wait_for_gcodes_to_finish();
 #endif
 
     /* MMU2 Reimplementation

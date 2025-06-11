@@ -748,11 +748,7 @@ void MI_PHASE_STEPPING_TOGGLE::OnChange([[maybe_unused]] size_t old_index) {
 
     // we need to wait until the action actually takes place so that when returning
     // to the menu (if any) the new state is already reflected
-    gui_dlg_wait([&]() {
-        if (value() == config_store().get_phase_stepping_enabled()) {
-            Screens::Access()->Close();
-        }
-    });
+    window_dlg_wait_t::wait_for_gcodes_to_finish();
 }
 #endif
 

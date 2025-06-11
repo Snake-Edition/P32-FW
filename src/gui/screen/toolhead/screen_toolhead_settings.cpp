@@ -238,13 +238,7 @@ void MI_PICK_PARK::update() {
 void MI_PICK_PARK::click(IWindowMenu &) {
     marlin_client::gcode("G27 P0 Z5"); // Lift Z if not high enough
     marlin_client::gcode_printf("T%d S1 L0 D0", (!is_picked && toolhead() != all_toolheads) ? std::get<ToolheadIndex>(toolhead()) : PrusaToolChanger::MARLIN_NO_TOOL_PICKED);
-
-    gui_dlg_wait([] {
-        if (!(queue.has_commands_queued() || planner.processing())) {
-            Screens::Access()->Close();
-        }
-    });
-
+    window_dlg_wait_t::wait_for_gcodes_to_finish();
     update();
 }
 

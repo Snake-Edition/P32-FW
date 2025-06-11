@@ -26,6 +26,10 @@ public:
     window_dlg_wait_t(const string_view_utf8 &second_string)
         : window_dlg_wait_t(GuiDefaults::DialogFrameRect, second_string) {}
 
+    /// Shows the dialog and blocks the UI thread until all gcodes are finished
+    /// Does this in a somewhat smart way that doesn't obstruct warnings
+    static void wait_for_gcodes_to_finish();
+
     virtual void Change(fsm::BaseData) override;
 };
 
