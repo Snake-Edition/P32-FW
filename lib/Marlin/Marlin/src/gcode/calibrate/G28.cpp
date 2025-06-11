@@ -344,9 +344,7 @@ void GcodeSuite::G28() {
   flags.only_if_needed = parser.boolval('O');
   flags.z_raise = parser.seenval('R') ? parser.value_linear_units() : Z_HOMING_HEIGHT;
   flags.no_change = parser.seen('N');
-  #if DISABLED(PRUSA_TOOLCHANGER)
-    flags.can_calibrate = !parser.seen('D');
-  #endif
+  flags.can_calibrate = !parser.seen('D');
   flags.force_calibrate = parser.seen('C');
   #if ENABLED(MARLIN_DEV_MODE)
     flags.simulate = parser.seen('S');
