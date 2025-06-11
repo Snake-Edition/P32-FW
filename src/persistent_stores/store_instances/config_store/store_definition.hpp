@@ -42,6 +42,7 @@
 #include <option/has_chamber_filtration_api.h>
 #include <option/has_auto_retract.h>
 #include <option/has_door_sensor_calibration.h>
+#include <option/has_manual_chamber_vents.h>
 #include <common/extended_printer_type.hpp>
 #include <common/hw_check.hpp>
 #include <pwm_utils.hpp>
@@ -682,6 +683,10 @@ struct CurrentStore
     /// !!! Do not set directly, always use auto_retract().mark_as_retracted
     StoreItem<uint8_t, 0, ItemFlag::printer_state, journal::hash("Filament auto-retracted")> filament_auto_retracted_bitset;
     static_assert(HOTENDS <= 8);
+#endif
+
+#if HAS_MANUAL_CHAMBER_VENTS()
+    StoreItem<bool, true, ItemFlag::printer_state, journal::hash("Check chamber ventilation state")> check_manual_vent_state;
 #endif
 
 private:
