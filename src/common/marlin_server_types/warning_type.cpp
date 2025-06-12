@@ -38,6 +38,13 @@ constexpr PhasesWarning warning_type_phase_constexpr(WarningType warning) {
         return PhasesWarning::EnclosureFilterExpiration;
 #endif
 
+#if HAS_MANUAL_CHAMBER_VENTS()
+    case WarningType::OpenChamberVents:
+        return PhasesWarning::ChamberVents;
+    case WarningType::CloseChamberVents:
+        return PhasesWarning::ChamberVents;
+#endif
+
 #if HAS_EMERGENCY_STOP()
     case WarningType::DoorOpen:
         return PhasesWarning::DoorOpen;
@@ -85,7 +92,7 @@ uint32_t warning_lifespan_sec(WarningType type) {
 static_assert([] {
     std::bitset<CountPhases<PhasesWarning>()> used_phases;
 
-    // Check that each phase (except for Warning, which is handled separately) has a separate phase
+    // Check that each phase (except for Warning and ChamberVents, which are handled separately) has a separate phase
     // If this does not apply and we use
     // In the future, we could possibly unify WarningType and PhasesWarning
     for (size_t i = 0; i <= static_cast<size_t>(WarningType::_last); i++) {
@@ -93,7 +100,12 @@ static_assert([] {
         const PhasesWarning ph = warning_type_phase_constexpr(wt);
         const auto phi = std::to_underlying(ph);
 
-        if (ph != PhasesWarning::Warning && used_phases.test(phi)) {
+        bool phase_warning_exception = ph == PhasesWarning::Warning;
+#if HAS_MANUAL_CHAMBER_VENTS()
+        phase_warning_exception |= ph == PhasesWarning::ChamberVents;
+#endif
+
+        if (!phase_warning_exception && used_phases.test(phi)) {
             std::abort();
         }
 

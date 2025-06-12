@@ -40,6 +40,7 @@
 #include <option/has_door_sensor_calibration.h>
 #include <option/has_auto_retract.h>
 #include <option/has_nozzle_cleaner.h>
+#include <option/has_manual_chamber_vents.h>
 
 #include <option/has_hotend_type_support.h>
 #if HAS_HOTEND_TYPE_SUPPORT()
@@ -421,6 +422,10 @@ enum class PhasesWarning : PhaseUnderlyingType {
 // These have some actual buttons that need to be handled.
 #if XL_ENCLOSURE_SUPPORT() || HAS_CHAMBER_FILTRATION_API()
     EnclosureFilterExpiration,
+#endif
+
+#if HAS_MANUAL_CHAMBER_VENTS()
+    ChamberVents,
 #endif
 
     ProbingFailed,
@@ -916,6 +921,9 @@ class ClientResponses {
             { PhasesWarning::Warning, { Response::Continue } },
 #if XL_ENCLOSURE_SUPPORT() || HAS_CHAMBER_FILTRATION_API()
             { PhasesWarning::EnclosureFilterExpiration, { Response::Ignore, Response::Postpone5Days, Response::Done } },
+#endif
+#if HAS_MANUAL_CHAMBER_VENTS()
+            { PhasesWarning::ChamberVents, { Response::Ok, Response::Disable } },
 #endif
             { PhasesWarning::ProbingFailed, { Response::Yes, Response::No } },
             { PhasesWarning::FilamentSensorStuckHelp, { Response::Ok, Response::FS_disable } },
