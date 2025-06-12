@@ -5,6 +5,7 @@
 #include <option/has_remote_bed.h>
 #include <option/has_chamber_filtration_api.h>
 #include <option/xbuddy_extension_variant_standard.h>
+#include <option/has_selftest.h>
 
 enum class WarningType : uint32_t {
 #if HAS_EMERGENCY_STOP()
@@ -28,6 +29,9 @@ enum class WarningType : uint32_t {
 #endif
     USBFlashDiskError,
     USBDriveUnsupportedFileSystem,
+#if HAS_SELFTEST()
+    ActionSelftestRequired,
+#endif
 #if ENABLED(POWER_PANIC)
     HeatbedColdAfterPP,
 #endif

@@ -93,6 +93,9 @@ bool is_warning_attention(const fsm::BaseData &data) {
 #if _DEBUG
     case ErrCode::CONNECT_STEPPERS_TIMEOUT:
 #endif
+#if HAS_SELFTEST()
+    case ErrCode::ERR_SYSTEM_ACTION_SELFTEST_REQUIRED:
+#endif
         return false;
     default:
         return true;
@@ -508,6 +511,10 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
         return ErrCode::WARNING_USB_DRIVE_UNSUPPORTED_FILE_SYSTEM;
     case WarningType::HeatBreakThermistorFail:
         return ErrCode::CONNECT_HEATBREAK_THERMISTOR_FAIL;
+#if HAS_SELFTEST()
+    case WarningType::ActionSelftestRequired:
+        return ErrCode::ERR_SYSTEM_ACTION_SELFTEST_REQUIRED;
+#endif
 #if ENABLED(POWER_PANIC)
     case WarningType::HeatbedColdAfterPP:
         return ErrCode::CONNECT_POWER_PANIC_COLD_BED;

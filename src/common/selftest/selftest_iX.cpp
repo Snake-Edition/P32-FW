@@ -461,6 +461,7 @@ void CSelftest::next() {
 
     // current state cannot be run
     // call recursively: it is fine, this function is tiny and there will be few iterations
+    marlin_server::set_warning(WarningType::ActionSelftestRequired);
     next();
 }
 
