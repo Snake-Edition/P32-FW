@@ -13,7 +13,7 @@
 #include "gui_invalidate.hpp"
 #include "knob_event.hpp"
 #include "marlin_client.hpp"
-#include "sw_timer.hpp"
+#include <utils/timing/rate_limiter.hpp>
 #include <logging/log.hpp>
 #include "display_hw_checks.hpp"
 #include <option/has_leds.h>
@@ -56,9 +56,9 @@ static const constexpr uint32_t GUI_DELAY_MAX = 10;
 static const constexpr uint8_t GUI_DELAY_LOOP = 100;
 static const constexpr uint32_t GUI_DELAY_REDRAW = 40; // 40 ms => 25 fps
 
-static Sw_Timer<uint32_t> gui_roll_timer(txtroll_t::GetBaseTick());
-static Sw_Timer<uint32_t> gui_loop_timer(GUI_DELAY_LOOP);
-static Sw_Timer<uint32_t> gui_redraw_timer(GUI_DELAY_REDRAW);
+static RateLimiter<uint32_t> gui_roll_timer(txtroll_t::GetBaseTick());
+static RateLimiter<uint32_t> gui_loop_timer(GUI_DELAY_LOOP);
+static RateLimiter<uint32_t> gui_redraw_timer(GUI_DELAY_REDRAW);
 
 void gui_init(void) {
     display::init();
@@ -131,17 +131,17 @@ void gui_handle_touch() {
 void gui_redraw(void) {
     const uint32_t now = ticks_ms();
 
-    if (gui_loop_timer.RestartIfIsOver(now)) {
+    if (gui_loop_timer.check(now)) {
         Screens::Access()->ScreenEvent(nullptr, GUI_event_t::LOOP, 0);
     }
 
-    if (txtroll_t::HasInstance() && gui_roll_timer.RestartIfIsOver(now)) {
+    if (txtroll_t::HasInstance() && gui_roll_timer.check(now)) {
         Screens::Access()->ScreenEvent(nullptr, GUI_event_t::TEXT_ROLL, nullptr);
     }
 
     bool should_sleep = true;
     if (gui_invalid) {
-        if (gui_redraw_timer.RestartIfIsOver(now)) {
+        if (gui_redraw_timer.check(now)) {
             Screens::Access()->Draw();
             gui_invalid = false;
             should_sleep = false;
@@ -149,7 +149,7 @@ void gui_redraw(void) {
     }
 
     if (should_sleep) {
-        uint32_t sleep = std::clamp(gui_redraw_timer.Remains(now), GUI_DELAY_MIN, GUI_DELAY_MAX);
+        uint32_t sleep = std::clamp(gui_redraw_timer.remaining_cooldown(now), GUI_DELAY_MIN, GUI_DELAY_MAX);
         osDelay(sleep);
     }
 }
