@@ -130,6 +130,11 @@ private:
     /// Last time we've successfully talked to the server.
     std::optional<Timestamp> last_success;
 
+    /// Last command we've received and handled.
+    ///
+    /// Used for deduplication.
+    std::optional<CommandId> last_command_id;
+
     // First retry after 100 ms.
     static const constexpr Duration COOLDOWN_BASE = 100;
     // Don't do retries less often than once a minute.

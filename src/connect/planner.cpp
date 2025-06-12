@@ -332,6 +332,10 @@ void Planner::reset() {
     cooldown.reset();
     perform_cooldown = false;
     failed_attempts = 0;
+    // Better be careful about ignoring a retransmit after this. We may be
+    // getting it because the server didn't get our answer (the service we've
+    // connected crashed, or it got lost, etc).
+    last_command_id = nullopt;
 }
 
 void Planner::reset_telemetry() {
@@ -588,6 +592,8 @@ void Planner::action_done(ActionResult result) {
                 EventType::Info,
             };
             last_success = nullopt;
+            // Similar reasons as within Planner::reset()
+            last_command_id = nullopt;
         }
 
         // Failed to talk to the server. Retry after a while (with a back-off), but otherwise keep stuff the same.
@@ -653,6 +659,9 @@ void Planner::action_done(ActionResult result) {
             // the data), so avoid some kind of infinite loop/blocked state.
             if (planned_event.has_value() && planned_event->type != EventType::Info) {
                 cleanups();
+                // We have *failed* to deliver the answer to that, so don't
+                // assume the command is handled.
+                last_command_id = nullopt;
             }
             failed_attempts = 0;
         }
@@ -1087,6 +1096,17 @@ void Planner::command(Command command) {
         };
         return;
     }
+
+    if (last_command_id == command.id) {
+        planned_event = Event {
+            EventType::Rejected,
+            command.id,
+        };
+        planned_event->reason = "Won't execute the same command multiple times";
+        return;
+    }
+
+    last_command_id = command.id;
 
     visit([&](const auto &arg) {
         this->command(command, arg);

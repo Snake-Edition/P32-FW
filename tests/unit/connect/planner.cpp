@@ -551,3 +551,20 @@ TEST_CASE("Command Set value - xbuddy_extension usb addon power logic") {
         REQUIRE_FALSE(buddy::usbpower);
     }
 }
+
+TEST_CASE("Connect duplicates command") {
+    Test test;
+
+    auto command = Command { CommandId(42), SetValue { PropertyName::ChamberFanPwmTarget, 0, int8_t(-1) } };
+    test.planner.command(command);
+    test.event_type(EventType::Finished);
+    test.planner.action_done(ActionResult::Ok);
+    // Once more... we don't do it again.
+    test.planner.command(command);
+    test.event_type(EventType::Rejected);
+    test.planner.action_done(ActionResult::Ok);
+    // A different command (by it's ID) is accepted again.
+    command.id = CommandId(43);
+    test.planner.command(command);
+    test.event_type(EventType::Finished);
+}
