@@ -9,3 +9,9 @@ target_include_directories(
   )
 
 add_catch_test(timer_event_period_tracker_tests)
+
+add_executable(rate_limiter_tests ${CMAKE_CURRENT_SOURCE_DIR}/rate_limiter_tests.cpp)
+
+target_include_directories(rate_limiter_tests PUBLIC ${CMAKE_SOURCE_DIR}/src/module/utils)
+
+add_catch_test(rate_limiter_tests)
