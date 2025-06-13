@@ -1567,7 +1567,11 @@ void Pause::setup_progress_mapper() {
     case LoadType::load:
     case LoadType::autoload: {
         constexpr static ProgressMapperWorkflowArray workflow { std::to_array<WorkflowStep>({
-            { LoadState::load_wait_temp, 3 },
+            // In autoload, first M1701 is issued with LoadType::load_to_gears where LoadState::load_to_gears is the only step
+            // Then, LoadType::autoload follows where LoadState::load_to_gears is not done. But that's fine, ProgressMapper will just skip it.
+            // In LoadType::load, LoadState::load_to_gears is part of the FSM
+            { LoadState::load_to_gears, 1 },
+                { LoadState::load_wait_temp, 3 },
                 { LoadState::long_load, 1 },
                 { LoadState::purge, 1 },
 #if HAS_AUTO_RETRACT()
