@@ -32,7 +32,7 @@ MI_FILAMENT::MI_FILAMENT(FilamentType filament_type, uint8_t target_extruder)
 void MI_FILAMENT::click(IWindowMenu &) {
     if (is_abrasive && !config_store().nozzle_is_hardened.get().test(target_extruder)) {
         StringViewUtf8Parameters<filament_name_buffer_size + 1> params;
-        if (MsgBoxWarning(_("Filament '%s' is abrasive, but you don't have a hardened nozzle installed. Do you really want to continue?").formatted(params, filament_name), Responses_YesNo) != Response::Yes) {
+        if (MsgBoxWarning(_("Filament '%s' is abrasive, but you don't have a hardened nozzle installed. Do you really want to continue?").formatted(params, filament_name.data()), Responses_YesNo) != Response::Yes) {
             return;
         }
     }
