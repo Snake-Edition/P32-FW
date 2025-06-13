@@ -7,7 +7,7 @@
 #include "assert.h"
 #include <cstdlib>
 #include <span>
-#include <bit>
+#include <type_traits>
 
 #define UTF8_IS_NONASCII(ch)    ((ch)&0x80)
 #define UTF8_IS_CONT(ch)        (((ch)&0xC0) == 0x80)
@@ -287,6 +287,9 @@ private:
 
 template <typename... Args>
 string_view_utf8 string_view_utf8::formatted(StringViewUtf8ParamBase &params, Args... args) const {
+    // Check that we're not accidentally passing invalid types to the printf
+    static_assert(((std::is_arithmetic_v<Args> || std::is_same_v<Args, char *> || std::is_same_v<Args, const char *>)&&...));
+
     FormatBuilder fmt(*this, params);
     (fmt.add_param(0, args), ...);
     return fmt.finalize();
