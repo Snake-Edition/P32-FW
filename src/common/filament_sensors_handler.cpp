@@ -142,6 +142,7 @@ void FilamentSensors::task_cycle() {
     // Update states of filament sensors
     if (enable_state_update_pending) {
         process_enable_state_update();
+        reconfigure_sensors_if_needed(true); // Have to be done due to autoload logical sensor on COREONE
     }
 
     // Run cycle to evaluate state of all sensors (even those not active)
