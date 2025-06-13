@@ -58,8 +58,6 @@ bool buddy::bootloader::fw_invalidate(void) {
         sector += 4U; // Need to add offset of 4 when sector higher than FLASH_SECTOR_11
     }
 
-    log_critical(Bootloader, "!!! Bricking itself !!! Erasing sector %i", sector);
-
     // Disable RTOS and interrupts, the following cannot be interrupted
     osThreadSuspendAll();
     __disable_irq();
