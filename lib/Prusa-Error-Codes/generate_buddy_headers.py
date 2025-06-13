@@ -103,7 +103,7 @@ inline constexpr ErrDesc error_list[] = {{{list_items}
 }};
 """
 
-def generate_header_file(yaml_file_name, header_file_name, printer_id, printer_code, mmu, list, includes):
+def generate_header_file(yaml_file_name, header_file_name, printer_id, printer_code, mmu, list, includes, ignore_printer_id):
     with open(yaml_file_name, "r") as yaml_file:
         parsed_file = yaml.safe_load(yaml_file)
 
@@ -114,12 +114,12 @@ def generate_header_file(yaml_file_name, header_file_name, printer_id, printer_c
             if ("deprecated" in err) and err["deprecated"] == True:
                 continue
 
-            if ("printers" in err) and (printer_id not in err["printers"]):
+            if ("printers" in err) and (printer_id not in err["printers"]) and not ignore_printer_id:
                 continue
 
             code = err["code"]
             assert len(code) == 5, f"Error code {code} is not five digits."
-            assert code[0:2] == "XX" or code[0:2] == printer_code, f"Code '{code}' has conflicting prefix, expected 'XX' or '{printer_code}'"
+            assert ignore_printer_id or code[0:2] == "XX" or code[0:2] == printer_code, f"Code '{code}' has conflicting prefix, expected 'XX' or '{printer_code}'"
 
             code = f"{printer_code}{code[2:]}"
 
@@ -127,11 +127,11 @@ def generate_header_file(yaml_file_name, header_file_name, printer_id, printer_c
             assert err_class in err_class_mapping, f"Unknown error class {err_class} in error code {code}."
 
             err_id = f"{err_class_mapping[err_class]}_{err['id']}"
-            assert err_id not in err_id_cache, f"Duplicate error id \"{err_id}\"."
+            assert ignore_printer_id or err_id not in err_id_cache, f"Duplicate error id \"{err_id}\"."
             err_id_cache.add(err_id)
 
             err_code = int(code)
-            assert err_code not in err_dict, f"Duplicate error code {code}."
+            assert ignore_printer_id or err_code not in err_dict, f"Duplicate error code {code}."
 
             btns = []
             if "action" in err:
@@ -206,7 +206,7 @@ def main(args):
                          getattr(args, "output-file"),
                          getattr(args, "printer-id"),
                          getattr(args, "printer-code"),
-                         args.mmu, args.list, args.include)
+                         args.mmu, args.list, args.include, args.ignore_printer_id)
 
 
 if __name__ == '__main__':
@@ -218,5 +218,6 @@ if __name__ == '__main__':
     parser.add_argument('--mmu', default=False, action='store_true', help='Generate mmu error codes')
     parser.add_argument('--list', default=False, action='store_true', help='Generate error list, requires translations')
     parser.add_argument('--include', default=[], action='append', help='List of files to include')
+    parser.add_argument('--ignore_printer_id', default=False, action='store_true', help='Force generation for all printers, used for translations')
     args = parser.parse_args(sys.argv[1:])
     main(args)

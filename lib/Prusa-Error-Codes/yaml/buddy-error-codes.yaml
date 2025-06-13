@@ -374,7 +374,7 @@ Errors:
     text: "Check the thermistor wiring, cooling duct or heatbreak fan wiring for potential damage."
     id: "HEATBREAK_COOLING_TOO_SLOW"
     gui_layout: "red_screen"
-    approved: false
+    approved: true
 
   - code: "XX250"
     printers: [iX, XL]
@@ -989,6 +989,13 @@ Errors:
     id: "DWARF_TMC"
     gui_layout: "red_screen"
     approved: true
+
+  - code: "XX537"
+    title: "SELFTEST NOT PASSED"
+    text: "Selftests required to perform this action have not been completed. The action cannot be executed."
+    id: "ACTION_SELFTEST_REQUIRED"
+    gui_layout: "warning_dialog"
+    approved: false
 
   - code: "XX601"
     title: "UNKNOWN ERROR"
