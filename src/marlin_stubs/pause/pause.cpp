@@ -909,8 +909,13 @@ void Pause::load_nozzle_clean_process([[maybe_unused]] Response response) {
 #endif
 
 void Pause::stop_process([[maybe_unused]] Response response) {
+    if (!planner.busy()) {
+        // The printer is not moving, we don't need to do anything drastic and lose homing.
+        set(LoadState::_stopped);
+        return;
+    }
+
     planner.quick_stop_and_resume();
-    set_all_unhomed();
     xyze_pos_t real_current_position;
     planner.get_axis_position_mm(static_cast<xyz_pos_t &>(real_current_position));
     real_current_position[E_AXIS] = 0;
@@ -922,6 +927,12 @@ void Pause::stop_process([[maybe_unused]] Response response) {
     #endif
     );
 #endif
+
+    // Lose homing only if we interrupted XYZ movement. quick_stop on extruder movement is fine
+    if (xyz_pos_t(current_position) != xyz_pos_t(real_current_position)) {
+        set_all_unhomed();
+    }
+
     current_position = real_current_position;
     planner.set_position_mm(current_position);
 
