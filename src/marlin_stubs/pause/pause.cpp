@@ -909,15 +909,7 @@ void Pause::load_nozzle_clean_process([[maybe_unused]] Response response) {
 #endif
 
 void Pause::stop_process([[maybe_unused]] Response response) {
-    if (!planner.draining()) {
-        planner.quick_stop();
-    }
-
-    if (planner.processing()) {
-        return; // wait in invoke_loop() until is printer done moving, then finalize stopping
-    }
-
-    planner.resume_queuing();
+    planner.quick_stop_and_resume();
     set_all_unhomed();
     xyze_pos_t real_current_position;
     planner.get_axis_position_mm(static_cast<xyz_pos_t &>(real_current_position));
@@ -1229,10 +1221,8 @@ bool Pause::parkMoveXGreaterThanY(const xyz_pos_t &pos0, const xyz_pos_t &pos1) 
         if (check4(check_for, StopConditions::SideFilamentSensorRunout) && FSensors_instance().no_filament_surely(LogicalFilamentSensor::side)) {
             log_info(MarlinServer, "Pause::sideFS runout");
             // Discard planned and executed moves at once - a bit brute-force solution, but there are currently no other planned moves than the E-move
-            PreciseStepping::quick_stop();
-            while (!planner.draining() && PreciseStepping::stopping()) {
-                PreciseStepping::loop();
-            }
+            planner.quick_stop_and_resume();
+
             return StopConditions::SideFilamentSensorRunout;
         }
         idle(true, true);
