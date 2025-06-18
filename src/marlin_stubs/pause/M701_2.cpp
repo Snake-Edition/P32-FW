@@ -176,11 +176,8 @@ void filament_gcodes::M702_no_parser(std::optional<float> unload_length, float z
 #endif
 
     // Unload
-    if (load_unload(ask_unloaded ? Pause::LoadType::unload_confirm : Pause::LoadType::unload, settings)) {
-        M70X_process_user_response(PreheatStatus::Result::DoneNoFilament, target_extruder);
-    } else {
-        M70X_process_user_response(PreheatStatus::Result::DidNotFinish, target_extruder);
-    }
+    load_unload(ask_unloaded ? Pause::LoadType::unload_confirm : Pause::LoadType::unload, settings);
+    M70X_process_user_response(PreheatStatus::Result::CooledDown, target_extruder);
     planner.set_e_position_mm((destination.e = current_position.e = current_position_tmp.e));
 }
 
