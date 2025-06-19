@@ -159,7 +159,7 @@ static bool phase_aligned(AxisEnum axis) {
 // Only the non-measured axis stepper is adjusted: the measured stepper is setup within
 // measure_axis_distance() itself.
 class SetupForMeasurement {
-    static unsigned setup; // helper to ensure machine settings are set exactly once
+    static inline unsigned nesting = 0; // helper to ensure machine settings are set exactly once
 
     // "other" stepper original settings
     decltype(stepperX) &other_stepper;
@@ -172,8 +172,9 @@ class SetupForMeasurement {
 public:
     [[nodiscard]] SetupForMeasurement(AxisEnum other_axis)
         : other_stepper(stepper_axis(other_axis)) {
-        ++setup;
-        assert(setup == 1);
+        // check for, but disallow nesting
+        ++nesting;
+        assert(nesting == 1);
 
         other_orig_cur = other_stepper.rms_current();
         other_orig_hold = other_stepper.hold_multiplier();
@@ -188,18 +189,16 @@ public:
     }
 
     ~SetupForMeasurement() {
-        --setup;
+        --nesting;
         other_stepper.rms_current(other_orig_cur, other_orig_hold);
         input_shaper::set_axis_config(A_AXIS, is_config_orig[A_AXIS]);
         input_shaper::set_axis_config(B_AXIS, is_config_orig[B_AXIS]);
     }
 
-    static bool is_setup() {
-        return setup > 0;
+    static bool is_active() {
+        return nesting > 0;
     }
 };
-
-unsigned SetupForMeasurement::setup = 0;
 
 // Axis measurement settings
 struct measure_axis_params {
@@ -244,7 +243,7 @@ static bool measure_axis_distance(AxisEnum axis, xy_long_t origin_steps, int32_t
     }
 
     // prepare stepper for the move
-    assert(SetupForMeasurement::is_setup());
+    assert(SetupForMeasurement::is_active());
     const sensorless_t stealth_states = start_sensorless_homing_per_axis(axis);
     auto &axis_stepper = stepper_axis(axis);
     const int32_t axis_orig_cur = axis_stepper.rms_current();
