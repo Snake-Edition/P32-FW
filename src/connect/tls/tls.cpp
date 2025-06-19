@@ -61,11 +61,6 @@ struct InitContexts {
     }
 };
 
-// Session available for resumption on reconnect.
-//
-// Used while we are offline / between we have the sessions.
-mbedtls_ssl_session *stored_session;
-
 } // namespace
 
 namespace connect_client {
@@ -91,23 +86,6 @@ tls::~tls() {
     // between full request-response exchanges at this point, so there's
     // nothing to effectively close/confirm).
     // mbedtls_ssl_close_notify(&ssl_context);
-
-    if (ssl_context.session) {
-        log_debug(connect, "Rescuing old session for restore");
-        // The examples use mbedtls_ssl_get_session. But that one needlessly
-        // allocates another copy and then we would just destroy the old
-        // session with the ssl context anyway. So instead, we just steal it.
-        // (This checks for null on its own)
-        mbedtls_ssl_session_free(stored_session);
-        stored_session = ssl_context.session;
-        // Make sure it does not get freed, we took it out.
-        ssl_context.session = nullptr;
-    } else {
-        log_debug(connect, "No session to rescue");
-        // Note: But we still may have a good stored_session intact from
-        // previous time. Let's keep that one.
-    }
-
     mbedtls_net_free(&net_context);
     mbedtls_ssl_free(&ssl_context);
     mbedtls_ssl_config_free(&ssl_config);
@@ -226,17 +204,6 @@ std::optional<Error> tls::connection(const char *connection_host, uint16_t conne
         }
     }
 
-    if (stored_session) {
-        log_debug(connect, "Injecting session to restore");
-        // We are not checking the result here.
-        // * We are resuming an "empty" session at the very first session.
-        //   This'll error out, but that's fine, we'll just do a full negotiaton.
-        // * We do not have a way to handle any kind of error apart from
-        //   falling back to full negotiation. However, that one will happen on
-        //   its own, we don't need to do anything about it.
-        mbedtls_ssl_set_session(&ssl_context, stored_session);
-    }
-
     while ((status = mbedtls_ssl_handshake(&ssl_context)) != 0) {
         if (status != MBEDTLS_ERR_SSL_WANT_READ && status != MBEDTLS_ERR_SSL_WANT_WRITE) {
             log_info(connect, "ssl handshake failed with: %d", status);
@@ -261,13 +228,6 @@ std::optional<Error> tls::connection(const char *connection_host, uint16_t conne
     }
 
     log_debug(connect, "SSL done");
-
-    if (stored_session) {
-        log_debug(connect, "Dropping previous restore session");
-        // We should have an up to date session in the current SSL context, we can drop the old one.
-        mbedtls_ssl_session_free(stored_session);
-        stored_session = nullptr;
-    }
 
     return std::nullopt;
 }
