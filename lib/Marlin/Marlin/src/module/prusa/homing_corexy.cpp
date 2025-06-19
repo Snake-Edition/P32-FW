@@ -158,7 +158,7 @@ static bool phase_aligned(AxisEnum axis) {
 // Helper class to adjust machine settings for AB measurements using measure_axis_distance().
 // Only the non-measured axis stepper is adjusted: the measured stepper is setup within
 // measure_axis_distance() itself.
-class SetupForMeasurement {
+class MeasurementGuard {
     static inline unsigned nesting = 0; // helper to ensure machine settings are set exactly once
 
     // "other" stepper original settings
@@ -170,7 +170,7 @@ class SetupForMeasurement {
     std::optional<input_shaper::AxisConfig> is_config_orig[2];
 
 public:
-    [[nodiscard]] SetupForMeasurement(AxisEnum other_axis)
+    [[nodiscard]] MeasurementGuard(AxisEnum other_axis)
         : other_stepper(stepper_axis(other_axis)) {
         // check for, but disallow nesting
         ++nesting;
@@ -189,7 +189,7 @@ public:
         input_shaper::set_axis_config(B_AXIS, std::nullopt);
     }
 
-    ~SetupForMeasurement() {
+    ~MeasurementGuard() {
         --nesting;
         planner.synchronize();
         other_stepper.rms_current(other_orig_cur, other_orig_hold);
@@ -245,7 +245,7 @@ static bool measure_axis_distance(AxisEnum axis, xy_long_t origin_steps, int32_t
     }
 
     // prepare stepper for the move
-    assert(SetupForMeasurement::is_active());
+    assert(MeasurementGuard::is_active());
     const sensorless_t stealth_states = start_sensorless_homing_per_axis(axis);
     auto &axis_stepper = stepper_axis(axis);
     const int32_t axis_orig_cur = axis_stepper.rms_current();
@@ -385,7 +385,7 @@ S sum_along(const T *seq, const size_t size, const size_t axis) {
 static bool measure_phase_cycles(AxisEnum axis, xy_pos_t &c_dist, xy_pos_t &m_dist, const float fr_mm_s) {
     // prepare for repeated measurements
     const AxisEnum other_axis = (axis == B_AXIS ? A_AXIS : B_AXIS);
-    SetupForMeasurement setup_guard(other_axis);
+    MeasurementGuard setup_guard(other_axis);
     ++internal::probe_id;
 
     const int32_t measure_max_dist = (XY_HOMING_ORIGIN_OFFSET * 4) / planner.mm_per_step[axis];
@@ -707,7 +707,7 @@ static bool measure_calibrate_walk(float &score, AxisEnum measured_axis,
     const xy_long_t origin_steps, const float fr_mm_s, const measure_axis_params &params) {
     // prepare for repeated measurements
     const AxisEnum other_axis = (measured_axis == B_AXIS ? A_AXIS : B_AXIS);
-    SetupForMeasurement setup_guard(other_axis);
+    MeasurementGuard setup_guard(other_axis);
     ++internal::probe_id;
 
     // calculate maximum reliable number of cycles to move towards the endstop
