@@ -176,6 +176,7 @@ public:
         ++nesting;
         assert(nesting == 1);
 
+        planner.synchronize();
         other_orig_cur = other_stepper.rms_current();
         other_orig_hold = other_stepper.hold_multiplier();
 #ifdef XY_HOMING_HOLDING_CURRENT
@@ -190,6 +191,7 @@ public:
 
     ~SetupForMeasurement() {
         --nesting;
+        planner.synchronize();
         other_stepper.rms_current(other_orig_cur, other_orig_hold);
         input_shaper::set_axis_config(A_AXIS, is_config_orig[A_AXIS]);
         input_shaper::set_axis_config(B_AXIS, is_config_orig[B_AXIS]);
