@@ -661,9 +661,11 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
         millis_t delay_ms = std::min<uint32_t>(Loadcell::TOUCHDOWN_DELAY_MS - precomp_ms, Loadcell::TOUCHDOWN_DELAY_MS);
         safe_delay(delay_ms);
 
-        // Return slowly back
+        // Return slowly back. Ensure this move is not optimized even when small
         float move_back = 0.09f;
-        do_blocking_move_to_z(current_position.z + move_back, MMM_TO_MMS(Z_PROBE_SPEED_BACK_MOVE));
+        current_position.z += move_back;
+        planner.buffer_line(current_position, MMM_TO_MMS(Z_PROBE_SPEED_BACK_MOVE), active_extruder, { .raw_block = true });
+        planner.synchronize();
         if (planner.draining())
           return NAN;
         uint32_t move_back_end = PreciseStepping::get_time_of_last_block_us();
