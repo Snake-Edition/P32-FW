@@ -1008,7 +1008,6 @@ void Planner::command(const Command &command, const SetValue &params) {
         if (raw_value % 60 != 0) {
             err = "Value should be whole minutes";
         } else if (minutes >= 1 && minutes <= buddy::ChamberFiltration::max_post_print_filtration_time_min) {
-            // TODO: Propagate change to Connect: new post print filtration duration range is <1;30>
             config_store().chamber_post_print_filtration_duration_min.set(minutes);
         } else {
             err = "Value out of range";

@@ -16,7 +16,7 @@ class ChamberFiltration {
 
 public:
     static constexpr size_t max_backend_count = 4;
-    static constexpr size_t max_post_print_filtration_time_min = 30;
+    static constexpr size_t max_post_print_filtration_time_min = 90; // Propagate any change to Connect
 
     using Backend = ChamberFiltrationBackend;
     using BackendArray = std::array<Backend, max_backend_count>;
