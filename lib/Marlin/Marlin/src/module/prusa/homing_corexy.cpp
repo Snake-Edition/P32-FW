@@ -653,11 +653,18 @@ static bool corexy_rehome_and_phase(xyze_pos_t &origin_pos, xy_long_t &origin_st
     }
 
     // reposition parallel to the origin
-    origin_pos = current_position;
-    origin_pos[X_AXIS] = (base_home_pos(X_AXIS) - XY_HOMING_ORIGIN_OFFSET * X_HOME_DIR);
-    origin_pos[Y_AXIS] = (base_home_pos(Y_AXIS) - XY_HOMING_ORIGIN_OFFSET * Y_HOME_DIR);
-    planner.buffer_line(origin_pos, fr_mm_s, active_extruder);
+    current_position[X_AXIS] = (base_home_pos(X_AXIS) - XY_HOMING_ORIGIN_OFFSET * X_HOME_DIR);
+    current_position[Y_AXIS] = (base_home_pos(Y_AXIS) - XY_HOMING_ORIGIN_OFFSET * Y_HOME_DIR);
+    planner.buffer_line(current_position, fr_mm_s, active_extruder);
     planner.synchronize();
+
+    // this position will become our reference for the rest of the home, and might not be exact or
+    // actually reached (due to the above move being discarded or optimized). We don't care however,
+    // as we additionally want to lose any current fractional step, so disregard the plan and
+    // reconstuct our current position
+    planner.reset_position();
+    origin_pos = planner.get_machine_position_mm();
+    PreciseStepping::reset_from_halt(false);
 
     // align both motors to a full phase
     stepper_wait_for_standstill(_BV(A_AXIS) | _BV(B_AXIS));
