@@ -249,7 +249,7 @@ struct PlannerHints {
                                       // would calculate if it knew the as-yet-unbuffered path
   #endif
   bool raw_block = false;             // Enqueue block without further modifications
-  MoveHints move;
+  MoveHints move = {};
 };
 
 class Planner {
@@ -623,23 +623,6 @@ class Planner {
       next_buffer_head = next_block_index(block_buffer_head);
       return &block_buffer[block_buffer_head];
     }
-
-    /**
-     * Planner::_buffer_msteps_raw
-     *
-     * Add a new linear movement to the buffer (in terms of steps) without implicit kinematic
-     * translation, compensation or queuing restrictions.
-     *
-     *  target      - target position in mini-steps units
-     *  fr_mm_s     - (target) speed of the move
-     *  extruder    - target extruder
-     *  hints       - parameters to aid planner calculations
-     *
-     * Returns true if movement was buffered, false otherwise
-     */
-    static bool _buffer_msteps_raw(const xyze_long_t &target, const xyze_pos_t &target_float
-      , feedRate_t fr_mm_s, const uint8_t extruder, const PlannerHints &hints=PlannerHints()
-    );
 
     /**
      * Planner::_buffer_msteps

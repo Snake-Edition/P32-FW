@@ -333,7 +333,7 @@ xy_pos_t probe_xy(const xyz_pos_t center, const float angle, const uint8_t tool,
     }
 
     // Return to initial
-    planner._buffer_msteps_raw(initial_pos_msteps, initial_mm, INTERPROBE_FEEDRATE_MMS, active_extruder);
+    planner._buffer_msteps(initial_pos_msteps, initial_mm, INTERPROBE_FEEDRATE_MMS, active_extruder, { .raw_block = true });
     planner.synchronize();
     current_position = initial_mm;
 
