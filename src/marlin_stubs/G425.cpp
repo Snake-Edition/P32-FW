@@ -276,7 +276,8 @@ void go_to_initial(const xyz_pos_t center, const float angle, const float radius
 }
 
 xy_pos_t probe_xy(const xyz_pos_t center, const float angle, const uint8_t tool, const Phase phase) {
-    // Wait for movements to finish
+    // As we perform measurements, we need to ensure the current position has been reached first
+    planner.buffer_line(current_position, PROBE_FEEDRATE_MMS, active_extruder, { .raw_block = true });
     planner.synchronize();
 
     // Mark initial position
