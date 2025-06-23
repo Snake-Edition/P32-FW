@@ -31,13 +31,13 @@ void QRErrorUrlWindow::set_error_code(ErrCode ec) {
         {
             char printer_code[10] = {};
             printerCode(printer_code);
-            builder.append_string("/");
+            builder.append_string("?ref_data=");
             builder.append_string(printer_code);
         }
         {
             char version[10] = {};
             version::fill_project_version_no_dots(version, sizeof(version));
-            builder.append_string("/");
+            builder.append_string("-");
             builder.append_string(version);
         }
     }
