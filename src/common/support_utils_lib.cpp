@@ -50,6 +50,7 @@ char to32(uint8_t number[], uint8_t startBit) {
     }
 
     if (val >= 32) {
+        // unreachable
         return '!';
     }
 
