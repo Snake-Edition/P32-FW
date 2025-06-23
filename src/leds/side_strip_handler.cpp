@@ -13,9 +13,9 @@ SideStripHandler &SideStripHandler::instance() {
     return instance;
 }
 
-SideStripHandler::SideStripHandler()
-    : dimming_enabled { config_store().side_leds_dimming_enabled.get() }
-    , brightness { config_store().side_leds_max_brightness.get() } {}
+SideStripHandler::SideStripHandler() {
+    load_config();
+}
 
 void SideStripHandler::activity_ping() {
     std::lock_guard lock(mutex);
@@ -51,14 +51,37 @@ void SideStripHandler::update() {
     controller.update();
 }
 
+void SideStripHandler::load_config() {
+    std::lock_guard lock(mutex);
+#if HAS_XBUDDY_EXTENSION()
+    camera_enabled = config_store().xbe_usb_power.get();
+    if (camera_enabled) {
+        brightness = config_store().side_leds_max_brightness_with_camera.get();
+        dimming_enabled = config_store().side_leds_dimming_enabled_with_camera.get();
+    } else
+#endif
+    {
+        brightness = config_store().side_leds_max_brightness.get();
+        dimming_enabled = config_store().side_leds_dimming_enabled.get();
+    }
+    // Set state to off to force a change of state that will transition to the new brightness
+    state = SideStripState::off;
+}
+
 uint8_t SideStripHandler::get_max_brightness() const {
     std::lock_guard lock(mutex);
     return brightness;
 }
 
 void SideStripHandler::set_max_brightness(uint8_t value) {
-    config_store().side_leds_max_brightness.set(value);
-
+#if HAS_XBUDDY_EXTENSION()
+    if (camera_enabled) {
+        config_store().side_leds_max_brightness_with_camera.set(value);
+    } else
+#endif
+    {
+        config_store().side_leds_max_brightness.set(value);
+    }
     std::lock_guard lock(mutex);
     if (brightness == value) {
         return;
@@ -75,8 +98,14 @@ bool SideStripHandler::get_dimming_enabled() const {
 }
 
 void SideStripHandler::set_dimming_enabled(bool value) {
-    config_store().side_leds_dimming_enabled.set(value);
-
+#if HAS_XBUDDY_EXTENSION()
+    if (camera_enabled) {
+        config_store().side_leds_dimming_enabled_with_camera.set(value);
+    } else
+#endif
+    {
+        config_store().side_leds_dimming_enabled.set(value);
+    }
     std::lock_guard lock(mutex);
     dimming_enabled = value;
 }

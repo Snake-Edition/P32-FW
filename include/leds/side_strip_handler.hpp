@@ -5,6 +5,7 @@
 
 #include <freertos/mutex.hpp>
 #include <optional>
+#include <option/has_xbuddy_extension.h>
 
 namespace leds {
 
@@ -44,6 +45,8 @@ public:
 
     void update();
 
+    void load_config();
+
     /// Set maximum brightness of the side leds white channel. The W brightness is limited to this value.
     /// 0 = disable side leds completely (even RGB status blinking), 255 = full
     uint8_t get_max_brightness() const;
@@ -69,8 +72,13 @@ private:
     };
 
     mutable freertos::Mutex mutex;
-    bool dimming_enabled { true };
-    uint8_t brightness { 255 };
+
+    // Values are initialized from config store by load_config() in constructor
+    bool dimming_enabled;
+#if HAS_XBUDDY_EXTENSION()
+    bool camera_enabled;
+#endif
+    uint8_t brightness;
 
     SideStripState state = SideStripState::off;
     uint32_t active_timestamp_ms = 0; // Timestamp of the last activity for idle dimming

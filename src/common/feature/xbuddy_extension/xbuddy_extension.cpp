@@ -277,6 +277,7 @@ std::optional<Temperature> XBuddyExtension::chamber_temperature() {
 
 void XBuddyExtension::set_usb_power(bool enabled) {
     config_store().xbe_usb_power.set(enabled);
+    leds::SideStripHandler::instance().load_config(); // SideStripHandler has different settings when the USB camera is enabled -> let it know that it should update the settings
 }
 
 bool XBuddyExtension::usb_power() const {
