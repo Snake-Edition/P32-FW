@@ -39,12 +39,20 @@ Errors:
     approved: true
 
   - code: "XX102"
-    printers: [iX, XL, COREONE]
-    title: "PRECISE HOMING REFINEMENT FAILED"
-    text: "Consider adjusting belt tension."
+    printers: [iX, COREONE]
+    title: "PRECISE HOMING FAILED"
+    text: "Cannot perform or failed to calibrate homing. Continuing can cause layer shifts after rehoming."
     id: "PRECISE_REFINEMENT_FAILED"
-    gui_layout: "red_screen"
-    approved: true
+    gui_layout: "warning_dialog"
+    approved: false
+
+  - code: "XX102"
+    printers: [XL]
+    title: "PRECISE HOMING FAILED"
+    text: "Cannot perform or failed to calibrate homing. Continuing can cause layer shifts after rehoming and toolchange issues."
+    id: "PRECISE_REFINEMENT_FAILED"
+    gui_layout: "warning_dialog"
+    approved: false
 
   - code: "XX103"
     printers: [XL]
@@ -96,7 +104,7 @@ Errors:
     approved: true
 
   - code: "XX109"
-    printers: [iX, COREONE]
+    printers: [iX, COREONE, MK4]
     title: "STEEL SHEEL NOT DETECTED"
     text: "Steel sheet was not detected. Please put the sheet on to prevent printer damage."
     action: [Retry, Skip]
@@ -210,6 +218,15 @@ Errors:
     type: WARNING
     gui_layout: "warning_dialog"
     approved: true
+
+  - code: "XX118"
+    title: "HOMING CALIBRATION NEEDED"
+    printers: [XL, COREONE, iX]
+    text: "Homing calibration is needed to ensure repeatable homing."
+    id: "HOMING_CALIBRATION_NEEDED"
+    type: WARNING
+    gui_layout: "warning_dialog"
+    approved: false
 
   # TEMPERATURE    xx2xx
 
