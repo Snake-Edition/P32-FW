@@ -3,9 +3,10 @@
 
 void format_duration(std::span<char> buffer, std::uint32_t duration, bool display_seconds) {
     static constexpr std::uint32_t SECONDS_PER_DAY = 24 * 60 * 60;
+    struct tm tm_buffer;
     time_t time = (time_t)duration;
 
-    const struct tm *timeinfo = gmtime(&time);
+    const struct tm *timeinfo = gmtime_r(&time, &tm_buffer);
     [[maybe_unused]] int count = 0;
     if (timeinfo->tm_yday) {
         // days are recalculated, because timeinfo shows number of days in year and we want more days than 365
