@@ -54,6 +54,16 @@ EXTERN (_scanf_float) /* Require proper _scanf_float rather than a stub */
 /* Define output sections */
 SECTIONS
 {
+  /* Disable usage of some functions */
+  /DISCARD/ :
+  {
+    /* These functions dynamically allocate. Use their _r variant. */
+    *(.text.asctime)
+    *(.text.gmtime)
+    *(.text.localtime)
+    *(.text.ctime)
+  }
+
   /* The startup code goes first into FLASH */
   .isr_vector :
   {

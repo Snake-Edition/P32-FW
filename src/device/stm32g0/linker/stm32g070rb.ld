@@ -50,6 +50,16 @@ MEMORY
 /* Sections */
 SECTIONS
 {
+  /* Disable usage of some functions */
+  /DISCARD/ :
+  {
+    /* These functions dynamically allocate. Use their _r variant. */
+    *(.text.asctime)
+    *(.text.gmtime)
+    *(.text.localtime)
+    *(.text.ctime)
+  }
+
   /* The startup code into "FLASH" Rom type memory */
   .isr_vector :
   {
