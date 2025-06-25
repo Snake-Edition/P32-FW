@@ -358,7 +358,7 @@ void GcodeSuite::G28() {
   if(!X && !Y && !Z) {
     X = Y = Z = true;
   }
-  
+
   #if ENABLED(CRASH_RECOVERY)
     const bool all_axes = (X && Y && Z);
     if (all_axes) {
@@ -940,7 +940,7 @@ enum class RefineResult {
   success,
   hard_fail, ///< Failed hard, cannot recover
   refine_fail, ///< Failed to refine, but could potentially continue unrefined
-  refine_fail_no_retry, ///< Failed to refine, could potentially continue unredinfed 
+  refine_fail_no_retry, ///< Failed to refine, could potentially continue unredinfed
 };
 
 RefineResult corexy_calibrate_homing_during_G28(float xy_mm_s, const G28Flags &flags) {
@@ -986,7 +986,7 @@ RefineResult corexy_calibrate_homing_during_G28(float xy_mm_s, const G28Flags &f
     // User decided to not do the calibration at his own risk -> consider the point refined
     return RefineResult::success;
   }
-      
+
   PrintStatusMessageGuard status_guard;
   status_guard.update<PrintStatusMessage::recalibrating_home>({});
 
@@ -1021,8 +1021,8 @@ RefineResult corexy_refine_during_G28_once(float fr_mm_s, const G28Flags &flags)
   fr_mm_s = fr_mm_s ?: homing_feedrate(A_AXIS);
 
   if (!flags.force_calibrate && corexy_home_is_calibrated()) {
-    // Retry the refinement a few times 
-    for (uint8_t retry = 0; retry < PRECISE_HOMING_COREXY_RETRIES; retry++) {  
+    // Retry the refinement a few times
+    for (uint8_t retry = 0; retry < PRECISE_HOMING_COREXY_RETRIES; retry++) {
       if (planner.draining()) {
         return RefineResult::hard_fail;
       }
@@ -1070,7 +1070,7 @@ bool corexy_refine_during_G28(float fr_mm_s, const G28Flags &flags) {
   while (true) {
     bool no_retry = false;
     switch(corexy_refine_during_G28_once(fr_mm_s, flags)) {
-      
+
       case RefineResult::success:
         return true;
 
