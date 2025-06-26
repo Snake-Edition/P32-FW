@@ -63,7 +63,6 @@
 #endif
 
 #include <common/mapi/parking.hpp>
-#include <Marlin/src/libs/nozzle.h>
 #include <bsod_gui.hpp>
 #include <marlin_server.hpp>
 #include <center_approx.hpp>
@@ -723,7 +722,7 @@ inline bool calibrate_all_simple() {
     }
 
     if (failed) {
-        nozzle.park(std::to_underlying(mapi::ZAction::absolute_move), XYZ_NOZZLE_PARK_POINT_M600);
+        mapi::park(mapi::ZAction::absolute_move, mapi::ParkingPosition::from_xyz_pos({ { XYZ_NOZZLE_PARK_POINT_M600 } }));
         marlin_server::set_warning(WarningType::NozzleDoesNotHaveRoundSection);
         return false;
     }
