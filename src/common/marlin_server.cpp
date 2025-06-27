@@ -505,6 +505,12 @@ static void handle_warnings() {
         break;
 #endif
 
+#if HAS_ILI9488_DISPLAY()
+    case PhasesWarning::DisplayProblemDetected:
+        config_store().reduce_display_baudrate.set(response == Response::Yes);
+        break;
+#endif
+
     default:
         // Most warnings are handled somewhere else and we shouldn't process the responses here
         // Return to avoid consuming the response

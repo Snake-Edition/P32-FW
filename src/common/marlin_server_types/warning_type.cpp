@@ -76,6 +76,11 @@ constexpr PhasesWarning warning_type_phase_constexpr(WarningType warning) {
         return PhasesWarning::HomingRefinementFailedNoRetry;
 #endif
 
+#if HAS_ILI9488_DISPLAY()
+    case WarningType::DisplayProblemDetected:
+        return PhasesWarning::DisplayProblemDetected;
+#endif
+
         //
     }
 }
@@ -132,3 +137,9 @@ static_assert([] {
 
     return true;
 }());
+
+#if HAS_ILI9488_DISPLAY()
+// This one should be very low on the list (= priority).
+// When it's popped up, it doesn't propagate to connect, so it might hide some important warnings
+static_assert(std::to_underlying(WarningType::DisplayProblemDetected) == std::to_underlying(WarningType::_cnt) - 1);
+#endif

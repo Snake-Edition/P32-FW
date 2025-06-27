@@ -96,6 +96,10 @@ bool is_warning_attention(const fsm::BaseData &data) {
 #if HAS_SELFTEST()
     case ErrCode::ERR_SYSTEM_ACTION_SELFTEST_REQUIRED:
 #endif
+#if HAS_ILI9488_DISPLAY()
+        // Local issue, do not report to connect
+    case ErrCode::ERR_ELECTRO_DISPLAY_PROBLEM_DETECTED:
+#endif
         return false;
     default:
         return true;
@@ -527,6 +531,10 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
         return ErrCode::CONNECT_NOT_DOWNLOADED;
     case WarningType::BuddyMCUMaxTemp:
         return ErrCode::CONNECT_BUDDY_MCU_MAX_TEMP;
+#if HAS_ILI9488_DISPLAY()
+    case WarningType::DisplayProblemDetected:
+        return ErrCode::ERR_ELECTRO_DISPLAY_PROBLEM_DETECTED;
+#endif
 #if HAS_DWARF()
     case WarningType::DwarfMCUMaxTemp:
         return ErrCode::CONNECT_DWARF_MCU_MAX_TEMP;

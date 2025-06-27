@@ -1,6 +1,7 @@
 #pragma once
 
 #include "client_response.hpp"
+#include <guiconfig/guiconfig.h>
 #include <option/has_manual_chamber_vents.h>
 #include <option/has_remote_bed.h>
 #include <option/has_chamber_filtration_api.h>
@@ -94,6 +95,9 @@ enum class WarningType : uint32_t {
     HomingRefinementFailedNoRetry,
 #endif
     AccelerometerCommunicationFailed,
+#if HAS_ILI9488_DISPLAY()
+    DisplayProblemDetected,
+#endif
     _cnt,
 };
 
