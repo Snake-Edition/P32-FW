@@ -636,6 +636,10 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
     case WarningType::HomingRefinementFailedNoRetry:
         return ErrCode::ERR_MECHANICAL_PRECISE_REFINEMENT_FAILED;
 #endif
+
+    case WarningType::_cnt:
+        // Fallthrough to unreachable
+        break;
     }
 
     assert(false);

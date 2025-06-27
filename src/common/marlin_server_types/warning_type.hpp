@@ -94,7 +94,7 @@ enum class WarningType : uint32_t {
     HomingRefinementFailedNoRetry,
 #endif
     AccelerometerCommunicationFailed,
-    _last = AccelerometerCommunicationFailed,
+    _cnt,
 };
 
 PhasesWarning warning_type_phase(WarningType warning);

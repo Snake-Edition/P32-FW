@@ -457,7 +457,7 @@ namespace {
 /******************************************************************************/
 // Warning handling
 
-static std::bitset<static_cast<size_t>(WarningType::_last) + 1> warning_flags;
+static std::bitset<std::to_underlying(WarningType::_cnt)> warning_flags;
 static uint32_t active_warning_pop_timestamp_sec = 0;
 
 static void handle_warnings() {

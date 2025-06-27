@@ -54,7 +54,7 @@ void GcodeSuite::M876() {
 
     if (parser.seenval('E')) {
         uint32_t val = parser.value_int();
-        if (val > uint32_t(WarningType::_last)) {
+        if (val >= uint32_t(WarningType::_cnt)) {
             return;
         }
         marlin_server::set_warning(WarningType(val));
