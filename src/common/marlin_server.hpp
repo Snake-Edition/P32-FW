@@ -227,12 +227,12 @@ void can_stop_wait_for_heatup(bool val);
 
 /// If the phase matches currently recorded response, return it and consume it.
 /// Otherwise, return std::monostate and do not consume it.
-FSMResponseVariant get_response_variant_from_phase(FSMAndPhase fsm_and_phase);
+FSMResponseVariant get_response_variant_from_phase(FSMAndPhase fsm_and_phase, bool consume_response = true);
 
 /// If the phase matches currently recorded response, return it and consume it.
 /// Otherwise, return Response::_none and do not consume it.
-inline Response get_response_from_phase(FSMAndPhase fsm_and_phase) {
-    return get_response_variant_from_phase(fsm_and_phase).value_or<Response>(Response::_none);
+inline Response get_response_from_phase(FSMAndPhase fsm_and_phase, bool consume_response = true) {
+    return get_response_variant_from_phase(fsm_and_phase, consume_response).value_or<Response>(Response::_none);
 }
 
 /// idles() for FSM response for the given phase and then \returns it

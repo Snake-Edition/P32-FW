@@ -3458,14 +3458,16 @@ static void _server_set_var(const Request &request) {
     bsod("unimplemented _server_set_var for var_id %i", (int)variable_identifier);
 }
 
-FSMResponseVariant get_response_variant_from_phase(FSMAndPhase fsm_and_phase) {
+FSMResponseVariant get_response_variant_from_phase(FSMAndPhase fsm_and_phase, bool consume_response) {
     // The FSM should be active the whole time we're waiting for the response.
     // If it isn't, something's probably wrong
     assert(fsm_states[fsm_and_phase.fsm].has_value());
 
     const EncodedFSMResponse value = server_side_encoded_fsm_response;
     if (value.fsm_and_phase == fsm_and_phase) {
-        server_side_encoded_fsm_response = empty_encoded_fsm_response;
+        if (consume_response) {
+            server_side_encoded_fsm_response = empty_encoded_fsm_response;
+        }
         return value.response;
     } else {
         return {};
