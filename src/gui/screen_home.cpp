@@ -354,8 +354,7 @@ void screen_home_data_t::on_enter() {
     if (first_time_check_st) {
         first_time_check_st = false;
         if (!is_selftest_successfully_completed()) {
-            const auto &error = find_error(ErrCode::CONNECT_UNFINISHED_SELFTEST);
-            MsgBoxWarning(_(error.err_text), Responses_Ok);
+            marlin_client::set_warning(WarningType::SelftestNotSuccessfullyCompleted);
         }
     }
 #endif

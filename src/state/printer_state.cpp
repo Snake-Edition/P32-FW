@@ -645,6 +645,11 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
         return ErrCode::ERR_MECHANICAL_PRECISE_REFINEMENT_FAILED;
 #endif
 
+#if HAS_SELFTEST()
+    case WarningType::SelftestNotSuccessfullyCompleted:
+        return ErrCode::CONNECT_UNFINISHED_SELFTEST;
+#endif
+
     case WarningType::_cnt:
         // Fallthrough to unreachable
         break;

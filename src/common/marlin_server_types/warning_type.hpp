@@ -32,6 +32,7 @@ enum class WarningType : uint32_t {
     USBFlashDiskError,
     USBDriveUnsupportedFileSystem,
 #if HAS_SELFTEST()
+    SelftestNotSuccessfullyCompleted,
     ActionSelftestRequired,
 #endif
 #if ENABLED(POWER_PANIC)
