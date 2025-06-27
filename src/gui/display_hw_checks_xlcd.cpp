@@ -1,10 +1,11 @@
 #include "display_hw_checks.hpp"
 
-#include "display.hpp"
-#include "ScreenHandler.hpp"
+#include <display.hpp>
+#include <ScreenHandler.hpp>
 #include <option/has_touch.h>
 #include <device/peripherals.h>
-#include "logging/log.hpp"
+#include <logging/log.hpp>
+#include <utils/timing/rate_limiter.hpp>
 
 LOG_COMPONENT_REF(GUI);
 
@@ -41,12 +42,8 @@ void check_lcd() {
 } // anonymous namespace
 
 void lcd::communication_check() {
-    const uint32_t min_check_period_ms = 2048; // both touch and display
-    static uint32_t last_touch_check_ms = ticks_ms();
-
-    uint32_t now = ticks_ms();
-    if ((now - last_touch_check_ms) >= min_check_period_ms) {
-        last_touch_check_ms = now;
+    static RateLimiter<uint32_t> check_limiter { 2048 };
+    if (check_limiter.check(ticks_ms())) {
         check_lcd();
     }
 }
