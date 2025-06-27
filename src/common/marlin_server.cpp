@@ -479,24 +479,21 @@ static void handle_warnings() {
         return;
     }
 
-    const auto consume_response = [&]() {
-        const auto response = get_response_from_phase(phase);
-        if (response != Response::_none) {
-            clear_warning(warning_type);
-        }
-
-        return response;
-    };
+    // Peek the response, only some of the warnings consume it
+    const auto response = get_response_from_phase(phase, false);
+    if (response == Response::_none) {
+        return;
+    }
 
     switch (phase) {
 
     case PhasesWarning::Warning:
-        consume_response();
+        // The only response is OK, at which point we just consume the response and hide the warning.
         break;
 
 #if HAS_MANUAL_CHAMBER_VENTS()
     case PhasesWarning::ChamberVents:
-        if (consume_response() == Response::Disable) {
+        if (response == Response::Disable) {
             config_store().check_manual_vent_state.set(false);
         }
         break;
@@ -504,14 +501,19 @@ static void handle_warnings() {
 
 #if HAS_CHAMBER_FILTRATION_API()
     case PhasesWarning::EnclosureFilterExpiration:
-        buddy::chamber_filtration().handle_filter_expiration_warning(consume_response());
+        buddy::chamber_filtration().handle_filter_expiration_warning(response);
         break;
 #endif
 
     default:
-        // Most warnings are handled somewhere else and we shouldn't consume and process the responses
-        break;
+        // Most warnings are handled somewhere else and we shouldn't process the responses here
+        // Return to avoid consuming the response
+        return;
     }
+
+    // Consume the response now
+    get_response_from_phase(phase, true);
+    clear_warning(warning_type);
 }
 
 static void update_warning_fsm() {
