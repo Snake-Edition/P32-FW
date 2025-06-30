@@ -9,6 +9,8 @@ extern "C" uint32_t rand_u() {
 TEST_CASE("Cork tracker") {
     buddy::cork::Tracker tracker;
 
+    REQUIRE(tracker.clear_cnt() == 0);
+
     auto cork_1 = tracker.new_cork();
     REQUIRE(cork_1.has_value());
 
@@ -37,7 +39,9 @@ TEST_CASE("Cork tracker") {
     auto cork_3 = tracker.new_cork();
     REQUIRE(cork_3.has_value());
 
+    REQUIRE(tracker.clear_cnt() == 0);
     tracker.clear();
+    REQUIRE(tracker.clear_cnt() == 1);
     REQUIRE(cork_2->is_done_and_consumed());
     REQUIRE(cork_3->is_done_and_consumed());
 }

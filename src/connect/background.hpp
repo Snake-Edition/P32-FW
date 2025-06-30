@@ -16,10 +16,14 @@ struct BackgroundGcodeContent {
     SharedBorrow data;
     size_t size;
     size_t position;
+    uint32_t start_tracker_clears;
+
+    BackgroundGcodeContent(SharedBorrow data, size_t size);
 };
 
 struct BackgroundGcodeWait {
     buddy::cork::Tracker::CorkHandle cork;
+    uint32_t start_tracker_clears;
     bool submitted;
 };
 

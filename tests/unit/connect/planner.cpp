@@ -202,10 +202,10 @@ TEST_CASE("Submit gcode") {
     // The "Cork" added for waiting
     REQUIRE(strncmp(test.printer.submitted_gcodes[3].c_str(), "M9933 C", 7) == 0);
 
-    // This marks _all_ corks as done. In reality, it would do just the right
-    // one, but we would have to parse the gcode here and that would complicate
-    // the test here.
-    buddy::cork::tracker.clear();
+    uint16_t cookie;
+    REQUIRE(sscanf(test.printer.submitted_gcodes[3].c_str() + 7, "%" SCNu16, &cookie) == 1 /* Number of items parsed */);
+
+    buddy::cork::tracker.mark_done(cookie);
 
     REQUIRE(test.consume_sleep() == 0);
     test.event_type(EventType::Finished);

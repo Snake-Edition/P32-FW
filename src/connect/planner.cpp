@@ -690,11 +690,7 @@ void Planner::command(const Command &command, const ProcessingOtherCommand &) {
 void Planner::command(const Command &command, const Gcode &gcode) {
     background_command = BackgroundCommand {
         command.id,
-        BackgroundGcodeContent {
-            gcode.gcode,
-            gcode.size,
-            0,
-        },
+        BackgroundGcodeContent(gcode.gcode, gcode.size),
     };
     planned_event = Event { EventType::Accepted, command.id };
 }

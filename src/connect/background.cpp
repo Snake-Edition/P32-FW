@@ -13,12 +13,18 @@ namespace {
 
     BackgroundResult step(BackgroundGcode &gcode, Printer &printer) {
         if (auto content = get_if<BackgroundGcodeContent>(&gcode); content != nullptr) {
+            if (buddy::cork::tracker.clear_cnt() != content->start_tracker_clears) {
+                log_debug(connect, "Queue got cleared while submitting a gcode command");
+                return BackgroundResult::Failure;
+            }
+
             if (content->size <= content->position) {
                 // All lines from the server are submitted. We need to "cork" it and wait for the execution.
                 auto cork = buddy::cork::tracker.new_cork();
                 if (cork.has_value()) {
                     gcode = BackgroundGcodeWait {
                         .cork = std::move(*cork),
+                        .start_tracker_clears = content->start_tracker_clears,
                         .submitted = false,
                     };
 
@@ -82,6 +88,10 @@ namespace {
 
             return BackgroundResult::More;
         } else if (auto wait = get_if<BackgroundGcodeWait>(&gcode); wait != nullptr) {
+            if (buddy::cork::tracker.clear_cnt() != wait->start_tracker_clears) {
+                log_debug(connect, "Queue got cleared while corking a gcode command");
+                return BackgroundResult::Failure;
+            }
             if (wait->submitted) {
                 if (wait->cork.is_done_and_consumed()) {
                     log_debug(connect, "Cork done!");
@@ -114,6 +124,12 @@ namespace {
     }
 
 } // namespace
+
+BackgroundGcodeContent::BackgroundGcodeContent(SharedBorrow data, size_t size)
+    : data(data)
+    , size(size)
+    , position(0)
+    , start_tracker_clears(buddy::cork::tracker.clear_cnt()) {}
 
 BackgroundResult background_cmd_step(BackgroundCmd &cmd, Printer &printer) {
     return visit([&](auto &cmd) { return step(cmd, printer); }, cmd);

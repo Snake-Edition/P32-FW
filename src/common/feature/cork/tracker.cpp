@@ -46,6 +46,8 @@ void Tracker::clear() {
             slot->done = true;
         }
     }
+
+    clears_called.fetch_add(1);
 }
 
 void Tracker::mark_done(Cookie cookie) {
@@ -122,6 +124,10 @@ std::array<char, 20> Tracker::CorkHandle::get_gcode() const {
     StringBuilder builder(buffer);
     builder.append_printf("M9933 C%" PRIu16, get_cookie());
     return buffer;
+}
+
+uint32_t Tracker::clear_cnt() const {
+    return clears_called.load();
 }
 
 Tracker tracker;

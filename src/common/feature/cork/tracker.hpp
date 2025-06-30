@@ -2,6 +2,7 @@
 
 #include <freertos/mutex.hpp>
 
+#include <atomic>
 #include <array>
 #include <optional>
 #include <cstdint>
@@ -43,6 +44,7 @@ private:
     };
     std::array<std::optional<Slot>, slot_cnt> slots;
     freertos::Mutex mutex;
+    std::atomic<uint32_t> clears_called = 0;
 
     Tracker(const Tracker &other) = delete;
     Tracker(Tracker &&other) = delete;
@@ -93,9 +95,16 @@ public:
     /// May return nullopt in case all slots are full.
     std::optional<CorkHandle> new_cork();
     /// Marks *all* slots as done (used when emptying the gcode queue).
+    ///
+    /// Also increases the count of clears called (see clear_cnt()).
     void clear();
     /// Marks specific slot (identified by the cookie) as done.
     void mark_done(Cookie cookie);
+
+    /// Number of calls to `clear` issued.
+    ///
+    /// (Yes, it is wrapping).
+    uint32_t clear_cnt() const;
 };
 
 extern Tracker tracker;
