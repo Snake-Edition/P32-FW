@@ -9,6 +9,7 @@
 #include <Marlin/src/feature/phase_stepping/calibration_config.hpp>
 #include <Marlin/src/feature/phase_stepping/calibration.hpp>
 #include <Marlin/src/gcode/gcode.h>
+#include <option/developer_mode.h>
 #include <sys/fcntl.h>
 #include <sys/unistd.h>
 #include <version/version.hpp>
@@ -123,6 +124,8 @@ static PhasesPhaseStepping intro_helper() {
 #endif
 }
 
+#if DEVELOPER_MODE()
+
 __attribute__((format(printf, 2, 3))) static void fdprintf(int fd, const char *fmt, ...) {
     std::array<char, 64> buffer;
 
@@ -164,6 +167,8 @@ static void dump_calibration_result(const Context &context) {
     close(fd);
 }
 
+#endif
+
 std::optional<uint8_t> evaluate_calibration_result(const CalibrationResult &calibration_result) {
     for (const auto &res : calibration_result) {
         log_info(Marlin, "res %f %f", (double)res.backward, (double)res.forward);
@@ -183,7 +188,9 @@ std::optional<uint8_t> evaluate_calibration_result(const CalibrationResult &cali
 }
 
 PhasesPhaseStepping evaluate_result(Context &context) {
+#if DEVELOPER_MODE()
     dump_calibration_result(context);
+#endif
     const auto reduction_x = evaluate_calibration_result(context.calibration_result_x);
     const auto reduction_y = evaluate_calibration_result(context.calibration_result_y);
     if (reduction_x && reduction_y) {
