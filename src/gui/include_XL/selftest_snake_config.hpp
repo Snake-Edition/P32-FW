@@ -1,7 +1,7 @@
 #pragma once
 #include "i18n.h"
 #include <utility_extensions.hpp>
-#include <printer_selftest.hpp>
+#include <common/selftest/include_XL/printer_selftest.hpp>
 
 namespace SelftestSnake {
 enum class Tool {
