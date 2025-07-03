@@ -20,6 +20,7 @@
 #include <common/cold_pull.hpp>
 #include <common/sound.hpp>
 #include <lang/i18n.h>
+#include <option/has_auto_retract.h>
 
 namespace {
 
@@ -234,6 +235,25 @@ namespace frame {
         static constexpr const char *text_info = N_("Before you continue,\nmake sure that PLA filament is loaded.");
     };
 
+#if HAS_AUTO_RETRACT()
+    class Deretract final : public ProgressFrame {
+        static constexpr const char *header = N_("Pushing filament to the nozzle");
+        static constexpr const char *text = N_("Filament needs to be heated and pushed back to the nozzle.");
+
+    public:
+        explicit Deretract(window_t *parent)
+            : ProgressFrame(parent, _(header), _(text)) {
+        }
+
+        void update(fsm::PhaseData fsm_data) {
+            const cold_pull::TemperatureProgressData data { fsm_data };
+            progress_bar.SetProgressPercent(data.percent);
+            progress_number.SetValue(data.percent);
+        }
+        static_assert(common_frames::is_update_callable<Deretract>);
+    };
+#endif
+
     class CoolDown final : public ProgressFrame {
         bool has_text3 { false };
 
@@ -336,6 +356,9 @@ using Frames = FrameDefinitionList<ScreenColdPull::FrameStorage,
     FrameDefinition<PhasesColdPull::load_ptfe, frame::LoadFilamentPtfe>,
 #endif
     FrameDefinition<PhasesColdPull::prepare_filament, frame::PrepareFilament>,
+#if HAS_AUTO_RETRACT()
+    FrameDefinition<PhasesColdPull::deretract, frame::Deretract>,
+#endif
     FrameDefinition<PhasesColdPull::blank_load, common_frames::Blank>,
     FrameDefinition<PhasesColdPull::blank_unload, common_frames::Blank>,
     FrameDefinition<PhasesColdPull::cool_down, frame::CoolDown>,

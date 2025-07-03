@@ -492,6 +492,9 @@ enum class PhasesColdPull : PhaseUnderlyingType {
     load_ptfe,
     #endif
     prepare_filament,
+    #if HAS_AUTO_RETRACT()
+    deretract,
+    #endif
     blank_load,
     blank_unload,
     cool_down,
@@ -983,6 +986,9 @@ class ClientResponses {
         { Response::Load, Response::Continue, Response::Abort }, // load_ptfe,
     #endif
         { Response::Unload, Response::Load, Response::Continue, Response::Abort }, // prepare_filament,
+    #if HAS_AUTO_RETRACT()
+        { Response::Abort }, // deretract
+    #endif
         {}, // blank_load
         {}, // blank_unload
         { Response::Abort }, // cool_down,

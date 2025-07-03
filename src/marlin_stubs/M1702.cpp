@@ -2,6 +2,7 @@
 #include <option/has_mmu2.h>
 #include <option/has_toolchanger.h>
 #include <option/has_gui.h>
+#include <option/has_auto_retract.h>
 
 #include <M70X.hpp>
 #include <fs_autoload_autolock.hpp>
@@ -13,6 +14,10 @@
 #include <client_response.hpp>
 #include <common/marlin_server.hpp>
 #include <common/RAII.hpp>
+
+#if HAS_AUTO_RETRACT()
+    #include <feature/auto_retract/auto_retract.hpp>
+#endif
 
 #if HAS_TOOLCHANGER() && HAS_GUI()
     #include <window_tool_action_box.hpp>
@@ -31,8 +36,10 @@ namespace PrusaGcodeSuite {
 namespace {
 
     constexpr const uint16_t HOTEND_COLD_TEMP { 36 };
-    constexpr const uint16_t HOTEND_PULL_TEMP { 80 };
-    constexpr const uint16_t HOTEND_END_TEMP { 85 };
+    // Temperature was increased from 80 to 90 to make it easier to pull out
+    // Slightly higher temperature less likely create big blobs, that cannot be manually pulled from the idler
+    constexpr const uint16_t HOTEND_PULL_TEMP { 90 };
+    constexpr const uint16_t HOTEND_END_TEMP { 95 };
 
     constexpr const millis_t TIMEOUT_DISABLED { 0 };
     constexpr const millis_t COOLING_TIMEOUT_MILLIS { 1000 * 60 * 15 };
@@ -201,7 +208,11 @@ namespace {
             return PhasesColdPull::blank_load;
     #endif
         case Response::Continue:
+    #if HAS_AUTO_RETRACT()
+            return PhasesColdPull::deretract;
+    #else
             return PhasesColdPull::cool_down;
+    #endif
         case Response::Abort:
             return PhasesColdPull::cleanup;
         default:
@@ -216,7 +227,11 @@ namespace {
         case Response::Load:
             return PhasesColdPull::blank_load;
         case Response::Continue:
+    #if HAS_AUTO_RETRACT()
+            return PhasesColdPull::deretract;
+    #else
             return PhasesColdPull::cool_down;
+    #endif
         case Response::Abort:
             return PhasesColdPull::cleanup;
         default:
@@ -264,7 +279,11 @@ namespace {
 
         switch (PreheatStatus::ConsumeResult()) {
         case PreheatStatus::Result::DoneHasFilament:
+    #if HAS_AUTO_RETRACT()
+            return PhasesColdPull::deretract;
+    #else
             return PhasesColdPull::cool_down;
+    #endif
         default:
     #if HAS_TOOLCHANGER() || HAS_MMU2()
             return PhasesColdPull::load_ptfe;
@@ -275,6 +294,7 @@ namespace {
     }
 
     PhasesColdPull cool_down() {
+
         thermalManager.disable_hotend(); // cool down without target to avoid PID handling target temp
         marlin_server::set_temp_to_display(HOTEND_COLD_TEMP, active_extruder); // still show target temperature
 
@@ -305,32 +325,50 @@ namespace {
         return PhasesColdPull::heat_up;
     }
 
-    PhasesColdPull heat_up() {
-        thermalManager.setTargetHotend(HOTEND_PULL_TEMP, active_extruder);
-        marlin_server::set_temp_to_display(HOTEND_PULL_TEMP, active_extruder);
+    bool heat_up(const uint16_t target_hotend_temp, PhasesColdPull current_phase) {
+        thermalManager.setTargetHotend(target_hotend_temp, active_extruder);
+        marlin_server::set_temp_to_display(target_hotend_temp, active_extruder);
 
         auto too_cold = []() {
             return static_cast<uint16_t>(Temperature::degHotend(active_extruder)) < Temperature::degTargetHotend(active_extruder);
         };
 
-        auto progress = [](millis_t) {
+        auto progress = [&](millis_t) {
             cold_pull::TemperatureProgressData data { { 0 } };
             data.percent = static_cast<uint8_t>(
                 100.0f * Temperature::degHotend(active_extruder) / Temperature::degTargetHotend(active_extruder));
-            marlin_server::fsm_change(PhasesColdPull::heat_up, data.fsm_data);
+            marlin_server::fsm_change(current_phase, data.fsm_data);
         };
 
-        switch (wait_while_with_progress(PhasesColdPull::heat_up, TIMEOUT_DISABLED, too_cold, progress)) {
+        switch (wait_while_with_progress(current_phase, TIMEOUT_DISABLED, too_cold, progress)) {
         case Response::Abort:
-            return PhasesColdPull::cleanup;
+            return false;
         case Response::_none:
             break;
         default:
             bsod("Invalid phase encountered.");
         }
 
-        return PhasesColdPull::automatic_pull;
+        return true;
     }
+
+    #if HAS_AUTO_RETRACT()
+    PhasesColdPull deretract() {
+
+        if (!buddy::auto_retract().is_retracted()) {
+            return PhasesColdPull::cool_down;
+        }
+
+        // If loaded filament is unknown FilamentType::none has nozzle temperature 215 -> Correct default value since PLA is recommended in the dialog
+        const auto hotend_detraction_temp = config_store().get_filament_type(marlin_vars().active_extruder).parameters().nozzle_temperature;
+        if (!heat_up(hotend_detraction_temp, PhasesColdPull::deretract)) {
+            return PhasesColdPull::cleanup;
+        }
+
+        buddy::auto_retract().maybe_deretract_to_nozzle();
+        return PhasesColdPull::cool_down;
+    }
+    #endif
 
     PhasesColdPull automatic_pull() {
         thermalManager.setTargetHotend(HOTEND_END_TEMP, active_extruder);
@@ -351,8 +389,7 @@ namespace {
     }
 
     PhasesColdPull manual_pull() {
-        thermalManager.disable_hotend();
-        marlin_server::set_temp_to_display(0, active_extruder);
+        // Keep it heated to HOTEND_END_TEMP to make manual pull easier
 
         was_success = true;
 
@@ -405,8 +442,12 @@ namespace {
             return blank_load();
         case PhasesColdPull::cool_down:
             return cool_down();
+    #if HAS_AUTO_RETRACT()
+        case PhasesColdPull::deretract:
+            return deretract();
+    #endif
         case PhasesColdPull::heat_up:
-            return heat_up();
+            return heat_up(HOTEND_PULL_TEMP, PhasesColdPull::heat_up) ? PhasesColdPull::automatic_pull : PhasesColdPull::cleanup;
         case PhasesColdPull::automatic_pull:
             return automatic_pull();
         case PhasesColdPull::manual_pull:
