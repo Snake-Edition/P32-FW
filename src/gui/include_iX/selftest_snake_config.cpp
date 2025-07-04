@@ -2,6 +2,11 @@
 #include <selftest_types.hpp>
 #include <selftest_result_evaluation.hpp>
 #include <config_store/store_instance.hpp>
+#include <option/has_precise_homing_corexy.h>
+
+#if HAS_PRECISE_HOMING_COREXY()
+    #include <module/prusa/homing_corexy.hpp>
+#endif
 
 namespace SelftestSnake {
 TestResult get_test_result(Action action, [[maybe_unused]] Tool tool) {
@@ -20,6 +25,10 @@ TestResult get_test_result(Action action, [[maybe_unused]] Tool tool) {
         return evaluate_results(sr.yaxis);
     case Action::XCheck:
         return evaluate_results(sr.xaxis);
+#if HAS_PRECISE_HOMING_COREXY()
+    case Action::PreciseHoming:
+        return corexy_home_is_calibrated() ? TestResult::TestResult_Passed : TestResult::TestResult_Unknown;
+#endif
     case Action::Loadcell:
         return merge_hotends(tool, [&](const int8_t e) {
             return evaluate_results(sr.tools[e].loadcell);
@@ -64,6 +73,9 @@ uint64_t get_test_mask(Action action) {
         return stmZcalib;
     case Action::Fans:
     case Action::PhaseSteppingCalibration:
+#if HAS_PRECISE_HOMING_COREXY()
+    case Action::PreciseHoming:
+#endif
         bsod("get_test_mask");
     case Action::_count:
         break;

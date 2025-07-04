@@ -2,6 +2,7 @@
 #include "i18n.h"
 #include <utility_extensions.hpp>
 #include <common/selftest/include_XL/printer_selftest.hpp>
+#include <option/has_precise_homing_corexy.h>
 
 namespace SelftestSnake {
 enum class Tool {
@@ -31,6 +32,9 @@ enum class Action {
     Fans,
     YCheck,
     XCheck,
+#if HAS_PRECISE_HOMING_COREXY()
+    PreciseHoming,
+#endif
     ZAlign, // also known as z_calib
     DockCalibration,
     Loadcell,
@@ -123,19 +127,22 @@ struct MenuItemText {
 // could have been done with an array of texts directly, but there would be an order dependancy
 inline constexpr MenuItemText blank_item_texts[] {
     { Action::Fans, N_("%d Fan Test") },
-    { Action::ZAlign, N_("%d Z Alignment Calibration") },
-    { Action::YCheck, N_("%d Y Axis Test") },
-    { Action::XCheck, N_("%d X Axis Test") },
-    { Action::DockCalibration, N_("%d Dock Position Calibration") },
-    { Action::Loadcell, N_("%d Loadcell Test") },
-    { Action::ToolOffsetsCalibration, N_("%d Tool Offset Calibration") },
-    { Action::ZCheck, N_("%d Z Axis Test") },
-    { Action::Heaters, N_("%d Heater Test") },
-    { Action::FilamentSensorCalibration, N_("%d Filament Sensor Calibration") },
-    { Action::BedHeaters, N_("%d Bed Heater Test") },
-    { Action::NozzleHeaters, N_("%d Nozzle Heaters Test") },
-    { Action::PhaseSteppingCalibration, N_("%d Phase Stepping Calibration") },
-    { Action::Gears, N_("%d Gearbox Alignment") },
+        { Action::ZAlign, N_("%d Z Alignment Calibration") },
+        { Action::YCheck, N_("%d Y Axis Test") },
+        { Action::XCheck, N_("%d X Axis Test") },
+#if HAS_PRECISE_HOMING_COREXY()
+        { Action::PreciseHoming, N_("%d Homing Calibration") },
+#endif
+        { Action::DockCalibration, N_("%d Dock Position Calibration") },
+        { Action::Loadcell, N_("%d Loadcell Test") },
+        { Action::ToolOffsetsCalibration, N_("%d Tool Offset Calibration") },
+        { Action::ZCheck, N_("%d Z Axis Test") },
+        { Action::Heaters, N_("%d Heater Test") },
+        { Action::FilamentSensorCalibration, N_("%d Filament Sensor Calibration") },
+        { Action::BedHeaters, N_("%d Bed Heater Test") },
+        { Action::NozzleHeaters, N_("%d Nozzle Heaters Test") },
+        { Action::PhaseSteppingCalibration, N_("%d Phase Stepping Calibration") },
+        { Action::Gears, N_("%d Gearbox Alignment") },
 };
 
 TestResult get_test_result(Action action, Tool tool);

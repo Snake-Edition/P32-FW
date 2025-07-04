@@ -2,6 +2,7 @@
 #include "i18n.h"
 #include <utility_extensions.hpp>
 #include <printer_selftest.hpp>
+#include <option/has_precise_homing_corexy.h>
 #include "selftest_types.hpp"
 
 namespace SelftestSnake {
@@ -19,6 +20,9 @@ enum class Action {
     DoorSensor,
     YCheck,
     XCheck,
+#if HAS_PRECISE_HOMING_COREXY()
+    PreciseHoming,
+#endif
     ZAlign, // also known as z_calib
     Loadcell, // Check loadcell before Z test, because it is used there
     ZCheck,
@@ -79,15 +83,18 @@ struct MenuItemText {
 // could have been done with an array of texts directly, but there would be an order dependancy
 inline constexpr MenuItemText blank_item_texts[] {
     { Action::Fans, N_("%d Fan Test") },
-    { Action::DoorSensor, N_("%d Door Sensor") },
-    { Action::ZAlign, N_("%d Z Alignment Calibration") },
-    { Action::YCheck, N_("%d Y Axis Test") },
-    { Action::XCheck, N_("%d X Axis Test") },
-    { Action::Loadcell, N_("%d Loadcell Test") },
-    { Action::ZCheck, N_("%d Z Axis Test") },
-    { Action::Heaters, N_("%d Heater Test") },
-    { Action::Gears, N_("%d Gearbox Alignment") },
-    { Action::FilamentSensorCalibration, N_("%d Filament Sensor Calibration") },
+        { Action::DoorSensor, N_("%d Door Sensor") },
+        { Action::ZAlign, N_("%d Z Alignment Calibration") },
+        { Action::YCheck, N_("%d Y Axis Test") },
+        { Action::XCheck, N_("%d X Axis Test") },
+#if HAS_PRECISE_HOMING_COREXY()
+        { Action::PreciseHoming, N_("%d Homing Calibration") },
+#endif
+        { Action::Loadcell, N_("%d Loadcell Test") },
+        { Action::ZCheck, N_("%d Z Axis Test") },
+        { Action::Heaters, N_("%d Heater Test") },
+        { Action::Gears, N_("%d Gearbox Alignment") },
+        { Action::FilamentSensorCalibration, N_("%d Filament Sensor Calibration") },
 };
 
 TestResult get_test_result(Action action, Tool tool);

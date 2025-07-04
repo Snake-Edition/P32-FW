@@ -17,6 +17,12 @@
     #endif /*HAS_SIDE_FSENSOR()*/
 #endif /*HAS_TOOLCHANGER()*/
 
+#include <option/has_precise_homing_corexy.h>
+
+#if HAS_PRECISE_HOMING_COREXY()
+    #include <module/prusa/homing_corexy.hpp>
+#endif
+
 namespace SelftestSnake {
 TestResult get_test_result(Action action, Tool tool) {
     SelftestResult sr = config_store().selftest_result.get();
@@ -46,6 +52,10 @@ TestResult get_test_result(Action action, Tool tool) {
         return evaluate_results(sr.yaxis);
     case Action::XCheck:
         return evaluate_results(sr.xaxis);
+#if HAS_PRECISE_HOMING_COREXY()
+    case Action::PreciseHoming:
+        return corexy_home_is_calibrated() ? TestResult::TestResult_Passed : TestResult::TestResult_Unknown;
+#endif
     case Action::DockCalibration:
         return merge_hotends(tool, [&](const int8_t e) {
             return evaluate_results(sr.tools[e].dockoffset);
@@ -124,6 +134,9 @@ uint64_t get_test_mask(Action action) {
     case Action::NozzleHeaters:
         return stmHeaters_noz;
     case Action::Gears:
+#if HAS_PRECISE_HOMING_COREXY()
+    case Action::PreciseHoming:
+#endif
         bsod("This should be gcode");
     case Action::FilamentSensorCalibration:
         return stmFSensor;

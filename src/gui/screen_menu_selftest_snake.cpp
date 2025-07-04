@@ -149,6 +149,11 @@ void do_snake(Action action, Tool tool = Tool::_first) {
             marlin_client::gcode("M1980");
             break;
 #endif
+#if HAS_PRECISE_HOMING_COREXY()
+        case Action::PreciseHoming:
+            marlin_client::gcode("G28 XY C");
+            break;
+#endif
         default:
             has_test_special_handling = false;
             break;
