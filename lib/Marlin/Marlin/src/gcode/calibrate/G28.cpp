@@ -990,6 +990,9 @@ RefineResult corexy_calibrate_homing_during_G28(float xy_mm_s, const G28Flags &f
   PrintStatusMessageGuard status_guard;
   status_guard.update<PrintStatusMessage::recalibrating_home>({});
 
+  /// Wait holder should be part of the homing procedure
+  marlin_server::fsm_change(PhaseWait::homing_calibration);
+
 #if HAS_TRINAMIC && defined(XY_HOMING_MEASURE_SENS_MIN)
   // Try calibrating motor sensitivity before calibration
   if (!corexy_sens_calibrate(xy_mm_s)) {
