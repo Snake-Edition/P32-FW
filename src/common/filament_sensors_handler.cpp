@@ -228,9 +228,20 @@ void FilamentSensors::process_events() {
     };
 
     const auto check_autoload = [&]() {
-        const auto event = sensor(LogicalFilamentSensor::autoload)->last_event();
+        const auto extruder_fs = sensor(LogicalFilamentSensor::extruder);
+        const auto side_fs = sensor(LogicalFilamentSensor::side);
 
-        if (event != IFSensor::Event::filament_inserted
+        const bool extruder_fs_inserted = extruder_fs && extruder_fs->last_event() == IFSensor::Event::filament_inserted;
+        const bool extruder_fs_no_filament = extruder_fs && extruder_fs->get_state() == FilamentSensorState::NoFilament;
+
+        const bool side_fs_enabled = side_fs && side_fs->is_enabled();
+        const bool side_fs_inserted = side_fs && side_fs->last_event() == IFSensor::Event::filament_inserted;
+        const bool side_fs_has_filament = side_fs && side_fs->get_state() == FilamentSensorState::HasFilament;
+
+        const bool trigger_autoload = (extruder_fs_inserted && (!side_fs_enabled || side_fs_has_filament))
+            || (side_fs_inserted && extruder_fs_no_filament);
+
+        if (!trigger_autoload
             || has_mmu
             || autoload_sent
             || isAutoloadLocked()
