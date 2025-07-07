@@ -33,7 +33,7 @@
     #include <feature/auto_retract/auto_retract.hpp>
 #endif
 
-#include <raii/scope_guard.hpp>
+#include <scope_guard.hpp>
 
 uint filament_gcodes::InProgress::lock = 0;
 
@@ -254,11 +254,14 @@ void filament_gcodes::M1701_no_parser(const std::optional<float> &fast_load_leng
 
         const uint16_t orig_temp = Temperature::degTargetHotend(active_extruder);
 
-        auto unload_and_reset = [&] {
+        ScopeGuard fail_guard = [&] {
             thermalManager.setTargetHotend(orig_temp, active_extruder);
             marlin_server::set_temp_to_display(orig_temp, active_extruder);
-            Pause::Instance().perform(Pause::LoadType::unload_from_gears, settings);
-            M70X_process_user_response(PreheatStatus::Result::DoneNoFilament, target_extruder);
+            PreheatStatus::SetResult(PreheatStatus::Result::DoneNoFilament);
+        };
+
+        auto unload_filament = [&](Pause::LoadType unload_type) {
+            Pause::Instance().perform(unload_type, settings);
         };
 
         if (orig_temp < EXTRUDE_MINTEMP) {
@@ -267,9 +270,9 @@ void filament_gcodes::M1701_no_parser(const std::optional<float> &fast_load_leng
         }
 
         // catch filament in gear and then ask for temp
-        if (!Pause::Instance().perform(Pause::LoadType::load_to_gears, settings) && FSensors_instance().has_filament_surely(LogicalFilamentSensor::extruder)) {
+        if (!Pause::Instance().perform(Pause::LoadType::load_to_gears, settings) && !FSensors_instance().no_filament_surely(LogicalFilamentSensor::extruder)) {
             // Unload when user said stop and filament was already loaded
-            unload_and_reset();
+            unload_filament(Pause::LoadType::unload_from_gears);
             return;
         }
         // check if filament is in gears before continuing to preheat
@@ -283,7 +286,7 @@ void filament_gcodes::M1701_no_parser(const std::optional<float> &fast_load_leng
 
             if (preheat_ret.first) {
                 // canceled
-                unload_and_reset();
+                unload_filament(Pause::LoadType::unload_from_gears);
                 return;
             }
 
@@ -295,13 +298,18 @@ void filament_gcodes::M1701_no_parser(const std::optional<float> &fast_load_leng
             // Returning to previous position is unwanted outside of printing (M1701 should be used only outside of printing)
             settings.SetParkPoint(park_position);
 
-            if (load_unload(Pause::LoadType::autoload, settings)) {
-                M70X_process_user_response(PreheatStatus::Result::DoneHasFilament, target_extruder);
-            } else {
-                M70X_process_user_response(PreheatStatus::Result::DidNotFinish, target_extruder);
+            if (!Pause::Instance().perform(Pause::LoadType::autoload, settings)) {
+                // This is a bit problematic, since we dont know how far the autoload has gotten (if only waiting for preheat or already loading to nozzle) -> therefore we have to always do the full unload even if it was stoped during wait_temp (where only unload from gears would suffice)
+                // This could possibly be solved if we move preheating and the whole autoload process into pause (so that is wouldn't be seperated to two operations (load_to_gears and autoload)) and then we could tell apart when the autoload was stopped
+                unload_filament(Pause::LoadType::unload);
+                return;
             }
         }
         planner.set_e_position_mm((destination.e = current_position.e = e_pos_to_restore));
+
+        // at this point autoload is considered successful so fail guard is not to be triggered and we report DoneHasFilament as status
+        fail_guard.disarm();
+        PreheatStatus::SetResult(PreheatStatus::Result::DoneHasFilament);
     }
 }
 
