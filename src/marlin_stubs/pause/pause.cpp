@@ -448,17 +448,19 @@ void Pause::load_start_process([[maybe_unused]] Response response) {
 
     switch (load_type) {
     case LoadType::load_to_gears:
-        // Both parts of the condition below need to be true:
-        // XL has side sensor, but not having gears FS means the "else" workflow is needed.
-        // MK4 with MMU rework doesn't have side sensor (for this case, the unofficial
-        // non-ergonomic autoload workflow would be: user pushes filament into the extruder
-        // and activates the FS by hand by moving the lever to trigger the autoload).
-        if (option::has_side_fsensor && settings.extruder_mmu_rework) {
+        // if extruder sensor is not working, we cannot load filament automatically, we need the user to manually confirm the the filament is pushed in
+        if (!FSensors_instance().is_working(LogicalFilamentSensor::extruder)) {
+            set(LoadState::filament_push_ask);
+            break;
+        }
+        // If we are loading and filament is not in extruder = loading triggered by sideFS -> need asisting
+        if (FSensors_instance().no_filament_surely(LogicalFilamentSensor::extruder)) {
             set_timed(LoadState::assist_insertion);
         } else {
             set(LoadState::load_to_gears);
         }
         break;
+
     case LoadType::autoload:
         // if filament is not present we want to break and not set loaded filament
         // we have already loaded the filament in gear, now just wait for temperature to rise
