@@ -33,6 +33,8 @@
     #include <feature/auto_retract/auto_retract.hpp>
 #endif
 
+#include <raii/scope_guard.hpp>
+
 uint filament_gcodes::InProgress::lock = 0;
 
 using namespace filament_gcodes;
@@ -227,7 +229,9 @@ void filament_gcodes::M1701_no_parser(const std::optional<float> &fast_load_leng
     filament::set_color_to_load(std::nullopt);
 
     InProgress progress;
-    FSensors_instance().ClrAutoloadSent();
+    ScopeGuard autoload_clr = [&] {
+        FSensors_instance().ClrAutoloadSent();
+    };
 
     if constexpr (option::has_bowden) {
         config_store().set_filament_type(target_extruder, FilamentType::none);
