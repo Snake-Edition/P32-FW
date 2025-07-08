@@ -517,8 +517,13 @@ void Pause::filament_push_ask_process(Response response) {
         setPhase(is_unstoppable() ? PhasesLoadUnload::UserPush_unstoppable : PhasesLoadUnload::UserPush_stoppable);
         const bool has_filament = FSensors_instance().has_filament_surely(LogicalFilamentSensor::extruder);
         const bool is_mmu_rework_and_has_filament = settings.extruder_mmu_rework && has_filament;
+        const bool side_fs_empty = FSensors_instance().no_filament_surely(LogicalFilamentSensor::side);
+        const bool extruder_fs_not_working = !FSensors_instance().is_working(LogicalFilamentSensor::extruder);
+
         if (response == Response::Continue || is_mmu_rework_and_has_filament) {
             set(LoadState::load_to_gears);
+        } else if (!is_unstoppable() && side_fs_empty && extruder_fs_not_working) { // We got to this state because extruder sensor is not working and side sensor triggered autoload (if now sideFS is empty we exit out)
+            set(LoadState::stop);
         }
     }
 }
