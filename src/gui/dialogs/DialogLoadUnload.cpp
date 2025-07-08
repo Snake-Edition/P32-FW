@@ -124,8 +124,8 @@ static constexpr EnumArray<PhasesLoadUnload, State, CountPhases<PhasesLoadUnload
     { PhasesLoadUnload::Unloading_unstoppable, { txt_unload } },
     { PhasesLoadUnload::IsFilamentUnloaded, { txt_unload_confirm, DialogLoadUnload::phaseWaitSound } },
     { PhasesLoadUnload::FilamentNotInFS, { txt_filament_not_in_fs, DialogLoadUnload::phaseAlertSound } },
-    { PhasesLoadUnload::ManualUnload_continuable, { txt_manual_unload, DialogLoadUnload::phaseStopSound } },
-    { PhasesLoadUnload::ManualUnload_uncontinuable, { txt_manual_unload, DialogLoadUnload::phaseStopSound } },
+    { PhasesLoadUnload::ManualUnload_continuable, { txt_manual_unload } },
+    { PhasesLoadUnload::ManualUnload_uncontinuable, { txt_manual_unload } },
     { PhasesLoadUnload::UserPush_stoppable, { txt_push_fil, DialogLoadUnload::phaseAlertSound } },
     { PhasesLoadUnload::UserPush_unstoppable, { txt_push_fil, DialogLoadUnload::phaseAlertSound } },
     { PhasesLoadUnload::MakeSureInserted_stoppable, { txt_make_sure_inserted, DialogLoadUnload::phaseAlertSound } },
@@ -338,6 +338,7 @@ DialogLoadUnload::DialogLoadUnload(fsm::BaseData data)
 }
 
 DialogLoadUnload::~DialogLoadUnload() {
+    Sound_Stop();
     // Dtor only resets the header to black.
     // The header could not be red before the screen opened.
     // And even if it were, this behavior would only cause the header to appear in the wrong color.
@@ -355,7 +356,6 @@ DialogLoadUnload *DialogLoadUnload::instance = nullptr;
 // Phase callbacks to play a sound in specific moment at the start/end of
 // specified phase
 void DialogLoadUnload::phaseAlertSound() {
-    Sound_Stop();
     Sound_Play(eSOUND_TYPE::SingleBeep);
 }
 void DialogLoadUnload::phaseWaitSound() {
@@ -363,7 +363,6 @@ void DialogLoadUnload::phaseWaitSound() {
         Sound_Play(eSOUND_TYPE::WaitingBeep);
     }
 }
-void DialogLoadUnload::phaseStopSound() { Sound_Stop(); }
 
 static constexpr bool is_notice_mmu([[maybe_unused]] PhasesLoadUnload phase) {
 #if HAS_MMU2()
@@ -504,6 +503,7 @@ void DialogLoadUnload::phaseEnter() {
     if (!current_phase) {
         return;
     }
+    Sound_Stop();
     {
         radio.Change(*current_phase /*, states[phase].btn_resp, &states[phase].btn_labels*/); // TODO alternative button label support
         label.SetText(_(get_current_state(*current_phase).label));

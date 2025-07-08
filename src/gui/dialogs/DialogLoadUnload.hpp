@@ -63,7 +63,6 @@ public:
 
     static void phaseAlertSound();
     static void phaseWaitSound();
-    static void phaseStopSound();
 
     static const char *get_name(LoadUnloadMode mode);
     LoadUnloadMode get_mode() { return mode; }
