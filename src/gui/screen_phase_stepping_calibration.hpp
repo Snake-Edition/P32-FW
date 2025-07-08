@@ -3,6 +3,7 @@
 #include "screen_fsm.hpp"
 #include "radio_button_fsm.hpp"
 #include <option/has_phase_stepping_calibration.h>
+#include <gui/frame_calibration_common.hpp>
 
 static_assert(HAS_PHASE_STEPPING_CALIBRATION());
 
@@ -15,7 +16,7 @@ public:
     ~ScreenPhaseSteppingCalibration();
 
     static constexpr Rect16 get_inner_frame_rect() {
-        return GuiDefaults::RectScreenBody - GuiDefaults::GetButtonRect(GuiDefaults::RectScreenBody).Height();
+        return rect_screen;
     }
 
 protected:

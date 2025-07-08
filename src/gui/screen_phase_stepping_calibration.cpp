@@ -298,7 +298,7 @@ using Frames = FrameDefinitionList<ScreenPhaseSteppingCalibration::FrameStorage,
 
 ScreenPhaseSteppingCalibration::ScreenPhaseSteppingCalibration()
     : ScreenFSM(txt_header, ScreenPhaseSteppingCalibration::get_inner_frame_rect())
-    , radio { this, GuiDefaults::GetButtonRect(GuiDefaults::RectScreenBody), PhasesPhaseStepping::intro } {
+    , radio { this, rect_radio, PhasesPhaseStepping::intro } {
     CaptureNormalWindow(radio);
     create_frame();
 }
