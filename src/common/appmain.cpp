@@ -151,6 +151,17 @@ static void wait_for_serial() {
 }
 #endif
 
+#if HAS_TOUCH()
+extern "C" void touchscreen_timer_callback(TimerHandle_t) {
+    if (touchscreen.is_enabled()) {
+        touchscreen.update();
+    }
+}
+
+static StaticTimer_t touchscreen_timer_buffer;
+static auto touchscreen_timer = xTimerCreateStatic("touchscreen", pdMS_TO_TICKS(1), pdTRUE, 0, touchscreen_timer_callback, &touchscreen_timer_buffer);
+#endif
+
 static void app_startup() {
 #if HAS_USB_DEVICE()
     // Attempt to wait for CDC to initialize to get the full Marlin startup output
@@ -195,6 +206,10 @@ void app_run(void) {
     marlin_server::init();
 
     TaskDeps::provide(TaskDeps::Dependency::default_task_ready);
+
+#if HAS_TOUCH()
+    xTimerStart(touchscreen_timer, portMAX_DELAY);
+#endif
 
     while (1) {
         metric_record_event(&metric_maintask_event);
@@ -301,12 +316,6 @@ void app_tim14_tick(void) {
 
 #if HAS_GUI()
     jogwheel.Update1msFromISR();
-#endif
-
-#if HAS_TOUCH()
-    if (touchscreen.is_enabled()) {
-        touchscreen.update();
-    }
 #endif
 
 #if HAS_EMERGENCY_STOP()
