@@ -69,9 +69,14 @@ void osSetIdleTaskWatchdog(void (*function)()) {
     watchdog_function = function;
 }
 
+extern "C" __attribute__((weak)) void idle_callback() {
+}
+
 extern "C" void vApplicationIdleHook() {
     delay_us_precise<probe_workunit_us>();
     cpu_idle_time_us_divided += probe_workunit_us_divided;
+
+    idle_callback();
 
     if (watchdog_function != nullptr) {
         watchdog_function();
