@@ -55,7 +55,7 @@ void SideStripHandler::load_config() {
     std::lock_guard lock(mutex);
 #if HAS_XBUDDY_EXTENSION()
     camera_enabled = config_store().xbe_usb_power.get();
-    brightness = config_store().side_leds_max_brightness.get();
+    max_brightness = config_store().side_leds_max_brightness.get();
     if (camera_enabled) {
         dimming_enabled = config_store().side_leds_dimming_enabled_with_camera.get();
     } else
@@ -69,17 +69,34 @@ void SideStripHandler::load_config() {
 
 uint8_t SideStripHandler::get_max_brightness() const {
     std::lock_guard lock(mutex);
-    return brightness;
+    return max_brightness;
 }
 
 void SideStripHandler::set_max_brightness(uint8_t value) {
     config_store().side_leds_max_brightness.set(value);
     std::lock_guard lock(mutex);
-    if (brightness == value) {
+    if (max_brightness == value) {
         return;
     }
 
-    brightness = value;
+    max_brightness = value;
+    // Set state to off to force a change of state that will transition to the new brightness
+    state = SideStripState::off;
+}
+
+uint8_t SideStripHandler::get_dimmed_brightness() const {
+    std::lock_guard lock(mutex);
+    return dimmed_brightness;
+}
+
+void SideStripHandler::set_dimmed_brightness(uint8_t value) {
+    config_store().side_leds_dimmed_brightness.set(value);
+    std::lock_guard lock(mutex);
+    if (dimmed_brightness == value) {
+        return;
+    }
+
+    dimmed_brightness = value;
     // Set state to off to force a change of state that will transition to the new brightness
     state = SideStripState::off;
 }
@@ -124,25 +141,18 @@ void SideStripHandler::change_state(SideStripState state) {
 }
 
 ColorRGBW SideStripHandler::get_color_for_state(SideStripState state) {
+    constexpr auto base_color = has_white_led() ? ColorRGBW(0, 0, 0, 255) : ColorRGBW(255, 255, 255);
+
     switch (state) {
     case SideStripState::off:
         return ColorRGBW();
     case SideStripState::idle:
-        if constexpr (has_white_led()) {
-            return ColorRGBW(0, 0, 0, 40).clamp(brightness);
-        } else {
-            return ColorRGBW(40, 40, 40).clamp(brightness);
-        }
+        return base_color.clamp(dimmed_brightness);
     case SideStripState::active:
-        if constexpr (has_white_led()) {
-            return ColorRGBW(0, 0, 0, 255).clamp(brightness);
-        } else {
-            return ColorRGBW(255, 255, 255).clamp(brightness);
-        }
+        return base_color.clamp(max_brightness);
     case SideStripState::custom_color:
         return ColorRGBW(custom_color->color);
     }
-
     return {};
 }
 

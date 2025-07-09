@@ -51,6 +51,10 @@ public:
     /// 0 = disable side leds completely (even RGB status blinking), 255 = full
     uint8_t get_max_brightness() const;
     void set_max_brightness(uint8_t value);
+    /// Set brightness of the side leds while the leds are dimmed down.
+    // /// 0 = disable dimmed side leds, 255 = full brightness
+    uint8_t get_dimmed_brightness() const;
+    void set_dimmed_brightness(uint8_t value);
 
     bool get_dimming_enabled() const;
     void set_dimming_enabled(bool value);
@@ -78,7 +82,8 @@ private:
 #if HAS_XBUDDY_EXTENSION()
     bool camera_enabled;
 #endif
-    uint8_t brightness;
+    uint8_t max_brightness;
+    uint8_t dimmed_brightness;
 
     SideStripState state = SideStripState::off;
     uint32_t active_timestamp_ms = 0; // Timestamp of the last activity for idle dimming

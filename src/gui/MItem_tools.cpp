@@ -836,26 +836,41 @@ void MI_LEDS_ENABLE::OnChange(size_t old_index) {
 
 #if HAS_SIDE_LEDS()
 /**********************************************************************************************/
-// MI_SIDE_LEDS_ENABLE
-MI_SIDE_LEDS_ENABLE::MI_SIDE_LEDS_ENABLE()
+// MI_SIDE_LEDS_MAX_BRIGTHNESS
+MI_SIDE_LEDS_MAX_BRIGTHNESS::MI_SIDE_LEDS_MAX_BRIGTHNESS()
     : WiSpin(
         static_cast<float>(leds::SideStripHandler::instance().get_max_brightness()) * 100 / 255,
         numeric_input_config::percent_with_off,
         _(label)) {
 }
 
-void MI_SIDE_LEDS_ENABLE::OnClick() {
+void MI_SIDE_LEDS_MAX_BRIGTHNESS::OnClick() {
     leds::SideStripHandler::instance().set_max_brightness(static_cast<uint8_t>(value()) * 255 / 100);
 }
 #endif
 
 #if HAS_SIDE_LEDS()
 /**********************************************************************************************/
-// MI_SIDE_LEDS_DIMMING
-MI_SIDE_LEDS_DIMMING::MI_SIDE_LEDS_DIMMING()
+// MI_SIDE_LEDS_DIMMED_BRIGTHNESS
+MI_SIDE_LEDS_DIMMED_BRIGTHNESS::MI_SIDE_LEDS_DIMMED_BRIGTHNESS()
+    : WiSpin(
+        static_cast<float>(leds::SideStripHandler::instance().get_dimmed_brightness()) * 100 / 255,
+        numeric_input_config::percent_with_off,
+        _(label)) {
+}
+
+void MI_SIDE_LEDS_DIMMED_BRIGTHNESS::OnClick() {
+    leds::SideStripHandler::instance().set_dimmed_brightness(static_cast<uint8_t>(value()) * 255 / 100);
+}
+#endif
+
+#if HAS_SIDE_LEDS()
+/**********************************************************************************************/
+// MI_SIDE_LEDS_DIMMING_ENABLE
+MI_SIDE_LEDS_DIMMING_ENABLE::MI_SIDE_LEDS_DIMMING_ENABLE()
     : WI_ICON_SWITCH_OFF_ON_t(leds::SideStripHandler::instance().get_dimming_enabled(), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
-void MI_SIDE_LEDS_DIMMING::OnChange(size_t) {
+void MI_SIDE_LEDS_DIMMING_ENABLE::OnChange(size_t) {
     leds::SideStripHandler::instance().set_dimming_enabled(value());
 }
 #endif

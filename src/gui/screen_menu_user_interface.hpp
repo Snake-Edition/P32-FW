@@ -38,8 +38,9 @@ using ScreenMenuUserInterface__ = ScreenMenu<GuiDefaults::MenuFooter, MI_RETURN,
     MI_LEDS_ENABLE,
 #endif
 #if HAS_SIDE_LEDS()
-    MI_SIDE_LEDS_ENABLE,
-    MI_SIDE_LEDS_DIMMING,
+    MI_SIDE_LEDS_MAX_BRIGTHNESS,
+    MI_SIDE_LEDS_DIMMED_BRIGTHNESS,
+    MI_SIDE_LEDS_DIMMING_ENABLE,
 #endif
 #if HAS_TOOLCHANGER()
     MI_TOOL_LEDS_ENABLE,

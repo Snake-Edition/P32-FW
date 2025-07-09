@@ -543,7 +543,7 @@ public:
 #endif
 
 #if HAS_SIDE_LEDS()
-class MI_SIDE_LEDS_ENABLE : public WiSpin {
+class MI_SIDE_LEDS_MAX_BRIGTHNESS : public WiSpin {
 
     static constexpr const char *const label =
     #if PRINTER_IS_PRUSA_COREONE()
@@ -553,11 +553,25 @@ class MI_SIDE_LEDS_ENABLE : public WiSpin {
     #endif
 
 public:
-    MI_SIDE_LEDS_ENABLE();
+    MI_SIDE_LEDS_MAX_BRIGTHNESS();
     virtual void OnClick() override;
 };
 
-class MI_SIDE_LEDS_DIMMING : public WI_ICON_SWITCH_OFF_ON_t {
+class MI_SIDE_LEDS_DIMMED_BRIGTHNESS : public WiSpin {
+
+    static constexpr const char *const label =
+    #if PRINTER_IS_PRUSA_COREONE()
+        N_("Chamber Lights Dimmed");
+    #else
+        N_("RGB Side Strip Dimmed");
+    #endif
+
+public:
+    MI_SIDE_LEDS_DIMMED_BRIGTHNESS();
+    virtual void OnClick() override;
+};
+
+class MI_SIDE_LEDS_DIMMING_ENABLE : public WI_ICON_SWITCH_OFF_ON_t {
     static constexpr const char *const label =
     #if PRINTER_IS_PRUSA_COREONE()
         N_("Chamber Dimming");
@@ -566,7 +580,7 @@ class MI_SIDE_LEDS_DIMMING : public WI_ICON_SWITCH_OFF_ON_t {
     #endif
 
 public:
-    MI_SIDE_LEDS_DIMMING();
+    MI_SIDE_LEDS_DIMMING_ENABLE();
     virtual void OnChange(size_t old_index) override;
 };
 #endif
