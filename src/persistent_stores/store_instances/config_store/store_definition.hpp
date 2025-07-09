@@ -435,8 +435,6 @@ struct CurrentStore
     StoreItem<bool, true, ItemFlag::user_interface, journal::hash("Enable Side LEDs dimming")> side_leds_dimming_enabled;
 
     #if HAS_XBUDDY_EXTENSION()
-    /// same as side_leds_max_brightness but when camera is powered on
-    StoreItem<uint8_t, 255, ItemFlag::user_interface, journal::hash("Chamber LEDs PWM with Camera")> side_leds_max_brightness_with_camera;
     /// same as side_leds_dimming_enabled but when camera is powered on
     StoreItem<bool, false, ItemFlag::user_interface, journal::hash("Side LEDs dimming with camera")> side_leds_dimming_enabled_with_camera;
     #endif
@@ -819,6 +817,10 @@ struct DeprecatedStore
 
 #if HAS_EMERGENCY_STOP()
     StoreItem<bool, true, journal::hash("Emergency stop enable")> emergency_stop_enable;
+#endif
+
+#if HAS_SIDE_LEDS() && HAS_XBUDDY_EXTENSION()
+    StoreItem<uint8_t, 255, journal::hash("Chamber LEDs PWM with Camera")> side_leds_max_brightness_with_camera;
 #endif
 };
 
