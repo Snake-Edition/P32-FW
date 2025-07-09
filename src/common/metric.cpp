@@ -161,6 +161,12 @@ void metric_record_string_at_time(metric_t *metric, uint32_t timestamp, const ch
 }
 
 static void metric_record_custom_at_time_v(metric_t *metric, uint32_t timestamp, const char *fmt, va_list args) {
+    // NEVER do metrics from an ISR, BAD IDEA
+    // Takes a lot of stack
+    if (xPortIsInsideInterrupt()) {
+        bsod("Metric from ISR");
+    }
+
     metric_point_t *recording = point_check_and_prepare(metric, timestamp, METRIC_VALUE_CUSTOM);
     if (!recording) {
         return;
