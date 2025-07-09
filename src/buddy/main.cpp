@@ -70,6 +70,7 @@
 #include "resources/revision.hpp"
 #include <buddy/filesystem_semihosting.h>
 #include <freertos/timing.hpp>
+#include <heap.h>
 
 #if BUDDY_ENABLE_CONNECT()
     #include "connect/run.hpp"
@@ -662,6 +663,10 @@ void iwdg_warning_cb(void) {
     trigger_crash_dump();
 }
 
+extern "C" void idle_callback() {
+    check_isr_stack_overflow();
+}
+
 void init_error_screen() {
 #if HAS_TOUCH
     touchscreen.disable_till_reset();
@@ -768,6 +773,7 @@ int main() {
     tick_timer_init();
 
     // other MCU setup
+    setup_isr_stack_overflow_trap();
     enable_trap_on_division_by_zero();
     enable_backup_domain();
     enable_segger_sysview();

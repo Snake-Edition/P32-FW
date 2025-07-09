@@ -84,6 +84,15 @@ extern "C" uint32_t heap_bytes_remaining() {
     return heap_total_size() - (current_heap_end() - heap_start);
 }
 
+extern "C" void setup_isr_stack_overflow_trap() {
+    *reinterpret_cast<uint32_t *>(heap_end()) = 0xdeadbeef;
+}
+extern "C" void check_isr_stack_overflow() {
+    if (*reinterpret_cast<uint32_t *>(heap_end()) != 0xdeadbeef) {
+        bsod("ISR stack overflow");
+    }
+}
+
 void *_sbrk_r([[maybe_unused]] struct _reent *pReent, int incr) {
     UBaseType_t usis; // saved interrupt status
 
