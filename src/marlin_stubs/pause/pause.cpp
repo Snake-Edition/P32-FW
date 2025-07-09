@@ -1095,7 +1095,7 @@ void Pause::filament_not_in_fs_process(Response response) {
     setPhase(PhasesLoadUnload::FilamentNotInFS);
     handle_help(response);
 
-    if (!FSensors_instance().has_filament_surely(LogicalFilamentSensor::autoload)) {
+    if (!FSensors_instance().has_filament_surely(LogicalFilamentSensor::primary_runout)) {
         if constexpr (!option::has_human_interactions) {
             // In case of no human interactions, require no filament being
             // detected for at least 1s to avoid FS flicking off and on due

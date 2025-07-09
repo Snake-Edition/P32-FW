@@ -198,14 +198,6 @@ void FilamentSensors::reconfigure_sensors_if_needed(bool force) {
     ls[LFS::side] = side_fs;
     ls[LFS::primary_runout] = side_fs_enabled ? side_fs : extruder_fs;
     ls[LFS::secondary_runout] = side_fs_enabled ? extruder_fs : nullptr;
-    ls[LFS::autoload] = side_fs_enabled ? side_fs : extruder_fs;
-
-#if HAS_MMU2()
-    if (has_mmu) {
-        // No autoload with MMU
-        ls[LFS::autoload] = nullptr;
-    }
-#endif
 }
 
 void FilamentSensors::process_events() {

@@ -21,8 +21,6 @@ enum class LogicalFilamentSensor : uint8_t {
     /// The second runout filament sensor - the one closer to the extruder
     /// XL,MK4+MMU: extruder sensor | OTHER: none
     secondary_runout,
-    /// Filament sensor that is used to detect autoload
-    autoload,
 };
 
 static constexpr size_t logical_filament_sensor_count = 5;

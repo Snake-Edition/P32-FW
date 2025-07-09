@@ -34,7 +34,7 @@ static FSMResponseVariant preheatTempUnKnown(PreheatData preheat_data, bool brea
         if (const auto ret = marlin_server::get_response_variant_from_phase(PhasesPreheat::UserTempSelection)) {
             return ret;
         }
-        if (preheat_data.mode == PreheatMode::Autoload && FSensors_instance().sensor_state(LogicalFilamentSensor::autoload) == FilamentSensorState::NoFilament) {
+        if (preheat_data.mode == PreheatMode::Autoload && FSensors_instance().sensor_state(LogicalFilamentSensor::primary_runout) == FilamentSensorState::NoFilament) {
             return FSMResponseVariant::make(Response::Abort);
         }
         if (break_on_autoload && FSensors_instance().IsAutoloadInProgress()) {
