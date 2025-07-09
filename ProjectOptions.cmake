@@ -143,6 +143,7 @@ if(BOARD IN_LIST BUDDY_BOARDS OR BOARD STREQUAL "XL_DEV_KIT_XLB")
 else()
   set(BOARD_IS_MASTER_BOARD false)
 endif()
+define_boolean_option(BOARD_IS_MASTER_BOARD ${BOARD_IS_MASTER_BOARD})
 
 # set MCU to its default if not specified
 if(${MCU} STREQUAL "<default>")

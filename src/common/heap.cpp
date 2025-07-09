@@ -5,6 +5,7 @@
 #include <sys/reent.h>
 #include <stdbool.h>
 #include <malloc.h>
+#include <cstddef>
 #include <errno.h>
 #include <stddef.h>
 #include <string.h>
@@ -13,11 +14,11 @@
 #include "heap.h"
 #include "FreeRTOS.h"
 #include "cmsis_os.h"
+#include <option/board_is_master_board.h>
 
 #if !defined(configUSE_NEWLIB_REENTRANT) || (configUSE_NEWLIB_REENTRANT != 1)
     #warning "#define configUSE_NEWLIB_REENTRANT 1"
 #endif
-#define ISR_STACK_LENGTH_BYTES 512 // #define bytes to reserve for ISR (MSP) stack
 
 using std::atomic;
 
@@ -58,6 +59,13 @@ static atomic<TaskHandle_t> fallible_request_for = nullptr;
 //
 // _sbrk implementation
 //
+
+#if BOARD_IS_MASTER_BOARD()
+    #define ISR_STACK_LENGTH_BYTES 1536 // #define bytes to reserve for ISR (MSP) stack
+#else
+    #define ISR_STACK_LENGTH_BYTES 512 // #define bytes to reserve for ISR (MSP) stack
+#endif
+static_assert(ISR_STACK_LENGTH_BYTES % alignof(std::max_align_t) == 0);
 
 extern char heap_start[] __asm__("end");
 extern char ram_end[] __asm__("_estack");
