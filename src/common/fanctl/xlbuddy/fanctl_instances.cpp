@@ -46,5 +46,4 @@ CFanCtlCommon &Fans::enclosure() {
 
 void Fans::tick() {
     Fans::enclosure().tick();
-    record_fanctl_metrics();
 }

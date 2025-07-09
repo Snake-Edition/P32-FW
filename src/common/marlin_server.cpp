@@ -781,6 +781,8 @@ static void cycle() {
     buddy::xbuddy_extension().step();
 #endif
 
+    record_fanctl_metrics();
+
     idle_hook_point.call_all();
 
     if (is_cycle_running) {

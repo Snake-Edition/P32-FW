@@ -57,5 +57,4 @@ void Fans::tick() {
     }
     Fans::print(0).tick();
     Fans::heat_break(0).tick();
-    record_fanctl_metrics();
 }
