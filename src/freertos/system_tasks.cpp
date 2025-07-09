@@ -2,7 +2,7 @@
 
 #if (configSUPPORT_STATIC_ALLOCATION == 1)
 static StaticTask_t __attribute__((section(".ccmram"))) idle_task;
-static StackType_t __attribute__((section(".ccmram"))) idle_stack[configMINIMAL_STACK_SIZE];
+static StackType_t idle_stack[configMINIMAL_STACK_SIZE]; // Doesn't fit into CCMRAM anymore
 extern "C" void vApplicationGetIdleTaskMemory(StaticTask_t **task,
     StackType_t **stack,
     uint32_t *stack_size) {
