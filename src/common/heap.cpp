@@ -21,9 +21,6 @@
 
 using std::atomic;
 
-uint32_t heap_total_size;
-uint32_t heap_bytes_remaining;
-
 //
 // FreeRTOS memory API
 //
@@ -43,7 +40,7 @@ void vApplicationMallocFailedHook() {
 
 size_t xPortGetFreeHeapSize(void) PRIVILEGED_FUNCTION {
     struct mallinfo mi = mallinfo(); // available space now managed by newlib
-    return mi.fordblks + heap_bytes_remaining; // plus space not yet handed to newlib by sbrk
+    return mi.fordblks + heap_bytes_remaining(); // plus space not yet handed to newlib by sbrk
 }
 
 void vPortInitialiseBlocks(void) PRIVILEGED_FUNCTION {};
@@ -62,22 +59,37 @@ static atomic<TaskHandle_t> fallible_request_for = nullptr;
 // _sbrk implementation
 //
 
-#define __HeapBase  end
-#define __HeapLimit _estack // except in K64F this was already adjusted in LD for stack...
-extern char __HeapBase, __HeapLimit; // make sure to define these symbols in linker LD command file
-register char *stack_ptr asm("sp");
+extern char heap_start[] __asm__("end");
+extern char ram_end[] __asm__("_estack");
+
+// Note: Compiler complains about going to negative ram_end indexes
+// if we don't do the dance with the extra heap_start math
+// Must be a function - global variables get initialized later than we need
+inline char *heap_end() {
+    return heap_start + (ram_end - heap_start) - ISR_STACK_LENGTH_BYTES;
+}
+
+// Must be a function - global variables get initialized later than we need
+static char *&current_heap_end() {
+    static char *val = heap_start;
+    return val;
+}
+
+// Must be a function - global variables get initialized later than we need
+extern "C" uint32_t heap_total_size() {
+    return heap_end() - heap_start;
+}
+
+extern "C" uint32_t heap_bytes_remaining() {
+    return heap_total_size() - (current_heap_end() - heap_start);
+}
 
 void *_sbrk_r([[maybe_unused]] struct _reent *pReent, int incr) {
     UBaseType_t usis; // saved interrupt status
-    static char *current_heap_end = &__HeapBase;
-    if (heap_total_size == 0) {
-        heap_total_size = heap_bytes_remaining = (int)((&__HeapLimit) - (&__HeapBase)) - ISR_STACK_LENGTH_BYTES;
-    };
-    char *limit = (xTaskGetSchedulerState() == taskSCHEDULER_NOT_STARTED) ? stack_ptr : // Before scheduler is started, limit is stack pointer (risky!)
-        &__HeapLimit - ISR_STACK_LENGTH_BYTES; // Once running, OK to reuse all remaining RAM except ISR stack (MSP) stack
+
     ENTER_CRITICAL_SECTION(usis);
-    char *previous_heap_end = current_heap_end;
-    if (current_heap_end + incr > limit) {
+    char *previous_heap_end = current_heap_end();
+    if (current_heap_end() + incr > heap_end()) {
         EXIT_CRITICAL_SECTION(usis);
         if (fallible_request_for.load() != xTaskGetCurrentTaskHandle()) {
             vApplicationMallocFailedHook();
@@ -85,8 +97,7 @@ void *_sbrk_r([[maybe_unused]] struct _reent *pReent, int incr) {
         return (char *)-1; // the malloc-family routine that called sbrk will return 0
     }
     // 'incr' of memory is available: update accounting and return it.
-    current_heap_end += incr;
-    heap_bytes_remaining -= incr;
+    current_heap_end() += incr;
     EXIT_CRITICAL_SECTION(usis);
     return (char *)previous_heap_end;
 }
@@ -160,7 +171,7 @@ void __malloc_unlock([[maybe_unused]] struct _reent *r) {
 };
 
 uint32_t mem_is_heap_allocated(const void *ptr) {
-    return (ptr >= (void *)&__HeapBase && ptr < (void *)&__HeapLimit);
+    return (ptr >= heap_start && ptr < heap_end);
 }
 
 //
