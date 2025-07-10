@@ -114,7 +114,7 @@ void WindowMenuPreheat::setup_item(ItemVariant &variant, int index) {
     }
 
     case Item::filament_section:
-        variant.emplace<MI_FILAMENT>(filament_list[mapping.pos_in_section], preheat_data.extruder);
+        variant.emplace<MI_FILAMENT>(filament_list[mapping.pos_in_section], extruder_index);
         break;
 
     case Item::adhoc_filament: {
