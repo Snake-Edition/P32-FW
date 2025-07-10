@@ -569,6 +569,7 @@ class MI_SIDE_LEDS_DIMMED_BRIGTHNESS : public WiSpin {
 public:
     MI_SIDE_LEDS_DIMMED_BRIGTHNESS();
     virtual void OnClick() override;
+    virtual void Loop() override;
 };
 
 class MI_SIDE_LEDS_DIMMING_ENABLE : public WI_ICON_SWITCH_OFF_ON_t {

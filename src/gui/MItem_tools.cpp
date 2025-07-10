@@ -862,6 +862,10 @@ MI_SIDE_LEDS_DIMMED_BRIGTHNESS::MI_SIDE_LEDS_DIMMED_BRIGTHNESS()
 void MI_SIDE_LEDS_DIMMED_BRIGTHNESS::OnClick() {
     leds::SideStripHandler::instance().set_dimmed_brightness(static_cast<uint8_t>(value()) * 255 / 100);
 }
+
+void MI_SIDE_LEDS_DIMMED_BRIGTHNESS::Loop() {
+    set_enabled(leds::SideStripHandler::instance().get_dimming_enabled());
+}
 #endif
 
 #if HAS_SIDE_LEDS()

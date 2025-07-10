@@ -14,3 +14,7 @@ endif()
 if(HAS_MMU2)
   target_sources(firmware PRIVATE screen_hw_mmu.cpp)
 endif()
+
+if(HAS_LEDS_MENU)
+  target_sources(firmware PRIVATE screen_menu_leds.cpp)
+endif()

@@ -14,6 +14,7 @@
 #include <option/has_leds.h>
 #include <option/has_touch.h>
 #include <option/xbuddy_extension_variant_standard.h>
+#include <option/has_leds_menu.h>
 
 #if HAS_TOUCH()
     #include "MItem_touch.hpp"
@@ -34,17 +35,9 @@ using ScreenMenuUserInterface__ = ScreenMenu<GuiDefaults::MenuFooter, MI_RETURN,
     // So we only allow sound control for ST7789
     MI_SOUND_VOLUME,
 #endif
-#if HAS_LEDS()
-    MI_LEDS_ENABLE,
+#if HAS_LEDS_MENU()
+    MI_LEDS_SETTINGS,
 #endif
-#if HAS_SIDE_LEDS()
-    MI_SIDE_LEDS_MAX_BRIGTHNESS,
-    MI_SIDE_LEDS_DIMMED_BRIGTHNESS,
-    MI_SIDE_LEDS_DIMMING_ENABLE,
-#endif
-#if HAS_TOOLCHANGER()
-    MI_TOOL_LEDS_ENABLE,
-#endif /*HAS_TOOLCHANGER()*/
 #if HAS_TOUCH()
     MI_ENABLE_TOUCH, TOUCH_SIG_WORKAROUND, MI_TOUCH_PLAYGROUND,
 #endif

@@ -65,6 +65,10 @@
     #include <gui/screen/screen_hw_mmu.hpp>
 #endif
 
+#if HAS_LEDS_MENU()
+    #include <screen/screen_menu_leds.hpp>
+#endif
+
 #include <config_store/store_instance.hpp>
 
 MI_SCREEN_BASE::MI_SCREEN_BASE(ScreenFactory::Creator::Func screen_ctor, const char *label)
@@ -141,6 +145,10 @@ template struct MI_SCREEN_CTOR<ScreenMenuSTSCalibrations>;
 
 #if PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_MINI()
 template struct MI_SCREEN_CTOR<ScreenMenuBedLevelCorrection>;
+#endif
+
+#if HAS_LEDS_MENU()
+template struct MI_SCREEN_CTOR<ScreenMenuLeds>;
 #endif
 
 /**********************************************************************************************/

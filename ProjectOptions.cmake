@@ -725,6 +725,16 @@ else()
   set(DEBUG NO)
 endif()
 
+if(HAS_LEDS
+   OR HAS_SIDE_LEDS
+   OR HAS_TOOLCHANGER
+   )
+  set(HAS_LEDS_MENU YES)
+else()
+  set(HAS_LEDS_MENU NO)
+endif()
+define_boolean_option(HAS_LEDS_MENU ${HAS_LEDS_MENU})
+
 # define enabled features
 
 if(BOOTLOADER STREQUAL "YES"

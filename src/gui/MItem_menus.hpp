@@ -12,6 +12,7 @@
 #include <option/has_translations.h>
 #include <option/has_chamber_filtration_api.h>
 #include <option/has_mmu2.h>
+#include <option/has_leds_menu.h>
 #include <img_resources.hpp>
 #include <ScreenFactory.hpp>
 
@@ -103,7 +104,6 @@ using MI_EXPERIMENTAL_SETTINGS
 
 using MI_USER_INTERFACE
     = MI_SCREEN<N_("User Interface"), class ScreenMenuUserInterface>;
-
 using MI_LANG_AND_TIME
     = MI_SCREEN<N_("Language & Time"), class ScreenMenuLangAndTime>;
 
@@ -181,6 +181,11 @@ using MI_SELFTEST_SNAKE
 
 using MI_BED_LEVEL_CORRECTION
     = MI_SCREEN<N_("Bed Level Correction"), class ScreenMenuBedLevelCorrection>;
+#endif
+
+#if HAS_LEDS_MENU()
+using MI_LEDS_SETTINGS
+    = MI_SCREEN<N_("LEDs Settings"), class ScreenMenuLeds>;
 #endif
 
 class MI_SERIAL_PRINTING_SCREEN_ENABLE : public WI_ICON_SWITCH_OFF_ON_t {
