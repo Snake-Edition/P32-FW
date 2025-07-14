@@ -20,7 +20,6 @@ MI_FILAMENT::MI_FILAMENT(FilamentType filament_type, uint8_t target_extruder)
 {
     const auto filament_params = filament_type.parameters();
     filament_name = filament_params.name;
-    is_abrasive = filament_params.is_abrasive;
 
     FilamentTypeGUI::setup_menu_item(filament_type, filament_name, *this);
 
@@ -30,14 +29,7 @@ MI_FILAMENT::MI_FILAMENT(FilamentType filament_type, uint8_t target_extruder)
 }
 
 void MI_FILAMENT::click(IWindowMenu &) {
-    if (is_abrasive && !config_store().nozzle_is_hardened.get().test(target_extruder)) {
-        StringViewUtf8Parameters<filament_name_buffer_size + 1> params;
-        if (MsgBoxWarning(_("Filament '%s' is abrasive, but you don't have a hardened nozzle installed. Do you really want to continue?").formatted(params, filament_name.data()), Responses_YesNo) != Response::Yes) {
-            return;
-        }
-    }
-
-    marlin_client::FSM_response_variant(PhasesPreheat::UserTempSelection, FSMResponseVariant::make<FilamentType>(filament_type));
+    WindowMenuPreheat::handle_filament_selection(filament_type, target_extruder);
 }
 
 // * WindowMenuPreheat
@@ -71,6 +63,20 @@ void WindowMenuPreheat::set_show_all_filaments(bool set) {
     show_all_filaments_ = set;
     update_list();
     move_focus_to_index(prev_focused_index);
+}
+
+bool WindowMenuPreheat::handle_filament_selection(FilamentType filament_type, uint8_t target_extruder) {
+    const auto filament = filament_type.parameters();
+
+    if (filament.is_abrasive && !config_store().nozzle_is_hardened.get().test(target_extruder)) {
+        StringViewUtf8Parameters<filament_name_buffer_size + 1> params;
+        if (MsgBoxWarning(_("Filament '%s' is abrasive, but you don't have a hardened nozzle installed. Do you really want to continue?").formatted(params, filament.name.data()), Responses_YesNo) != Response::Yes) {
+            return false;
+        }
+    }
+
+    marlin_client::FSM_response_variant(PhasesPreheat::UserTempSelection, FSMResponseVariant::make<FilamentType>(filament_type));
+    return true;
 }
 
 void WindowMenuPreheat::update_list() {
@@ -118,10 +124,9 @@ void WindowMenuPreheat::setup_item(ItemVariant &variant, int index) {
         break;
 
     case Item::adhoc_filament: {
-        const auto callback = [] {
-            const ScreenFilamentDetail::Params params {
-                .filament_type = FilamentType(PendingAdHocFilamentType {}),
-                .mode = ScreenFilamentDetail::Mode::preheat,
+        const auto callback = [this] {
+            const ScreenFilamentDetail::PreheatModeParams params {
+                .target_extruder = extruder_index,
             };
             Screens::Access()->Open(ScreenFactory::ScreenWithArg<ScreenFilamentDetail>(params));
         };

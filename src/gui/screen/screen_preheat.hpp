@@ -25,7 +25,6 @@ public:
     const FilamentType filament_type;
     const uint8_t target_extruder;
     FilamentTypeParameters::Name filament_name;
-    bool is_abrasive;
 };
 
 class WindowMenuPreheat : public WindowMenuVirtual<WindowMenuCallbackItem, MI_FILAMENT> {
@@ -39,6 +38,8 @@ public:
     int item_count() const final {
         return index_mapping.total_item_count();
     }
+
+    static bool handle_filament_selection(FilamentType filament_type, uint8_t target_extruder);
 
 protected:
     void update_list();

@@ -7,6 +7,7 @@
 #include <dialog_text_input.hpp>
 #include <ScreenHandler.hpp>
 #include <utils/string_builder.hpp>
+#include <screen/screen_preheat.hpp>
 
 #if HAS_CHAMBER_API()
     #include <feature/chamber/chamber.hpp>
@@ -139,28 +140,37 @@ void MI_FILAMENT_VISIBLE::OnChange(size_t) {
     filament_type.set_visible(value());
 }
 
-// * MI_PREHEAT_CONFIRM
-MI_PREHEAT_CONFIRM::MI_PREHEAT_CONFIRM()
+// * MI_CONFIRM
+MI_CONFIRM::MI_CONFIRM()
     : IWindowMenuItem(_("Confirm"), &img::ok_16x16) {}
 
-void MI_PREHEAT_CONFIRM::set_filament_type(FilamentType set) {
-    filament_type = set;
-}
-
-void MI_PREHEAT_CONFIRM::click(IWindowMenu &) {
-    marlin_client::FSM_response_variant(PhasesPreheat::UserTempSelection, FSMResponseVariant::make<FilamentType>(filament_type));
-    Screens::Access()->Close();
+void MI_CONFIRM::click(IWindowMenu &) {
+    callback();
 }
 
 // * ScreenFilamentDetail
-ScreenFilamentDetail::ScreenFilamentDetail(Params params)
-    : ScreenMenu(params.mode == Mode::preheat ? _("CUSTOM PARAMETERS") : _("FILAMENT DETAIL")) {
+ScreenFilamentDetail::ScreenFilamentDetail(FilamentType filament_type)
+    : ScreenFilamentDetail(filament_type, N_("FILAMENT DETAIL")) {}
 
+ScreenFilamentDetail::ScreenFilamentDetail(PreheatModeParams params)
+    : ScreenFilamentDetail(PendingAdHocFilamentType {}, N_("CUSTOM PARAMETERS")) {
+
+    auto &confirm_item = Item<MI_CONFIRM>();
+    confirm_item.set_is_hidden(false);
+    confirm_item.callback = [extruder = params.target_extruder] {
+        if (preheat_menu::WindowMenuPreheat::handle_filament_selection(PendingAdHocFilamentType {}, extruder)) {
+            Screens::Access()->Close();
+        }
+    };
+}
+
+ScreenFilamentDetail::ScreenFilamentDetail(FilamentType filament_type, const char *title)
+    : ScreenMenu(_(title)) {
     stdext::visit_tuple(container.menu_items, [&]<typename T>(T &item) {
-        if constexpr (!std::is_same_v<T, MI_RETURN>) {
-            item.set_filament_type(params.filament_type);
+        if constexpr (!std::is_same_v<T, MI_RETURN> && !std::is_same_v<T, MI_CONFIRM>) {
+            item.set_filament_type(filament_type);
         };
     });
 
-    Item<MI_PREHEAT_CONFIRM>().set_is_hidden(params.mode != Mode::preheat);
+    Item<MI_CONFIRM>().set_is_hidden();
 }

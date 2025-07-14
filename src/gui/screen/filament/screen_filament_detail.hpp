@@ -140,14 +140,11 @@ protected:
     FilamentType filament_type;
 };
 
-class MI_PREHEAT_CONFIRM final : public IWindowMenuItem {
+class MI_CONFIRM final : public IWindowMenuItem {
 public:
-    MI_PREHEAT_CONFIRM();
-    void set_filament_type(FilamentType set);
+    MI_CONFIRM();
     void click(IWindowMenu &) override;
-
-protected:
-    FilamentType filament_type;
+    stdext::inplace_function<void()> callback;
 };
 
 using ScreenFilamentDetail_ = ScreenMenu<EFooter::Off,
@@ -170,31 +167,27 @@ using ScreenFilamentDetail_ = ScreenMenu<EFooter::Off,
 #if HAS_CHAMBER_API()
     MI_FILAMENT_REQUIRES_FILTRATION,
 #endif
-    MI_PREHEAT_CONFIRM //
+    MI_CONFIRM //
     >;
 
 /// Management of a specified filament type
 class ScreenFilamentDetail final : public ScreenFilamentDetail_ {
 public:
-    enum class Mode : uint8_t {
-        /// Standard filament detail screen, as accessed from menu
-        standard,
-
-        /// When the detail screen is opened from within the preheat menu.
-        /// Adds a "Confirm" button that sends the filament as a response to the preheat FSM
-        preheat,
-    };
-
-    struct Params {
-        FilamentType filament_type;
-        Mode mode = Mode::standard;
+    /// When the detail screen is opened from within the preheat menu.
+    /// Adds a "Confirm" button that sends the filament as a response to the preheat FSM
+    struct PreheatModeParams {
+        uint8_t target_extruder = 0;
     };
 
 public:
-    ScreenFilamentDetail(Params params);
+    ScreenFilamentDetail(FilamentType filament_type);
 
-    ScreenFilamentDetail(FilamentType filament_type)
-        : ScreenFilamentDetail(Params { .filament_type = filament_type }) {}
+    /// Shows the screen in the PendingAdHocFilament mode for preheat
+    /// The added "Confirm" button sends the response to the Preheat FSM
+    ScreenFilamentDetail(PreheatModeParams preheat_mode);
+
+private:
+    ScreenFilamentDetail(FilamentType filament_type, const char *title);
 };
 
 }; // namespace screen_filament_detail
