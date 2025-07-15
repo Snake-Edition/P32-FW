@@ -20,6 +20,17 @@ public:
     // These are called from whatever task that needs them.
     void set_fan_pwm(size_t fan_idx, uint8_t pwm);
     void set_white_led(uint8_t intensity);
+    /**
+     * Set the strobe frequency of the white led.
+     *
+     * This overrides the PWM cycle to be "slow" at the given frequency, creating a strobe effect.
+     *
+     * nullopt leaves it back to the extension board.
+     *
+     * As the PWM timer is used for some fans too, but it seems their
+     * regulation works fine even in that case.
+     */
+    void set_white_strobe_frequency(std::optional<uint16_t> frequency);
     void set_rgbw_led(std::array<uint8_t, 4> rgbw);
     void set_usb_power(bool enabled);
     void set_mmu_power(bool enabled);
@@ -145,6 +156,15 @@ private:
         uint16_t mmu_power_enable = false;
         // technicaly a boolean - sets the MMU port non-reset pin
         uint16_t mmu_nreset = true;
+        // Frequency of the white led PWM.
+        //
+        // 0 = default left to discretion of the extension board.
+        // Is the frequency of the full cycle, in Hz.
+        //
+        // Can be used to implement a "strobe"
+        //
+        // Warning: PWM timer shared with some fans.
+        uint16_t white_led_freq = 0;
     };
     ModbusHoldingRegisterBlock<0x9000, Requiremnt> requirement;
 
