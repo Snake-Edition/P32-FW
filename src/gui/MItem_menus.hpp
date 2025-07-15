@@ -185,7 +185,7 @@ using MI_BED_LEVEL_CORRECTION
 
 #if HAS_LEDS_MENU()
 using MI_LEDS_SETTINGS
-    = MI_SCREEN<N_("LEDs Settings"), class ScreenMenuLeds>;
+    = MI_SCREEN<N_("Lights Settings"), class ScreenMenuLeds>;
 #endif
 
 class MI_SERIAL_PRINTING_SCREEN_ENABLE : public WI_ICON_SWITCH_OFF_ON_t {
