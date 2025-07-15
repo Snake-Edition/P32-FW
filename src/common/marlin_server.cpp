@@ -2742,7 +2742,13 @@ static void _server_print_loop(void) {
         break;
     }
 
-    if (marlin_vars().fan_check_enabled) {
+    bool do_fan_check = marlin_vars().fan_check_enabled;
+#if HAS_SELFTEST()
+    // Do not check fan error in marlin server during Fan selftest
+    do_fan_check &= !fsm_states[ClientFSM::FansSelftest].has_value();
+#endif
+
+    if (do_fan_check) {
         HOTEND_LOOP() {
 #if !PRINTER_IS_PRUSA_iX()
             const auto fan_state = Fans::heat_break(e).get_state();
