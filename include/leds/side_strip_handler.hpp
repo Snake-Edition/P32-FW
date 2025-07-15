@@ -12,7 +12,7 @@ namespace leds {
 
 enum class SideStripState {
     off,
-    idle,
+    dimmed,
     active,
     custom_color,
     _last = custom_color,

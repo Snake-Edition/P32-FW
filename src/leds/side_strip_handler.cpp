@@ -45,7 +45,7 @@ void SideStripHandler::update() {
         } else {
             // Clear to prevent overflow bugs
             active_timestamp_ms = 0;
-            change_state(SideStripState::idle);
+            change_state(SideStripState::dimmed);
         }
     }
 
@@ -131,7 +131,7 @@ void SideStripHandler::change_state(SideStripState state) {
         this->state = state;
 
         uint32_t duration;
-        if (state == SideStripState::idle) {
+        if (state == SideStripState::dimmed) {
             duration = 5000;
         } else if (state == SideStripState::custom_color) {
             duration = custom_color->transition_ms;
@@ -148,7 +148,7 @@ ColorRGBW SideStripHandler::get_color_for_state(SideStripState state) {
     switch (state) {
     case SideStripState::off:
         return ColorRGBW();
-    case SideStripState::idle:
+    case SideStripState::dimmed:
         return base_color.clamp(dimmed_brightness);
     case SideStripState::active:
         return base_color.clamp(max_brightness);
