@@ -365,7 +365,7 @@ void GcodeSuite::M972() {
     SERIAL_ECHO("Axis: ");
     SERIAL_ECHOLN(axis);
 
-    G28_no_parser(true, true, false, { .only_if_needed = true, .z_raise = 3 });
+    G28_no_parser(true, true, false, { .only_if_needed = true, .z_raise = 3, .precise = false });
     do_blocking_move_to_z(50);
     Planner::synchronize();
 
