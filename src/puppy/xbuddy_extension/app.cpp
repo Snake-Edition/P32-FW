@@ -79,6 +79,10 @@ public:
         case 0x900a: // MMU non-reset - controls the reset pin of the MMU connector (1 = running, 0 = holding the reset of the MMU)
             hal::mmu::nreset_pin_set(static_cast<bool>(value));
             return Status::Ok;
+        case 0x900b:
+            // Technically, this frequency is common also for some fans. But they seem to work fine.
+            hal::w_led::set_frequency(value);
+            return Status::Ok;
         }
         return Status::IllegalAddress;
     }

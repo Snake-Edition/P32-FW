@@ -25,6 +25,10 @@ static std::span<const std::byte> rx_byte_span_mmu { &rx_byte_mmu, 1 };
 static freertos::StreamBuffer<32> rx_mmu_buffer;
 static freertos::BinarySemaphore tx_semaphore_mmu;
 
+// Default prescaler for our timers.
+// 6 MHz clock (30 MHz peripheral clock, *2 to timer, /10 prescaler)
+static constexpr uint32_t default_prescaler = 10;
+
 extern "C" void USART3_IRQHandler(void) {
     HAL_UART_IRQHandler(&huart_rs485);
 }
@@ -344,7 +348,7 @@ static void tim2_init() {
     TIM2->CCER = TIM_CCER_CC1E | TIM_CCER_CC2E | TIM_CCER_CC3E | TIM_CCER_CC4E;
 
     // 6 MHz clock (30 MHz peripheral clock, *2 to timer, /10 prescaler)
-    TIM2->PSC = 10 - 1;
+    TIM2->PSC = default_prescaler - 1;
 
     // auto-reload value
     // 6 MHz / 255 gives ~25 kHz for PWM which is super good enough.
@@ -374,7 +378,7 @@ static void tim3_init() {
     TIM3->CCER = TIM_CCER_CC1E | TIM_CCER_CC2E | TIM_CCER_CC3E;
 
     // 6 MHz clock (30 MHz peripheral clock, *2 to timer, /10 prescaler)
-    TIM3->PSC = 10 - 1;
+    TIM3->PSC = default_prescaler - 1;
 
     // auto-reload value
     // 6 MHz / 255 gives ~25 kHz for PWM which is super good enough.
@@ -774,6 +778,18 @@ uint32_t hal::fan3::get_rpm() {
 
 void hal::w_led::set_pwm(DutyCycle duty_cycle) {
     TIM3->CCR1 = duty_cycle;
+}
+
+void hal::w_led::set_frequency(uint16_t freq) {
+    uint32_t prescaler = default_prescaler;
+    if (freq != 0) {
+        // Non-default feq requested.
+        const uint32_t timer_base_freq = 60000000;
+        const uint32_t timer_full_cycle = timer_base_freq / 255; // Counts down from this every full cycle
+        prescaler = timer_full_cycle / freq;
+    }
+
+    TIM3->PSC = prescaler - 1;
 }
 
 void hal::rgbw_led::set_r_pwm(DutyCycle duty_cycle) {

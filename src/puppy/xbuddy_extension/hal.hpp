@@ -47,7 +47,15 @@ namespace fan3 {
 
 namespace w_led {
     void set_pwm(DutyCycle duty_cycle);
-}
+    /**
+     * Frequency of the PWM cycle
+     *
+     * In Hz.
+     *
+     * 0 means "default" selected by us.
+     */
+    void set_frequency(uint16_t freq);
+} // namespace w_led
 
 namespace rgbw_led {
     void set_r_pwm(DutyCycle duty_cycle);
