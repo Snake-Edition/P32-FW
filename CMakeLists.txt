@@ -181,8 +181,7 @@ target_compile_definitions(
   )
 
 target_compile_definitions(
-  BuddyHeaders INTERFACE PRINTER_CODE=${PRINTER_CODE} BOARD=BOARD_${BOARD}
-                         MARLIN_DISABLE_INFINITE_LOOP PROCESS_CUSTOM_GCODE
+  BuddyHeaders INTERFACE PRINTER_CODE=${PRINTER_CODE} BOARD=BOARD_${BOARD} PROCESS_CUSTOM_GCODE
   )
 target_link_libraries(BuddyHeaders INTERFACE printers)
 
