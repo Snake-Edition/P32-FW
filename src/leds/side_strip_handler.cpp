@@ -54,17 +54,9 @@ void SideStripHandler::update() {
 
 void SideStripHandler::load_config() {
     std::lock_guard lock(mutex);
-#if HAS_XBUDDY_EXTENSION()
-    camera_enabled = config_store().xbe_usb_power.get();
     dimmed_brightness = config_store().side_leds_dimmed_brightness.get();
     max_brightness = config_store().side_leds_max_brightness.get();
-    if (camera_enabled) {
-        dimming_enabled = config_store().side_leds_dimming_enabled_with_camera.get();
-    } else
-#endif
-    {
-        dimming_enabled = config_store().side_leds_dimming_enabled.get();
-    }
+    dimming_enabled = config_store().side_leds_dimming_enabled.get();
     // Set state to off to force a change of state that will transition to the new brightness
     state = SideStripState::off;
 }
@@ -109,14 +101,7 @@ DimmingEnabled SideStripHandler::get_dimming_enabled() const {
 }
 
 void SideStripHandler::set_dimming_enabled(DimmingEnabled value) {
-#if HAS_XBUDDY_EXTENSION()
-    if (camera_enabled) {
-        config_store().side_leds_dimming_enabled_with_camera.set(value);
-    } else
-#endif
-    {
-        config_store().side_leds_dimming_enabled.set(value);
-    }
+    config_store().side_leds_dimming_enabled.set(value);
     std::lock_guard lock(mutex);
     dimming_enabled = value;
 }

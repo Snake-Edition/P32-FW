@@ -437,13 +437,7 @@ struct CurrentStore
     StoreItem<uint8_t, 255, ItemFlag::user_interface, journal::hash("XBuddy Extension Chamber LEDs PWM")> side_leds_max_brightness;
     StoreItem<uint8_t, PWM255::from_percent(40).value, ItemFlag::user_interface, journal::hash("XBuddy Extension Chamber LEDs dimmed PWM")> side_leds_dimmed_brightness;
     /// Whether the side leds should dim down a bit when user is not interacting with the printer or stay on full power the whole time
-    StoreItem<leds::DimmingEnabled, leds::DimmingEnabled::always, ItemFlag::user_interface, journal::hash("Enable Side LEDs dimming")> side_leds_dimming_enabled;
-
-    #if HAS_XBUDDY_EXTENSION()
-    /// same as side_leds_dimming_enabled but when camera is powered on
-    StoreItem<leds::DimmingEnabled, leds::DimmingEnabled::not_printing, ItemFlag::user_interface, journal::hash("Side LEDs dimming with camera")> side_leds_dimming_enabled_with_camera;
-    #endif
-
+    StoreItem<leds::DimmingEnabled, leds::DimmingEnabled::not_printing, ItemFlag::user_interface, journal::hash("Enable Side LEDs dimming")> side_leds_dimming_enabled;
 #endif
 
     StoreItem<bool, true, ItemFlag::user_interface, journal::hash("Enable Serial Printing Screen")> serial_print_screen_enabled;
@@ -824,8 +818,11 @@ struct DeprecatedStore
     StoreItem<bool, true, journal::hash("Emergency stop enable")> emergency_stop_enable;
 #endif
 
-#if HAS_SIDE_LEDS() && HAS_XBUDDY_EXTENSION()
+#if HAS_SIDE_LEDS()
+    StoreItem<leds::DimmingEnabled, leds::DimmingEnabled::not_printing, journal::hash("Side LEDs dimming with camera")> side_leds_dimming_enabled_with_camera;
+    #if HAS_XBUDDY_EXTENSION()
     StoreItem<uint8_t, 255, journal::hash("Chamber LEDs PWM with Camera")> side_leds_max_brightness_with_camera;
+    #endif
 #endif
 };
 

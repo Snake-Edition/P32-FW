@@ -80,9 +80,6 @@ private:
 
     // Values are initialized from config store by load_config() in constructor
     DimmingEnabled dimming_enabled;
-#if HAS_XBUDDY_EXTENSION()
-    bool camera_enabled;
-#endif
     uint8_t max_brightness;
     uint8_t dimmed_brightness;
 
