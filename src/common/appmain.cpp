@@ -214,7 +214,6 @@ void app_run(void) {
     while (1) {
         metric_record_event(&metric_maintask_event);
         metric_record_integer(&metric_cpu_usage, osGetCPUUsage());
-        loop();
         marlin_server::loop();
     }
 }

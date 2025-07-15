@@ -967,6 +967,9 @@ static void check_crash() {
 #endif // ENABLED(CRASH_RECOVERY)
 
 void loop() {
+    ::idle(false); // Do an idle first so boot is slightly faster
+    queue.advance();
+
 #if ANY(CRASH_RECOVERY, POWER_PANIC)
     check_crash();
 #endif
