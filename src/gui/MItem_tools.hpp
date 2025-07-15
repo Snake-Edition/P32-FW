@@ -572,7 +572,7 @@ public:
     virtual void Loop() override;
 };
 
-class MI_SIDE_LEDS_DIMMING_ENABLE : public WI_ICON_SWITCH_OFF_ON_t {
+class MI_SIDE_LEDS_DIMMING_ENABLE : public MenuItemSwitch {
     static constexpr const char *const label =
     #if PRINTER_IS_PRUSA_COREONE()
         N_("Chamber Dimming");
