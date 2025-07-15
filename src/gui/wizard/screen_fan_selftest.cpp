@@ -55,7 +55,10 @@ static constexpr const char *en_text_hotend_fan = N_("Hotend fan (test disabled)
 static constexpr const char *en_text_hotend_fan = N_("Hotend fan");
 #endif
 static constexpr const char *en_text_print_fan = N_("Print fan");
+#if HAS_SWITCHED_FAN_TEST()
 static constexpr const char *en_text_fans_switched = N_("Switched fans");
+static constexpr const char *en_text_info_switched = N_("Based on the test it looks like the fans connectors are switched. Double check your wiring and repeat the test.");
+#endif /* HAS_SWITCHED_FAN_TEST() */
 #if HAS_CHAMBER_API()
 static constexpr const char *en_text_enclosure_fan = N_("Enclosure fan");
 static constexpr const char *en_text_cooling_fans = N_("Cooling fans");
@@ -71,9 +74,6 @@ static constexpr const char *en_text_test_100_info = N_("Testing fan rotation on
 static constexpr const char *en_text_test_40_info = N_("Testing fan rotation on 40% power, please wait.");
 static constexpr const char *en_text_result_ok = N_("All tests passed successfully.");
 static constexpr const char *en_text_info_rpm_failed = N_("The RPM test has failed, check both fans are free to spin and connected correctly.");
-#if HAS_SWITCHED_FAN_TEST()
-static constexpr const char *en_text_info_switched = N_("Based on the test it looks like the fans connectors are switched. Double check your wiring and repeat the test.");
-#endif /* HAS_SWITCHED_FAN_TEST() */
 
 WindowIconOkNgArray make_fan_icon_array(window_t *parent, int16_t row, size_t icon_cnt) {
     return WindowIconOkNgArray(parent, point_i16_t(int16_t(col_results - (icon_cnt - 1) * WindowIconOkNgArray::icon_space_width), row), icon_cnt, SelftestSubtestState_t::running);
@@ -165,8 +165,7 @@ namespace frame {
 
 #if HAS_SWITCHED_FAN_TEST()
             if (switched_fans) {
-                info.SetText(_(en_text_fans_switched));
-                return;
+                info.SetText(_(en_text_info_switched));
             } else
 #endif
             {
