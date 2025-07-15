@@ -250,7 +250,12 @@ namespace state {
 #endif
 
         if (axes_need_homing(X_AXIS | Y_AXIS)) {
-            GcodeSuite::G28_no_parser(true, true, false, { .only_if_needed = true, .z_raise = 3 }); // XY only
+            const G28Flags flags {
+                .only_if_needed = true,
+                .z_raise = 3,
+                .precise = false,
+            };
+            GcodeSuite::G28_no_parser(true, true, false, flags); // XY only
 #if HAS_TOOLCHANGER()
             tool_change(/*tool_index=*/0, tool_return_t::no_return, tool_change_lift_t::no_lift, /*z_down=*/false);
 #endif
