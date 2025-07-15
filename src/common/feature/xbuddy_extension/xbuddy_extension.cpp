@@ -13,6 +13,15 @@
 #include <buddy/unreachable.hpp>
 #include <CFanCtl3Wire.hpp> // for FANCTL_START_TIMEOUT
 
+namespace {
+
+// PWM used for the white led in strobe mode. We want more "dark" time than "light" time for clearer stroboscopic effect.
+//
+// This is a bit below 15%.
+constexpr uint8_t strobe_pwm = 35;
+
+} // namespace
+
 namespace buddy {
 
 XBuddyExtension &xbuddy_extension() {
@@ -35,9 +44,10 @@ void XBuddyExtension::step() {
     const auto target_temp = chamber().target_temperature();
     const auto filtration_backend = chamber_filtration().backend();
     const auto filtration_pwm = chamber_filtration().output_pwm();
-    const auto chamber_leds_pwm = leds::SideStripHandler::instance().color().w;
 
     std::lock_guard _lg(mutex_);
+
+    const auto chamber_leds_pwm = strobe_freq_.has_value() ? strobe_pwm : leds::SideStripHandler::instance().color().w;
 
     if (status() != Status::ready) {
         return;
@@ -45,6 +55,7 @@ void XBuddyExtension::step() {
 
     puppies::xbuddy_extension.set_rgbw_led({ bed_leds_color_.r, bed_leds_color_.g, bed_leds_color_.b, bed_leds_color_.w });
     puppies::xbuddy_extension.set_white_led(chamber_leds_pwm);
+    puppies::xbuddy_extension.set_white_strobe_frequency(strobe_freq_);
     puppies::xbuddy_extension.set_usb_power(config_store().xbe_usb_power.get());
 
     const auto rpm0 = puppies::xbuddy_extension.get_fan_rpm(0);
@@ -269,6 +280,13 @@ leds::ColorRGBW XBuddyExtension::bed_leds_color() const {
 void XBuddyExtension::set_bed_leds_color(leds::ColorRGBW set) {
     std::lock_guard _lg(mutex_);
     bed_leds_color_ = set;
+}
+
+void XBuddyExtension::set_strobe(std::optional<uint16_t> freq) {
+    assert(freq != 0);
+
+    std::lock_guard _lg(mutex_);
+    strobe_freq_ = freq;
 }
 
 std::optional<Temperature> XBuddyExtension::chamber_temperature() {

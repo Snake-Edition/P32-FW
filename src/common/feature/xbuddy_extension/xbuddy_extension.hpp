@@ -84,6 +84,29 @@ public: // LEDs
     /// Sets PWM for the led strip that is under the bed
     void set_bed_leds_color(leds::ColorRGBW set);
 
+    /// Sets the white led strobe mode.
+    ///
+    /// * If set to nullopt, strobe mode is disabled. Led goes to shining
+    ///   according to the requested amount of light inside the chamber and PWM
+    ///   frequencies return to default.
+    /// * If set to a value, it'll blink at that frequency (configures PWM with
+    ///   the given frequency and some small-ish duty cycle to provide a
+    ///   stroboscopic effect). In Hz.
+    ///
+    /// Notes:
+    /// * 0 as a frequency doesn't make sense and is asserted against.
+    /// * Values 1, 2 and 3 were observed to act "weird". The prescaler in the
+    ///   HW is only 16 bits and we overflow at that case. Starting at 4Hz, it
+    ///   seems to act OK.
+    /// * We use the same hardware timer for controlling some fans. As
+    ///   controlling goes, it seems to work fine even with lower frequencies
+    ///   (tested even with the 4Hz) - they just do some tiny audible clicks.
+    ///   So while we don't expect them to be running at the time (we are using
+    ///   the strobe at specific wizard, with open door and no heating at the
+    ///   time), they _could_ be and everything would be likely fine. And the
+    ///   actual frequency will be in around the 100Hz range.
+    void set_strobe(std::optional<uint16_t> frequency);
+
     /// @returns percentage 0-100% converted from PWM value (0-max_pwm)
     /// @note in the future, non-linear mapping between intensity pct and PWM shall be implemented here
     static constexpr uint8_t led_pwm2pct(uint8_t pwm) {
@@ -113,6 +136,7 @@ private:
 
 #if XBUDDY_EXTENSION_VARIANT_STANDARD()
     leds::ColorRGBW bed_leds_color_;
+    std::optional<uint16_t> strobe_freq_ = std::nullopt;
 
     FanCooling chamber_cooling;
 
