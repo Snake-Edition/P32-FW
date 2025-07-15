@@ -303,6 +303,7 @@ namespace {
             if (disable_hotend) {
                 HOTEND_LOOP() {
                     thermalManager.setTargetHotend(0, e);
+                    set_temp_to_display(0, e);
                 }
             }
             m_failed = true;
