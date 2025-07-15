@@ -39,10 +39,8 @@ void selftest::calib_Z([[maybe_unused]] bool move_down_after) {
     Temporary_Reset_Motion_Parameters mp;
 
     // Home XY first
-    if (axis_unhomed_error(_BV(X_AXIS) | _BV(Y_AXIS))) {
-        if (!GcodeSuite::G28_no_parser(true, true, false, { .z_raise = 0 })) {
-            return; // This can happen only during print, homing recovery should follow
-        }
+    if (!GcodeSuite::G28_no_parser(true, true, false, { .only_if_needed = true, .z_raise = 0, .precise = false })) {
+        return; // This can happen only during print, homing recovery should follow
     }
 
     // Move the nozzle up and away from the bed
