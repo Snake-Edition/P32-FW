@@ -59,6 +59,7 @@
 #include "../Marlin/src/feature/print_area.h"
 #include "../Marlin/src/Marlin.h"
 #include "utility_extensions.hpp"
+#include <common/gcode/gcode_info_scan.hpp>
 
 #if ENABLED(PRUSA_MMU2)
     #include "../Marlin/src/feature/prusa/MMU2/mmu2_mk4.h"
@@ -1243,6 +1244,19 @@ void print_start(const char *filename, const GCodeReaderPosition &resume_pos, ma
     print_state = {};
 
     if (filename) {
+        // Avoid possible deadlocks by disabling a gcode scan, if there's any.
+        //
+        // The deadlock could happen if:
+        // * We started to download a file.
+        // * We start to show the preview, but it's not yet downloaded enough
+        //   to show on screen, in which case the scan _waits_ for it to become
+        //   downloaded enough.
+        // * Connect gets a command to start a print, forwarding it to us here.
+        // * We would have to wait of that one to finish below (the async job thing).
+        // * And we would be blocking Connect by not answering, therefore it
+        //   would not be updating the file downloaded range... not unblocking
+        //   the scan.
+        gcode_info_scan::cancel_scan();
         // We need a copy of the sfn as well because get_LFN needs the address mutable :/
         std::array<char, FILE_PATH_BUFFER_LEN> filepath_sfn;
         strlcpy(filepath_sfn.data(), filename, filepath_sfn.size());
