@@ -48,8 +48,6 @@ bool FooterLine::Create(footer::Item item_id, size_t index) {
         return (((item_id == Rec::item && !std::holds_alternative<typename Rec::T>(item)) ? item.emplace<typename Rec::T>(this), true : false) || ...);
     }(footer::FooterItemMappings());
 
-    result |= (item_id == footer::Item::none && !std::holds_alternative<std::monostate>(item) ? item.emplace<std::monostate>(), true : false);
-
     if (result) {
         positionWindows();
     }
@@ -175,7 +173,7 @@ std::array<Rect16::Width_t, FooterLine::array_sz> FooterLine::addBorderZeroWidth
 }
 
 bool FooterLine::slotUsed(size_t index) const {
-    return !std::holds_alternative<std::monostate>(items[index]);
+    return !std::holds_alternative<FooterItemNone>(items[index]);
 }
 
 window_t *FooterLine::SlotAccess(size_t index) {
@@ -184,7 +182,7 @@ window_t *FooterLine::SlotAccess(size_t index) {
     }
 
     const auto visitor = [&]<typename T>(T &mem) -> window_t * {
-        if constexpr (std::is_same_v<T, std::monostate>) {
+        if constexpr (std::is_same_v<T, FooterItemNone>) {
             return nullptr;
         } else {
             return &mem;
@@ -195,7 +193,7 @@ window_t *FooterLine::SlotAccess(size_t index) {
 }
 
 void FooterLine::unregister(size_t index) {
-    items[index].emplace<std::monostate>();
+    items[index].emplace<FooterItemNone>();
 }
 
 void FooterLine::SetCenterN(size_t n_and_fewer) {

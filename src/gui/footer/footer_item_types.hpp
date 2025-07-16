@@ -23,6 +23,11 @@
     #include "footer_item_sheet_profile.hpp"
 #endif
 
+struct FooterItemNone {
+    FooterItemNone() = default;
+    FooterItemNone([[maybe_unused]] window_t *parent) {}
+};
+
 namespace footer {
 
 template <typename T_, Item item_>
@@ -32,6 +37,7 @@ struct FooterItemMappingRec {
 };
 
 using FooterItemMappings = TypeList< //
+    FooterItemMappingRec<FooterItemNone, Item::none>,
     FooterItemMappingRec<FooterItemBed, Item::bed>,
     FooterItemMappingRec<FooterItemFilament, Item::filament>,
 #if _DEBUG
@@ -84,7 +90,7 @@ struct ItemVariantDef;
 
 template <typename... Rec>
 struct ItemVariantDef<TypeList<Rec...>> {
-    using T = std::variant<std::monostate, typename Rec::T...>;
+    using T = std::variant<typename Rec::T...>;
 };
 
 using ItemVariant = ItemVariantDef<FooterItemMappings>::T;
