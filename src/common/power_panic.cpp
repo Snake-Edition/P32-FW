@@ -115,6 +115,10 @@ void ac_fault_task_main([[maybe_unused]] void const *argument) {
     // suspend until resumed by the fault isr
     vTaskSuspend(NULL);
 
+    // stop & disable endstops
+    marlin_server::print_quick_stop_powerpanic();
+    endstops.enable_globally(false);
+
     // disable unnecessary threads
     // TODO: tcp_ip, network
     vTaskSuspend(USBH_MSC_WorkerTaskHandle);
@@ -1002,11 +1006,6 @@ void ac_fault_isr() {
 #if !HAS_DWARF() && HAS_TEMP_HEATBREAK && HAS_TEMP_HEATBREAK_CONTROL
     thermalManager.suspend_heatbreak_fan(2000);
 #endif
-
-    // stop & disable endstops
-    marlin_server::print_quick_stop_powerpanic();
-    endstops.enable_globally(false);
-
     // will continue in the main loop
     xTaskResumeFromISR(ac_fault_task);
 }
