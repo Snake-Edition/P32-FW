@@ -2958,13 +2958,13 @@ void lift_head() {
 }
 
 void park_head() {
-    if (!all_axes_homed()) {
-        return;
-    }
-
     server.resume.pos = current_position;
     retract();
     lift_head();
+
+    if (!all_axes_homed()) {
+        return;
+    }
 
 #if HAS_TOOLCHANGER()
     // Check that we are not in dock
