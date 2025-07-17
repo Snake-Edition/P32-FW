@@ -389,6 +389,38 @@ static void advance_and_wrap_time_within_period(float &time, const float advance
     }
 }
 
+bool Vibrate::setup(const MicrostepRestorer &microstep_restorer) {
+    step_len = get_step_len(axis_flag, microstep_restorer.saved_mres());
+    if (isnan(step_len)) {
+        return false;
+    }
+    return true;
+}
+
+void Vibrate::step() {
+    // As we push steps directly, phase stepping needs to be off
+    phase_stepping::assert_disabled();
+
+    const float excitation_amplitude = HarmonicGenerator::amplitudeNotRounded(frequency, excitation_acceleration);
+
+    HarmonicGenerator generator(frequency, excitation_amplitude, step_len);
+
+    StepDir stepDir(generator);
+
+    uint32_t step_nr = 0;
+    GcodeSuite::reset_stepper_timeout();
+    const uint32_t steps_to_do = generator.getStepsPerPeriod() * 1;
+
+    while (step_nr < steps_to_do) {
+        const StepDir::RetVal step_dir = stepDir.get();
+        while (is_full()) {
+            idle(true, true);
+        }
+        enqueue_step(step_dir.step_us, step_dir.dir, axis_flag);
+        ++step_nr;
+    }
+}
+
 /**
  * @brief Excite harmonic vibration and measure amplitude
  *
