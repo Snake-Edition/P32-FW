@@ -81,6 +81,10 @@ if(HAS_BELT_TUNING)
   target_sources(firmware PRIVATE M960.cpp)
 endif()
 
+if(HAS_MANUAL_BELT_TUNING)
+  target_sources(firmware PRIVATE M961.cpp)
+endif()
+
 if(CONNECT)
   target_sources(firmware PRIVATE M1200.cpp)
 endif()
