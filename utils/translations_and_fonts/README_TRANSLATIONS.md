@@ -100,9 +100,9 @@ Sometimes, translators are using unsupported characters in their translations (.
 python3 utils/translations_and_fonts/replace_unsupported_chars.py src/lang/po/
 ```
 
-7. Regenerating MO files. Run this for each language code and overwrite the existing MO files.
+7. Regenerating MO files. Run this for each language code and fix potential errors
 ```bash
-msgfmt src/lang/po/XX/Prusa-Buddy-Firmware_XX.po -o src/lang/po/XX/Prusa-Buddy-Firmware_XX.mo   # replace XX with language code
+msgfmt src/lang/po/XX/Prusa-Buddy-Firmware_XX.po -o temporary.mo   # replace XX with language code
 ```
 
 8. Regenerating fonts

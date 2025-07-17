@@ -62,12 +62,10 @@ move_translations() {
     for code in "${lang_codes[@]}"
     do
         po_filename="Prusa-Firmware-Buddy_${code}.po"
-        mo_filename="Prusa-Firmware-Buddy_${code}.mo"
 
         rm ${lang_source_folder}/${code}/*
 
         mv ${work_dir}/${po_filename} ${lang_source_folder}/${code}/${po_filename}
-        mv ${work_dir}/${mo_filename} ${lang_source_folder}/${code}/${mo_filename}
     done
 }
 
