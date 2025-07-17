@@ -22,3 +22,4 @@ __pycache__
 *.egg-info/
 *.egg
 /heap_instrumentation.txt
+/src/**/*.mo
