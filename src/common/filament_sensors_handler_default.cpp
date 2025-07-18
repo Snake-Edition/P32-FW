@@ -83,7 +83,6 @@ void fs_process_sample(int32_t fs_raw_value, uint8_t tool_index) {
     FSensorADC *sensor = extruder_filament_sensor(tool_index);
     assert(sensor);
 
-    sensor->record_raw(fs_raw_value);
     sensor->set_filtered_value_from_IRQ(filter.filter(fs_raw_value) ? fs_raw_value : FSensorADCEval::filtered_value_not_ready);
 }
 #endif

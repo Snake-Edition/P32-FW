@@ -67,6 +67,5 @@ void side_fs_process_sample(int32_t fs_raw_value, uint8_t tool_index) {
 
     auto &filter = filters[tool_index];
 
-    sensor->record_raw(fs_raw_value);
     sensor->set_filtered_value_from_IRQ(filter.filter(fs_raw_value) ? fs_raw_value : FSensorADCEval::filtered_value_not_ready);
 }

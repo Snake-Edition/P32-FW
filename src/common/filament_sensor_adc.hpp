@@ -68,10 +68,7 @@ public:
 
     void invalidate_calibration();
 
-    void record_raw(int32_t val);
-
 private:
     // Limit metrics recording for each tool
     buddy::metrics::RunApproxEvery limit_record = 49;
-    buddy::metrics::RunApproxEvery limit_record_raw = 60;
 };
