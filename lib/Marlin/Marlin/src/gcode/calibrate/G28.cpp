@@ -1023,45 +1023,48 @@ RefineResult corexy_refine_during_G28_once(float fr_mm_s, const G28Flags &flags)
   // Do not handle feedrate defaults again within precise homing: do it here
   fr_mm_s = fr_mm_s ?: homing_feedrate(A_AXIS);
 
-  if (!flags.force_calibrate && corexy_home_is_calibrated()) {
-    // Retry the refinement a few times
-    for (uint8_t retry = 0; retry < PRECISE_HOMING_COREXY_RETRIES; retry++) {
-      if (planner.draining()) {
-        return RefineResult::hard_fail;
+  if (flags.force_calibrate || !corexy_home_is_calibrated()) {
+    // Calibration is required, do not even attempt to naively refine
+    return corexy_calibrate_homing_during_G28(fr_mm_s, flags);
+  }
+
+  // Retry the refinement a few times
+  for (uint8_t retry = 0; retry < PRECISE_HOMING_COREXY_RETRIES; retry++) {
+    if (planner.draining()) {
+      return RefineResult::hard_fail;
+    }
+
+    if (corexy_home_refine(fr_mm_s, CoreXYCalibrationMode::disallow)) {
+      // Successfully refined the home
+
+      // Mark the axes as precisely homed
+      axes_home_level[X_AXIS] = AxisHomeLevel::full;
+      axes_home_level[Y_AXIS] = AxisHomeLevel::full;
+
+      // Record whether the refinement found a stable home
+      config_store().precise_homing_instability_history.transform([is_unstable = corexy_home_is_unstable()] (auto val) {
+        return (val << 1) | is_unstable;
+      });
+
+      // If at least history_threshold out of last history_window refinements were unstable, trigger calibration
+      static constexpr auto history_threshold = 6;
+      static constexpr auto history_window = 10;
+
+      // Check that we have the requested history window actually stored
+      using History = decltype(config_store_ns::CurrentStore::precise_homing_instability_history)::value_type;
+      static_assert(history_window <= sizeof(History) * 8);
+      static constexpr History history_mask = ((1 << history_window) - 1);
+
+      if(std::popcount(static_cast<History>(config_store().precise_homing_instability_history.get() & history_mask)) >= history_threshold) {
+        break; // Break out of the loop -> trigger calibration
       }
 
-      if (corexy_home_refine(fr_mm_s, CoreXYCalibrationMode::disallow)) {
-        // Successfully refined the home
+      return RefineResult::success;
+    }
 
-        // Mark the axes as precisely homed
-        axes_home_level[X_AXIS] = AxisHomeLevel::full;
-        axes_home_level[Y_AXIS] = AxisHomeLevel::full;
-
-        // Record whether the refinement found a stable home
-        config_store().precise_homing_instability_history.transform([is_unstable = corexy_home_is_unstable()] (auto val) {
-          return (val << 1) | is_unstable;
-        });
-
-        // If at least history_threshold out of last history_window refinements were unstable, trigger calibration
-        static constexpr auto history_threshold = 6;
-        static constexpr auto history_window = 10;
-
-        // Check that we have the requested history window actually stored
-        using History = decltype(config_store_ns::CurrentStore::precise_homing_instability_history)::value_type;
-        static_assert(history_window <= sizeof(History) * 8);
-        static constexpr History history_mask = ((1 << history_window) - 1);
-
-        if(std::popcount(static_cast<History>(config_store().precise_homing_instability_history.get() & history_mask)) >= history_threshold) {
-          break; // Break out of the loop -> trigger calibration
-        }
-
-        return RefineResult::success;
-      }
-
-      // instead of blindly retrying internally on the same location, move the gantry
-      if (!corexy_rehome_xy(fr_mm_s)) {
-        return RefineResult::hard_fail;
-      }
+    // instead of blindly retrying internally on the same location, move the gantry
+    if (!corexy_rehome_xy(fr_mm_s)) {
+      return RefineResult::hard_fail;
     }
   }
 
