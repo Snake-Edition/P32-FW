@@ -1037,10 +1037,6 @@ RefineResult corexy_refine_during_G28_once(float fr_mm_s, const G28Flags &flags)
     if (corexy_home_refine(fr_mm_s, CoreXYCalibrationMode::disallow)) {
       // Successfully refined the home
 
-      // Mark the axes as precisely homed
-      axes_home_level[X_AXIS] = AxisHomeLevel::full;
-      axes_home_level[Y_AXIS] = AxisHomeLevel::full;
-
       // Record whether the refinement found a stable home
       config_store().precise_homing_instability_history.transform([is_unstable = corexy_home_is_unstable()] (auto val) {
         return (val << 1) | is_unstable;
@@ -1079,6 +1075,9 @@ bool corexy_refine_during_G28(float fr_mm_s, const G28Flags &flags) {
     switch(result) {
 
       case RefineResult::success:
+        // Mark the axes as precisely homed
+        axes_home_level[X_AXIS] = AxisHomeLevel::full;
+        axes_home_level[Y_AXIS] = AxisHomeLevel::full;
         return true;
 
       case RefineResult::hard_fail:
@@ -1108,6 +1107,8 @@ bool corexy_refine_during_G28(float fr_mm_s, const G28Flags &flags) {
 
     case Response::Ignore:
       // The user decided to ignore the problem at his own risk, consider the homing calibrated for now
+      axes_home_level[X_AXIS] = AxisHomeLevel::full;
+      axes_home_level[Y_AXIS] = AxisHomeLevel::full;   
       return true;
 
     default:
