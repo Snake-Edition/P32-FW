@@ -121,10 +121,17 @@ if(${TRANSLATIONS_IN_EXTFLASH})
   foreach(LANG ${LANGUAGES_AVAILABLE})
     if(${ENABLE_TRANSLATION_${LANG}})
       string(TOLOWER ${LANG} LANG)
-      add_resource(
-        "${CMAKE_SOURCE_DIR}/src/lang/po/${LANG}/Prusa-Firmware-Buddy_${LANG}.mo"
-        "/lang/${LANG}.mo"
+      set(PO_FILE "${CMAKE_SOURCE_DIR}/src/lang/po/${LANG}/Prusa-Firmware-Buddy_${LANG}.po")
+      set(MO_FILE "${CMAKE_CURRENT_BINARY_DIR}/${LANG}.mo")
+      add_custom_command(
+        OUTPUT ${MO_FILE}
+        COMMAND msgfmt ${PO_FILE} -o ${MO_FILE}
+        DEPENDS ${PO_FILE}
+        COMMENT "Generating ${MO_FILE} from ${PO_FILE}"
+        VERBATIM
         )
+      add_custom_target(generate_mo_${LANG} ALL DEPENDS ${MO_FILE})
+      add_resource("${MO_FILE}" "/lang/${LANG}.mo")
     endif()
   endforeach()
 endif()
