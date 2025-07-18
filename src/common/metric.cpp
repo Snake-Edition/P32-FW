@@ -88,6 +88,11 @@ static bool check_min_interval(metric_t *metric, uint32_t timestamp) {
 }
 
 static metric_point_t *point_check_and_prepare(metric_t *metric, uint32_t timestamp, metric_value_type_t type) {
+    if (__get_IPSR()) {
+        // Don't do metrics from ISR, it takes a lot of stack
+        bsod("Metric from ISR");
+    }
+
     if (!are_metrics_enabled() || !metric->enabled) {
         return NULL;
     }
