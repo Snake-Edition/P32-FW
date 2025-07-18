@@ -25,13 +25,6 @@
 LOG_COMPONENT_DEF(Loadcell, logging::Severity::info);
 
 Loadcell loadcell;
-METRIC_DEF(metric_loadcell, "loadcell", METRIC_VALUE_CUSTOM, 0, METRIC_DISABLED);
-METRIC_DEF(metric_loadcell_hp, "loadcell_hp", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
-METRIC_DEF(metric_loadcell_xy, "loadcell_xy", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
-METRIC_DEF(metric_loadcell_age, "loadcell_age", METRIC_VALUE_INTEGER, 0, METRIC_DISABLED);
-
-// To be used by sensor info screen so we don't have to parse the CUSTOM_VALUE from the loadcell metric
-METRIC_DEF(metric_loadcell_value, "loadcell_value", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
 
 Loadcell::Loadcell()
     : failsOnLoadAbove(INFINITY)
@@ -176,25 +169,16 @@ void Loadcell::ProcessSample(int32_t loadcellRaw, uint32_t time_us) {
     }
 
     // save sample timestamp/age
-    int32_t ticks_us_from_now = ticks_diff(time_us, ticks_us());
     last_sample_time_us = time_us;
 
-    metric_record_custom_at_time(&metric_loadcell, time_us, " r=%" PRId32 "i,o=%" PRId32 "i,s=%0.4f", loadcellRaw, offset, (double)scale);
-    metric_record_integer_at_time(&metric_loadcell_age, time_us, ticks_us_from_now);
-
-    // filtered loads
     const float tared_z_load = get_tared_z_load();
-    metric_record_float(&metric_loadcell_value, tared_z_load);
     sensor_data().loadCell = tared_z_load;
     if (!std::isfinite(tared_z_load)) {
         fatal_error(ErrCode::ERR_SYSTEM_LOADCELL_INFINITE_LOAD);
     }
 
     const float filtered_z_load = get_filtered_z_load();
-    metric_record_float_at_time(&metric_loadcell_hp, time_us, filtered_z_load);
-
     const float filtered_xy_load = get_filtered_xy();
-    metric_record_float_at_time(&metric_loadcell_xy, time_us, filtered_xy_load);
 
     if (tareCount != 0) {
         // Undergoing tare process, only use valid samples

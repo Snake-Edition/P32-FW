@@ -22,11 +22,6 @@ void ProbeAnalysisBase::StoreSample([[maybe_unused]] uint32_t time_us, float cur
 
 #if !defined(UNITTESTS)
     lastSampleTimestamp = ticks_us();
-
-    METRIC_DEF(mbl, "mbl", METRIC_VALUE_CUSTOM, 0, METRIC_DISABLED);
-
-    // Use Record functions to log what we're actually working with (there might be losses due to how the values are encoded inside the Record)
-    metric_record_custom(&mbl, " z=%0.3f,l=%0.3f", double(record.z()), double(record.load()));
 #endif
 }
 
