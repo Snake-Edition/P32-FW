@@ -1103,7 +1103,7 @@ void prepare_move_to(const xyze_pos_t &target, feedRate_t fr_mm_s, PrepareMoveHi
       planner.apply_modifiers(target, true);
     }
     #endif
-    planner.buffer_line(target, fr_mm_s, active_extruder, planner_hints);
+    planner.buffer_segment(target, fr_mm_s, active_extruder, planner_hints);
   };
 
   while (--segment_count) {
