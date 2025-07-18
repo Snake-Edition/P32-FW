@@ -641,8 +641,10 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
         return ErrCode::ERR_MECHANICAL_HOMING_CALIBRATION_NEEDED;
 
     case WarningType::HomingRefinementFailed:
-    case WarningType::HomingRefinementFailedNoRetry:
         return ErrCode::ERR_MECHANICAL_PRECISE_REFINEMENT_FAILED;
+
+    case WarningType::HomingCalibrationFromMenuNeeded:
+        return ErrCode::ERR_MECHANICAL_HOMING_CALIBRATION_FROM_MENU_NEEDED;
 #endif
 
 #if HAS_SELFTEST()

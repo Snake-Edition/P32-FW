@@ -463,7 +463,7 @@ enum class PhasesWarning : PhaseUnderlyingType {
 #if HAS_PRECISE_HOMING_COREXY()
     HomingCalibrationNeeded,
     HomingRefinementFailed,
-    HomingRefinementFailedNoRetry,
+    HomingCalibrationFromMenuNeeded,
 #endif
 
 #if HAS_ILI9488_DISPLAY()
@@ -960,7 +960,7 @@ class ClientResponses {
 #if HAS_PRECISE_HOMING_COREXY()
             { PhasesWarning::HomingCalibrationNeeded, { Response::Calibrate, Response::Skip, Response::Always, Response::Never } },
             { PhasesWarning::HomingRefinementFailed, { Response::Retry, Response::Abort, Response::Ignore } },
-            { PhasesWarning::HomingRefinementFailedNoRetry, { Response::Abort, Response::Ignore } },
+            { PhasesWarning::HomingCalibrationFromMenuNeeded, { Response::Abort, Response::Ignore } },
 #endif
 #if HAS_ILI9488_DISPLAY()
             { PhasesWarning::DisplayProblemDetected, { Response::Yes, Response::No } },

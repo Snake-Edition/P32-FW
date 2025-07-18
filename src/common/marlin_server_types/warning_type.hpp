@@ -93,7 +93,7 @@ enum class WarningType : uint32_t {
 #if HAS_PRECISE_HOMING_COREXY()
     HomingCalibrationNeeded,
     HomingRefinementFailed,
-    HomingRefinementFailedNoRetry,
+    HomingCalibrationFromMenuNeeded,
 #endif
     AccelerometerCommunicationFailed,
 #if HAS_ILI9488_DISPLAY()
