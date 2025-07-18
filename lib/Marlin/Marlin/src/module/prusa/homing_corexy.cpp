@@ -1028,3 +1028,7 @@ bool corexy_home_is_unstable() {
     const CoreXYGridOrigin calibrated_origin = config_store().corexy_grid_origin.get();
     return calibrated_origin.uninitialized() || internal::home_unstable;
 }
+
+void corexy_clear_homing_calibration() {
+    config_store().corexy_grid_origin.set_to_default();
+}

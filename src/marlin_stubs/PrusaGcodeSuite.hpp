@@ -148,6 +148,11 @@ void M9150(); //< Set stealth mode
 
 void M9200(); //< Re-load IS settings from config store
 void M9201(); //< Reset to default motion parameters (accelerations, feedrates, ...)
+
+#if HAS_PRECISE_HOMING_COREXY()
+void M9202(); //< Clear precise homing calibration
+#endif
+
 void M9933(); //< Cork for tracking when gcode finished executing
 
 #if HAS_TOOLCHANGER()
