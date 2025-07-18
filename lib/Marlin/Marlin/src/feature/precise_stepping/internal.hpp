@@ -23,30 +23,38 @@
     #define FORCE_OFAST // no-op
 #endif
 
+#ifdef _DEBUG
+    // There seems to be a bug in the GCC where always_inline in debug causes trendemous stack usage
+    // Do just normal inline to prevent the ISR stack overflow (BFW-7496)
+    #define STEPPING_INLINE inline
+#else
+    #define STEPPING_INLINE __attribute__((always_inline)) inline
+#endif
+
 constexpr const double EPSILON = 0.000000001;
 constexpr const float EPSILON_FLOAT = 0.0000001f;
 
 constexpr const double MAX_PRINT_TIME = 10000000.;
 
 template <typename Type>
-FORCE_INLINE Type calc_distance(const Type start_v, const Type half_accel, const Type move_time) {
+STEPPING_INLINE Type calc_distance(const Type start_v, const Type half_accel, const Type move_time) {
     return (start_v + half_accel * move_time) * move_time;
 }
 
-FORCE_INLINE xyze_double_t calc_end_position(const xyze_double_t start_pos, const xyze_double_t axes_r, const double dist) {
+STEPPING_INLINE xyze_double_t calc_end_position(const xyze_double_t start_pos, const xyze_double_t axes_r, const double dist) {
     return start_pos + (axes_r * dist);
 }
 
-FORCE_INLINE xyze_double_t calc_end_position(const double start_v, const double half_accel, const double move_time, const xyze_double_t start_pos, const xyze_double_t axes_r) {
+STEPPING_INLINE xyze_double_t calc_end_position(const double start_v, const double half_accel, const double move_time, const xyze_double_t start_pos, const xyze_double_t axes_r) {
     const double dist = calc_distance<double>(start_v, half_accel, move_time);
     return calc_end_position(start_pos, axes_r, dist);
 }
 
-FORCE_INLINE xyze_double_t calc_end_position_move(const move_t *move) {
+STEPPING_INLINE xyze_double_t calc_end_position_move(const move_t *move) {
     return calc_end_position(move->start_v, move->half_accel, move->move_time, move->start_pos, move->axes_r);
 }
 
-FORCE_INLINE float fast_sqrt(float in) {
+STEPPING_INLINE float fast_sqrt(float in) {
     float out;
 #if defined(__GNUC__) && defined(__VFP_FP__) && !defined(__SOFTFP__)
     asm("vsqrt.f32 %0,%1"
@@ -60,7 +68,7 @@ FORCE_INLINE float fast_sqrt(float in) {
 
 // Calculates time that will take to travel the specified distance.
 // Step_dir determines which solution of the quadratic equation we will choose.
-FORCE_INLINE float calc_time_for_distance(const float start_velocity, const float acceleration, const float distance, const bool step_dir) {
+STEPPING_INLINE float calc_time_for_distance(const float start_velocity, const float acceleration, const float distance, const bool step_dir) {
     if (acceleration == 0.f) {
         if (start_velocity != 0.f) {
             return distance / start_velocity;
@@ -85,39 +93,39 @@ FORCE_INLINE float calc_time_for_distance(const float start_velocity, const floa
     }
 }
 
-FORCE_INLINE float calc_time_for_distance(const move_segment_step_generator_t &step_generator, const float distance) {
+STEPPING_INLINE float calc_time_for_distance(const move_segment_step_generator_t &step_generator, const float distance) {
     return std::max(calc_time_for_distance(step_generator.start_v, step_generator.accel, distance, step_generator.step_dir), 0.f);
 }
 
-FORCE_INLINE double get_move_half_accel(const move_t &move, const int axis) {
+STEPPING_INLINE double get_move_half_accel(const move_t &move, const int axis) {
     return move.half_accel * move.axes_r[axis];
 }
 
-FORCE_INLINE double get_move_start_v(const move_t &move, const int axis) {
+STEPPING_INLINE double get_move_start_v(const move_t &move, const int axis) {
     return move.start_v * move.axes_r[axis];
 }
 
-FORCE_INLINE double get_move_end_v(const move_t &move, const int axis) {
+STEPPING_INLINE double get_move_end_v(const move_t &move, const int axis) {
     return (move.start_v + 2. * move.half_accel * move.move_time) * move.axes_r[axis];
 }
 
-FORCE_INLINE double get_move_start_pos(const move_t &move, const int axis) {
+STEPPING_INLINE double get_move_start_pos(const move_t &move, const int axis) {
     return move.start_pos[axis];
 }
 
-FORCE_INLINE double get_move_end_pos(const move_t &move, const int axis) {
+STEPPING_INLINE double get_move_end_pos(const move_t &move, const int axis) {
     const double axis_r = move.axes_r[axis];
     return move.start_pos[axis] + calc_distance<double>(move.start_v * axis_r, move.half_accel * axis_r, move.move_time);
 }
 
 // True - Positive direction
 // False - Negative direction
-FORCE_INLINE bool get_move_step_dir(const move_t &move, const int axis) {
+STEPPING_INLINE bool get_move_step_dir(const move_t &move, const int axis) {
     return !(move.flags & (MOVE_FLAG_X_DIR << axis));
 }
 
 // Update the step event index after updating the first entry (oldest) to keep it sorted.
-FORCE_INLINE void step_generator_state_update_nearest_idx(step_generator_state_t &step_generator_state) {
+STEPPING_INLINE void step_generator_state_update_nearest_idx(step_generator_state_t &step_generator_state) {
     // index and time of the new event
     auto first_index = step_generator_state.step_event_index[0];
     const auto new_time = step_generator_state.step_events[first_index].time;
@@ -137,42 +145,42 @@ FORCE_INLINE void step_generator_state_update_nearest_idx(step_generator_state_t
     step_generator_state.step_event_index[insert_pos] = first_index;
 }
 
-FORCE_INLINE constexpr bool is_active_x_axis(const move_t &move) {
+STEPPING_INLINE constexpr bool is_active_x_axis(const move_t &move) {
     return bool(move.flags & MOVE_FLAG_X_ACTIVE);
 }
 
-FORCE_INLINE constexpr bool is_active_y_axis(const move_t &move) {
+STEPPING_INLINE constexpr bool is_active_y_axis(const move_t &move) {
     return bool(move.flags & MOVE_FLAG_Y_ACTIVE);
 }
 
-FORCE_INLINE constexpr bool is_active_z_axis(const move_t &move) {
+STEPPING_INLINE constexpr bool is_active_z_axis(const move_t &move) {
     return bool(move.flags & MOVE_FLAG_Z_ACTIVE);
 }
 
-FORCE_INLINE constexpr bool is_active_e_axis(const move_t &move) {
+STEPPING_INLINE constexpr bool is_active_e_axis(const move_t &move) {
     return bool(move.flags & MOVE_FLAG_E_ACTIVE);
 }
 
-FORCE_INLINE constexpr bool get_dir_x_axis(const move_t &move) {
+STEPPING_INLINE constexpr bool get_dir_x_axis(const move_t &move) {
     return bool(move.flags & MOVE_FLAG_X_DIR);
 }
 
-FORCE_INLINE constexpr bool get_dir_y_axis(const move_t &move) {
+STEPPING_INLINE constexpr bool get_dir_y_axis(const move_t &move) {
     return bool(move.flags & MOVE_FLAG_Y_DIR);
 }
 
-FORCE_INLINE constexpr bool get_dir_z_axis(const move_t &move) {
+STEPPING_INLINE constexpr bool get_dir_z_axis(const move_t &move) {
     return bool(move.flags & MOVE_FLAG_Z_DIR);
 }
 
-FORCE_INLINE constexpr bool get_dir_e_axis(const move_t &move) {
+STEPPING_INLINE constexpr bool get_dir_e_axis(const move_t &move) {
     return bool(move.flags & MOVE_FLAG_E_DIR);
 }
 
-FORCE_INLINE constexpr bool is_beginning_empty_move(const move_t &move) {
+STEPPING_INLINE constexpr bool is_beginning_empty_move(const move_t &move) {
     return bool(move.flags & MOVE_FLAG_BEGINNING_EMPTY_MOVE);
 }
 
-FORCE_INLINE constexpr bool is_ending_empty_move(const move_t &move) {
+STEPPING_INLINE constexpr bool is_ending_empty_move(const move_t &move) {
     return bool(move.flags & MOVE_FLAG_ENDING_EMPTY_MOVE);
 }
