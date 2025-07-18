@@ -131,15 +131,27 @@ extern osThreadId displayTaskHandle;
 
     indicate_progress(33);
 
-    // Disable task switching, we don't want anyone to screw up with anything now
-    freertos::CriticalSection critical_section;
+    {
+        // freertos::CriticalSection is a bit too restrictive and wouldn't allow us to udpate the display properly
+        // To be decently sure that noone pokes with anything, let's instead give this thread the highest priority
+        // and reduce other tasks priorities.
+        // We cannot suspend them completely, because they might be holding a mutex we will need during the factory reset.
+        const auto current_thread = osThreadGetId();
+        osThreadSetPriority(current_thread, osPriorityRealtime);
 
-    // freertos::CriticalSection actually only disables preemptive context switches,
-    // so if we happen to get stuck on some mutex (I2C/config store/flash),
-    // we would lose the context and things we don't want might happen
-    // To remedy this, let's give this thread the highest priority
-    // so that the OS returns here as soon as a mutex is unlocked
-    osThreadSetPriority(osThreadGetId(), osPriorityRealtime);
+        // Make sure that all other tasks have lower priority
+        const auto count = uxTaskGetNumberOfTasks();
+        const auto list = new TaskStatus_t[count];
+
+        uxTaskGetSystemState(list, count, nullptr);
+
+        for (size_t i = 0; i < count; i++) {
+            const auto handle = list[i].xHandle;
+            if (handle != current_thread && osThreadGetPriority(handle) >= osPriorityRealtime) {
+                osThreadSetPriority(handle, osPriorityHigh);
+            }
+        }
+    }
 
     // Kick the watchdog
     wdt_iwdg_refresh();
