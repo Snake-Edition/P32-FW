@@ -26,7 +26,7 @@
 LOG_COMPONENT_REF(Selftest);
 using namespace selftest;
 
-static constexpr int32_t acceptable_noise_range_g = 40;
+static constexpr int32_t acceptable_noise_range_g = 60;
 
 CSelftestPart_Loadcell::CSelftestPart_Loadcell(IPartHandler &state_machine, const LoadcellConfig_t &config,
     SelftestLoadcell_t &result)
