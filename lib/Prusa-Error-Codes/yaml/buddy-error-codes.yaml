@@ -41,7 +41,7 @@ Errors:
   - code: "XX102"
     printers: [iX, COREONE]
     title: "PRECISE HOMING FAILED"
-    text: "Cannot perform or failed to calibrate homing. Continuing can cause layer shifts after rehoming."
+    text: "Failed to calibrate homing. Continuing can cause layer shifts after rehoming."
     id: "PRECISE_REFINEMENT_FAILED"
     gui_layout: "warning_dialog"
     approved: false
@@ -49,7 +49,7 @@ Errors:
   - code: "XX102"
     printers: [XL]
     title: "PRECISE HOMING FAILED"
-    text: "Cannot perform or failed to calibrate homing. Continuing can cause layer shifts after rehoming and toolchange issues."
+    text: "Failed to calibrate homing. Continuing can cause layer shifts after rehoming and toolchange issues."
     id: "PRECISE_REFINEMENT_FAILED"
     gui_layout: "warning_dialog"
     approved: false
@@ -226,7 +226,7 @@ Errors:
     id: "HOMING_CALIBRATION_NEEDED"
     type: WARNING
     gui_layout: "warning_dialog"
-    approved: false
+    approved: true
 
   - code: "XX119"
     title: "LOADING OBSTRUCTION"
@@ -235,7 +235,16 @@ Errors:
     id: "LOADING_OBSTRUCTION"
     type: WARNING
     gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX120"
+    printers: [iX, COREONE, XL]
+    title: "CALIBRATE HOMING FROM MENU"
+    text: "Please run homing calibration from the Calibrations menu. Continuing can result in homing shifts and toolcrashes."
+    id: "HOMING_CALIBRATION_FROM_MENU_NEEDED"
+    gui_layout: "warning_dialog"
     approved: false
+
 
   # TEMPERATURE    xx2xx
 
@@ -734,7 +743,7 @@ Errors:
     text: "Display issues detected. Reducing the refresh rate will possibly solve the problem. Proceed?"
     id: "DISPLAY_PROBLEM_DETECTED"
     gui_layout: "warning_dialog"
-    approved: false
+    approved: true
 
 # CONNECTIVITY   xx4xx   # Connectivity - Wi - Fi, LAN, Prusa Connect Cloud
 
