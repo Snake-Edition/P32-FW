@@ -357,100 +357,25 @@ void do_blocking_move_to(const float rx, const float ry, const float rz, const f
   planner.synchronize();
 }
 
-static void line_to_destination_position(const feedRate_t &fr_mm_s) {
-  current_position = destination;
-  line_to_current_position(fr_mm_s);
-}
-
 /// Z-Manhattan fast move
-void plan_park_move_to(const float rx, const float ry, const float rz, const feedRate_t &fr_xy, const feedRate_t &fr_z, Segmented segmented){
-  #if ENABLED(DELTA)
-
-    if (!position_is_reachable(rx, ry)) return;
-
-    REMEMBER(fr, feedrate_mm_s, fr_xy);
-
-    destination = current_position;          // sync destination at the start
-
-    if (DEBUGGING(LEVELING)) DEBUG_POS("destination = current_position", destination);
-
-    // when in the danger zone
-    if (current_position.z > delta_clip_start_height) {
-      if (rz > delta_clip_start_height) {   // staying in the danger zone
-        destination.set(rx, ry, rz);        // move directly (uninterpolated)
-        prepare_internal_fast_move_to_destination();          // set current_position from destination
-        if (DEBUGGING(LEVELING)) DEBUG_POS("danger zone move", current_position);
-        return;
-      }
-      destination.z = delta_clip_start_height;
-      prepare_internal_fast_move_to_destination();            // set current_position from destination
-      if (DEBUGGING(LEVELING)) DEBUG_POS("zone border move", current_position);
-    }
-
-    if (rz > current_position.z) {                            // raising?
-      destination.z = rz;
-      prepare_internal_fast_move_to_destination(fr_z);  // set current_position from destination
-      if (DEBUGGING(LEVELING)) DEBUG_POS("z raise move", current_position);
-    }
-
-    destination.set(rx, ry);
-    prepare_internal_move_to_destination();                   // set current_position from destination
-    if (DEBUGGING(LEVELING)) DEBUG_POS("xy move", current_position);
-
-    if (rz < current_position.z) {                            // lowering?
-      destination.z = rz;
-      prepare_internal_fast_move_to_destination(fr_z);  // set current_position from destination
-      if (DEBUGGING(LEVELING)) DEBUG_POS("z lower move", current_position);
-    }
-
-  #elif IS_SCARA
-
-    if (!position_is_reachable(rx, ry)) return;
-
+void plan_park_move_to(const float rx, const float ry, const float rz, const feedRate_t &fr_xy, const feedRate_t &fr_z, Segmented segmented) {
+  // If Z needs to raise, do it before moving XY
+  if (current_position.z < rz) {
     destination = current_position;
+    destination.z = rz;
+    prepare_internal_move_to_destination(fr_z, { .apply_modifiers = true, .do_segment = segmented == Segmented::yes });
+  }
 
-    // If Z needs to raise, do it before moving XY
-    if (destination.z < rz) {
-      destination.z = rz;
-      prepare_internal_fast_move_to_destination(fr_z);
-    }
+  destination = current_position;
+  destination.set(rx, ry);
+  prepare_internal_move_to_destination(fr_xy, { .apply_modifiers = false /*XY move doesn't need MBL*/, .do_segment = segmented == Segmented::yes });
 
-    destination.set(rx, ry);
-    prepare_internal_fast_move_to_destination(fr_xy);
-
-    // If Z needs to lower, do it after moving XY
-    if (destination.z > rz) {
-      destination.z = rz;
-      prepare_internal_fast_move_to_destination(fr_z);
-    }
-
-  #else
-
-    void (*move)(const feedRate_t &fr_mm_s) = nullptr;
-    if (segmented == Segmented::yes) {
-        move = prepare_internal_move_to_destination;
-    } else {
-        move = line_to_destination_position;
-    }
-
-    // If Z needs to raise, do it before moving XY
-    if (current_position.z < rz) {
-      destination = current_position;
-      destination.z = rz;
-      move(fr_z);
-    }
-
+  // If Z needs to lower, do it after moving XY
+  if (current_position.z > rz) {
     destination = current_position;
-    destination.set(rx, ry);
-    move(fr_xy);
-
-    // If Z needs to lower, do it after moving XY
-    if (current_position.z > rz) {
-      destination = current_position;
-      destination.z = rz;
-      move(fr_z);
-    }
-  #endif
+    destination.z = rz;
+    prepare_internal_move_to_destination(fr_z, { .apply_modifiers = true, .do_segment = segmented == Segmented::yes });
+  }
 }
 
 void do_blocking_move_to(const xy_pos_t &raw, const feedRate_t &fr_mm_s/*=0.0f*/) {
