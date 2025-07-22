@@ -1072,23 +1072,25 @@ void prepare_move_to(const xyze_pos_t &target, feedRate_t fr_mm_s, PrepareMoveHi
   using SegmentCount = uint16_t;
   SegmentCount segment_count = 1;
 
-  // Segment the move enough for MBL
-  #if ENABLED(AUTO_BED_LEVELING_UBL)
-  if(hints.apply_modifiers && planner.leveling_active && planner.leveling_active_at_z(target.z)) {
-    segment_count = std::max<SegmentCount>(segment_count, std::round(xy_distance / LEVELED_SEGMENT_LENGTH));
-  }
-  #endif
+  if (hints.do_segment) {
+    // Segment the move enough for MBL
+    #if ENABLED(AUTO_BED_LEVELING_UBL)
+    if(hints.apply_modifiers && planner.leveling_active && planner.leveling_active_at_z(target.z)) {
+      segment_count = std::max<SegmentCount>(segment_count, std::round(xy_distance / LEVELED_SEGMENT_LENGTH));
+    }
+    #endif
 
-  // Segment the moves to be able to do emergency stop quickly
-  #if HAS_EMERGENCY_STOP()
-  {
-    // Using xy_distance here is quite approximate, but good enough for our purposes here
-    const float duration = (xy_distance / fr_mm_s);
+    // Segment the moves to be able to do emergency stop quickly
+    #if HAS_EMERGENCY_STOP()
+    {
+      // Using xy_distance here is quite approximate, but good enough for our purposes here
+      const float duration = (xy_distance / fr_mm_s);
 
-    segment_count = std::max<SegmentCount>(segment_count, abs(full_diff.z) / buddy::EmergencyStop::max_segment_z_mm);
-    segment_count = std::max<SegmentCount>(segment_count, duration / buddy::EmergencyStop::max_segment_time_s);
+      segment_count = std::max<SegmentCount>(segment_count, abs(full_diff.z) / buddy::EmergencyStop::max_segment_z_mm);
+      segment_count = std::max<SegmentCount>(segment_count, duration / buddy::EmergencyStop::max_segment_time_s);
+    }
+    #endif
   }
-  #endif
 
   xyze_pos_t segment_pos = current_position;
   const xyze_pos_t segment_diff = full_diff / segment_count;

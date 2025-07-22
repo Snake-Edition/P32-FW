@@ -56,6 +56,8 @@ struct PrepareMoveHints {
   /// Apply feedrate scaling
   bool scale_feedrate : 1 = true;
 
+  /// Segment the move to be able to append correct leveling values
+  bool do_segment : 1 = true;
   
   MoveHints move = {}; 
 
