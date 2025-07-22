@@ -256,18 +256,14 @@ void line_to_current_position(const feedRate_t &fr_mm_s=feedrate_mm_s);
 /// is suitable with UBL.
 void plan_move_by(const feedRate_t fr, const float dx, const float dy = 0, const float dz = 0, const float de = 0);
 
-void prepare_move_to_destination(const MoveHints &hints = {});
-
-void _internal_move_to_destination(const feedRate_t &fr_mm_s=0.0f);
-
-inline void prepare_internal_move_to_destination(const feedRate_t &fr_mm_s=0.0f) {
-  _internal_move_to_destination(fr_mm_s);
-}
-
 enum class Segmented {
     yes,
     no,
 };
+
+void prepare_move_to_destination(const PrepareMoveHints &hints = {});
+
+void prepare_internal_move_to_destination(const feedRate_t &fr_mm_s=0.0f, const PrepareMoveHints &hints = {});
 
 /// Plans (non-blocking) Z-Manhattan fast (non-linear) move to the specified location
 /// Feedrate is in mm/s

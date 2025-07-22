@@ -93,9 +93,9 @@ void GcodeSuite::G0_G1(TERN_(HAS_FAST_MOVES, const bool fast_move/*=false*/)) {
   #endif
 
   #if ANY(IS_SCARA, POLAR)
-    fast_move ? prepare_fast_move_to_destination() : prepare_move_to_destination({.is_printing_move = true});
+    fast_move ? prepare_fast_move_to_destination() : prepare_move_to_destination({ .move = { .is_printing_move = true } });
   #else
-    prepare_move_to_destination({.is_printing_move = true});
+    prepare_move_to_destination({ .move = { .is_printing_move = true } });
   #endif
 
   #ifdef G0_FEEDRATE
