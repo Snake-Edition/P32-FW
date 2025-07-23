@@ -24,6 +24,7 @@
 #include <filament_to_load.hpp>
 #include <Marlin/src/gcode/gcode.h>
 #include <mapi/parking.hpp>
+#include <common/RAII.hpp>
 
 #include <option/has_bowden.h>
 #include <option/has_human_interactions.h>
@@ -50,8 +51,17 @@ static bool load_unload(Pause::LoadType load_type, pause::Settings &rSettings) {
         thermalManager.setTargetHotend(disp_temp, rSettings.GetExtruder());
     }
 
-    // Load/Unload filament
-    bool res = Pause::Instance().perform(load_type, rSettings);
+    bool res;
+    {
+#if ENABLED(PREVENT_COLD_EXTRUSION) && HAS_AUTO_RETRACT()
+        const bool is_unload = load_type == Pause::LoadType::unload || load_type == Pause::LoadType::unload_confirm || load_type == Pause::LoadType::unload_from_gears;
+        const bool allow_cold = is_unload && buddy::auto_retract().is_retracted(hotend_from_extruder(rSettings.GetExtruder()));
+        AutoRestore ar_ce(thermalManager.allow_cold_extrude, true, allow_cold);
+#endif
+
+        // Load/Unload filament
+        res = Pause::Instance().perform(load_type, rSettings);
+    }
 
     if (marlin_server::printer_idle() && !res) { // Failed when printer is not printing
         // Disable nozzle heater
