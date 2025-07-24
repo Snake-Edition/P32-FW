@@ -20,6 +20,11 @@
     #include <gui/menu_item/specific/menu_items_chamber_filtration.hpp>
 #endif
 
+#include <option/has_xbuddy_extension.h>
+#if HAS_XBUDDY_EXTENSION()
+    #include <gui/menu_item/specific/menu_items_xbuddy_extension.hpp>
+#endif
+
 namespace screen_printer_setup_private {
 
 class MI_DONE : public IWindowMenuItem {
@@ -39,6 +44,9 @@ using ScreenBase
         // At least for C1, the filter addon is considered a hardware option, because it also affects the function of the cooling fans
         // BFW-6719
         MI_CHAMBER_FILTRATION_BACKEND,
+#endif
+#if HAS_XBUDDY_EXTENSION()
+        MI_CAM_USB_PWR,
 #endif
         MI_DONE>;
 
