@@ -48,9 +48,13 @@ bool is_selftest_successfully_completed() {
             continue;
         }
 
-        if (!all_passed(sr.tools[e].dockoffset, sr.tools[e].tooloffset)) {
-            return false;
+        // Without toolchanger, we don't have tool offsets
+        if (prusa_toolchanger.is_toolchanger_enabled()) {
+            if (!all_passed(sr.tools[e].dockoffset, sr.tools[e].tooloffset)) {
+                return false;
+            }
         }
+
 #endif /* HAS_TOOLCHANGER() */
 
 #if HAS_SWITCHED_FAN_TEST()
