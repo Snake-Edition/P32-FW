@@ -785,6 +785,9 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
         #if ENABLED(DETECT_PRINT_SHEET)
         if (!failed && flags.check_sheet) {
+          PrintStatusMessageGuard status_guard;
+          status_guard.update<PrintStatusMessage::detecting_steel_sheet>({});
+
           failed = [&] {
             // Do multiple attempts of detect print sheet
             // The point is that we want to prevent false failures caused by a dirty nozzle (cold filament left hanging out)

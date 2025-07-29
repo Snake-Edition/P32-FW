@@ -25,6 +25,9 @@ static constexpr EnumArray<Message::Type, const char *, Message::Type::_cnt> mes
 #if ENABLED(PROBE_CLEANUP_SUPPORT)
         { Message::Type::nozzle_cleaning, N_("Nozzle cleaning") },
 #endif
+#if ENABLED(DETECT_PRINT_SHEET)
+        { Message::Type::detecting_steel_sheet, N_("Detecting steel sheet") },
+#endif
 #if ENABLED(PRUSA_SPOOL_JOIN)
         { Message::Type::spool_joined, N_("Spool joined") },
         { Message::Type::joining_spool, N_("Joining spool") },
@@ -56,6 +59,9 @@ void PrintStatusMessageFormatterBuddy::format(StringBuilder &target, const Messa
 #endif
 #if ENABLED(PROBE_CLEANUP_SUPPORT)
     case Message::Type::nozzle_cleaning:
+#endif
+#if ENABLED(DETECT_PRINT_SHEET)
+    case Message::Type::detecting_steel_sheet:
 #endif
         // No extra data to show
         break;
