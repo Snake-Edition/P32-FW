@@ -4,6 +4,7 @@
 #include <option/has_auto_retract.h>
 
 #include "print_status_message_data.hpp"
+#include <inc/MarlinConfigPre.h>
 
 struct PrintStatusMessage {
     enum Type {
