@@ -422,7 +422,11 @@ static bool do_probe_move(const float z, const feedRate_t fr_mm_s) {
   #endif
 
   // Move down until the probe is triggered
-  do_blocking_move_to_z(z, fr_mm_s);
+  auto target = planner.get_machine_position_mm();
+  target.z = z;
+  planner.buffer_segment(target, fr_mm_s);
+  planner.synchronize();
+  // Note: current_position is updated lower in this function
 
   #if ENABLED(NOZZLE_LOAD_CELL)
     endstops.enable_z_probe(false);
