@@ -738,6 +738,9 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
   // Home X
   if (!failed && should_home_to_level(X_AXIS, AxisHomeLevel::imprecise)) {
+#ifdef HOMING_PREEMPTIVE_MOVE_Y
+    do_blocking_move_to_y(HOMING_PREEMPTIVE_MOVE_Y);
+#endif
     failed = !homeaxis(X_AXIS, fr_mm_s, false, reenable_wt_X, flags.can_calibrate);
   }
 
