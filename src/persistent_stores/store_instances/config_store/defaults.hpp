@@ -188,16 +188,6 @@ namespace defaults {
     // Note that previous FW versions didn't save this value during calibration, so fsensor has to work with this default value
     inline constexpr int32_t extruder_fs_ref_ins_value { std::numeric_limits<int32_t>::min() };
 
-    inline constexpr uint32_t extruder_fs_value_span {
-#if (BOARD_IS_XBUDDY() && defined LOVEBOARD_HAS_PT100)
-        100
-#elif (BOARD_IS_XLBUDDY())
-        1000
-#else
-        350000
-#endif
-    };
-
     // SIDE Filament sensor reference NOT INSERTED value
     // min == will require calibration
     inline constexpr int32_t side_fs_ref_nins_value { std::numeric_limits<int32_t>::min() };
@@ -205,7 +195,6 @@ namespace defaults {
     // min == invalid value
     // Note that previous FW versions didn't save this value during calibration, so fsensor has to work with this default value
     inline constexpr int32_t side_fs_ref_ins_value { std::numeric_limits<int32_t>::min() };
-    inline constexpr uint32_t side_fs_value_span { 310 };
 
     inline constexpr bool fsensor_enabled {
 #if PRINTER_IS_PRUSA_MINI() || PRINTER_IS_PRUSA_MK3_5()

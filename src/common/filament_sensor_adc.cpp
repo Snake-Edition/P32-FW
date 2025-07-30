@@ -72,8 +72,22 @@ void FSensorADC::CalibrateInserted(int32_t filtered_value) {
         return;
     }
 
+    constexpr uint32_t extruder_fs_value_span {
+#if (BOARD_IS_XBUDDY() && defined LOVEBOARD_HAS_PT100)
+        100
+#elif (BOARD_IS_XLBUDDY())
+        1000
+#else
+        350000
+#endif
+    };
+
+    constexpr uint32_t side_fs_value_span { 310 };
+
+    static constexpr float fs_selftest_span_multipler { 1.2 };
+
     // value should be outside of extended span, because if its close to span that is used to evaluate filament sensor, it will not be reliable and trigger randomly
-    int32_t extended_span = (is_side ? config_store_ns::defaults::side_fs_value_span : config_store_ns::defaults::extruder_fs_value_span) * fs_selftest_span_multipler;
+    const int32_t extended_span = (is_side ? side_fs_value_span : extruder_fs_value_span) * fs_selftest_span_multipler;
     if ((filtered_value >= fs_ref_nins_value - extended_span) && (filtered_value <= fs_ref_nins_value + extended_span)) {
         log_info(FSensor, "Calibrating HasFilament: FAIL value: %d", static_cast<int>(filtered_value));
         invalidate_calibration();

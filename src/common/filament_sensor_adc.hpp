@@ -14,9 +14,6 @@ struct metric_s;
 
 class FSensorADC final : public IFSensor {
 
-public:
-    static constexpr float fs_selftest_span_multipler { 1.2 }; // when doing selftest, fs with filament and without has to be different by this value times configured span to pass selftest
-
 protected:
     int32_t fs_ref_ins_value { 0 }; ///< value of filament insert in extruder
     int32_t fs_ref_nins_value { 0 }; ///< value of filament not inserted in extruder
