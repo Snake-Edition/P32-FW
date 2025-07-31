@@ -652,7 +652,7 @@ struct CurrentStore
 
     /// Whether to automatically calibrate precise homing when deemed necessary
     /// Tristate::other = ask the user
-    StoreItem<Tristate, Tristate::other, ItemFlag::features, journal::hash("Auto-recalibrate precise homing")> auto_recalibrate_precise_homing;
+    StoreItem<Tristate, Tristate::other, ItemFlag::features | ItemFlag::common_misconfigurations, journal::hash("Auto-recalibrate precise homing")> auto_recalibrate_precise_homing;
 
     /// History whether a homing point was stable after precise homing. High number of unstable homings will result in calibration prompt.
     /// Implemented as a rotating bit buffer (pushed after each successful refinement); ones represent unstable refinements
