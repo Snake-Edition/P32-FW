@@ -63,7 +63,7 @@
 #define MAX_RESPONSES (1 << RESPONSE_BITS)
 
 using PhaseResponses = std::array<Response, MAX_RESPONSES>;
-static constexpr PhaseResponses empty_phase_responses = {};
+inline constexpr PhaseResponses empty_phase_responses = {};
 
 // count enum class members (if "_last" is defined)
 template <class T>
@@ -634,545 +634,505 @@ enum class PhaseDoorSensorCalibration : PhaseUnderlyingType {
 constexpr inline ClientFSM client_fsm_from_phase(PhaseDoorSensorCalibration) { return ClientFSM::DoorSensorCalibration; }
 #endif
 
-// static class for work with fsm responses (like button click)
-// encode responses - get them from marlin client, to marlin server and decode them again
-class ClientResponses {
-    ClientResponses() = delete;
-    ClientResponses(ClientResponses &) = delete;
+namespace ClientResponses {
 
-    // declare 2d arrays of single buttons for radio buttons
-    static constexpr EnumArray<PhasesLoadUnload, PhaseResponses, CountPhases<PhasesLoadUnload>()> LoadUnloadResponses {
-        { PhasesLoadUnload::initial, {} },
-            { PhasesLoadUnload::ChangingTool, {} },
-            { PhasesLoadUnload::Parking_stoppable, { Response::Stop } },
-            { PhasesLoadUnload::Parking_unstoppable, {} },
-            { PhasesLoadUnload::WaitingTemp_stoppable, { Response::Stop } },
-            { PhasesLoadUnload::WaitingTemp_unstoppable, {} },
-            { PhasesLoadUnload::Ramming_stoppable, { Response::Stop } },
-            { PhasesLoadUnload::Ramming_unstoppable, {} },
-            { PhasesLoadUnload::Unloading_stoppable, { Response::Stop } },
-            { PhasesLoadUnload::Unloading_unstoppable, {} },
-            { PhasesLoadUnload::IsFilamentUnloaded, { Response::Yes, Response::No } },
-            { PhasesLoadUnload::FilamentNotInFS, { Response::Help } },
-            { PhasesLoadUnload::ManualUnload_continuable, { Response::Continue, Response::Retry } },
-            { PhasesLoadUnload::ManualUnload_uncontinuable, { Response::Help, Response::Retry } },
-            { PhasesLoadUnload::UserPush_stoppable, { Response::Continue, Response::Stop } },
-            { PhasesLoadUnload::UserPush_unstoppable, { Response::Continue } },
-            { PhasesLoadUnload::MakeSureInserted_stoppable, { Response::Stop, Response::Help } },
-            { PhasesLoadUnload::MakeSureInserted_unstoppable, { Response::Help } },
-            { PhasesLoadUnload::Inserting_stoppable, { Response::Stop } },
-            { PhasesLoadUnload::Inserting_unstoppable, {} },
-            { PhasesLoadUnload::IsFilamentInGear, { Response::Yes, Response::No } },
-            { PhasesLoadUnload::Ejecting_stoppable, { Response::Stop } },
-            { PhasesLoadUnload::Ejecting_unstoppable, {} },
-            { PhasesLoadUnload::Loading_stoppable, { Response::Stop } },
-            { PhasesLoadUnload::Loading_unstoppable, {} },
-            { PhasesLoadUnload::LoadingToGears_stoppable, { Response::Stop } },
-            { PhasesLoadUnload::LoadingToGears_unstoppable, {} },
-            { PhasesLoadUnload::Purging_stoppable, { Response::Stop } },
-            { PhasesLoadUnload::Purging_unstoppable, {} },
-            { PhasesLoadUnload::AwaitingFilament_stoppable, { Response::Stop } },
-            { PhasesLoadUnload::AwaitingFilament_unstoppable, {} },
-            { PhasesLoadUnload::IsColor, { Response::Yes, Response::Purge_more, Response::Retry } },
-            { PhasesLoadUnload::IsColorPurge, { Response::Yes, Response::Purge_more } },
-            { PhasesLoadUnload::Unparking, {} },
+// declare 2d arrays of single buttons for radio buttons
+inline constexpr EnumArray<PhasesLoadUnload, PhaseResponses, CountPhases<PhasesLoadUnload>()> LoadUnloadResponses {
+    { PhasesLoadUnload::initial, {} },
+        { PhasesLoadUnload::ChangingTool, {} },
+        { PhasesLoadUnload::Parking_stoppable, { Response::Stop } },
+        { PhasesLoadUnload::Parking_unstoppable, {} },
+        { PhasesLoadUnload::WaitingTemp_stoppable, { Response::Stop } },
+        { PhasesLoadUnload::WaitingTemp_unstoppable, {} },
+        { PhasesLoadUnload::Ramming_stoppable, { Response::Stop } },
+        { PhasesLoadUnload::Ramming_unstoppable, {} },
+        { PhasesLoadUnload::Unloading_stoppable, { Response::Stop } },
+        { PhasesLoadUnload::Unloading_unstoppable, {} },
+        { PhasesLoadUnload::IsFilamentUnloaded, { Response::Yes, Response::No } },
+        { PhasesLoadUnload::FilamentNotInFS, { Response::Help } },
+        { PhasesLoadUnload::ManualUnload_continuable, { Response::Continue, Response::Retry } },
+        { PhasesLoadUnload::ManualUnload_uncontinuable, { Response::Help, Response::Retry } },
+        { PhasesLoadUnload::UserPush_stoppable, { Response::Continue, Response::Stop } },
+        { PhasesLoadUnload::UserPush_unstoppable, { Response::Continue } },
+        { PhasesLoadUnload::MakeSureInserted_stoppable, { Response::Stop, Response::Help } },
+        { PhasesLoadUnload::MakeSureInserted_unstoppable, { Response::Help } },
+        { PhasesLoadUnload::Inserting_stoppable, { Response::Stop } },
+        { PhasesLoadUnload::Inserting_unstoppable, {} },
+        { PhasesLoadUnload::IsFilamentInGear, { Response::Yes, Response::No } },
+        { PhasesLoadUnload::Ejecting_stoppable, { Response::Stop } },
+        { PhasesLoadUnload::Ejecting_unstoppable, {} },
+        { PhasesLoadUnload::Loading_stoppable, { Response::Stop } },
+        { PhasesLoadUnload::Loading_unstoppable, {} },
+        { PhasesLoadUnload::LoadingToGears_stoppable, { Response::Stop } },
+        { PhasesLoadUnload::LoadingToGears_unstoppable, {} },
+        { PhasesLoadUnload::Purging_stoppable, { Response::Stop } },
+        { PhasesLoadUnload::Purging_unstoppable, {} },
+        { PhasesLoadUnload::AwaitingFilament_stoppable, { Response::Stop } },
+        { PhasesLoadUnload::AwaitingFilament_unstoppable, {} },
+        { PhasesLoadUnload::IsColor, { Response::Yes, Response::Purge_more, Response::Retry } },
+        { PhasesLoadUnload::IsColorPurge, { Response::Yes, Response::Purge_more } },
+        { PhasesLoadUnload::Unparking, {} },
 #if HAS_NOZZLE_CLEANER()
-            { PhasesLoadUnload::UnloadNozzleCleaning, {} },
-            { PhasesLoadUnload::LoadNozzleCleaning, {} },
+        { PhasesLoadUnload::UnloadNozzleCleaning, {} },
+        { PhasesLoadUnload::LoadNozzleCleaning, {} },
 #endif
 #if HAS_LOADCELL()
-            { PhasesLoadUnload::FilamentStuck, { Response::Unload } },
+        { PhasesLoadUnload::FilamentStuck, { Response::Unload } },
 #endif
 #if HAS_AUTO_RETRACT()
-            { PhasesLoadUnload::AutoRetracting, {} },
+        { PhasesLoadUnload::AutoRetracting, {} },
 #endif
 #if HAS_MMU2()
-            { PhasesLoadUnload::LoadFilamentIntoMMU, { Response::Continue } },
+        { PhasesLoadUnload::LoadFilamentIntoMMU, { Response::Continue } },
 
-            { PhasesLoadUnload::MMU_EngagingIdler, {} },
-            { PhasesLoadUnload::MMU_DisengagingIdler, {} },
-            { PhasesLoadUnload::MMU_UnloadingToFinda, {} },
-            { PhasesLoadUnload::MMU_UnloadingToPulley, {} },
-            { PhasesLoadUnload::MMU_FeedingToFinda, {} },
-            { PhasesLoadUnload::MMU_FeedingToBondtech, {} },
-            { PhasesLoadUnload::MMU_FeedingToNozzle, {} },
-            { PhasesLoadUnload::MMU_AvoidingGrind, {} },
-            { PhasesLoadUnload::MMU_FinishingMoves, {} },
-            { PhasesLoadUnload::MMU_ERRDisengagingIdler, {} },
-            { PhasesLoadUnload::MMU_ERREngagingIdler, {} },
-            { PhasesLoadUnload::MMU_ERRWaitingForUser, { Response::Retry, Response::Slowly, Response::Continue, Response::Restart, Response::Unload, Response::Stop, Response::MMU_disable } },
-            { PhasesLoadUnload::MMU_ERRInternal, {} },
-            { PhasesLoadUnload::MMU_ERRHelpingFilament, {} },
-            { PhasesLoadUnload::MMU_ERRTMCFailed, {} },
-            { PhasesLoadUnload::MMU_UnloadingFilament, {} },
-            { PhasesLoadUnload::MMU_LoadingFilament, {} },
-            { PhasesLoadUnload::MMU_SelectingFilamentSlot, {} },
-            { PhasesLoadUnload::MMU_PreparingBlade, {} },
-            { PhasesLoadUnload::MMU_PushingFilament, {} },
-            { PhasesLoadUnload::MMU_PerformingCut, {} },
-            { PhasesLoadUnload::MMU_ReturningSelector, {} },
-            { PhasesLoadUnload::MMU_ParkingSelector, {} },
-            { PhasesLoadUnload::MMU_EjectingFilament, {} },
-            { PhasesLoadUnload::MMU_RetractingFromFinda, {} },
-            { PhasesLoadUnload::MMU_Homing, {} },
-            { PhasesLoadUnload::MMU_MovingSelector, {} },
-            { PhasesLoadUnload::MMU_FeedingToFSensor, {} },
-            { PhasesLoadUnload::MMU_HWTestBegin, {} },
-            { PhasesLoadUnload::MMU_HWTestIdler, {} },
-            { PhasesLoadUnload::MMU_HWTestSelector, {} },
-            { PhasesLoadUnload::MMU_HWTestPulley, {} },
-            { PhasesLoadUnload::MMU_HWTestCleanup, {} },
-            { PhasesLoadUnload::MMU_HWTestExec, {} },
-            { PhasesLoadUnload::MMU_HWTestDisplay, {} },
-            { PhasesLoadUnload::MMU_ErrHwTestFailed, {} },
+        { PhasesLoadUnload::MMU_EngagingIdler, {} },
+        { PhasesLoadUnload::MMU_DisengagingIdler, {} },
+        { PhasesLoadUnload::MMU_UnloadingToFinda, {} },
+        { PhasesLoadUnload::MMU_UnloadingToPulley, {} },
+        { PhasesLoadUnload::MMU_FeedingToFinda, {} },
+        { PhasesLoadUnload::MMU_FeedingToBondtech, {} },
+        { PhasesLoadUnload::MMU_FeedingToNozzle, {} },
+        { PhasesLoadUnload::MMU_AvoidingGrind, {} },
+        { PhasesLoadUnload::MMU_FinishingMoves, {} },
+        { PhasesLoadUnload::MMU_ERRDisengagingIdler, {} },
+        { PhasesLoadUnload::MMU_ERREngagingIdler, {} },
+        { PhasesLoadUnload::MMU_ERRWaitingForUser, { Response::Retry, Response::Slowly, Response::Continue, Response::Restart, Response::Unload, Response::Stop, Response::MMU_disable } },
+        { PhasesLoadUnload::MMU_ERRInternal, {} },
+        { PhasesLoadUnload::MMU_ERRHelpingFilament, {} },
+        { PhasesLoadUnload::MMU_ERRTMCFailed, {} },
+        { PhasesLoadUnload::MMU_UnloadingFilament, {} },
+        { PhasesLoadUnload::MMU_LoadingFilament, {} },
+        { PhasesLoadUnload::MMU_SelectingFilamentSlot, {} },
+        { PhasesLoadUnload::MMU_PreparingBlade, {} },
+        { PhasesLoadUnload::MMU_PushingFilament, {} },
+        { PhasesLoadUnload::MMU_PerformingCut, {} },
+        { PhasesLoadUnload::MMU_ReturningSelector, {} },
+        { PhasesLoadUnload::MMU_ParkingSelector, {} },
+        { PhasesLoadUnload::MMU_EjectingFilament, {} },
+        { PhasesLoadUnload::MMU_RetractingFromFinda, {} },
+        { PhasesLoadUnload::MMU_Homing, {} },
+        { PhasesLoadUnload::MMU_MovingSelector, {} },
+        { PhasesLoadUnload::MMU_FeedingToFSensor, {} },
+        { PhasesLoadUnload::MMU_HWTestBegin, {} },
+        { PhasesLoadUnload::MMU_HWTestIdler, {} },
+        { PhasesLoadUnload::MMU_HWTestSelector, {} },
+        { PhasesLoadUnload::MMU_HWTestPulley, {} },
+        { PhasesLoadUnload::MMU_HWTestCleanup, {} },
+        { PhasesLoadUnload::MMU_HWTestExec, {} },
+        { PhasesLoadUnload::MMU_HWTestDisplay, {} },
+        { PhasesLoadUnload::MMU_ErrHwTestFailed, {} },
 #endif
-    };
+};
 
-    static constexpr EnumArray<PhasesPreheat, PhaseResponses, CountPhases<PhasesPreheat>()> PreheatResponses {
-        { PhasesPreheat::initial, {} },
+inline constexpr EnumArray<PhasesPreheat, PhaseResponses, CountPhases<PhasesPreheat>()> PreheatResponses {
+    { PhasesPreheat::initial, {} },
 
-        // Additionally, filament type selection is passed through FSMResponseVariant(FilamentType)
-        { PhasesPreheat::UserTempSelection, { Response::Abort, Response::Cooldown } },
-    };
+    // Additionally, filament type selection is passed through FSMResponseVariant(FilamentType)
+    { PhasesPreheat::UserTempSelection, { Response::Abort, Response::Cooldown } },
+};
 
-    static constexpr EnumArray<PhasesPrintPreview, PhaseResponses, CountPhases<PhasesPrintPreview>()> PrintPreviewResponses {
-        { PhasesPrintPreview::loading, {} },
-            { PhasesPrintPreview::download_wait, {
-                                                     Response::Quit,
-                                                 } },
-            { PhasesPrintPreview::main_dialog, {
+inline constexpr EnumArray<PhasesPrintPreview, PhaseResponses, CountPhases<PhasesPrintPreview>()> PrintPreviewResponses {
+    { PhasesPrintPreview::loading, {} },
+        { PhasesPrintPreview::download_wait, {
+                                                 Response::Quit,
+                                             } },
+        { PhasesPrintPreview::main_dialog, {
 #if PRINTER_IS_PRUSA_XL()
-                                                   Response::Continue,
+                                               Response::Continue,
 #elif PRINTER_IS_PRUSA_MINI()
-                                                   Response::PRINT,
+                                               Response::PRINT,
 #else
-                                                   Response::Print,
+                                               Response::Print,
 #endif
-                                                   Response::Back,
-                                               } },
-            { PhasesPrintPreview::unfinished_selftest, {
-                                                           Response::Ignore,
-                                                           Response::Calibrate,
-                                                       } },
-            { PhasesPrintPreview::new_firmware_available, {
-                                                              Response::Continue,
-                                                          } },
-            { PhasesPrintPreview::wrong_printer, {
-                                                     Response::Abort,
-                                                     Response::PRINT,
-                                                 } },
-            { PhasesPrintPreview::wrong_printer_abort, {
-                                                           Response::Abort,
-                                                       } },
-            { PhasesPrintPreview::filament_not_inserted, {
-                                                             Response::Yes,
-                                                             Response::No,
-                                                             Response::FS_disable,
-                                                         } },
+                                               Response::Back,
+                                           } },
+        { PhasesPrintPreview::unfinished_selftest, {
+                                                       Response::Ignore,
+                                                       Response::Calibrate,
+                                                   } },
+        { PhasesPrintPreview::new_firmware_available, {
+                                                          Response::Continue,
+                                                      } },
+        { PhasesPrintPreview::wrong_printer, {
+                                                 Response::Abort,
+                                                 Response::PRINT,
+                                             } },
+        { PhasesPrintPreview::wrong_printer_abort, {
+                                                       Response::Abort,
+                                                   } },
+        { PhasesPrintPreview::filament_not_inserted, {
+                                                         Response::Yes,
+                                                         Response::No,
+                                                         Response::FS_disable,
+                                                     } },
 #if HAS_MMU2()
-            { PhasesPrintPreview::mmu_filament_inserted, {
-                                                             Response::Yes,
-                                                             Response::No,
-                                                         } },
+        { PhasesPrintPreview::mmu_filament_inserted, {
+                                                         Response::Yes,
+                                                         Response::No,
+                                                     } },
 #endif
 #if HAS_TOOLCHANGER() || HAS_MMU2()
-            { PhasesPrintPreview::tools_mapping, {
-                                                     Response::Back,
-                                                     Response::Filament,
-                                                     Response::PRINT,
-                                                 } },
+        { PhasesPrintPreview::tools_mapping, {
+                                                 Response::Back,
+                                                 Response::Filament,
+                                                 Response::PRINT,
+                                             } },
 #endif
-            { PhasesPrintPreview::wrong_filament, {
+        { PhasesPrintPreview::wrong_filament, {
 #if !PRINTER_IS_PRUSA_XL()
-                                                      Response::Change,
+                                                  Response::Change,
 #endif
-                                                      Response::Ok,
-                                                      Response::Abort,
-                                                  } },
-            { PhasesPrintPreview::file_error, {
+                                                  Response::Ok,
                                                   Response::Abort,
                                               } },
-    };
+        { PhasesPrintPreview::file_error, {
+                                              Response::Abort,
+                                          } },
+};
 
 #if HAS_SELFTEST()
-    static constexpr EnumArray<PhasesSelftest, PhaseResponses, CountPhases<PhasesSelftest>()> SelftestResponses {
-        { PhasesSelftest::_none, {} },
-        { PhasesSelftest::Loadcell_prepare, {} },
-        { PhasesSelftest::Loadcell_move_away, {} },
-        { PhasesSelftest::Loadcell_tool_select, {} },
-        { PhasesSelftest::Loadcell_cooldown, { Response::Abort } },
+inline constexpr EnumArray<PhasesSelftest, PhaseResponses, CountPhases<PhasesSelftest>()> SelftestResponses {
+    { PhasesSelftest::_none, {} },
+    { PhasesSelftest::Loadcell_prepare, {} },
+    { PhasesSelftest::Loadcell_move_away, {} },
+    { PhasesSelftest::Loadcell_tool_select, {} },
+    { PhasesSelftest::Loadcell_cooldown, { Response::Abort } },
 
-        { PhasesSelftest::Loadcell_user_tap_ask_abort, { Response::Continue, Response::Abort } },
-        { PhasesSelftest::Loadcell_user_tap_countdown, {} },
-        { PhasesSelftest::Loadcell_user_tap_check, {} },
-        { PhasesSelftest::Loadcell_user_tap_ok, {} },
-        { PhasesSelftest::Loadcell_fail, {} },
+    { PhasesSelftest::Loadcell_user_tap_ask_abort, { Response::Continue, Response::Abort } },
+    { PhasesSelftest::Loadcell_user_tap_countdown, {} },
+    { PhasesSelftest::Loadcell_user_tap_check, {} },
+    { PhasesSelftest::Loadcell_user_tap_ok, {} },
+    { PhasesSelftest::Loadcell_fail, {} },
 
-        { PhasesSelftest::FSensor_ask_unload, { Response::Continue, Response::Unload, Response::Abort } },
-        { PhasesSelftest::FSensor_wait_tool_pick, {} },
-        { PhasesSelftest::FSensor_unload_confirm, { Response::Yes, Response::No } },
-        { PhasesSelftest::FSensor_calibrate, {} },
-        { PhasesSelftest::FSensor_insertion_wait, { Response::Abort_invalidate_test } },
-        { PhasesSelftest::FSensor_insertion_ok, { Response::Continue, Response::Abort_invalidate_test } },
-        { PhasesSelftest::FSensor_insertion_calibrate, { Response::Abort_invalidate_test } },
-        { PhasesSelftest::Fsensor_enforce_remove, { Response::Abort_invalidate_test } },
-        { PhasesSelftest::FSensor_done, {} },
-        { PhasesSelftest::FSensor_fail, {} },
+    { PhasesSelftest::FSensor_ask_unload, { Response::Continue, Response::Unload, Response::Abort } },
+    { PhasesSelftest::FSensor_wait_tool_pick, {} },
+    { PhasesSelftest::FSensor_unload_confirm, { Response::Yes, Response::No } },
+    { PhasesSelftest::FSensor_calibrate, {} },
+    { PhasesSelftest::FSensor_insertion_wait, { Response::Abort_invalidate_test } },
+    { PhasesSelftest::FSensor_insertion_ok, { Response::Continue, Response::Abort_invalidate_test } },
+    { PhasesSelftest::FSensor_insertion_calibrate, { Response::Abort_invalidate_test } },
+    { PhasesSelftest::Fsensor_enforce_remove, { Response::Abort_invalidate_test } },
+    { PhasesSelftest::FSensor_done, {} },
+    { PhasesSelftest::FSensor_fail, {} },
 
-        { PhasesSelftest::CalibZ, {} },
+    { PhasesSelftest::CalibZ, {} },
 
-        { PhasesSelftest::Axis, {} },
+    { PhasesSelftest::Axis, {} },
 
-        { PhasesSelftest::Heaters, {} },
-        { PhasesSelftest::HeatersDisabledDialog, { Response::Ok } },
-        { PhasesSelftest::Heaters_AskBedSheetAfterFail, { Response::Ok, Response::Retry } },
+    { PhasesSelftest::Heaters, {} },
+    { PhasesSelftest::HeatersDisabledDialog, { Response::Ok } },
+    { PhasesSelftest::Heaters_AskBedSheetAfterFail, { Response::Ok, Response::Retry } },
 
-        { PhasesSelftest::FirstLayer_mbl, {} },
-        { PhasesSelftest::FirstLayer_print, {} },
+    { PhasesSelftest::FirstLayer_mbl, {} },
+    { PhasesSelftest::FirstLayer_print, {} },
 
-        { PhasesSelftest::FirstLayer_filament_known_and_not_unsensed, { Response::Next, Response::Unload } },
-        { PhasesSelftest::FirstLayer_filament_not_known_or_unsensed, { Response::Next, Response::Load, Response::Unload } },
-        { PhasesSelftest::FirstLayer_calib, { Response::Next } },
-        { PhasesSelftest::FirstLayer_use_val, { Response::Yes, Response::No } },
-        { PhasesSelftest::FirstLayer_start_print, { Response::Next } },
-        { PhasesSelftest::FirstLayer_reprint, { Response::Yes, Response::No } },
-        { PhasesSelftest::FirstLayer_clean_sheet, { Response::Next } },
-        { PhasesSelftest::FirstLayer_failed, { Response::Next } },
+    { PhasesSelftest::FirstLayer_filament_known_and_not_unsensed, { Response::Next, Response::Unload } },
+    { PhasesSelftest::FirstLayer_filament_not_known_or_unsensed, { Response::Next, Response::Load, Response::Unload } },
+    { PhasesSelftest::FirstLayer_calib, { Response::Next } },
+    { PhasesSelftest::FirstLayer_use_val, { Response::Yes, Response::No } },
+    { PhasesSelftest::FirstLayer_start_print, { Response::Next } },
+    { PhasesSelftest::FirstLayer_reprint, { Response::Yes, Response::No } },
+    { PhasesSelftest::FirstLayer_clean_sheet, { Response::Next } },
+    { PhasesSelftest::FirstLayer_failed, { Response::Next } },
 
-        { PhasesSelftest::Dock_needs_calibration, { Response::Continue, Response::Abort } },
-        { PhasesSelftest::Dock_move_away, {} },
-        { PhasesSelftest::Dock_wait_user_park1, { Response::Continue, Response::Abort } },
-        { PhasesSelftest::Dock_wait_user_park2, { Response::Continue, Response::Abort } },
-        { PhasesSelftest::Dock_wait_user_park3, { Response::Continue, Response::Abort } },
-        { PhasesSelftest::Dock_wait_user_remove_pins, { Response::Continue, Response::Abort } },
-        { PhasesSelftest::Dock_wait_user_loosen_pillar, { Response::Continue, Response::Abort } },
-        { PhasesSelftest::Dock_wait_user_lock_tool, { Response::Continue, Response::Abort } },
-        { PhasesSelftest::Dock_wait_user_tighten_top_screw, { Response::Continue, Response::Abort } },
-        { PhasesSelftest::Dock_measure, { Response::Abort } },
-        { PhasesSelftest::Dock_wait_user_tighten_bottom_screw, { Response::Continue, Response::Abort } },
-        { PhasesSelftest::Dock_wait_user_install_pins, { Response::Continue, Response::Abort } },
-        { PhasesSelftest::Dock_selftest_park_test, { Response::Abort } },
-        { PhasesSelftest::Dock_selftest_failed, {} },
-        { PhasesSelftest::Dock_calibration_success, { Response::Continue } },
+    { PhasesSelftest::Dock_needs_calibration, { Response::Continue, Response::Abort } },
+    { PhasesSelftest::Dock_move_away, {} },
+    { PhasesSelftest::Dock_wait_user_park1, { Response::Continue, Response::Abort } },
+    { PhasesSelftest::Dock_wait_user_park2, { Response::Continue, Response::Abort } },
+    { PhasesSelftest::Dock_wait_user_park3, { Response::Continue, Response::Abort } },
+    { PhasesSelftest::Dock_wait_user_remove_pins, { Response::Continue, Response::Abort } },
+    { PhasesSelftest::Dock_wait_user_loosen_pillar, { Response::Continue, Response::Abort } },
+    { PhasesSelftest::Dock_wait_user_lock_tool, { Response::Continue, Response::Abort } },
+    { PhasesSelftest::Dock_wait_user_tighten_top_screw, { Response::Continue, Response::Abort } },
+    { PhasesSelftest::Dock_measure, { Response::Abort } },
+    { PhasesSelftest::Dock_wait_user_tighten_bottom_screw, { Response::Continue, Response::Abort } },
+    { PhasesSelftest::Dock_wait_user_install_pins, { Response::Continue, Response::Abort } },
+    { PhasesSelftest::Dock_selftest_park_test, { Response::Abort } },
+    { PhasesSelftest::Dock_selftest_failed, {} },
+    { PhasesSelftest::Dock_calibration_success, { Response::Continue } },
 
-        { PhasesSelftest::ToolOffsets_wait_user_confirm_start, { Response::Continue, Response::Abort } },
-        { PhasesSelftest::ToolOffsets_wait_user_clean_nozzle_cold, { Response::Heatup, Response::Continue } },
-        { PhasesSelftest::ToolOffsets_wait_user_clean_nozzle_hot, { Response::Cooldown, Response::Continue } },
-        { PhasesSelftest::ToolOffsets_wait_user_install_sheet, { Response::Continue } },
-        { PhasesSelftest::ToolOffsets_pin_install_prepare, {} },
-        { PhasesSelftest::ToolOffsets_wait_user_install_pin, { Response::Continue } },
-        { PhasesSelftest::ToolOffsets_wait_stable_temp, {} },
-        { PhasesSelftest::ToolOffsets_wait_calibrate, {} },
-        { PhasesSelftest::ToolOffsets_wait_move_away, {} },
-        { PhasesSelftest::ToolOffsets_wait_user_remove_pin, { Response::Continue } },
-        { PhasesSelftest::RevisePrinterStatus_ask_revise, { Response::Adjust, Response::Skip } },
-        { PhasesSelftest::RevisePrinterStatus_revise, { Response::Done } },
-        { PhasesSelftest::RevisePrinterStatus_ask_retry, { Response::Yes, Response::No } },
-    };
+    { PhasesSelftest::ToolOffsets_wait_user_confirm_start, { Response::Continue, Response::Abort } },
+    { PhasesSelftest::ToolOffsets_wait_user_clean_nozzle_cold, { Response::Heatup, Response::Continue } },
+    { PhasesSelftest::ToolOffsets_wait_user_clean_nozzle_hot, { Response::Cooldown, Response::Continue } },
+    { PhasesSelftest::ToolOffsets_wait_user_install_sheet, { Response::Continue } },
+    { PhasesSelftest::ToolOffsets_pin_install_prepare, {} },
+    { PhasesSelftest::ToolOffsets_wait_user_install_pin, { Response::Continue } },
+    { PhasesSelftest::ToolOffsets_wait_stable_temp, {} },
+    { PhasesSelftest::ToolOffsets_wait_calibrate, {} },
+    { PhasesSelftest::ToolOffsets_wait_move_away, {} },
+    { PhasesSelftest::ToolOffsets_wait_user_remove_pin, { Response::Continue } },
+    { PhasesSelftest::RevisePrinterStatus_ask_revise, { Response::Adjust, Response::Skip } },
+    { PhasesSelftest::RevisePrinterStatus_revise, { Response::Done } },
+    { PhasesSelftest::RevisePrinterStatus_ask_retry, { Response::Yes, Response::No } },
+};
 
-    static constexpr PhaseResponses FanSelftestResponses[] = {
-        {}, // PhasesFanSelftest::test_100_percent
+inline constexpr PhaseResponses FanSelftestResponses[] = {
+    {}, // PhasesFanSelftest::test_100_percent
     #if PRINTER_IS_PRUSA_MK3_5()
-        { Response::Yes, Response::No }, // PhasesFanSelftest::manual_check
+    { Response::Yes, Response::No }, // PhasesFanSelftest::manual_check
     #endif
-        {}, // PhasesFanSelftest::test_40_percent
-        {}, // PhasesFanSelftest::results
-    };
-    static_assert(std::size(ClientResponses::FanSelftestResponses) == CountPhases<PhasesFansSelftest>());
+    {}, // PhasesFanSelftest::test_40_percent
+    {}, // PhasesFanSelftest::results
+};
+static_assert(std::size(ClientResponses::FanSelftestResponses) == CountPhases<PhasesFansSelftest>());
 #endif
 
-    static constexpr EnumArray<PhaseNetworkSetup, PhaseResponses, CountPhases<PhaseNetworkSetup>()> network_setup_responses {
-        { PhaseNetworkSetup::init, {} },
-            { PhaseNetworkSetup::ask_switch_to_wifi, { Response::Yes, Response::No } },
-            // Note: Additionally to this, the phase accepts various NetworkSetupResponse responses through FSMResponseVariant
-            { PhaseNetworkSetup::action_select, { Response::Back, Response::Help } },
-            // Note: Additionally to this, the phase accepts various NetworkSetupResponse responses through FSMResponseVariant
-            { PhaseNetworkSetup::wifi_scan, { Response::Back } },
-            { PhaseNetworkSetup::wait_for_ini_file, { Response::Cancel } },
-            { PhaseNetworkSetup::ask_delete_ini_file, { Response::Yes, Response::No } },
+inline constexpr EnumArray<PhaseNetworkSetup, PhaseResponses, CountPhases<PhaseNetworkSetup>()> network_setup_responses {
+    { PhaseNetworkSetup::init, {} },
+        { PhaseNetworkSetup::ask_switch_to_wifi, { Response::Yes, Response::No } },
+        // Note: Additionally to this, the phase accepts various NetworkSetupResponse responses through FSMResponseVariant
+        { PhaseNetworkSetup::action_select, { Response::Back, Response::Help } },
+        // Note: Additionally to this, the phase accepts various NetworkSetupResponse responses through FSMResponseVariant
+        { PhaseNetworkSetup::wifi_scan, { Response::Back } },
+        { PhaseNetworkSetup::wait_for_ini_file, { Response::Cancel } },
+        { PhaseNetworkSetup::ask_delete_ini_file, { Response::Yes, Response::No } },
 #if HAS_NFC()
-            { PhaseNetworkSetup::ask_use_prusa_app, { Response::Yes, Response::No } },
-            { PhaseNetworkSetup::wait_for_nfc, { Response::Cancel } },
-            { PhaseNetworkSetup::nfc_confirm, { Response::Ok, Response::Cancel } },
+        { PhaseNetworkSetup::ask_use_prusa_app, { Response::Yes, Response::No } },
+        { PhaseNetworkSetup::wait_for_nfc, { Response::Cancel } },
+        { PhaseNetworkSetup::nfc_confirm, { Response::Ok, Response::Cancel } },
 #endif
-            { PhaseNetworkSetup::connecting_finishable, { Response::Finish, Response::Cancel } },
-            { PhaseNetworkSetup::connecting_nonfinishable, { Response::Cancel } },
-            { PhaseNetworkSetup::connected, { Response::Ok } },
-            { PhaseNetworkSetup::ask_setup_prusa_connect, { Response::Yes, Response::No } },
-            { PhaseNetworkSetup::prusa_conect_setup, { Response::Done } },
+        { PhaseNetworkSetup::connecting_finishable, { Response::Finish, Response::Cancel } },
+        { PhaseNetworkSetup::connecting_nonfinishable, { Response::Cancel } },
+        { PhaseNetworkSetup::connected, { Response::Ok } },
+        { PhaseNetworkSetup::ask_setup_prusa_connect, { Response::Yes, Response::No } },
+        { PhaseNetworkSetup::prusa_conect_setup, { Response::Done } },
 
-            { PhaseNetworkSetup::no_interface_error, { Response::Ok, Response::Help, Response::Retry } },
-            { PhaseNetworkSetup::connection_error, { Response::Back, Response::Help, Response::Abort } },
-            { PhaseNetworkSetup::help_qr, { Response::Back } },
-            { PhaseNetworkSetup::finish, {} },
-    };
+        { PhaseNetworkSetup::no_interface_error, { Response::Ok, Response::Help, Response::Retry } },
+        { PhaseNetworkSetup::connection_error, { Response::Back, Response::Help, Response::Abort } },
+        { PhaseNetworkSetup::help_qr, { Response::Back } },
+        { PhaseNetworkSetup::finish, {} },
+};
 
 #if ENABLED(CRASH_RECOVERY)
-    static constexpr PhaseResponses CrashRecoveryResponses[] = {
-        {}, // check X
-        {}, // check Y
-        {}, // home
-        { Response::Retry, Response::Pause, Response::Resume }, // axis NOK
-        {}, // axis short
-        {}, // axis long
-        { Response::Resume, Response::Pause }, // repeated crash
-        { Response::Retry }, // home_fail
+inline constexpr PhaseResponses CrashRecoveryResponses[] = {
+    {}, // check X
+    {}, // check Y
+    {}, // home
+    { Response::Retry, Response::Pause, Response::Resume }, // axis NOK
+    {}, // axis short
+    {}, // axis long
+    { Response::Resume, Response::Pause }, // repeated crash
+    { Response::Retry }, // home_fail
     #if HAS_TOOLCHANGER()
-        { Response::Continue }, // toolchanger recovery
+    { Response::Continue }, // toolchanger recovery
     #endif
-    };
-    static_assert(std::size(ClientResponses::CrashRecoveryResponses) == CountPhases<PhasesCrashRecovery>());
+};
+static_assert(std::size(ClientResponses::CrashRecoveryResponses) == CountPhases<PhasesCrashRecovery>());
 #endif
 
-    static constexpr PhaseResponses QuickPauseResponses[] = {
-        { Response::Resume }, // QuickPaused
-    };
-    static_assert(std::size(ClientResponses::QuickPauseResponses) == CountPhases<PhasesQuickPause>());
+inline constexpr PhaseResponses QuickPauseResponses[] = {
+    { Response::Resume }, // QuickPaused
+};
+static_assert(std::size(ClientResponses::QuickPauseResponses) == CountPhases<PhasesQuickPause>());
 
-    static constexpr EnumArray<PhasesWarning, PhaseResponses, CountPhases<PhasesWarning>()> WarningResponses {
+inline constexpr EnumArray<PhasesWarning, PhaseResponses, CountPhases<PhasesWarning>()> WarningResponses {
 #if HAS_EMERGENCY_STOP()
-        { PhasesWarning::DoorOpen, {} },
+    { PhasesWarning::DoorOpen, {} },
 #endif
-            { PhasesWarning::Warning, { Response::Continue } },
+        { PhasesWarning::Warning, { Response::Continue } },
 #if XL_ENCLOSURE_SUPPORT() || HAS_CHAMBER_FILTRATION_API()
-            { PhasesWarning::EnclosureFilterExpiration, { Response::Ignore, Response::Postpone5Days, Response::Done } },
+        { PhasesWarning::EnclosureFilterExpiration, { Response::Ignore, Response::Postpone5Days, Response::Done } },
 #endif
 #if HAS_MANUAL_CHAMBER_VENTS()
-            { PhasesWarning::ChamberVents, { Response::Ok, Response::Disable } },
+        { PhasesWarning::ChamberVents, { Response::Ok, Response::Disable } },
 #endif
-            { PhasesWarning::ProbingFailed, { Response::Yes, Response::No } },
-            { PhasesWarning::FilamentSensorStuckHelp, { Response::Ok, Response::FS_disable } },
+        { PhasesWarning::ProbingFailed, { Response::Yes, Response::No } },
+        { PhasesWarning::FilamentSensorStuckHelp, { Response::Ok, Response::FS_disable } },
 #if HAS_MMU2()
-            { PhasesWarning::FilamentSensorStuckHelpMMU, { Response::Ok } },
+        { PhasesWarning::FilamentSensorStuckHelpMMU, { Response::Ok } },
 #endif
 #if ENABLED(DETECT_PRINT_SHEET)
-            { PhasesWarning::SteelSheetNotDetected, { Response::Retry, Response::Ignore } },
+        { PhasesWarning::SteelSheetNotDetected, { Response::Retry, Response::Ignore } },
 #endif
 #if HAS_CHAMBER_API()
-            { PhasesWarning::FailedToReachChamberTemperature, { Response::Ok, Response::Skip } },
+        { PhasesWarning::FailedToReachChamberTemperature, { Response::Ok, Response::Skip } },
 #endif
 #if HAS_UNEVEN_BED_PROMPT()
-            { PhasesWarning::BedUnevenAlignmentPrompt, { Response::Yes, Response::No } },
+        { PhasesWarning::BedUnevenAlignmentPrompt, { Response::Yes, Response::No } },
 #endif
 #if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-            { PhasesWarning::NozzleCleaningFailed, { Response::Retry, Response::Ignore, Response::Abort } },
+        { PhasesWarning::NozzleCleaningFailed, { Response::Retry, Response::Ignore, Response::Abort } },
 #endif
 #if HAS_CEILING_CLEARANCE()
-            { PhasesWarning::CeilingClearanceViolation, { Response::Continue, Response::Abort } },
+        { PhasesWarning::CeilingClearanceViolation, { Response::Continue, Response::Abort } },
 #endif
 #if HAS_PRECISE_HOMING_COREXY()
-            { PhasesWarning::HomingCalibrationNeeded, { Response::Calibrate, Response::Skip, Response::Always, Response::Never } },
-            { PhasesWarning::HomingRefinementFailed, { Response::Retry, Response::Abort, Response::Ignore } },
-            { PhasesWarning::HomingCalibrationFromMenuNeeded, { Response::Abort, Response::Ignore } },
+        { PhasesWarning::HomingCalibrationNeeded, { Response::Calibrate, Response::Skip, Response::Always, Response::Never } },
+        { PhasesWarning::HomingRefinementFailed, { Response::Retry, Response::Abort, Response::Ignore } },
+        { PhasesWarning::HomingCalibrationFromMenuNeeded, { Response::Abort, Response::Ignore } },
 #endif
 #if HAS_ILI9488_DISPLAY()
-            { PhasesWarning::DisplayProblemDetected, { Response::Yes, Response::No } },
+        { PhasesWarning::DisplayProblemDetected, { Response::Yes, Response::No } },
 #endif
-            { PhasesWarning::MetricsConfigChangePrompt, { Response::Yes, Response::No } },
-    };
+        { PhasesWarning::MetricsConfigChangePrompt, { Response::Yes, Response::No } },
+};
 
 #if HAS_COLDPULL()
-    static constexpr PhaseResponses ColdPullResponses[] = {
-        { Response::Continue, Response::Stop }, // introduction,
+inline constexpr PhaseResponses ColdPullResponses[] = {
+    { Response::Continue, Response::Stop }, // introduction,
     #if HAS_TOOLCHANGER()
-        { Response::Continue, Response::Tool1, Response::Tool2, Response::Tool3, Response::Tool4, Response::Tool5 }, // select_tool
-        {}, // pick_tool
+    { Response::Continue, Response::Tool1, Response::Tool2, Response::Tool3, Response::Tool4, Response::Tool5 }, // select_tool
+    {}, // pick_tool
     #endif
     #if HAS_MMU2()
-        { Response::Abort }, // stop_mmu,
+    { Response::Abort }, // stop_mmu,
     #endif
     #if HAS_TOOLCHANGER() || HAS_MMU2()
-        { Response::Unload, Response::Continue, Response::Abort }, // unload_ptfe,
-        { Response::Load, Response::Continue, Response::Abort }, // load_ptfe,
+    { Response::Unload, Response::Continue, Response::Abort }, // unload_ptfe,
+    { Response::Load, Response::Continue, Response::Abort }, // load_ptfe,
     #endif
-        { Response::Unload, Response::Load, Response::Continue, Response::Abort }, // prepare_filament,
+    { Response::Unload, Response::Load, Response::Continue, Response::Abort }, // prepare_filament,
     #if HAS_AUTO_RETRACT()
-        { Response::Abort }, // deretract
+    { Response::Abort }, // deretract
     #endif
-        {}, // blank_load
-        {}, // blank_unload
-        { Response::Abort }, // cool_down,
-        { Response::Abort }, // heat_up,
-        {}, // automatic_pull,
-        { Response::Continue }, // manual_pull,
-        { Response::Abort }, // cleanup (restart_mmu),
-        { Response::Finish }, // pull_done,
-        {}, // finish,
-    };
-    static_assert(std::size(ClientResponses::ColdPullResponses) == CountPhases<PhasesColdPull>());
+    {}, // blank_load
+    {}, // blank_unload
+    { Response::Abort }, // cool_down,
+    { Response::Abort }, // heat_up,
+    {}, // automatic_pull,
+    { Response::Continue }, // manual_pull,
+    { Response::Abort }, // cleanup (restart_mmu),
+    { Response::Finish }, // pull_done,
+    {}, // finish,
+};
+static_assert(std::size(ClientResponses::ColdPullResponses) == CountPhases<PhasesColdPull>());
 #endif
 
 #if HAS_PHASE_STEPPING_CALIBRATION()
-    static constexpr EnumArray<PhasesPhaseStepping, PhaseResponses, CountPhases<PhasesPhaseStepping>()> phase_stepping_calibration_responses {
-        { PhasesPhaseStepping::restore_defaults, { Response::Ok } },
-            { PhasesPhaseStepping::intro, { Response::Continue, Response::Abort } },
-            { PhasesPhaseStepping::home, {} },
+inline constexpr EnumArray<PhasesPhaseStepping, PhaseResponses, CountPhases<PhasesPhaseStepping>()> phase_stepping_calibration_responses {
+    { PhasesPhaseStepping::restore_defaults, { Response::Ok } },
+        { PhasesPhaseStepping::intro, { Response::Continue, Response::Abort } },
+        { PhasesPhaseStepping::home, {} },
     #if HAS_ATTACHABLE_ACCELEROMETER()
-            { PhasesPhaseStepping::connect_to_board, { Response::Abort } },
-            { PhasesPhaseStepping::wait_for_extruder_temperature, { Response::Abort } },
-            { PhasesPhaseStepping::attach_to_extruder, { Response::Continue, Response::Abort } },
-            { PhasesPhaseStepping::attach_to_bed, { Response::Continue, Response::Abort } },
+        { PhasesPhaseStepping::connect_to_board, { Response::Abort } },
+        { PhasesPhaseStepping::wait_for_extruder_temperature, { Response::Abort } },
+        { PhasesPhaseStepping::attach_to_extruder, { Response::Continue, Response::Abort } },
+        { PhasesPhaseStepping::attach_to_bed, { Response::Continue, Response::Abort } },
     #endif
-            { PhasesPhaseStepping::calib_x, { Response::Abort } },
-            { PhasesPhaseStepping::calib_y, { Response::Abort } },
-            { PhasesPhaseStepping::calib_error, { Response::Ok } },
-            { PhasesPhaseStepping::calib_nok, { Response::Ok } },
-            { PhasesPhaseStepping::calib_ok, { Response::Ok } },
-            { PhasesPhaseStepping::finish, {} },
-    };
+        { PhasesPhaseStepping::calib_x, { Response::Abort } },
+        { PhasesPhaseStepping::calib_y, { Response::Abort } },
+        { PhasesPhaseStepping::calib_error, { Response::Ok } },
+        { PhasesPhaseStepping::calib_nok, { Response::Ok } },
+        { PhasesPhaseStepping::calib_ok, { Response::Ok } },
+        { PhasesPhaseStepping::finish, {} },
+};
 #endif
 
 #if HAS_INPUT_SHAPER_CALIBRATION()
-    static constexpr EnumArray<PhasesInputShaperCalibration, PhaseResponses, CountPhases<PhasesInputShaperCalibration>()> input_shaper_calibration_responses {
-        { PhasesInputShaperCalibration::info, { Response::Continue, Response::Abort } },
-            { PhasesInputShaperCalibration::parking, {} },
+inline constexpr EnumArray<PhasesInputShaperCalibration, PhaseResponses, CountPhases<PhasesInputShaperCalibration>()> input_shaper_calibration_responses {
+    { PhasesInputShaperCalibration::info, { Response::Continue, Response::Abort } },
+        { PhasesInputShaperCalibration::parking, {} },
     #if HAS_ATTACHABLE_ACCELEROMETER()
-            { PhasesInputShaperCalibration::connect_to_board, { Response::Abort } },
-            { PhasesInputShaperCalibration::wait_for_extruder_temperature, { Response::Abort } },
-            { PhasesInputShaperCalibration::attach_to_extruder, { Response::Continue, Response::Abort } },
-            { PhasesInputShaperCalibration::attach_to_bed, { Response::Continue, Response::Abort } },
+        { PhasesInputShaperCalibration::connect_to_board, { Response::Abort } },
+        { PhasesInputShaperCalibration::wait_for_extruder_temperature, { Response::Abort } },
+        { PhasesInputShaperCalibration::attach_to_extruder, { Response::Continue, Response::Abort } },
+        { PhasesInputShaperCalibration::attach_to_bed, { Response::Continue, Response::Abort } },
     #endif
-            { PhasesInputShaperCalibration::measuring_x_axis, { Response::Abort } },
-            { PhasesInputShaperCalibration::measuring_y_axis, { Response::Abort } },
-            { PhasesInputShaperCalibration::measurement_failed, { Response::Retry, Response::Abort } },
-            { PhasesInputShaperCalibration::computing, { Response::Abort } },
-            { PhasesInputShaperCalibration::bad_results, { Response::Ok } },
-            { PhasesInputShaperCalibration::results, { Response::Yes, Response::No } },
-            { PhasesInputShaperCalibration::finish, {} },
-    };
+        { PhasesInputShaperCalibration::measuring_x_axis, { Response::Abort } },
+        { PhasesInputShaperCalibration::measuring_y_axis, { Response::Abort } },
+        { PhasesInputShaperCalibration::measurement_failed, { Response::Retry, Response::Abort } },
+        { PhasesInputShaperCalibration::computing, { Response::Abort } },
+        { PhasesInputShaperCalibration::bad_results, { Response::Ok } },
+        { PhasesInputShaperCalibration::results, { Response::Yes, Response::No } },
+        { PhasesInputShaperCalibration::finish, {} },
+};
 #endif
 
 #if HAS_BELT_TUNING()
-    static constexpr EnumArray<PhaseBeltTuning, PhaseResponses, CountPhases<PhaseBeltTuning>()> belt_tuning_responses {
-        { PhaseBeltTuning::init, {} },
-        { PhaseBeltTuning::ask_for_gantry_align, { Response::Done, Response::Abort } },
-        { PhaseBeltTuning::preparing, { Response::Abort } },
-        { PhaseBeltTuning::ask_for_dampeners_installation, { Response::Done, Response::Abort } },
-        { PhaseBeltTuning::calibrating_accelerometer, { Response::Abort } },
-        { PhaseBeltTuning::measuring, { Response::Abort } },
-        { PhaseBeltTuning::vibration_check, { Response::Yes, Response::No } },
-        { PhaseBeltTuning::results, { Response::Retry, Response::Finish } },
-        { PhaseBeltTuning::ask_for_dampeners_uninstallation, { Response::Done } },
-        { PhaseBeltTuning::error, { Response::Abort, Response::Retry } },
-        { PhaseBeltTuning::finish, {} },
-    };
+inline constexpr EnumArray<PhaseBeltTuning, PhaseResponses, CountPhases<PhaseBeltTuning>()> belt_tuning_responses {
+    { PhaseBeltTuning::init, {} },
+    { PhaseBeltTuning::ask_for_gantry_align, { Response::Done, Response::Abort } },
+    { PhaseBeltTuning::preparing, { Response::Abort } },
+    { PhaseBeltTuning::ask_for_dampeners_installation, { Response::Done, Response::Abort } },
+    { PhaseBeltTuning::calibrating_accelerometer, { Response::Abort } },
+    { PhaseBeltTuning::measuring, { Response::Abort } },
+    { PhaseBeltTuning::vibration_check, { Response::Yes, Response::No } },
+    { PhaseBeltTuning::results, { Response::Retry, Response::Finish } },
+    { PhaseBeltTuning::ask_for_dampeners_uninstallation, { Response::Done } },
+    { PhaseBeltTuning::error, { Response::Abort, Response::Retry } },
+    { PhaseBeltTuning::finish, {} },
+};
 #endif
 
 #if HAS_GEARBOX_ALIGNMENT()
-    static constexpr EnumArray<PhaseGearboxAlignment, PhaseResponses, CountPhases<PhaseGearboxAlignment>()> gearbox_alignment_responses {
-        { PhaseGearboxAlignment::intro, { Response::Continue, Response::Skip } },
-        { PhaseGearboxAlignment::filament_loaded_ask_unload, { Response::Unload, Response::Abort } },
-        { PhaseGearboxAlignment::filament_unknown_ask_unload, { Response::Continue, Response::Unload, Response::Abort } },
-        { PhaseGearboxAlignment::loosen_screws, { Response::Continue, Response::Skip } },
-        { PhaseGearboxAlignment::alignment, {} },
-        { PhaseGearboxAlignment::tighten_screws, { Response::Continue } },
-        { PhaseGearboxAlignment::done, { Response::Continue } },
-        { PhaseGearboxAlignment::finish, {} },
-    };
+inline constexpr EnumArray<PhaseGearboxAlignment, PhaseResponses, CountPhases<PhaseGearboxAlignment>()> gearbox_alignment_responses {
+    { PhaseGearboxAlignment::intro, { Response::Continue, Response::Skip } },
+    { PhaseGearboxAlignment::filament_loaded_ask_unload, { Response::Unload, Response::Abort } },
+    { PhaseGearboxAlignment::filament_unknown_ask_unload, { Response::Continue, Response::Unload, Response::Abort } },
+    { PhaseGearboxAlignment::loosen_screws, { Response::Continue, Response::Skip } },
+    { PhaseGearboxAlignment::alignment, {} },
+    { PhaseGearboxAlignment::tighten_screws, { Response::Continue } },
+    { PhaseGearboxAlignment::done, { Response::Continue } },
+    { PhaseGearboxAlignment::finish, {} },
+};
 #endif
 
 #if HAS_DOOR_SENSOR_CALIBRATION()
-    static constexpr EnumArray<PhaseDoorSensorCalibration, PhaseResponses, CountPhases<PhaseDoorSensorCalibration>()> door_sensor_calibration_responses {
-        { PhaseDoorSensorCalibration::confirm_abort, { Response::Back, Response::Skip } },
-        { PhaseDoorSensorCalibration::repeat, { Response::Ok } },
-        { PhaseDoorSensorCalibration::skip_ask, { Response::Calibrate, Response::Skip } },
-        { PhaseDoorSensorCalibration::confirm_closed, { Response::Continue, Response::Abort } },
-        { PhaseDoorSensorCalibration::tighten_screw_half, { Response::Continue, Response::Abort } },
-        { PhaseDoorSensorCalibration::confirm_open, { Response::Continue, Response::Abort } },
-        { PhaseDoorSensorCalibration::loosen_screw_half, { Response::Continue, Response::Abort } },
-        { PhaseDoorSensorCalibration::finger_test, { Response::Continue, Response::Abort } },
-        { PhaseDoorSensorCalibration::loosen_screw_quarter, { Response::Continue, Response::Abort } },
-        { PhaseDoorSensorCalibration::done, { Response::Continue } },
-        { PhaseDoorSensorCalibration::finish, {} },
-    };
+inline constexpr EnumArray<PhaseDoorSensorCalibration, PhaseResponses, CountPhases<PhaseDoorSensorCalibration>()> door_sensor_calibration_responses {
+    { PhaseDoorSensorCalibration::confirm_abort, { Response::Back, Response::Skip } },
+    { PhaseDoorSensorCalibration::repeat, { Response::Ok } },
+    { PhaseDoorSensorCalibration::skip_ask, { Response::Calibrate, Response::Skip } },
+    { PhaseDoorSensorCalibration::confirm_closed, { Response::Continue, Response::Abort } },
+    { PhaseDoorSensorCalibration::tighten_screw_half, { Response::Continue, Response::Abort } },
+    { PhaseDoorSensorCalibration::confirm_open, { Response::Continue, Response::Abort } },
+    { PhaseDoorSensorCalibration::loosen_screw_half, { Response::Continue, Response::Abort } },
+    { PhaseDoorSensorCalibration::finger_test, { Response::Continue, Response::Abort } },
+    { PhaseDoorSensorCalibration::loosen_screw_quarter, { Response::Continue, Response::Abort } },
+    { PhaseDoorSensorCalibration::done, { Response::Continue } },
+    { PhaseDoorSensorCalibration::finish, {} },
+};
 #endif
 
-    static constexpr EnumArray<ClientFSM, std::span<const PhaseResponses>, ClientFSM::_count> fsm_phase_responses {
-        { ClientFSM::Serial_printing, {} },
-            { ClientFSM::Load_unload, LoadUnloadResponses },
-            { ClientFSM::Preheat, PreheatResponses },
-#if HAS_SELFTEST()
-            { ClientFSM::Selftest, SelftestResponses },
-            { ClientFSM::FansSelftest, FanSelftestResponses },
-#endif
-            { ClientFSM::NetworkSetup, network_setup_responses },
-            { ClientFSM::Printing, {} },
-#if ENABLED(CRASH_RECOVERY)
-            { ClientFSM::CrashRecovery, CrashRecoveryResponses },
-#endif
-            { ClientFSM::QuickPause, QuickPauseResponses },
-            { ClientFSM::Warning, WarningResponses },
-            { ClientFSM::PrintPreview, PrintPreviewResponses },
-#if HAS_COLDPULL()
-            { ClientFSM::ColdPull, ColdPullResponses },
-#endif
-#if HAS_PHASE_STEPPING_CALIBRATION()
-            { ClientFSM::PhaseSteppingCalibration, phase_stepping_calibration_responses },
-#endif
-#if HAS_INPUT_SHAPER_CALIBRATION()
-            { ClientFSM::InputShaperCalibration, input_shaper_calibration_responses },
-#endif
-#if HAS_BELT_TUNING()
-            { ClientFSM::BeltTuning, belt_tuning_responses },
-#endif
-#if HAS_GEARBOX_ALIGNMENT()
-            { ClientFSM::GearboxAlignment, gearbox_alignment_responses },
-#endif
-#if HAS_DOOR_SENSOR_CALIBRATION()
-            { ClientFSM::DoorSensorCalibration, door_sensor_calibration_responses },
-#endif
-            { ClientFSM::Wait, {} },
-    };
+extern constinit const EnumArray<ClientFSM, std::span<const PhaseResponses>, ClientFSM::_count> fsm_phase_responses;
 
-public:
-    static constexpr const PhaseResponses &get_fsm_responses(ClientFSM fsm_type, PhaseUnderlyingType phase) {
-        if (std::to_underlying(fsm_type) >= fsm_phase_responses.size()) {
-            return empty_phase_responses;
-        }
-
-        const auto &responses = fsm_phase_responses[fsm_type];
-        if (phase >= responses.size()) {
-            return empty_phase_responses;
-        }
-
-        return responses[phase];
+inline constexpr const PhaseResponses &get_fsm_responses(ClientFSM fsm_type, PhaseUnderlyingType phase) {
+    if (std::to_underlying(fsm_type) >= fsm_phase_responses.size()) {
+        return empty_phase_responses;
     }
 
-    // get all responses accepted in phase
-    static constexpr const PhaseResponses &get_available_responses(FSMAndPhase fsm_phase) {
-        return get_fsm_responses(fsm_phase.fsm, fsm_phase.phase);
+    const auto &responses = fsm_phase_responses[fsm_type];
+    if (phase >= responses.size()) {
+        return empty_phase_responses;
     }
 
-    // get index of single response in PhaseResponses
-    // return -1 (maxval) if does not exist
-    static constexpr uint8_t GetIndex(FSMAndPhase fsm_phase, Response response) {
-        const auto responses = fsm_phase_responses[fsm_phase.fsm];
-        if (fsm_phase.phase >= responses.size()) {
-            return -1;
-        }
+    return responses[phase];
+}
 
-        const PhaseResponses &cmds = responses[fsm_phase.phase];
-        for (size_t i = 0; i < MAX_RESPONSES; ++i) {
-            if (cmds[i] == response) {
-                return i;
-            }
-        }
+// get all responses accepted in phase
+inline constexpr const PhaseResponses &get_available_responses(FSMAndPhase fsm_phase) {
+    return get_fsm_responses(fsm_phase.fsm, fsm_phase.phase);
+}
+
+// get index of single response in PhaseResponses
+// return -1 (maxval) if does not exist
+inline constexpr uint8_t GetIndex(FSMAndPhase fsm_phase, Response response) {
+    const auto responses = fsm_phase_responses[fsm_phase.fsm];
+    if (fsm_phase.phase >= responses.size()) {
         return -1;
     }
 
-    // get response from PhaseResponses by index
-    static constexpr const Response &get_available_response(FSMAndPhase phase, const uint8_t index) {
-        if (index >= MAX_RESPONSES) {
-            return ResponseNone;
+    const PhaseResponses &cmds = responses[fsm_phase.phase];
+    for (size_t i = 0; i < MAX_RESPONSES; ++i) {
+        if (cmds[i] == response) {
+            return i;
         }
-        return get_available_responses(phase)[index];
     }
+    return -1;
+}
 
-    template <class T>
-    static bool has_available_responses(const T phase) {
-        return get_available_response(phase, 0) != Response::_none; // this phase has no responses
+// get response from PhaseResponses by index
+inline constexpr const Response &get_available_response(FSMAndPhase phase, const uint8_t index) {
+    if (index >= MAX_RESPONSES) {
+        return ResponseNone;
     }
-};
+    return get_available_responses(phase)[index];
+}
+
+template <class T>
+inline bool has_available_responses(const T phase) {
+    return get_available_response(phase, 0) != Response::_none; // this phase has no responses
+}
+} // namespace ClientResponses
 
 #if HAS_SELFTEST()
 enum class SelftestParts {
@@ -1196,7 +1156,7 @@ enum class SelftestParts {
     _count = _none
 };
 
-static constexpr PhasesSelftest SelftestGetFirstPhaseFromPart(SelftestParts part) {
+inline constexpr PhasesSelftest SelftestGetFirstPhaseFromPart(SelftestParts part) {
     switch (part) {
     case SelftestParts::Axis:
         return PhasesSelftest::_first_Axis;
@@ -1231,7 +1191,7 @@ static constexpr PhasesSelftest SelftestGetFirstPhaseFromPart(SelftestParts part
     return PhasesSelftest::_none;
 }
 
-static constexpr PhasesSelftest SelftestGetLastPhaseFromPart(SelftestParts part) {
+inline constexpr PhasesSelftest SelftestGetLastPhaseFromPart(SelftestParts part) {
     switch (part) {
     case SelftestParts::Axis:
         return PhasesSelftest::_last_Axis;
@@ -1266,13 +1226,13 @@ static constexpr PhasesSelftest SelftestGetLastPhaseFromPart(SelftestParts part)
     return PhasesSelftest::_none;
 }
 
-static constexpr bool SelftestPartContainsPhase(SelftestParts part, PhasesSelftest ph) {
+inline constexpr bool SelftestPartContainsPhase(SelftestParts part, PhasesSelftest ph) {
     const PhaseUnderlyingType ph_u16 = PhaseUnderlyingType(ph);
 
     return (ph_u16 >= PhaseUnderlyingType(SelftestGetFirstPhaseFromPart(part))) && (ph_u16 <= PhaseUnderlyingType(SelftestGetLastPhaseFromPart(part)));
 }
 
-static constexpr SelftestParts SelftestGetPartFromPhase(PhasesSelftest ph) {
+inline constexpr SelftestParts SelftestGetPartFromPhase(PhasesSelftest ph) {
     for (size_t i = 0; i < size_t(SelftestParts::_none); ++i) {
         if (SelftestPartContainsPhase(SelftestParts(i), ph)) {
             return SelftestParts(i);

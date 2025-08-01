@@ -33,7 +33,7 @@ public:
     void Draw();
 
     static constexpr auto preview_phase { PhasesPrintPreview::tools_mapping };
-    static constexpr const auto &responses_with_print { ClientResponses::get_available_responses(preview_phase) };
+    static constexpr const auto &responses_with_print { ClientResponses::PrintPreviewResponses[preview_phase] };
     static constexpr const auto responses_no_print {
         []() {
             auto modified_resps = responses_with_print;
