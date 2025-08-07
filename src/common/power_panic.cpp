@@ -145,7 +145,7 @@ void ac_fault_task_main([[maybe_unused]] void const *argument) {
 
 std::atomic_bool ac_fault_triggered = false;
 std::atomic_bool should_beep = true;
-static PPState power_panic_state = PPState::Inactive;
+std::atomic<PPState> power_panic_state = PPState::Inactive;
 
 bool panic_is_active() {
     // panic loop is active when state is higher then triggered
@@ -599,7 +599,7 @@ bool shutdown_loop_checked() {
     processing = planner.processing();
     if (!processing) {
         log_warning(PowerPanic, "shutdown state %u/%u took too long",
-            static_cast<unsigned>(power_panic_state), static_cast<unsigned>(shutdown_state - 1));
+            static_cast<unsigned>(power_panic_state.load()), static_cast<unsigned>(shutdown_state - 1));
     }
 
     return processing;
