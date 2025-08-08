@@ -21,6 +21,7 @@
 #include "adc.hpp"
 #include <config_store/store_instance.hpp>
 #include "Marlin/src/module/prusa/accelerometer.h"
+#include <common/power_panic.hpp>
 
 using namespace common::puppies::fifo;
 
@@ -218,6 +219,11 @@ CommunicationStatus Dwarf::read_fifo(std::array<uint16_t, MODBUS_FIFO_LEN> &fifo
             // Mark acceleration data as corrupted, but retry. Dwarf is most probably ok,
             // no need to do a full puppy reconnect.
             PrusaAccelerometer::set_possible_overflow();
+
+            if (power_panic::panic_is_active()) {
+                // Give up early in power panic to unblock.
+                return status;
+            }
         }
     }
     return status;

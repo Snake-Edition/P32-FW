@@ -8,6 +8,8 @@
 #include "timing.h"
 #include "metric.h"
 
+#include <common/power_panic.hpp>
+
 namespace buddy::puppies {
 
 PuppyModbus puppyModbus;
@@ -155,7 +157,12 @@ ModbusErrorInfo PuppyModbus::make_single_request(RequestTiming *const timing) {
         if (!suppress_error_logs) {
             log_info(Modbus, "Error detected, recovering serial.");
         }
-        PuppyBus::ErrorRecovery();
+        if (!power_panic::panic_is_active()) {
+            // Don't try to recover while in power panic. The bus likely died
+            // because we cut power to puppies and we are in a hurry, so don't
+            // wait for anything.
+            PuppyBus::ErrorRecovery();
+        }
     }
     return err;
 }
@@ -167,8 +174,10 @@ ModbusErrorInfo PuppyModbus::make_request(RequestTiming *const timing, uint8_t r
         err = make_single_request(timing);
         if (!modbusIsOk(err)) {
             // only repeat because of selected errors and maximal number of times
+            // (don't repeat in power panic, we are unlikely to succeed and we
+            // are in a hurry).
             bool repeat = (modbusGetResponseError(err) == MODBUS_ERROR_LENGTH || modbusGetResponseError(err) == MODBUS_ERROR_CRC)
-                && retries;
+                && retries && !power_panic::panic_is_active();
 
             if (repeat) {
                 if (!suppress_error_logs) {
