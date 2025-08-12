@@ -28,6 +28,11 @@ using namespace selftest;
 
 static constexpr int32_t acceptable_noise_range_g = 60;
 
+auto set_extruder_temperature = [](int16_t temperature, uint8_t extruder) {
+    thermalManager.setTargetHotend(temperature, extruder);
+    marlin_server::set_temp_to_display(temperature, extruder);
+};
+
 CSelftestPart_Loadcell::CSelftestPart_Loadcell(IPartHandler &state_machine, const LoadcellConfig_t &config,
     SelftestLoadcell_t &result)
     : rStateMachine(state_machine)
@@ -40,13 +45,13 @@ CSelftestPart_Loadcell::CSelftestPart_Loadcell(IPartHandler &state_machine, cons
     , log(1000)
     , log_fast(100) // this is only during 1s (will generate 9-10 logs)
 {
-    thermalManager.setTargetHotend(0, rConfig.tool_nr);
+    set_extruder_temperature(0, rConfig.tool_nr);
     endstops.enable(true);
     log_info(Selftest, "%s Started", rConfig.partname);
 }
 
 CSelftestPart_Loadcell::~CSelftestPart_Loadcell() {
-    thermalManager.setTargetHotend(begin_target_temp, rConfig.tool_nr);
+    set_extruder_temperature(begin_target_temp, rConfig.tool_nr);
     endstops.enable(false);
 }
 
@@ -89,8 +94,7 @@ LoopResult CSelftestPart_Loadcell::stateMoveUpWaitFinish() {
 }
 
 LoopResult CSelftestPart_Loadcell::stateCooldownInit() {
-    thermalManager.setTargetHotend(0, rConfig.tool_nr); // Disable heating for tested hotend
-    marlin_server::set_temp_to_display(0, rConfig.tool_nr);
+    set_extruder_temperature(0, rConfig.tool_nr); // Disable heating for tested hotend
     const float temp = thermalManager.degHotend(rConfig.tool_nr);
     rResult.temperature = static_cast<int16_t>(temp);
     need_cooling = temp > rConfig.cool_temp; // Check if temperature is safe
