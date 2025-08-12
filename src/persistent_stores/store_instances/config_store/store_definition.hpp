@@ -45,6 +45,7 @@
 #include <option/has_door_sensor_calibration.h>
 #include <option/has_manual_chamber_vents.h>
 #include <option/has_precise_homing_corexy.h>
+#include <option/has_manual_belt_tuning.h>
 #include <common/extended_printer_type.hpp>
 #include <common/hw_check.hpp>
 #include <pwm_utils.hpp>
@@ -702,6 +703,10 @@ struct CurrentStore
 
 #if HAS_MANUAL_CHAMBER_VENTS()
     StoreItem<bool, true, ItemFlag::printer_state, journal::hash("Check chamber ventilation state")> check_manual_vent_state;
+#endif
+
+#if HAS_MANUAL_BELT_TUNING()
+    StoreItem<bool, false, ItemFlag::calibrations, journal::hash("Manual Belt Tuning Completed")> manual_belt_tuning_completed;
 #endif
 
 private:
