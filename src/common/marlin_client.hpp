@@ -131,7 +131,9 @@ void try_recover_from_media_error();
 
 void park_head();
 
-void notify_server_about_encoder_move();
+void notify_server_about_encoder_move_up();
+
+void notify_server_about_encoder_move_down();
 
 void notify_server_about_knob_click();
 

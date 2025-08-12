@@ -380,8 +380,12 @@ void try_recover_from_media_error() {
     _send_request_flag_to_server(RequestFlag::TryRecoverFromMediaError);
 }
 
-void notify_server_about_encoder_move() {
-    _send_request_flag_to_server(RequestFlag::KnobMove);
+void notify_server_about_encoder_move_up() {
+    _send_request_flag_to_server(RequestFlag::KnobMoveUp);
+}
+
+void notify_server_about_encoder_move_down() {
+    _send_request_flag_to_server(RequestFlag::KnobMoveDown);
 }
 
 void notify_server_about_knob_click() {

@@ -66,8 +66,12 @@ bool gui::knob::EventEncoder(int diff) {
     if (diff == 0) {
         return false;
     }
+    if (diff > 0) {
+        marlin_client::notify_server_about_encoder_move_up();
+    } else {
+        marlin_client::notify_server_about_encoder_move_down();
+    }
 
-    marlin_client::notify_server_about_encoder_move();
     window_t *capture_ptr = Screens::Access()->Get()->GetCapturedWindow();
     Screens::Access()->ScreenEvent(nullptr, GUI_event_t::ENC_CHANGE, (void *)(intptr_t)diff);
 
