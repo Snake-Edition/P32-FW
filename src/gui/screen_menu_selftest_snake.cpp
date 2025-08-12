@@ -8,6 +8,7 @@
 #include <option/has_phase_stepping_selftest.h>
 #include <option/has_door_sensor_calibration.h>
 #include <option/has_toolchanger.h>
+#include <option/has_manual_belt_tuning.h>
 #if HAS_TOOLCHANGER()
     #include <module/prusa/toolchanger.h>
 #endif

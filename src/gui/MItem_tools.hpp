@@ -634,6 +634,10 @@ protected:
 using MI_BELT_TUNING = WithConstructorArgs<MenuItemGcodeAction, N_("Belt Tuning"), "M960 W"_tstr>;
 #endif
 
+#if HAS_MANUAL_BELT_TUNING()
+using MI_MANUAL_BELT_TUNING = WithConstructorArgs<MenuItemGcodeAction, N_("Manual Belt Tuning"), "M961"_tstr>;
+#endif
+
 #if HAS_ILI9488_DISPLAY()
 class MI_DISPLAY_BAUDRATE : public MenuItemSwitch {
 public:
