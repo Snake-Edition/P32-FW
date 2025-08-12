@@ -18,3 +18,7 @@ endif()
 if(HAS_LEDS_MENU)
   target_sources(firmware PRIVATE screen_menu_leds.cpp)
 endif()
+
+if(HAS_SELFTEST)
+  add_subdirectory(selftest)
+endif()

@@ -3,6 +3,7 @@
 #include <option/has_phase_stepping_calibration.h>
 #include <option/has_input_shaper_calibration.h>
 #include <option/has_door_sensor_calibration.h>
+#include <option/has_manual_belt_tuning.h>
 #include <logging/log.hpp>
 
 LOG_COMPONENT_DEF(Fsm, logging::Severity::debug);
@@ -40,6 +41,9 @@ static constexpr uint32_t score(ClientFSM fsm_type) {
     case ClientFSM::PrintPreview:
 #if HAS_COLDPULL()
     case ClientFSM::ColdPull:
+#endif
+#if HAS_MANUAL_BELT_TUNING()
+    case ClientFSM::BeltTuning:
 #endif
     case ClientFSM::NetworkSetup:
 #if HAS_PHASE_STEPPING_CALIBRATION()

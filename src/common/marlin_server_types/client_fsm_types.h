@@ -15,6 +15,7 @@
 #include <option/has_chamber_api.h>
 #include <option/has_uneven_bed_prompt.h>
 #include <option/has_door_sensor_calibration.h>
+#include <option/has_manual_belt_tuning.h>
 
 #include <inc/MarlinConfigPre.h>
 
@@ -44,6 +45,9 @@ enum class ClientFSM : uint8_t {
     PrintPreview,
     #if HAS_COLDPULL()
     ColdPull,
+    #endif
+    #if HAS_MANUAL_BELT_TUNING()
+    BeltTuning,
     #endif
     #if HAS_PHASE_STEPPING_CALIBRATION()
     PhaseSteppingCalibration,

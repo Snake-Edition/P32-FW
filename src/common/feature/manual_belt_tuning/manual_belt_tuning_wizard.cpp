@@ -112,7 +112,7 @@ public:
             return;
         }
 
-        if (!GcodeSuite::G28_no_parser(true, true, true)) {
+        if (!GcodeSuite::G28_no_parser(true, true, true, { .precise = true })) {
             return;
         }
         do_blocking_move_to(240, -8, 10, 50.f); // belt tension calibration position
@@ -159,7 +159,6 @@ public:
 
                 // Save top belt results
                 freq_top_belt = vibrator.frequency;
-                skip_upper_belt = false;
                 fsm_change(PhaseManualBeltTuning::measure_lower_belt);
             }
 

@@ -15,7 +15,12 @@
 #include <option/has_input_shaper_calibration.h>
 #include <option/has_coldpull.h>
 #include <option/has_door_sensor_calibration.h>
+#include <option/has_manual_belt_tuning.h>
 #include <gui/screen/screen_preheat.hpp>
+
+#if HAS_MANUAL_BELT_TUNING()
+    #include <screen/selftest/screen_belt_tuning.hpp>
+#endif
 
 #if HAS_COLDPULL()
     #include "screen_cold_pull.hpp"
@@ -189,6 +194,9 @@ using FSMDisplayConfig = FSMDisplayConfigDef<
 #endif
 #if HAS_DOOR_SENSOR_CALIBRATION()
     FSMScreenDef<ClientFSM::DoorSensorCalibration, ScreenDoorSensorCalibration>,
+#endif
+#if HAS_MANUAL_BELT_TUNING()
+    FSMScreenDef<ClientFSM::BeltTuning, ScreenBeltTuning>,
 #endif
 
     // This is here so that we can worry-free write commas at the end of each argument

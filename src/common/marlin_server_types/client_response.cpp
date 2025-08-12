@@ -1,4 +1,9 @@
 #include "client_response.hpp"
+#include <option/has_manual_belt_tuning.h>
+
+#if HAS_MANUAL_BELT_TUNING()
+    #include <fsm/manual_belt_tuning_phases.hpp>
+#endif
 
 namespace ClientResponses {
 
@@ -20,6 +25,9 @@ constinit const EnumArray<ClientFSM, std::span<const PhaseResponses>, ClientFSM:
         { ClientFSM::PrintPreview, PrintPreviewResponses },
 #if HAS_COLDPULL()
         { ClientFSM::ColdPull, ColdPullResponses },
+#endif
+#if HAS_MANUAL_BELT_TUNING()
+        { ClientFSM::BeltTuning, belt_tuning_responses },
 #endif
 #if HAS_PHASE_STEPPING_CALIBRATION()
         { ClientFSM::PhaseSteppingCalibration, phase_stepping_calibration_responses },
