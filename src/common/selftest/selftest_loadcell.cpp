@@ -195,7 +195,8 @@ LoopResult CSelftestPart_Loadcell::stateConnectionCheck() {
 }
 
 LoopResult CSelftestPart_Loadcell::stateAskAbortInit() {
-    IPartHandler::SetFsmPhase(PhasesSelftest::Loadcell_user_tap_ask_abort);
+    const bool show_ignore = rResult.loadcell_noisy && !rResult.ignore_noisy;
+    IPartHandler::SetFsmPhase(show_ignore ? PhasesSelftest::Loadcell_user_tap_ask_ignore_abort : PhasesSelftest::Loadcell_user_tap_ask_abort);
     return LoopResult::RunNext;
 }
 
@@ -205,6 +206,10 @@ LoopResult CSelftestPart_Loadcell::stateAskAbort() {
     case Response::Abort: // Abort is automatic at state machine level, it should never get here
         log_error(Selftest, "%s user pressed abort, code should not reach this place", rConfig.partname);
         return LoopResult::Abort;
+    case Response::Ignore:
+        log_error(Selftest, "%s user selected to ignore loadcell noise", rConfig.partname);
+        rResult.ignore_noisy = true;
+        return LoopResult::RunNext;
     case Response::Continue:
         log_info(Selftest, "%s user pressed continue", rConfig.partname);
         return LoopResult::RunNext;
@@ -223,7 +228,9 @@ LoopResult CSelftestPart_Loadcell::stateTapCheckCountDownInit() {
 
     loadcell_value_range = {};
     time_start_countdown = SelftestInstance().GetTime();
-    rResult = {};
+    // Preserve the ignore noisy across retries.
+    const bool ignore_noisy = rResult.ignore_noisy;
+    rResult = { .ignore_noisy = ignore_noisy };
 
     IPartHandler::SetFsmPhase(PhasesSelftest::Loadcell_user_tap_countdown);
     return LoopResult::RunNext;
@@ -258,7 +265,7 @@ LoopResult CSelftestPart_Loadcell::stateTapCheckCountDown() {
 }
 
 LoopResult CSelftestPart_Loadcell::stateTapCheckInit() {
-    if (loadcell_value_range.max - loadcell_value_range.min > acceptable_noise_range_g) {
+    if (loadcell_value_range.max - loadcell_value_range.min > acceptable_noise_range_g && !rResult.ignore_noisy) {
         log_info(Selftest, "%s range: %" PRIi32 "-%" PRIi32 " outside of %" PRIi32, rConfig.partname, loadcell_value_range.min, loadcell_value_range.max, acceptable_noise_range_g);
         rResult.loadcell_noisy = true;
         return LoopResult::GoToMark0;
@@ -300,6 +307,6 @@ LoopResult CSelftestPart_Loadcell::stateTapOk() {
 
     log_info(Selftest, "%s finished", rConfig.partname);
     IPartHandler::SetFsmPhase(PhasesSelftest::Loadcell_user_tap_ok);
-    return LoopResult::RunNext;
     rResult.progress = 100;
+    return LoopResult::RunNext;
 }

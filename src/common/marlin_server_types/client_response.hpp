@@ -256,6 +256,7 @@ enum class PhasesSelftest : PhaseUnderlyingType {
     Loadcell_tool_select,
     Loadcell_cooldown,
     Loadcell_user_tap_ask_abort,
+    Loadcell_user_tap_ask_ignore_abort,
     Loadcell_user_tap_countdown,
     Loadcell_user_tap_check,
     Loadcell_user_tap_ok,
@@ -799,6 +800,7 @@ inline constexpr EnumArray<PhasesSelftest, PhaseResponses, CountPhases<PhasesSel
     { PhasesSelftest::Loadcell_cooldown, { Response::Abort } },
 
     { PhasesSelftest::Loadcell_user_tap_ask_abort, { Response::Continue, Response::Abort } },
+    { PhasesSelftest::Loadcell_user_tap_ask_ignore_abort, { Response::Continue, Response::Ignore, Response::Abort } },
     { PhasesSelftest::Loadcell_user_tap_countdown, {} },
     { PhasesSelftest::Loadcell_user_tap_check, {} },
     { PhasesSelftest::Loadcell_user_tap_ok, {} },

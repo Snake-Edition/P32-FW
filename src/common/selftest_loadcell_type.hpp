@@ -14,7 +14,8 @@
 struct SelftestLoadcell_t {
     static constexpr uint8_t countdown_undef = 0b11111;
 
-    uint8_t progress = 0;
+    uint8_t progress : 7 = 0;
+    bool ignore_noisy : 1 = false;
     uint8_t countdown : 5 = countdown_undef;
     bool loadcell_noisy : 1 = false;
     bool wrong_tap : 1 = false;
