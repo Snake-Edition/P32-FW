@@ -4348,7 +4348,7 @@ msgstr "ロードセルカクニン"
 msgid ""
 "Loadcell data are noisy. Make sure the printer is on a stable surface. Retry?"
 msgstr ""
-"ロードセル データガ フアンテイです. プリンタヲ アンテイシタ バショニ オイテク"
+"ロードセル データガ フアンテイデス. プリンタヲ アンテイシタ バショニ オイテク"
 "ダサイ. リトライシマスカ?"
 
 #: tmp_error_headers/error_list_coreone.hpp:450
@@ -5278,7 +5278,7 @@ msgstr "ノズルオンド"
 
 #: src/common/feature/print_status_message/print_status_message_formatter_buddy.cpp:26
 msgid "Nozzle cleaning"
-msgstr "ノズルの清掃"
+msgstr "ノズルノ セイソウ"
 
 #: tmp_error_headers/error_list_coreone.hpp:835
 #: tmp_error_headers/error_list_xl.hpp:905
@@ -5710,8 +5710,8 @@ msgid ""
 "Performing factory reset.\n"
 "Do not turn off the printer."
 msgstr ""
-"ファクトリー・リセット中.\n"
-"プリンターノ電源ヲオフニシナイデクダサイ."
+"ファクトリー・リセットチュウ.\n"
+"プリンターノ デンゲンヲ オフニシナイデクダサイ."
 
 #: src/gui/MItem_menus.hpp:158
 msgid "Phase Stepping"
@@ -5994,7 +5994,7 @@ msgstr ""
 
 #: src/gui/screen_menu_connect.cpp:113
 msgid "Previous registration to Connect will be forgotten. Proceed?"
-msgstr "イゼンノ コネクト トウロクは サクジョサレマス. ゾッコウシマスカ?"
+msgstr "イゼンノ コネクト トウロクハ サクジョサレマス. ゾッコウシマスカ?"
 
 #: src/gui/screen_printing_end_result.cpp:15
 #, c-format
@@ -6143,9 +6143,9 @@ msgid ""
 "Factory reset will be performed.\n"
 "Some configuration (network, filament profiles, ...) will be preserved."
 msgstr ""
-"プリンタータイプが %s から %s に変更されました.\n"
-"ファクトリーリセットが実行されます.\n"
-"一部の設定(ネットワーク、フィラメントプロファイルなど)は保持されます."
+"プリンタタイプガ %s カラ %s ニ ヘンコウサレマシタ.\n"
+"ファクトリリセットガ ジッコウサレマス.\n"
+"イチブノ セッテイ(ネットワーク、フィラメントプロファイル ナド)ハ ホジサレマス."
 
 #: src/gui/MItem_menus.cpp:169
 msgid "Printhead"
