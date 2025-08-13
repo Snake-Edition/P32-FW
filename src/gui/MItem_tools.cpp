@@ -201,7 +201,18 @@ void MI_AUTO_HOME::click(IWindowMenu & /*window_menu*/) {
         return;
     }
 
-    marlin_client::gcode("G28 P");
+    // Note: This check is _in theory_ a bit racy - we could switch between
+    // printing / not printing between the check and the execution. However,
+    // this is highly unlikely and also somewhat harmless:
+    // * In one direction, we do precise homing even when imprecise would suffice.
+    // * In another direction, we add an imprecise homing _to the start_ of the
+    //   print, which is before the print itself does its own homing.
+    if (marlin_client::is_printing()) {
+        marlin_client::gcode("G28 P");
+    } else {
+        // Outside of a print, we are fine homing imprecisely.
+        marlin_client::gcode("G28 P I");
+    }
 }
 
 /*****************************************************************************/
