@@ -44,7 +44,7 @@ Errors:
     text: "Failed to calibrate homing. Continuing can cause layer shifts after rehoming."
     id: "PRECISE_REFINEMENT_FAILED"
     gui_layout: "warning_dialog"
-    approved: false
+    approved: true
 
   - code: "XX102"
     printers: [XL]
@@ -52,7 +52,7 @@ Errors:
     text: "Failed to calibrate homing. Continuing can cause layer shifts after rehoming and toolchange issues."
     id: "PRECISE_REFINEMENT_FAILED"
     gui_layout: "warning_dialog"
-    approved: false
+    approved: true
 
   - code: "XX103"
     printers: [XL]
@@ -1037,9 +1037,16 @@ Errors:
 
   - code: "XX537"
     title: "SELFTEST NOT PASSED"
-    text: "Selftests required to perform this action have not been completed. The action cannot be executed."
+    text: "The previous tests must be completed before this one."
     id: "ACTION_SELFTEST_REQUIRED"
     gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX538"
+    title: "INTERNAL ERROR"
+    text: "We are actively working on resolving these issues. Please send the crash dump, saved upon reset, to our support team."
+    id: "INTERNAL_ERROR"
+    gui_layout: "red_screen"
     approved: false
 
   - code: "XX601"
