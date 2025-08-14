@@ -758,9 +758,8 @@ msgid "CANCEL"
 msgstr "СКАСУВАТИ"
 
 #: src/gui/screen/screen_cancel_objects.cpp:160
-#, fuzzy
 msgid "CANCEL OBJECTS"
-msgstr "СКАСУВАТИ"
+msgstr "СКАСУВАТИ ОБ'ЄКТИ"
 
 #: tmp_error_headers/error_list_coreone.hpp:43
 msgid "CEILING CLEARANCE WARNING"
@@ -908,9 +907,8 @@ msgid "Calibrating accelerometer..."
 msgstr "Калібрування акселерометра..."
 
 #: src/common/feature/print_status_message/print_status_message_formatter_buddy.cpp:17
-#, fuzzy
 msgid "Calibrating axis"
-msgstr "Калібрування"
+msgstr "Калібрування осі"
 
 #: src/gui/wizard/selftest_frame_tool_offsets.cpp:71
 msgid "Calibrating tool offsets."
@@ -956,7 +954,6 @@ msgstr ""
 "Не вдалося досягти калібрувального штифта. Перевірте встановлення штифта."
 
 #: src/common/feature/factory_reset/factory_reset.hpp:37
-#, fuzzy
 msgid "Calibrations"
 msgstr "Калібрування"
 
@@ -1304,9 +1301,8 @@ msgid "Clean steel sheet."
 msgstr "Очистьте сталевий лист."
 
 #: src/gui/dialogs/DialogLoadUnload.cpp:62
-#, fuzzy
 msgid "Cleaning nozzle"
-msgstr "Охолодження сопла"
+msgstr "Очищення сопла"
 
 #: src/gui/screen_move_z.hpp:21
 msgid "Click the knob to close"
@@ -1361,9 +1357,8 @@ msgid "Comm err"
 msgstr "Помилка зв'язку"
 
 #: src/common/feature/factory_reset/factory_reset.hpp:38
-#, fuzzy
 msgid "Common Misconfigurations"
-msgstr "Виправити поширені помилки конфігурації"
+msgstr "Поширені помилки конфігурації"
 
 #: src/gui/screen_input_shaper_calibration.cpp:217
 #, c-format
@@ -1436,9 +1431,8 @@ msgid "Cooling down. Do not touch the nozzle!"
 msgstr "Охолодження. Не торкайтеся сопла!"
 
 #: src/gui/wizard/screen_fan_selftest.cpp:64
-#, fuzzy
 msgid "Cooling fans"
-msgstr "Охолодження сопла"
+msgstr "Вентилятори охолодження"
 
 #: src/gui/screen_cold_pull.cpp:261
 msgid "Cooling the nozzle"
@@ -3692,9 +3686,8 @@ msgid "Homing"
 msgstr "Калібрування початкових позицій"
 
 #: src/gui/MItem_hardware.cpp:160
-#, fuzzy
 msgid "Homing Calibration"
-msgstr "%d Калібрування початкової позиції"
+msgstr "Калібрування початкової позиції"
 
 #: tmp_error_headers/error_list_coreone.hpp:86
 #: tmp_error_headers/error_list_xl.hpp:79
@@ -4050,9 +4043,8 @@ msgid "Invalid BGCODE file header"
 msgstr "Недійсний заголовок файлу BGCODE"
 
 #: src/gui/MItem_mmu.hpp:245
-#, fuzzy
 msgid "Invoke MMU maintenance"
-msgstr "Обслуговування екструдера"
+msgstr "Запустити обслуговування MMU"
 
 #: src/gui/screen/filament/screen_filament_detail.cpp:122
 msgid "Is Abrasive"
@@ -4093,9 +4085,8 @@ msgid "Item %i"
 msgstr "Елемент %i"
 
 #: src/common/feature/print_status_message/print_status_message_formatter_buddy.cpp:30
-#, fuzzy
 msgid "Joining spool"
-msgstr "Вирівнювання інструменту"
+msgstr "З'єднання котушки"
 
 #: src/gui/screen/screen_factory_reset.cpp:57
 msgid "Keep"
@@ -4103,9 +4094,8 @@ msgstr "Зберегти"
 
 #. / Reset everything, keep just HW configuration
 #: src/gui/screen/screen_factory_reset.cpp:31
-#, fuzzy
 msgid "Keep HW Config"
-msgstr "Немає конфігурації"
+msgstr "Зберегти конфігурацію обладнання"
 
 #: src/gui/screen_menu_lang_and_time.hpp:27
 msgid "LANGUAGE & TIME"
@@ -4147,9 +4137,8 @@ msgid "LOADCELL MEASURE FAILED"
 msgstr "НЕ ВДАЛОСЯ ВИМІРЯТИ ДАТЧИКОМ НАВАНТАЖЕННЯ"
 
 #: src/gui/include_XL/selftest_snake_submenus.cpp:34
-#, fuzzy
 msgid "LOADCELL TEST"
-msgstr "ТАЙМ-АУТ ДАТЧИКА НАВАНТАЖЕННЯ"
+msgstr "ТЕСТ ДАТЧИКА НАВАНТАЖЕННЯ"
 
 #: tmp_error_headers/error_list_coreone.hpp:456
 #: tmp_error_headers/error_list_xl.hpp:505
@@ -5295,9 +5284,8 @@ msgid "ON "
 msgstr "УВІМК."
 
 #: src/gui/screen/screen_cancel_objects.cpp:92
-#, fuzzy
 msgid "Object"
-msgstr "Скасувати об'єкт"
+msgstr "Об'єкт"
 
 #. / Display string of the nullopt value
 #: src/gui/screen_menu_connect.cpp:46
@@ -6074,7 +6062,7 @@ msgid ""
 "Factory reset will be performed.\n"
 "Some configuration (network, filament profiles, ...) will be preserved."
 msgstr ""
-"Тип принтера змінено з %s на %s.\\nБуде виконано скидання до заводських "
+"Тип принтера змінено з %s на %s.\nБуде виконано скидання до заводських "
 "налаштувань.\n"
 "Деякі конфігурації (мережа, профілі філаментів,...) буде збережено."
 
@@ -6101,9 +6089,8 @@ msgstr ""
 "допустиму різницю в %.3f мм."
 
 #: src/common/feature/print_status_message/print_status_message_formatter_buddy.cpp:18
-#, fuzzy
 msgid "Probing bed"
-msgstr "Підготовка леза"
+msgstr "Вимірювання столу"
 
 #: src/gui/MItem_network.cpp:223
 msgid "Protocol"
@@ -7572,7 +7559,7 @@ msgid ""
 "This operation cannot be undone. Your data will be lost!\n"
 "Do you want to proceed with the factory reset?"
 msgstr ""
-"Цю операцію неможливо скасувати. Ваші дані буде втрачено!\\nБажаєте "
+"Цю операцію неможливо скасувати. Ваші дані буде втрачено!\nБажаєте "
 "продовжити скидання до заводських налаштувань?"
 
 #. trying to assign to oneself again
@@ -7702,9 +7689,8 @@ msgid "Today at"
 msgstr "Сьогодні о"
 
 #: src/gui/screen/screen_m600.cpp:44
-#, fuzzy
 msgid "Tool"
-msgstr "Інструмент1"
+msgstr "Інструмент"
 
 #: src/gui/screen/toolhead/screen_toolhead_settings.cpp:350
 #, c-format
@@ -7846,9 +7832,8 @@ msgid "Tool4"
 msgstr "Інструмент4"
 
 #: src/common/client_response_texts.hpp:118
-#, fuzzy
 msgid "Tool5"
-msgstr "Інструмент1"
+msgstr "Інструмент5"
 
 #: tmp_error_headers/error_list_xl.hpp:765
 msgid ""
@@ -8303,9 +8288,8 @@ msgid "Waiting for fingerprint timed out"
 msgstr "Вийшов час очікування відбитка пальця"
 
 #: src/common/feature/print_status_message/print_status_message_formatter_buddy.cpp:22
-#, fuzzy
 msgid "Waiting for hotend"
-msgstr "Очікування нагрівального столу"
+msgstr "Очікування екструдера"
 
 #: src/gui/wizard/selftest_frame_tool_offsets.cpp:64
 msgid "Waiting for hotends to stabilize at calibration temperature:"
