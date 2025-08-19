@@ -1,4 +1,5 @@
 #include "screen_belt_tuning.hpp"
+#include <feature/manual_belt_tuning/manual_belt_tuning_config.hpp>
 
 #include <marlin_server_types/fsm/manual_belt_tuning_phases.hpp>
 #include <img_resources.hpp>
@@ -9,66 +10,69 @@
 
 using Phase = PhaseManualBeltTuning;
 
+namespace {
+
 // Introduction to belt tuning calibration, QR, prerequisites PHASE: intro
-static constexpr const char link_begin_calib[] = "prusa.io/core-belt-calibration";
-static constexpr const char *txt_title_begin = N_("Let's calibrate your belt tension");
-static constexpr const char *txt_desc_begin = N_("Before we begin, scan the QR code for the guide. You'll also need an Allen key.");
+constexpr const char link_begin_calib[] = "prusa.io/core-belt-calibration";
+constexpr const char *txt_title_begin = N_("Let's calibrate your belt tension");
+constexpr const char *txt_desc_begin = N_("Before we begin, scan the QR code for the guide. You'll also need an Allen key.");
 // Checking if X-axis gantry is correctly lined up PHASE: check_x_gantry
-static constexpr const char link_belt_calib_gantry[] = "prusa.io/core-belt-calibration-gantry";
-static constexpr const char *txt_title_gantry = N_("Check X-axis gantry squareness");
-static constexpr const char *txt_desc_gantry = N_("Move printhead to front. Check there's no gap between gantry and tensioner on both ends. If there is, follow the guide.");
+constexpr const char link_belt_calib_gantry[] = "prusa.io/core-belt-calibration-gantry";
+constexpr const char *txt_title_gantry = N_("Check X-axis gantry squareness");
+constexpr const char *txt_desc_gantry = N_("Move printhead to front. Check there's no gap between gantry and tensioner on both ends. If there is, follow the guide.");
 // Waiting for homing and moving to wizard position
-static constexpr const char *txt_wait = N_("Printer is homing, please wait.");
+constexpr const char *txt_wait = N_("Printer is homing, please wait.");
 // Prepare for measuring actual frequencies, QR, prerequisites PHASE: intro_measure
-static constexpr const char *txt_title_measure = N_("Measuring actual belt frequency");
-static constexpr const char *txt_desc_measure = N_("The upper belt will be measured first, then the lower. Use the knob to adjust resonance. Correct frequency appears as slow belt motion with sharp peaks.");
+constexpr const char *txt_title_measure = N_("Measuring actual belt frequency");
+constexpr const char *txt_desc_measure = N_("The upper belt will be measured first, then the lower. Use the knob to adjust resonance. Correct frequency appears as slow belt motion with sharp peaks.");
 // Measuring actual upper belt frequency, Knob PHASE: measure_upper_belt
-static constexpr const char *txt_title_up_belt_freq = N_("Upper belt actual frequency");
-static constexpr const char *txt_desc_up_belt_freq = N_("Turn the knob to adjust frequency. Look for slow belt movement with sharp, regular peaks, then click the knob to proceed.");
+constexpr const char *txt_title_up_belt_freq = N_("Upper belt actual frequency");
+constexpr const char *txt_desc_up_belt_freq = N_("Turn the knob to adjust frequency. Look for slow belt movement with sharp, regular peaks, then click the knob to proceed.");
 // Measuring actual lower belt frequency, Knob PHASE: measure_lower_belt
-static constexpr const char *txt_title_lo_belt_freq = N_("Lower belt actual frequency");
-static constexpr const char *txt_desc_lo_belt_freq = N_("Turn the knob to adjust frequency. Look for slow belt movement with sharp, regular peaks, then click the knob to proceed.");
+constexpr const char *txt_title_lo_belt_freq = N_("Lower belt actual frequency");
+constexpr const char *txt_desc_lo_belt_freq = N_("Turn the knob to adjust frequency. Look for slow belt movement with sharp, regular peaks, then click the knob to proceed.");
 // Show results of both belt measurements in Newtons PHASE: show_tension
-static constexpr const char *txt_title_freq_report = N_("Actual belts frequencies");
-static constexpr const char *txt_desc_freq_report = N_("Upper belt: %hu Hz\nLower belt: %hu Hz\nReady to calculate screw adjustment.\n\nPress Continue to proceed.");
+constexpr const char *txt_title_freq_report = N_("Actual belts frequencies");
+constexpr const char *txt_desc_freq_report = N_("Upper belt: %hu Hz\nLower belt: %hu Hz\nReady to calculate screw adjustment.\n\nPress Continue to proceed.");
 // User adjusts the tensioners with calculated allen key turns PHASE: adjust_tensioners
-static constexpr const char link_tensioning[] = "prusa.io/core-belt-calibration-tensioning";
-static constexpr const char *txt_tighten = N_("tighten");
-static constexpr const char *txt_loosen = N_("loosen");
-static constexpr const char *txt_title_turn_screw = N_("Adjust belt tensioners");
-static constexpr const char *txt_desc_turn_screw = N_("Turn both screws:\n%s %s turns\n\nPress Continue when done.");
+constexpr const char link_tensioning[] = "prusa.io/core-belt-calibration-tensioning";
+constexpr const char *txt_tighten = N_("tighten");
+constexpr const char *txt_loosen = N_("loosen");
+constexpr const char *txt_title_turn_screw = N_("Adjust belt tensioners");
+constexpr const char *txt_desc_turn_screw = N_("Turn both screws:\n%s %s turns\n\nPress Continue when done.");
 // Prepare to recheck belt tension with target frequency PHASE: intro_recheck_target_freq
-static constexpr const char *txt_title_result_check = N_("Let's check the result");
-static constexpr const char *txt_desc_result_check = N_("We'll now verify the belt tension - first the upper, then the lower belt.\nEach will vibrate at its target frequency.\nLook for the same sharp motion as before.\n\nPress Continue to start with the upper belt.");
+constexpr const char *txt_title_result_check = N_("Let's check the result");
+constexpr const char *txt_desc_result_check = N_("We'll now verify the belt tension - first the upper, then the lower belt.\nEach will vibrate at its target frequency.\nLook for the same sharp motion as before.\n\nPress Continue to start with the upper belt.");
 // Recheck upper belt with target frequency PHASE: recheck_upper_belt
-static constexpr const char *txt_title_check_up_belt = N_("Checking upper belt tension");
-static constexpr const char *txt_desc_check_up_belt = N_("The belt is now vibrating at the target frequency.\nCheck that it shows clear, sharp peaks like before, press Adjust if not.\nPress Continue to proceed.");
+constexpr const char *txt_title_check_up_belt = N_("Checking upper belt tension");
+constexpr const char *txt_desc_check_up_belt = N_("The belt is now vibrating at the target frequency.\nCheck that it shows clear, sharp peaks like before, press Adjust if not.\nPress Continue to proceed.");
 // Recheck lower belt with target frequency PHASE: recheck_lower_belt
-static constexpr const char *txt_title_check_lo_belt = N_("Checking lower belt tension");
-static constexpr const char *txt_desc_check_lo_belt = N_("The belt is now vibrating at the target frequency.\nCheck that it shows clear, sharp peaks like before, press Adjust if not.\nPress Continue to finish belt tensioning.");
+constexpr const char *txt_title_check_lo_belt = N_("Checking lower belt tension");
+constexpr const char *txt_desc_check_lo_belt = N_("The belt is now vibrating at the target frequency.\nCheck that it shows clear, sharp peaks like before, press Adjust if not.\nPress Continue to finish belt tensioning.");
+constexpr uint8_t qr_size = 100;
+
+constexpr Rect16 rect_title = Rect16(WizardDefaults::MarginLeft, WizardDefaults::row_0, GuiDefaults::ScreenWidth - WizardDefaults::MarginLeft - WizardDefaults::MarginRight, WizardDefaults::txt_h);
+constexpr Rect16 rect_line = Rect16(WizardDefaults::MarginLeft, WizardDefaults::row_1, GuiDefaults::ScreenWidth - WizardDefaults::MarginLeft - WizardDefaults::MarginRight, 1);
+
+constexpr Rect16 rect_hourglass = Rect16(WizardDefaults::MarginLeft, WizardDefaults::row_0, GuiDefaults::ScreenWidth - WizardDefaults::MarginLeft - WizardDefaults::MarginRight, 110);
+constexpr Rect16 rect_wait = Rect16(WizardDefaults::MarginLeft, rect_hourglass.Bottom() + WizardDefaults::txt_h, GuiDefaults::ScreenWidth - WizardDefaults::MarginLeft - WizardDefaults::MarginRight, WizardDefaults::txt_h);
+
+constexpr Rect16 rect_qr = Rect16(GuiDefaults::ScreenWidth - WizardDefaults::MarginRight - qr_size, WizardDefaults::row_1 + 10 /*=visual delimeter*/, qr_size, qr_size);
+constexpr Rect16 rect_desc = Rect16(WizardDefaults::MarginLeft, WizardDefaults::row_1 + 10 /*=visual delimeter*/, GuiDefaults::ScreenWidth - WizardDefaults::MarginLeft - WizardDefaults::MarginRight, WizardDefaults::Y_space - WizardDefaults::RectRadioButton(0).Height() - WizardDefaults::row_h - 30 /*=visual space*/);
+constexpr Rect16 rect_desc_qr = Rect16(WizardDefaults::MarginLeft, WizardDefaults::row_1 + 10 /*=visual delimeter*/, GuiDefaults::ScreenWidth - WizardDefaults::MarginLeft - WizardDefaults::MarginRight - qr_size - 5 /*=padding*/, WizardDefaults::Y_space - WizardDefaults::RectRadioButton(0).Height() - WizardDefaults::row_h - 70 /*=space for link*/);
+
+constexpr Rect16 rect_scan_me = Rect16(rect_qr.Left(), rect_qr.Bottom(), qr_size, WizardDefaults::txt_h);
+constexpr Rect16 rect_details = Rect16(WizardDefaults::MarginLeft, rect_desc_qr.Bottom(), GuiDefaults::ScreenWidth, WizardDefaults::txt_h);
+constexpr Rect16 rect_link = Rect16(WizardDefaults::MarginLeft, rect_details.Bottom(), GuiDefaults::ScreenWidth, WizardDefaults::txt_h);
+constexpr Rect16 rect_desc_knob = Rect16(WizardDefaults::MarginLeft, WizardDefaults::row_1 + 10, GuiDefaults::ScreenWidth - WizardDefaults::MarginLeft - WizardDefaults::MarginRight, WizardDefaults::Y_space - WizardDefaults::RectRadioButton(0).Height() - WizardDefaults::row_h - 80 /*=visual space*/);
+
+constexpr Rect16 rect_knob = Rect16(GuiDefaults::ScreenWidth / 2 - 41, WizardDefaults::RectRadioButton(0).Top() - 70, 81, 55);
+constexpr Rect16 rect_minus = Rect16(GuiDefaults::ScreenWidth / 2 - 61, WizardDefaults::RectRadioButton(0).Top() - 70, 20, 55);
+constexpr Rect16 rect_plus = Rect16(GuiDefaults::ScreenWidth / 2 + 40, WizardDefaults::RectRadioButton(0).Top() - 70, 20, 55);
+
+} // namespace
 
 namespace frames {
-
-static constexpr uint8_t qr_size = 100;
-
-static constexpr Rect16 rect_title = Rect16(WizardDefaults::MarginLeft, WizardDefaults::row_0, GuiDefaults::ScreenWidth - WizardDefaults::MarginLeft - WizardDefaults::MarginRight, WizardDefaults::txt_h);
-static constexpr Rect16 rect_line = Rect16(WizardDefaults::MarginLeft, WizardDefaults::row_1, GuiDefaults::ScreenWidth - WizardDefaults::MarginLeft - WizardDefaults::MarginRight, 1);
-
-static constexpr Rect16 rect_hourglass = Rect16(WizardDefaults::MarginLeft, WizardDefaults::row_0, GuiDefaults::ScreenWidth - WizardDefaults::MarginLeft - WizardDefaults::MarginRight, 110);
-static constexpr Rect16 rect_wait = Rect16(WizardDefaults::MarginLeft, rect_hourglass.Bottom() + WizardDefaults::txt_h, GuiDefaults::ScreenWidth - WizardDefaults::MarginLeft - WizardDefaults::MarginRight, WizardDefaults::txt_h);
-
-static constexpr Rect16 rect_qr = Rect16(GuiDefaults::ScreenWidth - WizardDefaults::MarginRight - qr_size, WizardDefaults::row_1 + 10 /*=visual delimeter*/, qr_size, qr_size);
-static constexpr Rect16 rect_desc = Rect16(WizardDefaults::MarginLeft, WizardDefaults::row_1 + 10 /*=visual delimeter*/, GuiDefaults::ScreenWidth - WizardDefaults::MarginLeft - WizardDefaults::MarginRight, WizardDefaults::Y_space - WizardDefaults::RectRadioButton(0).Height() - WizardDefaults::row_h - 30 /*=visual space*/);
-static constexpr Rect16 rect_desc_qr = Rect16(WizardDefaults::MarginLeft, WizardDefaults::row_1 + 10 /*=visual delimeter*/, GuiDefaults::ScreenWidth - WizardDefaults::MarginLeft - WizardDefaults::MarginRight - qr_size - 5 /*=padding*/, WizardDefaults::Y_space - WizardDefaults::RectRadioButton(0).Height() - WizardDefaults::row_h - 70 /*=space for link*/);
-
-static constexpr Rect16 rect_scan_me = Rect16(rect_qr.Left(), rect_qr.Bottom(), qr_size, WizardDefaults::txt_h);
-static constexpr Rect16 rect_details = Rect16(WizardDefaults::MarginLeft, rect_desc_qr.Bottom(), GuiDefaults::ScreenWidth, WizardDefaults::txt_h);
-static constexpr Rect16 rect_link = Rect16(WizardDefaults::MarginLeft, rect_details.Bottom(), GuiDefaults::ScreenWidth, WizardDefaults::txt_h);
-
-static constexpr Rect16 rect_desc_knob = Rect16(WizardDefaults::MarginLeft, WizardDefaults::row_1 + 10, GuiDefaults::ScreenWidth - WizardDefaults::MarginLeft - WizardDefaults::MarginRight, WizardDefaults::Y_space - WizardDefaults::RectRadioButton(0).Height() - WizardDefaults::row_h - 80 /*=visual space*/);
-static constexpr Rect16 rect_knob = Rect16(GuiDefaults::ScreenWidth / 2 - 41, WizardDefaults::RectRadioButton(0).Top() - 70, 81, 55);
-static constexpr Rect16 rect_minus = Rect16(GuiDefaults::ScreenWidth / 2 - 61, WizardDefaults::RectRadioButton(0).Top() - 70, 20, 55);
-static constexpr Rect16 rect_plus = Rect16(GuiDefaults::ScreenWidth / 2 + 40, WizardDefaults::RectRadioButton(0).Top() - 70, 20, 55);
 
 class FrameWait : public window_frame_t {
 public:
