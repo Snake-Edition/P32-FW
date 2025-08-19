@@ -100,3 +100,7 @@ endif()
 if(HAS_PRECISE_HOMING_COREXY)
   target_sources(firmware PRIVATE M9202.cpp)
 endif()
+
+if(HAS_AUTOMATIC_CHAMBER_VENTS)
+  target_sources(firmware PRIVATE M870.cpp)
+endif()
