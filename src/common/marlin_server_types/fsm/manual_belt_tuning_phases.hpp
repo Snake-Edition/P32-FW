@@ -59,6 +59,9 @@ enum class PhaseManualBeltTuning : PhaseUnderlyingType {
     /// Recheck lower belt with target frequency
     recheck_lower_belt,
 
+    /// Calibration successfully completed
+    finished,
+
     _cnt,
     _last = _cnt - 1
 };
@@ -77,6 +80,7 @@ inline constexpr EnumArray<PhaseManualBeltTuning, PhaseResponses, PhaseManualBel
     { PhaseManualBeltTuning::intro_recheck_target_freq, { Response::Continue, Response::Abort } },
     { PhaseManualBeltTuning::recheck_upper_belt, { Response::Continue, Response::Adjust } },
     { PhaseManualBeltTuning::recheck_lower_belt, { Response::Continue, Response::Adjust } },
+    { PhaseManualBeltTuning::finished, { Response::Finish } },
 };
 
 } // namespace ClientResponses

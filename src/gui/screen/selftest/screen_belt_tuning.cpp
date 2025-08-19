@@ -50,6 +50,10 @@ constexpr const char *txt_desc_check_up_belt = N_("The belt is now vibrating at 
 // Recheck lower belt with target frequency PHASE: recheck_lower_belt
 constexpr const char *txt_title_check_lo_belt = N_("Checking lower belt tension");
 constexpr const char *txt_desc_check_lo_belt = N_("The belt is now vibrating at the target frequency.\nCheck that it shows clear, sharp peaks like before, press Adjust if not.\nPress Continue to finish belt tensioning.");
+// Finish screen
+constexpr const char *txt_title_finished = N_("Calibration complete");
+constexpr const char *txt_desc_finished = N_("Belt tension has been successfully calibrated.\nYou're all set and ready to print.\n\nPress Finish to exit.");
+
 constexpr uint8_t qr_size = 100;
 
 constexpr Rect16 rect_title = Rect16(WizardDefaults::MarginLeft, WizardDefaults::row_0, GuiDefaults::ScreenWidth - WizardDefaults::MarginLeft - WizardDefaults::MarginRight, WizardDefaults::txt_h);
@@ -268,6 +272,7 @@ using FrameAdjustTensioners = WithConstructorArgs<frames::FrameTitleDescRadioQR,
 using FrameIntroRecheck = WithConstructorArgs<frames::FrameTitleDescRadio, Phase::intro_recheck_target_freq, txt_title_result_check, txt_desc_result_check>;
 using FrameRecheckUp = WithConstructorArgs<frames::FrameTitleDescRadio, Phase::recheck_upper_belt, txt_title_check_up_belt, txt_desc_check_up_belt>;
 using FrameRecheckLo = WithConstructorArgs<frames::FrameTitleDescRadio, Phase::recheck_lower_belt, txt_title_check_lo_belt, txt_desc_check_lo_belt>;
+using FrameFinished = WithConstructorArgs<frames::FrameTitleDescRadio, Phase::finished, txt_title_finished, txt_desc_finished>;
 
 using Frames = FrameDefinitionList<ScreenBeltTuning::FrameStorage,
     FrameDefinition<Phase::intro, FrameIntro>,
@@ -280,7 +285,8 @@ using Frames = FrameDefinitionList<ScreenBeltTuning::FrameStorage,
     FrameDefinition<Phase::adjust_tensioners, FrameAdjustTensioners>,
     FrameDefinition<Phase::intro_recheck_target_freq, FrameIntroRecheck>,
     FrameDefinition<Phase::recheck_upper_belt, FrameRecheckUp>,
-    FrameDefinition<Phase::recheck_lower_belt, FrameRecheckLo>>;
+    FrameDefinition<Phase::recheck_lower_belt, FrameRecheckLo>,
+    FrameDefinition<Phase::finished, FrameFinished>>;
 
 } // namespace
 

@@ -174,10 +174,14 @@ public:
                 skip_upper_belt = true;
                 continue;
             } else {
+                fsm_change(PhaseManualBeltTuning::finished);
                 config_store().manual_belt_tuning_completed.set(true); // TODO: Ask Martin from where wizard should be run and use this persistent variable
                 break;
             }
         }
+
+        // Single button finish screen
+        wait_for_response(PhaseManualBeltTuning::finished);
     }
 
     void
