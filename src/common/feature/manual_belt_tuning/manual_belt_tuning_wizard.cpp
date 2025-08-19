@@ -90,6 +90,11 @@ const float freq_bottom_belt_optimal = tension_to_freq(tension_optimal_N, length
 class ManualBeltTuningWizard {
 public:
     ManualBeltTuningWizard() {}
+    ~ManualBeltTuningWizard() {
+#if HAS_XBUDDY_EXTENSION()
+        buddy::xbuddy_extension().set_strobe(std::nullopt);
+#endif
+    }
 
     void run() {
         // phstep needs to be off _before_ getting the current ustep resolution
