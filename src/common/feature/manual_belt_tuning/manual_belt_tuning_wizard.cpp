@@ -238,7 +238,6 @@ public:
         switch (wait_for_response(phase)) {
         case Response::Continue:
             return true;
-            break;
         case Response::Abort:
             break;
         default:
