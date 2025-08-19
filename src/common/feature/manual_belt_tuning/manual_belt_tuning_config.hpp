@@ -55,12 +55,16 @@ constexpr float calc_revs_from_freq(float df1, float df2, float k1, float k2) {
     return ((df2 * k2) - (df1 * k1)) / ((k2 * k2) - (k1 * k1));
 }
 
+constexpr float floor_to_half(float val) {
+    return static_cast<float>(static_cast<int>(val * 2)) / 2.0f;
+}
+
 // optimal belt tension for the printer
 constexpr uint16_t tension_optimal_N = 19;
 
 // optimal frequency for top belt
-constexpr float freq_top_belt_optimal = tension_to_freq(tension_optimal_N, length_top_belt);
+constexpr float freq_top_belt_optimal = floor_to_half(tension_to_freq(tension_optimal_N, length_top_belt));
 // optimal frequency for bottom belt
-constexpr float freq_bottom_belt_optimal = tension_to_freq(tension_optimal_N, length_bottom_belt);
+constexpr float freq_bottom_belt_optimal = floor_to_half(tension_to_freq(tension_optimal_N, length_bottom_belt));
 
 }; // namespace manual_belt_tuning

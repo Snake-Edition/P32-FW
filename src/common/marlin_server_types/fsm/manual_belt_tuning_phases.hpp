@@ -3,9 +3,22 @@
 
 #include <marlin_server_types/client_response.hpp>
 
+// Frequency has 0.5f step and we need to send this through 4B
 struct belt_tensions {
-    uint8_t upper_belt_tension = 0;
-    uint8_t lower_belt_tension = 0;
+    uint16_t upper_belt_tension = 0; /// Tension is passed multiplied by 2
+    uint16_t lower_belt_tension = 0; /// Tension is passed multiplied by 2
+
+    belt_tensions() = default;
+
+    belt_tensions(float upper, float lower) {
+        set_upper(upper);
+        set_lower(lower);
+    }
+
+    void set_upper(float upper_belt) { upper_belt_tension = static_cast<uint16_t>(upper_belt * 2); }
+    float get_upper() const { return static_cast<float>(upper_belt_tension) / 2.0f; }
+    void set_lower(float lower_belt) { lower_belt_tension = static_cast<uint16_t>(lower_belt * 2); }
+    float get_lower() const { return static_cast<float>(lower_belt_tension) / 2.0f; }
 };
 
 struct screw_revs {

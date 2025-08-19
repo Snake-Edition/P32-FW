@@ -34,7 +34,7 @@ constexpr const char *txt_title_lo_belt_freq = N_("Lower belt actual frequency")
 constexpr const char *txt_desc_lo_belt_freq = N_("Turn the knob to adjust frequency. Look for slow belt movement with sharp, regular peaks, then click the knob to proceed.");
 // Show results of both belt measurements in Newtons PHASE: show_tension
 constexpr const char *txt_title_freq_report = N_("Actual belts frequencies");
-constexpr const char *txt_desc_freq_report = N_("Upper belt: %hu Hz\nLower belt: %hu Hz\nReady to calculate screw adjustment.\n\nPress Continue to proceed.");
+constexpr const char *txt_desc_freq_report = N_("Upper belt: %.1f Hz\nLower belt: %.1f Hz\n\nReady to calculate screw adjustment.\n\nOptimal upper belt frequency: %.1f Hz\nOptimal lower belt frequency: %.1f Hz\n\nPress Continue to proceed.");
 // User adjusts the tensioners with calculated allen key turns PHASE: adjust_tensioners
 constexpr const char link_tensioning[] = "prusa.io/core-belt-calibration-tensioning";
 constexpr const char *txt_tighten = N_("tighten");
@@ -132,7 +132,7 @@ public:
     void update(fsm::PhaseData data) {
         if (phase == PhaseManualBeltTuning::show_tension) {
             const auto tensions = fsm::deserialize_data<belt_tensions>(data);
-            desc.SetText(_(desc_ptr).formatted(params, tensions.upper_belt_tension, tensions.lower_belt_tension));
+            desc.SetText(_(desc_ptr).formatted(params, tensions.get_upper(), tensions.get_lower(), manual_belt_tuning::freq_top_belt_optimal, manual_belt_tuning::freq_bottom_belt_optimal));
         } else {
             desc.SetText(_(desc_ptr));
         }
@@ -212,7 +212,7 @@ public:
         : FrameTitle(parent, title)
         , phase(phase)
         , desc(this, rect_desc_knob, is_multiline::yes, is_closed_on_click_t::no, _(desc))
-        , numb(this, rect_numb, 0, "%u Hz")
+        , numb(this, rect_numb, 0, "%0.1f Hz")
         , knob(this, rect_knob, &img::turn_knob_81x55)
         , plus(this, rect_plus, is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeRAM("+"))
         , minus(this, rect_minus, is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeRAM("-")) {
@@ -223,15 +223,14 @@ public:
         minus.set_font(Font::big);
         minus.SetTextColor(COLOR_ORANGE);
         numb.SetAlignment(Align_t::Center());
-        numb.PrintAsUint32();
     }
 
     void update(fsm::PhaseData data) {
         const auto tensions = fsm::deserialize_data<belt_tensions>(data);
         if (phase == PhaseManualBeltTuning::measure_upper_belt) {
-            numb.SetValue(tensions.upper_belt_tension);
+            numb.SetValue(tensions.get_upper());
         } else if (phase == PhaseManualBeltTuning::measure_lower_belt) {
-            numb.SetValue(tensions.lower_belt_tension);
+            numb.SetValue(tensions.get_lower());
         }
     }
 

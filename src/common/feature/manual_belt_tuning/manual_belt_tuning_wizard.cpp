@@ -68,9 +68,7 @@ public:
 
         fsm_change(PhaseManualBeltTuning::intro_measure);
         if (wait_for_continue(PhaseManualBeltTuning::intro_measure)) {
-            struct belt_tensions tension_data = {
-                .upper_belt_tension = static_cast<uint8_t>(freq_top_belt_optimal)
-            };
+            const struct belt_tensions tension_data(freq_top_belt_optimal, freq_bottom_belt_optimal);
             fsm_change(PhaseManualBeltTuning::measure_upper_belt, fsm::serialize_data<belt_tensions>(tension_data));
         } else {
             return;
@@ -110,9 +108,7 @@ public:
 
                 // Save top belt results
                 freq_top_belt = vibrator.frequency;
-                struct belt_tensions tension_data = {
-                    .lower_belt_tension = static_cast<uint8_t>(freq_bottom_belt)
-                };
+                const struct belt_tensions tension_data(0.0f, freq_bottom_belt);
                 fsm_change(PhaseManualBeltTuning::measure_lower_belt, fsm::serialize_data<belt_tensions>(tension_data));
             }
 
@@ -135,18 +131,13 @@ public:
             // eights of one turn (signed)
             const int dri8 = int(dr * 8);
 
-            struct belt_tensions tension_data = {
-                .upper_belt_tension = static_cast<uint8_t>(freq_top_belt),
-                .lower_belt_tension = static_cast<uint8_t>(freq_bottom_belt)
-            };
-
-            fsm_change(PhaseManualBeltTuning::show_tension, fsm::serialize_data<belt_tensions>(tension_data));
-
-            struct screw_revs revs_data = {
-                .turn_eights = static_cast<int8_t>(dri8),
-            };
+            const struct belt_tensions show_tension_data(freq_top_belt, freq_bottom_belt);
+            fsm_change(PhaseManualBeltTuning::show_tension, fsm::serialize_data<belt_tensions>(show_tension_data));
 
             if (wait_for_continue(PhaseManualBeltTuning::show_tension)) {
+                struct screw_revs revs_data = {
+                    .turn_eights = static_cast<int8_t>(dri8),
+                };
                 fsm_change(PhaseManualBeltTuning::adjust_tensioners, fsm::serialize_data<screw_revs>(revs_data));
             } else {
                 return;
@@ -159,23 +150,27 @@ public:
             }
 
             if (wait_for_continue(PhaseManualBeltTuning::intro_recheck_target_freq)) {
-                fsm_change(PhaseManualBeltTuning::recheck_upper_belt);
+                const struct belt_tensions tension_data(freq_top_belt, freq_bottom_belt);
+                fsm_change(PhaseManualBeltTuning::recheck_upper_belt, fsm::serialize_data<belt_tensions>(tension_data));
             } else {
                 return;
             }
 
             auto response = resonate(vibrator, PhaseManualBeltTuning::recheck_upper_belt);
             if (response == Response::Adjust) {
-                fsm_change(PhaseManualBeltTuning::measure_upper_belt);
+                const struct belt_tensions tension_data(freq_top_belt, freq_bottom_belt);
+                fsm_change(PhaseManualBeltTuning::measure_upper_belt, fsm::serialize_data<belt_tensions>(tension_data));
                 skip_upper_belt = false;
                 continue;
             } else {
-                fsm_change(PhaseManualBeltTuning::recheck_lower_belt);
+                const struct belt_tensions tension_data(freq_top_belt, freq_bottom_belt);
+                fsm_change(PhaseManualBeltTuning::recheck_lower_belt, fsm::serialize_data<belt_tensions>(tension_data));
             }
 
             response = resonate(vibrator, PhaseManualBeltTuning::recheck_lower_belt);
             if (response == Response::Adjust) {
-                fsm_change(PhaseManualBeltTuning::measure_lower_belt);
+                const struct belt_tensions tension_data(freq_top_belt, freq_bottom_belt);
+                fsm_change(PhaseManualBeltTuning::measure_lower_belt, fsm::serialize_data<belt_tensions>(tension_data));
                 skip_upper_belt = true;
                 continue;
             } else {
@@ -185,7 +180,8 @@ public:
         }
     }
 
-    void adjust_vibrator(Vibrate &vibrator) {
+    void
+    adjust_vibrator(Vibrate &vibrator) {
         vibrator.frequency = std::clamp<float>(abs(vibrator.frequency), freq_min, freq_max);
         vibrator.excitation_acceleration = abs(calc_accel(vibrator.frequency) * 0.001f);
 #if HAS_XBUDDY_EXTENSION()
@@ -202,12 +198,6 @@ public:
                 const auto knob_move = get_last_knob_move();
                 if (knob_move != KnobMove::NoMove) {
                     vibrator.frequency += knob_move == KnobMove::Up ? 0.5f : -0.5f;
-
-                    struct belt_tensions tension_data = {
-                        .upper_belt_tension = static_cast<uint8_t>(vibrator.frequency),
-                        .lower_belt_tension = static_cast<uint8_t>(vibrator.frequency), // duplicated - could be either of the belts
-                    };
-                    fsm_change(phase, fsm::serialize_data<belt_tensions>(tension_data));
                 }
                 break;
             }
@@ -222,6 +212,9 @@ public:
                 break;
             }
             adjust_vibrator(vibrator);
+
+            const struct belt_tensions tension_data(vibrator.frequency, vibrator.frequency); // duplicated - could be either of the belts
+            fsm_change(phase, fsm::serialize_data<belt_tensions>(tension_data));
 
             vibrator.step();
 
@@ -246,7 +239,7 @@ public:
         }
         return false;
     }
-};
+}; // namespace
 
 } // namespace
 
