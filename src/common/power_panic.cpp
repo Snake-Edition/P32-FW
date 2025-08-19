@@ -403,9 +403,9 @@ void resume_loop() {
             snprintf(cmd_buf, sizeof(cmd_buf), "M190 S%d", state_buf.planner.target_bed);
             marlin_server::enqueue_gcode(cmd_buf);
         }
-
+#if HAS_NOZZLE_CLEANER()
         marlin_server::enqueue_gcode("G12"); // clean nozzle
-
+#endif
         resume_state = ResumeState::Unpark;
         break;
     }
