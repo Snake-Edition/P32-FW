@@ -4,8 +4,8 @@
 #include <marlin_server_types/client_response.hpp>
 
 struct belt_tensions {
-    uint8_t upper_belt_tension;
-    uint8_t lower_belt_tension;
+    uint8_t upper_belt_tension = 0;
+    uint8_t lower_belt_tension = 0;
 };
 
 struct screw_revs {

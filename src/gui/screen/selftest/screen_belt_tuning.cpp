@@ -4,6 +4,7 @@
 #include <marlin_server_types/fsm/manual_belt_tuning_phases.hpp>
 #include <img_resources.hpp>
 #include <guiconfig/wizard_config.hpp>
+#include <window_numb.hpp>
 #include <client_response.hpp>
 #include <qr.hpp>
 #include <meta_utils.hpp>
@@ -66,6 +67,7 @@ constexpr Rect16 rect_details = Rect16(WizardDefaults::MarginLeft, rect_desc_qr.
 constexpr Rect16 rect_link = Rect16(WizardDefaults::MarginLeft, rect_details.Bottom(), GuiDefaults::ScreenWidth, WizardDefaults::txt_h);
 constexpr Rect16 rect_desc_knob = Rect16(WizardDefaults::MarginLeft, WizardDefaults::row_1 + 10, GuiDefaults::ScreenWidth - WizardDefaults::MarginLeft - WizardDefaults::MarginRight, WizardDefaults::Y_space - WizardDefaults::RectRadioButton(0).Height() - WizardDefaults::row_h - 80 /*=visual space*/);
 
+constexpr Rect16 rect_numb = Rect16(GuiDefaults::ScreenWidth / 2 - 50, WizardDefaults::RectRadioButton(0).Top() - 100, 100, 22);
 constexpr Rect16 rect_knob = Rect16(GuiDefaults::ScreenWidth / 2 - 41, WizardDefaults::RectRadioButton(0).Top() - 70, 81, 55);
 constexpr Rect16 rect_minus = Rect16(GuiDefaults::ScreenWidth / 2 - 61, WizardDefaults::RectRadioButton(0).Top() - 70, 20, 55);
 constexpr Rect16 rect_plus = Rect16(GuiDefaults::ScreenWidth / 2 + 40, WizardDefaults::RectRadioButton(0).Top() - 70, 20, 55);
@@ -210,6 +212,7 @@ public:
         : FrameTitle(parent, title)
         , phase(phase)
         , desc(this, rect_desc_knob, is_multiline::yes, is_closed_on_click_t::no, _(desc))
+        , numb(this, rect_numb, 0, "%u Hz")
         , knob(this, rect_knob, &img::turn_knob_81x55)
         , plus(this, rect_plus, is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeRAM("+"))
         , minus(this, rect_minus, is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeRAM("-")) {
@@ -219,6 +222,17 @@ public:
         minus.SetAlignment(Align_t::Center());
         minus.set_font(Font::big);
         minus.SetTextColor(COLOR_ORANGE);
+        numb.SetAlignment(Align_t::Center());
+        numb.PrintAsUint32();
+    }
+
+    void update(fsm::PhaseData data) {
+        const auto tensions = fsm::deserialize_data<belt_tensions>(data);
+        if (phase == PhaseManualBeltTuning::measure_upper_belt) {
+            numb.SetValue(tensions.upper_belt_tension);
+        } else if (phase == PhaseManualBeltTuning::measure_lower_belt) {
+            numb.SetValue(tensions.lower_belt_tension);
+        }
     }
 
     virtual void windowEvent([[maybe_unused]] window_t *sender, GUI_event_t event, [[maybe_unused]] void *param) override {
@@ -234,6 +248,7 @@ public:
 private:
     Phase phase;
     window_text_t desc;
+    window_numb_t numb;
     window_icon_t knob;
     window_text_t plus;
     window_text_t minus;
