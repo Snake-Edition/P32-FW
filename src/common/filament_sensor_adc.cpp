@@ -41,7 +41,7 @@ void FSensorADC::cycle() {
     // disabled FS will not enter cycle, but load_settings can disable it too
     // so better not try to change state when sensor is disabled
     if (is_enabled()) {
-        state = FSensorADCEval::evaluate_state(filtered_value, fs_ref_nins_value, fs_ref_ins_value, state);
+        state = FSensorADCEval::evaluate_state(filtered_value, fs_ref_nins_value, fs_ref_ins_value, state, value_span);
     }
 }
 
@@ -52,6 +52,20 @@ void FSensorADC::set_filtered_value_from_IRQ(int32_t filtered_value) {
 FSensorADC::FSensorADC(uint8_t tool_index, bool is_side_sensor)
     : tool_index(tool_index)
     , is_side(is_side_sensor) {
+    constexpr uint32_t extruder_fs_value_span {
+#if (BOARD_IS_XBUDDY() && defined LOVEBOARD_HAS_PT100)
+        100
+#elif (BOARD_IS_XLBUDDY())
+        1000
+#else
+        350000
+#endif
+    };
+
+    constexpr uint32_t side_fs_value_span { 310 };
+
+    value_span = (is_side ? side_fs_value_span : extruder_fs_value_span);
+
     load_settings();
 }
 
@@ -71,23 +85,9 @@ void FSensorADC::CalibrateInserted(int32_t filtered_value) {
     if (filtered_value == FSensorADCEval::filtered_value_not_ready) {
         return;
     }
-
-    constexpr uint32_t extruder_fs_value_span {
-#if (BOARD_IS_XBUDDY() && defined LOVEBOARD_HAS_PT100)
-        100
-#elif (BOARD_IS_XLBUDDY())
-        1000
-#else
-        350000
-#endif
-    };
-
-    constexpr uint32_t side_fs_value_span { 310 };
-
-    static constexpr float fs_selftest_span_multipler { 1.2 };
-
     // value should be outside of extended span, because if its close to span that is used to evaluate filament sensor, it will not be reliable and trigger randomly
-    const int32_t extended_span = (is_side ? side_fs_value_span : extruder_fs_value_span) * fs_selftest_span_multipler;
+    const int32_t extended_span = value_span * fs_selftest_span_multipler;
+
     if ((filtered_value >= fs_ref_nins_value - extended_span) && (filtered_value <= fs_ref_nins_value + extended_span)) {
         log_info(FSensor, "Calibrating HasFilament: FAIL value: %d", static_cast<int>(filtered_value));
         invalidate_calibration();

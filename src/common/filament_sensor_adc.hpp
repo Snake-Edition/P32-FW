@@ -67,4 +67,8 @@ public:
 private:
     // Limit metrics recording for each tool
     buddy::metrics::RunApproxEvery limit_record = 49;
+
+    uint32_t value_span = 0;
+
+    static constexpr float fs_selftest_span_multipler { 1.2 };
 };
