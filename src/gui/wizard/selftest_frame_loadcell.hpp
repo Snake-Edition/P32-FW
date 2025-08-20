@@ -12,6 +12,7 @@
 #include "window_wizard_progress.hpp"
 #include "radio_button.hpp"
 #include "status_footer.hpp"
+#include <qr.hpp>
 
 /**
  * @brief
@@ -29,6 +30,9 @@ class SelftestFrameLoadcell : public SelftestFrameNamedWithRadio {
     WindowBlinkingText text_big; // BIG, possibly blinking number
     char txt_big_buffer[8] = {};
 
+    QRStaticStringWindow qr;
+    window_text_t text_details;
+    window_text_t text_qr_link;
     window_text_t text_result; // in middle of screen
 
 protected:

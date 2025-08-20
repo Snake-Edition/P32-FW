@@ -26,7 +26,15 @@ static constexpr size_t top_of_changeable_area = WizardDefaults::row_1 + WizardD
 static constexpr size_t height_of_changeable_area = WizardDefaults::RectRadioButton(1).Top() - top_of_changeable_area;
 static constexpr Rect16 ChangeableRect = { col_texts, top_of_changeable_area, WizardDefaults::X_space, height_of_changeable_area };
 
+static constexpr uint8_t qr_size = 130;
+static constexpr Rect16 rect_phase_text = Rect16(col_texts, row_2, WizardDefaults::X_space, txt_h * 3);
+static constexpr Rect16 rect_text_side = Rect16(col_texts, row_2, WizardDefaults::X_space - qr_size - 5, txt_h * 3);
+static constexpr Rect16 rect_qr = Rect16(GuiDefaults::ScreenWidth - WizardDefaults::MarginRight - qr_size, top_of_changeable_area, qr_size, qr_size);
+static constexpr Rect16 rect_details = Rect16(col_texts, rect_qr.Bottom(), WizardDefaults::X_space, txt_h);
+static constexpr Rect16 rect_qr_link = Rect16(col_texts, rect_details.Bottom(), WizardDefaults::X_space, txt_h);
+
 static constexpr const char *en_text_loadcell_test = N_("Loadcell Test");
+static constexpr const char *loadcell_qr_link = "prusa.io/loadcell-noise-issue";
 
 // hand icon is 154x100
 static constexpr int16_t hand_w = 154;
@@ -43,19 +51,33 @@ SelftestFrameLoadcell::SelftestFrameLoadcell(window_t *parent, PhasesSelftest ph
     , footer(this, 0, footer::Item::nozzle, footer::Item::bed, footer::Item::axis_z) // ItemAxisZ to show Z coord while moving up
     , progress(this, WizardDefaults::row_1)
     , icon_hand(this, &img::hand_with_nozzle1_154x100, hand_pos)
-    , text_phase(this, Rect16(col_texts, row_2, WizardDefaults::X_space, txt_h * 3), is_multiline::yes)
+    , text_phase(this, rect_phase_text, is_multiline::yes)
     , text_big(this, Rect16(0, row_6, hand_pos.x, txt_big_h))
+    , qr(this, rect_qr, Align_t::Center(), loadcell_qr_link)
+    , text_details(this, rect_details, is_multiline::no, is_closed_on_click_t::no, _("More details at"))
+    , text_qr_link(this, rect_qr_link, is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeRAM(loadcell_qr_link))
     , text_result(this, ChangeableRect, is_multiline::no) {
     text_result.SetAlignment(Align_t::Center());
     text_big.set_font(Font::big);
     text_big.SetBlinkColor(COLOR_ORANGE); // Blink orange if temperature is to high
     text_big.SetAlignment(Align_t::Center());
+    qr.SetAlignment(Align_t::RightTop());
+    text_details.set_font(Font::small);
+    text_details.SetAlignment(Align_t::Right());
+    text_qr_link.set_font(Font::small);
+    text_qr_link.SetAlignment(Align_t::Right());
 
     change();
 }
 
 void SelftestFrameLoadcell::change() {
     SelftestLoadcell_t dt = SelftestLoadcell_t::from_phaseData(data_current);
+
+    // Set default layout
+    qr.Hide();
+    text_details.Hide();
+    text_qr_link.Hide();
+    text_phase.SetRect(rect_phase_text);
 
     const char *txt_phase = nullptr; // text_phase
     const char *txt_result = nullptr; // text_result
@@ -95,8 +117,11 @@ void SelftestFrameLoadcell::change() {
 
         } else if (dt.loadcell_noisy) {
             txt_phase = N_("Loadcell data are noisy. Make sure the printer is on a stable surface. Retry?");
-            icon_id = &img::warning_48x48;
-
+            icon_id = nullptr;
+            qr.Show();
+            text_details.Show();
+            text_qr_link.Show();
+            text_phase.SetRect(rect_text_side);
         } else {
             txt_phase = N_("We will need your help with this test. You will be asked to tap the nozzle. Don't worry; it is going to be cold.");
             icon_id = &img::hand_with_nozzle3_154x100;
