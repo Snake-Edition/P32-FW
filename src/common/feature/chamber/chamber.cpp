@@ -5,8 +5,13 @@
 #include <config_store/store_instance.hpp>
 #include <marlin_server.hpp>
 #include <marlin_server_shared.h>
+#include <option/has_automatic_chamber_vents.h>
 #include <option/has_xbuddy_extension.h>
 #include <feature/safety_timer/safety_timer.hpp>
+
+#if HAS_AUTOMATIC_CHAMBER_VENTS()
+    #include <marlin_stubs/feature/automatic_chamber_vents/automatic_chamber_vents.hpp>
+#endif
 
 #if XL_ENCLOSURE_SUPPORT()
     #include <hw/xl/xl_enclosure.hpp>
@@ -173,7 +178,7 @@ void Chamber::reset() {
 }
 
 #if HAS_MANUAL_CHAMBER_VENTS()
-void Chamber::check_vent_state() {
+void Chamber::manage_ventilation_state() {
     const auto fil_target = config_store().get_filament_type(0).parameters().chamber_target_temperature;
     constexpr uint8_t temp_limit = 45; // Limit for closed grills is chamber max temperature of PETG
 
@@ -185,6 +190,25 @@ void Chamber::check_vent_state() {
         } else if (fil_target.value() <= temp_limit && vent_state_ != Chamber::VentState::open) {
             marlin_server::set_warning(WarningType::OpenChamberVents);
             vent_state_ = Chamber::VentState::open;
+        }
+    }
+}
+#endif
+
+#if HAS_AUTOMATIC_CHAMBER_VENTS()
+void Chamber::manage_ventilation_state() {
+    const auto fil_target = config_store().get_filament_type(0).parameters().chamber_target_temperature;
+    constexpr uint8_t temp_limit = 45; // Limit for closed grills is chamber max temperature of PETG
+
+    if (fil_target.has_value()) {
+        if (fil_target.value() > temp_limit && vent_state_ != Chamber::VentState::closed) {
+            if (automatic_chamber_vents::close()) {
+                vent_state_ = Chamber::VentState::closed;
+            }
+        } else if (fil_target.value() <= temp_limit && vent_state_ != Chamber::VentState::open) {
+            if (automatic_chamber_vents::open()) {
+                vent_state_ = Chamber::VentState::open;
+            }
         }
     }
 }
