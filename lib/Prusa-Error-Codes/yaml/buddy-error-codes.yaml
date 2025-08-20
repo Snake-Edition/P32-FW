@@ -243,8 +243,7 @@ Errors:
     text: "Please run homing calibration from the Calibrations menu. Continuing can result in homing shifts and toolcrashes."
     id: "HOMING_CALIBRATION_FROM_MENU_NEEDED"
     gui_layout: "warning_dialog"
-    approved: false
-
+    approved: true
 
   # TEMPERATURE    xx2xx
 
@@ -1047,7 +1046,7 @@ Errors:
     text: "We are actively working on resolving these issues. Please send the crash dump, saved upon reset, to our support team."
     id: "INTERNAL_ERROR"
     gui_layout: "red_screen"
-    approved: false
+    approved: true
 
   - code: "XX601"
     title: "UNKNOWN ERROR"
