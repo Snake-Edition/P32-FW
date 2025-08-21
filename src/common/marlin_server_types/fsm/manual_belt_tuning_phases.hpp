@@ -47,6 +47,9 @@ enum class PhaseManualBeltTuning : PhaseUnderlyingType {
     /// Show results of both belt measurements in Newtons
     show_tension,
 
+    /// Alignment issue detected, x-gantry is most likely bended
+    alignment_issue,
+
     /// User adjusts the tensioners with calculated allen key turns
     adjust_tensioners,
 
@@ -67,7 +70,8 @@ inline constexpr EnumArray<PhaseManualBeltTuning, PhaseResponses, PhaseManualBel
     { PhaseManualBeltTuning::measure_upper_belt, { Response::Done, Response::Abort } },
     { PhaseManualBeltTuning::measure_lower_belt, { Response::Done, Response::Abort } },
     { PhaseManualBeltTuning::show_tension, { Response::Continue, Response::Abort } },
-    { PhaseManualBeltTuning::adjust_tensioners, { Response::Continue, Response::Abort } },
+    { PhaseManualBeltTuning::alignment_issue, { Response::Retry, Response::Abort } },
+    { PhaseManualBeltTuning::adjust_tensioners, { Response::Continue, Response::Adjust, Response::Abort } },
     { PhaseManualBeltTuning::finished, { Response::Finish } },
 };
 

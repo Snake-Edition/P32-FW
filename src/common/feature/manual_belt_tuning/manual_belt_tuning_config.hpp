@@ -20,6 +20,11 @@ constexpr float length_top_belt = length_belt - 0.005f;
 // bottom belt length (vibrating part)
 constexpr float length_bottom_belt = length_belt + 0.005f;
 
+// range of valid measured frequencies
+// outside measurements are considered to have x-gantry misalignment
+constexpr uint16_t freq_result_min = 90;
+constexpr uint16_t freq_result_max = 98;
+
 // constants for calculating how many revolutions to do for any frequency differences
 // this constants represents average frequency change of the belt per one revolution of its own screw
 constexpr uint16_t belt_hz_per_rev = 15;

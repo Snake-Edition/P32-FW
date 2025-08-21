@@ -34,13 +34,17 @@ constexpr const char *txt_title_lo_belt_freq = N_("Lower belt actual frequency")
 constexpr const char *txt_desc_lo_belt_freq = N_("Turn the knob to adjust frequency. Look for slow belt movement with sharp, regular peaks, then click the knob to proceed.");
 // Show results of both belt measurements in Newtons PHASE: show_tension
 constexpr const char *txt_title_freq_report = N_("Actual belts frequencies");
-constexpr const char *txt_desc_freq_report = N_("Upper belt: %.1f Hz\nLower belt: %.1f Hz\n\nReady to calculate screw adjustment.\n\nOptimal upper belt frequency: %.1f Hz\nOptimal lower belt frequency: %.1f Hz\n\nPress Continue to proceed.");
+constexpr const char *txt_desc_freq_report = N_("Upper belt: %.1f Hz\nOptimal tension is between %u and %u Hz\n\nLower belt: %.1f Hz\nOptimal tension is between %u and %u Hz\n\nReady to calculate screw adjustment.\nPress Continue to proceed.");
+// Warning about x-gantry alignment issue PHASE: alignment_issue
+constexpr const char *txt_title_alignment_issue = N_("Alignment issue detected");
+constexpr const char *txt_desc_alignment_issue = N_("Measured belt frequencies are out of the expected range.\nPlease check that the gantry is aligned properly and repeat the calibration.");
 // User adjusts the tensioners with calculated allen key turns PHASE: adjust_tensioners
 constexpr const char link_tensioning[] = "prusa.io/core-belt-calibration-tensioning";
 constexpr const char *txt_tighten = N_("tighten");
 constexpr const char *txt_loosen = N_("loosen");
 constexpr const char *txt_title_turn_screw = N_("Adjust belt tensioners");
 constexpr const char *txt_desc_turn_screw = N_("Turn both screws:\n%s %s turns\n\nPress Continue when done.");
+constexpr const char *txt_desc_no_turn = N_("No need to turn the tensioner screws.\n\nPress Continue to finish calibration or Adjust to repeat measuring.");
 // Finish screen
 constexpr const char *txt_title_finished = N_("Calibration complete");
 constexpr const char *txt_desc_finished = N_("Belt tension has been successfully calibrated.\nYou're all set and ready to print.\n\nPress Finish to exit.");
@@ -67,6 +71,8 @@ constexpr Rect16 rect_knob = Rect16(GuiDefaults::ScreenWidth / 2 - 41, WizardDef
 constexpr Rect16 rect_minus = Rect16(GuiDefaults::ScreenWidth / 2 - 61, WizardDefaults::RectRadioButton(0).Top() - 70, 20, 55);
 constexpr Rect16 rect_plus = Rect16(GuiDefaults::ScreenWidth / 2 + 40, WizardDefaults::RectRadioButton(0).Top() - 70, 20, 55);
 
+constexpr Rect16 rect_text_joe = Rect16(WizardDefaults::MarginLeft, WizardDefaults::row_1 + 10, GuiDefaults::ScreenWidth - WizardDefaults::MarginLeft - WizardDefaults::MarginRight - 50, WizardDefaults::Y_space - WizardDefaults::RectRadioButton(0).Height() - WizardDefaults::row_h - 30 /*=visual space*/ - 64 /* icon */);
+constexpr Rect16 rect_joe = Rect16(0, rect_text_joe.Bottom(), GuiDefaults::ScreenWidth, 64);
 } // namespace
 
 namespace frames {
@@ -127,7 +133,7 @@ public:
     void update(fsm::PhaseData data) {
         if (phase == PhaseManualBeltTuning::show_tension) {
             const auto tensions = fsm::deserialize_data<belt_tensions>(data);
-            desc.SetText(_(desc_ptr).formatted(params, tensions.get_upper(), tensions.get_lower(), manual_belt_tuning::freq_top_belt_optimal, manual_belt_tuning::freq_bottom_belt_optimal));
+            desc.SetText(_(desc_ptr).formatted(params, tensions.get_upper(), manual_belt_tuning::freq_result_min, manual_belt_tuning::freq_result_max, tensions.get_lower(), manual_belt_tuning::freq_result_min, manual_belt_tuning::freq_result_max));
         } else {
             desc.SetText(_(desc_ptr));
         }
@@ -137,7 +143,21 @@ protected:
     Phase phase;
     const char *desc_ptr;
     window_text_t desc;
-    StringViewUtf8Parameters<20> params;
+    StringViewUtf8Parameters<30> params;
+};
+
+class FrameFinishJoe : public FrameTitleRadio {
+public:
+    FrameFinishJoe(window_t *parent, Phase phase, const char *title, const char *desc)
+        : FrameTitleRadio(parent, phase, title)
+        , desc(this, rect_text_joe, is_multiline::yes, is_closed_on_click_t::no, _(desc))
+        , joe(this, rect_joe, &img::pepa_42x64) {
+        joe.SetAlignment(Align_t::Center());
+    }
+
+protected:
+    window_text_t desc;
+    window_icon_t joe;
 };
 
 class FrameTitleDescRadioQR : public FrameTitleRadio {
@@ -163,8 +183,14 @@ public:
         if (phase == PhaseManualBeltTuning::adjust_tensioners) {
 
             auto revs = fsm::deserialize_data<screw_revs>(data);
+
+            if (revs.turn_eights == 0) {
+                desc.SetText(_(txt_desc_no_turn));
+                return;
+            }
+
             StringBuilder sb1(buffer_tighten_loosen);
-            if (revs.turn_eights >= 0) {
+            if (revs.turn_eights > 0) {
                 sb1.append_string_view(_(txt_tighten));
             } else {
                 sb1.append_string_view(_(txt_loosen));
@@ -194,12 +220,11 @@ protected:
     window_text_t details;
     window_text_t link;
     window_text_t desc;
-    std::array<char, 20> buffer_tighten_loosen = {};
-    std::array<char, 20> buffer_eights = {};
-    StringViewUtf8Parameters<80> params;
+    std::array<char, 40> buffer_tighten_loosen = {};
+    std::array<char, 40> buffer_eights = {};
+    StringViewUtf8Parameters<120> params;
 };
 
-// Specific
 class FrameAdjustKnob : public FrameTitle {
 
 public:
@@ -259,8 +284,9 @@ using FrameIntroMeasure = WithConstructorArgs<frames::FrameTitleDescRadioQR, Pha
 using FrameMeasureUpBelt = WithConstructorArgs<frames::FrameAdjustKnob, Phase::measure_upper_belt, txt_title_up_belt_freq, txt_desc_up_belt_freq>;
 using FrameMeasureLoBelt = WithConstructorArgs<frames::FrameAdjustKnob, Phase::measure_lower_belt, txt_title_lo_belt_freq, txt_desc_lo_belt_freq>;
 using FrameShowTensions = WithConstructorArgs<frames::FrameTitleDescRadio, Phase::show_tension, txt_title_freq_report, txt_desc_freq_report>;
+using FrameAlignmentIssue = WithConstructorArgs<frames::FrameTitleDescRadioQR, Phase::alignment_issue, txt_title_alignment_issue, txt_desc_alignment_issue, link_belt_calib_gantry>;
 using FrameAdjustTensioners = WithConstructorArgs<frames::FrameTitleDescRadioQR, Phase::adjust_tensioners, txt_title_turn_screw, txt_desc_turn_screw, link_tensioning>;
-using FrameFinished = WithConstructorArgs<frames::FrameTitleDescRadio, Phase::finished, txt_title_finished, txt_desc_finished>;
+using FrameFinished = WithConstructorArgs<frames::FrameFinishJoe, Phase::finished, txt_title_finished, txt_desc_finished>;
 
 using Frames = FrameDefinitionList<ScreenBeltTuning::FrameStorage,
     FrameDefinition<Phase::intro, FrameIntro>,
@@ -270,6 +296,7 @@ using Frames = FrameDefinitionList<ScreenBeltTuning::FrameStorage,
     FrameDefinition<Phase::measure_upper_belt, FrameMeasureUpBelt>,
     FrameDefinition<Phase::measure_lower_belt, FrameMeasureLoBelt>,
     FrameDefinition<Phase::show_tension, FrameShowTensions>,
+    FrameDefinition<Phase::alignment_issue, FrameAlignmentIssue>,
     FrameDefinition<Phase::adjust_tensioners, FrameAdjustTensioners>,
     FrameDefinition<Phase::finished, FrameFinished>>;
 
