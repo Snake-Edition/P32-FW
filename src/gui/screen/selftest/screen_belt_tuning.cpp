@@ -41,15 +41,6 @@ constexpr const char *txt_tighten = N_("tighten");
 constexpr const char *txt_loosen = N_("loosen");
 constexpr const char *txt_title_turn_screw = N_("Adjust belt tensioners");
 constexpr const char *txt_desc_turn_screw = N_("Turn both screws:\n%s %s turns\n\nPress Continue when done.");
-// Prepare to recheck belt tension with target frequency PHASE: intro_recheck_target_freq
-constexpr const char *txt_title_result_check = N_("Let's check the result");
-constexpr const char *txt_desc_result_check = N_("We'll now verify the belt tension - first the upper, then the lower belt.\nEach will vibrate at its target frequency.\nLook for the same sharp motion as before.\n\nPress Continue to start with the upper belt.");
-// Recheck upper belt with target frequency PHASE: recheck_upper_belt
-constexpr const char *txt_title_check_up_belt = N_("Checking upper belt tension");
-constexpr const char *txt_desc_check_up_belt = N_("The belt is now vibrating at the target frequency.\nCheck that it shows clear, sharp peaks like before, press Adjust if not.\nPress Continue to proceed.");
-// Recheck lower belt with target frequency PHASE: recheck_lower_belt
-constexpr const char *txt_title_check_lo_belt = N_("Checking lower belt tension");
-constexpr const char *txt_desc_check_lo_belt = N_("The belt is now vibrating at the target frequency.\nCheck that it shows clear, sharp peaks like before, press Adjust if not.\nPress Continue to finish belt tensioning.");
 // Finish screen
 constexpr const char *txt_title_finished = N_("Calibration complete");
 constexpr const char *txt_desc_finished = N_("Belt tension has been successfully calibrated.\nYou're all set and ready to print.\n\nPress Finish to exit.");
@@ -269,9 +260,6 @@ using FrameMeasureUpBelt = WithConstructorArgs<frames::FrameAdjustKnob, Phase::m
 using FrameMeasureLoBelt = WithConstructorArgs<frames::FrameAdjustKnob, Phase::measure_lower_belt, txt_title_lo_belt_freq, txt_desc_lo_belt_freq>;
 using FrameShowTensions = WithConstructorArgs<frames::FrameTitleDescRadio, Phase::show_tension, txt_title_freq_report, txt_desc_freq_report>;
 using FrameAdjustTensioners = WithConstructorArgs<frames::FrameTitleDescRadioQR, Phase::adjust_tensioners, txt_title_turn_screw, txt_desc_turn_screw, link_tensioning>;
-using FrameIntroRecheck = WithConstructorArgs<frames::FrameTitleDescRadio, Phase::intro_recheck_target_freq, txt_title_result_check, txt_desc_result_check>;
-using FrameRecheckUp = WithConstructorArgs<frames::FrameTitleDescRadio, Phase::recheck_upper_belt, txt_title_check_up_belt, txt_desc_check_up_belt>;
-using FrameRecheckLo = WithConstructorArgs<frames::FrameTitleDescRadio, Phase::recheck_lower_belt, txt_title_check_lo_belt, txt_desc_check_lo_belt>;
 using FrameFinished = WithConstructorArgs<frames::FrameTitleDescRadio, Phase::finished, txt_title_finished, txt_desc_finished>;
 
 using Frames = FrameDefinitionList<ScreenBeltTuning::FrameStorage,
@@ -283,9 +271,6 @@ using Frames = FrameDefinitionList<ScreenBeltTuning::FrameStorage,
     FrameDefinition<Phase::measure_lower_belt, FrameMeasureLoBelt>,
     FrameDefinition<Phase::show_tension, FrameShowTensions>,
     FrameDefinition<Phase::adjust_tensioners, FrameAdjustTensioners>,
-    FrameDefinition<Phase::intro_recheck_target_freq, FrameIntroRecheck>,
-    FrameDefinition<Phase::recheck_upper_belt, FrameRecheckUp>,
-    FrameDefinition<Phase::recheck_lower_belt, FrameRecheckLo>,
     FrameDefinition<Phase::finished, FrameFinished>>;
 
 } // namespace

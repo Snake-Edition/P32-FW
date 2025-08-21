@@ -50,15 +50,6 @@ enum class PhaseManualBeltTuning : PhaseUnderlyingType {
     /// User adjusts the tensioners with calculated allen key turns
     adjust_tensioners,
 
-    /// Prepare to recheck belt tension with target frequency
-    intro_recheck_target_freq,
-
-    /// Recheck upper belt with target frequency
-    recheck_upper_belt,
-
-    /// Recheck lower belt with target frequency
-    recheck_lower_belt,
-
     /// Calibration successfully completed
     finished,
 
@@ -77,9 +68,6 @@ inline constexpr EnumArray<PhaseManualBeltTuning, PhaseResponses, PhaseManualBel
     { PhaseManualBeltTuning::measure_lower_belt, { Response::Done, Response::Abort } },
     { PhaseManualBeltTuning::show_tension, { Response::Continue, Response::Abort } },
     { PhaseManualBeltTuning::adjust_tensioners, { Response::Continue, Response::Abort } },
-    { PhaseManualBeltTuning::intro_recheck_target_freq, { Response::Continue, Response::Abort } },
-    { PhaseManualBeltTuning::recheck_upper_belt, { Response::Continue, Response::Adjust } },
-    { PhaseManualBeltTuning::recheck_lower_belt, { Response::Continue, Response::Adjust } },
     { PhaseManualBeltTuning::finished, { Response::Finish } },
 };
 
