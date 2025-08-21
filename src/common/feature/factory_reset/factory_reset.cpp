@@ -217,7 +217,11 @@ extern osThreadId displayTaskHandle;
     indicate_progress(100);
 
     // Wait a few seconds so that the user can visually verify that the factory reset is complete
-    HAL_Delay(3000);
+    constexpr const int few = 3;
+    for (int i = 0; i < few; ++i) {
+        wdt_iwdg_refresh();
+        HAL_Delay(1000);
+    }
 
     // We cannot display msg box here - it would be trying to load an icon from xFlash that we've probably wiped.
     // Also, fonts might be in xFlash one day.
