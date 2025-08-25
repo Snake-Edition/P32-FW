@@ -13,7 +13,7 @@
 
 #include <fsm/manual_belt_tuning_phases.hpp>
 #include <common/marlin_server.hpp>
-#include <bsod/bsod.h>
+#include <buddy/unreachable.hpp>
 #include <string_builder.hpp>
 
 #include <Marlin/src/gcode/gcode.h>
@@ -132,7 +132,7 @@ public:
                 case Response::Abort:
                     return Result::abort;
                 default:
-                    bsod_unreachable();
+                    BUDDY_UNREACHABLE();
                     return Result::abort;
                 }
             }
@@ -168,7 +168,7 @@ public:
             case Response::Abort:
                 return Result::abort;
             default:
-                bsod_unreachable();
+                BUDDY_UNREACHABLE();
                 break;
             }
             break;
@@ -237,7 +237,7 @@ public:
         case Response::Abort:
             break;
         default:
-            bsod_unreachable();
+            BUDDY_UNREACHABLE();
             break;
         }
         return false;
