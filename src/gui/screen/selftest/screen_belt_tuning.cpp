@@ -34,7 +34,7 @@ constexpr const char *txt_title_lo_belt_freq = N_("Lower belt actual frequency")
 constexpr const char *txt_desc_lo_belt_freq = N_("Turn the knob to adjust frequency. Look for slow belt movement with sharp, regular peaks, then click the knob to proceed.");
 // Show results of both belt measurements in Newtons PHASE: show_tension
 constexpr const char *txt_title_freq_report = N_("Actual belts frequencies");
-constexpr const char *txt_desc_freq_report = N_("Upper belt: %.1f Hz\nOptimal tension is between %u and %u Hz\n\nLower belt: %.1f Hz\nOptimal tension is between %u and %u Hz\n\nReady to calculate screw adjustment.\nPress Continue to proceed.");
+constexpr const char *txt_desc_freq_report = N_("Upper belt: %.1f Hz\nLower belt: %.1f Hz\n\nOptimal tension is between %u and %u Hz\n\nReady to calculate screw adjustment.\nPress Continue to proceed.");
 // Warning about x-gantry alignment issue PHASE: alignment_issue
 constexpr const char *txt_title_alignment_issue = N_("Alignment issue detected");
 constexpr const char *txt_desc_alignment_issue = N_("Measured belt frequencies are out of the expected range.\nPlease check that the gantry is aligned properly and repeat the calibration.");
@@ -133,7 +133,7 @@ public:
     void update(fsm::PhaseData data) {
         if (phase == PhaseManualBeltTuning::show_tension) {
             const auto tensions = fsm::deserialize_data<belt_tensions>(data);
-            desc.SetText(_(desc_ptr).formatted(params, tensions.get_upper(), manual_belt_tuning::freq_result_min, manual_belt_tuning::freq_result_max, tensions.get_lower(), manual_belt_tuning::freq_result_min, manual_belt_tuning::freq_result_max));
+            desc.SetText(_(desc_ptr).formatted(params, tensions.get_upper(), tensions.get_lower(), manual_belt_tuning::freq_result_min, manual_belt_tuning::freq_result_max));
         } else {
             desc.SetText(_(desc_ptr));
         }
