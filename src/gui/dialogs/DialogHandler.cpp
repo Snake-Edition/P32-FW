@@ -19,7 +19,7 @@
 #include <gui/screen/screen_preheat.hpp>
 
 #if HAS_MANUAL_BELT_TUNING()
-    #include <screen/selftest/screen_belt_tuning.hpp>
+    #include <screen/selftest/screen_manual_belt_tuning.hpp>
 #endif
 
 #if HAS_COLDPULL()
@@ -196,7 +196,7 @@ using FSMDisplayConfig = FSMDisplayConfigDef<
     FSMScreenDef<ClientFSM::DoorSensorCalibration, ScreenDoorSensorCalibration>,
 #endif
 #if HAS_MANUAL_BELT_TUNING()
-    FSMScreenDef<ClientFSM::BeltTuning, ScreenBeltTuning>,
+    FSMScreenDef<ClientFSM::BeltTuning, ScreenManualBeltTuning>,
 #endif
 
     // This is here so that we can worry-free write commas at the end of each argument

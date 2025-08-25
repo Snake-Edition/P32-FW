@@ -1,4 +1,4 @@
-#include "screen_belt_tuning.hpp"
+#include "screen_manual_belt_tuning.hpp"
 #include <feature/manual_belt_tuning/manual_belt_tuning_config.hpp>
 
 #include <marlin_server_types/fsm/manual_belt_tuning_phases.hpp>
@@ -288,7 +288,7 @@ using FrameAlignmentIssue = WithConstructorArgs<frames::FrameTitleDescRadioQR, P
 using FrameAdjustTensioners = WithConstructorArgs<frames::FrameTitleDescRadioQR, Phase::adjust_tensioners, txt_title_turn_screw, txt_desc_turn_screw, link_tensioning>;
 using FrameFinished = WithConstructorArgs<frames::FrameFinishJoe, Phase::finished, txt_title_finished, txt_desc_finished>;
 
-using Frames = FrameDefinitionList<ScreenBeltTuning::FrameStorage,
+using Frames = FrameDefinitionList<ScreenManualBeltTuning::FrameStorage,
     FrameDefinition<Phase::intro, FrameIntro>,
     FrameDefinition<Phase::check_x_gantry, FrameCheckXGantry>,
     FrameDefinition<Phase::homing_wait, FrameWait>,
@@ -302,25 +302,25 @@ using Frames = FrameDefinitionList<ScreenBeltTuning::FrameStorage,
 
 } // namespace
 
-ScreenBeltTuning::ScreenBeltTuning()
+ScreenManualBeltTuning::ScreenManualBeltTuning()
     : ScreenFSM("BELT TUNING", GuiDefaults::RectScreenNoHeader) {
     header.SetIcon(&img::selftest_16x16);
     CaptureNormalWindow(inner_frame);
     create_frame();
 }
 
-ScreenBeltTuning::~ScreenBeltTuning() {
+ScreenManualBeltTuning::~ScreenManualBeltTuning() {
     destroy_frame();
 }
 
-void ScreenBeltTuning::create_frame() {
+void ScreenManualBeltTuning::create_frame() {
     Frames::create_frame(frame_storage, get_phase(), &inner_frame);
 }
 
-void ScreenBeltTuning::destroy_frame() {
+void ScreenManualBeltTuning::destroy_frame() {
     Frames::destroy_frame(frame_storage, get_phase());
 }
 
-void ScreenBeltTuning::update_frame() {
+void ScreenManualBeltTuning::update_frame() {
     Frames::update_frame(frame_storage, get_phase(), fsm_base_data.GetData());
 }

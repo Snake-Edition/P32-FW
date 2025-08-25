@@ -3,11 +3,11 @@
 #include <screen_fsm.hpp>
 #include <marlin_server_types/fsm/manual_belt_tuning_phases.hpp>
 
-class ScreenBeltTuning final : public ScreenFSM {
+class ScreenManualBeltTuning final : public ScreenFSM {
 
 public:
-    ScreenBeltTuning();
-    ~ScreenBeltTuning();
+    ScreenManualBeltTuning();
+    ~ScreenManualBeltTuning();
 
 protected:
     inline PhaseManualBeltTuning get_phase() const {
