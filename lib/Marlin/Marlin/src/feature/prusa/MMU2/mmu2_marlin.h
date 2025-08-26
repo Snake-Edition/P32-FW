@@ -70,10 +70,14 @@ void marlin_refresh_print_state_in_ram();
 void marlin_clear_print_state_in_ram();
 void marlin_stop_and_save_print_to_ram();
 void marlin_finalize_unload();
+bool marlin_is_retracted();
 
 int16_t thermal_degTargetHotend();
 int16_t thermal_degHotend();
-void thermal_setExtrudeMintemp(int16_t t);
+
+/// @returns the old extruder mintemp value which can be used to restore the setting later
+int16_t thermal_setExtrudeMintemp(int16_t t);
+
 void thermal_setTargetHotend(int16_t t);
 
 void safe_delay_keep_alive(uint16_t t);

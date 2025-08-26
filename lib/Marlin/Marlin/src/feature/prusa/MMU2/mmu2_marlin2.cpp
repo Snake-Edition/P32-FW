@@ -167,6 +167,17 @@ void marlin_finalize_unload() {
 #endif
 }
 
+bool marlin_is_retracted() {
+#if HAS_AUTO_RETRACT()
+    static_assert(HOTENDS == 1);
+
+    // The filament is completely out of the nozzle - so not auto-retracted
+    return buddy::auto_retract().is_safely_retracted_for_unload();
+#else
+    return false;
+#endif
+}
+
 int16_t thermal_degTargetHotend() {
     return thermalManager.degTargetHotend(active_extruder);
 }
@@ -175,8 +186,10 @@ int16_t thermal_degHotend() {
     return thermalManager.degHotend(active_extruder);
 }
 
-void thermal_setExtrudeMintemp(int16_t t) {
+int16_t thermal_setExtrudeMintemp(int16_t t) {
+    int16_t rv = thermalManager.extrude_min_temp;
     thermalManager.extrude_min_temp = t;
+    return rv;
 }
 
 void thermal_setTargetHotend(int16_t t) {

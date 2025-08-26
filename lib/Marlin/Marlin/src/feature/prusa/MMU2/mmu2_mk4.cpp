@@ -723,9 +723,9 @@ bool MMU2::tool_change(char code, uint8_t slot) {
     } break;
 
     case 'x': {
-        thermal_setExtrudeMintemp(0); // Allow cold extrusion since Tx only loads to the gears not nozzle
+        auto emt = thermal_setExtrudeMintemp(0); // Allow cold extrusion since Tx only loads to the gears not nozzle
         tool_change(slot);
-        thermal_setExtrudeMintemp(EXTRUDE_MINTEMP);
+        thermal_setExtrudeMintemp(emt);
     } break;
 
     case 'c': {
@@ -830,8 +830,16 @@ bool MMU2::unload() {
 
     {
         CommandInProgressGuard cipg(CommandInProgress::UnloadFilament, commandInProgressManager);
-        WaitForHotendTargetTempBeep();
-        UnloadInner(PreUnloadPolicy::Ramming);
+        if (!marlin_is_retracted()) {
+            // if not already auto-retracted, do the ramming ourself
+            WaitForHotendTargetTempBeep();
+            UnloadInner(PreUnloadPolicy::Ramming);
+        } else {
+            // otherwise it's not even necessary to wait for temperature, the filament can be pulled out of the nube directly
+            auto emt = thermal_setExtrudeMintemp(0); // Allow cold extrusion since Tx only loads to the gears not nozzle
+            UnloadInner(PreUnloadPolicy::RelieveFilament);
+            thermal_setExtrudeMintemp(emt);
+        }
     }
 
     ScreenUpdateEnable();
@@ -879,11 +887,11 @@ bool MMU2::loading_test(uint8_t slot) {
         CommandInProgressGuard cipg(CommandInProgress::TestLoad, commandInProgressManager);
         FSensorBlockRunout blockRunout;
         BlockEStallDetection blockEStallDetection;
-        thermal_setExtrudeMintemp(0); // Allow cold extrusion - load test doesn't push filament all the way into the nozzle
+        auto emt = thermal_setExtrudeMintemp(0); // Allow cold extrusion - load test doesn't push filament all the way into the nozzle
         ToolChangeCommon(slot);
         planner_synchronize();
         UnloadInner(PreUnloadPolicy::RelieveFilament);
-        thermal_setExtrudeMintemp(EXTRUDE_MINTEMP);
+        thermal_setExtrudeMintemp(emt);
     }
     ScreenUpdateEnable();
     return true;
