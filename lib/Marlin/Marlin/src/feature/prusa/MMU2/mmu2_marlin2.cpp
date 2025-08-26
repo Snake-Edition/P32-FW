@@ -170,8 +170,6 @@ void marlin_finalize_unload() {
 bool marlin_is_retracted() {
 #if HAS_AUTO_RETRACT()
     static_assert(HOTENDS == 1);
-
-    // The filament is completely out of the nozzle - so not auto-retracted
     return buddy::auto_retract().is_safely_retracted_for_unload();
 #else
     return false;

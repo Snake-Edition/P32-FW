@@ -385,6 +385,7 @@ private:
         RelieveFilament,
         ExtraRelieveFilament, // longer retraction for E-stall enabled printers
     };
+    void UnloadObeyAutoRetracted();
     void UnloadInner(PreUnloadPolicy preUnloadPolicy);
     void CutFilamentInner(uint8_t slot);
 
