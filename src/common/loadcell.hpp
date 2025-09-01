@@ -149,14 +149,12 @@ private:
     struct ZFilterParams {
         static constexpr float gain = 276.1148366795870;
         static constexpr std::array<const float, 5> a = { { 1, -3.678167822936356, 5.211060348827695, -3.364842682922483, 0.837181651256023 } };
-        static constexpr size_t settling_time = 120; // 375ms
     };
 #else /*PRINTER*/
     // Original
     struct ZFilterParams {
         static constexpr float gain = 5.724846511e+01f;
         static constexpr std::array<const float, 5> a = { { 1, -3.6132919084, 4.9481816585, -3.0510427201, 0.7164075250 } };
-        static constexpr size_t settling_time = 120; // 375ms
     };
 #endif /*PRINTER*/
 
@@ -165,7 +163,6 @@ private:
     struct XYFilterParam {
         static constexpr float gain = 1 / 1.185768264324116e-02;
         static constexpr std::array<const float, 5> a = { { 1, -3.661929127367906, 5.041628953899732, -3.096320393316955, 0.716633873504158 } };
-        static constexpr size_t settling_time = 120; // 375ms
     };
 
     /// Implements IIR bandpass filter
@@ -192,42 +189,57 @@ private:
          */
         static constexpr float GAIN = PARAM::gain;
 
-        /**
-         * @brief Settling time in samples.
-         * The filter must get from 14000 loadcell offset under 40 threshold.
-         * Exact value could be calculated from the filter exponentials, but quick approximation is
-         * octave command "max(find(abs(impz(B, A)) > 40/14000))". Plus a small reserve.
-         */
-        static constexpr size_t SETTLING_TIME = PARAM::settling_time;
-
         BandPassFilter() {
             reset();
         }
 
         inline void reset() {
-            std::memset(&xv, 0, sizeof(xv));
-            std::memset(&yv, 0, sizeof(yv));
-            samples = 0;
+            initialized_ = false;
         }
 
         inline float filter(float input) {
             static_assert(NZEROS == 4, "This code works only for NZEROS == 4");
             static_assert(NPOLES == 4, "This code works only for NPOLES == 4");
             static_assert(A[0] == 1, "This code works only A[0] == 1");
-            if (samples < SETTLING_TIME) {
-                ++samples;
+
+            input /= GAIN;
+
+            if (!initialized_) {
+                initialized_ = true;
+
+                // Initialize the filter as if it has been receiving the same "input" sample infinitely
+
+                // xv is just a history of the input samples
+                for (auto &x : xv) {
+                    x = input;
+                }
+
+                // yv is the history of the bandpass filter output
+                // since we're "simulating" the same output since the beginning of time, it should be zero
+                for (auto &y : yv) {
+                    y = 0;
+                }
+
+            } else {
+                xv[0] = xv[1];
+                xv[1] = xv[2];
+                xv[2] = xv[3];
+                xv[3] = xv[4];
+                xv[4] = input;
+
+                yv[0] = yv[1];
+                yv[1] = yv[2];
+                yv[2] = yv[3];
+                yv[3] = yv[4];
+
+                yv[4] =
+                    // Note: xv cancels each other out if it is the same the whole time
+                    xv[0] + -2 * xv[2] + xv[4]
+
+                    // Feedback from the previous filter outputs
+                    - A[4] * yv[0] - A[3] * yv[1] - A[2] * yv[2] - A[1] * yv[3];
             }
 
-            xv[0] = xv[1];
-            xv[1] = xv[2];
-            xv[2] = xv[3];
-            xv[3] = xv[4];
-            xv[4] = input / GAIN;
-            yv[0] = yv[1];
-            yv[1] = yv[2];
-            yv[2] = yv[3];
-            yv[3] = yv[4];
-            yv[4] = xv[0] + -2 * xv[2] + xv[4] - A[4] * yv[0] - A[3] * yv[1] - A[2] * yv[2] - A[1] * yv[3];
             return yv[4];
         }
 
@@ -235,14 +247,14 @@ private:
             return yv[std::size(yv) - 1];
         }
 
-        inline bool settled() const {
-            return (samples == SETTLING_TIME);
+        inline bool initialized() const {
+            return initialized_;
         }
 
     private:
         float xv[NZEROS + 1];
         float yv[NPOLES + 1];
-        unsigned int samples; ///< Samples fed until SETTLING_TIME is reached
+        bool initialized_ = false;
     };
 
     static constexpr float scale = 0.0192f;

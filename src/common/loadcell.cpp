@@ -66,7 +66,7 @@ float Loadcell::Tare(TareMode mode) {
 
     // request tare from ISR routine
     int requestedTareCount = tareMode == TareMode::Continuous
-        ? std::max(z_filter.SETTLING_TIME, xy_filter.SETTLING_TIME)
+        ? 1 // Just to initialize the XY and Z bandpass filters
         : STATIC_TARE_SAMPLE_CNT;
     tareSum = 0;
     tareCount = requestedTareCount;
@@ -84,8 +84,8 @@ float Loadcell::Tare(TareMode mode) {
     if (!planner.draining()) {
         if (tareMode == TareMode::Continuous) {
             // double-check filters are ready after the tare
-            assert(z_filter.settled());
-            assert(xy_filter.settled());
+            assert(z_filter.initialized());
+            assert(xy_filter.initialized());
         }
 
         offset = tareSum / requestedTareCount;
@@ -196,7 +196,7 @@ void Loadcell::ProcessSample(int32_t loadcellRaw, uint32_t time_us) {
             loadForEndstops = tared_z_load;
             threshold = thresholdStatic;
         } else {
-            assert(!Endstops::is_z_probe_enabled() || z_filter.settled());
+            assert(!Endstops::is_z_probe_enabled() || z_filter.initialized());
             loadForEndstops = filtered_z_load;
             threshold = thresholdContinuous;
         }
@@ -215,7 +215,7 @@ void Loadcell::ProcessSample(int32_t loadcellRaw, uint32_t time_us) {
 
         // Trigger XY endstop/probe
         if (xy_endstop_enabled) {
-            assert(xy_filter.settled());
+            assert(xy_filter.initialized());
 
             // Everything as absolute values, watch for changes.
             // Load perpendicular to the sensor sense vector is not guaranteed to have defined sign.
