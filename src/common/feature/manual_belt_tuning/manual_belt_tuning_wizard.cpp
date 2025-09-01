@@ -62,15 +62,15 @@ public:
         }
 
         enable_all_steppers();
-        if (!GcodeSuite::G28_no_parser(true, true, true, { .precise = false })) {
+        if (!GcodeSuite::G28_no_parser(true, true, false, { .precise = false })) {
             return Result::abort;
         }
-        do_blocking_move_to(240, -8, 10, 50.f); // belt tension calibration position
+        do_blocking_move_to_xy(240, -8, 50.f); // belt tension calibration position
         planner.synchronize();
 
         fsm_change(PhaseManualBeltTuning::intro_measure);
         if (wait_for_continue(PhaseManualBeltTuning::intro_measure)) {
-            const struct belt_tensions tension_data(freq_top_belt_optimal, freq_bottom_belt_optimal);
+            const struct belt_tensions tension_data(higher_freq_belt_optimal, lower_freq_belt_optimal);
             fsm_change(PhaseManualBeltTuning::measure_upper_belt, fsm::serialize_data<belt_tensions>(tension_data));
         } else {
             return Result::abort;
@@ -93,8 +93,8 @@ public:
         }
 
         // Variables for result frequency
-        float freq_top_belt = freq_top_belt_optimal;
-        float freq_bottom_belt = freq_bottom_belt_optimal;
+        float freq_top_belt = higher_freq_belt_optimal;
+        float freq_bottom_belt = lower_freq_belt_optimal;
 
         // Measurement checkpoint, make sure fsm with phase data is set up
         while (true) {
@@ -123,8 +123,7 @@ public:
             freq_bottom_belt = vibrator.frequency;
             tension_data = belt_tensions(freq_top_belt, freq_bottom_belt);
 
-            if (freq_top_belt < freq_result_min || freq_top_belt > freq_result_max
-                || freq_bottom_belt < freq_result_min || freq_bottom_belt > freq_result_max) {
+            if (fabs(freq_top_belt - freq_bottom_belt) > freq_diff_limit) {
                 fsm_change(PhaseManualBeltTuning::alignment_issue);
                 switch (wait_for_response(PhaseManualBeltTuning::alignment_issue)) {
                 case Response::Retry:
@@ -137,23 +136,27 @@ public:
                 }
             }
 
-            // difference frequency
-            const float dft = freq_top_belt_optimal - freq_top_belt;
-            const float dfb = freq_bottom_belt_optimal - freq_bottom_belt;
-            // difference revelations
-            const float drt = calc_revs_from_freq(dft, dfb, belt_hz_per_rev, belt_hz_per_rev2);
-            const float drb = calc_revs_from_freq(dfb, dft, belt_hz_per_rev, belt_hz_per_rev2);
-            //  average
-            const float dr = (drt + drb) / 2;
             // eights of one turn (signed)
-            const int dri8 = int(dr * 8);
+            int8_t rev_eights = 0; // Default value 0 (no turns needed)
+            const float freq_higher = std::fmax(freq_top_belt, freq_bottom_belt);
+            const float freq_lower = std::fmin(freq_bottom_belt, freq_top_belt);
+
+            if (freq_higher > freq_result_max || freq_lower < freq_result_min) {
+                // difference frequency
+                const float dfh = higher_freq_belt_optimal - freq_higher;
+                const float dfl = lower_freq_belt_optimal - freq_lower;
+                // difference revelations
+                const float drh = calc_revs_from_freq(dfh, dfl, belt_hz_per_rev, belt_hz_per_rev2);
+                const float drl = calc_revs_from_freq(dfl, dfh, belt_hz_per_rev, belt_hz_per_rev2);
+                //  average
+                const float dr = (drh + drl) / 2;
+                // eights of one turn (signed)
+                rev_eights = static_cast<int8_t>(std::roundf(dr * 8));
+            }
 
             fsm_change(PhaseManualBeltTuning::show_tension, fsm::serialize_data<belt_tensions>(tension_data));
             if (wait_for_continue(PhaseManualBeltTuning::show_tension)) {
-                struct screw_revs revs_data = {
-                    .turn_eights = static_cast<int8_t>(dri8),
-                };
-                fsm_change(PhaseManualBeltTuning::adjust_tensioners, fsm::serialize_data<screw_revs>(revs_data));
+                fsm_change(PhaseManualBeltTuning::adjust_tensioners, fsm::serialize_data<screw_revs>({ rev_eights }));
             } else {
                 return Result::abort;
             }

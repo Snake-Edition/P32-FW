@@ -2,6 +2,9 @@
 
 namespace manual_belt_tuning {
 
+// the limit of valid frequency diff in Hz
+constexpr uint16_t freq_diff_limit = 8;
+
 // frequency range
 constexpr uint16_t freq_min = 50;
 constexpr uint16_t freq_max = 130;
@@ -67,9 +70,9 @@ constexpr float floor_to_half(float val) {
 // optimal belt tension for the printer
 constexpr uint16_t tension_optimal_N = 19;
 
-// optimal frequency for top belt
-constexpr float freq_top_belt_optimal = floor_to_half(tension_to_freq(tension_optimal_N, length_top_belt));
-// optimal frequency for bottom belt
-constexpr float freq_bottom_belt_optimal = floor_to_half(tension_to_freq(tension_optimal_N, length_bottom_belt));
+// optimal frequency for top belt (in some cases lower belt has higher freq and optimal frequencies are switched)
+constexpr float higher_freq_belt_optimal = floor_to_half(tension_to_freq(tension_optimal_N, length_top_belt));
+// optimal frequency for bottom belt (in some cases lower belt has higher freq and optimal frequencies are switched)
+constexpr float lower_freq_belt_optimal = floor_to_half(tension_to_freq(tension_optimal_N, length_bottom_belt));
 
 }; // namespace manual_belt_tuning
