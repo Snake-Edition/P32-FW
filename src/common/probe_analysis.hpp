@@ -54,37 +54,11 @@ public:
 
     /// Entry of the moving window used for analysis.
     struct Record {
-        /// Z is expected to be 0 +- a few mm
-        /// 1 bit sign, 5 bits (+- 31) whole, 10 bits (+-0.001) decimal
-        static constexpr float z_mult = 1024;
+        /// Extruder's Z coordinate [mm]
+        float z;
 
-        /// Load tends to fluctuate betwen +- 200 g
-        /// 1 bit sign, 8 bits (+- 255) whole, 7 bits (+-0.01) decimal
-        static constexpr float load_mult = 128;
-
-        constexpr Record() = default;
-
-        Record(float z, float load)
-            : z_fixpoint(std::clamp<float>(z * z_mult, std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()))
-            , load_fixpoint(std::clamp<float>(load * load_mult, std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max())) {}
-
-        /// Extruder's Z coordinate [mm ]
-        constexpr inline float z() const {
-            static constexpr float coef = 1.0f / z_mult;
-            return static_cast<float>(z_fixpoint) * coef;
-        }
-
-        /// Extruder's Z coordinate [mm * z_mult]
-        int16_t z_fixpoint;
-
-        /// Load measured [grams ]
-        constexpr inline float load() const {
-            static constexpr float coef = 1.0f / load_mult;
-            return static_cast<float>(load_fixpoint) * coef;
-        }
-
-        /// Load measured [grams * load_mult]
-        int16_t load_fixpoint;
+        /// Load measured [grams]
+        float load;
     };
 
     /// Represents a single sample

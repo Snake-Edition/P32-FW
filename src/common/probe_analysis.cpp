@@ -17,8 +17,7 @@ void ProbeAnalysisBase::StoreSample([[maybe_unused]] uint32_t time_us, float cur
     if (analysisInProgress) {
         return;
     }
-    const auto record = Record { currentZ, currentLoad };
-    window.push_back(record);
+    window.push_back({ currentZ, currentLoad });
 
 #if !defined(UNITTESTS)
     lastSampleTimestamp = ticks_us();
@@ -207,7 +206,7 @@ ProbeAnalysisBase::Sample ProbeAnalysisBase::ClosestSample(Time time, SearchDire
 
 std::tuple<float, ProbeAnalysisBase::Line, ProbeAnalysisBase::Line> ProbeAnalysisBase::CalculateErrorWhenLoadRepresentedAsLines(SamplesRange samples, Sample split, size_t gap) {
     // linear regression
-    auto getLoad = [](Sample s) { return s->load(); };
+    auto getLoad = [](Sample s) { return s->load; };
     Line leftLine = LinearRegression(SamplesRange(samples.first, split - 1), getLoad);
     Line rightLine = LinearRegression(SamplesRange(split + gap, samples.last), getLoad);
 
@@ -221,9 +220,9 @@ std::tuple<float, ProbeAnalysisBase::Line, ProbeAnalysisBase::Line> ProbeAnalysi
     for (auto it = samples.first; it <= samples.last; ++it) {
         float diff;
         if (it < split) {
-            diff = leftLine.GetY(TimeOfSample(it)) - it->load();
+            diff = leftLine.GetY(TimeOfSample(it)) - it->load;
         } else {
-            diff = rightLine.GetY(TimeOfSample(it)) - it->load();
+            diff = rightLine.GetY(TimeOfSample(it)) - it->load;
         }
         error += diff * diff;
     }
@@ -262,12 +261,12 @@ bool ProbeAnalysisBase::CompensateForSystemDelay() {
 
     auto it = window.rbegin();
     for (; it < window.rend() - samplesToShift; ++it) {
-        it->z_fixpoint = (it + samplesToShift)->z_fixpoint;
+        it->z = (it + samplesToShift)->z;
     }
     // Approximate the missing Z samples based on the closest two Z samples we already have
-    const auto diff = (it - 1)->z_fixpoint - (it - 2)->z_fixpoint;
+    auto diff = (it - 1)->z - (it - 2)->z;
     for (; it < window.rend(); ++it) {
-        it->z_fixpoint = (it - 1)->z_fixpoint + diff;
+        it->z = (it - 1)->z + diff;
     }
 
     return true;
@@ -277,7 +276,7 @@ void ProbeAnalysisBase::CalculateHaltSpan(Features &features) {
     // find the start of the fall line
     Sample fallStart = window.begin();
     for (auto it = fallStart + 1; it < window.end(); ++it) {
-        if (fallStart->z_fixpoint != it->z_fixpoint) {
+        if (fallStart->z != it->z) {
             break;
         }
         fallStart = it;
@@ -286,7 +285,7 @@ void ProbeAnalysisBase::CalculateHaltSpan(Features &features) {
     // find the end of the raise line
     Sample riseEnd = window.end() - 1;
     for (auto it = riseEnd; it > fallStart; --it) {
-        if (riseEnd->z_fixpoint != it->z_fixpoint) {
+        if (riseEnd->z != it->z) {
             break;
         }
         riseEnd = it;
@@ -297,10 +296,10 @@ void ProbeAnalysisBase::CalculateHaltSpan(Features &features) {
     Sample riseStart = fallStart;
     bool extendingHalt = true;
     for (auto it = riseEnd; it > fallStart; --it) {
-        if (it->z_fixpoint < fallEnd->z_fixpoint) {
+        if (it->z < fallEnd->z) {
             fallEnd = riseStart = it;
             extendingHalt = true;
-        } else if (extendingHalt && it->z_fixpoint == fallEnd->z_fixpoint) {
+        } else if (extendingHalt && it->z == fallEnd->z) {
             fallEnd = it;
         } else {
             extendingHalt = false;
@@ -330,7 +329,7 @@ bool ProbeAnalysisBase::CalculateAnalysisRange(Features &features) {
 }
 
 bool ProbeAnalysisBase::CalculateLoadLineApproximationFeatures(Features &features) {
-    auto getLoad = [](Sample s) { return s->load(); };
+    auto getLoad = [](Sample s) { return s->load; };
     size_t compressionGapSamples = static_cast<size_t>(analysisCompressionGap / samplingInterval);
     size_t decompressionGapSamples = static_cast<size_t>(analysisDecompressionGap / samplingInterval);
 
@@ -347,7 +346,7 @@ bool ProbeAnalysisBase::CalculateLoadLineApproximationFeatures(Features &feature
 }
 
 bool ProbeAnalysisBase::CalculateZLineApproximationFeatures(Features &features) {
-    auto getZ = [](Sample s) { return s->z(); };
+    auto getZ = [](Sample s) { return s->z; };
 
     features.fallLine = LinearRegression(SamplesRange(features.fallStart + skipBorderSamples, features.fallEnd - skipBorderSamples), getZ);
     features.haltLine = LinearRegression(SamplesRange(features.fallEnd + skipBorderSamples, features.riseStart - skipBorderSamples), getZ);
@@ -372,10 +371,9 @@ bool ProbeAnalysisBase::CheckLineSanity(Features &features) {
 
 void ProbeAnalysisBase::CalculateLoadMeans(Features &features) {
     auto calcLoadMean = [](SamplesRange samples) {
-        const auto accum_f = [](float acc, Record const &record) {
-            return acc + record.load();
-        };
-        return std::accumulate(samples.begin(), samples.end(), 0.0f, accum_f) / static_cast<float>(samples.Size());
+        return std::accumulate(samples.begin(), samples.end(), 0.0f, [](float acc, Record const &record) {
+            return acc + record.load;
+        }) / static_cast<float>(samples.Size());
     };
 
     SamplesRange beforeCompressionSamples(features.analysisStart, ClosestSample(features.compressionStartTime - analysisCompressionGap, SearchDirection::Backward));
@@ -402,13 +400,12 @@ void ProbeAnalysisBase::CalculateLoadAngles(Features &features) const {
 
 ProbeAnalysisBase::VarianceInfo ProbeAnalysisBase::CalculateVariance(SamplesRange samples, Line regression) {
     // FIXME: !!! accumulate function is wrong, should return acc + r.load. Fixing this causes classify to fail however.
-    float mean = std::accumulate(samples.begin(), samples.end(), 0.0f, []([[maybe_unused]] float acc, Record const &r) { return r.load(); }) / static_cast<float>(samples.Size());
+    float mean = std::accumulate(samples.begin(), samples.end(), 0.0f, []([[maybe_unused]] float acc, Record const &r) { return r.load; }) / static_cast<float>(samples.Size());
     float totalVariance = 0, unexplainedVariance = 0;
 
     for (auto it = samples.first; it <= samples.last; ++it) {
-        const auto load = it->load();
-        totalVariance += std::pow(load - mean, 2.0f);
-        unexplainedVariance += std::pow(regression.GetY(TimeOfSample(it)) - load, 2.0f);
+        totalVariance += std::pow(it->load - mean, 2.0f);
+        unexplainedVariance += std::pow(regression.GetY(TimeOfSample(it)) - it->load, 2.0f);
     }
 
     return VarianceInfo(totalVariance, unexplainedVariance);

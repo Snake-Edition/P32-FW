@@ -120,34 +120,34 @@ SCENARIO("Analysis properly handles its sample window", "[probe_analysis]") {
             THEN("compensation for system delay shifts Z values to the future") {
                 analysis.CompensateForSystemDelay();
 
-                REQUIRE(analysis.window[5].z() == 0);
-                REQUIRE(analysis.window[6].z() == -10);
-                REQUIRE(analysis.window[9].z() == -10);
-                REQUIRE(analysis.window[10].z() == 0);
+                REQUIRE(analysis.window[5].z == 0);
+                REQUIRE(analysis.window[6].z == -10);
+                REQUIRE(analysis.window[9].z == -10);
+                REQUIRE(analysis.window[10].z == 0);
             }
 
             THEN("compensation depends on used sampling interval") {
                 analysis.SetSamplingIntervalMs(20);
                 analysis.CompensateForSystemDelay();
 
-                REQUIRE(analysis.window[4].z() == 0);
-                REQUIRE(analysis.window[5].z() == -10);
-                REQUIRE(analysis.window[8].z() == -10);
-                REQUIRE(analysis.window[9].z() == 0);
+                REQUIRE(analysis.window[4].z == 0);
+                REQUIRE(analysis.window[5].z == -10);
+                REQUIRE(analysis.window[8].z == -10);
+                REQUIRE(analysis.window[9].z == 0);
             }
         }
 
         WHEN("filled up with rising Z samples") {
             for (int i = 0; i < 12; i++) {
-                analysis.StoreSample(/*time_us=*/0, /*current_z=*/5 + i * 2, /*current_load=*/0);
+                analysis.StoreSample(/*time_us=*/0, /*current_z=*/100 + i * 2, /*current_load=*/0);
             }
 
             THEN("compensation for system delay fills missing Z coordinates") {
                 analysis.CompensateForSystemDelay();
 
-                REQUIRE(analysis.window[2].z() == 5);
-                REQUIRE(analysis.window[1].z() == 5 - 2);
-                REQUIRE(analysis.window[0].z() == 5 - 4);
+                REQUIRE(analysis.window[2].z == 100);
+                REQUIRE(analysis.window[1].z == 100 - 2);
+                REQUIRE(analysis.window[0].z == 100 - 4);
             }
         }
     }
@@ -220,7 +220,7 @@ SCENARIO("analysis properly calculates probe features", "[probe_analysis]") {
             analysis.SetSamplingIntervalMs(1);
             auto samples = ProbeAnalysisT::SamplesRange(analysis.window.begin(), analysis.window.begin() + 3);
             auto line = analysis.LinearRegression(samples, [](ProbeAnalysisT::Sample s) {
-                return s->z();
+                return s->z;
             });
             THEN("both a and b are zero") {
                 REQUIRE_THAT(line.a, Catch::Matchers::WithinRel(0.0f));
@@ -232,7 +232,7 @@ SCENARIO("analysis properly calculates probe features", "[probe_analysis]") {
             analysis.SetSamplingIntervalMs(1000);
             auto samples = ProbeAnalysisT::SamplesRange(analysis.window.begin() + 3, analysis.window.begin() + 4);
             auto line = analysis.LinearRegression(samples, [](ProbeAnalysisT::Sample s) {
-                return s->z();
+                return s->z;
             });
             THEN("both a and b have the expected value") {
                 REQUIRE_THAT(line.a, Catch::Matchers::WithinRel(-10.0f));
