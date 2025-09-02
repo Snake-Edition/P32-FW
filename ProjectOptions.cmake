@@ -787,7 +787,7 @@ define_boolean_option(DEBUG_WITH_BEEPS ${DEBUG_WITH_BEEPS})
 # Eventually, this'll become the only used and supported way to talk to Connect. At that point, both
 # this option and the "old" code will be removed.
 set(WEBSOCKET
-    "ON"
+    "OFF"
     CACHE BOOL "Use websocket to talk to connect. In development"
     )
 define_boolean_option(WEBSOCKET ${WEBSOCKET})
