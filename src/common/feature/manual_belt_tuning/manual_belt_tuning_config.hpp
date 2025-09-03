@@ -6,7 +6,7 @@ namespace manual_belt_tuning {
 constexpr uint16_t freq_diff_limit = 8;
 
 // frequency range
-constexpr uint16_t freq_min = 50;
+constexpr uint16_t freq_min = 60;
 constexpr uint16_t freq_max = 130;
 
 // acceleration range
