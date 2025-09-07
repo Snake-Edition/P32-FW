@@ -22,7 +22,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
   which uses print fan to speed up cooling.
 8. **Game**: Instead of printing you can enjoy simple game.
 9. ~~**Bigger time**: Printing and remaining time is now bigger.~~
-10. ~~**Selftest check**: Now you can select `Ignore` to immediately pass all selftests.~~
+10. **Selftest check**: Now you can select `Ignore` to immediately pass all selftests.
 11. ~~**Temperature calibration**: You can calibrate PID temperature control for your hotend/bed directly from the menu. Calibration does 5 cycles.~~
 12. ~~**Total time**: Elapsed, Remaining and Total or End time are shown during printing.~~
 13.
@@ -46,6 +46,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
     1. max. feedrate (for X and Y only)
 23. **Adjustable filament load length**: Different extruders need different load length.
 24. **Adjustable homing sensitivity**: X and Y homing sensitivity can be changed in menu and saved.
+25. **Different extruder/print head support**: Profiles for other extruders (Bondtech, [Binus dualdrive](https://www.printables.com/model/946290-dual-gear-drive-extruder-for-prusa-minimini)) and print heads (Revo Six)
 
 ## Feed the Snake
 

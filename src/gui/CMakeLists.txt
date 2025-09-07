@@ -13,6 +13,8 @@ target_sources(
   firmware
   PRIVATE auto_layout.cpp
           box_unfinished_selftest.cpp
+          MItem_extruder_profiles.cpp
+          screen_menu_extruder_profiles.cpp
           file_sort.cpp
           fonts.cpp
           frame_calibration_common.cpp
@@ -30,6 +32,7 @@ target_sources(
           menu_vars.cpp
           MItem_crash.cpp
           MItem_experimental_tools.cpp
+          MItem_print_head_profiles.cpp
           MItem_filament.cpp
           MItem_hardware.cpp
           MItem_input_shaper.cpp
@@ -63,6 +66,7 @@ target_sources(
           screen_menu_footer_settings.cpp
           screen_menu_fw_update.cpp
           screen_menu_hardware.cpp
+          screen_menu_print_head_profiles.cpp
           screen_menu_hardware_tune.cpp
           screen_menu_info.cpp
           screen_menu_input_shaper.cpp

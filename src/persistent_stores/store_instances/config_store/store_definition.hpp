@@ -497,6 +497,9 @@ struct CurrentStore
     StoreItem<float, defaults::axis_steps_per_unit_y, journal::hash("Axis Steps Per Unit Y")> axis_steps_per_unit_y;
     StoreItem<float, defaults::axis_steps_per_unit_z, journal::hash("Axis Steps Per Unit Z")> axis_steps_per_unit_z;
     StoreItem<float, defaults::axis_steps_per_unit_e0, journal::hash("Axis Steps Per Unit E0")> axis_steps_per_unit_e0;
+    
+    // Extruder profile support - stores which profile is currently active
+    StoreItem<uint8_t, 0, journal::hash("Extruder Profile")> extruder_profile;
     StoreItem<uint16_t, 0, journal::hash("Axis Microsteps X")> axis_microsteps_X_; // 0 - default value, !=0 - user value
     StoreItem<uint16_t, 0, journal::hash("Axis Microsteps Y")> axis_microsteps_Y_; // 0 - default value, !=0 - user value
     StoreItem<uint16_t, defaults::axis_microsteps_Z_, journal::hash("Axis Microsteps Z")> axis_microsteps_Z_;
