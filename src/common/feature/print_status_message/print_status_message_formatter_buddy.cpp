@@ -24,6 +24,7 @@ static constexpr EnumArray<Message::Type, const char *, Message::Type::_cnt> mes
 
 #if ENABLED(PROBE_CLEANUP_SUPPORT)
         { Message::Type::nozzle_cleaning, N_("Nozzle cleaning") },
+        { Message::Type::purging, N_("Purging") },
 #endif
 #if ENABLED(DETECT_PRINT_SHEET)
         { Message::Type::detecting_steel_sheet, N_("Detecting steel sheet") },
@@ -59,6 +60,7 @@ void PrintStatusMessageFormatterBuddy::format(StringBuilder &target, const Messa
 #endif
 #if ENABLED(PROBE_CLEANUP_SUPPORT)
     case Message::Type::nozzle_cleaning:
+    case Message::Type::purging:
 #endif
 #if ENABLED(DETECT_PRINT_SHEET)
     case Message::Type::detecting_steel_sheet:
