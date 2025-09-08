@@ -25,6 +25,12 @@
  */
 
 #include "../../../inc/MarlinConfig.h"
+#include "config_store/store_instance.hpp"
+#include "feature/print_status_message/print_status_message_guard.hpp"
+
+#if HAS_AUTO_RETRACT()
+    #include "feature/auto_retract/auto_retract.hpp"
+#endif
 
 #if ENABLED(AUTO_BED_LEVELING_UBL)
 
@@ -35,6 +41,11 @@
     #include <marlin_server.hpp>
     #include <calibration_z.hpp>
     #include <option/has_uneven_bed_prompt.h>
+    #if HAS_LOADCELL()
+        #include <fsm/nozzle_cleaning_phases.hpp>
+    #endif
+
+    #include <mapi/motion.hpp>
 
 /** \addtogroup G-Codes
  * @{
@@ -290,11 +301,46 @@ void GcodeSuite::G29() {
             // need.
             plan_park_move_to_xyz({ { XYZ_NOZZLE_PARK_POINT_M600 } }, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE, Segmented::yes);
 
-            const auto response = marlin_server::prompt_warning(WarningType::NozzleCleaningFailed);
+            marlin_server::FSM_Holder _fsm(PhaseNozzleCleaning::cleaning_failed);
+            const auto response = marlin_server::wait_for_response(PhaseNozzleCleaning::cleaning_failed);
             if (response == Response::Ignore) {
                 // Continue executing the function
 
             } else if (response == Response::Retry) {
+                #if !HAS_NOZZLE_CLEANER() && HAS_AUTO_RETRACT()
+                marlin_server::fsm_change(PhaseNozzleCleaning::recommend_purge);
+                const auto response1 = marlin_server::wait_for_response(PhaseNozzleCleaning::recommend_purge);
+                if (response1 == Response::Purge) {
+                    marlin_server::fsm_destroy(ClientFSM::NozzleCleaning);
+                    const int16_t temp_before = Temperature::degTargetHotend(active_extruder);
+                    const int16_t target_temp = config_store().get_filament_type(active_extruder).parameters().nozzle_temperature;
+                    // Set and wait for temp
+                    M109_no_parser(active_extruder, { .target_temp = target_temp, .wait_heat = true, .display_temp = true });
+                    {
+                        // Purge
+                        PrintStatusMessageGuard statusGuard;
+                        statusGuard.update<PrintStatusMessage::purging>({});
+                        const auto retract_lenght = buddy::auto_retract().retract_length();
+                        mapi::extruder_move(retract_lenght, ADVANCED_PAUSE_PURGE_FEEDRATE);
+                        buddy::auto_retract().maybe_retract_from_nozzle();
+                        planner.synchronize();   
+                    }
+                    // If the print was stopped, dont continue
+                    if (planner.draining()) {
+                        return;
+                    }
+                    marlin_server::fsm_create(PhaseNozzleCleaning::remove_filament);
+                    const auto response2 = marlin_server::wait_for_response(PhaseNozzleCleaning::remove_filament);
+                    marlin_server::fsm_destroy(ClientFSM::NozzleCleaning);
+                    if (response2 == Response::Done) {
+                        // Set back target temp and wait
+                        M109_no_parser(active_extruder, { .target_temp = temp_before, .wait_heat_or_cool = true, .autotemp = true, .display_temp = true } );
+                    } else { // if (response2 == Response::Abort)
+                        marlin_server::print_abort();
+                        return;
+                    }
+                } 
+                #endif
                 continue;
 
             } else { // if(response == Response::Abort)

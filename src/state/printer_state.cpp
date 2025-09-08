@@ -238,6 +238,9 @@ DeviceState get_state(bool ready) {
         // preheat menu to be the only menu screen to not be Idle... :-(
     case ClientFSM::Preheat:
     case ClientFSM::Wait:
+#if HAS_LOADCELL()
+    case ClientFSM::NozzleCleaning:
+#endif
         return DeviceState::Busy;
 
     case ClientFSM::Warning: {
@@ -402,7 +405,9 @@ StateWithDialog get_state_with_dialog(bool ready) {
     case ClientFSM::Printing:
     case ClientFSM::Serial_printing:
         break;
-
+#if HAS_LOADCELL()
+    case ClientFSM::NozzleCleaning:
+#endif
 #if HAS_SELFTEST()
     case ClientFSM::Selftest:
     case ClientFSM::FansSelftest:

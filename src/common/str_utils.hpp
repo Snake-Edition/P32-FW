@@ -60,10 +60,10 @@ template <char... chars>
 struct TemplateString {
     static constexpr inline const char str[] = { chars..., '\0' };
 
-    consteval inline operator const char *() const {
+    constexpr inline operator const char *() const {
         return str;
     }
-    consteval inline operator ConstexprString() const {
+    constexpr inline operator ConstexprString() const {
         return ConstexprString(str);
     }
 };

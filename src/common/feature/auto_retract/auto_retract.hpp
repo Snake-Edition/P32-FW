@@ -25,6 +25,9 @@ public:
     /// If is_retracted, executes the deretraction process and marks the currently active hotend as not retracted
     void maybe_deretract_to_nozzle();
 
+    /// How much the auto_retract retracts
+    int16_t retract_length() const;
+
 private:
     AutoRetract();
 

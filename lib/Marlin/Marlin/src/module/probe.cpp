@@ -853,7 +853,7 @@ bool cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max) {
   if (probe_deployed) {
     STOW_PROBE();
   }
-
+  
   return consecutive_clean_cnt >= required_clean_cnt;
 }
 #endif
