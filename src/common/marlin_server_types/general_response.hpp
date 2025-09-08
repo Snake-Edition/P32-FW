@@ -41,6 +41,7 @@ enum class Response : uint8_t {
     Ok,
     Pause,
     Print,
+    Purge,
     Purge_more,
     Quit,
     Reheat,

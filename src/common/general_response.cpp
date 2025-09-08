@@ -37,6 +37,7 @@ static constexpr EnumArray<Response, const char *, Response::_count> response_st
     R(Ok),
     R(Pause),
     R(Print),
+    R(Purge),
     R(Purge_more),
     R(Quit),
     R(Reheat),
