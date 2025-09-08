@@ -366,7 +366,7 @@ set_feature_for_printers(
   "XL"
   "MINI"
   )
-set_feature_for_printers(HAS_AUTO_RETRACT "COREONE" "MK4")
+set_feature_for_printers(HAS_AUTO_RETRACT "COREONE" "MK4" "XL")
 
 # Printers that support any form of backwards gcode compatibility modes
 set_feature_for_printers(HAS_GCODE_COMPATIBILITY "MK3.5" "MK4" "COREONE")
