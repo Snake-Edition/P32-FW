@@ -305,6 +305,14 @@ struct G28Flags {
   #endif
 };
 
+struct M109Flags {
+  int16_t target_temp = 0;
+  bool wait_heat = true;            // Wait only when heating
+  bool wait_heat_or_cool = false;   // Wait for heating or cooling
+  bool autotemp = false;            // Use AUTOTEMP with S, B, F parameters
+  bool display_temp = false;
+};
+
 class GcodeSuite {
 public:
 
@@ -413,6 +421,8 @@ public:
    * @return true on success
    */
   static bool G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags = G28Flags());
+
+  static bool M109_no_parser(const uint8_t target_extruder, const M109Flags& flags = M109Flags());
 
   static void T(const uint8_t tool_index);
 
@@ -617,6 +627,7 @@ private:
 
   #if EXTRUDERS
     static void M109();
+    
   #endif
 
   static void M105();
