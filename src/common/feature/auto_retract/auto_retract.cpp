@@ -24,25 +24,6 @@ LOG_COMPONENT_REF(MarlinServer);
 
 using namespace buddy;
 
-namespace {
-
-class EStallDisabler {
-private:
-    bool detect;
-
-public:
-    EStallDisabler() {
-        detect = EMotorStallDetector::Instance().Enabled();
-        EMotorStallDetector::Instance().SetEnabled(false);
-    }
-    EStallDisabler(const EStallDisabler &other) = delete;
-    ~EStallDisabler() {
-        EMotorStallDetector::Instance().SetEnabled(detect);
-    }
-};
-
-} // namespace
-
 AutoRetract &buddy::auto_retract() {
     static AutoRetract instance;
     return instance;
@@ -100,7 +81,7 @@ void AutoRetract::maybe_retract_from_nozzle(const ProgressCallback &progress_cal
         // No estall detection during the ramming; we may do so too fast sometimes
         // to the point where the motor skips, but we don't care, as it doesn't
         // damage the print.
-        EStallDisabler estall_disabler;
+        BlockEStallDetection estall_blocker;
 
         const auto &sequence = standard_ramming_sequence(StandardRammingSequence::auto_retract, hotend);
         struct {
@@ -157,7 +138,7 @@ void AutoRetract::maybe_deretract_to_nozzle() {
         // No estall detection during the ramming; we may do so too fast sometimes
         // to the point where the motor skips, but we don't care, as it doesn't
         // damage the print.
-        EStallDisabler estall_disabler;
+        BlockEStallDetection estall_blocker;
         standard_ramming_sequence(StandardRammingSequence::auto_retract, hotend).undo(FILAMENT_CHANGE_FAST_LOAD_FEEDRATE);
     }
 
