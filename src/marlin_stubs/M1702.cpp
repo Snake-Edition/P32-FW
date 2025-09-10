@@ -355,7 +355,7 @@ namespace {
     #if HAS_AUTO_RETRACT()
     PhasesColdPull deretract() {
 
-        if (!buddy::auto_retract().is_retracted()) {
+        if (!buddy::auto_retract().will_deretract()) {
             return PhasesColdPull::cool_down;
         }
 

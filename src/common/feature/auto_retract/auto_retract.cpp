@@ -1,7 +1,7 @@
 #include "auto_retract.hpp"
 
 #include <marlin_vars.hpp>
-#include <config_store/store_definition.hpp>
+#include <config_store/store_instance.hpp>
 #include <feature/ramming/standard_ramming_sequence.hpp>
 #include <module/planner.h>
 #include <RAII.hpp>
@@ -10,6 +10,7 @@
 #include <feature/print_status_message/print_status_message_guard.hpp>
 #include <marlin_server.hpp>
 #include <feature/prusa/e-stall_detector.h>
+#include <mapi/motion.hpp>
 
 #include <option/has_mmu2.h>
 #if HAS_MMU2()
@@ -29,26 +30,39 @@ AutoRetract &buddy::auto_retract() {
     return instance;
 }
 
-bool AutoRetract::is_retracted(uint8_t hotend) const {
+AutoRetract::AutoRetract() {
+    for (uint8_t i = 0; i < HOTENDS; i++) {
+        retracted_hotends_bitset_.set(i, config_store().get_filament_retracted_distance(i).value_or(0.0f) > 0.0f);
+    }
+}
+
+bool AutoRetract::will_deretract() const {
+    const auto hotend = marlin_vars().active_hotend_id();
+    return will_deretract(hotend);
+}
+
+bool AutoRetract::will_deretract(uint8_t hotend) const {
     return retracted_hotends_bitset_.test(hotend);
 }
 
-bool AutoRetract::is_retracted() const {
-    return is_retracted(marlin_vars().active_hotend_id());
+bool AutoRetract::is_safely_retracted_for_unload(uint8_t hotend) const {
+    const auto dist = config_store().get_filament_retracted_distance(hotend);
+    return dist.has_value() && dist.value() >= minimum_auto_retract_distance;
 }
 
-float AutoRetract::retracted_distance() const {
+bool AutoRetract::is_safely_retracted_for_unload() const {
     const auto hotend = marlin_vars().active_hotend_id();
-    return is_retracted(hotend) ? standard_ramming_sequence(StandardRammingSequence::auto_retract, hotend).retracted_distance() : 0;
+    return is_safely_retracted_for_unload(hotend);
 }
 
-void buddy::AutoRetract::mark_as_retracted(uint8_t hotend, bool retracted) {
-    if (retracted_hotends_bitset_.test(hotend) == retracted) {
-        return;
-    }
+std::optional<float> AutoRetract::retracted_distance() const {
+    const auto hotend = marlin_vars().active_hotend_id();
+    return config_store().get_filament_retracted_distance(hotend);
+}
 
-    retracted_hotends_bitset_.set(hotend, retracted);
-    config_store().filament_auto_retracted_bitset.set(retracted_hotends_bitset_.to_ulong());
+void AutoRetract::set_retracted_distance(uint8_t hotend, std::optional<float> dist) {
+    retracted_hotends_bitset_.set(hotend, dist.value_or(0.0f) > 0.0f);
+    config_store().set_filament_retracted_distance(hotend, dist);
 }
 
 void AutoRetract::maybe_retract_from_nozzle(const ProgressCallback &progress_callback) {
@@ -58,8 +72,8 @@ void AutoRetract::maybe_retract_from_nozzle(const ProgressCallback &progress_cal
 
     const auto hotend = marlin_vars().active_hotend_id();
 
-    // Already is retracted -> exit
-    if (is_retracted(hotend)) {
+    // Is already retracted -> exit
+    if (is_safely_retracted_for_unload(hotend)) {
         return;
     }
 
@@ -77,13 +91,13 @@ void AutoRetract::maybe_retract_from_nozzle(const ProgressCallback &progress_cal
     const auto orig_e_position = planner.get_position_msteps().e;
     const auto orig_current_e_position = current_position.e;
 
+    const auto &sequence = standard_ramming_sequence(StandardRammingSequence::auto_retract, hotend);
     {
         // No estall detection during the ramming; we may do so too fast sometimes
         // to the point where the motor skips, but we don't care, as it doesn't
         // damage the print.
         BlockEStallDetection estall_blocker;
 
-        const auto &sequence = standard_ramming_sequence(StandardRammingSequence::auto_retract, hotend);
         struct {
             uint32_t start_time;
             float progress_coef;
@@ -109,7 +123,8 @@ void AutoRetract::maybe_retract_from_nozzle(const ProgressCallback &progress_cal
     planner.set_e_position_mm(orig_e_position);
     current_position.e = orig_current_e_position;
 
-    mark_as_retracted(hotend, true);
+    assert(sequence.retracted_distance() >= minimum_auto_retract_distance);
+    set_retracted_distance(hotend, sequence.retracted_distance());
 }
 
 void AutoRetract::maybe_deretract_to_nozzle() {
@@ -121,8 +136,8 @@ void AutoRetract::maybe_deretract_to_nozzle() {
 
     const auto hotend = marlin_vars().active_hotend_id();
 
-    // Already not retracted -> exit
-    if (!is_retracted(hotend)) {
+    // Is not retracted -> exit
+    if (!will_deretract(hotend)) {
         return;
     }
 
@@ -139,7 +154,8 @@ void AutoRetract::maybe_deretract_to_nozzle() {
         // to the point where the motor skips, but we don't care, as it doesn't
         // damage the print.
         BlockEStallDetection estall_blocker;
-        standard_ramming_sequence(StandardRammingSequence::auto_retract, hotend).undo(FILAMENT_CHANGE_FAST_LOAD_FEEDRATE);
+        mapi::extruder_move(retracted_distance().value_or(0.0f), FILAMENT_CHANGE_FAST_LOAD_FEEDRATE);
+        planner.synchronize();
     }
 
     // "Fake" original extruder position - we are interrupting various movements by this function,
@@ -147,11 +163,7 @@ void AutoRetract::maybe_deretract_to_nozzle() {
     planner.set_e_position_mm(orig_e_position);
     current_position.e = orig_current_e_position;
 
-    mark_as_retracted(hotend, false);
-}
-
-AutoRetract::AutoRetract() {
-    retracted_hotends_bitset_ = config_store().filament_auto_retracted_bitset.get();
+    set_retracted_distance(hotend, std::nullopt);
 }
 
 bool AutoRetract::can_perform_action() const {

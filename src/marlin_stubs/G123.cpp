@@ -59,7 +59,7 @@ void PrusaGcodeSuite::G123() {
 #if HAS_AUTO_RETRACT()
     // When the user takes manual control over the extruder, do not do any retracting/deretracting moves
     if (target_pos.e != current_position.e) {
-        buddy::auto_retract().mark_as_retracted(marlin_vars().active_hotend_id(), false);
+        buddy::auto_retract().set_retracted_distance(marlin_vars().active_hotend_id(), std::nullopt);
     }
 #endif
 
