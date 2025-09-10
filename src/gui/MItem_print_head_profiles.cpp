@@ -15,7 +15,7 @@
 #include <cmath>
 #include <string>
 
-float Revosix = 1.0f; // temp freq
+float Revosix = 25.0f; // measured Revo Six X-axis resonant frequency (Hz)
 
 // Main menu entry
 MI_PRINT_HEAD_PROFILES::MI_PRINT_HEAD_PROFILES()
@@ -32,7 +32,7 @@ MI_HEAD_ORIGINAL_PRUSA::MI_HEAD_ORIGINAL_PRUSA()
 
 void MI_HEAD_ORIGINAL_PRUSA::click(IWindowMenu &window_menu) {
     (void)window_menu;
-    if (MsgBoxQuestion(_("Apply Original Prusa X-axis Input Shaper defaults?"), Responses_YesNo) != Response::Yes) {
+    if (MsgBoxQuestion(_("Apply Prusa X-axis Input Shaper defaults? DO NOT TOUCH THE NOZZLE! Wait for confirmation"), Responses_YesNo) != Response::Yes) {
         return;
     }
 
@@ -44,7 +44,12 @@ void MI_HEAD_ORIGINAL_PRUSA::click(IWindowMenu &window_menu) {
     // Make the input shaper reload config from config_store
     gui_try_gcode_with_msg("M9200");
 
-    MsgBoxInfo(_("Applied. You can fine-tune in Input Shaper menu."), Responses_Ok);
+    // Start PID autotune for stock hotend (170C target, 5 cycles). We avoid an initial blocking OK dialog.
+    gui_try_gcode_with_msg("M117 PID Tune Prusa");
+    gui_try_gcode_with_msg("M303 E0 S170 C5 U1");
+    gui_try_gcode_with_msg("M500"); // will execute after autotune completes, persisting tuned PID
+    // Final status (non-blocking) displayed only after M303+M500 finish
+    MsgBoxInfo(_("Prusa profile applied & PID autotune finished."), Responses_Ok);
 }
 
 // Revo Six
@@ -53,11 +58,13 @@ MI_HEAD_REVO_SIX::MI_HEAD_REVO_SIX()
 
 void MI_HEAD_REVO_SIX::click(IWindowMenu &window_menu) {
     (void)window_menu;
-    if (MsgBoxQuestion(_("Apply Revo Six print head profile?"), Responses_YesNo) != Response::Yes) {
+    if (MsgBoxQuestion(_("Apply Revo Six print head profile? DO NOT TOUCH THE NOZZLE! Wait for confirmation."), Responses_YesNo) != Response::Yes) {
         return;
     }
 
     auto axis_x = config_store().input_shaper_axis_x_config.get();
+    // Apply measured profile: EI filter at 25 Hz (keep existing damping & vibration settings)
+    axis_x.type = input_shaper::Type::ei;
     axis_x.frequency = Revosix;
     config_store().input_shaper_axis_x_config.set(axis_x);
     config_store().input_shaper_axis_x_enabled.set(true);
@@ -65,7 +72,11 @@ void MI_HEAD_REVO_SIX::click(IWindowMenu &window_menu) {
     // Make the input shaper reload config from config_store
     gui_try_gcode_with_msg("M9200");
 
-    MsgBoxInfo(_("Revo Six profile applied. You can fine-tune later."), Responses_Ok);
+    // Start PID autotune for Revo Six (170C target, 5 cycles). Use only final completion dialog.
+    gui_try_gcode_with_msg("M117 PID Tune Revo Six");
+    gui_try_gcode_with_msg("M303 E0 S170 C5 U1");
+    gui_try_gcode_with_msg("M500");
+    MsgBoxInfo(_("Revo Six profile applied (EI 25 Hz) & PID autotune finished."), Responses_Ok);
 }
 
 // ---------------- Current Print Head profile (info row) ----------------
@@ -83,8 +94,8 @@ const char *MI_HEAD_CURRENT::get_current_head_profile_name() {
 
     const auto cfg = store.input_shaper_axis_x_config.get();
 
-    // Recognize Revo Six preset (our temporary definition)
-    if (approx_equal(cfg.frequency, Revosix)) {
+    // Recognize Revo Six preset (EI filter at measured 25 Hz)
+    if (cfg.type == input_shaper::Type::ei && approx_equal(cfg.frequency, Revosix)) {
         return "Revo Six";
     }
 

@@ -19,37 +19,37 @@
 const ExtruderProfileData extruder_profiles[] = {
     // Standard Prusa extruder
     {
-        .name = "Standard Prusa",
-        .steps_per_unit_e = 280.0f,      // Standard Prusa MINI/MK3 E steps
-        .reverse_direction = false,       // Normal direction
-        .max_feedrate_e = 120.0f,        // mm/s
-        .max_acceleration_e = 5000.0f,   // mm/s²
-        .max_jerk_e = 4.5f,             // mm/s
-        .retract_length = 3.2f,          // mm
-        .retract_speed = 70.0f           // mm/s
+        .name = "Prusa",
+        .steps_per_unit_e = 280.0f, // Standard Prusa MINI/MK3 E steps
+        .reverse_direction = false, // Normal direction
+        .max_feedrate_e = 120.0f, // mm/s
+        .max_acceleration_e = 5000.0f, // mm/s²
+        .max_jerk_e = 4.5f, // mm/s
+        .retract_length = 3.2f, // mm
+        .retract_speed = 70.0f // mm/s
     },
     // BondTech extruder
     {
         .name = "BondTech",
-        .steps_per_unit_e = 415.0f,      // BondTech BMG typical steps
-        .reverse_direction = true,        // Reversed direction (as per instructions)
-        .max_feedrate_e = 120.0f,        // mm/s
-        .max_acceleration_e = 10000.0f,  // Higher acceleration due to gearing
-        .max_jerk_e = 4.5f,             // mm/s
-        .retract_length = 0.8f,          // Shorter retraction due to gearing
-        .retract_speed = 60.0f           // mm/s
+        .steps_per_unit_e = 415.0f, // BondTech BMG typical steps
+        .reverse_direction = true, // Reversed direction (as per instructions)
+        .max_feedrate_e = 120.0f, // mm/s
+        .max_acceleration_e = 10000.0f, // Higher acceleration due to gearing
+        .max_jerk_e = 4.5f, // mm/s
+        .retract_length = 0.8f, // Shorter retraction due to gearing
+        .retract_speed = 60.0f // mm/s
     },
     // Binus Dualdrive
     // https://www.printables.com/model/946290-dual-gear-drive-extruder-for-prusa-minimini#bom-bill-of-materials-
     {
         .name = "Binus Dualdrive",
         .steps_per_unit_e = 140.0f,
-        .reverse_direction = false,       // Normal direction
-        .max_feedrate_e = 120.0f,        // mm/s
-        .max_acceleration_e = 5000.0f,   // mm/s²
-        .max_jerk_e = 4.5f,             // mm/s
-        .retract_length = 3.2f,          // mm
-        .retract_speed = 70.0f           // mm/s
+        .reverse_direction = false, // Normal direction
+        .max_feedrate_e = 120.0f, // mm/s
+        .max_acceleration_e = 5000.0f, // mm/s²
+        .max_jerk_e = 4.5f, // mm/s
+        .retract_length = 3.2f, // mm
+        .retract_speed = 70.0f // mm/s
     },
 };
 
@@ -61,7 +61,7 @@ static void apply_extruder_profile(ExtruderProfile profile_type) {
         return;
     }
 
-    const ExtruderProfileData& profile = extruder_profiles[static_cast<size_t>(profile_type)];
+    const ExtruderProfileData &profile = extruder_profiles[static_cast<size_t>(profile_type)];
 
     // Show confirmation dialog
     if (MsgBoxQuestion(_("Apply extruder profile?"), Responses_YesNo) != Response::Yes) {
@@ -87,12 +87,12 @@ static void apply_extruder_profile(ExtruderProfile profile_type) {
             set_z_max_pos_mm(190.0f);
         }
 
-    MsgBoxInfo(_("Profile applied. Save settings in Experimental menu."), Responses_Ok);
+        MsgBoxInfo(_("Profile applied. Save settings in Experimental menu."), Responses_Ok);
     }
 }
 
 // Helper function to get current profile name
-const char* MI_CURRENT_PROFILE::get_current_profile_name() {
+const char *MI_CURRENT_PROFILE::get_current_profile_name() {
     uint8_t current_profile = config_store().extruder_profile.get();
     if (current_profile < extruder_profiles_count) {
         return extruder_profiles[current_profile].name;
@@ -152,8 +152,6 @@ void MI_PROFILE_CUSTOM::click(IWindowMenu &window_menu) {
     // Open experimental settings directly for custom configuration
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuExperimentalSettings>);
 }
-
-
 
 MI_CURRENT_PROFILE::MI_CURRENT_PROFILE()
     : WI_INFO_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {

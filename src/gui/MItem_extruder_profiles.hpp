@@ -10,22 +10,22 @@
 
 // Extruder profile definitions
 enum class ExtruderProfile : uint8_t {
-    Standard = 0,       // Standard Prusa extruder
-    BondTech = 1,       // BondTech extruder
-    Binus_Dualdrive = 2,         // Binus Dualdrive https://www.printables.com/model/946290-dual-gear-drive-extruder-for-prusa-minimini#bom-bill-of-materials-
-    Custom = 3         // Custom settings
+    Standard = 0, // Standard Prusa extruder
+    BondTech = 1, // BondTech extruder
+    Binus_Dualdrive = 2, // Binus Dualdrive https://www.printables.com/model/946290-dual-gear-drive-extruder-for-prusa-minimini#bom-bill-of-materials-
+    Custom = 3 // Custom settings
 };
 
 // Profile data structure
 struct ExtruderProfileData {
-    const char* name;
-    float steps_per_unit_e;     // E steps per mm
-    bool reverse_direction;     // Whether to reverse extruder direction
-    float max_feedrate_e;       // Max E feedrate
-    float max_acceleration_e;   // Max E acceleration
-    float max_jerk_e;          // Max E jerk
-    float retract_length;      // Default retraction length
-    float retract_speed;       // Default retraction speed
+    const char *name;
+    float steps_per_unit_e; // E steps per mm
+    bool reverse_direction; // Whether to reverse extruder direction
+    float max_feedrate_e; // Max E feedrate
+    float max_acceleration_e; // Max E acceleration
+    float max_jerk_e; // Max E jerk
+    float retract_length; // Default retraction length
+    float retract_speed; // Default retraction speed
 };
 
 // Profile database
@@ -46,7 +46,7 @@ protected:
 
 // Profile selection items
 class MI_PROFILE_STANDARD : public IWindowMenuItem {
-    static constexpr const char *const label = N_("Standard Prusa");
+    static constexpr const char *const label = N_("Prusa");
 
 public:
     MI_PROFILE_STANDARD();
@@ -75,9 +75,9 @@ protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
 
-// Custom profile opens Experimental Settings
+// Opens Experimental settings menu for manual tuning
 class MI_PROFILE_CUSTOM : public IWindowMenuItem {
-    static constexpr const char *const label = N_("Custom...");
+    static constexpr const char *const label = N_("Custom");
 
 public:
     MI_PROFILE_CUSTOM();
@@ -90,11 +90,11 @@ protected:
 // Current profile display
 class MI_CURRENT_PROFILE : public WI_INFO_t {
     static constexpr const char *const label = N_("Current");
-    
+
 public:
     MI_CURRENT_PROFILE();
-    static const char* get_current_profile_name();
-    
+    static const char *get_current_profile_name();
+
 protected:
     virtual void click(IWindowMenu &window_menu) override;
 };

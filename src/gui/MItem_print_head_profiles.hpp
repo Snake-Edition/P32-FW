@@ -21,7 +21,7 @@ protected:
 
 // "Original Prusa" -> restore default X-axis Input Shaper config
 class MI_HEAD_ORIGINAL_PRUSA : public IWindowMenuItem {
-    static constexpr const char *const label = N_("Original Prusa");
+    static constexpr const char *const label = N_("Prusa");
 
 public:
     MI_HEAD_ORIGINAL_PRUSA();
