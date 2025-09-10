@@ -55,7 +55,7 @@ static bool load_unload(Pause::LoadType load_type, pause::Settings &rSettings) {
     {
 #if ENABLED(PREVENT_COLD_EXTRUSION) && HAS_AUTO_RETRACT()
         const bool is_unload = load_type == Pause::LoadType::unload || load_type == Pause::LoadType::unload_confirm || load_type == Pause::LoadType::unload_from_gears;
-        const bool allow_cold = is_unload && buddy::auto_retract().is_retracted(hotend_from_extruder(rSettings.GetExtruder()));
+        const bool allow_cold = is_unload && buddy::auto_retract().is_safely_retracted_for_unload(hotend_from_extruder(rSettings.GetExtruder()));
         AutoRestore ar_ce(thermalManager.allow_cold_extrude, true, allow_cold);
 #endif
 
@@ -150,7 +150,7 @@ void filament_gcodes::M702_no_parser(std::optional<float> unload_length, float z
         marlin_server::unpause_nozzle(target_extruder);
     }
 #if HAS_AUTO_RETRACT()
-    if (op_preheat && !buddy::auto_retract().is_retracted(hotend_from_extruder(target_extruder))) {
+    if (op_preheat && !buddy::auto_retract().is_safely_retracted_for_unload(hotend_from_extruder(target_extruder))) {
 #else
     if (op_preheat) {
 #endif
