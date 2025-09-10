@@ -3,6 +3,9 @@
 #include <footer_def.hpp>
 #include <footer_eeprom.hpp>
 #include <config_store/defaults.hpp>
+#if HAS_AUTO_RETRACT()
+    #include <feature/auto_retract/auto_retract.hpp>
+#endif
 
 namespace config_store_ns {
 namespace migrations {
@@ -333,6 +336,30 @@ namespace migrations {
         };
         backend.read_items_for_migrations(callback);
         backend.save_migration_item<NewItem::value_type>(NewItem::hashed_id, saved_emergency_enable);
+    }
+#endif
+
+#if HAS_AUTO_RETRACT()
+    void filament_auto_retract(journal::Backend &backend) {
+        using NewItem = decltype(CurrentStore::filament_retracted_distances);
+        using OldItem = decltype(DeprecatedStore::filament_auto_retracted_bitset);
+
+        OldItem::value_type old_byte = OldItem::default_val;
+
+        auto callback = [&](journal::Backend::ItemHeader header, std::array<uint8_t, journal::Backend::MAX_ITEM_SIZE> &buffer) {
+            if (header.id == OldItem::hashed_id) {
+                memcpy(&old_byte, buffer.data(), header.len);
+            }
+        };
+
+        backend.read_items_for_migrations(callback);
+
+        std::bitset<HOTENDS> old_bitset = old_byte;
+        static constexpr uint8_t standard_ramming_target_distance = 20;
+
+        for (uint8_t i = 0; i < HOTENDS; i++) {
+            backend.save_migration_item<NewItem::value_type>(NewItem::hashed_id_first + i, old_bitset.test(i) ? standard_ramming_target_distance : config_store_ns::invalid_retracted_distance);
+        }
     }
 #endif
 } // namespace migrations

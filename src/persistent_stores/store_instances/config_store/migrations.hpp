@@ -8,6 +8,7 @@
 #include <option/has_chamber_filtration_api.h>
 #include <option/xl_enclosure_support.h>
 #include <option/has_emergency_stop.h>
+#include <option/has_auto_retract.h>
 
 namespace config_store_ns {
 namespace deprecated_ids {
@@ -84,6 +85,12 @@ namespace deprecated_ids {
         decltype(DeprecatedStore::emergency_stop_enable)::hashed_id,
     };
 #endif
+
+#if HAS_AUTO_RETRACT()
+    inline constexpr uint16_t filament_auto_retracted_bitset[] {
+        decltype(DeprecatedStore::filament_auto_retracted_bitset)::hashed_id,
+    };
+#endif
 } // namespace deprecated_ids
 
 namespace migrations {
@@ -117,6 +124,10 @@ namespace migrations {
 #if HAS_EMERGENCY_STOP()
     void
     emergency_stop(journal::Backend &backend);
+#endif
+
+#if HAS_AUTO_RETRACT()
+    void filament_auto_retract(journal::Backend &backend);
 #endif
 } // namespace migrations
 
@@ -155,6 +166,9 @@ inline constexpr journal::Backend::MigrationFunction migration_functions[] {
 #endif
 #if HAS_EMERGENCY_STOP()
         { migrations::emergency_stop, deprecated_ids::emergency_stop_enable },
+#endif
+#if HAS_AUTO_RETRACT()
+        { migrations::filament_auto_retract, deprecated_ids::filament_auto_retracted_bitset },
 #endif
 };
 
