@@ -46,7 +46,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
     1. max. feedrate (for X and Y only)
 23. **Adjustable filament load length**: Different extruders need different load length.
 24. **Adjustable homing sensitivity**: X and Y homing sensitivity can be changed in menu and saved.
-25. **Different extruder/print head support**: Profiles for other extruders (Bondtech, [Binus dualdrive](https://www.printables.com/model/946290-dual-gear-drive-extruder-for-prusa-minimini)) and print heads (Revo Six)
+25. **Different extruder/print head support**: Profiles for other extruders (Bondtech, [Binus dualdrive](https://www.printables.com/model/946290-dual-gear-drive-extruder-for-prusa-minimini)) and print heads (Revo Six with [this](https://www.printables.com/model/31006-prusa-mini-v6-hotend-adapter) mount)
 
 ## Feed the Snake
 
