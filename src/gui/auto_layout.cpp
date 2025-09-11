@@ -1,6 +1,6 @@
 #include "auto_layout.hpp"
 
-void layout_vertical_stack(const Rect16 &rect, const std::initializer_list<window_t *> &windows, const std::initializer_list<StackLayoutItem> &items) {
+void layout_vertical_stack(const Rect16 &rect, const std::span<window_t *> &windows, const std::span<const StackLayoutItem> &items) {
     assert(windows.size() == items.size());
 
     int minimum_size = 0;
