@@ -44,4 +44,8 @@ static constexpr StackLayoutItem for_progress_bar {
     .margin_bottom = 8,
 };
 
+static constexpr StackLayoutItem for_footer {
+    .height = GuiDefaults::FooterHeight,
+};
+
 } // namespace standard_stack_layout

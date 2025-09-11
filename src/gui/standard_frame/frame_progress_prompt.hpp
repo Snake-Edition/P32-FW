@@ -1,5 +1,6 @@
 #pragma once
 
+#include "footer_line.hpp"
 #include <client_fsm_types.h>
 
 #include <window_progress.hpp>
@@ -19,6 +20,12 @@ class FrameProgressPrompt : public window_frame_t {
 
 public:
     FrameProgressPrompt(window_t *parent, FSMAndPhase fsm_phase, const string_view_utf8 &txt_title, const string_view_utf8 &txt_info, Align_t info_alignment = Align_t::CenterTop());
+
+    /**
+     * Used by WithFooter<>
+     * @param footer to add to vertical stack
+     */
+    void add_footer(FooterLine &footer);
 
 protected:
     window_text_t title;

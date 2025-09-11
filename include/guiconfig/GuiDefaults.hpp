@@ -26,7 +26,7 @@ struct GuiDefaults {
     // TODO bind this values
     static constexpr size_t ScreenWidth = 240;
     static constexpr size_t ScreenHeight = 320;
-    static constexpr size_t FooterHeight = FooterLines * FooterItemHeight + (FooterLines - 1) * FooterLinesSpace + FooterPadding.top + FooterPadding.bottom;
+    static constexpr uint8_t FooterHeight = FooterLines * FooterItemHeight + (FooterLines - 1) * FooterLinesSpace + FooterPadding.top + FooterPadding.bottom;
     static constexpr padding_ui8_t HeaderPadding { 4, 4, 4, 4 }; // number of edge pixels that will remain black in all cases
     static constexpr uint8_t HeaderTextExtraPaddingTop { 1 }; // extra padding to be added to the top, needed if font is weird
     static constexpr auto HeaderTextFont { Font::special };
@@ -57,7 +57,7 @@ struct GuiDefaults {
 #elif HAS_LARGE_DISPLAY()
     static constexpr size_t ScreenWidth = 480; // Some values are redundant on purpose - It's more convenient for future display's implementation
     static constexpr size_t ScreenHeight = 320;
-    static constexpr size_t FooterHeight = 23;
+    static constexpr uint8_t FooterHeight = 23;
     static constexpr padding_ui8_t HeaderPadding { 14, 12, 14, 4 }; // number of edge pixels that will remain black in all cases
     static constexpr uint8_t HeaderTextExtraPaddingTop { 1 }; // extra padding to be added to the top, needed if font is weird
     static constexpr auto HeaderTextFont { Font::special };
