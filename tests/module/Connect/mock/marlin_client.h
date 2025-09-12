@@ -53,7 +53,7 @@ typedef struct _marlin_vars_t {
     float z_offset; // probe z-offset [mm]
     float display_nozzle; // nozzle temperature to display [C]
     float travel_acceleration; // travel acceleration from planner
-    uint32_t print_duration; // print_job_timer.duration() [ms]
+    uint32_t print_duration; // print_job_timer.duration() [s]
     uint32_t time_to_end; // oProgressData.oTime2End.mGetValue() [s]
     char *media_LFN; // Long-File-Name of the currently selected file - a pointer to a global static buffer
     char *media_SFN_path; // Short-File-Name path to currently selected file - a pointer to a global static buffer

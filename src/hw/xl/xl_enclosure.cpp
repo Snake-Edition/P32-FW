@@ -71,9 +71,9 @@ void Enclosure::updateTempValidationTimer() {
         is_temp_valid_ = false;
     } else if (!is_temp_valid_) {
         // Printer is printing/pausing/paused/resuming and temp is not validated yet
-        static constexpr uint32_t footer_temp_delay_ms = 5 * 60 * 1000;
+        static constexpr uint32_t footer_temp_delay_s = 5 * 60;
         const auto print_dur = marlin_vars().print_duration.get();
-        if (print_dur >= footer_temp_delay_ms) {
+        if (print_dur >= footer_temp_delay_s) {
             is_temp_valid_ = true;
         }
     }
