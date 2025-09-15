@@ -70,7 +70,7 @@ void buddy::AutoRetract::mark_as_retracted(uint8_t hotend, bool retracted) {
     config_store().filament_auto_retracted_bitset.set(retracted_hotends_bitset_.to_ulong());
 }
 
-void AutoRetract::maybe_retract_from_nozzle() {
+void AutoRetract::maybe_retract_from_nozzle(const ProgressCallback &progress_callback) {
     if (!can_perform_action()) {
         return;
     }
@@ -106,14 +106,19 @@ void AutoRetract::maybe_retract_from_nozzle() {
         struct {
             uint32_t start_time;
             float progress_coef;
+            const ProgressCallback &progress_callback;
         } progress_data {
             ticks_ms(),
             100.0f / sequence.duration_estimate_ms(),
+            progress_callback
         };
 
         CallbackHookGuard progress_guard(marlin_server::idle_hook_point, [&] {
             const float progress = std::min((ticks_ms() - progress_data.start_time) * progress_data.progress_coef, 100.0f);
             psm_guard.update<PrintStatusMessage::Type::auto_retracting>({ progress });
+            if (progress_data.progress_callback) {
+                progress_data.progress_callback(progress);
+            }
         });
         sequence.execute();
     }

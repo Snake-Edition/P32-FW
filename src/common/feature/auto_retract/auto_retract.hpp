@@ -1,13 +1,16 @@
 #pragma once
 
-namespace buddy {
+#include <bitset>
+#include <inplace_function.hpp>
 
+namespace buddy {
 /// Class for managing automatic retraction after print or load, so that the printer keeps the nozzle empty for MBL and non-printing to prevent oozing.
 /// Only to be managed from the marlin thread
 class AutoRetract {
     friend AutoRetract &auto_retract();
 
 public:
+    using ProgressCallback = stdext::inplace_function<void(float)>;
     /// \returns whether the specified hotend is auto-retracted (and will need de-retracting on print)
     bool is_retracted(uint8_t hotend) const;
 
@@ -20,7 +23,7 @@ public:
     void mark_as_retracted(uint8_t hotend, bool retracted);
 
     /// If !is_retracted, executes the retraction process and marks the currently active hotend as retracted
-    void maybe_retract_from_nozzle();
+    void maybe_retract_from_nozzle(const ProgressCallback &progress_callback = nullptr);
 
     /// If is_retracted, executes the deretraction process and marks the currently active hotend as not retracted
     void maybe_deretract_to_nozzle();
