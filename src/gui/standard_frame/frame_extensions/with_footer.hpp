@@ -11,9 +11,9 @@ public:
         requires(Base b, FooterLine l) { b.add_footer(l); }, "Base frame needs to implement add_footer");
 
     template <typename... Args>
-    WithFooter(Args &&...args)
-        : Base(std::forward<Args>(args)...)
-        , footer(Base::parent, 0) {
+    WithFooter(window_frame_t *parent, Args &&...args)
+        : Base(parent, std::forward<Args>(args)...)
+        , footer(parent, 0) {
         footer.Create(footer_items);
         Base::add_footer(footer);
     }
