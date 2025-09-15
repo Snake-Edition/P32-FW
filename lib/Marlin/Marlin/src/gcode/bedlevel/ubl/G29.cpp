@@ -320,8 +320,7 @@ void GcodeSuite::G29() {
                         // Purge
                         PrintStatusMessageGuard statusGuard;
                         statusGuard.update<PrintStatusMessage::purging>({});
-                        const auto retract_lenght = buddy::auto_retract().retract_length();
-                        mapi::extruder_move(retract_lenght, ADVANCED_PAUSE_PURGE_FEEDRATE);
+                        // deretraction happens from planner on first move of standard_ramming_sequence(auto_retract) which is E positive move
                         buddy::auto_retract().maybe_retract_from_nozzle();
                         planner.synchronize();   
                     }
