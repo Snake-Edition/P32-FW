@@ -49,6 +49,9 @@ private:
     /// Shadows the config_store variable to reduce mutex locking
     std::bitset<HOTENDS> retracted_hotends_bitset_ = 0;
 
+    /// Keeps whether saved value in persistent storage is known or unknown (invalidated)
+    std::bitset<HOTENDS> known_hotends_bitset_ = 0;
+
     bool is_checking_deretract_ = false;
 };
 

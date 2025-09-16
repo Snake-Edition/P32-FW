@@ -32,7 +32,9 @@ AutoRetract &buddy::auto_retract() {
 
 AutoRetract::AutoRetract() {
     for (uint8_t i = 0; i < HOTENDS; i++) {
-        retracted_hotends_bitset_.set(i, config_store().get_filament_retracted_distance(i).value_or(0.0f) > 0.0f);
+        const auto dist = config_store().get_filament_retracted_distance(i);
+        retracted_hotends_bitset_.set(i, dist.value_or(0.0f) > 0.0f);
+        known_hotends_bitset_.set(i, dist.has_value());
     }
 }
 
@@ -61,6 +63,11 @@ std::optional<float> AutoRetract::retracted_distance() const {
 }
 
 void AutoRetract::set_retracted_distance(uint8_t hotend, std::optional<float> dist) {
+    if (!dist.has_value() && !known_hotends_bitset_.test(hotend)) {
+        // To reduce mutex locking
+        return;
+    }
+    known_hotends_bitset_.set(hotend, dist.has_value());
     retracted_hotends_bitset_.set(hotend, dist.value_or(0.0f) > 0.0f);
     config_store().set_filament_retracted_distance(hotend, dist);
 }
@@ -171,7 +178,7 @@ void AutoRetract::maybe_deretract_to_nozzle() {
     planner.set_e_position_mm(orig_e_position);
     current_position.e = orig_current_e_position;
 
-    set_retracted_distance(hotend, std::nullopt);
+    set_retracted_distance(hotend, 0.0f);
 }
 
 bool AutoRetract::can_perform_action() const {

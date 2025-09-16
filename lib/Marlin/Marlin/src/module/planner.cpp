@@ -115,8 +115,10 @@
 #include <option/has_auto_retract.h>
 #if HAS_AUTO_RETRACT()
   #include <feature/auto_retract/auto_retract.hpp>
+  #include <feature/retract_tracker/retract_tracker.hpp>
 #endif
 
+#include <marlin_vars.hpp>
 #include "configuration_store.h"
 #include "bsod.h"
 
@@ -2382,14 +2384,27 @@ bool Planner::buffer_segment(const abce_pos_t &abce
 #endif
 
 #if HAS_AUTO_RETRACT()
-  if(target.e > position.e) {
+  if (target.e != position.e) {
+    buddy::retract_tracker().track_extruder_move(abce.e - position_float.e);
+  }
+
+  if (target.e > position.e) {
     buddy::auto_retract().maybe_deretract_to_nozzle();
     
-  } else if(hints.move.is_printing_move && buddy::auto_retract().will_deretract()) {
+  } else if (hints.move.is_printing_move && buddy::auto_retract().will_deretract()) {
     // Ignore retraction commands if we're retracted to prevent the filament getting out of the extruder
     // Only limit to printing moves - otherwise we screw up things like unload
     position.e = target.e;
     position_float.e = abce.e;
+    
+  } else if (target.e < position.e) {
+    // Invalidate auto_retract value if we retract E at least some amount (5 mm)
+    // maybe_retract_from_nozzle will overwrite the value at the end of it's sequence, other moves invalidate auto_retract value
+    // Before retract tracker's value is validated invalidate on any retract E move (10)
+    const auto hotend = marlin_vars().active_hotend_id();
+    if (buddy::retract_tracker().get_retracted_distance(hotend).value_or(10) > 5) {
+      buddy::auto_retract().set_retracted_distance(hotend, std::nullopt);
+    }
   }
 #endif
 
