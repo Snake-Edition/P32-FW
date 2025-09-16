@@ -32,7 +32,7 @@
  * - `B<val>` - Set bed temperature
  * - `H<val>` - Set heatbreak temperature
  * - `A<val>` - Set is abrasive
- * - `G<val>` - Set is flexible
+ * - `G<val>` - Set disable auto retract (1 = no retraction)
  *
  * - `C<val>` - Set target chamber temperature
  * - `D<val>` - Set minimum chamber temperature
@@ -78,7 +78,7 @@ void PrusaGcodeSuite::M865() {
     p.store_option('B', params.heatbed_temperature);
 
     p.store_option('A', params.is_abrasive);
-    p.store_option('G', params.is_flexible);
+    p.store_option('G', params.do_not_auto_retract);
 
 #if HAS_FILAMENT_HEATBREAK_PARAM()
     p.store_option('H', params.heatbreak_temperature);

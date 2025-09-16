@@ -73,8 +73,8 @@ public:
     /// Whether the filament is abrasive and requires hardened (abrasive-resistant) nozzle
     bool is_abrasive = false;
 
-    /// Whether the filament is flexible - might require special care in some cases
-    bool is_flexible = false;
+    /// If set, the filament should not be auto-retracted (for example TPU could get tangled in the extruder gear)
+    bool do_not_auto_retract = false;
 
 public:
     constexpr bool operator==(const FilamentTypeParameters &) const = default;

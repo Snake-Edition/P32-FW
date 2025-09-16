@@ -186,7 +186,7 @@ constexpr EnumArray<PresetFilamentType, FilamentTypeParameters, PresetFilamentTy
             .chamber_target_temperature = 25,
             .requires_filtration = true,
 #endif
-            .is_flexible = true,
+            .do_not_auto_retract = true,
         },
     },
     {
@@ -322,7 +322,7 @@ FilamentTypeParameters FilamentType::parameters() const {
             .requires_filtration = e1.requires_filtration,
 #endif
             .is_abrasive = e1.is_abrasive,
-            .is_flexible = e1.is_flexible,
+            .do_not_auto_retract = e1.do_not_auto_retract,
         };
         static_assert(aggregate_arity<FilamentTypeParameters>() == 6 + HAS_FILAMENT_HEATBREAK_PARAM() * 1 + HAS_CHAMBER_API() * 4, "Revise the initializer");
     };
@@ -375,7 +375,7 @@ void FilamentType::set_parameters(const FilamentTypeParameters &set) const {
         .requires_filtration = set.requires_filtration,
 #endif
         .is_abrasive = set.is_abrasive,
-        .is_flexible = set.is_flexible,
+        .do_not_auto_retract = set.do_not_auto_retract,
     };
     // Note - even though we're not setting requires_filtration without HAS_CHAMBER_API, it is still in the EEPROM struct to provide binary compatibility
     static_assert(aggregate_arity<FilamentTypeParameters_EEPROM1>() == 7 + 1 /* _unused */, "Revise the initializer");

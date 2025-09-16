@@ -19,7 +19,7 @@ public:
 
     bool requires_filtration : 1 = false;
     bool is_abrasive : 1 = false;
-    bool is_flexible : 1 = false;
+    bool do_not_auto_retract : 1 = false;
 
     // Keeping the remaining bits of the bitfield unused, but zero initialized, for future proofing
     uint8_t _unused : 5 = 0;

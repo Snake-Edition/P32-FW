@@ -129,9 +129,11 @@ MI_FILAMENT_REQUIRES_FILTRATION::MI_FILAMENT_REQUIRES_FILTRATION()
 MI_FILAMENT_IS_ABRASIVE::MI_FILAMENT_IS_ABRASIVE()
     : MI_TOGGLE(&FilamentTypeParameters::is_abrasive, N_("Is Abrasive")) {}
 
-// * MI_FILAMENT_IS_FLEXIBLE
-MI_FILAMENT_IS_FLEXIBLE::MI_FILAMENT_IS_FLEXIBLE()
-    : MI_TOGGLE(&FilamentTypeParameters::is_flexible, N_("Is Flexible")) {}
+// * MI_FILAMENT_AUTO_RETRACT
+MI_FILAMENT_AUTO_RETRACT::MI_FILAMENT_AUTO_RETRACT()
+    : MI_TOGGLE(&FilamentTypeParameters::do_not_auto_retract, N_("Auto Retract")) {
+    set_invert_value(true);
+}
 
 // * MI_FILAMENT_VISIBLE
 MI_FILAMENT_VISIBLE::MI_FILAMENT_VISIBLE()
