@@ -521,8 +521,8 @@ void CurrentStore::set_filament_type(uint8_t index, FilamentType value) {
 
 #if HAS_AUTO_RETRACT()
     if (value == FilamentType::none) {
-        // On filament removal, it invalidates retracted distance
-        buddy::auto_retract().set_retracted_distance(HAS_TOOLCHANGER() ? index : 0, std::nullopt);
+        // On filadment removal, also mark the hotend as non-retracted (meaning does not need deretracting)
+        buddy::auto_retract().mark_as_retracted(HAS_TOOLCHANGER() ? index : 0, false);
     }
 #endif
 
@@ -905,33 +905,6 @@ void CurrentStore::set_phase_stepping_enabled(AxisEnum axis, bool new_state) {
         return;
     }
 }
-#endif
-
-#if HAS_AUTO_RETRACT()
-
-void CurrentStore::set_filament_retracted_distance(uint8_t tool_idx, std::optional<float> dist) {
-    assert(tool_idx < max_tool_count);
-    if (!dist.has_value()) {
-        filament_retracted_distances.set(tool_idx, invalid_retracted_distance);
-        return;
-    }
-
-    const float rounded_dist = std::round(dist.value());
-    const float clamped_dist = std::clamp<float>(rounded_dist, 0, invalid_retracted_distance - 1);
-    assert(clamped_dist == rounded_dist);
-    filament_retracted_distances.set(tool_idx, static_cast<uint8_t>(clamped_dist));
-}
-
-std::optional<float> CurrentStore::get_filament_retracted_distance(uint8_t tool_idx) {
-    assert(tool_idx < max_tool_count);
-
-    const auto distance = filament_retracted_distances.get(tool_idx);
-    if (distance == invalid_retracted_distance) {
-        return std::nullopt;
-    }
-    return distance;
-}
-
 #endif
 
 } // namespace config_store_ns

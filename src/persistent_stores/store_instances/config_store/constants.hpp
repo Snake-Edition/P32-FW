@@ -2,7 +2,6 @@
 
 #include <module/temperature.h>
 #include "old_eeprom/constants.hpp"
-#include <option/has_auto_retract.h>
 
 #include <limits>
 #include <cstdint>
@@ -28,8 +27,4 @@ inline constexpr size_t wifi_max_passwd_len { old_eeprom::WIFI_MAX_PASSWD_LEN };
 
 inline constexpr size_t metrics_host_size { connect_host_size }; ///< Size of metrics host string
 inline constexpr int16_t stallguard_sensitivity_unset { std::numeric_limits<int16_t>::max() };
-
-#if HAS_AUTO_RETRACT()
-inline constexpr uint8_t invalid_retracted_distance = 255;
-#endif
 } // namespace config_store_ns

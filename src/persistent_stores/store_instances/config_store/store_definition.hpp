@@ -679,14 +679,9 @@ struct CurrentStore
 #endif
 
 #if HAS_AUTO_RETRACT()
-    // Each hotend holds retracted distance. This value is compressed (casted to uint8) to range < 0 ; 255 > with 255 being special value reserved for unknown distance
-    // DO NOT ACCESS THIS ARRAY DIRECTLY, user getter/setter instead
-    StoreItemArray<uint8_t, uint8_t { 255 }, ItemFlag::printer_state, journal::hash("Filament retracted distances"), 8, HOTENDS> filament_retracted_distances;
-
-    // Casts float of range < 0.0f ; 254f > to uint8. Value 255 is reserved to unknown value
-    void set_filament_retracted_distance(uint8_t tool_idx, std::optional<float> dist);
-    std::optional<float> get_filament_retracted_distance(uint8_t tool_idx);
-
+    /// Bitset, one bit for each hotend
+    /// !!! Do not set directly, always use auto_retract().mark_as_retracted
+    StoreItem<uint8_t, 0, ItemFlag::printer_state, journal::hash("Filament auto-retracted")> filament_auto_retracted_bitset;
     static_assert(HOTENDS <= 8);
 #endif
 
@@ -817,10 +812,6 @@ struct DeprecatedStore
     #if HAS_XBUDDY_EXTENSION()
     StoreItem<uint8_t, 255, journal::hash("Chamber LEDs PWM with Camera")> side_leds_max_brightness_with_camera;
     #endif
-#endif
-
-#if HAS_AUTO_RETRACT()
-    StoreItem<uint8_t, 0, journal::hash("Filament auto-retracted")> filament_auto_retracted_bitset;
 #endif
 
     /*

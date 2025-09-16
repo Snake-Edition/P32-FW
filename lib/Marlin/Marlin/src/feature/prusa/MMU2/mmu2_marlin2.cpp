@@ -159,7 +159,7 @@ void marlin_finalize_unload() {
     static_assert(HOTENDS == 1);
 
     // The filament is completely out of the nozzle - so not auto-retracted
-    buddy::auto_retract().set_retracted_distance(0, std::nullopt);
+    buddy::auto_retract().mark_as_retracted(0, false);
 #endif
 }
 
