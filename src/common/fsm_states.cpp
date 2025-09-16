@@ -56,9 +56,7 @@ static constexpr uint32_t score(ClientFSM fsm_type) {
     case ClientFSM::BeltTuning:
 #endif
         return 2;
-#if HAS_LOADCELL()
-    case ClientFSM::NozzleCleaning:
-#endif
+
     case ClientFSM::Warning:
         return 3;
 

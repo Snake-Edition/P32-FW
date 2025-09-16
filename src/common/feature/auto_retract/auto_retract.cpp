@@ -58,12 +58,7 @@ bool AutoRetract::is_retracted() const {
 
 float AutoRetract::retracted_distance() const {
     const auto hotend = marlin_vars().active_hotend_id();
-    return is_retracted(hotend) ? retract_length() : 0;
-}
-
-int16_t AutoRetract::retract_length() const {
-    const auto hotend = marlin_vars().active_hotend_id();
-    return standard_ramming_sequence(StandardRammingSequence::auto_retract, hotend).retracted_distance();
+    return is_retracted(hotend) ? standard_ramming_sequence(StandardRammingSequence::auto_retract, hotend).retracted_distance() : 0;
 }
 
 void buddy::AutoRetract::mark_as_retracted(uint8_t hotend, bool retracted) {

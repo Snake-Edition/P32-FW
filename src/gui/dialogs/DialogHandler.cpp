@@ -17,7 +17,6 @@
 #include <option/has_door_sensor_calibration.h>
 #include <option/has_manual_belt_tuning.h>
 #include <gui/screen/screen_preheat.hpp>
-#include <gui/screen/screen_nozzle_cleaning.hpp>
 
 #if HAS_MANUAL_BELT_TUNING()
     #include <screen/selftest/screen_manual_belt_tuning.hpp>
@@ -199,9 +198,7 @@ using FSMDisplayConfig = FSMDisplayConfigDef<
 #if HAS_MANUAL_BELT_TUNING()
     FSMScreenDef<ClientFSM::BeltTuning, ScreenManualBeltTuning>,
 #endif
-#if HAS_LOADCELL()
-    FSMScreenDef<ClientFSM::NozzleCleaning, ScreenNozzleCleaning>,
-#endif
+
     // This is here so that we can worry-free write commas at the end of each argument
     FSMEndDef>;
 
