@@ -35,6 +35,7 @@ endif()
 add_subdirectory(print_status_message)
 
 if(HAS_AUTO_RETRACT)
+  add_subdirectory(retract_tracker)
   add_subdirectory(auto_retract)
 endif()
 
