@@ -118,33 +118,23 @@ void GcodeSuite::M104() {
  * - `T` - Tool
  */
 void GcodeSuite::M109() {
-   #if ENABLED(PRUSA_MMU2) // MMU2 doesn't handle different temps per slot, sayonara! (TODO?)
-    constexpr int8_t target_extruder = 0;
+
+  if (DEBUGGING(DRYRUN)) return;
+
+  #if ENABLED(PRUSA_MMU2) // MMU2 doesn't handle different temps per slot, sayonara! (TODO?)
+	  constexpr int8_t target_extruder = 0;
   #else
     const int8_t target_extruder = get_target_extruder_from_command();
     if (target_extruder < 0) return;
   #endif
-  M109Flags flags;
-  flags.wait_heat = parser.seen('S');
-  flags.wait_heat_or_cool = parser.seen('R');
-  flags.display_temp = parser.seen('D');
-  flags.autotemp = parser.seen('F');
-  flags.target_temp = parser.seenval('S') ? parser.value_celsius() :
-                     parser.seenval('R') ? parser.value_celsius() : 0;
-  M109_no_parser(target_extruder, flags);
-}
 
-bool GcodeSuite::M109_no_parser(const uint8_t target_extruder, const M109Flags& flags) {
-
-  if (DEBUGGING(DRYRUN)) return true;
-
-  const bool no_wait_for_cooling = flags.wait_heat && !flags.wait_heat_or_cool;
-  const bool set_temp = no_wait_for_cooling || flags.wait_heat_or_cool;
+  const bool no_wait_for_cooling = parser.seenval('S'),
+             set_temp = no_wait_for_cooling || parser.seenval('R');
   if (set_temp) {
-    const int16_t temp = flags.target_temp;
+    const int16_t temp = parser.value_celsius();
     #if ENABLED(SINGLENOZZLE)
       singlenozzle_temp[target_extruder] = temp;
-      if (target_extruder != active_extruder) return false;
+      if (target_extruder != active_extruder) return;
     #endif
     thermalManager.setTargetHotend(temp, target_extruder);
 
@@ -154,7 +144,7 @@ bool GcodeSuite::M109_no_parser(const uint8_t target_extruder, const M109Flags& 
     #endif
 
     #if ENABLED(PRINTJOB_TIMER_AUTOSTART)
-    // TODO: this doesn't work properly for multitool, temperature of last tool decides whenever printjob timer is started or not
+      // TODO: this doesn't work properly for multitool, temperature of last tool decides whenever printjob timer is started or not
       /*
        * Use half EXTRUDE_MINTEMP to allow nozzles to be put into hot
        * standby mode, (e.g., in a dual extruder setup) without affecting
@@ -166,18 +156,18 @@ bool GcodeSuite::M109_no_parser(const uint8_t target_extruder, const M109Flags& 
       else
         print_job_timer.start();
     #endif
-    }
+  }
 
   #if ENABLED(AUTOTEMP)
     planner.autotemp_M104_M109();
   #endif
-  if (set_temp) {
-    marlin_server::set_temp_to_display(flags.display_temp ? flags.target_temp : thermalManager.degTargetHotend(target_extruder), target_extruder);
-    (void)thermalManager.wait_for_hotend(target_extruder, no_wait_for_cooling, flags.autotemp);
-  }
 
-  return true;
+  if (set_temp) {
+    marlin_server::set_temp_to_display(parser.seenval('D') ? parser.value_celsius() : thermalManager.degTargetHotend(target_extruder), target_extruder);
+    (void)thermalManager.wait_for_hotend(target_extruder, no_wait_for_cooling, parser.seen('F'));
+  }
 }
+
 /** @}*/
 
 #endif // EXTRUDERS
