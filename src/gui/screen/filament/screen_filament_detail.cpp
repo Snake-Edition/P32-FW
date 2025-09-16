@@ -23,11 +23,19 @@ MI_TOGGLE::MI_TOGGLE(Parameter param, const char *label)
 }
 void MI_TOGGLE::set_filament_type(FilamentType set) {
     filament_type = set;
-    set_value(filament_type.parameters().*param_);
+    // The XOR inverts the value if `invert_value == true`
+    set_value(filament_type.parameters().*param_ ^ invert_value);
     set_enabled(filament_type.is_customizable());
 }
 void MI_TOGGLE::OnChange(size_t) {
-    filament_type.modify_parameters([&](auto &p) { p.*param_ = value(); });
+    // The XOR inverts the value if `invert_value == true`
+    filament_type.modify_parameters([&](auto &p) { p.*param_ = (value() ^ invert_value); });
+}
+
+void MI_TOGGLE::set_invert_value(bool set) {
+    // Should only be called during initialization
+    assert(filament_type == FilamentType::none);
+    invert_value = set;
 }
 
 // * MI_FILAMENT_NAME

@@ -55,9 +55,14 @@ public:
     void set_filament_type(FilamentType set);
     void OnChange(size_t) override;
 
+protected:
+    /// If true, the displayed toggle value will be inverse of the actual parameter value
+    void set_invert_value(bool set);
+
 private:
     Parameter param_;
     FilamentType filament_type;
+    bool invert_value = false;
 };
 
 class MI_FILAMENT_NAME final : public WiInfo<32> {
