@@ -42,5 +42,9 @@ if(HAS_REMOTE_BED)
   add_subdirectory(remote_bed)
 endif()
 
+if(HAS_LOADCELL)
+  add_subdirectory(nozzle_cleaning_failed)
+endif()
+
 add_subdirectory(ramming)
 add_subdirectory(cork)

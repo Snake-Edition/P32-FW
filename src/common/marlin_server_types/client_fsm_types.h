@@ -64,6 +64,9 @@ enum class ClientFSM : uint8_t {
     #if HAS_DOOR_SENSOR_CALIBRATION()
     DoorSensorCalibration,
     #endif
+    #if HAS_LOADCELL()
+    NozzleCleaningFailed,
+    #endif
     Wait, ///< FSM that only blocks the screen with a "please wait" text
     _none, // cannot be created, must have same index as _count
     _count = _none

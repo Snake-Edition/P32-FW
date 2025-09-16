@@ -50,9 +50,6 @@ enum class WarningType : uint32_t {
     BedMCUMaxTemp,
 #endif
     ProbingFailed,
-#if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-    NozzleCleaningFailed,
-#endif
 #if XL_ENCLOSURE_SUPPORT() || HAS_CHAMBER_FILTRATION_API()
     EnclosureFilterExpirWarning,
     EnclosureFilterExpiration,

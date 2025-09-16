@@ -1,0 +1,56 @@
+/// \file
+
+#pragma once
+
+#include <marlin_server_types/client_response.hpp>
+#include <utils/enum_array.hpp>
+
+enum class PhaseNozzleCleaningFailed : PhaseUnderlyingType {
+    init,
+
+    // Nozzle cleaning failed warning
+    cleaning_failed,
+
+    // On retry
+    recommend_purge,
+
+    // Wait for temp
+    wait_temp,
+
+    // Purge the filament
+    purge,
+
+    // Autoretract
+    autoretract,
+
+    // After purge
+    remove_filament,
+
+    // warn user what abort really does
+    warn_abort,
+
+    _cnt,
+    _last = _cnt - 1
+};
+
+struct NozzleCleaningFailedProgressData {
+    /// 0-255
+    uint8_t progress_0_255 = 0;
+};
+
+namespace ClientResponses {
+
+inline constexpr EnumArray<PhaseNozzleCleaningFailed, PhaseResponses, PhaseNozzleCleaningFailed::_cnt> nozzle_cleaning_responses {
+    { PhaseNozzleCleaningFailed::init, {} },
+    { PhaseNozzleCleaningFailed::cleaning_failed, { Response::Retry, Response::Ignore, Response::Abort } },
+    { PhaseNozzleCleaningFailed::recommend_purge, { Response::Yes, Response::No } },
+    { PhaseNozzleCleaningFailed::wait_temp, { Response::Abort } },
+    { PhaseNozzleCleaningFailed::purge, { Response::Abort } },
+    { PhaseNozzleCleaningFailed::autoretract, {} },
+    { PhaseNozzleCleaningFailed::remove_filament, { Response::Done, Response::Abort } },
+    { PhaseNozzleCleaningFailed::warn_abort, { Response::Yes, Response::No } },
+};
+
+} // namespace ClientResponses
+
+constexpr inline ClientFSM client_fsm_from_phase(PhaseNozzleCleaningFailed) { return ClientFSM::NozzleCleaningFailed; }

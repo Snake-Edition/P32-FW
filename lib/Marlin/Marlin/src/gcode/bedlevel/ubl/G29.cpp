@@ -25,6 +25,10 @@
  */
 
 #include "../../../inc/MarlinConfig.h"
+#include <buddy/unreachable.hpp>
+#include "feature/nozzle_cleaning_failed/nozzle_cleaning_failed_wizard.hpp"
+#include <config_store/store_instance.hpp>
+#include <feature/print_status_message/print_status_message_guard.hpp>
 
 #if ENABLED(AUTO_BED_LEVELING_UBL)
 
@@ -35,6 +39,9 @@
     #include <marlin_server.hpp>
     #include <calibration_z.hpp>
     #include <option/has_uneven_bed_prompt.h>
+
+
+    #include <mapi/motion.hpp>
 
 /** \addtogroup G-Codes
  * @{
@@ -290,16 +297,20 @@ void GcodeSuite::G29() {
             // need.
             plan_park_move_to_xyz({ { XYZ_NOZZLE_PARK_POINT_M600 } }, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE, Segmented::yes);
 
-            const auto response = marlin_server::prompt_warning(WarningType::NozzleCleaningFailed);
-            if (response == Response::Ignore) {
-                // Continue executing the function
-
-            } else if (response == Response::Retry) {
-                continue;
-
-            } else { // if(response == Response::Abort)
-                marlin_server::print_abort();
+            using namespace nozzle_cleaning_failed_wizard;
+            Result result = run_wizard();
+            if(planner.draining()) return;
+            switch (result) {
+            case Result::abort:
                 return;
+            case Result::ignore:
+                // Continue without retrying
+                break;
+            case Result::retry:
+                // Retry nozzle cleaning without purge
+                continue;
+            default:
+                BUDDY_UNREACHABLE();
             }
         }
     #endif

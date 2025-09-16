@@ -23,11 +23,6 @@ constexpr PhasesWarning warning_type_phase_constexpr(WarningType warning) {
         return PhasesWarning::FilamentSensorStuckHelpMMU;
 #endif
 
-#if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-    case WarningType::NozzleCleaningFailed:
-        return PhasesWarning::NozzleCleaningFailed;
-#endif
-
 #if HAS_UNEVEN_BED_PROMPT()
     case WarningType::BedUnevenAlignmentPrompt:
         return PhasesWarning::BedUnevenAlignmentPrompt;

@@ -4,6 +4,9 @@
 #if HAS_MANUAL_BELT_TUNING()
     #include <fsm/manual_belt_tuning_phases.hpp>
 #endif
+#if HAS_LOADCELL()
+    #include <fsm/nozzle_cleaning_phases.hpp>
+#endif
 
 namespace ClientResponses {
 
@@ -43,6 +46,9 @@ constinit const EnumArray<ClientFSM, std::span<const PhaseResponses>, ClientFSM:
 #endif
 #if HAS_DOOR_SENSOR_CALIBRATION()
         { ClientFSM::DoorSensorCalibration, door_sensor_calibration_responses },
+#endif
+#if HAS_LOADCELL()
+        { ClientFSM::NozzleCleaningFailed, nozzle_cleaning_responses },
 #endif
         { ClientFSM::Wait, {} },
 };

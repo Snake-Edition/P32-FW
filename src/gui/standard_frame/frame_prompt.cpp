@@ -28,8 +28,7 @@ FramePrompt::FramePrompt(window_t *parent, FSMAndPhase fsm_phase, const string_v
     info.set_font(Font::small);
 #endif
 
-    CaptureNormalWindow(radio);
-    static_cast<window_frame_t *>(parent)->CaptureNormalWindow(*this);
+    static_cast<window_frame_t *>(parent)->CaptureNormalWindow(radio);
 
     std::array<window_t *, layout_no_footer.size()> windows_no_footer { &title, &info, &radio };
     layout_vertical_stack(parent->GetRect(), windows_no_footer, layout_no_footer);
@@ -37,5 +36,5 @@ FramePrompt::FramePrompt(window_t *parent, FSMAndPhase fsm_phase, const string_v
 
 void FramePrompt::add_footer(FooterLine &footer) {
     std::array<window_t *, layout_with_footer.size()> windows_with_footer { &title, &info, &radio, &footer };
-    layout_vertical_stack(title.GetParent()->GetRect(), windows_with_footer, layout_no_footer);
+    layout_vertical_stack(title.GetParent()->GetRect(), windows_with_footer, layout_with_footer);
 }

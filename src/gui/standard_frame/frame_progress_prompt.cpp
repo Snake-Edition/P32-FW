@@ -30,8 +30,7 @@ FrameProgressPrompt::FrameProgressPrompt(window_t *parent, FSMAndPhase fsm_phase
     info.set_font(Font::small);
 #endif
 
-    CaptureNormalWindow(radio);
-    static_cast<window_frame_t *>(parent)->CaptureNormalWindow(*this);
+    static_cast<window_frame_t *>(parent)->CaptureNormalWindow(radio);
 
     std::array<window_t *, layout_no_footer.size()> windows_no_footer { &title, &progress_bar, &info, &radio };
     layout_vertical_stack(parent->GetRect(), windows_no_footer, layout_no_footer);
@@ -39,5 +38,5 @@ FrameProgressPrompt::FrameProgressPrompt(window_t *parent, FSMAndPhase fsm_phase
 
 void FrameProgressPrompt::add_footer(FooterLine &footer) {
     std::array<window_t *, layout_with_footer.size()> windows_with_footer { &title, &progress_bar, &info, &radio, &footer };
-    layout_vertical_stack(title.GetParent()->GetRect(), windows_with_footer, layout_no_footer);
+    layout_vertical_stack(title.GetParent()->GetRect(), windows_with_footer, layout_with_footer);
 }

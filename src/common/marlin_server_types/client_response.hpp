@@ -453,10 +453,6 @@ enum class PhasesWarning : PhaseUnderlyingType {
     BedUnevenAlignmentPrompt,
 #endif
 
-#if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-    NozzleCleaningFailed,
-#endif
-
 #if HAS_CEILING_CLEARANCE()
     CeilingClearanceViolation,
 #endif
@@ -951,9 +947,6 @@ inline constexpr EnumArray<PhasesWarning, PhaseResponses, CountPhases<PhasesWarn
 #endif
 #if HAS_UNEVEN_BED_PROMPT()
         { PhasesWarning::BedUnevenAlignmentPrompt, { Response::Yes, Response::No } },
-#endif
-#if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-        { PhasesWarning::NozzleCleaningFailed, { Response::Retry, Response::Ignore, Response::Abort } },
 #endif
 #if HAS_CEILING_CLEARANCE()
         { PhasesWarning::CeilingClearanceViolation, { Response::Continue, Response::Abort } },

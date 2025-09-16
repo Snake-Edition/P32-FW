@@ -238,6 +238,9 @@ DeviceState get_state(bool ready) {
         // preheat menu to be the only menu screen to not be Idle... :-(
     case ClientFSM::Preheat:
     case ClientFSM::Wait:
+#if HAS_LOADCELL()
+    case ClientFSM::NozzleCleaningFailed:
+#endif
         return DeviceState::Busy;
 
     case ClientFSM::Warning: {
@@ -402,7 +405,9 @@ StateWithDialog get_state_with_dialog(bool ready) {
     case ClientFSM::Printing:
     case ClientFSM::Serial_printing:
         break;
-
+#if HAS_LOADCELL()
+    case ClientFSM::NozzleCleaningFailed:
+#endif
 #if HAS_SELFTEST()
     case ClientFSM::Selftest:
     case ClientFSM::FansSelftest:
@@ -566,10 +571,6 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
 #endif
     case WarningType::FilamentSensorsDisabled:
         return ErrCode::ERR_MECHANICAL_FILAMENT_SENSORS_DISABLED;
-#if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-    case WarningType::NozzleCleaningFailed:
-        return ErrCode::CONNECT_NOZZLE_CLEANING_FAILED;
-#endif
 #if _DEBUG
     case WarningType::SteppersTimeout:
         return ErrCode::CONNECT_STEPPERS_TIMEOUT;
