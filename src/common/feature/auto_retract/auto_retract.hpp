@@ -1,9 +1,9 @@
+/// @file
 #pragma once
 
-#include <bitset>
-#include <inplace_function.hpp>
 #include <optional>
 #include <bitset>
+#include <inplace_function.hpp>
 
 namespace buddy {
 /// Class for managing automatic retraction after print or load, so that the printer keeps the nozzle empty for MBL and non-printing to prevent oozing.
@@ -16,20 +16,17 @@ public:
 
     static constexpr float minimum_auto_retract_distance = 20.f; ///< Minimum retract distance for the filament to be considered auto-retracted. Auto-retracted filaments can be unloaded without heating.
 
-    /// \returns whether the specified hotend is retracted (some amount > 0.0f) and is a known value -> will deretract on positive Z move
-    bool will_deretract() const;
+    /// To hide dependency on marlin_vars
+    static uint8_t current_hotend();
 
     /// \returns whether the specified \param hotend is retracted (some amount > 0.0f) and is a known value -> will deretract on positive Z move
-    bool will_deretract(uint8_t hotend) const;
+    bool will_deretract(uint8_t hotend = current_hotend()) const;
 
     /// \returns true if the filament is completely retracted from the \param hotend's nozzle (distance >= minimum_retract_distance), allowing for cold unload.
-    bool is_safely_retracted_for_unload(uint8_t hotend) const;
-
-    /// \returns true if the filament is completely retracted from the current hotend's nozzle (distance >= minimum_retract_distance), allowing for cold unload.
-    bool is_safely_retracted_for_unload() const;
+    bool is_safely_retracted_for_unload(uint8_t hotend = current_hotend()) const;
 
     /// How much is the filament retracted from the nozzle (mm), std::nullopt if retracted distance not a known value
-    std::optional<float> retracted_distance() const;
+    std::optional<float> retracted_distance(uint8_t hotend = current_hotend()) const;
 
     /// If !is_retracted, executes the retraction process and marks the currently active hotend as retracted
     void maybe_retract_from_nozzle(const ProgressCallback &progress_callback = nullptr);

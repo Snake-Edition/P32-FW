@@ -38,9 +38,8 @@ AutoRetract::AutoRetract() {
     }
 }
 
-bool AutoRetract::will_deretract() const {
-    const auto hotend = marlin_vars().active_hotend_id();
-    return will_deretract(hotend);
+uint8_t buddy::AutoRetract::current_hotend() {
+    return marlin_vars().active_hotend_id();
 }
 
 bool AutoRetract::will_deretract(uint8_t hotend) const {
@@ -52,13 +51,7 @@ bool AutoRetract::is_safely_retracted_for_unload(uint8_t hotend) const {
     return dist.has_value() && dist.value() >= minimum_auto_retract_distance;
 }
 
-bool AutoRetract::is_safely_retracted_for_unload() const {
-    const auto hotend = marlin_vars().active_hotend_id();
-    return is_safely_retracted_for_unload(hotend);
-}
-
-std::optional<float> AutoRetract::retracted_distance() const {
-    const auto hotend = marlin_vars().active_hotend_id();
+std::optional<float> AutoRetract::retracted_distance(uint8_t hotend) const {
     return config_store().get_filament_retracted_distance(hotend);
 }
 
