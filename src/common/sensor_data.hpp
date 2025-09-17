@@ -43,6 +43,8 @@ public:
 #if HAS_REMOTE_BED()
     float bedMCUTemperature;
 #endif
+
+    void update();
 };
 
 SensorData &sensor_data();

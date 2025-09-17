@@ -78,6 +78,7 @@
 #include "metric.h"
 #include "app_metrics.h"
 #include "media_prefetch_instance.hpp"
+#include <common/sensor_data.hpp>
 
 #include <option/has_leds.h>
 
@@ -3590,6 +3591,8 @@ void onStartup() {
 void onIdle() {
     idle();
 
+    // update sensor values for metrics and sensor screens
+    sensor_data().update();
     buddy::metrics::record();
 
     print_utils_loop();
