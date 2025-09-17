@@ -2350,14 +2350,6 @@ bool Planner::buffer_segment(const abce_pos_t &abce
   #error Z_CEILING_CLEARANCE must be defined only if HAS_CEILING_CLEARANCE()
 #endif
 
-#if HAS_CEILING_CLEARANCE()
-  // ! Important: call before checking for draining_buffer
-  buddy::check_ceiling_clearance(abce);
-#endif
-
-  // If we are aborting, do not accept queuing of movements
-  if (draining_buffer || PreciseStepping::stopping()) return false;
-
   // The target position of the tool in absolute mini-steps
   // Calculate target position in absolute mini-steps
   const abce_long_t target = {
@@ -2366,6 +2358,17 @@ bool Planner::buffer_segment(const abce_pos_t &abce
     int32_t(LROUND(abce.c * settings.axis_msteps_per_mm[C_AXIS])),
     int32_t(LROUND(abce.e * settings.axis_msteps_per_mm[E_AXIS_N(extruder)]))
   };
+
+#if HAS_CEILING_CLEARANCE()
+  // BFW-7734 only check when a negative Z-move is planned - it's a workaround for ceiling check sometimes reporting false positives yet for unknown reasons
+  if(target.z < position.z){
+    // ! Important: call before checking for draining_buffer
+    buddy::check_ceiling_clearance(abce);
+  }
+#endif
+
+  // If we are aborting, do not accept queuing of movements
+  if (draining_buffer || PreciseStepping::stopping()) return false;
 
 #if HAS_EMERGENCY_STOP()
   // E-moves alone are always allowed
