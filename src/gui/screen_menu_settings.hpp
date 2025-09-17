@@ -32,6 +32,11 @@
     #include <gui/menu_item/specific/menu_items_chamber_filtration.hpp>
 #endif
 
+#include <option/has_auto_retract.h>
+#if HAS_AUTO_RETRACT()
+    #include <gui/menu_item/specific/menu_items_auto_retract.hpp>
+#endif
+
 class MI_HELP_FW_UPDATE : public IWindowMenuItem {
     static constexpr const char *const label = N_("FW update");
 
@@ -52,6 +57,9 @@ using ScreenMenuSettings__ = ScreenMenu<GuiDefaults::MenuFooter, MI_RETURN,
 #endif
 #if HAS_LOADCELL()
     MI_STUCK_FILAMENT_DETECTION,
+#endif
+#if HAS_AUTO_RETRACT()
+    MI_AUTO_RETRACT_ENABLE,
 #endif
 #if HAS_MMU2()
     MI_MMU_ENABLE,

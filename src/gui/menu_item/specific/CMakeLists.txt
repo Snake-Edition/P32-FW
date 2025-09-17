@@ -13,3 +13,7 @@ endif()
 if(HAS_MMU2)
   target_sources(firmware PRIVATE menu_items_hw_mmu.cpp)
 endif()
+
+if(HAS_AUTO_RETRACT)
+  target_sources(firmware PRIVATE menu_items_auto_retract.cpp)
+endif()
