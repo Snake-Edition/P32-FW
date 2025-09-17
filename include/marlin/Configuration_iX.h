@@ -1450,6 +1450,10 @@
     #define Y_AXIS_UNLOAD_POS Y_WASTEBIN_POINT
     #define Z_AXIS_UNLOAD_POS Z_NOZZLE_PARK_POINT
 
+    #define Z_NOZZLE_CLEANING_FAILED_POINT 60
+    #define XYZ_NOZZLE_CLEANINIG_FAILED_POINT \
+        {X_NOZZLE_PARK_POINT_M600, Y_NOZZLE_PARK_POINT_M600, Z_NOZZLE_CLEANING_FAILED_POINT}
+
     /**
      * Park the nozzle after print is finished
      * When disabled, similar functionality can be still achieved with slicer "End G-code"

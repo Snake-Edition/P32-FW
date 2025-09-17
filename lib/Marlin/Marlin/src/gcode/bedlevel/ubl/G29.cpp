@@ -295,7 +295,7 @@ void GcodeSuite::G29() {
             // filament, we want the nozzle to park at an accessible place to
             // have it cleaned and the M600 position happens to be just what we
             // need.
-            plan_park_move_to_xyz({ { XYZ_NOZZLE_PARK_POINT_M600 } }, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE, Segmented::yes);
+            plan_park_move_to_xyz({ { XYZ_NOZZLE_CLEANINIG_FAILED_POINT } }, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE, Segmented::yes);
 
             using namespace nozzle_cleaning_failed_wizard;
             Result result = run_wizard();
