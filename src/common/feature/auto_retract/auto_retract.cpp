@@ -84,6 +84,11 @@ void AutoRetract::maybe_retract_from_nozzle(const ProgressCallback &progress_cal
         return;
     }
 
+    // Do not auto retract when disabled globally
+    if (!config_store().auto_retract_enabled.get()) {
+        return;
+    }
+
     // Do not auto retract specific filaments (for example TPU might get tangled up in the extruder - BFW-6953)
     if (config_store().get_filament_type(hotend).parameters().do_not_auto_retract) {
         return;
