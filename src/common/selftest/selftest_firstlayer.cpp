@@ -336,14 +336,6 @@ LoopResult CSelftestPart_FirstLayer::statePrint() {
     return LoopResult::RunNext;
 }
 
-LoopResult CSelftestPart_FirstLayer::stateMblFinished() {
-    return LoopResult::RunNext;
-}
-
-LoopResult CSelftestPart_FirstLayer::statePrintFinished() {
-    return LoopResult::RunNext;
-}
-
 LoopResult CSelftestPart_FirstLayer::stateReprintInit() {
     IPartHandler::SetFsmPhase(PhasesSelftest::FirstLayer_reprint);
     rResult.preselect_response = Response::No;

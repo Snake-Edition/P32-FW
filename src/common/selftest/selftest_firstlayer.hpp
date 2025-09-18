@@ -67,8 +67,6 @@ public:
     LoopResult stateMbl();
     LoopResult statePrint();
 
-    LoopResult stateMblFinished();
-    LoopResult statePrintFinished();
     LoopResult stateReprintInit();
     LoopResult stateReprint();
     LoopResult stateCleanSheetInit();
