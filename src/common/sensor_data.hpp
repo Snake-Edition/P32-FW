@@ -6,6 +6,7 @@
 #include <option/has_loadcell.h>
 #include <option/has_remote_bed.h>
 #include <utils/atomic.hpp>
+#include <utils/timing/rate_limiter.hpp>
 
 // this struct collects data from metrics and gives access to the
 // sensor info screen

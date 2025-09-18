@@ -8,7 +8,7 @@
 #pragma once
 
 #include "filament_sensor.hpp"
-#include <app_metrics.h>
+#include <utils/timing/rate_limiter.hpp>
 
 struct metric_s;
 
@@ -66,7 +66,7 @@ public:
 
 private:
     // Limit metrics recording for each tool
-    buddy::metrics::RunApproxEvery limit_record = 49;
+    RateLimiter<uint32_t> limit_record;
 
     uint32_t value_span = 0;
 

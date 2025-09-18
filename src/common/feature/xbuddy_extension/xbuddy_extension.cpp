@@ -3,7 +3,6 @@
 #include <utility>
 
 #include <common/temperature.hpp>
-#include <common/app_metrics.h>
 #include <puppies/xbuddy_extension.hpp>
 #include <feature/chamber/chamber.hpp>
 #include <feature/chamber_filtration/chamber_filtration.hpp>
@@ -12,6 +11,7 @@
 #include <leds/side_strip_handler.hpp>
 #include <buddy/unreachable.hpp>
 #include <CFanCtl3Wire.hpp> // for FANCTL_START_TIMEOUT
+#include <utils/timing/rate_limiter.hpp>
 
 namespace {
 
@@ -147,8 +147,8 @@ void XBuddyExtension::step() {
       // them to wrong value, keep them at what they are now).
 
     METRIC_DEF(xbe_fan, "xbe_fan", METRIC_VALUE_CUSTOM, 0, METRIC_DISABLED);
-    static auto fan_should_record = metrics::RunApproxEvery(1000);
-    if (fan_should_record()) {
+    static auto fan_should_record = RateLimiter<uint32_t>(1000);
+    if (fan_should_record.check(ticks_ms())) {
         for (int fan = 0; fan < 3; ++fan) {
             const FanPWM pwm = FanPWM { puppies::xbuddy_extension.get_requested_fan_pwm(fan) };
             const FanRPM rpm = puppies::xbuddy_extension.get_fan_rpm(fan).value_or(0);

@@ -27,6 +27,7 @@
 #include "config_features.h"
 #include <option/has_mmu2.h>
 #include <metric_handlers.h>
+#include <utils/timing/rate_limiter.hpp>
 
 #include "../Marlin/src/module/temperature.h"
 #include "../Marlin/src/module/planner.h"
@@ -78,8 +79,8 @@ void RecordRuntimeStats() {
     METRIC_DEF(stack, "stack", METRIC_VALUE_CUSTOM, 0, METRIC_ENABLED); // Thread stack usage
     METRIC_DEF(runtime, "runtime", METRIC_VALUE_CUSTOM, 0, METRIC_ENABLED); // Thread runtime usage
     constexpr const uint32_t STACK_RUNTIME_RECORD_INTERVAL_MS = 3000; // Sample stack and runtime this often
-    static auto should_record_stack_runtime = RunApproxEvery(STACK_RUNTIME_RECORD_INTERVAL_MS);
-    if (should_record_stack_runtime()) {
+    static auto should_record_stack_runtime = RateLimiter<uint32_t>(STACK_RUNTIME_RECORD_INTERVAL_MS);
+    if (should_record_stack_runtime.check(ticks_ms())) {
         static TaskStatus_t task_statuses[17] = {};
 
 #if configGENERATE_RUN_TIME_STATS
@@ -146,8 +147,8 @@ void RecordMarlinVariables() {
 
 #if HAS_TEMP_HEATBREAK
     METRIC_DEF(heatbreak, "temp_hbr", METRIC_VALUE_CUSTOM, 0, METRIC_DISABLED); // float value, tag "n": extruder index, tag "a": is active extruder
-    static auto heatbreak_should_record = RunApproxEvery(1000);
-    if (heatbreak_should_record()) {
+    static auto heatbreak_should_record = RateLimiter<uint32_t>(1000);
+    if (heatbreak_should_record.check(ticks_ms())) {
         FOREACH_EXTRUDER() {
             metric_record_custom(&heatbreak, ",n=%i,a=%i value=%.2f", e, e == active_extruder_or_first, static_cast<double>(thermalManager.degHeatbreak(e)));
         }
@@ -167,8 +168,8 @@ void RecordMarlinVariables() {
 #endif /*HAS_TEMP_CHAMBER*/
 
     // These temperature metrics go outside of Marlin and are filtered and converted here
-    static auto filtered_should_run = RunApproxEvery(1000 / OVERSAMPLENR);
-    if (filtered_should_run()) {
+    static auto filtered_should_run = RateLimiter<uint32_t>(1000 / OVERSAMPLENR);
+    if (filtered_should_run.check(ticks_ms())) {
         static uint8_t sample_nr = 0;
 
         METRIC_DEF(mcu, "temp_mcu", METRIC_VALUE_INTEGER, 0, METRIC_DISABLED);
@@ -219,16 +220,16 @@ void RecordMarlinVariables() {
     metric_record_integer(&target_bed, thermalManager.degTargetBed());
 
     METRIC_DEF(nozzle, "temp_noz", METRIC_VALUE_CUSTOM, 0, METRIC_DISABLED);
-    static auto nozzle_should_record = RunApproxEvery(1000 - 10);
-    if (nozzle_should_record()) {
+    static auto nozzle_should_record = RateLimiter<uint32_t>(1000 - 10);
+    if (nozzle_should_record.check(ticks_ms())) {
         FOREACH_EXTRUDER() {
             metric_record_custom(&nozzle, ",n=%i,a=%i value=%.2f", e, e == active_extruder, static_cast<double>(thermalManager.degHotend(e)));
         }
     }
 
     METRIC_DEF(target_nozzle, "ttemp_noz", METRIC_VALUE_CUSTOM, 0, METRIC_DISABLED);
-    static auto target_nozzle_should_record = RunApproxEvery(1000 + 9);
-    if (target_nozzle_should_record()) {
+    static auto target_nozzle_should_record = RateLimiter<uint32_t>(1000 + 9);
+    if (target_nozzle_should_record.check(ticks_ms())) {
         FOREACH_EXTRUDER() {
             metric_record_custom(&target_nozzle, ",n=%i,a=%i value=%ii", e, e == active_extruder, thermalManager.degTargetHotend(e));
         }
@@ -390,8 +391,8 @@ void record_dwarf_internal_temperatures() {
 
     // All MCU temperatures
     METRIC_DEF(mcu, "dwarfs_mcu_temp", METRIC_VALUE_CUSTOM, 0, METRIC_DISABLED); // float value, tag "n": extruder index, tag "a": is active extruder
-    static auto mcu_should_record = RunApproxEvery(1002);
-    if (mcu_should_record()) {
+    static auto mcu_should_record = RateLimiter<uint32_t>(1002);
+    if (mcu_should_record.check(ticks_ms())) {
         FOREACH_EXTRUDER() {
             metric_record_custom(&mcu, ",n=%i,a=%i value=%i", e, e == active_extruder_or_first, static_cast<int>(buddy::puppies::dwarfs[e].get_mcu_temperature()));
         }
@@ -399,8 +400,8 @@ void record_dwarf_internal_temperatures() {
 
     // All board temperatures
     METRIC_DEF(board, "dwarfs_board_temp", METRIC_VALUE_CUSTOM, 0, METRIC_DISABLED); // float value, tag "n": extruder index, tag "a": is active extruder
-    static auto board_should_record = RunApproxEvery(1003);
-    if (board_should_record()) {
+    static auto board_should_record = RateLimiter<uint32_t>(1003);
+    if (board_should_record.check(ticks_ms())) {
         FOREACH_EXTRUDER() {
             metric_record_custom(&board, ",n=%i,a=%i value=%i", e, e == active_extruder_or_first, static_cast<int>(buddy::puppies::dwarfs[e].get_board_temperature()));
         }

@@ -51,7 +51,8 @@ void FSensorADC::set_filtered_value_from_IRQ(int32_t filtered_value) {
 
 FSensorADC::FSensorADC(uint8_t tool_index, bool is_side_sensor)
     : tool_index(tool_index)
-    , is_side(is_side_sensor) {
+    , is_side(is_side_sensor)
+    , limit_record(49 /* ms */) {
     constexpr uint32_t extruder_fs_value_span {
 #if (BOARD_IS_XBUDDY() && defined LOVEBOARD_HAS_PT100)
         100
@@ -155,7 +156,7 @@ void FSensorADC::invalidate_calibration() {
 }
 
 void FSensorADC::record_state() {
-    if (!limit_record()) {
+    if (!limit_record.check(ticks_ms())) {
         return;
     }
 
