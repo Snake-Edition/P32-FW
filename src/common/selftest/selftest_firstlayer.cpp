@@ -50,6 +50,15 @@ static filament_status get_filament_status() {
     return static_cast<filament_status>(eeprom | sensor); // combine flags
 }
 
+void preheat() {
+    const auto filament_desc = config_store().get_filament_type(active_extruder).parameters();
+
+    // nozzle temperature preheat
+    thermalManager.setTargetHotend(filament_desc.nozzle_preheat_temperature, 0);
+    marlin_server::set_temp_to_display(filament_desc.nozzle_temperature, 0);
+    // bed temperature
+    thermalManager.setTargetBed(filament_desc.heatbed_temperature);
+}
 /**
  * @brief initialization for state which will ask user what to do with filament
  * behavior depends on eeprom and filament sensor
@@ -57,6 +66,7 @@ static filament_status get_filament_status() {
  * @return LoopResult
  */
 LoopResult CSelftestPart_FirstLayer::stateAskFilamentInit() {
+
     filament_status filament = get_filament_status();
     switch (filament) {
     case filament_status::TypeKnown_SensorValid: // do not allow load
@@ -85,6 +95,8 @@ LoopResult CSelftestPart_FirstLayer::stateAskFilament() {
         filament_status filament = get_filament_status();
         if (filament == filament_status::TypeKnown_SensorValid) {
             state_selected_by_user = StateSelectedByUser::Calib;
+            // Filament is known, preheat can be started
+            preheat();
         } else {
             state_selected_by_user = StateSelectedByUser::Preheat;
         }
@@ -278,36 +290,18 @@ LoopResult CSelftestPart_FirstLayer::stateShowStartPrint() {
 
 LoopResult CSelftestPart_FirstLayer::statePrintInit() {
     IPartHandler::SetFsmPhase(PhasesSelftest::FirstLayer_mbl);
-    const auto filament = config_store().get_filament_type(active_extruder);
-    const auto filament_desc = filament.parameters();
-    const int temp_nozzle = filament_desc.nozzle_temperature;
-    temp_nozzle_preheat = filament_desc.nozzle_preheat_temperature;
-    temp_bed = filament_desc.heatbed_temperature;
-
-    // nozzle temperature preheat
-    thermalManager.setTargetHotend(temp_nozzle_preheat, 0);
-    marlin_server::set_temp_to_display(temp_nozzle, 0);
-
-    // bed temperature
-    thermalManager.setTargetBed(temp_bed);
+    preheat();
     return LoopResult::RunNext;
 }
 
-// TODOS:
-//  1. remove no longer used states
-//  2. change enqueue gcode to non parser variants
-//  3. dont allow to show progress bar on the Z height in MBL
-
 LoopResult CSelftestPart_FirstLayer::stateWaitNozzle() {
-    std::array<char, sizeof("M109 R170")> gcode_buff; // safe to be local variable, it will copied
-    snprintf(gcode_buff.begin(), gcode_buff.size(), "M109 R%d", temp_nozzle_preheat);
-    return enqueueGcode(gcode_buff.begin()) ? LoopResult::RunNext : LoopResult::RunCurrent;
+    (void)thermalManager.wait_for_hotend(active_extruder, true, false);
+    return LoopResult::RunNext;
 }
 
 LoopResult CSelftestPart_FirstLayer::stateWaitBed() {
-    std::array<char, sizeof("M190 S100")> gcode_buff; // safe to be local variable, it will be copied
-    snprintf(gcode_buff.begin(), gcode_buff.size(), "M190 S%d", temp_bed);
-    return enqueueGcode(gcode_buff.begin()) ? LoopResult::RunNext : LoopResult::RunCurrent;
+    (void)thermalManager.wait_for_bed();
+    return LoopResult::RunNext;
 }
 
 LoopResult CSelftestPart_FirstLayer::stateHome() {

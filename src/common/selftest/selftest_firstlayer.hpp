@@ -34,9 +34,6 @@ class CSelftestPart_FirstLayer {
     const FirstLayerConfig_t &rConfig;
     SelftestFirstLayer_t &rResult;
 
-    int temp_nozzle_preheat;
-    int temp_bed;
-
     bool skip_user_changing_initial_distance;
     bool reprint;
     StateSelectedByUser state_selected_by_user;
