@@ -13,8 +13,7 @@
 #include "M70X.hpp"
 #include "SteelSheets.hpp"
 #include <config_store/store_instance.hpp>
-
-#include <array>
+#include <gcode/gcode.h>
 
 using namespace selftest;
 LOG_COMPONENT_REF(Selftest);
@@ -305,10 +304,20 @@ LoopResult CSelftestPart_FirstLayer::stateWaitBed() {
 }
 
 LoopResult CSelftestPart_FirstLayer::stateHome() {
-    return enqueueGcode("G28") ? LoopResult::RunNext : LoopResult::RunCurrent;
+    // Make sure we're homed
+    if (!GcodeSuite::G28_no_parser(true, true, true,
+            {
+                .only_if_needed = true,
+                .precise = false, // We don't need precise position for this procedure
+            })) {
+        return LoopResult::Abort;
+    }
+    return LoopResult::RunNext;
 }
 
 LoopResult CSelftestPart_FirstLayer::stateMbl() {
+    // Note: I will not spend time trying to "inline" this gcode, since this selftest will probably be
+    //       rewritten in the near future
     return enqueueGcode("G29") ? LoopResult::RunNext : LoopResult::RunCurrent;
 }
 
