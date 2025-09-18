@@ -71,11 +71,14 @@ class WindowLiveAdjustZ_withText : public WindowLiveAdjustZ {
 public:
     static constexpr const char *text_str = N_("Z height:");
     WindowLiveAdjustZ_withText(window_t *parent, point_i16_t pt, size_t width);
-    void Idle();
-    void Activate();
-    bool IsActive();
+    void set_active(bool set) {
+        active = set;
+        text.set_visible(set);
+        set_visible(set);
+    }
 
 protected:
+    bool active = false;
     virtual void windowEvent(window_t *sender, GUI_event_t event, void *param) override;
 };
 

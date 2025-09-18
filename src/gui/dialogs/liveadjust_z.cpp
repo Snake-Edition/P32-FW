@@ -149,24 +149,12 @@ WindowLiveAdjustZ_withText::WindowLiveAdjustZ_withText(window_t *parent, point_i
     SetRect(GetRect().Union(text.GetRect()));
 }
 
-void WindowLiveAdjustZ_withText::Idle() {
-    number.Shadow();
-}
-
-void WindowLiveAdjustZ_withText::Activate() {
-    number.Unshadow();
-}
-
-bool WindowLiveAdjustZ_withText::IsActive() {
-    return number.IsShadowed();
-}
-
 void WindowLiveAdjustZ_withText::windowEvent(window_t *sender, GUI_event_t event, void *param) {
     switch (event) {
 
     case GUI_event_t::ENC_UP:
     case GUI_event_t::ENC_DN:
-        if (IsActive()) {
+        if (!active) {
             return; // discard event
         }
         break;
