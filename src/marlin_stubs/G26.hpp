@@ -33,7 +33,7 @@ public:
     }
 
     uint8_t progress_percent() const;
-
+    void run();
     void wait_for_move() {
         planner.synchronize();
     }

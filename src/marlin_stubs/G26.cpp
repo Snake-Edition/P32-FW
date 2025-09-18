@@ -350,6 +350,28 @@ void FirstLayer::print_shape_2() {
     finish_printing();
 }
 
+void FirstLayer::run() {
+    // is filament selected
+    auto filament = config_store().get_filament_type(active_extruder);
+    if (filament == FilamentType::none) {
+        return;
+    }
+    auto filament_description = filament.parameters();
+    const int temp_nozzle = filament_description.nozzle_temperature;
+
+    // nozzle temperature print
+    thermalManager.setTargetHotend(temp_nozzle, 0);
+    marlin_server::set_temp_to_display(temp_nozzle, 0);
+    thermalManager.wait_for_hotend(0, false);
+
+    print_shape_2();
+
+    thermalManager.setTargetHotend(0, 0);
+    marlin_server::set_temp_to_display(0, 0);
+
+    thermalManager.setTargetBed(0);
+}
+
 /**
  * @brief gcode to draw a first layer on bed
  *
@@ -370,29 +392,8 @@ void FirstLayer::print_shape_2() {
  */
 
 void PrusaGcodeSuite::G26() {
-    // is filament selected
-    auto filament = config_store().get_filament_type(active_extruder);
-    if (filament == FilamentType::none) {
-        return;
-    }
-
     FirstLayer fl;
-
-    auto filament_description = filament.parameters();
-    const int temp_nozzle = filament_description.nozzle_temperature;
-
-    // nozzle temperature print
-    thermalManager.setTargetHotend(temp_nozzle, 0);
-    marlin_server::set_temp_to_display(temp_nozzle, 0);
-    thermalManager.wait_for_hotend(0, false);
-
-    // fl.print_shape_1();
-    fl.print_shape_2();
-
-    thermalManager.setTargetHotend(0, 0);
-    marlin_server::set_temp_to_display(0, 0);
-
-    thermalManager.setTargetBed(0);
+    fl.run();
 }
 
 /** @}*/
