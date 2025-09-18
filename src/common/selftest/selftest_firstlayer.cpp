@@ -293,6 +293,11 @@ LoopResult CSelftestPart_FirstLayer::statePrintInit() {
     return LoopResult::RunNext;
 }
 
+// TODOS:
+//  1. remove no longer used states
+//  2. change enqueue gcode to non parser variants
+//  3. dont allow to show progress bar on the Z height in MBL
+
 LoopResult CSelftestPart_FirstLayer::stateWaitNozzle() {
     std::array<char, sizeof("M109 R170")> gcode_buff; // safe to be local variable, it will copied
     snprintf(gcode_buff.begin(), gcode_buff.size(), "M109 R%d", temp_nozzle_preheat);
@@ -314,30 +319,26 @@ LoopResult CSelftestPart_FirstLayer::stateMbl() {
 }
 
 LoopResult CSelftestPart_FirstLayer::statePrint() {
-    return enqueueGcode("G26") ? LoopResult::RunNext : LoopResult::RunCurrent; // draw firstlay
+    FirstLayer fli;
+
+    IPartHandler::SetFsmPhase(PhasesSelftest::FirstLayer_print);
+    Subscriber idle_subsrciber { marlin_server::idle_publisher,
+        [&] {
+            rResult.progress = fli.progress_percent();
+            // We have to change state every cycle to track the progress
+            marlin_server::fsm_change(IPartHandler::GetFsmPhase(), rResult.Serialize());
+        } };
+
+    fli.run();
+    return LoopResult::RunNext;
 }
 
 LoopResult CSelftestPart_FirstLayer::stateMblFinished() {
-    // Wait for the G26 to start
-    if (!FirstLayer::instance()) {
-        return LoopResult::RunCurrent;
-    }
-
-    IPartHandler::SetFsmPhase(PhasesSelftest::FirstLayer_print);
-    rResult.progress = 0;
     return LoopResult::RunNext;
 }
 
 LoopResult CSelftestPart_FirstLayer::statePrintFinished() {
-    FirstLayer *fli = FirstLayer::instance();
-
-    // If the G26 finished, go to the next phase
-    if (!fli) {
-        return LoopResult::RunNext;
-    }
-
-    rResult.progress = fli->progress_percent();
-    return LoopResult::RunCurrent;
+    return LoopResult::RunNext;
 }
 
 LoopResult CSelftestPart_FirstLayer::stateReprintInit() {
