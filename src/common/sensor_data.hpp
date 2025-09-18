@@ -14,12 +14,24 @@ struct SensorData {
 private:
     friend SensorData &sensor_data();
 
-    SensorData() = default;
+    SensorData();
     SensorData(SensorData &other) = delete;
     SensorData(SensorData &&other) = delete;
 
+    void update_MCU_temp();
+
+    RateLimiter<uint32_t> limiter;
+    uint8_t sample_nr = 0;
+    int32_t mcu_sum = 0;
+#if BOARD_IS_XLBUDDY()
+    int32_t sandwich_sum = 0;
+    int32_t splitter_sum = 0;
+#endif
+
 public:
     RelaxedAtomic<float> MCUTemp;
+    RelaxedAtomic<float> sandwichTemp;
+    RelaxedAtomic<float> splitterTemp;
     RelaxedAtomic<float> boardTemp;
     RelaxedAtomic<float> hbrFan;
     RelaxedAtomic<float> inputVoltage;

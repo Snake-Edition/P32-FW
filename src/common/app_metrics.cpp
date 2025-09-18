@@ -168,42 +168,21 @@ void RecordMarlinVariables() {
 #endif /*HAS_TEMP_CHAMBER*/
 
     // These temperature metrics go outside of Marlin and are filtered and converted here
-    static auto filtered_should_run = RateLimiter<uint32_t>(1000 / OVERSAMPLENR);
-    if (filtered_should_run.check(ticks_ms())) {
-        static uint8_t sample_nr = 0;
-
+    {
         METRIC_DEF(mcu, "temp_mcu", METRIC_VALUE_INTEGER, 0, METRIC_DISABLED);
-        static int32_t mcu_sum = 0;
-        mcu_sum += AdcGet::getMCUTemp();
-
-#if BOARD_IS_XLBUDDY()
-        METRIC_DEF(sandwich, "temp_sandwich", METRIC_VALUE_FLOAT, 1000 - 10, METRIC_DISABLED);
-        static int sandwich_sum = 0;
-        sandwich_sum += AdcGet::sandwichTemp();
-
-        METRIC_DEF(splitter, "temp_splitter", METRIC_VALUE_FLOAT, 1000 - 11, METRIC_DISABLED);
-        static int splitter_sum = 0;
-        splitter_sum += AdcGet::splitterTemp();
-#endif /*BOARD_IS_XLBUDDY()*/
-
-        if (++sample_nr >= OVERSAMPLENR) {
-            const float value = static_cast<float>(mcu_sum) / OVERSAMPLENR;
-            metric_record_integer(&mcu, value);
-            sensor_data().MCUTemp = value;
-            mcu_sum = 0;
-#if BOARD_IS_XLBUDDY()
-            // The same thermistor, use the same conversion as TEMP_BOARD
-            // The function takes downsampled ADC value multiplied by OVERSAMPLENR
-            metric_record_float(&sandwich, Temperature::analog_to_celsius_board(sandwich_sum));
-            sandwich_sum = 0;
-            if (prusa_toolchanger.is_splitter_enabled()) {
-                metric_record_float(&splitter, Temperature::analog_to_celsius_board(splitter_sum));
-            }
-            splitter_sum = 0;
-#endif /*BOARD_IS_XLBUDDY()*/
-            sample_nr = 0;
-        }
+        metric_record_integer(&mcu, sensor_data().MCUTemp.load());
     }
+
+#if BOARD_IS_XLBUDDY()
+    {
+        METRIC_DEF(sandwich, "temp_sandwich", METRIC_VALUE_FLOAT, 1000 - 10, METRIC_DISABLED);
+        metric_record_float(&sandwich, sensor_data().sandwichTemp.load());
+    }
+    if (prusa_toolchanger.is_splitter_enabled()) {
+        METRIC_DEF(splitter, "temp_splitter", METRIC_VALUE_FLOAT, 1000 - 11, METRIC_DISABLED);
+        metric_record_float(&splitter, sensor_data().splitterTemp.load());
+    }
+#endif
 
     METRIC_DEF(metric_nozzle_pwm, "nozzle_pwm", METRIC_VALUE_INTEGER, 1000, METRIC_DISABLED);
     metric_record_integer(&metric_nozzle_pwm, thermalManager.nozzle_pwm);

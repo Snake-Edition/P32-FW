@@ -10,6 +10,7 @@
 
 #include <adc.hpp>
 #include "../Marlin/src/module/temperature.h"
+#include <timing.h>
 
 #if BOARD_IS_XLBUDDY()
     #include <Marlin/src/module/prusa/toolchanger.h>
@@ -20,9 +21,40 @@ SensorData &sensor_data() {
     return instance;
 }
 
+SensorData::SensorData()
+    : limiter(1000 / OVERSAMPLENR) {
+}
+
+void SensorData::update_MCU_temp() {
+    if (limiter.check(ticks_ms())) {
+        mcu_sum += AdcGet::getMCUTemp();
+
+#if BOARD_IS_XLBUDDY()
+        sandwich_sum += AdcGet::sandwichTemp();
+        splitter_sum += AdcGet::splitterTemp();
+#endif
+
+        if (++sample_nr >= OVERSAMPLENR) {
+            MCUTemp = static_cast<float>(mcu_sum) / OVERSAMPLENR;
+            mcu_sum = 0;
+
+#if BOARD_IS_XLBUDDY()
+            sandwichTemp = Temperature::analog_to_celsius_board(sandwich_sum);
+            splitterTemp = Temperature::analog_to_celsius_board(splitter_sum);
+            sandwich_sum = 0;
+            splitter_sum = 0;
+#endif
+            sample_nr = 0;
+        }
+    }
+}
+
 void SensorData::update() {
     // Board temperature
     boardTemp = thermalManager.degBoard();
+
+    // MCU temperature
+    update_MCU_temp();
 
 #if HAS_DOOR_SENSOR()
     // Door sensor
