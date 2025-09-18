@@ -5,6 +5,7 @@
 #include <option/has_door_sensor.h>
 #include <option/has_loadcell.h>
 #include <option/has_remote_bed.h>
+#include <utils/atomic.hpp>
 
 // this struct collects data from metrics and gives access to the
 // sensor info screen
@@ -17,31 +18,31 @@ private:
     SensorData(SensorData &&other) = delete;
 
 public:
-    float MCUTemp;
-    float boardTemp;
-    float hbrFan;
-    float inputVoltage;
+    RelaxedAtomic<float> MCUTemp;
+    RelaxedAtomic<float> boardTemp;
+    RelaxedAtomic<float> hbrFan;
+    RelaxedAtomic<float> inputVoltage;
 #if BOARD_IS_XLBUDDY()
-    float sandwich5VVoltage;
-    float sandwich5VCurrent;
-    float buddy5VCurrent;
-    float dwarfBoardTemperature;
-    float dwarfMCUTemperature;
+    RelaxedAtomic<float> sandwich5VVoltage;
+    RelaxedAtomic<float> sandwich5VCurrent;
+    RelaxedAtomic<float> buddy5VCurrent;
+    RelaxedAtomic<float> dwarfBoardTemperature;
+    RelaxedAtomic<float> dwarfMCUTemperature;
 #elif BOARD_IS_XBUDDY()
-    float heaterVoltage;
-    float heaterCurrent;
-    float inputCurrent;
-    float mmuCurrent;
+    RelaxedAtomic<float> heaterVoltage;
+    RelaxedAtomic<float> heaterCurrent;
+    RelaxedAtomic<float> inputCurrent;
+    RelaxedAtomic<float> mmuCurrent;
 #else
 #endif
 #if HAS_DOOR_SENSOR()
-    buddy::DoorSensor::DetailedState door_sensor_detailed_state;
+    RelaxedAtomic<buddy::DoorSensor::DetailedState> door_sensor_detailed_state;
 #endif
 #if HAS_LOADCELL()
-    float loadCell;
+    RelaxedAtomic<float> loadCell;
 #endif
 #if HAS_REMOTE_BED()
-    float bedMCUTemperature;
+    RelaxedAtomic<float> bedMCUTemperature;
 #endif
 
     void update();

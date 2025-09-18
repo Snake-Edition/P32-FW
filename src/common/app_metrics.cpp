@@ -157,7 +157,7 @@ void RecordMarlinVariables() {
 #if HAS_TEMP_BOARD
     {
         METRIC_DEF(board, "temp_brd", METRIC_VALUE_FLOAT, 1000 - 9, METRIC_DISABLED);
-        metric_record_float(&board, sensor_data().boardTemp);
+        metric_record_float(&board, sensor_data().boardTemp.load());
     }
 #endif
 
@@ -245,7 +245,7 @@ void RecordMarlinVariables() {
 #if HAS_DOOR_SENSOR()
     {
         METRIC_DEF(door_sensor, "door_sensor", METRIC_VALUE_INTEGER, 1100, METRIC_ENABLED);
-        metric_record_integer(&door_sensor, sensor_data().door_sensor_detailed_state.raw_data);
+        metric_record_integer(&door_sensor, sensor_data().door_sensor_detailed_state.load().raw_data);
     }
 #endif
 
@@ -257,7 +257,7 @@ void RecordMarlinVariables() {
 #if FAN_COUNT >= 2
     {
         METRIC_DEF(heatbreak_fan_speed, "fan_hbr_speed", METRIC_VALUE_INTEGER, 502, METRIC_DISABLED);
-        metric_record_integer(&heatbreak_fan_speed, sensor_data().hbrFan);
+        metric_record_integer(&heatbreak_fan_speed, sensor_data().hbrFan.load());
     }
 #endif
 
@@ -308,30 +308,30 @@ void RecordPowerStats() {
     metric_record_integer(&metric_bed_v_raw, advancedpower.GetBedVoltageRaw());
     {
         METRIC_DEF(metric_bed_v, "volt_bed", METRIC_VALUE_FLOAT, 1001, METRIC_ENABLED);
-        metric_record_float(&metric_bed_v, sensor_data().inputVoltage);
+        metric_record_float(&metric_bed_v, sensor_data().inputVoltage.load());
     }
     METRIC_DEF(metric_nozzle_v_raw, "volt_nozz_raw", METRIC_VALUE_INTEGER, 1002, METRIC_DISABLED);
     metric_record_integer(&metric_nozzle_v_raw, advancedpower.GetHeaterVoltageRaw());
     {
         METRIC_DEF(metric_nozzle_v, "volt_nozz", METRIC_VALUE_FLOAT, 1003, METRIC_ENABLED);
-        metric_record_float(&metric_nozzle_v, sensor_data().heaterVoltage);
+        metric_record_float(&metric_nozzle_v, sensor_data().heaterVoltage.load());
     }
     METRIC_DEF(metric_nozzle_i_raw, "curr_nozz_raw", METRIC_VALUE_INTEGER, 1004, METRIC_DISABLED);
     metric_record_integer(&metric_nozzle_i_raw, advancedpower.GetHeaterCurrentRaw());
     {
         METRIC_DEF(metric_nozzle_i, "curr_nozz", METRIC_VALUE_FLOAT, 1005, METRIC_ENABLED);
-        metric_record_float(&metric_nozzle_i, sensor_data().heaterCurrent);
+        metric_record_float(&metric_nozzle_i, sensor_data().heaterCurrent.load());
     }
     METRIC_DEF(metric_input_i_raw, "curr_inp_raw", METRIC_VALUE_INTEGER, 1006, METRIC_DISABLED);
     metric_record_integer(&metric_input_i_raw, advancedpower.GetInputCurrentRaw());
     {
         METRIC_DEF(metric_input_i, "curr_inp", METRIC_VALUE_FLOAT, 1007, METRIC_ENABLED);
-        metric_record_float(&metric_input_i, sensor_data().inputCurrent);
+        metric_record_float(&metric_input_i, sensor_data().inputCurrent.load());
     }
         #if HAS_MMU2()
     {
         METRIC_DEF(metric_mmu_i, "cur_mmu_imp", METRIC_VALUE_FLOAT, 1008, METRIC_ENABLED);
-        metric_record_float(&metric_mmu_i, sensor_data().mmuCurrent);
+        metric_record_float(&metric_mmu_i, sensor_data().mmuCurrent.load());
     }
         #endif
     METRIC_DEF(metric_oc_nozzle_fault, "oc_nozz", METRIC_VALUE_INTEGER, 1010, METRIC_ENABLED);
@@ -346,19 +346,19 @@ void RecordPowerStats() {
 
     {
         METRIC_DEF(metric_24VVoltage, "24VVoltage", METRIC_VALUE_FLOAT, 1001, METRIC_ENABLED);
-        metric_record_float(&metric_24VVoltage, sensor_data().inputVoltage);
+        metric_record_float(&metric_24VVoltage, sensor_data().inputVoltage.load());
     }
     {
         METRIC_DEF(metric_5VVoltage, "5VVoltage", METRIC_VALUE_FLOAT, 1002, METRIC_ENABLED);
-        metric_record_float(&metric_5VVoltage, sensor_data().sandwich5VVoltage);
+        metric_record_float(&metric_5VVoltage, sensor_data().sandwich5VVoltage.load());
     }
     {
         METRIC_DEF(metric_Sandwitch5VCurrent, "Sandwitch5VCurrent", METRIC_VALUE_FLOAT, 1003, METRIC_ENABLED);
-        metric_record_float(&metric_Sandwitch5VCurrent, sensor_data().sandwich5VCurrent);
+        metric_record_float(&metric_Sandwitch5VCurrent, sensor_data().sandwich5VCurrent.load());
     }
     {
         METRIC_DEF(metric_xlbuddy5VCurrent, "xlbuddy5VCurrent", METRIC_VALUE_FLOAT, 1004, METRIC_ENABLED);
-        metric_record_float(&metric_xlbuddy5VCurrent, sensor_data().buddy5VCurrent);
+        metric_record_float(&metric_xlbuddy5VCurrent, sensor_data().buddy5VCurrent.load());
     }
 }
     #else
@@ -381,11 +381,11 @@ void RecordPrintFilename() {
 void record_dwarf_internal_temperatures() {
     {
         METRIC_DEF(metric_dwarfBoardTemperature, "dwarf_board_temp", METRIC_VALUE_INTEGER, 1001, METRIC_ENABLED);
-        metric_record_integer(&metric_dwarfBoardTemperature, sensor_data().dwarfBoardTemperature);
+        metric_record_integer(&metric_dwarfBoardTemperature, sensor_data().dwarfBoardTemperature.load());
     }
     {
         METRIC_DEF(metric_dwarfMCUTemperature, "dwarf_mcu_temp", METRIC_VALUE_INTEGER, 1001, METRIC_DISABLED);
-        metric_record_integer(&metric_dwarfMCUTemperature, sensor_data().dwarfMCUTemperature);
+        metric_record_integer(&metric_dwarfMCUTemperature, sensor_data().dwarfMCUTemperature.load());
     }
 
     // All MCU temperatures

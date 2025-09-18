@@ -7,5 +7,5 @@ MI_INFO_REMOTE_BED_MCU_TEMPERATURE::MI_INFO_REMOTE_BED_MCU_TEMPERATURE()
     : MenuItemAutoUpdatingLabel {
         _("Bed MCU Temp"),
         standard_print_format::temp_c,
-        [](auto) { return sensor_data().bedMCUTemperature; },
+        [](auto) -> float { return sensor_data().bedMCUTemperature.load(); },
     } {}
