@@ -25,7 +25,8 @@ bool extruder_move(float distance, float feed_rate, bool ignore_flow_factor) {
     // Only .z should ever differ because of MBL application.
     current_position.e = pos.e;
 
-    return planner.buffer_line(pos, feed_rate);
+    // ! Imporant - do not use buffer_line, it would reapply modifiers on top of the position_float
+    return planner.buffer_segment(pos, feed_rate);
 }
 
 float extruder_schedule_turning(float feed_rate, float step) {
