@@ -3288,7 +3288,9 @@ void Temperature::isr() {
 
             idle(true, true);
 
-            status_guard.update<PrintStatusMessage::absorbing_heat>({ .current = 100 - (temp_bed.target - bed_frame_est_celsius) / start_diff * 100, .target = 100 });
+            auto progress = std::clamp(100 - (fabs(temp_bed.target - bed_frame_est_celsius) / start_diff) * 100, 0.f, 100.f);
+
+            status_guard.update<PrintStatusMessage::absorbing_heat>({ .current = progress, .target = 100 });
         }
 
         MarlinUI::reset_status();
