@@ -3271,7 +3271,7 @@ void Temperature::isr() {
     }
 
     void Temperature::wait_for_frame_heatup() {
-        if (abs(temp_bed.target - bed_frame_est_celsius) < 0.5f) {
+        if (fabs(temp_bed.target - bed_frame_est_celsius) < 0.5f) {
             log_info(MarlinServer, "Absorbing heat: already stable, continuing");
             return;
         }
@@ -3279,11 +3279,17 @@ void Temperature::isr() {
         SkippableGCode::Guard skippable_operation;
         PrintStatusMessageGuard status_guard;
 
-        const float start_diff = temp_bed.target - bed_frame_est_celsius;
-        while (abs(temp_bed.target - bed_frame_est_celsius) > 0.5f && !skippable_operation.is_skip_requested()) {
+        float start_target = temp_bed.target;
+        float start_diff = fabs(start_target - bed_frame_est_celsius);
+        while (fabs(temp_bed.target - bed_frame_est_celsius) > 0.5f && !skippable_operation.is_skip_requested()) {
             // Check if we're aborting
             if (planner.draining()) {
                 break;
+            }
+            if (start_target != temp_bed.target) {
+              //Target changed -> recalculate start_diff
+              start_target = temp_bed.target;
+              start_diff = fabs(start_target - bed_frame_est_celsius);
             }
 
             idle(true, true);
