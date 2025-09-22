@@ -679,6 +679,7 @@ struct CurrentStore
 #endif
 
 #if HAS_AUTO_RETRACT()
+    StoreItem<bool, true, ItemFlag::printer_state, journal::hash("Pre-nozzle cleaning retraction enabled")> pre_nozzle_cleaning_retraction_enable;
     // Each hotend holds retracted distance. This value is compressed (casted to uint8) to range < 0 ; 255 > with 255 being special value reserved for unknown distance
     // DO NOT ACCESS THIS ARRAY DIRECTLY, user getter/setter instead
     StoreItemArray<uint8_t, uint8_t { 255 }, ItemFlag::printer_state, journal::hash("Filament retracted distances"), 8, HOTENDS> filament_retracted_distances;

@@ -861,8 +861,10 @@ bool cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max) {
   }
 
   #if HAS_AUTO_RETRACT()
-  // If retracted distance is known, we should retract to avoid nozzle cleaning fail often occurring with the filament in the nozzle
-  prepare_for_nozzle_cleaning();
+  if (config_store().pre_nozzle_cleaning_retraction_enable.get()) {
+    // If retracted distance is known, we should retract to avoid nozzle cleaning fail often occurring with the filament in the nozzle
+    prepare_for_nozzle_cleaning();
+  }
   #endif // HAS_AUTO_RETRACT()
   
   PrintStatusMessageGuard pmg;

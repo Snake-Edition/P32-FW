@@ -20,6 +20,7 @@
 #include <option/has_side_leds.h>
 #include <option/buddy_enable_connect.h>
 #include <option/has_belt_tuning.h>
+#include <option/has_auto_retract.h>
 #include <meta_utils.hpp>
 #include <gui/menu_item/menu_item_gcode_action.hpp>
 
@@ -659,3 +660,11 @@ public:
     MI_LOG_TO_TXT();
     void OnChange(size_t) final;
 };
+
+#if HAS_AUTO_RETRACT()
+class MI_PRE_NOZZLE_CLEANING_RETRACT : public WI_ICON_SWITCH_OFF_ON_t {
+public:
+    MI_PRE_NOZZLE_CLEANING_RETRACT();
+    void OnChange(size_t) final;
+};
+#endif
