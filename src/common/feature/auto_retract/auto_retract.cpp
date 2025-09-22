@@ -150,6 +150,14 @@ void AutoRetract::maybe_deretract_to_nozzle() {
     const auto orig_current_e_position = current_position.e;
 
     {
+        // Workaround: Somehow, the below extruder_move & planner.synchronize()
+        // disrupts the shape of the move after it.
+        //
+        // This makes it work until we find the reason and fix the underlying problem.
+        //
+        // BFW-7739.
+        phase_stepping::EnsureDisabled phaseSteppingDisabler;
+
         // No estall detection during the ramming; we may do so too fast sometimes
         // to the point where the motor skips, but we don't care, as it doesn't
         // damage the print.
