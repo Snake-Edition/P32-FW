@@ -169,9 +169,9 @@ bool XBuddyExtension::is_fan_ok(const Fan fan) const {
     if (actual_pwm.value == 0) {
         // Fan is not supposed to spin - all is well
 
-    } else if (fan_rpm(fan).value_or(0) > 0) {
+    } else if (auto rpm = fan_rpm(fan); !rpm.has_value() || rpm.value() > 0) {
         // Fan is spinning - all is well
-        // Or we don't know the RPM, at which point we will not report the problem until we are sure
+        // Or we don't know the RPM, at which point, it's an error in modBus read communication and we can't assume anything about the fan_rpm
 
     } else if (ticks_diff(ticks_ms(), fan_start_timestamp[fan]) >= FANCTL_START_TIMEOUT) {
         // Fan should be spinning for some time now, but it isn't -> report a problem
