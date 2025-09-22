@@ -1054,8 +1054,9 @@ RefineResult corexy_refine_during_G28_once(float fr_mm_s, const G28Flags &flags)
       static_assert(history_window <= sizeof(History) * 8);
       static constexpr History history_mask = ((1 << history_window) - 1);
 
-      if(std::popcount(static_cast<History>(config_store().precise_homing_instability_history.get() & history_mask)) >= history_threshold) {
-        break; // Break out of the loop -> trigger calibration
+      const auto recent_instability_count = std::popcount(static_cast<History>(config_store().precise_homing_instability_history.get() & history_mask));
+      if(flags.can_calibrate && recent_instability_count >= history_threshold) {
+        break; // Break out of the loop -> offer calibration
       }
 
       return RefineResult::success;
