@@ -66,7 +66,7 @@ void AutoRetract::set_retracted_distance(uint8_t hotend, std::optional<float> di
 }
 
 void AutoRetract::maybe_retract_from_nozzle(const ProgressCallback &progress_callback) {
-    if (!can_perform_action()) {
+    if (!ready_to_extrude()) {
         return;
     }
 
@@ -146,7 +146,7 @@ void AutoRetract::maybe_deretract_to_nozzle() {
         return;
     }
 
-    if (!can_perform_action()) {
+    if (!ready_to_extrude()) {
         log_error(MarlinServer, "auto_retract: Cannot perform deretract");
         return;
     }
@@ -179,7 +179,7 @@ void AutoRetract::maybe_deretract_to_nozzle() {
     set_retracted_distance(hotend, 0.0f);
 }
 
-bool AutoRetract::can_perform_action() const {
+bool AutoRetract::ready_to_extrude() const {
     if (thermalManager.tooColdToExtrude(active_extruder)) {
         return false;
     }

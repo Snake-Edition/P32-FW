@@ -41,7 +41,7 @@ private:
     AutoRetract();
 
     /// Common checks for retract & deretract
-    bool can_perform_action() const;
+    bool ready_to_extrude() const;
 
     /// Shadows the config_store variable to reduce mutex locking
     std::bitset<HOTENDS> retracted_hotends_bitset_ = 0;
