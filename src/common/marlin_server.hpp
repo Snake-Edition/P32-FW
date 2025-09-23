@@ -234,6 +234,9 @@ FSMResponseVariant get_response_variant_from_phase(FSMAndPhase fsm_and_phase, bo
 /// Sets a FSM response to be processed
 void set_response(const EncodedFSMResponse &response);
 
+/// Clears any pending response for the provided FSM
+void clear_fsm_response(ClientFSM fsm);
+
 /// If the phase matches currently recorded response, return it and consume it.
 /// Otherwise, return Response::_none and do not consume it.
 inline Response get_response_from_phase(FSMAndPhase fsm_and_phase, bool consume_response = true) {

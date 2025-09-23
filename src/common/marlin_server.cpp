@@ -545,6 +545,11 @@ static void update_warning_fsm() {
         // Avoid reinit of warning timestamp timer if warning is already shown
         if (!fsm_states[ClientFSM::Warning].has_value() || fsm_states[ClientFSM::Warning]->GetData() != data) {
             active_warning_pop_timestamp_sec = ticks_s();
+
+            // Clear any pending responses for this FSM.
+            // The displayed warning has changed, we don't want some stray response to be accidentally processed
+            clear_fsm_response(ClientFSM::Warning);
+
             fsm_create(warning_type_phase(type), data);
         }
     } else {
@@ -599,8 +604,15 @@ void fsm_destroy(ClientFSM type) {
 void fsm_change(FSMAndPhase fsm_and_phase, fsm::PhaseData data) {
     const auto base_data = fsm::BaseData(fsm_and_phase.phase, data);
 
-    if (fsm_states[fsm_and_phase.fsm] != base_data) {
-        fsm_states[fsm_and_phase.fsm] = base_data;
+    auto &fsm_state = fsm_states[fsm_and_phase.fsm];
+
+    if (fsm_state->GetPhase() != fsm_and_phase.phase) {
+        // Clear any pending responses for this FSM. They might have been sent a long time ago and we don't want them to affect the behavior.
+        marlin_server::clear_fsm_response(fsm_and_phase.fsm);
+    }
+
+    if (fsm_state != base_data) {
+        fsm_state = base_data;
         commit_fsm_states();
     }
 }
@@ -3546,6 +3558,15 @@ FSMResponseVariant get_response_variant_from_phase(FSMAndPhase fsm_and_phase, bo
 
 void set_response(const EncodedFSMResponse &response) {
     fsm_response = response;
+}
+
+/// Clears any pending response for the provided FSM
+void clear_fsm_response(ClientFSM fsm) {
+    fsm_response.transform([fsm](EncodedFSMResponse &response) {
+        if (response.fsm_and_phase.fsm == fsm) {
+            response = empty_encoded_fsm_response;
+        }
+    });
 }
 
 Response wait_for_response(FSMAndPhase fsm_and_phase, uint32_t timeout_ms) {
