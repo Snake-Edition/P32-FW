@@ -32,6 +32,11 @@ enum class PhaseNozzleCleaningFailed : PhaseUnderlyingType {
     remove_filament,
 #endif
 
+#if HAS_AUTO_RETRACT()
+    /// Offer the user to enable auto-retract to prevent failures in the future
+    offer_auto_retract_enable,
+#endif
+
     // warn user what abort really does
     warn_abort,
 
@@ -55,6 +60,9 @@ inline constexpr EnumArray<PhaseNozzleCleaningFailed, PhaseResponses, PhaseNozzl
         { PhaseNozzleCleaningFailed::purge, { Response::Abort } },
         { PhaseNozzleCleaningFailed::autoretract, {} },
         { PhaseNozzleCleaningFailed::remove_filament, { Response::Done, Response::Abort } },
+#endif
+#if HAS_AUTO_RETRACT()
+        { PhaseNozzleCleaningFailed::offer_auto_retract_enable, { Response::Yes, Response::No } },
 #endif
         { PhaseNozzleCleaningFailed::warn_abort, { Response::Yes, Response::No } },
 };

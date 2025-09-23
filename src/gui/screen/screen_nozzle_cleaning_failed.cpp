@@ -27,6 +27,10 @@ constexpr auto txt_desc_remove_filament = N_("Remove the purged filament and ens
 constexpr auto txt_desc_restore_temp = N_("The filament has been removed. The nozzle temperature will now be restored for printing.");
 #endif
 
+#if HAS_AUTO_RETRACT()
+constexpr auto txt_desc_offer_auto_retract = N_("The auto-retract feature is disabled, which might have caused the failure.\n\nDo you want to enable auto-retract?");
+#endif
+
 constexpr auto txt_desc_warn_abort = N_("Are you sure you want to abort the print?\n\nThe current print will be cancelled and you will need to start over.");
 
 constexpr auto warning_suffix = "nozzle-cleaning-failed"_tstr;
@@ -53,6 +57,9 @@ using Frames = FrameDefinitionList<ScreenNozzleCleaningFailed::FrameStorage,
     FrameDefinition<Phase::purge, WithConstructorArgs<WithFooter<FrameNozzleCleaningProgress, nozzle_cleaning_footer_items>, Phase::purge, txt_title_cleaning_nozzle, txt_desc_purge>>,
     FrameDefinition<Phase::autoretract, WithConstructorArgs<WithFooter<FrameNozzleCleaningProgress, nozzle_cleaning_footer_items>, Phase::autoretract, txt_title_cleaning_nozzle, txt_desc_autoretract>>,
     FrameDefinition<Phase::remove_filament, WithConstructorArgs<WithFooter<FramePrompt, nozzle_cleaning_footer_items>, Phase::remove_filament, txt_title_cleaning_nozzle, txt_desc_remove_filament>>,
+#endif
+#if HAS_AUTO_RETRACT()
+    FrameDefinition<Phase::offer_auto_retract_enable, WithConstructorArgs<FramePrompt, Phase::offer_auto_retract_enable, txt_desc_cleaning_failed, txt_desc_offer_auto_retract>>,
 #endif
     FrameDefinition<Phase::warn_abort, WithConstructorArgs<WithFooter<FramePrompt, nozzle_cleaning_footer_items>, Phase::warn_abort, txt_warning, txt_desc_warn_abort>>>;
 

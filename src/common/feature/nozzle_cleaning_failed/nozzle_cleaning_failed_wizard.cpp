@@ -30,23 +30,32 @@ public:
         , warn_active(false) {}
 
     Result run() {
-        // Inform the user that the nozzle cleaning failed, ask him what to do (ignore/retry/abort)
-        switch (ask_user_what_to_do()) {
+        {
+            // Inform the user that the nozzle cleaning failed, ask him what to do (ignore/retry/abort)
+            const auto what_to_do = ask_user_what_to_do();
 
-        case Response::Retry:
-            // Continue the wizard
-            break;
+#if HAS_AUTO_RETRACT()
+            // No matter what user chose, offer him to enable auto-retract
+            offer_auto_retract_enable();
+#endif
 
-        case Response::Ignore:
-            // Ignore the failure, do not continue the wizard
-            return Result::ignore;
+            switch (what_to_do) {
 
-        case Response::Abort:
-            print_abort();
-            return Result::abort;
+            case Response::Retry:
+                // Continue the wizard
+                break;
 
-        default:
-            BUDDY_UNREACHABLE();
+            case Response::Ignore:
+                // Ignore the failure, do not continue the wizard
+                return Result::ignore;
+
+            case Response::Abort:
+                print_abort();
+                return Result::abort;
+
+            default:
+                BUDDY_UNREACHABLE();
+            }
         }
 
         // In case we have nozzle cleaner OR we are missing autoretract, no sense in normal purging so return
@@ -99,6 +108,34 @@ public:
             return response;
         }
     }
+
+#if HAS_AUTO_RETRACT()
+    void offer_auto_retract_enable() {
+        if (config_store().auto_retract_enabled.get()) {
+            // Auto-retract is enabled, no point in offering to enable
+            return;
+        }
+
+        if (config_store().get_filament_type(active_extruder).parameters().do_not_auto_retract) {
+            // The filament has auto-retract disabled, globally enabling auto-retract would not help
+            return;
+        }
+
+        fsm_change(Phase::offer_auto_retract_enable);
+        switch (marlin_server::wait_for_response(Phase::offer_auto_retract_enable)) {
+
+        case Response::Yes:
+            config_store().auto_retract_enabled.set(true);
+            break;
+
+        case Response::No:
+            break;
+
+        default:
+            BUDDY_UNREACHABLE();
+        }
+    }
+#endif
 
 #if HAS_NOZZLE_CLEANING_FAILED_PURGING()
     [[nodiscard]] bool recommend_purge() {
