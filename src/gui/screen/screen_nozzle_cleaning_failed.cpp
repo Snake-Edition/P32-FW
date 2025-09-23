@@ -4,7 +4,7 @@
 #include <standard_frame/frame_progress_prompt.hpp>
 #include <find_error.hpp>
 #include <standard_frame/frame_qr_prompt.hpp>
-#include <fsm/nozzle_cleaning_phases.hpp>
+#include <fsm/nozzle_cleaning_failed_phases.hpp>
 #include <standard_frame/frame_prompt.hpp>
 #include <standard_frame/frame_prompt.hpp>
 #include <img_resources.hpp>

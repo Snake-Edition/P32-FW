@@ -3,7 +3,7 @@
 #include <feature/auto_retract/auto_retract.hpp>
 #include <gcode/temperature/M104_M109.hpp>
 #include <mapi/motion.hpp>
-#include <fsm/nozzle_cleaning_phases.hpp>
+#include <fsm/nozzle_cleaning_failed_phases.hpp>
 
 #include <Marlin/src/Marlin.h>
 #include <common/marlin_server.hpp>

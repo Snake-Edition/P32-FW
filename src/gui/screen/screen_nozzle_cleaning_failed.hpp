@@ -3,7 +3,7 @@
 #pragma once
 
 #include <screen_fsm.hpp>
-#include <marlin_server_types/fsm/nozzle_cleaning_phases.hpp>
+#include <marlin_server_types/fsm/nozzle_cleaning_failed_phases.hpp>
 
 class ScreenNozzleCleaningFailed final : public ScreenFSM {
 

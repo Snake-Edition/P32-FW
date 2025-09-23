@@ -5,7 +5,7 @@
     #include <fsm/manual_belt_tuning_phases.hpp>
 #endif
 #if HAS_LOADCELL()
-    #include <fsm/nozzle_cleaning_phases.hpp>
+    #include <fsm/nozzle_cleaning_failed_phases.hpp>
 #endif
 
 namespace ClientResponses {
