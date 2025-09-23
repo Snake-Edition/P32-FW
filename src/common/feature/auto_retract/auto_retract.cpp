@@ -143,7 +143,7 @@ void AutoRetract::maybe_deretract_to_nozzle() {
         return;
     }
 
-    const auto orig_e_position = planner.get_position_msteps().e;
+    const auto orig_e_position = planner.position_float.e;
     const auto orig_current_e_position = current_position.e;
 
     {

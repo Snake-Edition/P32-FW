@@ -330,12 +330,14 @@ class Planner {
       static constexpr bool leveling_active = false;
     #endif
 
+    /// Current planned machine position, in millimeters
     static xyze_pos_t position_float;
+
+    /// Currently planned machine position, in msteps
+    xyze_long_t get_position_msteps() const { return position; };
 
     /// Maximum Z position at which we printed so far for
     static float max_printed_z;
-
-    xyze_long_t get_position_msteps() const { return position; };
 
     static skew_factor_t skew_factor;
 
