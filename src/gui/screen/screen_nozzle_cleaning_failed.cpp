@@ -17,12 +17,16 @@ constexpr auto txt_title_cleaning_nozzle = N_("Cleaning the nozzle");
 constexpr auto txt_warning = N_("Warning");
 
 constexpr auto txt_desc_cleaning_failed = N_("\nNozzle cleaning failed.");
+
+#if HAS_NOZZLE_CLEANING_FAILED_PURGING()
 constexpr auto txt_desc_recommend_purge = N_("Would you like to purge the filament?\n\nIt will then retract to prevent oozing. Be careful, the nozzle is hot!");
 constexpr auto txt_desc_wait_temp = N_("Waiting for nozzle temperature...");
 constexpr auto txt_desc_purge = N_("Purging the filament.\n\nPlease wait until the purge is complete.");
 constexpr auto txt_desc_autoretract = N_("The filament has been purged.\n\nThe nozzle will now retract the filament to prevent oozing.");
 constexpr auto txt_desc_remove_filament = N_("Remove the purged filament and ensure the nozzle is clean and ready.\n\nBe careful, the nozzle is hot!");
 constexpr auto txt_desc_restore_temp = N_("The filament has been removed. The nozzle temperature will now be restored for printing.");
+#endif
+
 constexpr auto txt_desc_warn_abort = N_("Are you sure you want to abort the print?\n\nThe current print will be cancelled and you will need to start over.");
 
 constexpr auto warning_suffix = "nozzle-cleaning-failed"_tstr;
@@ -43,11 +47,13 @@ constexpr FooterLine::IdArray nozzle_cleaning_footer_items = { footer::Item::noz
 
 using Frames = FrameDefinitionList<ScreenNozzleCleaningFailed::FrameStorage,
     FrameDefinition<Phase::cleaning_failed, WithConstructorArgs<FrameQRPrompt, Phase::cleaning_failed, txt_desc_cleaning_failed, warning_suffix>>,
+#if HAS_NOZZLE_CLEANING_FAILED_PURGING()
     FrameDefinition<Phase::recommend_purge, WithConstructorArgs<WithFooter<FramePrompt, nozzle_cleaning_footer_items>, Phase::recommend_purge, txt_title_cleaning_nozzle, txt_desc_recommend_purge>>,
     FrameDefinition<Phase::wait_temp, WithConstructorArgs<WithFooter<FrameNozzleCleaningProgress, nozzle_cleaning_footer_items>, Phase::wait_temp, txt_title_cleaning_nozzle, txt_desc_wait_temp>>,
     FrameDefinition<Phase::purge, WithConstructorArgs<WithFooter<FrameNozzleCleaningProgress, nozzle_cleaning_footer_items>, Phase::purge, txt_title_cleaning_nozzle, txt_desc_purge>>,
     FrameDefinition<Phase::autoretract, WithConstructorArgs<WithFooter<FrameNozzleCleaningProgress, nozzle_cleaning_footer_items>, Phase::autoretract, txt_title_cleaning_nozzle, txt_desc_autoretract>>,
     FrameDefinition<Phase::remove_filament, WithConstructorArgs<WithFooter<FramePrompt, nozzle_cleaning_footer_items>, Phase::remove_filament, txt_title_cleaning_nozzle, txt_desc_remove_filament>>,
+#endif
     FrameDefinition<Phase::warn_abort, WithConstructorArgs<WithFooter<FramePrompt, nozzle_cleaning_footer_items>, Phase::warn_abort, txt_warning, txt_desc_warn_abort>>>;
 
 } // namespace
