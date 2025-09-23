@@ -152,7 +152,7 @@ bool is_idle();
 //-----------------------------------------------------------------------------
 // client side functions (can be called from client thread only)
 
-void FSM_encoded_response(EncodedFSMResponse);
+void FSM_encoded_response(const EncodedFSMResponse &response);
 
 inline void FSM_response(FSMAndPhase fsm_and_phase, Response response) {
     FSM_encoded_response(EncodedFSMResponse { .response = FSMResponseVariant::make(response), .fsm_and_phase = fsm_and_phase });

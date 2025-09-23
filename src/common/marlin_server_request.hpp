@@ -22,7 +22,6 @@ struct Request {
         TestStart,
 #endif
         PrintStart,
-        FSM,
         CancelObjectID,
         UncancelObjectID,
         SetWarning,
@@ -45,7 +44,6 @@ struct Request {
         } test_start; // Type::TestStart
         char gcode[MARLIN_MAX_REQUEST + 1]; // Type::Gcode
         InjectQueueRecord inject; // Type::Inject
-        EncodedFSMResponse encoded_fsm_response; // Type::FSM
         float babystep; // Type::Babystep
         struct {
             marlin_server::PreviewSkipIfAble skip_preview;

@@ -37,6 +37,7 @@
 #include <inject_queue.hpp>
 #include <buddy/unreachable.hpp>
 #include <utils/string_builder.hpp>
+#include <utils/mutex_atomic.hpp>
 
 #include "../Marlin/src/lcd/extensible_ui/ui_api.h"
 #include "../Marlin/src/gcode/queue.h"
@@ -208,6 +209,9 @@ RequestQueue request_queue;
 /// Bitset for requests that don't need parameters
 std::atomic<uint32_t> request_flags = 0;
 static_assert(std::to_underlying(RequestFlag::_cnt) <= 32, "There are more flags than bits");
+
+/// FSM response to be processed by the server
+static MutexAtomic<EncodedFSMResponse, freertos::Mutex> fsm_response = empty_encoded_fsm_response;
 
 namespace {
 
@@ -611,8 +615,6 @@ static void fsm_destroy_and_create(ClientFSM old_type, ClientFSM new_type, fsm::
 // variables
 
 osThreadId server_task = 0; // task handle
-
-static EncodedFSMResponse server_side_encoded_fsm_response = empty_encoded_fsm_response;
 
 /// Whether marlin_server::cycle() is currently running - for nesting prevention
 static bool is_cycle_running = false;
@@ -3333,9 +3335,6 @@ bool _process_server_valid_request(const Request &request, int client_id) {
     case Request::Type::SetWarning:
         set_warning(request.warning_type);
         return true;
-    case Request::Type::FSM:
-        server_side_encoded_fsm_response = request.encoded_fsm_response;
-        return true;
     case Request::Type::EventMask:
         server.notify_events[client_id] = request.event_mask;
         // Send Event::MediaInserted event if media currently inserted
@@ -3527,28 +3526,31 @@ FSMResponseVariant get_response_variant_from_phase(FSMAndPhase fsm_and_phase, bo
     // If it isn't, something's probably wrong
     assert(fsm_states[fsm_and_phase.fsm].has_value());
 
-    const EncodedFSMResponse value = server_side_encoded_fsm_response;
-    if (value.fsm_and_phase == fsm_and_phase) {
-        if (consume_response) {
-            server_side_encoded_fsm_response = empty_encoded_fsm_response;
+    FSMResponseVariant result;
+
+    fsm_response.transform([&](EncodedFSMResponse &value) {
+        if (value.fsm_and_phase != fsm_and_phase) {
+            // The response is for a different phase -> do not consume it, do not return it
+            return;
         }
-        return value.response;
-    } else {
-        return {};
-    }
+
+        result = value.response;
+
+        if (consume_response) {
+            value = empty_encoded_fsm_response;
+        }
+    });
+
+    return result;
+}
+
+void set_response(const EncodedFSMResponse &response) {
+    fsm_response = response;
 }
 
 Response wait_for_response(FSMAndPhase fsm_and_phase, uint32_t timeout_ms) {
     // Warning phase response is consumed in marlin_server::handle_warnings
     assert(fsm_and_phase != PhasesWarning::Warning);
-
-    // If marlin_server::cycle is currently running, that means that it will not be called nestedly inside the idle() we are using here
-    // Responses are processed in _process_server_valid_request that is called from cycle()
-    // That means that in this case the server would never process any response and we would get stuck in an infinite loop.
-    // At this point we can as well do a bsod so that we can easily analyse the issue.
-    if (is_cycle_running) {
-        bsod("wait_for_response inside cycle");
-    }
 
     const auto wait_start = ticks_ms();
 

@@ -401,11 +401,9 @@ void set_warning(WarningType type) {
 
 //-----------------------------------------------------------------------------
 // responses from client finite state machine (like button click)
-void FSM_encoded_response(EncodedFSMResponse encoded_fsm_response) {
-    Request request;
-    request.type = Request::Type::FSM;
-    request.encoded_fsm_response = encoded_fsm_response;
-    _send_request_to_server_and_wait(request);
+void FSM_encoded_response(const EncodedFSMResponse &encoded_fsm_response) {
+    // marlin_server::set_response is thread safe, just use that one
+    marlin_server::set_response(encoded_fsm_response);
 }
 
 bool is_printing() {
