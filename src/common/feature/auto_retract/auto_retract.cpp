@@ -93,9 +93,6 @@ void AutoRetract::maybe_retract_from_nozzle(const ProgressCallback &progress_cal
     PrintStatusMessageGuard psm_guard;
     psm_guard.update<PrintStatusMessage::Type::auto_retracting>({});
 
-    const auto orig_e_position = planner.get_position_msteps().e;
-    const auto orig_current_e_position = current_position.e;
-
     const auto &sequence = standard_ramming_sequence(StandardRammingSequence::auto_retract, hotend);
     {
         // No estall detection during the ramming; we may do so too fast sometimes
@@ -122,11 +119,6 @@ void AutoRetract::maybe_retract_from_nozzle(const ProgressCallback &progress_cal
         });
         sequence.execute();
     }
-
-    // "Fake" original extruder position - we are interrupting various movements by this function,
-    // firmware gets very confused if the current position changes while it is planning a move
-    planner.set_e_position_mm(orig_e_position);
-    current_position.e = orig_current_e_position;
 
     assert(sequence.retracted_distance() >= minimum_auto_retract_distance);
     set_retracted_distance(hotend, sequence.retracted_distance());
