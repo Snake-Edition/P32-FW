@@ -90,6 +90,9 @@ void AutoRetract::maybe_retract_from_nozzle(const ProgressCallback &progress_cal
     // Finish all pending movements so that the progress reporting is nice
     planner.synchronize();
 
+    // We might be retracted a bit, deretract to make sure the ramming sequence runs proper
+    maybe_deretract_to_nozzle();
+
     PrintStatusMessageGuard psm_guard;
     psm_guard.update<PrintStatusMessage::Type::auto_retracting>({});
 
