@@ -15,6 +15,7 @@
 #include <gcode/inject_queue_actions.hpp>
 #include <marlin_server_shared.h>
 #include <utils/callback_hook.hpp>
+#include <marlin_server_request.hpp>
 
 #include <serial_printing.hpp>
 

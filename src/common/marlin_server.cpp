@@ -202,6 +202,13 @@ CallbackHookPoint<> idle_hook_point;
 
 void media_prefetch_start();
 
+/// Queue for requests with parameters
+RequestQueue request_queue;
+
+/// Bitset for requests that don't need parameters
+std::atomic<uint32_t> request_flags = 0;
+static_assert(std::to_underlying(RequestFlag::_cnt) <= 32, "There are more flags than bits");
+
 namespace {
 
     struct server_t {
@@ -233,8 +240,6 @@ namespace {
         bool mmu_maintenance_checked = false;
 #endif
     };
-    std::atomic<uint32_t> request_flags = 0;
-    static_assert(std::to_underlying(RequestFlag::_cnt) <= 32, "There are more flags than bits");
 
     server_t server; // server structure - initialize task to zero
 
@@ -606,12 +611,7 @@ static void fsm_destroy_and_create(ClientFSM old_type, ClientFSM new_type, fsm::
 // variables
 
 osThreadId server_task = 0; // task handle
-ServerQueue server_queue;
 
-constexpr EncodedFSMResponse empty_encoded_fsm_response = {
-    .response = {},
-    .fsm_and_phase = FSMAndPhase(static_cast<ClientFSM>(0xff), 0xff),
-};
 static EncodedFSMResponse server_side_encoded_fsm_response = empty_encoded_fsm_response;
 
 /// Whether marlin_server::cycle() is currently running - for nesting prevention
@@ -836,7 +836,7 @@ static void cycle() {
 
     process_request_flags();
 
-    if (Request request; server_queue.try_receive(request, 0)) {
+    if (Request request; request_queue.try_receive(request, 0)) {
         _process_server_request(request);
     }
 

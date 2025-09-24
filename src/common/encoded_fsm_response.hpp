@@ -11,6 +11,11 @@ struct EncodedFSMResponse {
     FSMAndPhase fsm_and_phase;
 };
 
+constexpr EncodedFSMResponse empty_encoded_fsm_response = {
+    .response {},
+    .fsm_and_phase { ClientFSM::_count, 0 },
+};
+
 #ifndef UNITTESTS
 static_assert(sizeof(EncodedFSMResponse) <= 12);
 #endif
