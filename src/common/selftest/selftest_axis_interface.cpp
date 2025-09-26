@@ -48,7 +48,6 @@ bool phaseAxis(IPartHandler *&m_pAxis, const AxisConfig_t &config_axis, Separate
         m_pAxis = selftest::Factory::CreateDynamical<CSelftestPart_Axis>(config_axis, staticResults[config_axis.axis],
             &CSelftestPart_Axis::stateHomeZ,
             &CSelftestPart_Axis::stateWaitHome,
-            &CSelftestPart_Axis::stateEnableZProbe,
             &CSelftestPart_Axis::stateInitProgressTimeCalculation,
 
             &CSelftestPart_Axis::stateCycleMark2,

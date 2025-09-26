@@ -199,10 +199,6 @@ LoopResult CSelftestPart_Axis::stateWaitHome() {
         return LoopResult::RunCurrent;
     }
     endstops.enable(true);
-    return LoopResult::RunNext;
-}
-
-LoopResult CSelftestPart_Axis::stateEnableZProbe() {
     endstops.enable_z_probe();
     return LoopResult::RunNext;
 }
@@ -235,6 +231,11 @@ LoopResult CSelftestPart_Axis::stateMoveFinishCycle() {
     if ((++m_Step) < config.steps) {
         return LoopResult::GoToMark2;
     }
+
+    // Disable the endstops now (BFW-7792)
+    endstops.enable(false);
+    endstops.enable_z_probe(false);
+
     return LoopResult::RunNext;
 }
 

@@ -51,7 +51,6 @@ public:
 
     LoopResult stateHomeZ(); ///< Enqueue homing and toolchange
     LoopResult stateWaitHome(); ///< Wait for homing and toolchange to finish
-    LoopResult stateEnableZProbe();
 
     LoopResult stateInitProgressTimeCalculation();
     LoopResult stateCycleMark2() { return LoopResult::MarkLoop2; }
