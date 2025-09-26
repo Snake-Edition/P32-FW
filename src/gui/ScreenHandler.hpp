@@ -37,9 +37,12 @@ class Screens {
     ScreenFactory::UniquePtr current; // pointer obtained by screen creation
     screen_node creator_node; // set by Open
 
-    bool close;
-    bool close_all;
-    bool close_printing;
+    bool is_dialog_open = false;
+
+    bool close_dialog = false;
+    bool close = false;
+    bool close_all = false;
+    bool close_printing = false;
 
     uint32_t timeout_tick;
 
@@ -61,7 +64,7 @@ public:
 
     void PushBeforeCurrent(screen_node screen_creator);
 
-    /// Closes currently open screen on the stack
+    /// Closes currently open screen on the stack (or dialog, if we're waiting on one)
     void Close();
 
     /// Closes the specific screen anywhere on the stack

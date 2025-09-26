@@ -2,6 +2,7 @@
 #include "bsod.h"
 
 #include <gui.hpp>
+#include <RAII.hpp>
 
 static const uint32_t MENU_TIMEOUT_MS = 30000;
 
@@ -11,9 +12,6 @@ Screens::Screens(screen_node screen_creator)
     : stack_iterator(stack.begin())
     , current(nullptr)
     , creator_node(screen_creator)
-    , close(false)
-    , close_all(false)
-    , close_printing(false)
     , timeout_tick(0) {
 }
 
@@ -71,13 +69,13 @@ void Screens::Open(screen_node screen_creator) {
     creator_node = screen_creator;
 }
 
-/**
- * @brief close current screen
- * it sets flag to close current screen
- * it also clears creator_node, because order matters!
- * In case you want to replace current screen, you must call Close() first and Open() after
- */
 void Screens::Close() {
+    // If we're blockingly waiting on a dilog, close the dialog, not the screen
+    if (is_dialog_open) {
+        close_dialog = true;
+        return;
+    }
+
     close = true;
     creator_node.MakeEmpty();
 }
@@ -121,6 +119,7 @@ bool Screens::Close(const ScreenFactory::Creator &creator) {
  */
 void Screens::CloseAll() {
     close_all = true;
+    close_dialog = true;
     creator_node.MakeEmpty();
 }
 
@@ -294,13 +293,11 @@ void Screens::InnerLoop() {
 }
 
 void Screens::gui_loop_until_dialog_closed(stdext::inplace_function<void()> callback) {
-    for (;;) {
-        const bool dialog_closed = close || close_all;
-        close = false; // Note: We reset close flag because it is reused for closing both dialogs and screens
-        if (dialog_closed) {
-            break;
-        }
+    // !!! Both AutoRestores are important, we might be in dialogception, in which case we don't want to alter the statte for the upper dialog
+    AutoRestore dialog_open_guard(is_dialog_open, true);
+    AutoRestore close_dialog_guard(close_dialog, false);
 
+    while (!close_dialog) {
         gui::TickLoop();
         gui_loop();
         if (callback) {
