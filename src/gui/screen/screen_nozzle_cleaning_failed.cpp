@@ -24,7 +24,6 @@ constexpr auto txt_desc_wait_temp = N_("Waiting for nozzle temperature...");
 constexpr auto txt_desc_purge = N_("Purging the filament.\n\nPlease wait until the purge is complete.");
 constexpr auto txt_desc_autoretract = N_("The filament has been purged.\n\nThe nozzle will now retract the filament to prevent oozing.");
 constexpr auto txt_desc_remove_filament = N_("Remove the purged filament and ensure the nozzle is clean and ready.\n\nBe careful, the nozzle is hot!");
-constexpr auto txt_desc_restore_temp = N_("The filament has been removed. The nozzle temperature will now be restored for printing.");
 #endif
 
 #if HAS_AUTO_RETRACT()
