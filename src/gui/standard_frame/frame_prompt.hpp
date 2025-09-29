@@ -5,6 +5,8 @@
 #include <window_frame.hpp>
 #include <window_text.hpp>
 #include <radio_button_fsm.hpp>
+#include <optional>
+#include <error_codes.hpp>
 
 /**
  * Standard layout frame.
@@ -17,6 +19,11 @@ class FramePrompt : public window_frame_t {
 
 public:
     FramePrompt(window_t *parent, FSMAndPhase fsm_phase, const string_view_utf8 &txt_title, const string_view_utf8 &txt_info, Align_t info_alignment = Align_t::CenterTop());
+
+    /** Takes title and text from the error code
+     *  Construct the frame with \param error_code_mapper function (phase -> ErrCode), to extract useful information from ErrDesc related to given phase.
+     */
+    FramePrompt(window_frame_t *parent, FSMAndPhase fsm_phase, std::optional<ErrCode> (*error_code_mapper)(FSMAndPhase fsm_phase));
 
     /**
      * Used by WithFooter<>
