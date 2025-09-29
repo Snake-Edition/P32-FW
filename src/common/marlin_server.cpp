@@ -2943,6 +2943,13 @@ void set_media_position(uint32_t set) {
 }
 
 void retract() {
+#if HAS_AUTO_RETRACT()
+    if (buddy::auto_retract().will_deretract()) {
+        // Filament is already retracted, don't retact it more
+        return;
+    }
+#endif
+
 // server.motion_param.save_reset();  // TODO: currently disabled (see Crash_s::save_parameters())
 #if ENABLED(ADVANCED_PAUSE_FEATURE)
     float mm = PAUSE_PARK_RETRACT_LENGTH / planner.e_factor[active_extruder];
