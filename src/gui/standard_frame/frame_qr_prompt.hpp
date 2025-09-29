@@ -24,7 +24,7 @@ protected:
     window_text_t info;
     window_text_t link;
     window_icon_t icon_phone;
-    QRDynamicStringWindow<32> qr;
+    QRErrorUrlWindow qr;
     RadioButtonFSM radio;
 
     std::array<char, 32> link_buffer;

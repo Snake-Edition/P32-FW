@@ -49,6 +49,7 @@ public:
 class QRErrorUrlWindow : public QRDynamicStringWindow<44> {
 public:
     QRErrorUrlWindow(window_t *parent, Rect16 rect, ErrCode ec);
+    QRErrorUrlWindow(window_t *parent, Rect16 rect);
 
     void set_error_code(ErrCode ec);
 };

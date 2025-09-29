@@ -5,12 +5,11 @@
 #include <guiconfig/wizard_config.hpp>
 
 FrameQRPrompt::FrameQRPrompt(window_t *parent, FSMAndPhase fsm_phase, const string_view_utf8 &info_text, const char *qr_suffix)
-    : window_frame_t(parent)
-    , info(this, FrameQRLayout::text_rect(), is_multiline::yes, is_closed_on_click_t::no, info_text)
-    , link(this, FrameQRLayout::link_rect(), is_multiline::no)
-    , icon_phone(this, FrameQRLayout::phone_icon_rect(), &img::hand_qr_59x72)
-    , qr(this, FrameQRLayout::qrcode_rect(), Align_t::Center())
-    , radio(this, WizardDefaults::RectRadioButton(0), fsm_phase) //
+    : info(parent, FrameQRLayout::text_rect(), is_multiline::yes, is_closed_on_click_t::no, info_text)
+    , link(parent, FrameQRLayout::link_rect(), is_multiline::no)
+    , icon_phone(parent, FrameQRLayout::phone_icon_rect(), &img::hand_qr_59x72)
+    , qr(parent, FrameQRLayout::qrcode_rect())
+    , radio(parent, WizardDefaults::RectRadioButton(0), fsm_phase) //
 {
     StringBuilder(link_buffer)
         .append_string("prusa.io/")

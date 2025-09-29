@@ -24,6 +24,10 @@ QRErrorUrlWindow::QRErrorUrlWindow(window_t *parent, Rect16 rect, ErrCode ec)
     set_error_code(ec);
 }
 
+QRErrorUrlWindow::QRErrorUrlWindow(window_t *parent, Rect16 rect)
+    : QRDynamicStringWindow { parent, rect, Align_t::Center() } {
+}
+
 void QRErrorUrlWindow::set_error_code(ErrCode ec) {
     StringBuilder builder { buffer };
     builder.append_printf("https://prusa.io/%05d", map_error_code(ec));
