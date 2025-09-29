@@ -325,7 +325,7 @@ LoopResult CSelftestPart_FirstLayer::statePrint() {
     FirstLayer fli;
 
     IPartHandler::SetFsmPhase(PhasesSelftest::FirstLayer_print);
-    Subscriber idle_subsrciber { marlin_server::idle_publisher,
+    CallbackHookGuard idle_subsrciber { marlin_server::idle_hook_point,
         [&] {
             rResult.progress = fli.progress_percent();
             // We have to change state every cycle to track the progress
