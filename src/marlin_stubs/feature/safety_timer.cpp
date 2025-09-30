@@ -113,11 +113,6 @@ SafetyTimer::expired_t SafetyTimer::Loop() {
     return expired_t::yes;
 }
 
-// marlin compatibility function
-void safety_timer_set_interval(millis_t ms) {
-    SafetyTimer::Instance().SetInterval(ms);
-}
-
 void SafetyTimer::BindPause(IPause &pause) {
     pBoundPause = &pause;
 }

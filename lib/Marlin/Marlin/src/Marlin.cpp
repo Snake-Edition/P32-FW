@@ -58,9 +58,9 @@
 #include "module/configuration_store.h"
 #include "module/printcounter.h" // PrintCounter or Stopwatch
 #include "feature/closedloop.h"
-#include "feature/safety_timer.h"
 #if !BOARD_IS_DWARF()
 #include "pause_stubbed.hpp"
+#include <safety_timer_stubbed.hpp>
 #endif
 
 #include "HAL/shared/Delay.h"
@@ -357,12 +357,14 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
 
   const millis_t ms = millis();
 
+#if !BOARD_IS_DWARF()
   SafetyTimer::expired_t expired = SafetyTimer::Instance().Loop();
   if (expired ==  SafetyTimer::expired_t::yes)  {
     #ifdef ACTION_ON_SAFETY_TIMER_EXPIRED
       host_action_safety_timer_expired();
     #endif
   }
+#endif
 
   if (max_inactive_time && ELAPSED(ms, gcode.previous_move_ms + max_inactive_time)) {
     SERIAL_ERROR_START();

@@ -320,35 +320,6 @@ HardwareSerial::operator bool() {
 HardwareSerial SerialUART3(nullptr);
 HardwareSerial Serial3(nullptr);
 
-#include "Marlin/src/feature/safety_timer.h"
-
-void safety_timer_set_interval([[maybe_unused]] millis_t ms) {
-}
-
-bool safety_timer_is_expired() {
-    return false;
-}
-
-void safety_timer_reset() {
-}
-
-SafetyTimer &SafetyTimer::Instance() {
-    static SafetyTimer ret;
-    return ret;
-}
-
-SafetyTimer::SafetyTimer()
-    : pBoundPause(nullptr)
-    , interval(default_interval)
-    , last_reset(0)
-    , knob_moves(0)
-    , knob_clicks(0) {
-}
-
-SafetyTimer::expired_t SafetyTimer::Loop() {
-    return SafetyTimer::expired_t::no;
-}
-
 #include "metric.h"
 
 void metric_record_custom_at_time(metric_t *, uint32_t, const char *, ...) {}

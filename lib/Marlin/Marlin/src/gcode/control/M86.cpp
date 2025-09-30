@@ -21,7 +21,7 @@
  */
 
 #include "../gcode.h"
-#include "../../feature/safety_timer.h"
+#include <safety_timer_stubbed.hpp>
 
 /** \addtogroup G-Codes
  * @{
@@ -41,7 +41,7 @@
  */
 void GcodeSuite::M86() {
   if (parser.seen('S'))
-    safety_timer_set_interval(parser.value_millis_from_seconds());
+    SafetyTimer::Instance().SetInterval(parser.value_millis_from_seconds());
 }
 
 /** @}*/
