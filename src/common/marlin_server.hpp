@@ -206,8 +206,6 @@ void set_media_position(uint32_t set);
 
 void print_quick_stop_powerpanic();
 
-uint32_t get_user_click_count();
-uint32_t get_user_move_count();
 int32_t get_knob_position();
 
 void nozzle_timeout_on();

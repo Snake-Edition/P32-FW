@@ -230,8 +230,6 @@ namespace {
         bool enable_nozzle_temp_timeout; // enables nozzle temperature timeout in print pause
         uint32_t last_update; // last update tick count
         uint16_t flags; // server flags (MARLIN_SFLG)
-        uint32_t knob_click_counter = 0; // Hold user knob clicks for safety timer
-        uint32_t knob_move_counter = 0; // Holds user knob moves for safety timer
         int32_t knob_position = 0; /// Increased with each knob move up, decreased with each knob move down
 #if ENABLED(AXIS_MEASURE)
         /// length of axes measured after crash
@@ -3085,14 +3083,6 @@ void set_resume_data(const resume_state_t *data) {
     server.resume = *data;
 }
 
-uint32_t get_user_click_count(void) {
-    return server.knob_click_counter;
-}
-
-uint32_t get_user_move_count(void) {
-    return server.knob_move_counter;
-}
-
 int32_t get_knob_position() {
     return server.knob_position;
 }
@@ -3418,16 +3408,13 @@ static void process_request_flags() {
         case RequestFlag::KnobMoveUp:
             buddy::safety_timer().reset_norestore();
             server.knob_position++;
-            server.knob_move_counter++;
             break;
         case RequestFlag::KnobMoveDown:
             buddy::safety_timer().reset_norestore();
             server.knob_position--;
-            server.knob_move_counter++;
             break;
         case RequestFlag::KnobClick:
             buddy::safety_timer().reset_restore_nonblocking();
-            server.knob_click_counter++;
             break;
         case RequestFlag::GuiCantPrint:
             gui_cant_print();
