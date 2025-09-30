@@ -7,6 +7,7 @@
 #include <window_frame.hpp>
 #include <window_text.hpp>
 #include <radio_button_fsm.hpp>
+#include <text_error_url.hpp>
 
 /**
  * Standard layout frame with a QR code.
@@ -22,7 +23,7 @@ public:
 
 protected:
     window_text_t info;
-    window_text_t link;
+    TextErrorUrlWindow link;
     window_icon_t icon_phone;
     QRErrorUrlWindow qr;
     RadioButtonFSM radio;
