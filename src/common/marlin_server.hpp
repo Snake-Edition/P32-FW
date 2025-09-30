@@ -208,7 +208,7 @@ void print_quick_stop_powerpanic();
 
 uint32_t get_user_click_count();
 uint32_t get_user_move_count();
-KnobMove get_last_knob_move();
+int32_t get_knob_position();
 
 void nozzle_timeout_on();
 void nozzle_timeout_off();

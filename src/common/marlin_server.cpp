@@ -231,7 +231,7 @@ namespace {
         uint16_t flags; // server flags (MARLIN_SFLG)
         uint32_t knob_click_counter = 0; // Hold user knob clicks for safety timer
         uint32_t knob_move_counter = 0; // Holds user knob moves for safety timer
-        KnobMove last_knob_move = KnobMove::NoMove; // Last knob move direction (used for belt tuning)
+        int32_t knob_position = 0; /// Increased with each knob move up, decreased with each knob move down
 #if ENABLED(AXIS_MEASURE)
         /// length of axes measured after crash
         /// negative numbers represent undefined length
@@ -3094,18 +3094,16 @@ void set_resume_data(const resume_state_t *data) {
     server.resume = *data;
 }
 
-extern uint32_t get_user_click_count(void) {
+uint32_t get_user_click_count(void) {
     return server.knob_click_counter;
 }
 
-extern uint32_t get_user_move_count(void) {
+uint32_t get_user_move_count(void) {
     return server.knob_move_counter;
 }
 
-extern KnobMove get_last_knob_move(void) {
-    KnobMove move = server.last_knob_move;
-    server.last_knob_move = KnobMove::NoMove; // reset after reading
-    return move;
+int32_t get_knob_position() {
+    return server.knob_position;
 }
 
 //-----------------------------------------------------------------------------
@@ -3427,11 +3425,11 @@ static void process_request_flags() {
             print_exit();
             break;
         case RequestFlag::KnobMoveUp:
-            server.last_knob_move = KnobMove::Up;
+            server.knob_position++;
             server.knob_move_counter++;
             break;
         case RequestFlag::KnobMoveDown:
-            server.last_knob_move = KnobMove::Down;
+            server.knob_position--;
             server.knob_move_counter++;
             break;
         case RequestFlag::KnobClick:

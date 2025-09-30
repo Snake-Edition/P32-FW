@@ -13,9 +13,4 @@ inline constexpr uint8_t CURRENT_TOOL = std::numeric_limits<uint8_t>::max();
 
 extern osThreadId server_task; // task of marlin server
 
-enum class KnobMove : uint8_t {
-    NoMove,
-    Up,
-    Down,
-};
 } // namespace marlin_server

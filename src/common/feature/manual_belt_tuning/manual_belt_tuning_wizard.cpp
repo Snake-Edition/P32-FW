@@ -100,7 +100,6 @@ public:
         while (true) {
             struct belt_tensions tension_data(freq_top_belt, freq_bottom_belt);
             fsm_change(PhaseManualBeltTuning::measure_upper_belt, fsm::serialize_data<belt_tensions>(tension_data));
-            get_last_knob_move(); // Consume last recorded move
 
             vibrator.frequency = freq_top_belt;
             vibrator.excitation_acceleration = abs(calc_accel(vibrator.frequency) * 0.001f);
@@ -212,11 +211,14 @@ public:
 
     Response resonate(Vibrate &vibrator, PhaseManualBeltTuning phase) {
         Response response = Response::_none;
+        auto knob_pos = get_knob_position();
         while (true) {
-            const auto knob_move = get_last_knob_move();
-            if (knob_move != KnobMove::NoMove) {
-                vibrator.frequency += knob_move == KnobMove::Up ? 0.5f : -0.5f;
+            {
+                const auto new_knob_pos = get_knob_position();
+                vibrator.frequency += (new_knob_pos - knob_pos) * 0.5f;
+                knob_pos = new_knob_pos;
             }
+
             adjust_vibrator(vibrator);
 
             const struct belt_tensions tension_data(vibrator.frequency, vibrator.frequency); // duplicated - could be either of the belts
