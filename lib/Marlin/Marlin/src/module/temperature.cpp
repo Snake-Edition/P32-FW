@@ -86,6 +86,7 @@
 #include <option/has_local_bed.h>
 #include <option/has_remote_bed.h>
 #include <option/has_modular_bed.h>
+#include <scope_guard.hpp>
 
 LOG_COMPONENT_REF(MarlinServer);
 
@@ -3071,13 +3072,12 @@ void Temperature::isr() {
       bool wants_to_cool = false;
       wait_for_heatup = true;
       millis_t now, next_temp_ms = 0, next_cool_check_ms = 0;
-      uint8_t fan_speed_at_start = fan_speed[0];
-      bool fan_cools = false;
 
-      if (isCoolingHotend(target_extruder) && fan_cooling) {
-        fan_cools = true;
-        thermalManager.set_fan_speed(target_extruder, 255);
-      }
+      /// !!! PRINT FAN IS ALWAYS FAN 0
+      const uint8_t fan_speed_at_start = get_fan_speed(0);
+      ScopeGuard fan_restore_guard = [&] {
+        thermalManager.set_fan_speed(0, fan_speed_at_start);
+      };
 
       PrintStatusMessageGuard statusGuard;
 
@@ -3094,8 +3094,11 @@ void Temperature::isr() {
 
           // Exit if S<lower>, continue if S<higher>, R<lower>, or R<higher>
           if (no_wait_for_cooling && wants_to_cool) break;
-          if (!wants_to_cool && fan_cools) // Nozzle too cold now
-            thermalManager.set_fan_speed(target_extruder, fan_speed_at_start);
+
+          // If fan_cooling is enabled, assist the cooling/heating with the print fan
+          // !!! ONLY WORKS FOR ACTIVE EXTRUDER - PRINT FAN IS ALWAYS FAN 0
+          if (fan_cooling && active_extruder == target_extruder)
+            thermalManager.set_fan_speed(0, wants_to_cool ? 255 : 0);
         }
 
         now = millis();
@@ -3130,10 +3133,6 @@ void Temperature::isr() {
           }
         }
       } while (wait_for_heatup && TEMP_CONDITIONS);
-
-      /// reset fan speed
-      if (fan_cools)
-        thermalManager.set_fan_speed(target_extruder, fan_speed_at_start);
 
       return wait_for_heatup;
     }
