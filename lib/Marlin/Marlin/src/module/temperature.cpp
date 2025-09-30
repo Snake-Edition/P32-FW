@@ -1718,6 +1718,22 @@ bool Temperature::temperatures_ready() {
   return temperatures_ready_state;
 }
 
+bool Temperature::are_all_temperatures_reached() {
+  #if HAS_TEMP_HOTEND
+    if(!are_hotend_temperatures_reached()) {
+      return false;
+    }
+  #endif
+
+  #if HAS_HEATED_BED
+    if (!is_bed_temperature_reached()) {
+      return false;
+    }
+  #endif
+
+  return true;
+}
+
 #if HAS_TEMP_HEATBREAK && HAS_TEMP_HEATBREAK_CONTROL
 void Temperature::suspend_heatbreak_fan(millis_t ms) {
   // TODO: why do have next_heatbreak_check_ms instead of using the nicer watch_heatbreak?
@@ -3061,9 +3077,22 @@ void Temperature::isr() {
       #define MIN_COOLING_SLOPE_TIME 60
     #endif
 
+    bool Temperature::is_hotend_temperature_reached(uint8_t hotend) {
+      return degTargetHotend(hotend) <= 0 || (temp_hotend_residency_start_ms[hotend] && !PENDING(millis(), temp_hotend_residency_start_ms[hotend] + (TEMP_RESIDENCY_TIME) * 1000UL));
+    }
+
+    bool Temperature::are_hotend_temperatures_reached() {
+      for(uint8_t hotend = 0; hotend < HOTENDS; hotend++) {
+        if (!is_hotend_temperature_reached(hotend)) {
+            return false;
+        }
+      }
+
+      return true;
+    }
+
     bool Temperature::wait_for_hotend(const uint8_t target_extruder, const bool no_wait_for_cooling/*=true*/, bool fan_cooling/*=false*/) {
       // Loop until the temperature has stabilized
-      #define TEMP_CONDITIONS (!temp_hotend_residency_start_ms[target_extruder] || PENDING(now, temp_hotend_residency_start_ms[target_extruder] + (TEMP_RESIDENCY_TIME) * 1000UL))
 
       #if DISABLED(BUSY_WHILE_HEATING) && ENABLED(HOST_KEEPALIVE_FEATURE)
         KEEPALIVE_STATE(NOT_BUSY);
@@ -3108,7 +3137,7 @@ void Temperature::isr() {
           print_heater_states(target_extruder);
           SERIAL_ECHOPGM(" W:");
           if (temp_hotend_residency_start_ms[target_extruder]) {
-              if (TEMP_CONDITIONS){
+              if (!is_hotend_temperature_reached(target_extruder)){
                 SERIAL_ECHO(long((((TEMP_RESIDENCY_TIME) * 1000UL) - (now - temp_hotend_residency_start_ms[target_extruder])) / 1000UL));
               } else {
                 SERIAL_CHAR('0');
@@ -3133,7 +3162,7 @@ void Temperature::isr() {
             old_temp = temp;
           }
         }
-      } while (wait_for_heatup && TEMP_CONDITIONS);
+      } while (wait_for_heatup && !is_hotend_temperature_reached(target_extruder));
 
       return wait_for_heatup;
     }
@@ -3149,7 +3178,14 @@ void Temperature::isr() {
       #define MIN_COOLING_SLOPE_TIME_BED 60
     #endif
 
+    bool Temperature::is_bed_temperature_reached() {
+      // TODO: Switch to residency time and employ with wait_for_bed
+      // To achieve that, we will have to take the residency out of wait_for_bed and make it global
+      return temp_bed.target <= 0 || std::abs(temp_bed.target - temp_bed.celsius) <= TEMP_BED_HYSTERESIS;
+    }
+
     bool Temperature::wait_for_bed(const bool no_wait_for_cooling/*=true*/) {
+      // TODO: Employ is_bed_temperature_reached once it considers residency
       #if TEMP_BED_RESIDENCY_TIME > 0
         millis_t residency_start_ms = 0;
         bool first_loop = true;

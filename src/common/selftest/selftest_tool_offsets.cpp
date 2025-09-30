@@ -25,7 +25,7 @@ void set_nozzle_temps(int16_t temp) {
 bool all_nozzles_at_target() {
     for (uint8_t tool_nr = 0; tool_nr < HOTENDS; tool_nr++) {
         if (is_tool_selftest_enabled(tool_nr, ToolMask::AllTools)) { // check temperature on all tools, its not possible to calibrate just one tool
-            if (thermalManager.still_heating(tool_nr)) {
+            if (!thermalManager.is_hotend_temperature_reached(tool_nr)) {
                 return false;
             }
         }

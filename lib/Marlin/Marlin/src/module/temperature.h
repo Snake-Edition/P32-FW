@@ -537,6 +537,9 @@ class Temperature {
     // Return true if the temperatures have been sampled at least once
     static bool temperatures_ready();
 
+    /// @returns whether all the hotends and the bed have stabilized on the target temperature (or if the target temp is 0)
+    static bool are_all_temperatures_reached();
+
     //high level conversion routines, for use outside of temperature.cpp
     //inline so that there is no performance decrease.
     //deg=degreeCelsius
@@ -588,14 +591,15 @@ class Temperature {
         #endif
 
       }
-      
+
       #if HAS_TEMP_HOTEND
+        /// @returns whether the hotend has stabilized on the target temperature (or if the target temp is 0)
+        static bool is_hotend_temperature_reached(uint8_t hotend);
+
+        static bool are_hotend_temperatures_reached();
+
         static bool wait_for_hotend(const uint8_t target_extruder, const bool no_wait_for_cooling=true, bool fan_cooling=false);
       #endif
-
-      FORCE_INLINE static bool still_heating(const uint8_t e) {
-        return degTargetHotend(e) > TEMP_HYSTERESIS && ABS(degHotend(e) - degTargetHotend(e)) > TEMP_HYSTERESIS;
-      }
 
     #endif // HOTENDS
 
@@ -671,6 +675,9 @@ class Temperature {
 
         start_watching_bed();
       }
+
+      /// @returns whether the bed has stabilized on the target temperature (or if the target temp is 0)
+      static bool is_bed_temperature_reached();
 
       static bool wait_for_bed(const bool no_wait_for_cooling=true);
 
