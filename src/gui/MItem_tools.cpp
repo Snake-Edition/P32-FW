@@ -993,7 +993,7 @@ void MI_LOG_TO_TXT::OnChange(size_t) {
 
 #if HAS_AUTO_RETRACT()
 MI_PRE_NOZZLE_CLEANING_RETRACT::MI_PRE_NOZZLE_CLEANING_RETRACT()
-    : WI_ICON_SWITCH_OFF_ON_t(config_store().pre_nozzle_cleaning_retraction_enable.get(), _("Pre nozzle cleaning retraction")) {}
+    : WI_ICON_SWITCH_OFF_ON_t(config_store().pre_nozzle_cleaning_retraction_enable.get(), _("Nozzle Cleaning Retraction")) {}
 
 void MI_PRE_NOZZLE_CLEANING_RETRACT::OnChange(size_t) {
     config_store().pre_nozzle_cleaning_retraction_enable.set(value());
