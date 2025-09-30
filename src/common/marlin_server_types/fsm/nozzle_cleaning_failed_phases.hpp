@@ -6,6 +6,7 @@
 #include <utils/enum_array.hpp>
 #include <option/has_nozzle_cleaner.h>
 #include <option/has_auto_retract.h>
+#include <optional>
 
 #define HAS_NOZZLE_CLEANING_FAILED_PURGING() (HAS_AUTO_RETRACT() && !HAS_NOZZLE_CLEANER())
 

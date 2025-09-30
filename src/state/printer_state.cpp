@@ -19,6 +19,11 @@
 #include <option/has_side_fsensor.h>
 #include <option/has_belt_tuning.h>
 
+#if HAS_LOADCELL()
+    #include <fsm/nozzle_cleaning_failed_phases.hpp>
+    #include <fsm/nozzle_cleaning_failed_mapper.hpp>
+#endif
+
 using namespace marlin_server;
 using namespace printer_state;
 using std::make_tuple;
@@ -205,7 +210,10 @@ DeviceState get_state(bool ready) {
         return DeviceState::Paused;
 #if HAS_LOADCELL()
     case ClientFSM::NozzleCleaningFailed:
-        return DeviceState::Attention;
+        if (nozzle_cleaning_failed_phase_error_code_mapper(GetEnumFromPhaseIndex<PhaseNozzleCleaningFailed>(data.GetPhase()))) {
+            return DeviceState::Attention;
+        }
+        break;
 #endif
 #if HAS_SELFTEST()
     case ClientFSM::Selftest:
@@ -400,15 +408,22 @@ StateWithDialog get_state_with_dialog(bool ready) {
         }
         break;
     }
+#if HAS_LOADCELL()
+    case ClientFSM::NozzleCleaningFailed: {
+        auto phase = GetEnumFromPhaseIndex<PhaseNozzleCleaningFailed>(data.GetPhase());
+        if (auto attention_code = nozzle_cleaning_failed_phase_error_code_mapper(phase); attention_code.has_value()) {
+            const Response *available_responses = ClientResponses::get_available_responses(phase).data();
+            return { state, attention_code, fsm_gen, available_responses };
+        }
+        break;
+    }
+#endif
 
     // These have no buttons or phase
     case ClientFSM::Wait:
     case ClientFSM::Printing:
     case ClientFSM::Serial_printing:
         break;
-#if HAS_LOADCELL()
-    case ClientFSM::NozzleCleaningFailed:
-#endif
 #if HAS_SELFTEST()
     case ClientFSM::Selftest:
     case ClientFSM::FansSelftest:

@@ -8,36 +8,18 @@
 #include <standard_frame/frame_prompt.hpp>
 #include <standard_frame/frame_prompt.hpp>
 #include <img_resources.hpp>
+#include <fsm/nozzle_cleaning_failed_mapper.hpp>
 
 using Phase = PhaseNozzleCleaningFailed;
 
 namespace {
-
-constexpr auto txt_title_cleaning_nozzle = N_("Cleaning the nozzle");
-constexpr auto txt_warning = N_("Warning");
-
 constexpr auto txt_desc_cleaning_failed = N_("\nNozzle cleaning failed.");
-
-#if HAS_NOZZLE_CLEANING_FAILED_PURGING()
-constexpr auto txt_desc_recommend_purge = N_("Would you like to purge the filament?\n\nIt will then retract to prevent oozing. Be careful, the nozzle is hot!");
-constexpr auto txt_desc_wait_temp = N_("Waiting for nozzle temperature...");
-constexpr auto txt_desc_purge = N_("Purging the filament.\n\nPlease wait until the purge is complete.");
-constexpr auto txt_desc_autoretract = N_("The filament has been purged.\n\nThe nozzle will now retract the filament to prevent oozing.");
-constexpr auto txt_desc_remove_filament = N_("Remove the purged filament and ensure the nozzle is clean and ready.\n\nBe careful, the nozzle is hot!");
-#endif
-
-#if HAS_AUTO_RETRACT()
-constexpr auto txt_desc_offer_auto_retract = N_("The auto-retract feature is disabled, which might have caused the failure.\n\nDo you want to enable auto-retract?");
-#endif
-
-constexpr auto txt_desc_warn_abort = N_("Are you sure you want to abort the print?\n\nThe current print will be cancelled and you will need to start over.");
-
 constexpr auto warning_suffix = "nozzle-cleaning-failed"_tstr;
 
 class FrameNozzleCleaningProgress : public FrameProgressPrompt {
 public:
-    FrameNozzleCleaningProgress(window_frame_t *parent, Phase fsm_phase, const string_view_utf8 &txt_title, const string_view_utf8 &txt_info)
-        : FrameProgressPrompt(parent, fsm_phase, txt_title, txt_info, Align_t::CenterTop()) {
+    FrameNozzleCleaningProgress(window_frame_t *parent, Phase fsm_phase)
+        : FrameProgressPrompt(parent, fsm_phase, nozzle_cleaning_failed_phase_error_code_mapper) {
     }
 
     void update(const fsm::PhaseData &data_) {
@@ -51,16 +33,16 @@ constexpr FooterLine::IdArray nozzle_cleaning_footer_items = { footer::Item::noz
 using Frames = FrameDefinitionList<ScreenNozzleCleaningFailed::FrameStorage,
     FrameDefinition<Phase::cleaning_failed, WithConstructorArgs<FrameQRPrompt, Phase::cleaning_failed, txt_desc_cleaning_failed, warning_suffix>>,
 #if HAS_NOZZLE_CLEANING_FAILED_PURGING()
-    FrameDefinition<Phase::recommend_purge, WithConstructorArgs<WithFooter<FramePrompt, nozzle_cleaning_footer_items>, Phase::recommend_purge, txt_title_cleaning_nozzle, txt_desc_recommend_purge>>,
-    FrameDefinition<Phase::wait_temp, WithConstructorArgs<WithFooter<FrameNozzleCleaningProgress, nozzle_cleaning_footer_items>, Phase::wait_temp, txt_title_cleaning_nozzle, txt_desc_wait_temp>>,
-    FrameDefinition<Phase::purge, WithConstructorArgs<WithFooter<FrameNozzleCleaningProgress, nozzle_cleaning_footer_items>, Phase::purge, txt_title_cleaning_nozzle, txt_desc_purge>>,
-    FrameDefinition<Phase::autoretract, WithConstructorArgs<WithFooter<FrameNozzleCleaningProgress, nozzle_cleaning_footer_items>, Phase::autoretract, txt_title_cleaning_nozzle, txt_desc_autoretract>>,
-    FrameDefinition<Phase::remove_filament, WithConstructorArgs<WithFooter<FramePrompt, nozzle_cleaning_footer_items>, Phase::remove_filament, txt_title_cleaning_nozzle, txt_desc_remove_filament>>,
+    FrameDefinition<Phase::recommend_purge, WithConstructorArgs<WithFooter<FramePrompt, nozzle_cleaning_footer_items>, Phase::recommend_purge, nozzle_cleaning_failed_phase_error_code_mapper>>,
+    FrameDefinition<Phase::wait_temp, WithConstructorArgs<WithFooter<FrameNozzleCleaningProgress, nozzle_cleaning_footer_items>, Phase::wait_temp>>,
+    FrameDefinition<Phase::purge, WithConstructorArgs<WithFooter<FrameNozzleCleaningProgress, nozzle_cleaning_footer_items>, Phase::purge>>,
+    FrameDefinition<Phase::autoretract, WithConstructorArgs<WithFooter<FrameNozzleCleaningProgress, nozzle_cleaning_footer_items>, Phase::autoretract>>,
+    FrameDefinition<Phase::remove_filament, WithConstructorArgs<WithFooter<FramePrompt, nozzle_cleaning_footer_items>, Phase::remove_filament, nozzle_cleaning_failed_phase_error_code_mapper>>,
 #endif
 #if HAS_AUTO_RETRACT()
-    FrameDefinition<Phase::offer_auto_retract_enable, WithConstructorArgs<FramePrompt, Phase::offer_auto_retract_enable, txt_desc_cleaning_failed, txt_desc_offer_auto_retract>>,
+    FrameDefinition<Phase::offer_auto_retract_enable, WithConstructorArgs<FramePrompt, Phase::offer_auto_retract_enable, nozzle_cleaning_failed_phase_error_code_mapper>>,
 #endif
-    FrameDefinition<Phase::warn_abort, WithConstructorArgs<WithFooter<FramePrompt, nozzle_cleaning_footer_items>, Phase::warn_abort, txt_warning, txt_desc_warn_abort>>>;
+    FrameDefinition<Phase::warn_abort, WithConstructorArgs<WithFooter<FramePrompt, nozzle_cleaning_footer_items>, Phase::warn_abort, nozzle_cleaning_failed_phase_error_code_mapper>>>;
 
 } // namespace
 
