@@ -61,7 +61,6 @@
 #include <option/board_is_master_board.h>
 #if BOARD_IS_MASTER_BOARD()
 #include "pause_stubbed.hpp"
-#include <safety_timer_stubbed.hpp>
 #endif
 
 #include "HAL/shared/Delay.h"
@@ -357,15 +356,6 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
   if (queue.length < BUFSIZE) queue.get_available_commands();
 
   const millis_t ms = millis();
-
-#if BOARD_IS_MASTER_BOARD()
-  SafetyTimer::expired_t expired = SafetyTimer::Instance().Loop();
-  if (expired ==  SafetyTimer::expired_t::yes)  {
-    #ifdef ACTION_ON_SAFETY_TIMER_EXPIRED
-      host_action_safety_timer_expired();
-    #endif
-  }
-#endif
 
   if (max_inactive_time && ELAPSED(ms, gcode.previous_move_ms + max_inactive_time)) {
     SERIAL_ERROR_START();

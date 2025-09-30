@@ -24,7 +24,6 @@
 #if ENABLED(HOST_PROMPT_SUPPORT) && DISABLED(EMERGENCY_PARSER)
 
     #include "../../lib/Marlin/Marlin/src/feature/host_actions.h"
-    #include "safety_timer_stubbed.hpp"
     #include "../../lib/Marlin/Marlin/src/gcode/gcode.h"
     #include "marlin_server.hpp"
     #include "client_fsm_types.h"

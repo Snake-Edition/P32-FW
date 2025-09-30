@@ -31,7 +31,6 @@
 
 #include "Marlin/src/feature/pause.h"
 #include "filament_sensors_handler.hpp"
-#include "safety_timer_stubbed.hpp"
 #include "marlin_server.hpp"
 #include "fs_event_autolock.hpp"
 #include "filament.hpp"
@@ -1655,11 +1654,11 @@ void Pause::setup_progress_mapper() {
 // Pause::FSM_HolderLoadUnload
 
 void Pause::FSM_HolderLoadUnload::bindToSafetyTimer() {
-    SafetyTimer::Instance().BindPause(pause);
+    // TODO: Will be removed in a separate commit
 }
 
 void Pause::FSM_HolderLoadUnload::unbindFromSafetyTimer() {
-    SafetyTimer::Instance().UnbindPause(pause);
+    // TODO: Will be removed in a separate commit
 }
 
 Pause::FSM_HolderLoadUnload::FSM_HolderLoadUnload(Pause &p)

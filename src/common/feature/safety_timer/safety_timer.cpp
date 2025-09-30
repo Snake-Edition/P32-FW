@@ -3,7 +3,7 @@
 #include <marlin_server.hpp>
 #include <RAII.hpp>
 #include <bsod/bsod.h>
-
+#include <feature/host_actions.h>
 
 namespace buddy {
 
@@ -105,6 +105,10 @@ void SafetyTimer::trigger() {
         }
 
         if (has_anything_to_disable) {
+#ifdef ACTION_ON_SAFETY_TIMER_EXPIRED
+            host_action_safety_timer_expired();
+#endif
+
             if (disable_all) {
                 Temperature::disable_all_heaters();
                 marlin_server::set_warning(WarningType::HeatersTimeout);
@@ -131,6 +135,10 @@ void SafetyTimer::trigger() {
     for (uint8_t hotend = 0; hotend < HOTENDS; hotend++) {
         nozzle_temperatures_to_restore_[hotend] = thermalManager.degTargetHotend(hotend);
     }
+
+#ifdef ACTION_ON_SAFETY_TIMER_EXPIRED
+    host_action_safety_timer_expired();
+#endif
 
     Temperature::disable_hotend();
     marlin_server::set_warning(WarningType::NozzleTimeout);

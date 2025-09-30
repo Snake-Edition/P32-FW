@@ -38,6 +38,7 @@
 #include <buddy/unreachable.hpp>
 #include <utils/string_builder.hpp>
 #include <utils/mutex_atomic.hpp>
+#include <feature/safety_timer/safety_timer.hpp>
 
 #include "../Marlin/src/lcd/extensible_ui/ui_api.h"
 #include "../Marlin/src/gcode/queue.h"
@@ -797,6 +798,8 @@ static void cycle() {
 #if XBUDDY_EXTENSION_VARIANT_STANDARD()
     buddy::xbuddy_extension().step();
 #endif
+
+    buddy::safety_timer().step();
 
     record_fanctl_metrics();
 
@@ -1925,6 +1928,8 @@ bool active_extruder_fan_checks() {
 }
 
 static void resuming_reheating() {
+    buddy::safety_timer().reset_restore_nonblocking();
+
     if (hotendErrorChecker.isFailed()) {
         set_warning(WarningType::HotendTempDiscrepancy);
         thermalManager.setTargetHotend(0, 0);
@@ -2392,6 +2397,7 @@ static void _server_print_loop(void) {
         }
 
         thermalManager.disable_all_heaters();
+
 #if FAN_COUNT > 0
         thermalManager.set_fan_speed(0, 0);
 #endif
@@ -3410,14 +3416,17 @@ static void process_request_flags() {
             print_exit();
             break;
         case RequestFlag::KnobMoveUp:
+            buddy::safety_timer().reset_norestore();
             server.knob_position++;
             server.knob_move_counter++;
             break;
         case RequestFlag::KnobMoveDown:
+            buddy::safety_timer().reset_norestore();
             server.knob_position--;
             server.knob_move_counter++;
             break;
         case RequestFlag::KnobClick:
+            buddy::safety_timer().reset_restore_nonblocking();
             server.knob_click_counter++;
             break;
         case RequestFlag::GuiCantPrint:
@@ -3542,6 +3551,11 @@ FSMResponseVariant get_response_variant_from_phase(FSMAndPhase fsm_and_phase, bo
             value = empty_encoded_fsm_response;
         }
     });
+
+    if (result != FSMResponseVariant {}) {
+        // Receiving a valid response from anywhere (for example Connect) counts as activity, prolong the activity heaters timeout
+        buddy::safety_timer().reset_norestore();
+    }
 
     return result;
 }

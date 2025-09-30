@@ -70,6 +70,7 @@ GcodeSuite gcode;
 #include <option/has_phase_stepping.h>
 #include <option/has_phase_stepping_calibration.h>
 #include <marlin_vars.hpp>
+#include <feature/safety_timer/safety_timer.hpp>
 
 millis_t GcodeSuite::previous_move_ms;
 
@@ -853,6 +854,9 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
  * This is called from the main loop()
  */
 void GcodeSuite::process_next_command() {
+  // We're doing something, don't go to sleep
+  buddy::safety_timer().reset_norestore();
+
   char * const current_command = queue.command_buffer[queue.index_r];
 
   PORT_REDIRECT(queue.port[queue.index_r]);
@@ -872,6 +876,9 @@ void GcodeSuite::process_next_command() {
   marlin_vars().gcode_command = marlin_server::Cmd(parser.command_letter << 16 | parser.codenum);
   process_parsed_command();
   marlin_vars().gcode_command = marlin_server::Cmd();
+
+  // The gcode might have taken a long time, again mark that we're doing something
+  buddy::safety_timer().reset_norestore();
 }
 
 /**

@@ -11,6 +11,7 @@
 #include <marlin_server.hpp>
 #include <gcode/gcode.h>
 #include <feature/print_status_message/print_status_message_guard.hpp>
+#include <feature/safety_timer/safety_timer.hpp>
 
 using namespace buddy;
 
@@ -73,6 +74,9 @@ void PrusaGcodeSuite::M191() {
 
 void PrusaGcodeSuite::M141_no_parser(const M141Args &args) {
     using buddy::Temperature;
+
+    // Keep everything heated up while we're waiting
+    buddy::SafetyTimerBlocker safety_timer_blocker;
 
     if (!chamber().capabilities().temperature_control()) {
         SERIAL_ERROR_MSG("Chamber does not allow temperature control");

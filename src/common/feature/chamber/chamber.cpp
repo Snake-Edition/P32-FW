@@ -6,6 +6,7 @@
 #include <marlin_server.hpp>
 #include <marlin_server_shared.h>
 #include <option/has_xbuddy_extension.h>
+#include <feature/safety_timer/safety_timer.hpp>
 
 #if XL_ENCLOSURE_SUPPORT()
     #include <hw/xl/xl_enclosure.hpp>
@@ -144,6 +145,9 @@ std::optional<Temperature> Chamber::target_temperature() const {
 }
 
 std::optional<Temperature> Chamber::set_target_temperature(std::optional<Temperature> target) {
+    // Wake up heaters if they are timed out
+    buddy::safety_timer().reset_restore_nonblocking();
+
     std::lock_guard _lg(mutex_);
     target_temperature_ = target;
 

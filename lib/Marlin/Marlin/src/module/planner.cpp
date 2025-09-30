@@ -118,6 +118,8 @@
   #include <feature/retract_tracker/retract_tracker.hpp>
 #endif
 
+#include <feature/safety_timer/safety_timer.hpp>
+
 #include <marlin_vars.hpp>
 #include "configuration_store.h"
 #include "bsod.h"
@@ -2371,12 +2373,17 @@ bool Planner::buffer_segment(const abce_pos_t &abce
   // BFW-7734 only check when a negative Z-move is planned - it's a workaround for ceiling check sometimes reporting false positives yet for unknown reasons
   if(target.z < position.z){
     // ! Important: call before checking for draining_buffer
+    // Note: I don't remember why I thought it was important and now I think it should probably be under the check
     buddy::check_ceiling_clearance(abce);
   }
 #endif
 
   // If we are aborting, do not accept queuing of movements
   if (draining_buffer || PreciseStepping::stopping()) return false;
+
+  // Make sure we are at the correct temperatures before doing any move whatsoever
+  // Also doing any printer movement resets the timer
+  buddy::safety_timer().reset_restore_blocking();
 
 #if HAS_EMERGENCY_STOP()
   // E-moves alone are always allowed

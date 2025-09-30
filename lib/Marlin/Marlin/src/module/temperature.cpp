@@ -83,6 +83,11 @@
   #include "../libs/buzzer.h"
 #endif
 
+#include <option/board_is_master_board.h>
+#if BOARD_IS_MASTER_BOARD()
+  #include <feature/safety_timer/safety_timer.hpp>
+#endif
+
 #include <option/has_dwarf.h>
 #include <option/has_local_bed.h>
 #include <option/has_remote_bed.h>
@@ -3092,6 +3097,11 @@ void Temperature::isr() {
     }
 
     void Temperature::setTargetHotend(const int16_t celsius, const uint8_t E_NAME) {
+    #if BOARD_IS_MASTER_BOARD()
+        // We cannot overwrite target temps while the safety_timer is active, deactivate it first
+        buddy::safety_timer().reset_restore_nonblocking();
+    #endif
+
         const uint8_t ee = HOTEND_INDEX;
         const int16_t new_temp = _MIN(celsius, temp_range[ee].maxtemp - HEATER_MAXTEMP_SAFETY_MARGIN);
 
@@ -3115,6 +3125,11 @@ void Temperature::isr() {
     }
 
     bool Temperature::wait_for_hotend(const uint8_t target_extruder, const bool no_wait_for_cooling/*=true*/, bool fan_cooling/*=false*/) {
+      #if BOARD_IS_MASTER_BOARD()
+        // Keep all heaters on while we're waiting for temperatures
+        buddy::SafetyTimerBlocker safety_timer_blocker;
+      #endif
+
       // Loop until the temperature has stabilized
 
       #if DISABLED(BUSY_WHILE_HEATING) && ENABLED(HOST_KEEPALIVE_FEATURE)
@@ -3208,6 +3223,9 @@ void Temperature::isr() {
     }
 
     void Temperature::setTargetBed(const int16_t celsius) {
+      // We cannot overwrite target temps while the safety_timer is active, deactivate it first
+      buddy::safety_timer().reset_restore_nonblocking();
+
     #if ENABLED(AUTO_POWER_CONTROL)
         if (celsius) {
             powerManager.power_on();
@@ -3240,6 +3258,10 @@ void Temperature::isr() {
 
     bool Temperature::wait_for_bed(const bool no_wait_for_cooling/*=true*/) {
       // TODO: Employ is_bed_temperature_reached once it considers residency
+      
+      // Keep all heaters on while we're waiting for temperatures
+      buddy::SafetyTimerBlocker safety_timer_blocker;
+
       #if TEMP_BED_RESIDENCY_TIME > 0
         millis_t residency_start_ms = 0;
         bool first_loop = true;
@@ -3347,6 +3369,9 @@ void Temperature::isr() {
     }
 
     void Temperature::wait_for_frame_heatup() {
+        // Keep everything heated up when absorbing heat
+        buddy::SafetyTimerBlocker safety_timer_blocker;
+      
         if (fabs(temp_bed.target - bed_frame_est_celsius) < 0.5f) {
             log_info(MarlinServer, "Absorbing heat: already stable, continuing");
             return;
