@@ -1,6 +1,7 @@
 #include "frame_progress_prompt.hpp"
-
+#include <find_error.hpp>
 #include <gui/auto_layout.hpp>
+#include <buddy/unreachable.hpp>
 
 namespace {
 static constexpr std::array layout_no_footer {
@@ -34,6 +35,20 @@ FrameProgressPrompt::FrameProgressPrompt(window_t *parent, FSMAndPhase fsm_phase
 
     std::array<window_t *, layout_no_footer.size()> windows_no_footer { &title, &progress_bar, &info, &radio };
     layout_vertical_stack(parent->GetRect(), windows_no_footer, layout_no_footer);
+}
+
+FrameProgressPrompt::FrameProgressPrompt(window_frame_t *parent, FSMAndPhase fsm_phase, std::optional<ErrCode> (*error_code_mapper)(const FSMAndPhase fsm_phase))
+    : FrameProgressPrompt(parent, fsm_phase, string_view_utf8::MakeNULLSTR(), string_view_utf8::MakeNULLSTR()) {
+    // Extracting information: Phase -> corresponding error code -> message
+    const auto err_code = error_code_mapper(fsm_phase);
+    if (!err_code.has_value()) {
+        BUDDY_UNREACHABLE(); // Some phases do not have corresponding error codes - they should not be called with this constructor
+    }
+
+    const auto err = find_error(err_code.value());
+
+    info.SetText(_(err.err_text));
+    title.SetText(_(err.err_title));
 }
 
 void FrameProgressPrompt::add_footer(FooterLine &footer) {
