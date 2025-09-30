@@ -141,10 +141,7 @@ Temperature thermalManager;
 
 #if HOTENDS
   hotend_info_t Temperature::temp_hotend[HOTEND_TEMPS]; // = { 0 }
-
-   #if TEMP_RESIDENCY_TIME > 0
-      uint32_t Temperature::temp_hotend_residency_start_ms[HOTEND_TEMPS];
-    #endif
+  uint32_t Temperature::temp_hotend_residency_start_ms[HOTEND_TEMPS];
 #endif
 
 #if ENABLED(AUTO_POWER_E_FANS)
@@ -1424,19 +1421,17 @@ void Temperature::min_temp_error(const heater_ind_t heater) {
 
 #endif // PIDTEMPBED
 
-#if TEMP_RESIDENCY_TIME > 0
-  void Temperature::update_temp_residency_hotend(uint8_t hotend) {
-    const float temp_diff = ABS(temp_hotend[hotend].target - temp_hotend[hotend].celsius);
+void Temperature::update_temp_residency_hotend(uint8_t hotend) {
+  const float temp_diff = ABS(temp_hotend[hotend].target - temp_hotend[hotend].celsius);
 
-    if (!temp_hotend_residency_start_ms[hotend] && temp_diff < TEMP_WINDOW) {
-      // Start the TEMP_RESIDENCY_TIME timer when we reach target temp for the first time.
-      temp_hotend_residency_start_ms[hotend] = millis();
-    } else if (temp_diff > TEMP_HYSTERESIS) {
-      // Restart the timer whenever the temperature falls outside the hysteresis.
-      temp_hotend_residency_start_ms[hotend] = 0;
-    }
+  if (!temp_hotend_residency_start_ms[hotend] && temp_diff < TEMP_WINDOW) {
+    // Start the TEMP_RESIDENCY_TIME timer when we reach target temp for the first time.
+    temp_hotend_residency_start_ms[hotend] = millis();
+  } else if (temp_diff > TEMP_HYSTERESIS) {
+    // Restart the timer whenever the temperature falls outside the hysteresis.
+    temp_hotend_residency_start_ms[hotend] = 0;
   }
-#endif
+}
 
 /**
  * Manage heating activities for extruder hot-ends and a heated bed
@@ -1477,9 +1472,7 @@ void Temperature::manage_heater() {
         hotend_idle[e].update(ms);
       #endif
       
-      #if TEMP_RESIDENCY_TIME > 0
-        update_temp_residency_hotend(e);
-      #endif
+      update_temp_residency_hotend(e);
 
       #if ENABLED(THERMAL_PROTECTION_HOTENDS)
         // Check for thermal runaway
@@ -3067,13 +3060,8 @@ void Temperature::isr() {
     #endif
 
     bool Temperature::wait_for_hotend(const uint8_t target_extruder, const bool no_wait_for_cooling/*=true*/, bool fan_cooling/*=false*/) {
-      #if TEMP_RESIDENCY_TIME > 0
-        // Loop until the temperature has stabilized
-        #define TEMP_CONDITIONS (!temp_hotend_residency_start_ms[target_extruder] || PENDING(now, temp_hotend_residency_start_ms[target_extruder] + (TEMP_RESIDENCY_TIME) * 1000UL))
-      #else
-        // Loop until the temperature is very close target
-        #define TEMP_CONDITIONS (wants_to_cool ? isCoolingHotend(target_extruder) : isHeatingHotend(target_extruder))
-      #endif
+      // Loop until the temperature has stabilized
+      #define TEMP_CONDITIONS (!temp_hotend_residency_start_ms[target_extruder] || PENDING(now, temp_hotend_residency_start_ms[target_extruder] + (TEMP_RESIDENCY_TIME) * 1000UL))
 
       #if DISABLED(BUSY_WHILE_HEATING) && ENABLED(HOST_KEEPALIVE_FEATURE)
         KEEPALIVE_STATE(NOT_BUSY);
@@ -3114,17 +3102,15 @@ void Temperature::isr() {
         if (ELAPSED(now, next_temp_ms)) { // Print temp & remaining time every 1s while waiting
           next_temp_ms = now + 1000UL;
           print_heater_states(target_extruder);
-          #if TEMP_RESIDENCY_TIME > 0
-            SERIAL_ECHOPGM(" W:");
-            if (temp_hotend_residency_start_ms[target_extruder]) {
-                if (TEMP_CONDITIONS){
-                  SERIAL_ECHO(long((((TEMP_RESIDENCY_TIME) * 1000UL) - (now - temp_hotend_residency_start_ms[target_extruder])) / 1000UL));
-                } else {
-                  SERIAL_CHAR('0');
-                }
-            } else
-              SERIAL_CHAR('?');
-          #endif
+          SERIAL_ECHOPGM(" W:");
+          if (temp_hotend_residency_start_ms[target_extruder]) {
+              if (TEMP_CONDITIONS){
+                SERIAL_ECHO(long((((TEMP_RESIDENCY_TIME) * 1000UL) - (now - temp_hotend_residency_start_ms[target_extruder])) / 1000UL));
+              } else {
+                SERIAL_CHAR('0');
+              }
+          } else
+            SERIAL_CHAR('?');
           SERIAL_EOL();
         }
 

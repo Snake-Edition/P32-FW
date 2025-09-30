@@ -262,11 +262,9 @@ class Temperature {
         #define HOTEND_TEMPS HOTENDS
       static hotend_info_t temp_hotend[HOTEND_TEMPS];
 
-      #if TEMP_RESIDENCY_TIME > 0
-        // timestamp when temeperature reached target +-TEMP_WINDOW, 0 when outside this window
-        // note: 0 is valid timestamp, but if temperature reaches window at time 0, it will just be evaluated again little later, so it doesn't cause any bug
-        static uint32_t temp_hotend_residency_start_ms[HOTEND_TEMPS];
-      #endif
+      // timestamp when temeperature reached target +-TEMP_WINDOW, 0 when outside this window
+      // note: 0 is valid timestamp, but if temperature reaches window at time 0, it will just be evaluated again little later, so it doesn't cause any bug
+      static uint32_t temp_hotend_residency_start_ms[HOTEND_TEMPS];
       
     #endif
 
@@ -577,12 +575,10 @@ class Temperature {
           }
         #endif
         
-        #if TEMP_RESIDENCY_TIME > 0
-          // target changed, reset time when it reached target
-          if (temp_hotend[ee].target != new_temp){
-            temp_hotend_residency_start_ms[ee] = 0;
-          }
-        #endif
+        // target changed, reset time when it reached target
+        if (temp_hotend[ee].target != new_temp){
+          temp_hotend_residency_start_ms[ee] = 0;
+        }
 
         temp_hotend[ee].target = new_temp;
         
@@ -775,9 +771,8 @@ private:
      */
     static void disable_heaters(disable_bed_t disable_bed);
   
-    #if TEMP_RESIDENCY_TIME > 0
-      static void update_temp_residency_hotend(uint8_t hotend);
-    #endif
+    static void update_temp_residency_hotend(uint8_t hotend);
+    
 public:
     /**
      * Switch off all heaters, set all target temperatures to 0
