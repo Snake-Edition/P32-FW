@@ -42,6 +42,7 @@
 #include <device/board.h>
 #include "printers.h"
 #include "MarlinPin.h"
+#include <module/motion.h>
 #include "../../../../src/common/adc.hpp"
 #include "../marlin_stubs/skippable_gcode.hpp"
 
@@ -3089,7 +3090,7 @@ void Temperature::isr() {
 
         // Target temperature might be changed during the loop
         if (target_temp != degTargetHotend(target_extruder)) {
-          wants_to_cool = isCoolingHotend(target_extruder);
+          wants_to_cool = temp_hotend[target_extruder].target < temp_hotend[target_extruder].celsius;
           target_temp = degTargetHotend(target_extruder);
 
           // Exit if S<lower>, continue if S<higher>, R<lower>, or R<higher>

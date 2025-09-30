@@ -588,15 +588,7 @@ class Temperature {
         #endif
 
       }
-
-      FORCE_INLINE static bool isHeatingHotend(const uint8_t E_NAME) {
-        return temp_hotend[HOTEND_INDEX].target > temp_hotend[HOTEND_INDEX].celsius;
-      }
-
-      FORCE_INLINE static bool isCoolingHotend(const uint8_t E_NAME) {
-        return temp_hotend[HOTEND_INDEX].target < temp_hotend[HOTEND_INDEX].celsius;
-      }
-
+      
       #if HAS_TEMP_HOTEND
         static bool wait_for_hotend(const uint8_t target_extruder, const bool no_wait_for_cooling=true, bool fan_cooling=false);
       #endif
