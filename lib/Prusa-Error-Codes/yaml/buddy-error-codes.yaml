@@ -1562,3 +1562,67 @@ Errors:
     type: "CONNECT"
     gui_layout: "warning_dialog"
     approved: true
+
+  - code: "XX841"
+    printers: [XL, COREONE, MK4]
+    title: "Cleaning the nozzle"
+    text: "Would you like to purge the filament?\n\nIt will then retract to prevent oozing. Be careful, the nozzle is hot!"
+    id: "NOZZLE_CLEANING_FAILED_RECOMMEND_PURGE"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX842"
+    printers: [XL, COREONE, MK4]
+    title: "Cleaning the nozzle"
+    text: "Waiting for nozzle temperature..."
+    id: "NOZZLE_CLEANING_FAILED_WAIT_TEMP"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX843"
+    printers: [XL, COREONE, MK4]
+    title: "Cleaning the nozzle"
+    text: "Purging the filament.\n\nPlease wait until the purge is complete."
+    id: "NOZZLE_CLEANING_FAILED_PURGE"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX844"
+    printers: [XL, COREONE, MK4]
+    title: "Cleaning the nozzle"
+    text: "The filament has been purged.\n\nThe nozzle will now retract the filament to prevent oozing."
+    id: "NOZZLE_CLEANING_FAILED_AUTORETRACT"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX845"
+    printers: [XL, COREONE, MK4]
+    title: "Cleaning the nozzle"
+    text: "Remove the purged filament and ensure the nozzle is clean and ready.\n\nBe careful, the nozzle is hot!"
+    id: "NOZZLE_CLEANING_FAILED_REMOVE_FILAMENT"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX846"
+    printers: [XL, COREONE, MK4, iX]
+    title: "Nozzle cleaning failed"
+    text: "The auto-retract feature is disabled, which might have caused the failure.\n\nDo you want to enable auto-retract?"
+    id: "NOZZLE_CLEANING_FAILED_AUTORETRACT_ENABLE_ASK"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX847"
+    printers: [XL, COREONE, MK4, iX]
+    title: "Warning"
+    text: "Are you sure you want to abort the print?\n\nThe current print will be cancelled and you will need to start over."
+    id: "NOZZLE_CLEANING_FAILED_ABORT_ASK"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
+    approved: true
+
