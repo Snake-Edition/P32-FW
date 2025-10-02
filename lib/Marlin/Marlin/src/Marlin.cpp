@@ -58,7 +58,8 @@
 #include "module/configuration_store.h"
 #include "module/printcounter.h" // PrintCounter or Stopwatch
 #include "feature/closedloop.h"
-#if !BOARD_IS_DWARF()
+#include <option/board_is_master_board.h>
+#if BOARD_IS_MASTER_BOARD()
 #include "pause_stubbed.hpp"
 #include <safety_timer_stubbed.hpp>
 #endif
@@ -357,7 +358,7 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
 
   const millis_t ms = millis();
 
-#if !BOARD_IS_DWARF()
+#if BOARD_IS_MASTER_BOARD()
   SafetyTimer::expired_t expired = SafetyTimer::Instance().Loop();
   if (expired ==  SafetyTimer::expired_t::yes)  {
     #ifdef ACTION_ON_SAFETY_TIMER_EXPIRED
@@ -388,7 +389,7 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
         if (!already_shutdown_steppers) {
           already_shutdown_steppers = true;  // L6470 SPI will consume 99% of free time without this
 
-          #if _DEBUG && !BOARD_IS_DWARF()
+          #if _DEBUG && BOARD_IS_MASTER_BOARD()
           // Report steppers being disabled to the user
           // Skip if position not trusted to avoid warnings when position is not important
           if(axes_home_level != AxesHomeLevel::no_axes_homed) {
