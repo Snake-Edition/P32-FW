@@ -71,6 +71,7 @@ public:
         , header { this, _(header_txt) }
         , inner_frame { this, inner_frame_rect } {
         ClrMenuTimeoutClose();
+        CaptureNormalWindow(inner_frame);
     }
 
     void Change(fsm::BaseData new_fsm_base_data) {

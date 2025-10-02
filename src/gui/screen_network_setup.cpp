@@ -486,7 +486,6 @@ using namespace network_wizard;
 ScreenNetworkSetup::ScreenNetworkSetup()
     : ScreenFSM(N_("NETWORK SETUP"), GuiDefaults::RectScreenNoHeader) {
     header.SetIcon(&img::wizard_16x16);
-    CaptureNormalWindow(inner_frame);
     create_frame();
 }
 

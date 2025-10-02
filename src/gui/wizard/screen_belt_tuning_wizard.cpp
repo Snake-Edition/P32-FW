@@ -242,7 +242,6 @@ ScreenBeltTuningWizard::ScreenBeltTuningWizard()
     : ScreenFSM(N_("BELT TUNING"), GuiDefaults::RectScreenNoHeader) //
 {
     header.SetIcon(&img::wizard_16x16);
-    CaptureNormalWindow(inner_frame);
     create_frame();
 }
 

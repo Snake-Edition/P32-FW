@@ -308,7 +308,6 @@ using Frames = FrameDefinitionList<ScreenFanSelftest::FrameStorage,
 ScreenFanSelftest::ScreenFanSelftest()
     : ScreenFSM(en_text_header, GuiDefaults::RectScreenBody) {
     header.SetIcon(&img::selftest_16x16);
-    CaptureNormalWindow(inner_frame);
     create_frame();
 }
 

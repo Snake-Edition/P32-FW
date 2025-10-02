@@ -49,7 +49,6 @@ using Frames = FrameDefinitionList<ScreenNozzleCleaningFailed::FrameStorage,
 ScreenNozzleCleaningFailed::ScreenNozzleCleaningFailed()
     : ScreenFSM(N_("WARNING"), GuiDefaults::RectScreenNoHeader) {
     header.SetIcon(&img::warning_16x16);
-    CaptureNormalWindow(inner_frame);
     create_frame();
 }
 
