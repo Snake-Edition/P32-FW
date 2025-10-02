@@ -49,6 +49,7 @@
 #include <feature/ramming/standard_ramming_sequence.hpp>
 #include <utils/progress.hpp>
 #include <buddy/unreachable.hpp>
+#include <feature/safety_timer/safety_timer.hpp>
 
 #include <option/has_human_interactions.h>
 #include <option/has_mmu2.h>
@@ -182,11 +183,7 @@ constexpr RammingSequenceArray unloadRammingSequence(FILAMENT_UNLOAD_RAMMING_SEQ
 // PausePrivatePhase
 
 PausePrivatePhase::PausePrivatePhase()
-    : phase(PhasesLoadUnload::initial)
-    , bed_restore_temp(NAN) {
-    HOTEND_LOOP() {
-        nozzle_restore_temp[e] = NAN;
-    }
+    : phase(PhasesLoadUnload::initial) {
 }
 
 void PausePrivatePhase::setPhase(PhasesLoadUnload ph) {
@@ -200,65 +197,7 @@ void PausePrivatePhase::setPhase(PhasesLoadUnload ph) {
 }
 
 Response PausePrivatePhase::getResponse() {
-    const Response ret = marlin_server::get_response_from_phase(phase);
-    // user just clicked
-    if (ret != Response::_none) {
-        RestoreTemp();
-    }
-    return ret;
-}
-
-bool PausePrivatePhase::CanSafetyTimerExpire() const {
-    if (HasTempToRestore()) {
-        return false; // already expired
-    }
-    if ((getPhase() == PhasesLoadUnload::MakeSureInserted_stoppable) || (getPhase() == PhasesLoadUnload::MakeSureInserted_unstoppable) || (getPhase() == PhasesLoadUnload::FilamentNotInFS)) { // special waiting state without button
-        return true; // waits for filament sensor
-    }
-    // We generally think of a Phase that it needs user interaction IFF it has a button.
-    // Yet if that button is "Stop" and it's the ONLY button within that Phase, that means the phase can be cancelled if user wishes so and does NOT REQUIRE user interaction as it is able to progress on it's own.
-    return ClientResponses::has_available_responses(getPhase()) && (ClientResponses::get_available_response(getPhase(), 0) != Response::Stop || ClientResponses::get_available_responses(getPhase()).size() > 1);
-}
-
-void PausePrivatePhase::NotifyExpiredFromSafetyTimer() {
-    if (CanSafetyTimerExpire()) {
-        HOTEND_LOOP() {
-            nozzle_restore_temp[e] = thermalManager.degTargetHotend(e);
-        }
-        bed_restore_temp = thermalManager.degTargetBed();
-    }
-}
-
-void PausePrivatePhase::clrRestoreTemp() {
-    HOTEND_LOOP() {
-        nozzle_restore_temp[e] = NAN;
-    }
-    bed_restore_temp = NAN;
-}
-
-void PausePrivatePhase::RestoreTemp() {
-    HOTEND_LOOP() {
-        if (!isnan(nozzle_restore_temp[e])) {
-            thermalManager.setTargetHotend(nozzle_restore_temp[e], e);
-            marlin_server::set_temp_to_display(nozzle_restore_temp[e], e);
-            nozzle_restore_temp[e] = NAN;
-        }
-    }
-    if (!isnan(bed_restore_temp)) {
-        thermalManager.setTargetBed(bed_restore_temp);
-        bed_restore_temp = NAN;
-    }
-    marlin_server::clear_warning(WarningType::NozzleTimeout);
-    marlin_server::clear_warning(WarningType::HeatersTimeout);
-}
-
-bool PausePrivatePhase::HasTempToRestore() const {
-    HOTEND_LOOP() {
-        if (!isnan(nozzle_restore_temp[e])) {
-            return true;
-        }
-    }
-    return !isnan(bed_restore_temp);
+    return marlin_server::get_response_from_phase(phase);
 }
 
 /*****************************************************************************/
@@ -330,6 +269,9 @@ bool Pause::should_park() {
 }
 
 bool Pause::is_target_temperature_safe() {
+    // Restore target temperatures, otherwise targetTooColdToExtrude would return true
+    buddy::safety_timer().reset_restore_nonblocking();
+
 #if HAS_AUTO_RETRACT()
     if (load_type == LoadType::unload && auto_retract().is_safely_retracted_for_unload(hotend_from_extruder(active_extruder))) {
         return true; // Its safe to unload even if the temp is too low if we are retracted
@@ -344,11 +286,25 @@ bool Pause::is_target_temperature_safe() {
 }
 
 bool Pause::ensureSafeTemperatureNotifyProgress() {
+    // Do not disable heaters while we're waiting for the heatup, duh.
+    // Also resets the safety timer, so it prevents it from triggering if we're periodically calling this
+    buddy::SafetyTimerBlocker safety_timer_blocker;
+
     if (!is_target_temperature_safe()) {
         return false;
     }
 
-    if (Temperature::degHotend(active_extruder) + heating_phase_min_hotend_diff > Temperature::degTargetHotend(active_extruder)) { // do not disturb user with heating dialog
+    const auto is_tempreature_reached = [] {
+        return
+            // We're not restoring from a safety timer
+            buddy::safety_timer().state() == buddy::SafetyTimer::State::idle
+
+            // Pause-specific voodoo
+            && Temperature::degHotend(active_extruder) + heating_phase_min_hotend_diff > Temperature::degTargetHotend(active_extruder);
+    };
+
+    if (is_tempreature_reached()) {
+        // do not disturb user with heating dialog
         return true;
     }
 
@@ -358,7 +314,7 @@ bool Pause::ensureSafeTemperatureNotifyProgress() {
         Temperature::degTargetHotend(active_extruder) - heating_phase_min_hotend_diff, marlin_vars().hotend(active_extruder).temp_nozzle);
 
     // Wait until temperature is close
-    while (Temperature::degHotend(active_extruder) < (Temperature::degTargetHotend(active_extruder) - heating_phase_min_hotend_diff)) {
+    while (!is_tempreature_reached()) {
         if (check_user_stop(getResponse())) {
             return false;
         }
@@ -433,7 +389,7 @@ void Pause::start_process([[maybe_unused]] Response response) {
 void Pause::load_start_process([[maybe_unused]] Response response) {
     // TODO: this shouldn't be needed here
     // actual temperature does not matter, only target
-    if (!is_target_temperature_safe() && load_type != LoadType::load_to_gears && (option::has_human_interactions || !HasTempToRestore())) {
+    if (!is_target_temperature_safe() && load_type != LoadType::load_to_gears && option::has_human_interactions) {
         set(LoadState::stop);
         return;
     }
@@ -638,7 +594,6 @@ void Pause::move_to_purge_process([[maybe_unused]] Response response) {
 }
 
 void Pause::load_wait_temp_process([[maybe_unused]] Response response) {
-    RestoreTemp();
     if (ensureSafeTemperatureNotifyProgress()) { // blocking -> checks for user stop
         if (load_type == LoadType::load_purge) {
             set(LoadState::purge);
@@ -1434,6 +1389,9 @@ void Pause::filament_change(const pause::Settings &settings_, bool is_filament_s
         return; // already paused
     }
 
+    // Restore target temperatures, otherwise targetTooColdToExtrude would return true
+    buddy::safety_timer().reset_restore_nonblocking();
+
     if (!DEBUGGING(DRYRUN) && settings.unload_length && thermalManager.targetTooColdToExtrude(settings.target_extruder)) {
         SERIAL_ECHO_MSG(MSG_ERR_HOTEND_TOO_COLD);
         return; // unable to reach safe temperature
@@ -1653,20 +1611,10 @@ void Pause::setup_progress_mapper() {
 /*****************************************************************************/
 // Pause::FSM_HolderLoadUnload
 
-void Pause::FSM_HolderLoadUnload::bindToSafetyTimer() {
-    // TODO: Will be removed in a separate commit
-}
-
-void Pause::FSM_HolderLoadUnload::unbindFromSafetyTimer() {
-    // TODO: Will be removed in a separate commit
-}
-
 Pause::FSM_HolderLoadUnload::FSM_HolderLoadUnload(Pause &p)
     : FSM_Holder(PhasesLoadUnload::initial)
     , pause(p) {
     pause.set_mode(pause.get_load_unload_mode());
-    pause.clrRestoreTemp();
-    bindToSafetyTimer();
     if (pause.should_park()) {
         pause.park_nozzle_and_notify();
     }
@@ -1679,7 +1627,6 @@ Pause::FSM_HolderLoadUnload::FSM_HolderLoadUnload(Pause &p)
 Pause::FSM_HolderLoadUnload::~FSM_HolderLoadUnload() {
     thermalManager.set_fan_speed(0, original_print_fan_speed);
     active = false;
-    pause.RestoreTemp();
 
     const float min_layer_h = 0.05f;
     // do not unpark and wait for temp if not homed or z park len is 0
@@ -1690,7 +1637,6 @@ Pause::FSM_HolderLoadUnload::~FSM_HolderLoadUnload() {
         pause.unpark_nozzle_and_notify();
     }
     pause.clr_mode();
-    unbindFromSafetyTimer(); // unbind must be last action, without it Pause cannot block safety timer
 }
 
 bool Pause::FSM_HolderLoadUnload::active = false;

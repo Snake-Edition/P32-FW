@@ -13,7 +13,6 @@
 #include "client_response.hpp"
 #include "pause_settings.hpp"
 #include "marlin_server.hpp"
-#include "IPause.hpp"
 #include <array>
 #include "Marlin/src/libs/stopwatch.h"
 
@@ -26,7 +25,7 @@
 // @brief With Z unhomed, ensure that it is at least amount_mm above bed.
 void unhomed_z_lift(float amount_mm);
 
-class PausePrivatePhase : public IPause {
+class PausePrivatePhase {
     friend class PauseFsmNotifier;
     friend class PauseFsmDurationNotifier;
 
@@ -87,9 +86,6 @@ private:
     PhasesLoadUnload phase; // needed for CanSafetyTimerExpire
     std::optional<LoadUnloadMode> load_unload_mode = std::nullopt;
 
-    float nozzle_restore_temp[HOTENDS];
-    float bed_restore_temp;
-
 protected:
     LoadState state { LoadState::unload_start };
     ProgressMapper<LoadState> progress_mapper;
@@ -97,8 +93,6 @@ protected:
     PausePrivatePhase();
     void setPhase(PhasesLoadUnload ph);
 
-    // auto restores temp turned off by safety timer,
-    // it is also restored by SafetyTimer on any user click
     // cannot guarante that SafetyTimer will happen first, so have to do it on both places
     Response getResponse();
 
@@ -114,8 +108,6 @@ protected:
     bool finished() { return state == LoadState::_finished || state == LoadState::_stopped; }
     bool finished_ok() { return state == LoadState::_finished; }
 
-    void clrRestoreTemp();
-
 public:
     inline PhasesLoadUnload getPhase() const {
         return phase;
@@ -124,11 +116,6 @@ public:
     constexpr uint8_t getPhaseIndex() const {
         return GetPhaseIndex(phase);
     }
-
-    virtual void RestoreTemp() override;
-    virtual bool CanSafetyTimerExpire() const override; // evaluate if client can click == safety timer can expire
-    virtual void NotifyExpiredFromSafetyTimer() override;
-    virtual bool HasTempToRestore() const override;
 
     void set_mode(LoadUnloadMode mode) { load_unload_mode = mode; }
     void clr_mode() { load_unload_mode = std::nullopt; }
@@ -367,8 +354,6 @@ private:
     class FSM_HolderLoadUnload : public marlin_server::FSM_Holder {
         Pause &pause;
 
-        void bindToSafetyTimer();
-        void unbindFromSafetyTimer();
         static bool active; // we currently support only 1 instance
         uint16_t original_print_fan_speed;
 
