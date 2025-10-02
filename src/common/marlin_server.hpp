@@ -208,19 +208,6 @@ void print_quick_stop_powerpanic();
 
 int32_t get_knob_position();
 
-void nozzle_timeout_on();
-void nozzle_timeout_off();
-
-class DisableNozzleTimeout {
-public:
-    DisableNozzleTimeout() {
-        nozzle_timeout_off();
-    }
-    ~DisableNozzleTimeout() {
-        nozzle_timeout_on();
-    }
-};
-
 // user can stop waiting for heating/cooling by pressing a button
 bool can_stop_wait_for_heatup();
 void can_stop_wait_for_heatup(bool val);

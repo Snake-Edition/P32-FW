@@ -225,9 +225,7 @@ namespace {
 #if ENABLED(CRASH_RECOVERY) //
         bool aborting_did_crash_trigger = false; // To remember crash_s state when aborting
 #endif /*ENABLED(CRASH_RECOVERY)*/
-        uint32_t paused_ticks; // tick count in moment when printing paused
         resume_state_t resume; // resume data (state before pausing)
-        bool enable_nozzle_temp_timeout; // enables nozzle temperature timeout in print pause
         uint32_t last_update; // last update tick count
         uint16_t flags; // server flags (MARLIN_SFLG)
         int32_t knob_position = 0; /// Increased with each knob move up, decreased with each knob move down
@@ -655,7 +653,6 @@ void init(void) {
         server.notify_changes[i] = 0; // by default nothing
     }
     server_task = osThreadGetId();
-    server.enable_nozzle_temp_timeout = true;
 
     // Random at boot, to avoid chance of reusing the same (0/1) dialog ID
     // after a reboot.
@@ -1878,25 +1875,6 @@ void set_axes_length(xy_float_t xy) {
 }
 #endif // ENABLED(AXIS_MEASURE)
 
-static const uint8_t PAUSE_NOZZLE_TIMEOUT = 45; // nozzle "sleep" after 45s inside paused state
-
-void nozzle_timeout_on() {
-    server.enable_nozzle_temp_timeout = true;
-};
-void nozzle_timeout_off() {
-    server.enable_nozzle_temp_timeout = false;
-}
-void nozzle_timeout_loop() {
-    if ((ticks_ms() - server.paused_ticks > (1000 * PAUSE_NOZZLE_TIMEOUT)) && server.enable_nozzle_temp_timeout) {
-        HOTEND_LOOP() {
-            if ((marlin_vars().hotend(e).target_nozzle > 0)) {
-                thermalManager.setTargetHotend(0, e);
-                set_temp_to_display(0, e);
-            }
-        }
-    }
-}
-
 // Checking valid behaviour of Heatbreak fan & Print fan of currently active extruder/tool
 bool active_extruder_fan_checks() {
     if (marlin_vars().fan_check_enabled
@@ -2214,12 +2192,10 @@ static void _server_print_loop(void) {
         break;
     case State::Pausing_ParkHead:
         if (!planner.processing()) {
-            server.paused_ticks = ticks_ms(); // time when printing paused
             server.print_state = State::Paused;
         }
         break;
     case State::Paused:
-        nozzle_timeout_loop();
         gcode.reset_stepper_timeout(); // prevent disable axis
         // resume queuing serial commands (to be able to resume)
         GCodeQueue::pause_serial_commands = false;
@@ -2691,7 +2667,6 @@ static void _server_print_loop(void) {
             fsm_destroy(ClientFSM::CrashRecovery);
             break;
         }
-        server.paused_ticks = ticks_ms(); // time when printing paused
     #if ENABLED(AXIS_MEASURE)
         Axis_length_t alok = xy_axes_length_ok();
         if (alok != Axis_length_t::ok) {
@@ -2708,7 +2683,6 @@ static void _server_print_loop(void) {
         break;
     }
     case State::CrashRecovery_HOMEFAIL: {
-        nozzle_timeout_loop();
         switch (marlin_server::get_response_from_phase(PhasesCrashRecovery::home_fail)) {
         case Response::Retry: {
             Crash_recovery_fsm cr_fsm(SelftestSubtestState_t::running, SelftestSubtestState_t::undef);
@@ -2723,7 +2697,6 @@ static void _server_print_loop(void) {
         break;
     }
     case State::CrashRecovery_Axis_NOK: {
-        nozzle_timeout_loop();
         switch (marlin_server::get_response_from_phase(PhasesCrashRecovery::axis_NOK)) {
         case Response::Retry:
             measure_axes_and_home();
@@ -2745,7 +2718,6 @@ static void _server_print_loop(void) {
         break;
     }
     case State::CrashRecovery_Repeated_Crash: {
-        nozzle_timeout_loop();
         switch (marlin_server::get_response_from_phase(PhasesCrashRecovery::repeated_crash)) {
         case Response::Resume:
             server.print_state = State::Resuming_Begin;
@@ -2884,7 +2856,6 @@ void resuming_begin(void) {
     modbedMaxTempErrorChecker.reset();
 #endif /*HAS_REMOTE_BED()*/
 
-    nozzle_timeout_on(); // could be turned off after pause by changing temperature.
     if (print_reheat_ready()) {
 
 #if ENABLED(CRASH_RECOVERY)
@@ -3499,7 +3470,6 @@ static void _server_set_var(const Request &request) {
             // if print is paused we want to change the resume temp and turn off timeout
             // this prevents going back to temperature before pause and enables to heat nozzle during pause
             if (server.print_state == State::Paused) {
-                nozzle_timeout_off();
                 server.resume.nozzle_temp[e] = extruder.target_nozzle;
             }
             thermalManager.setTargetHotend(extruder.target_nozzle, e);
