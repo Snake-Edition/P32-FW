@@ -3460,12 +3460,6 @@ static void _server_set_var(const Request &request) {
         auto &extruder = marlin_vars().hotend(e);
         if (reinterpret_cast<uintptr_t>(&extruder.target_nozzle) == variable_identifier) {
             extruder.target_nozzle = request.set_variable.float_value;
-
-            // if print is paused we want to change the resume temp and turn off timeout
-            // this prevents going back to temperature before pause and enables to heat nozzle during pause
-            if (server.print_state == State::Paused) {
-                server.resume.nozzle_temp[e] = extruder.target_nozzle;
-            }
             thermalManager.setTargetHotend(extruder.target_nozzle, e);
             return;
         } else if (reinterpret_cast<uintptr_t>(&extruder.flow_factor) == variable_identifier) {
