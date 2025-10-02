@@ -3091,6 +3091,29 @@ void Temperature::isr() {
       return true;
     }
 
+    void Temperature::setTargetHotend(const int16_t celsius, const uint8_t E_NAME) {
+        const uint8_t ee = HOTEND_INDEX;
+        const int16_t new_temp = _MIN(celsius, temp_range[ee].maxtemp - HEATER_MAXTEMP_SAFETY_MARGIN);
+
+    #if ENABLED(AUTO_POWER_CONTROL)
+        if (celsius) {
+            powerManager.power_on();
+        }
+    #endif
+
+        // target changed, reset time when it reached target
+        if (temp_hotend[ee].target != new_temp) {
+            temp_hotend_residency_start_ms[ee] = 0;
+        }
+
+        temp_hotend[ee].target = new_temp;
+
+        start_watching_hotend(ee);
+    #if ENABLED(PRUSA_TOOLCHANGER)
+        prusa_toolchanger.getTool(ee).set_hotend_target_temp(temp_hotend[ee].target);
+    #endif
+    }
+
     bool Temperature::wait_for_hotend(const uint8_t target_extruder, const bool no_wait_for_cooling/*=true*/, bool fan_cooling/*=false*/) {
       // Loop until the temperature has stabilized
 
@@ -3183,6 +3206,37 @@ void Temperature::isr() {
       // To achieve that, we will have to take the residency out of wait_for_bed and make it global
       return temp_bed.target <= 0 || std::abs(temp_bed.target - temp_bed.celsius) <= TEMP_BED_HYSTERESIS;
     }
+
+    void Temperature::setTargetBed(const int16_t celsius) {
+    #if ENABLED(AUTO_POWER_CONTROL)
+        if (celsius) {
+            powerManager.power_on();
+        }
+    #endif
+        temp_bed.target =
+    #ifdef BED_MAXTEMP
+            _MIN(celsius, BED_MAXTEMP - BED_MAXTEMP_SAFETY_MARGIN)
+    #else
+            celsius
+    #endif
+            ;
+
+    #if HAS_MODULAR_BED()
+        for (uint8_t x = 0; x < X_HBL_COUNT; ++x) {
+            for (uint8_t y = 0; y < Y_HBL_COUNT; ++y) {
+                int16_t target_temp = 0;
+                if (temp_bed.enabled_mask & (1 << advanced_modular_bed->idx(x, y))) {
+                    target_temp = temp_bed.target;
+                }
+                advanced_modular_bed->set_target(x, y, target_temp);
+            }
+        }
+        advanced_modular_bed->update_bedlet_temps(temp_bed.enabled_mask, temp_bed.target);
+    #endif
+
+        start_watching_bed();
+    }
+
 
     bool Temperature::wait_for_bed(const bool no_wait_for_cooling/*=true*/) {
       // TODO: Employ is_bed_temperature_reached once it considers residency

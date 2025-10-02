@@ -568,31 +568,9 @@ class Temperature {
 
     #if HOTENDS
 
-      static void setTargetHotend(const int16_t celsius, const uint8_t E_NAME) {
-        const uint8_t ee = HOTEND_INDEX;
-        const int16_t new_temp = _MIN(celsius, temp_range[ee].maxtemp - HEATER_MAXTEMP_SAFETY_MARGIN);
-
-        #if ENABLED(AUTO_POWER_CONTROL)
-          if (celsius) {
-            powerManager.power_on();
-          }
-        #endif
-        
-        // target changed, reset time when it reached target
-        if (temp_hotend[ee].target != new_temp){
-          temp_hotend_residency_start_ms[ee] = 0;
-        }
-
-        temp_hotend[ee].target = new_temp;
-        
-        start_watching_hotend(ee);
-        #if ENABLED(PRUSA_TOOLCHANGER)
-          prusa_toolchanger.getTool(ee).set_hotend_target_temp(temp_hotend[ee].target);
-        #endif
-
-      }
-
       #if HAS_TEMP_HOTEND
+        static void setTargetHotend(const int16_t celsius, const uint8_t E_NAME);
+
         /// @returns whether the hotend has stabilized on the target temperature (or if the target temp is 0)
         static bool is_hotend_temperature_reached(uint8_t hotend);
 
@@ -646,35 +624,7 @@ class Temperature {
         static inline void start_watching_bed() {}
       #endif
 
-      static void setTargetBed(const int16_t celsius) {
-        #if ENABLED(AUTO_POWER_CONTROL)
-          if (celsius) {
-            powerManager.power_on();
-          }
-        #endif
-        temp_bed.target =
-          #ifdef BED_MAXTEMP
-            _MIN(celsius, BED_MAXTEMP - BED_MAXTEMP_SAFETY_MARGIN)
-          #else
-            celsius
-          #endif
-        ;
-
-        #if HAS_MODULAR_BED()
-          for(uint8_t x = 0; x < X_HBL_COUNT; ++x) {
-            for(uint8_t y = 0; y < Y_HBL_COUNT; ++y) {
-              int16_t target_temp = 0;
-              if(temp_bed.enabled_mask & (1 << advanced_modular_bed->idx(x, y))) {
-                target_temp = temp_bed.target;
-              }
-              advanced_modular_bed->set_target(x, y, target_temp);
-            }
-          }
-          advanced_modular_bed->update_bedlet_temps(temp_bed.enabled_mask, temp_bed.target);
-        #endif
-
-        start_watching_bed();
-      }
+      static void setTargetBed(const int16_t celsius);
 
       /// @returns whether the bed has stabilized on the target temperature (or if the target temp is 0)
       static bool is_bed_temperature_reached();
