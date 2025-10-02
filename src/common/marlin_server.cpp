@@ -1435,15 +1435,6 @@ void print_pause(void) {
     }
 }
 
-/**
- * @brief Restore paused nozzle temperature to enable filament change
- */
-void unpause_nozzle(const uint8_t extruder) {
-    thermalManager.setTargetHotend(server.resume.nozzle_temp[extruder], extruder);
-    set_temp_to_display(server.resume.nozzle_temp[extruder], extruder);
-    server.resume.nozzle_temp_paused = false;
-}
-
 #if ENABLED(CRASH_RECOVERY)
 /**
  * @brief Go to homing or measure axis and follow with homing.
@@ -2870,9 +2861,11 @@ void resuming_begin(void) {
             server.print_state = State::Resuming_UnparkHead_XY;
         }
     } else {
-        HOTEND_LOOP() {
-            unpause_nozzle(e);
+        for (uint8_t hotend = 0; hotend < HOTENDS; hotend++) {
+            thermalManager.setTargetHotend(server.resume.nozzle_temp[hotend], hotend);
+            set_temp_to_display(server.resume.nozzle_temp[hotend], hotend);
         }
+
 #if FAN_COUNT > 0
         thermalManager.set_fan_speed(0, 0); // disable print fan
 #endif

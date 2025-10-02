@@ -79,10 +79,6 @@ static bool load_unload(Pause::LoadType load_type, pause::Settings &rSettings) {
 void filament_gcodes::M701_no_parser(FilamentType filament_to_be_loaded, const std::optional<float> &fast_load_length, float z_min_pos, std::optional<RetAndCool_t> op_preheat, uint8_t target_extruder, int8_t mmu_slot, std::optional<Color> color_to_be_loaded, ResumePrint_t resume_print_request) {
     InProgress progress;
 
-    if (marlin_server::printer_paused()) {
-        marlin_server::unpause_nozzle(target_extruder);
-    }
-
     const bool do_purge_only = fast_load_length.has_value() && fast_load_length <= 0.0f;
 
     if (op_preheat) {
@@ -144,9 +140,6 @@ void filament_gcodes::M701_no_parser(FilamentType filament_to_be_loaded, const s
 void filament_gcodes::M702_no_parser(std::optional<float> unload_length, float z_min_pos, std::optional<RetAndCool_t> op_preheat, uint8_t target_extruder, bool ask_unloaded) {
     InProgress progress;
 
-    if (marlin_server::printer_paused()) {
-        marlin_server::unpause_nozzle(target_extruder);
-    }
 #if HAS_AUTO_RETRACT()
     if (op_preheat && !buddy::auto_retract().is_safely_retracted_for_unload(hotend_from_extruder(target_extruder))) {
 #else

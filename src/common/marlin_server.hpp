@@ -137,8 +137,6 @@ struct resume_state_t {
 //
 void print_pause();
 
-void unpause_nozzle(const uint8_t extruder);
-
 // return true if the printer is currently aborting or already aborted the print
 bool aborting_or_aborted();
 
