@@ -76,7 +76,6 @@ private:
 
 class ScreenPreheat : public ScreenFSM {
     WindowExtendedMenu<WindowMenuPreheat> menu;
-    window_header_t header;
 
 public:
     ScreenPreheat();

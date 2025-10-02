@@ -157,8 +157,7 @@ void WindowMenuPreheat::screenEvent(window_t *sender, GUI_event_t event, void *p
 // * ScreenPreheat
 ScreenPreheat::ScreenPreheat()
     : ScreenFSM(nullptr, {})
-    , menu(this, GuiDefaults::RectScreenNoHeader)
-    , header(this) //
+    , menu(this, GuiDefaults::RectScreenNoHeader) //
 {
     CaptureNormalWindow(menu);
 }
