@@ -11,6 +11,7 @@
 #include "advanced_power.hpp"
 #include <printers.h>
 #include "config_store/store_instance.hpp"
+#include <feature/safety_timer/safety_timer.hpp>
 
 using namespace selftest;
 LOG_COMPONENT_REF(Selftest);

@@ -7,6 +7,7 @@
 #include "selftest_heater_config.hpp"
 #include "selftest_log.hpp"
 #include "power_check.hpp"
+#include <feature/safety_timer/safety_timer.hpp>
 
 namespace selftest {
 
@@ -46,6 +47,8 @@ private:
     LogTimer check_log;
     float power_avg = 0;
     float pwm_avg = 0;
+
+    buddy::SafetyTimerBlocker safety_timer_blocker;
 
     static uint32_t estimate(const HeaterConfig_t &config);
     void actualizeProgress(float current, float progres_start, float progres_end) const;
