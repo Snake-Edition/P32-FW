@@ -292,13 +292,8 @@ void resume_loop() {
         resume.pos = state_buf.crash.crash_current_position;
         resume.fan_speed = state_buf.planner.fan_speed;
         resume.print_speed = state_buf.planner.print_speed;
+        resume.nozzle_temp = state_buf.planner.target_nozzle;
         resume.nozzle_temp_paused = state_buf.planner.was_paused; // Nozzle temperatures are stored in resume
-        HOTEND_LOOP() {
-            resume.nozzle_temp[e] = state_buf.planner.target_nozzle[e];
-            if (state_buf.planner.was_paused) {
-                marlin_server::set_temp_to_display(state_buf.planner.target_nozzle[e], e);
-            }
-        }
         marlin_server::set_resume_data(&resume);
 
         // Set sdpos
@@ -381,6 +376,7 @@ void resume_loop() {
             resume_state = ResumeState::ParkForPause;
         } else {
             HOTEND_LOOP() {
+                marlin_server::set_temp_to_display(state_buf.planner.target_nozzle[e], e);
                 thermalManager.setTargetHotend(state_buf.planner.target_nozzle[e], e);
             }
             // setTargetBed is already called higher up in this function
@@ -911,14 +907,14 @@ void ac_fault_isr() {
 
         // save print temperatures
         if (state_buf.planner.was_paused || resume.nozzle_temp_paused) { // Paused print or whenever nozzle is cooled down
-            HOTEND_LOOP() {
-                state_buf.planner.target_nozzle[e] = resume.nozzle_temp[e];
-            }
+            state_buf.planner.target_nozzle = resume.nozzle_temp;
+
         } else {
             HOTEND_LOOP() {
                 state_buf.planner.target_nozzle[e] = thermalManager.degTargetHotend(e);
             }
         }
+
         if (state_buf.planner.was_paused) {
             state_buf.planner.fan_speed = resume.fan_speed;
             state_buf.planner.print_speed = resume.print_speed;

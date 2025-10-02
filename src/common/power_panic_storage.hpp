@@ -75,7 +75,7 @@ struct state_planner_t {
     float junction_deviation_mm;
 #endif
 
-    int16_t target_nozzle[HOTENDS];
+    std::array<int16_t, HOTENDS> target_nozzle;
     int16_t flow_percentage[HOTENDS];
     int16_t target_bed;
     int16_t extrude_min_temp;
