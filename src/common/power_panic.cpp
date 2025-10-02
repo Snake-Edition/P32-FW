@@ -90,6 +90,7 @@
 
 #include <usb_host/usbh_async_diskio.hpp>
 #include <gcode/gcode_reader_restore_info.hpp>
+#include <feature/safety_timer/safety_timer.hpp>
 
 namespace {
 
@@ -387,6 +388,8 @@ void resume_loop() {
     }
 
     case ResumeState::WaitForHeaters: {
+        buddy::safety_timer().reset_restore_nonblocking();
+
         if (!Temperature::are_all_temperatures_reached()) {
             break;
         }
@@ -908,6 +911,9 @@ void ac_fault_isr() {
         // save print temperatures
         if (state_buf.planner.was_paused || resume.nozzle_temp_paused) { // Paused print or whenever nozzle is cooled down
             state_buf.planner.target_nozzle = resume.nozzle_temp;
+
+        } else if (buddy::safety_timer().is_active()) {
+            state_buf.planner.target_nozzle = buddy::safety_timer().nozzle_temperatures_to_restore();
 
         } else {
             HOTEND_LOOP() {
