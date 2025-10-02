@@ -43,7 +43,7 @@ static constexpr uint32_t score(ClientFSM fsm_type) {
     case ClientFSM::ColdPull:
 #endif
 #if HAS_MANUAL_BELT_TUNING()
-    case ClientFSM::BeltTuning:
+    case ClientFSM::ManualBeltTuning:
 #endif
     case ClientFSM::NetworkSetup:
 #if HAS_PHASE_STEPPING_CALIBRATION()

@@ -62,7 +62,7 @@ enum class PhaseManualBeltTuning : PhaseUnderlyingType {
 
 namespace ClientResponses {
 
-inline constexpr EnumArray<PhaseManualBeltTuning, PhaseResponses, PhaseManualBeltTuning::_cnt> belt_tuning_responses {
+inline constexpr EnumArray<PhaseManualBeltTuning, PhaseResponses, PhaseManualBeltTuning::_cnt> manual_belt_tuning_responses {
     { PhaseManualBeltTuning::intro, { Response::Continue, Response::Abort } },
     { PhaseManualBeltTuning::check_x_gantry, { Response::Continue, Response::Abort } },
     { PhaseManualBeltTuning::homing_wait, {} },
@@ -77,4 +77,4 @@ inline constexpr EnumArray<PhaseManualBeltTuning, PhaseResponses, PhaseManualBel
 
 } // namespace ClientResponses
 
-constexpr inline ClientFSM client_fsm_from_phase(PhaseManualBeltTuning) { return ClientFSM::BeltTuning; }
+constexpr inline ClientFSM client_fsm_from_phase(PhaseManualBeltTuning) { return ClientFSM::ManualBeltTuning; }

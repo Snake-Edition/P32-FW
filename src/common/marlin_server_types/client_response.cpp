@@ -30,7 +30,7 @@ constinit const EnumArray<ClientFSM, std::span<const PhaseResponses>, ClientFSM:
         { ClientFSM::ColdPull, ColdPullResponses },
 #endif
 #if HAS_MANUAL_BELT_TUNING()
-        { ClientFSM::BeltTuning, belt_tuning_responses },
+        { ClientFSM::ManualBeltTuning, manual_belt_tuning_responses },
 #endif
 #if HAS_PHASE_STEPPING_CALIBRATION()
         { ClientFSM::PhaseSteppingCalibration, phase_stepping_calibration_responses },

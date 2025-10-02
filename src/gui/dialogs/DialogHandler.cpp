@@ -200,7 +200,7 @@ using FSMDisplayConfig = FSMDisplayConfigDef<
     FSMScreenDef<ClientFSM::DoorSensorCalibration, ScreenDoorSensorCalibration>,
 #endif
 #if HAS_MANUAL_BELT_TUNING()
-    FSMScreenDef<ClientFSM::BeltTuning, ScreenManualBeltTuning>,
+    FSMScreenDef<ClientFSM::ManualBeltTuning, ScreenManualBeltTuning>,
 #endif
 #if HAS_LOADCELL()
     FSMScreenDef<ClientFSM::NozzleCleaningFailed, ScreenNozzleCleaningFailed>,
