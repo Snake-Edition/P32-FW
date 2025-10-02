@@ -18,6 +18,8 @@
 #include <option/has_manual_belt_tuning.h>
 #include <option/has_loadcell.h>
 #include <gui/screen/screen_preheat.hpp>
+#include <gui/screen/dialog_safety_timer.hpp>
+
 #if HAS_LOADCELL()
     #include <gui/screen/screen_nozzle_cleaning_failed.hpp>
 #endif
@@ -166,6 +168,7 @@ struct FSMDisplayConfigDef {
 
 using FSMDisplayConfig = FSMDisplayConfigDef<
     FSMDialogDef<ClientFSM::Wait, window_dlg_wait_t>,
+    FSMDialogDef<ClientFSM::SafetyTimer, DialogSafetyTimer>,
     FSMPrintDef<ClientFSM::Serial_printing>,
     FSMDialogDef<ClientFSM::Load_unload, DialogLoadUnload>,
     FSMScreenDef<ClientFSM::Preheat, ScreenPreheat>,

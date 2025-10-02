@@ -55,12 +55,17 @@ static constexpr uint32_t score(ClientFSM fsm_type) {
 #if HAS_BELT_TUNING()
     case ClientFSM::BeltTuning:
 #endif
-        return 2;
 #if HAS_LOADCELL()
     case ClientFSM::NozzleCleaningFailed:
 #endif
-    case ClientFSM::Warning:
+        return 2;
+
+    case ClientFSM::SafetyTimer:
+        // Show over everything except warnings
         return 3;
+
+    case ClientFSM::Warning:
+        return 4;
 
     case ClientFSM::_none:
         break;

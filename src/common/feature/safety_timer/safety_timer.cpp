@@ -4,6 +4,32 @@
 #include <RAII.hpp>
 #include <bsod/bsod.h>
 #include <feature/host_actions.h>
+#include <utils/progress.hpp>
+#include <fsm/safety_timer_phases.hpp>
+
+namespace {
+void handle_resuming_abort() {
+    // Abort right away if not printing
+    if (marlin_server::is_printing()) {
+        marlin_server::fsm_change(PhaseSafetyTimer::abort_confirm);
+        switch (marlin_server::wait_for_response(PhaseSafetyTimer::abort_confirm)) {
+
+        case Response::No:
+            return;
+
+        case Response::Abort:
+            // Continue aborting
+            break;
+
+        default:
+            bsod_unreachable();
+        }
+    }
+
+    marlin_server::print_abort();
+    marlin_server::quick_stop();
+}
+} // namespace
 
 namespace buddy {
 
@@ -62,9 +88,27 @@ void SafetyTimer::reset_restore_blocking() {
     // Prevent the timer from timing out during the heatup
     SafetyTimerBlocker timer_blocker;
 
+    std::array<float, HOTENDS> start_temperatures;
+    for (uint8_t hotend = 0; hotend < HOTENDS; hotend++) {
+        start_temperatures[hotend] = Temperature::degHotend(hotend);
+    }
+
     while (!planner.draining() && state() == State::restoring) {
+        float min_progress = 1;
+        for (uint8_t hotend = 0; hotend < HOTENDS; hotend++) {
+            const float hotend_progress = to_normalized_progress(start_temperatures[hotend], Temperature::degTargetHotend(hotend), Temperature::degHotend(hotend));
+            min_progress = std::min(min_progress, hotend_progress);
+        }
+        marlin_server::fsm_change(PhaseSafetyTimer::resuming, fsm::serialize_data<float>(min_progress * 100));
+
+        if (marlin_server::get_response_from_phase(PhaseSafetyTimer::resuming) == Response::Abort) {
+            handle_resuming_abort();
+        }
+
         idle(true);
     }
+
+    marlin_server::fsm_destroy(ClientFSM::SafetyTimer);
 }
 
 void SafetyTimer::trigger() {

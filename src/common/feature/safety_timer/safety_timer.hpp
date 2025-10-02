@@ -69,7 +69,6 @@ public:
     void reset_restore_nonblocking();
 
     /// RESTARTS the inactivity timer and BLOCKINGLY RESTORES the temperatures (if the timer was holding)
-    /// TODO Also shows a nice progress bar
     void reset_restore_blocking();
 
     /// Trigger safety timer, disable all heaters and whatnot

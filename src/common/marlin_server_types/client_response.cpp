@@ -1,5 +1,6 @@
 #include "client_response.hpp"
 #include <option/has_manual_belt_tuning.h>
+#include <fsm/safety_timer_phases.hpp>
 
 #if HAS_MANUAL_BELT_TUNING()
     #include <fsm/manual_belt_tuning_phases.hpp>
@@ -50,6 +51,7 @@ constinit const EnumArray<ClientFSM, std::span<const PhaseResponses>, ClientFSM:
 #if HAS_LOADCELL()
         { ClientFSM::NozzleCleaningFailed, nozzle_cleaning_responses },
 #endif
+        { ClientFSM::SafetyTimer, safety_timer_responses },
         { ClientFSM::Wait, {} },
 };
 
