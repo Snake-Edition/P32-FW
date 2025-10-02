@@ -1913,6 +1913,7 @@ static void resuming_reheating() {
         thermalManager.set_fan_speed(0, 255);
 #endif
         server.print_state = State::Paused;
+        return;
     }
 
     if (active_extruder_fan_checks()) {
