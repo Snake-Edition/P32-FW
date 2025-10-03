@@ -330,10 +330,6 @@ void metric_record_integer_at_time(metric_t *, uint32_t, int) {}
 
 unsigned HAL_RCC_CSR = 0;
 
-#include "Marlin/src/gcode/gcode.h"
-
-millis_t GcodeSuite::previous_move_ms = 0;
-
 #include "Marlin/src/gcode/queue.h"
 
 void GCodeQueue::get_available_commands() {

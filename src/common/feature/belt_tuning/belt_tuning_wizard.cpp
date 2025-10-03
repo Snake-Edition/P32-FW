@@ -28,7 +28,6 @@ public:
     void run() {
         while (fsm_.loop()) {
             idle(true);
-            gcode.reset_stepper_timeout();
         }
     }
 

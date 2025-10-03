@@ -2194,7 +2194,6 @@ static void _server_print_loop(void) {
         }
         break;
     case State::Paused:
-        gcode.reset_stepper_timeout(); // prevent disable axis
         // resume queuing serial commands (to be able to resume)
         GCodeQueue::pause_serial_commands = false;
 
@@ -2630,7 +2629,6 @@ static void _server_print_loop(void) {
         } else {
             Crash_recovery_tool_fsm cr_fsm(prusa_toolchanger.get_enabled_mask(), prusa_toolchanger.get_parked_mask());
             fsm_change(PhasesCrashRecovery::tool_recovery, cr_fsm.Serialize());
-            gcode.reset_stepper_timeout(); // Prevent disable axis
         }
         break;
     }
@@ -2691,7 +2689,6 @@ static void _server_print_loop(void) {
         default:
             break;
         }
-        gcode.reset_stepper_timeout(); // Prevent disable axis
         break;
     }
     case State::CrashRecovery_Axis_NOK: {
@@ -2712,7 +2709,6 @@ static void _server_print_loop(void) {
             server.print_state = State::Paused;
             fsm_destroy(ClientFSM::CrashRecovery);
         }
-        gcode.reset_stepper_timeout(); // prevent disable axis
         break;
     }
     case State::CrashRecovery_Repeated_Crash: {
@@ -2727,7 +2723,6 @@ static void _server_print_loop(void) {
             server.print_state = State::Paused;
             fsm_destroy(ClientFSM::CrashRecovery);
         }
-        gcode.reset_stepper_timeout(); // prevent disable axis
         break;
     }
 #endif // ENABLED(CRASH_RECOVERY)

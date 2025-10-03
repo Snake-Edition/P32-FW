@@ -408,7 +408,6 @@ void Vibrate::step() {
     StepDir stepDir(generator);
 
     uint32_t step_nr = 0;
-    GcodeSuite::reset_stepper_timeout();
     const uint32_t steps_to_do = generator.getStepsPerPeriod() * 1;
 
     while (step_nr < steps_to_do) {
@@ -520,7 +519,6 @@ std::optional<VibrateMeasureResult> vibrate_measure(const VibrateMeasureParams &
     };
 
     uint32_t step_nr = 0;
-    GcodeSuite::reset_stepper_timeout();
     const uint32_t steps_to_do = generator.getStepsPerPeriod() * args.excitation_cycles;
     const uint32_t steps_to_do_max = steps_to_do * 2 + generator.getStepsPerPeriod() + STEP_EVENT_QUEUE_SIZE;
     bool do_once = true; // Do once after step buffer is refilled

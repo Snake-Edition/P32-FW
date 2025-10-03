@@ -129,7 +129,6 @@ LoopResult CSelftestPart_Loadcell::stateCooldown() {
     if (need_cooling && temp > rConfig.cool_temp) {
         LogInfoTimed(log, "%s cooling down, target: %d current: %f", rConfig.partname,
             static_cast<int>(rConfig.cool_temp), static_cast<double>(temp));
-        gcode.reset_stepper_timeout(); // Do not disable steppers while cooling
         return LoopResult::RunCurrent;
     }
 

@@ -157,7 +157,6 @@ void PrusaGcodeSuite::M141_no_parser(const M141Args &args) {
         }
 
         idle(true);
-        gcode.reset_stepper_timeout();
     }
 
     marlin_server::clear_warning(WarningType::FailedToReachChamberTemperature);

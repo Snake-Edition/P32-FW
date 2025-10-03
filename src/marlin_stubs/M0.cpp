@@ -29,9 +29,5 @@ void PrusaGcodeSuite::M0() {
 
     while (marlin_server::get_response_from_phase(PhasesQuickPause::QuickPaused) == Response::_none) {
         idle(true, true);
-        // It's not enough to call idle with no_stepper_sleep = true, as the
-        // first idle() call right after this gcode would disable the steppers
-        // anyway. Hence, reset the timeout explicitely.
-        gcode.reset_stepper_timeout();
     }
 }

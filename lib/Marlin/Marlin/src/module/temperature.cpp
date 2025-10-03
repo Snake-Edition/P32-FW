@@ -3311,7 +3311,6 @@ void Temperature::isr() {
         }
 
         idle(true);
-        gcode.reset_stepper_timeout(); // Keep steppers powered
 
         const float temp = degBed();
         statusGuard.update<PrintStatusMessage::waiting_for_bed_temp>({.current = temp, .target = target_temp});

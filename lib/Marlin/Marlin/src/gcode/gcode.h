@@ -355,8 +355,6 @@ public:
     static int8_t get_coordinate_system();
     static void set_coordinate_system_offset(int8_t system, AxisEnum axis, float offset);
   #endif
-  static millis_t previous_move_ms;
-  FORCE_INLINE static void reset_stepper_timeout() { previous_move_ms = millis(); }
 
   /// Validates that the option value is valid and may pass it through tool mapping (depending on is_physical flag)
   static int8_t get_target_extruder_from_option_value(std::optional<uint8_t> option_value, const bool is_physical);
