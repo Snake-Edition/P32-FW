@@ -48,8 +48,7 @@ MoveTarget::MoveTarget(float initial_pos)
     , half_accel(0)
     , start_v(0)
     , duration(0)
-    , target_pos(initial_pos)
-    , end_time(0) {}
+    , target_pos(initial_pos) {}
 
 MoveTarget::MoveTarget(float initial_pos, const move_t &move, int axis, const uint64_t move_duration_ticks)
     : initial_pos(initial_pos)
@@ -59,7 +58,6 @@ MoveTarget::MoveTarget(float initial_pos, const move_t &move, int axis, const ui
     half_accel = r * float(move.half_accel);
     start_v = r * float(move.start_v);
     target_pos = target_position();
-    end_time = move_end_time(move.print_time + move.move_time);
 }
 
 MoveTarget::MoveTarget(float initial_pos, const input_shaper_state_t &is_state, const uint64_t move_duration_ticks)
@@ -69,19 +67,6 @@ MoveTarget::MoveTarget(float initial_pos, const input_shaper_state_t &is_state, 
     , duration(uint32_t(move_duration_ticks)) {
     assert(move_duration_ticks <= std::numeric_limits<uint32_t>::max());
     target_pos = target_position();
-    end_time = move_end_time(is_state.nearest_next_change);
-}
-
-float MoveTarget::move_end_time(double end_time) const {
-    // To ensure the lock-free behavior of current_target_end_time (and conserve space) we reduce
-    // the precision of end_time to float. Since end_time is only used for flushing, the precision
-    // is not crucial (no steps are produced) as long as we *guarantee* proper ordering.
-    // The value needs to be strictly <= when compared and we do so here.
-    float f_end_time = end_time;
-    if (f_end_time > end_time) {
-        f_end_time = std::nextafterf(f_end_time, 0.f);
-    }
-    return f_end_time;
 }
 
 float MoveTarget::target_position() const {
@@ -98,12 +83,12 @@ FORCE_INLINE uint64_t convert_absolute_time_to_ticks(const double time) {
     return uint64_t(time * TICK_FREQ);
 }
 
-FORCE_INLINE uint64_t calc_move_segment_end_time_in_ticks(const move_t &move) {
-    return convert_absolute_time_to_ticks(move.print_time + move.move_time);
+FORCE_INLINE double calc_move_segment_end_time(const move_t &move) {
+    return move.print_time + move.move_time;
 }
 
-FORCE_INLINE uint64_t calc_move_segment_end_time_in_ticks(const input_shaper_state_t &is_state) {
-    return convert_absolute_time_to_ticks(is_state.nearest_next_change);
+FORCE_INLINE double calc_move_segment_end_time(const input_shaper_state_t &is_state) {
+    return is_state.nearest_next_change;
 }
 
 template <typename T>
@@ -133,7 +118,7 @@ static void init_step_generator_internal(
 
     axis_state.last_position = axis_state.next_target.initial_pos;
     axis_state.current_target = MoveTarget(axis_state.last_position);
-    axis_state.current_target_end_time = MAX_PRINT_TIME;
+    axis_state.next_target_end_time = MAX_PRINT_TIME;
 
     int32_t initial_steps_made = pos_to_steps(AxisEnum(axis), axis_state.next_target.initial_pos);
     axis_state.initial_count_position = Stepper::get_axis_steps(AxisEnum(axis)) - initial_steps_made;
@@ -154,7 +139,8 @@ void phase_stepping::init_step_generator_classic(
     const uint8_t axis = step_generator.axis;
     axis_state.current_print_time_ticks = convert_absolute_time_to_ticks(move.print_time);
 
-    const uint64_t next_print_time_ticks = calc_move_segment_end_time_in_ticks(move);
+    axis_state.next_target_end_time = calc_move_segment_end_time(move);
+    const uint64_t next_print_time_ticks = convert_absolute_time_to_ticks(axis_state.next_target_end_time);
     const uint64_t move_duration_ticks = next_print_time_ticks - axis_state.current_print_time_ticks;
     const float move_start_pos = extract_physical_position(AxisEnum(axis), move.start_pos);
     axis_state.next_target = MoveTarget(move_start_pos, move, axis, move_duration_ticks);
@@ -185,7 +171,8 @@ void phase_stepping::init_step_generator_input_shaping(
 
     axis_state.current_print_time_ticks = convert_absolute_time_to_ticks(step_generator.is_state->print_time);
 
-    const uint64_t next_print_time_ticks = calc_move_segment_end_time_in_ticks(*step_generator.is_state);
+    axis_state.next_target_end_time = calc_move_segment_end_time(*step_generator.is_state);
+    const uint64_t next_print_time_ticks = convert_absolute_time_to_ticks(axis_state.next_target_end_time);
     const uint64_t move_duration_ticks = next_print_time_ticks - axis_state.current_print_time_ticks;
     axis_state.next_target = MoveTarget(step_generator.is_state->start_pos, *step_generator.is_state, move_duration_ticks);
     axis_state.current_print_time_ticks = next_print_time_ticks;
@@ -211,7 +198,7 @@ step_event_info_t phase_stepping::next_step_event_classic(
 
     step_event_info_t next_step_event = { std::numeric_limits<double>::max(), 0, STEP_EVENT_INFO_STATUS_GENERATED_INVALID };
     if (axis_state.pending_targets.isFull()) {
-        next_step_event.time = axis_state.current_target_end_time;
+        next_step_event.time = axis_state.next_target_end_time;
         next_step_event.status = StepEventInfoStatus::STEP_EVENT_INFO_STATUS_GENERATED_PENDING;
     } else if (const move_t *next_move = PreciseStepping::move_segment_queue_next_move(*axis_state.last_processed_move); next_move != nullptr) {
         next_step_event.time = next_move->print_time;
@@ -226,7 +213,8 @@ step_event_info_t phase_stepping::next_step_event_classic(
 
         // buffer the next
         if (!is_ending_empty_move(*next_move)) {
-            const uint64_t next_print_time_ticks = calc_move_segment_end_time_in_ticks(*next_move);
+            axis_state.next_target_end_time = calc_move_segment_end_time(*next_move);
+            const uint64_t next_print_time_ticks = convert_absolute_time_to_ticks(axis_state.next_target_end_time);
             const uint64_t move_duration_ticks = next_print_time_ticks - axis_state.current_print_time_ticks;
             axis_state.next_target = MoveTarget(move_start_pos, *next_move, axis, move_duration_ticks);
             axis_state.current_print_time_ticks = next_print_time_ticks;
@@ -261,7 +249,7 @@ step_event_info_t phase_stepping::next_step_event_input_shaping(
 
     step_event_info_t next_step_event = { std::numeric_limits<double>::max(), 0, STEP_EVENT_INFO_STATUS_GENERATED_INVALID };
     if (axis_state.pending_targets.isFull()) {
-        next_step_event.time = axis_state.current_target_end_time;
+        next_step_event.time = axis_state.next_target_end_time;
         next_step_event.status = StepEventInfoStatus::STEP_EVENT_INFO_STATUS_GENERATED_PENDING;
     } else {
         next_step_event.time = step_generator.is_state->nearest_next_change;
@@ -277,7 +265,8 @@ step_event_info_t phase_stepping::next_step_event_input_shaping(
 
             // buffer the next
             if (step_generator.is_state->nearest_next_change < MAX_PRINT_TIME) {
-                const uint64_t next_print_time_ticks = calc_move_segment_end_time_in_ticks(*step_generator.is_state);
+                axis_state.next_target_end_time = calc_move_segment_end_time(*step_generator.is_state);
+                const uint64_t next_print_time_ticks = convert_absolute_time_to_ticks(axis_state.next_target_end_time);
                 const uint64_t move_duration_ticks = next_print_time_ticks - axis_state.current_print_time_ticks;
                 axis_state.next_target = MoveTarget(move_start_pos, *step_generator.is_state, move_duration_ticks);
                 axis_state.current_print_time_ticks = next_print_time_ticks;
@@ -687,8 +676,6 @@ static FORCE_INLINE FORCE_OFAST void refresh_axis(
             // Pull new movement
             const auto current_target = axis_state.pending_targets.dequeue();
             axis_state.current_target = current_target;
-
-            axis_state.current_target_end_time = current_target.end_time;
 
             axis_state.is_cruising = (current_target.half_accel == 0) && (current_target.duration > 10'000);
             axis_state.is_moving = true;
