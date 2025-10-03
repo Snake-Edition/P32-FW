@@ -675,7 +675,7 @@ static FORCE_INLINE FORCE_OFAST void refresh_axis(
     uint32_t move_epoch = ticks_diff(now, axis_state.initial_time);
     float move_position = axis_state.last_position;
 
-    while (!axis_state.current_target.has_value() || move_epoch > axis_state.current_target->duration) {
+    while (!axis_state.current_target.has_value() || move_epoch >= axis_state.current_target->duration) {
         if (axis_state.current_target.has_value()) {
             axis_state.initial_time += axis_state.current_target->duration;
             move_position = axis_state.current_target->target_pos;
