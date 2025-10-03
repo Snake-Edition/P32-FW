@@ -237,7 +237,6 @@ typedef struct {
 #endif
 
 struct PlannerHints {
-  float millimeters = 0.0;            // Move Length, if known, else 0.
   #if ENABLED(HINTS_CURVE_RADIUS)
     float curve_radius = 0.0;         // Radius of curvature of the motion path - to calculate cornering speed
   #else

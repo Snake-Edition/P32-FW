@@ -1280,6 +1280,9 @@ bool Planner::_populate_block(block_t * const block,
   block->flag.clear();
   block->busy = false;
 
+  // TODO: raw_block (no_discard) = hints.last_segment
+  // Don't discard last segment even if it's shorted than MIN_MSTEPS_PER_SEGMENT
+
   // Set direction bits
   block->direction_bits = dm;
 
@@ -1302,43 +1305,34 @@ bool Planner::_populate_block(block_t * const block,
 
   #if EXTRUDERS
     delta_mm.e = e_msteps_float * mm_per_mstep[E_AXIS_N(extruder)];
-  #endif
-
-  if (!hints.raw_block NUM_AXIS_GANG(
-      && block->msteps.a < MIN_MSTEPS_PER_SEGMENT, && block->msteps.b < MIN_MSTEPS_PER_SEGMENT, && block->msteps.c < MIN_MSTEPS_PER_SEGMENT,
-      && block->msteps.i < MIN_MSTEPS_PER_SEGMENT, && block->msteps.j < MIN_MSTEPS_PER_SEGMENT, && block->msteps.k < MIN_MSTEPS_PER_SEGMENT,
-      && block->msteps.u < MIN_MSTEPS_PER_SEGMENT, && block->msteps.v < MIN_MSTEPS_PER_SEGMENT, && block->msteps.w < MIN_MSTEPS_PER_SEGMENT
-    )
-  ) {
-    block->millimeters = TERN0(HAS_EXTRUDERS, ABS(delta_mm.e));
-  }
-  else {
-    if (hints.millimeters)
-      block->millimeters = hints.millimeters;
-    else
-      block->millimeters = SQRT(sq(delta_mm.x) + sq(delta_mm.y) + sq(delta_mm.z));
-
-    /**
-     * At this point at least one of the axes has more mini-steps than
-     * MIN_MSTEPS_PER_SEGMENT, ensuring the segment won't get dropped as
-     * zero-length. It's important to not apply corrections
-     * to blocks that would get dropped!
-     *
-     * A correction function is permitted to add steps to an axis, it
-     * should *never* remove steps!
-     */
-    #if ENABLED(BACKLASH_COMPENSATION)
-      if (!hints.raw_block) {
-        backlash.add_correction_msteps(da, db, dc, dm, block);
-      }
-    #endif
-  }
-
-  #if EXTRUDERS
     block->msteps.e = e_msteps;
   #endif
 
   block->mstep_event_count = _MAX(block->msteps.a, block->msteps.b, block->msteps.c, e_msteps);
+
+  // Always calculate the block length if we are going to keep it
+  if (block->mstep_event_count >= MIN_MSTEPS_PER_SEGMENT || block->flag.raw_block) {
+    if (block->msteps.a || block->msteps.b || block->msteps.c) {
+      block->millimeters = SQRT(sq(delta_mm.x) + sq(delta_mm.y) + sq(delta_mm.z));
+    } else {
+      block->millimeters = abs(delta_mm.e);
+    }
+  }
+
+    /**
+   * At this point at least one of the axes has more mini-steps than
+   * MIN_MSTEPS_PER_SEGMENT, ensuring the segment won't get dropped as
+   * zero-length. It's important to not apply corrections
+   * to blocks that would get dropped!
+   *
+   * A correction function is permitted to add steps to an axis, it
+   * should *never* remove steps!
+   */
+  #if ENABLED(BACKLASH_COMPENSATION)
+    if (!hints.no_discard) {
+      backlash.add_correction_msteps(da, db, dc, dm, block);
+    }
+  #endif
 
   if (!hints.raw_block) {
     // Bail if this is a regular short block
