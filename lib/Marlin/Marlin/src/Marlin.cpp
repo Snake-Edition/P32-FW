@@ -166,9 +166,6 @@ bool wait_for_heatup = true;
   bool suspend_auto_report; // = false
 #endif
 
-// Inactivity shutdown
-millis_t stepper_inactive_time = (DEFAULT_STEPPER_DEACTIVE_TIME) * 1000UL;
-
 #if PIN_EXISTS(CHDK)
   extern millis_t chdk_timeout;
 #endif
@@ -336,8 +333,6 @@ bool anyHeatherIsActive() {
  * Manage several activities:
  *  - Check for Filament Runout
  *  - Keep the command buffer full
- *  - Check for maximum inactive time between commands
- *  - Check for maximum inactive time between stepper commands
  *  - Check if CHDK_PIN needs to go LOW
  *  - Check for KILL button held down
  *  - Check for HOME button held down
@@ -354,7 +349,7 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
 
   if (queue.length < BUFSIZE) queue.get_available_commands();
 
-  const millis_t ms = millis();
+  [[maybe_unused]] const millis_t ms = millis();
 
   // Prevent steppers timing-out in the middle of M600
   #if BOTH(ADVANCED_PAUSE_FEATURE, PAUSE_PARK_NO_STEPPER_TIMEOUT)
@@ -362,23 +357,6 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
   #else
     #define MOVE_AWAY_TEST true
   #endif
-
-  #if HAS_PLANNER()
-    if (stepper_inactive_time) {
-      static bool already_shutdown_steppers; // = false
-      if (planner.processing())
-        gcode.reset_stepper_timeout();
-      else if (MOVE_AWAY_TEST && !ignore_stepper_queue && ELAPSED(ms, gcode.previous_move_ms + stepper_inactive_time)) {
-        if (!already_shutdown_steppers) {
-          already_shutdown_steppers = true;  // L6470 SPI will consume 99% of free time without this
-
-          // Moved to StepperTimeoutManager
-        }
-      }
-      else
-        already_shutdown_steppers = false;
-    }
-  #endif /* HAS_PLANNER() */
 
   #if PIN_EXISTS(CHDK) // Check if pin should be set to LOW (after M240 set it HIGH)
     if (chdk_timeout && ELAPSED(ms, chdk_timeout)) {

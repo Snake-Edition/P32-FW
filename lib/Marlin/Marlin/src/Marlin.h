@@ -80,9 +80,6 @@ extern bool wait_for_heatup;
 
 extern uint16_t job_id;
 
-// Inactivity shutdown timer
-extern millis_t stepper_inactive_time;
-
 #if HAS_POWER_SWITCH
   extern bool powersupply_on;
   #define PSU_PIN_ON()  do{ OUT_WRITE(PS_ON_PIN,  PSU_ACTIVE_HIGH); powersupply_on = true; }while(0)
