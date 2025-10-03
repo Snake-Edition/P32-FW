@@ -39,6 +39,7 @@
 #include <utils/string_builder.hpp>
 #include <utils/mutex_atomic.hpp>
 #include <feature/safety_timer/safety_timer.hpp>
+#include <feature/stepper_timeout/stepper_timeout.hpp>
 
 #include "../Marlin/src/lcd/extensible_ui/ui_api.h"
 #include "../Marlin/src/gcode/queue.h"
@@ -795,6 +796,10 @@ static void cycle() {
 #endif
 
     buddy::safety_timer().step();
+
+    // Although the timeout should never trigger within idle() (= when a gcode is run),
+    // We still need to run the step() there to prevent "sampling bias" so that the timer could reset itself during movements and single-injected gcodes
+    buddy::stepper_timeout().step();
 
     record_fanctl_metrics();
 

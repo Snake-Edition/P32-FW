@@ -25,6 +25,7 @@
 #include "../../lcd/ultralcd.h"
 #include "../../module/stepper.h"
 #include "gcode/parser.h"
+#include <feature/stepper_timeout/stepper_timeout.hpp>
 
 /** \addtogroup G-Codes
  * @{
@@ -117,7 +118,7 @@ void GcodeSuite::M17() {
  */
 void GcodeSuite::M18_M84() {
   if (parser.seenval('S')) {
-    stepper_inactive_time = parser.value_millis_from_seconds();
+    buddy::stepper_timeout().set_interval_ms(parser.value_millis_from_seconds());
   }
   else {
     if (parser.seen("XYZE")) {

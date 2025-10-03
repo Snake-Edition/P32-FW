@@ -379,33 +379,7 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
         if (!already_shutdown_steppers) {
           already_shutdown_steppers = true;  // L6470 SPI will consume 99% of free time without this
 
-          #if _DEBUG && BOARD_IS_MASTER_BOARD()
-          // Report steppers being disabled to the user
-          // Skip if position not trusted to avoid warnings when position is not important
-          if(axes_home_level != AxesHomeLevel::no_axes_homed) {
-            /// @note Hacky link from marlin_server which cannot be included here.
-            /// @todo Remove when stepper timeout screen is solved properly.
-            extern void marlin_server_steppers_timeout_warning();
-            marlin_server_steppers_timeout_warning();
-          }
-          #endif
-
-          #if (ENABLED(XY_LINKED_ENABLE) && (ENABLED(DISABLE_INACTIVE_X) || ENABLED(DISABLE_INACTIVE_Y)))
-            disable_XY();
-          #else
-            #if ENABLED(DISABLE_INACTIVE_X)
-              disable_X();
-            #endif
-            #if ENABLED(DISABLE_INACTIVE_Y)
-              disable_Y();
-            #endif
-          #endif
-          #if ENABLED(DISABLE_INACTIVE_Z)
-            disable_Z();
-          #endif
-          #if ENABLED(DISABLE_INACTIVE_E)
-            disable_e_steppers();
-          #endif
+          // Moved to StepperTimeoutManager
         }
       }
       else
