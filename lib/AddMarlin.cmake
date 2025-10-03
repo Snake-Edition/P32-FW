@@ -86,7 +86,6 @@ if(BOARD_IS_MASTER_BOARD)
             Marlin/Marlin/src/gcode/control/M42.cpp
             Marlin/Marlin/src/gcode/control/M7-M9.cpp
             Marlin/Marlin/src/gcode/control/M80_M81.cpp
-            Marlin/Marlin/src/gcode/control/M85.cpp
             Marlin/Marlin/src/gcode/control/M86.cpp
             Marlin/Marlin/src/gcode/control/M999.cpp
             Marlin/Marlin/src/gcode/eeprom/M500-M504.cpp

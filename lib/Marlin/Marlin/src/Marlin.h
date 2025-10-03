@@ -81,7 +81,7 @@ extern bool wait_for_heatup;
 extern uint16_t job_id;
 
 // Inactivity shutdown timer
-extern millis_t max_inactive_time, stepper_inactive_time;
+extern millis_t stepper_inactive_time;
 
 #if HAS_POWER_SWITCH
   extern bool powersupply_on;

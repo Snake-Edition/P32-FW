@@ -167,8 +167,7 @@ bool wait_for_heatup = true;
 #endif
 
 // Inactivity shutdown
-millis_t max_inactive_time, // = 0
-         stepper_inactive_time = (DEFAULT_STEPPER_DEACTIVE_TIME) * 1000UL;
+millis_t stepper_inactive_time = (DEFAULT_STEPPER_DEACTIVE_TIME) * 1000UL;
 
 #if PIN_EXISTS(CHDK)
   extern millis_t chdk_timeout;
@@ -356,12 +355,6 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
   if (queue.length < BUFSIZE) queue.get_available_commands();
 
   const millis_t ms = millis();
-
-  if (max_inactive_time && ELAPSED(ms, gcode.previous_move_ms + max_inactive_time)) {
-    SERIAL_ERROR_START();
-    SERIAL_ECHOLNPAIR(MSG_KILL_INACTIVE_TIME, parser.command_ptr);
-    kill(PSTR("Inactive time kill"), parser.command_ptr);
-  }
 
   // Prevent steppers timing-out in the middle of M600
   #if BOTH(ADVANCED_PAUSE_FEATURE, PAUSE_PARK_NO_STEPPER_TIMEOUT)
