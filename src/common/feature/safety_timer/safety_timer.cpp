@@ -2,7 +2,7 @@
 
 #include <marlin_server.hpp>
 #include <RAII.hpp>
-#include <bsod/bsod.h>
+#include <buddy/unreachable.hpp>
 #include <feature/host_actions.h>
 #include <utils/progress.hpp>
 #include <fsm/safety_timer_phases.hpp>
@@ -22,7 +22,7 @@ void handle_resuming_abort() {
             break;
 
         default:
-            bsod_unreachable();
+            BUDDY_UNREACHABLE();
         }
     }
 
@@ -117,7 +117,7 @@ void SafetyTimer::trigger() {
 
     if (blocker_count_ > 0) {
         // Never call this when a blocker is active
-        bsod_unreachable();
+        BUDDY_UNREACHABLE();
     }
 
     // In case the trigger was called explicitly from somewhere
@@ -171,7 +171,7 @@ void SafetyTimer::trigger() {
     if (state_ == State::active) {
         // We should NEVER get to the state where we have heaters on when the SafetyTimer is marked as active.
         // setTargetHotend HAS to reset the safety timer before changing target temps
-        bsod_unreachable();
+        BUDDY_UNREACHABLE();
     }
 
     state_ = State::active;

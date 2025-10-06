@@ -15,13 +15,13 @@ public:
     }
 
     void update(fsm::PhaseData data) {
-        progress_bar.set_progress_percent(fsm::deserialize_data<float>(data));
+        progress_bar.SetProgressPercent(fsm::deserialize_data<float>(data));
     }
 };
 
 using Frames = FrameDefinitionList<DialogSafetyTimer::FrameStorage,
     FrameDefinition<Phase::resuming, FrameResuming>,
-    FrameDefinition<Phase::abort_confirm, FramePrompt, N_("Abort print?"), N_("Do you really want to abort the print?")> //
+    FrameDefinition<Phase::abort_confirm, WithConstructorArgs<FramePrompt, N_("Abort print?"), N_("Do you really want to abort the print?")>> //
     >;
 
 DialogSafetyTimer::DialogSafetyTimer(fsm::BaseData data)
