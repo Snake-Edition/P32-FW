@@ -318,7 +318,7 @@ bool Pause::ensureSafeTemperatureNotifyProgress() {
         if (check_user_stop(getResponse())) {
             return false;
         }
-        idle(true, true);
+        idle(true);
     }
 
     // Check that safety timer didn't disable heaters
@@ -1138,7 +1138,7 @@ bool Pause::invoke_loop() {
             set(LoadState::stop);
         }
         (this->*(state_handlers[state]))(response);
-        idle(true, true); // idle loop to prevent wdt and manage heaters etc, true == do not shutdown steppers
+        idle(true); // idle loop to prevent wdt and manage heaters etc
     };
 
 #if ENABLED(PID_EXTRUSION_SCALING)
@@ -1199,7 +1199,7 @@ bool Pause::parkMoveXGreaterThanY(const xyz_pos_t &pos0, const xyz_pos_t &pos1) 
 
             return StopConditions::SideFilamentSensorRunout;
         }
-        idle(true, true);
+        idle(true);
     }
     return StopConditions::Accomplished;
 }
@@ -1520,6 +1520,10 @@ void Pause::handle_help(Response response) {
 
     if (marlin_server::prompt_warning(warning) == Response::FS_disable) {
         FSensors_instance().set_enabled_global(false);
+        while (FSensors_instance().is_enable_state_update_processing()) {
+            // Wait for the filament sensor disable to propagate, some phases rely on it to be updated
+            idle(true);
+        }
         marlin_server::set_warning(WarningType::FilamentSensorsDisabled);
         config_store().show_fsensors_disabled_warning_after_print.set(true);
     }

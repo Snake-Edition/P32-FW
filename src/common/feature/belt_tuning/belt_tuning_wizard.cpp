@@ -109,7 +109,7 @@ private:
                 }));
             }
 
-            idle(true, true);
+            idle(true);
             return true;
         });
 
@@ -193,7 +193,7 @@ private:
                     return false;
                 }
 
-                idle(true, true);
+                idle(true);
                 return true;
             });
         }

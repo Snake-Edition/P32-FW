@@ -449,7 +449,7 @@ void manage_inactivity() {
  *   @par @c true Keep steppers from disabling on timeout
  *   @par @c false Allow steppers to release (and lose position) on timeout
  */
-void idle(bool waiting, [[maybe_unused]] bool no_stepper_sleep/*=false*/) {
+void idle(bool waiting) {
   #if HAS_PLANNER()
     endstops.event_handler();
   #endif

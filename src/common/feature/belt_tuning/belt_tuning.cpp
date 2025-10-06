@@ -119,7 +119,7 @@ std::optional<MeasureBeltTensionResult> measure_belt_tension(const MeasureBeltTe
         }
 
         const auto measure_result = vibrate_measure_repeat(measure_params, frequency, [&](auto) {
-            idle(true, true);
+            idle(true);
 
             return !config.progress_callback || config.progress_callback(progress_args);
         });

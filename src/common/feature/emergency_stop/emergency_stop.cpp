@@ -154,7 +154,7 @@ void EmergencyStop::maybe_block() {
     // If the power panic started the draining, we shall quit from inside of
     // the planner as fast as possible.
     while (in_emergency() && !planner.draining() && !PreciseStepping::stopping() && !power_panic::ac_fault_triggered) {
-        idle(true, true);
+        idle(true);
     }
 
     // Trigger the scope guards: unpark, clear the warning

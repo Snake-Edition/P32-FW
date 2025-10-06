@@ -1301,7 +1301,7 @@ void print_start(const char *filename, const GCodeReaderPosition &resume_pos, ma
             get_LFN(filename_lfn.data(), filename_lfn.size(), filepath_sfn.data());
         });
         while (async_job.is_active()) {
-            ::idle(true, true);
+            ::idle(true);
         }
 
         // Update marlin vars
@@ -1704,7 +1704,7 @@ void update_sfn() {
     });
 
     while (async_job.is_active()) {
-        ::idle(true, true);
+        ::idle(true);
     }
 
     // We haven't found the file -> do nothing. Fail open is sorted out later in the code.
@@ -3534,18 +3534,7 @@ Response wait_for_response(FSMAndPhase fsm_and_phase, uint32_t timeout_ms) {
             return Response::_none;
         }
 
-        // The second true - don't disable steppers. If we are sitting in some
-        // kind of dialog (eg. nozzle cleaning failed), we do _not_ want to
-        // disable it during the dialog, because we would lose homing and that
-        // can lead to very interesting behavior (especially for example on XL
-        // with tool changer).
-        //
-        // It might also prevent disabling it in some rare cases where we would
-        // prefer to save the power (mostly out of the print), but that's
-        // significantly smaller problem.
-        //
-        // BFW-6914.
-        ::idle(true, true);
+        ::idle(true);
     }
 }
 

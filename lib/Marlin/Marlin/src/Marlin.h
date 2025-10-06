@@ -32,7 +32,7 @@
 #include <stdlib.h>
 
 void stop();
-void idle(bool waiting, bool no_stepper_sleep=false);
+void idle(bool waiting);
 void manage_inactivity();
 
 #if ENABLED(G38_PROBE_TARGET)

@@ -28,6 +28,6 @@ void PrusaGcodeSuite::M0() {
     planner.synchronize();
 
     while (marlin_server::get_response_from_phase(PhasesQuickPause::QuickPaused) == Response::_none) {
-        idle(true, true);
+        idle(true);
     }
 }

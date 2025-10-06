@@ -41,7 +41,7 @@ static FSMResponseVariant preheatTempUnKnown(PreheatData preheat_data, bool brea
             return FSMResponseVariant();
         }
 
-        idle(true, true);
+        idle(true);
     }
 }
 

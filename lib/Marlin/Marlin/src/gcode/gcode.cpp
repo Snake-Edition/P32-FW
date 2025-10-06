@@ -204,9 +204,9 @@ void GcodeSuite::get_destination_from_command() {
 /**
  * Dwell waits immediately. It does not synchronize. Use M400 instead of G4
  */
-void GcodeSuite::dwell(millis_t time, bool no_stepper_delay) {
+void GcodeSuite::dwell(millis_t time) {
   time += millis();
-  while (!planner.draining() && PENDING(millis(), time)) idle(true, no_stepper_delay);
+  while (!planner.draining() && PENDING(millis(), time)) idle(true);
 }
 
 /**

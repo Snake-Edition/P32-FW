@@ -171,7 +171,7 @@ void IPartHandler::Abort() {
     // Wait till all commands are processed before calling Abort
     // Abort might be restoring phase stepping config, which would trigger some asserts if quick_stop is not processed
     while (planner.processing()) {
-        idle(true, true);
+        idle(true);
     }
 }
 

@@ -578,7 +578,7 @@ static bool measure_origin_multipoint(AxisEnum axis, const xy_long_t &origin_ste
                 axis, internal::cal_id, i, (long)c_ab[0], (long)c_ab[1], c_unstable);
             metric_record_custom(&metric_phxy_orig, ",a=%u,t=\"p\" c=%u,p=%u,d0=%li,d1=%li,v=%u",
                 axis, internal::cal_id, i, (long)c_diff[0], (long)c_diff[1], c_invalid);
-            idle(true, true); // allow some time to flush the metrics buffer
+            idle(true); // allow some time to flush the metrics buffer
 
             if (c_invalid) {
                 internal::home_unstable = true;

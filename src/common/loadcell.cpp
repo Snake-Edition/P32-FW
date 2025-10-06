@@ -39,12 +39,12 @@ Loadcell::Loadcell()
 void Loadcell::WaitBarrier(uint32_t ticks_us) {
     // the first sample we're waiting for needs to be valid
     while (!planner.draining() && undefinedCnt) {
-        idle(true, true);
+        idle(true);
     }
 
     // now wait until the requested timestamp
     while (!planner.draining() && ticks_diff(loadcell.GetLastSampleTimeUs(), ticks_us) < 0) {
-        idle(true, true);
+        idle(true);
     }
 }
 
@@ -73,7 +73,7 @@ float Loadcell::Tare(TareMode mode) {
 
     // wait until we have all the samples that were requested
     while (!planner.draining() && tareCount != 0) {
-        idle(true, true);
+        idle(true);
     }
 
     // We might have exited the loop prematurely because of planner.draining()

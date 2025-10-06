@@ -531,7 +531,7 @@ bool PrusaToolChangerUtils::wait(stdext::inplace_function<bool()> function, uint
     while (!(result = function()) // Wait for this and remember its state for return
         && !planner.draining() // This triggers on powerpanic and quickstop
         && (ticks_ms() - start_time) < timeout_ms) { // Timeout
-        idle(true, true);
+        idle(true);
     }
     return result;
 }

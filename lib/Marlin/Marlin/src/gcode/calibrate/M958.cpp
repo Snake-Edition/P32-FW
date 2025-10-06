@@ -264,7 +264,7 @@ static constexpr float expected_accelerometer_sample_period = 1.f / 1344.f;
 float get_accelerometer_sample_period(const SamplePeriodProgressHook &progress_hook, PrusaAccelerometer &accelerometer) {
     for (int i = 0; i < 96; ++i) {
         // Note: this is fast enough, it does not need to call progress_hook
-        idle(true, true);
+        idle(true);
         accelerometer.clear();
     }
     constexpr int request_samples_num = 20'000;
@@ -413,7 +413,7 @@ void Vibrate::step() {
     while (step_nr < steps_to_do) {
         const StepDir::RetVal step_dir = stepDir.get();
         while (is_full()) {
-            idle(true, true);
+            idle(true);
         }
         enqueue_step(step_dir.step_us, step_dir.dir, axis_flag);
         ++step_nr;
@@ -578,7 +578,7 @@ std::optional<VibrateMeasureResult> vibrate_measure(const VibrateMeasureParams &
                     return std::nullopt;
                 }
 
-                idle(true, true);
+                idle(true);
             }
         }
 
@@ -603,7 +603,7 @@ std::optional<VibrateMeasureResult> vibrate_measure(const VibrateMeasureParams &
         // Wait till all the movement is executed
         while (has_steps()) {
             accelerometer.clear();
-            idle(true, true);
+            idle(true);
         }
 
         // Then wait for the specified time
@@ -611,7 +611,7 @@ std::optional<VibrateMeasureResult> vibrate_measure(const VibrateMeasureParams &
             const uint32_t end_time = millis() + excitation_period * args.wait_cycles * 1000.f;
             while (ticks_diff(millis(), end_time) > 0) {
                 accelerometer.clear();
-                idle(true, true);
+                idle(true);
             }
         }
 
@@ -637,7 +637,7 @@ std::optional<VibrateMeasureResult> vibrate_measure(const VibrateMeasureParams &
                     return std::nullopt;
                 }
 
-                idle(true, true);
+                idle(true);
                 break;
 
             case GetSampleResult::error:
@@ -866,7 +866,7 @@ float get_step_len(StepEventFlag_t axis_flag, const uint16_t orig_mres[]) {
 }
 
 static bool idle_progress_hook(const VibrateMeasureProgressHookParams &) {
-    idle(true, true);
+    idle(true);
     return true;
 };
 
@@ -1233,7 +1233,7 @@ static input_shaper::AxisConfig find_best_shaper(const FindBestShaperProgressHoo
 
 static input_shaper::AxisConfig find_best_shaper(const Spectrum &psd, const Action final_action, input_shaper::AxisConfig default_config) {
     const auto progress_hook = [](input_shaper::Type, float) {
-        idle(true, true);
+        idle(true);
         return true;
     };
     return find_best_shaper(progress_hook, psd, final_action, default_config);
@@ -1301,7 +1301,7 @@ MicrostepRestorer::~MicrostepRestorer() {
         return PreciseStepping::has_step_events_queued();
     };
     while (has_steps()) {
-        idle(true, true);
+        idle(true);
     }
     LOOP_XYZ(i) {
         stepper_microsteps((AxisEnum)i, state[i]);

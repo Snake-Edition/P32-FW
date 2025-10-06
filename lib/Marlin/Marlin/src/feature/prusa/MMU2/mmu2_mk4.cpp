@@ -1149,8 +1149,7 @@ bool MMU2::manage_response(const bool move_axes, const bool turn_off_nozzle) {
         // - still running -> wait normally in idle()
         // - failed -> then do the safety moves on the printer like before
         // - finished ok -> proceed with reading other commands
-        marlin_idle(true, true); // calls LogicStep() and remembers its return status
-                                 // also disables stepper motor unlocking
+        marlin_idle(true); // calls LogicStep() and remembers its return status
         if (planner_draining()) {
             return true; // power panic happening, pretend we finished OK (and hope for the best).
         }
