@@ -33,7 +33,7 @@
 
 void stop();
 void idle(bool waiting, bool no_stepper_sleep=false);
-void manage_inactivity(const bool ignore_stepper_queue=false);
+void manage_inactivity();
 
 #if ENABLED(G38_PROBE_TARGET)
   extern uint8_t G38_move;          // Flag to tell the ISR that G38 is in progress, and the type

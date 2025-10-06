@@ -134,8 +134,10 @@ void marlin_manage_heater() {
     thermalManager.manage_heater();
 }
 
-void marlin_manage_inactivity(bool ignore_stepper_queue) {
-    manage_inactivity(ignore_stepper_queue);
+void marlin_manage_inactivity([[maybe_unused]] bool ignore_stepper_queue) {
+    // ignore_stepper_queue was removed from Marlin::manage_inactivity
+    // Keeping it in the MMU code to not break the compatibility with MK3
+    manage_inactivity();
 }
 
 void marlin_idle(bool waiting, bool ignore_stepper_queue) {
