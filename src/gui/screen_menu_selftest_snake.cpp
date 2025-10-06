@@ -62,13 +62,15 @@ Action get_previous_action(Action action) {
     return _get_valid_action(static_cast<Action>(std::to_underlying(action) - 1), -1);
 }
 
-bool are_previous_completed(Action action) {
-    if (action == get_first_action()) {
-        return true;
-    }
+bool is_completed(TestResult test_result) {
+    // Skipped is also considered completed - it marks non-obligatory tests that have been explicitly skipped by the user
+    return test_result == TestResult_Passed || test_result == TestResult_Skipped;
+}
 
-    for (Action act = action; act > get_first_action(); act = get_previous_action(act)) {
-        if (get_test_result(get_previous_action(act), Tool::_all_tools) != TestResult_Passed) {
+bool are_previous_completed(Action action) {
+    for (Action act = action; act > get_first_action();) {
+        act = get_previous_action(act);
+        if (!is_completed(get_test_result(act, Tool::_all_tools))) {
             return false;
         }
     }
@@ -183,7 +185,7 @@ void do_snake(Action action, Tool tool = Tool::_first) {
 
 void continue_snake() {
     const TestResult last_test_result = get_test_result(snake_config.last_action, snake_config.last_tool);
-    if ((last_test_result != TestResult_Passed && last_test_result != TestResult_Skipped)
+    if (!is_completed(last_test_result)
         || SelftestInstance().IsAborted()) { // last selftest didn't pass
         snake_config.reset();
         return;
@@ -427,7 +429,7 @@ void ScreenMenuSTSWizard::windowEvent(window_t *sender, GUI_event_t event, void 
         draw_enabled = true;
     }
 
-    if (get_test_result(get_last_action(), Tool::_all_tools) == TestResult_Passed && are_previous_completed(get_last_action())) {
+    if (is_completed(get_test_result(get_last_action(), Tool::_all_tools)) && are_previous_completed(get_last_action())) {
         MsgBoxPepaCentered(_("Happy printing!"),
             { Response::Continue, Response::_none, Response::_none, Response::_none });
         Screens::Access()->Close();
