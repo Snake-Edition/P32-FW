@@ -203,6 +203,11 @@ namespace frame {
 #endif
         // clang-format on
         {
+#if HAS_MINI_DISPLAY()
+            test_title.set_font(Font::small);
+            print_label.set_font(Font::small);
+            heatbreak_label.set_font(Font::small);
+#endif
 #if HAS_TOOLCHANGER()
             for (size_t i = 0; i < HOTENDS; i++) {
                 if (!prusa_toolchanger.is_tool_enabled(i)) {
