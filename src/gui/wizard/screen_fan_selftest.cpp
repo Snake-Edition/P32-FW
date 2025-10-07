@@ -189,7 +189,7 @@ namespace frame {
             , print_label_icon { this, &img::turbine_16x16, point_i16_t({ WizardDefaults::col_0, row_2 }) }
             , heatbreak_label { this, Rect16(col_texts, row_3, col_texts_w, WizardDefaults::txt_h), is_multiline::no, is_closed_on_click_t::no, _(en_text_hotend_fan) }
             , heatbreak_label_icon { this, &img::fan_16x16, point_i16_t({ WizardDefaults::col_0, row_3 }) }
-            , info { this, Rect16(col_texts, row_6, col_texts_w, WizardDefaults::row_h * 3), is_multiline::yes, is_closed_on_click_t::no }
+            , info { this, Rect16(col_texts, row_6, col_texts_w, WizardDefaults::row_h * 4), is_multiline::yes, is_closed_on_click_t::no }
             , print_icons { make_fan_icon_array(this, row_2, HOTENDS) }
             , heatbreak_icons { make_fan_icon_array(this, row_3, HOTENDS) }
 #if HAS_CHAMBER_API()
