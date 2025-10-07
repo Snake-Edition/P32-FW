@@ -22,8 +22,7 @@ FrameQRPrompt::FrameQRPrompt(window_t *parent, FSMAndPhase fsm_phase, const stri
         .append_string("https://prusa.io/qr-")
         .append_string(qr_suffix);
 
-    CaptureNormalWindow(radio);
-    static_cast<window_frame_t *>(parent)->CaptureNormalWindow(*this);
+    static_cast<window_frame_t *>(parent)->CaptureNormalWindow(radio);
 }
 
 FrameQRPrompt::FrameQRPrompt(window_frame_t *parent, FSMAndPhase fsm_phase, std::optional<ErrCode> (*error_code_mapper)(FSMAndPhase fsm_phase))

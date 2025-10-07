@@ -18,7 +18,7 @@
  * - QR code & link
  * - A FSM radio
  */
-class FrameQRPrompt : public window_frame_t {
+class FrameQRPrompt {
 
 public:
     FrameQRPrompt(window_t *parent, FSMAndPhase fsm_phase, const string_view_utf8 &info_text, const char *qr_suffix);

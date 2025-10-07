@@ -162,7 +162,7 @@ class FrameResults : public FramePrompt {
 public:
     FrameResults(FrameParent parent, PhaseBeltTuning phase = PhaseBeltTuning::results)
         : FramePrompt(parent, phase, nullptr, nullptr)
-        , graph(this)
+        , graph(parent)
         , phase(phase)
         , screen(*parent.screen) //
     {
