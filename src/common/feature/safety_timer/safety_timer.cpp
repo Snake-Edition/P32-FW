@@ -97,6 +97,11 @@ void SafetyTimer::reset_restore_blocking() {
 
     reset_restore_nonblocking();
 
+    if (state() != State::restoring) {
+        // Not restoring, do not show the blocking screen
+        return;
+    }
+
     // Prevent the timer from timing out during the heatup
     SafetyTimerBlocker timer_blocker;
 
