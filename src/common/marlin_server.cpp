@@ -2853,29 +2853,15 @@ void resuming_begin(void) {
     modbedMaxTempErrorChecker.reset();
 #endif /*HAS_REMOTE_BED()*/
 
-    if (print_reheat_ready()) {
-
-#if ENABLED(CRASH_RECOVERY)
-        if (crash_s.get_state() == Crash_s::REPEAT_WAIT) {
-            // Skip unpark when recovering from toolcrash or homing fail
-            server.print_state = State::Resuming_UnparkHead_ZE;
-        } else
-#endif /*ENABLED(CRASH_RECOVERY)*/
-        {
-            unpark_head_XY();
-            server.print_state = State::Resuming_UnparkHead_XY;
-        }
-    } else {
-        for (uint8_t hotend = 0; hotend < HOTENDS; hotend++) {
-            thermalManager.setTargetHotend(server.resume.nozzle_temp[hotend], hotend);
-            set_temp_to_display(server.resume.nozzle_temp[hotend], hotend);
-        }
+    for (uint8_t hotend = 0; hotend < HOTENDS; hotend++) {
+        thermalManager.setTargetHotend(server.resume.nozzle_temp[hotend], hotend);
+        set_temp_to_display(server.resume.nozzle_temp[hotend], hotend);
+    }
 
 #if FAN_COUNT > 0
-        thermalManager.set_fan_speed(0, 0); // disable print fan
+    thermalManager.set_fan_speed(0, 0); // disable print fan
 #endif
-        server.print_state = State::Resuming_Reheating;
-    }
+    server.print_state = State::Resuming_Reheating;
 
     if (!server.print_is_serial) {
         media_prefetch_start();
