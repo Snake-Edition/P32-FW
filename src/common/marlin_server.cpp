@@ -1759,16 +1759,6 @@ void try_recover_from_media_error() {
     }
 }
 
-bool print_reheat_ready() {
-    for (uint8_t hotend = 0; hotend < HOTENDS; hotend++) {
-        if (Temperature::degTargetHotend(hotend) != server.resume.nozzle_temp[hotend]) {
-            return false;
-        }
-    }
-
-    return Temperature::are_all_temperatures_reached();
-}
-
 #if ENABLED(POWER_PANIC)
 void powerpanic_resume(const char *media_SFN_path, const GCodeReaderPosition &resume_pos, bool auto_recover) {
     print_start(media_SFN_path, resume_pos, marlin_server::PreviewSkipIfAble::all);
@@ -1924,15 +1914,15 @@ static void resuming_reheating() {
     }
 
     // Check if nozzles are being reheated
-    HOTEND_LOOP() {
-        if (thermalManager.degTargetHotend(e) == 0 && server.resume.nozzle_temp[e] > 0) {
+    for (uint8_t hotend = 0; hotend < HOTENDS; hotend++) {
+        if (Temperature::degTargetHotend(hotend) != server.resume.nozzle_temp[hotend]) {
             // Stopped reheating, can happen if there is an error during reheating
             server.print_state = State::Paused;
             return;
         }
     }
 
-    if (!print_reheat_ready()) {
+    if (!Temperature::are_all_temperatures_reached()) {
         return;
     }
 

@@ -102,9 +102,6 @@ void print_abort();
 //
 void print_resume();
 
-//
-bool print_reheat_ready();
-
 // Quick stop to avoid harm to the user
 void quick_stop();
 
