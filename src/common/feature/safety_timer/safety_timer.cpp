@@ -102,6 +102,11 @@ void SafetyTimer::reset_restore_blocking() {
         return;
     }
 
+    if (non_blocking_guard_count_ > 0) {
+        // SafetyTimerNonBlockingGuard is active, do not block
+        return;
+    }
+
     // Prevent the timer from timing out during the heatup
     SafetyTimerBlocker timer_blocker;
 
@@ -246,6 +251,18 @@ SafetyTimerBlocker::~SafetyTimerBlocker() {
 
     assert(st.blocker_count_ > 0);
     st.blocker_count_--;
+}
+
+SafetyTimerNonBlockingGuard::SafetyTimerNonBlockingGuard() {
+    auto &st = safety_timer();
+    st.non_blocking_guard_count_++;
+    assert(st.non_blocking_guard_count_ > 0);
+}
+
+SafetyTimerNonBlockingGuard::~SafetyTimerNonBlockingGuard() {
+    auto &st = safety_timer();
+    assert(st.non_blocking_guard_count_ > 0);
+    st.non_blocking_guard_count_--;
 }
 
 } // namespace buddy

@@ -15,6 +15,7 @@ namespace buddy {
 class SafetyTimer {
     friend SafetyTimer &safety_timer();
     friend class SafetyTimerBlocker;
+    friend class SafetyTimerNonBlockingGuard;
 
 public:
     using Time = uint32_t;
@@ -87,6 +88,9 @@ private:
     /// Number of currently active SafetyTimerBlocker guards
     uint8_t blocker_count_ = 0;
 
+    /// Number of currently active SafetyTimerNonBlocking guards
+    uint8_t non_blocking_guard_count_ = 0;
+
     /// Timestamp of the last activity
     utils::Timer<Time> activity_timer_ { default_interval };
 
@@ -104,6 +108,15 @@ class SafetyTimerBlocker : public Uncopyable {
 public:
     SafetyTimerBlocker();
     ~SafetyTimerBlocker();
+};
+
+/// Guard marking a section that will turn all reset_restore blocking calls to nonblocking ones
+/// As a result, moves planned within this guard will go through even when the temperatures are not restoring yet
+class SafetyTimerNonBlockingGuard : public Uncopyable {
+
+public:
+    SafetyTimerNonBlockingGuard();
+    ~SafetyTimerNonBlockingGuard();
 };
 
 /// @returns instance to the SafetyTimer
