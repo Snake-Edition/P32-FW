@@ -129,7 +129,6 @@ bool print_preview();
 struct resume_state_t {
     xyze_pos_t pos = {}; // resume position for unpark_head
     std::array<int16_t, HOTENDS> nozzle_temp; // target nozzle temperatures
-    bool nozzle_temp_paused = false; // True if nozzle_temp is valid and hotend cools down
     uint8_t fan_speed = 0; // resume fan speed
     uint16_t print_speed = 0; // resume printing speed
 };

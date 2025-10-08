@@ -449,7 +449,6 @@ namespace {
 
         print_job_timer.pause();
         server.resume.nozzle_temp = buddy::safety_timer().original_hotend_targets();
-        server.resume.nozzle_temp_paused = true;
         server.resume.fan_speed = marlin_vars().print_fan_speed; // save fan speed
         server.resume.print_speed = marlin_vars().print_speed;
 #if FAN_COUNT > 0
@@ -2546,7 +2545,6 @@ static void _server_print_loop(void) {
     #if HAS_TOOLCHANGER()
     case State::CrashRecovery_ToolchangePowerPanic: {
         // server.resume.nozzle_temp is already configured by powerpanic
-        server.resume.nozzle_temp_paused = true; // Nozzle temperatures are stored in server.resume
         endstops.enable_globally(false);
         crash_recovery_begin_toolchange(); // Also sets server.print_state
         break;

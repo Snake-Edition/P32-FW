@@ -294,7 +294,6 @@ void resume_loop() {
         resume.fan_speed = state_buf.planner.fan_speed;
         resume.print_speed = state_buf.planner.print_speed;
         resume.nozzle_temp = state_buf.planner.target_nozzle;
-        resume.nozzle_temp_paused = state_buf.planner.was_paused; // Nozzle temperatures are stored in resume
         marlin_server::set_resume_data(&resume);
 
         // Set sdpos
@@ -909,7 +908,7 @@ void ac_fault_isr() {
         state_buf.crash.counters = crash_s.counters.backup_data();
 
         // save print temperatures
-        if (state_buf.planner.was_paused || resume.nozzle_temp_paused) { // Paused print or whenever nozzle is cooled down
+        if (state_buf.planner.was_paused) { // Paused print or whenever nozzle is cooled down
             state_buf.planner.target_nozzle = resume.nozzle_temp;
 
         } else {
