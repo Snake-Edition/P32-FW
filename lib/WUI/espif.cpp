@@ -10,6 +10,7 @@
 #include <cinttypes>
 #include <timing.h>
 #include <mutex>
+#include <memory>
 
 #include <FreeRTOS.h>
 #include <freertos/binary_semaphore.hpp>

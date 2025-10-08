@@ -1,21 +1,17 @@
 #pragma once
 #include <inplace_function.hpp>
 #include <stdint.h>
-#include "crc32.h"
 #include <stdlib.h>
 #include <string.h>
 #include <optional>
-#include <algorithm>
-#include "bsod.h"
 #include <freertos/mutex.hpp>
 #include <mutex>
-#include <variant>
-#include "store_item.hpp"
 #include <span>
-#include <memory>
+#include <atomic>
 #include <storage_drivers/storage.hpp>
 #include <assert.h>
 #include <type_traits>
+#include <journal/concepts.hpp>
 
 namespace journal {
 
@@ -257,6 +253,8 @@ public:
 
     Address current_address = 0; // current position of the main bank 'end' (where next item will be stored ie without end item transaction)
     Address current_next_address = 0; // current position of the next bank 'end' (needed for migrating_transaction)
+
+    /// Increases with each bank migration (persistent across restarts)
     uint32_t current_bank_id = 0;
 
     /**
@@ -369,6 +367,22 @@ public:
     Backend(Backend &&other) = delete;
     Backend &operator=(const Backend &other) = delete;
     Backend &operator=(Backend &&other) = delete;
+
+public:
+    auto item_write_count() const {
+        return item_write_count_.load(std::memory_order_relaxed);
+    }
+
+    auto bank_migration_count() const {
+        return bank_migration_count_.load(std::memory_order_relaxed);
+    }
+
+private:
+    /// Increases with every item write outside of bank migrations
+    std::atomic<uint32_t> item_write_count_ = 0;
+
+    /// Number of migrations done since printer start - metric
+    std::atomic<uint32_t> bank_migration_count_ = 0;
 };
 
 template <uint16_t ADDRESS, uint16_t SIZE, configuration_store::Storage &(storage)()>

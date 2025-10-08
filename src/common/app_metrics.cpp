@@ -134,6 +134,25 @@ void RecordRuntimeStats() {
 
     METRIC_DEF(heap, "heap", METRIC_VALUE_CUSTOM, 503, METRIC_ENABLED);
     metric_record_custom(&heap, " free=%zui,total=%zui", xPortGetFreeHeapSize(), static_cast<size_t>(heap_total_size()));
+
+    // Config store metrics (BFW-7758)
+    {
+        // Should be same for all store metrics (so that we can get synchronized datapoints in Grafana)
+        // Should not be a "whole second" number to reduce metrics bursts when a lot of metrics get reported at the same time, overflowing buffers
+        static constexpr uint32_t store_metrics_interval_ms = 5051;
+
+        /// Cumulative count of config store migrations since printer start
+        METRIC_DEF(store_migrations, "store_migrations", METRIC_VALUE_INTEGER, store_metrics_interval_ms, METRIC_ENABLED);
+        metric_record_integer(&store_migrations, config_store().get_backend().bank_migration_count());
+
+        /// Cumulative count of bytes written to EEPROM by config_store since printer start
+        METRIC_DEF(store_bytes, "store_bytes", METRIC_VALUE_INTEGER, store_metrics_interval_ms, METRIC_ENABLED);
+        metric_record_integer(&store_bytes, EEPROMInstance().bytes_written());
+
+        /// Cumulative count of items written to EEPROM by config_store since printer start (outside of bank migrations)
+        METRIC_DEF(store_items, "store_items", METRIC_VALUE_INTEGER, store_metrics_interval_ms, METRIC_ENABLED);
+        metric_record_integer(&store_items, config_store().get_backend().item_write_count());
+    }
 }
 
 void RecordMarlinVariables() {

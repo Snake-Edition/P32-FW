@@ -1,9 +1,17 @@
 #include "backend.hpp"
-#include "timing.h"
-#include "assert.h"
-#include <memory>
-#include <utility>
-#include <ranges>
+#include <cassert>
+#include <crc32.h>
+#include <algorithm>
+
+#ifndef UNITTESTS
+    #include <metric.h>
+
+/// Emitted for each item write (outside of migrations), value is the hash ID of the written item
+METRIC_DEF(metric_store_id, "store_id", METRIC_VALUE_INTEGER, 0, METRIC_ENABLED);
+
+/// Emitted for ecah migration, value is the number of bytes written due to the migration
+METRIC_DEF(metric_store_migration, "store_migration", METRIC_VALUE_INTEGER, 0, METRIC_ENABLED);
+#endif
 
 namespace journal {
 std::unique_lock<freertos::Mutex> Backend::lock() {
@@ -442,13 +450,22 @@ Backend::Address Backend::get_next_bank_start_address() const {
     }
 }
 void Backend::migrate_bank() {
+#ifndef UNITTESTS
+    const auto start_bytes_written = storage.bytes_written();
+#endif
+
     current_bank_id++;
+    bank_migration_count_.fetch_add(1, std::memory_order_relaxed);
     init_bank(get_next_bank(), current_bank_id);
 
     {
         auto guard = bank_migration_guard();
         dump_callback();
     }
+
+#ifndef UNITTESTS
+    metric_record_integer(&metric_store_migration, storage.bytes_written() - start_bytes_written);
+#endif
 }
 void Backend::transaction_start() {
     auto lock_guard = lock();
@@ -524,6 +541,15 @@ uint16_t Backend::write_item(Address address, Backend::ItemHeader header, const 
     storage.write_bytes(data_address, data);
     written += data.size();
     storage.write_bytes(address, { reinterpret_cast<const uint8_t *>(&header), ITEM_HEADER_SIZE });
+
+    if (!bank_migration.has_value() && header.id != LAST_ITEM_ID) {
+#ifndef UNITTESTS
+        metric_record_integer(&metric_store_id, header.id);
+#endif
+
+        item_write_count_.fetch_add(1, std::memory_order_relaxed);
+    }
+
     return written + ITEM_HEADER_SIZE;
 }
 

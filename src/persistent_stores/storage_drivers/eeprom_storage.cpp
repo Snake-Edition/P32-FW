@@ -10,9 +10,11 @@ void EEPROMStorage::read_bytes(uint16_t address, std::span<uint8_t> buffer) {
 };
 void EEPROMStorage::write_byte(uint16_t address, uint8_t data) {
     st25dv64k_user_write(address, data);
+    bytes_written_.fetch_add(1, std::memory_order_relaxed);
 };
 void EEPROMStorage::write_bytes(uint16_t address, std::span<const uint8_t> data) {
     st25dv64k_user_write_bytes(address, data.data(), data.size());
+    bytes_written_.fetch_add(data.size(), std::memory_order_relaxed);
 };
 
 void EEPROMStorage::erase_area(uint16_t start_address, uint16_t end_address) {

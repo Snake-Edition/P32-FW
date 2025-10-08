@@ -1,4 +1,8 @@
 #pragma once
+
+#include <atomic>
+#include <cstdint>
+
 #include "storage.hpp"
 
 class EEPROMStorage : public configuration_store::Storage {

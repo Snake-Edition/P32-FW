@@ -8,6 +8,7 @@
 #include <journal/store.hpp>
 #include <footer_eeprom.hpp>
 #include <str_utils.hpp>
+#include <crc32.h>
 
 namespace config_store_ns::old_eeprom {
 void eeprom_init_ram_mirror(eeprom_data &eeprom_ram_mirror) {
