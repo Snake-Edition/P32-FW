@@ -338,10 +338,7 @@ bool Pause::ensureSafeTemperatureNotifyProgress() {
 }
 
 [[nodiscard]] Pause::StopConditions Pause::do_e_move_notify_progress_coldextrude(const float &length, const feedRate_t &fr_mm_s, StopConditions check_for) {
-#if ENABLED(PREVENT_COLD_EXTRUSION)
-    AutoRestore<bool> CE(thermalManager.allow_cold_extrude);
-    thermalManager.allow_cold_extrude = true;
-#endif
+    AutoRestore cold_extrude_guard(thermalManager.allow_cold_extrude, true);
     return do_e_move_notify_progress(length, fr_mm_s, check_for);
 }
 
