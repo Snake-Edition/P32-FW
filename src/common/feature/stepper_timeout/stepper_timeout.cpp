@@ -24,7 +24,8 @@ void StepperTimeoutManager::step() {
     const auto now = ticks_ms();
 
     // Any activity - running gcode, motors, ...
-    if (marlin_server::is_processing()) {
+    // Never disable motors during print (or print pause, when we're not processing anything)
+    if (marlin_server::is_processing() || marlin_server::is_printing()) {
         timer_.restart(now);
     }
 
