@@ -1761,6 +1761,12 @@ void try_recover_from_media_error() {
 }
 
 bool print_reheat_ready() {
+    for (uint8_t hotend = 0; hotend < HOTENDS; hotend++) {
+        if (Temperature::degTargetHotend(hotend) != server.resume.nozzle_temp[hotend]) {
+            return false;
+        }
+    }
+
     return Temperature::are_all_temperatures_reached();
 }
 
