@@ -1127,6 +1127,9 @@ bool Pause::invoke_loop() {
 
     FSM_HolderLoadUnload holder(*this);
 
+    // Prevent the "waiting for temperature restore" from triggering - the Pause manages temperature safety for extrusion internally
+    buddy::SafetyTimerNonBlockingGuard non_blocking_guard;
+
     set(LoadState::start);
 
     while (!finished()) {
