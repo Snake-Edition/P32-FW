@@ -345,7 +345,13 @@ void filament_gcodes::M1600_no_parser(FilamentType filament_to_be_loaded, uint8_
 
     PreheatStatus::SetResult(PreheatStatus::Result::DoneHasFilament);
 
-    preheat_to(filament, target_extruder, PreheatBehavior::no_force_preheat_bed_and_chamber(config_store().filament_change_preheat_all.get()));
+#if HAS_AUTO_RETRACT()
+    if (!buddy::auto_retract().is_safely_retracted_for_unload(hotend_from_extruder(target_extruder))) {
+#else
+    {
+#endif
+        preheat_to(filament, target_extruder, PreheatBehavior::no_force_preheat_bed_and_chamber(config_store().filament_change_preheat_all.get()));
+    }
     xyze_pos_t current_position_tmp = current_position;
 
     pause::Settings settings;
