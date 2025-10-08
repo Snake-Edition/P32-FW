@@ -912,13 +912,8 @@ void ac_fault_isr() {
         if (state_buf.planner.was_paused || resume.nozzle_temp_paused) { // Paused print or whenever nozzle is cooled down
             state_buf.planner.target_nozzle = resume.nozzle_temp;
 
-        } else if (buddy::safety_timer().is_active()) {
-            state_buf.planner.target_nozzle = buddy::safety_timer().nozzle_temperatures_to_restore();
-
         } else {
-            HOTEND_LOOP() {
-                state_buf.planner.target_nozzle[e] = thermalManager.degTargetHotend(e);
-            }
+            state_buf.planner.target_nozzle = buddy::safety_timer().original_hotend_targets();
         }
 
         if (state_buf.planner.was_paused) {

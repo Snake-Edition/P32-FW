@@ -54,10 +54,9 @@ public:
         return state_ == State::active;
     }
 
-    const NozzleTargetTemperatures &nozzle_temperatures_to_restore() const {
-        assert(is_active());
-        return nozzle_temperatures_to_restore_;
-    }
+    /// @returns "original" target hotend temperatures (that is what the temperatures would be without the SafetyTimer being active).
+    /// If the SafetyTimer is not active, returns current targets.
+    NozzleTargetTemperatures original_hotend_targets() const;
 
 public:
     /// Restarts the inactivity timer, but if the timer is already triggered, it will NOT restore the temperatures

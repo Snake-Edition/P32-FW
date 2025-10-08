@@ -42,6 +42,18 @@ void SafetyTimer::set_interval(Time set) {
     activity_timer_.set_interval(std::max<Time>(set, 3000));
 }
 
+SafetyTimer::NozzleTargetTemperatures SafetyTimer::original_hotend_targets() const {
+    if (is_active()) {
+        return nozzle_temperatures_to_restore_;
+    } else {
+        NozzleTargetTemperatures result;
+        for (uint8_t hotend = 0; hotend < HOTENDS; hotend++) {
+            result[hotend] = Temperature::degTargetHotend(hotend);
+        }
+        return result;
+    }
+}
+
 void SafetyTimer::reset_norestore() {
     if (prevent_recursion_) {
         return;

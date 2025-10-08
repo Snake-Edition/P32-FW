@@ -448,9 +448,7 @@ namespace {
         SerialPrinting::pause();
 
         print_job_timer.pause();
-        HOTEND_LOOP() {
-            server.resume.nozzle_temp[e] = marlin_vars().hotend(e).target_nozzle; // save nozzle target temp
-        }
+        server.resume.nozzle_temp = buddy::safety_timer().original_hotend_targets();
         server.resume.nozzle_temp_paused = true;
         server.resume.fan_speed = marlin_vars().print_fan_speed; // save fan speed
         server.resume.print_speed = marlin_vars().print_speed;
