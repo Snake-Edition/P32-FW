@@ -178,7 +178,7 @@ SECTIONS
     PROVIDE_HIDDEN (__end_log_components = .);
 
     PROVIDE_HIDDEN (__start_metric_definitions = .);
-    KEEP(*(.data.metric_definitions))
+    KEEP(*(SORT(.data.metric_definitions.*)))
     PROVIDE_HIDDEN (__end_metric_definitions = .);
 
     *(.data)           /* .data sections */
