@@ -5,6 +5,7 @@
 #include "window.hpp"
 #include <array>
 #include <utils/string_builder.hpp>
+#include <error_codes.hpp>
 
 /**
  * GUI widget for displaying QR codes with static string.
