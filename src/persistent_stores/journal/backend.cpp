@@ -2,6 +2,7 @@
 #include <cassert>
 #include <crc32.h>
 #include <algorithm>
+#include <bsod.h>
 
 #ifndef UNITTESTS
     #include <metric.h>
