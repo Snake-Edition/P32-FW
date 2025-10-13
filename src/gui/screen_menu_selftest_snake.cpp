@@ -81,6 +81,7 @@ const img::Resource *get_icon(Action action, Tool tool) {
     case TestResult_Passed:
         return &img::ok_color_16x16;
     case TestResult_Skipped:
+        return &img::ok_16x16;
     case TestResult_Unknown:
         return &img::na_color_16x16;
     case TestResult_Failed:
