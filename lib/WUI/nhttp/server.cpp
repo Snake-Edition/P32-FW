@@ -170,7 +170,7 @@ void Server::inject_transfer(altcp_pcb *conn, pbuf *data, uint16_t data_offset, 
     transfer_slot.forward_progress();
 }
 
-void Server::ConnectionSlot::step(string_view input, uint8_t *output, size_t out_size) {
+void Server::ConnectionSlot::step(const std::string_view &input, uint8_t *output, size_t out_size) {
     Step s = { 0, 0, handler::Continue() };
     std::visit([&](auto &phase) {
         phase.step(input, client_closed && input.empty() && output == nullptr, output, out_size, s);

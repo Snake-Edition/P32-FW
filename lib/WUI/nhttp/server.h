@@ -254,7 +254,7 @@ private:
     private:
         void release_buffer();
         uint16_t send_space() const;
-        void step(std::string_view input, uint8_t *output, size_t output_size);
+        void step(const std::string_view &input, uint8_t *output, size_t output_size);
 
         bool client_closed = false;
 
