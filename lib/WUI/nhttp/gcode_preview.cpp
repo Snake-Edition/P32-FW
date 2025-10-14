@@ -20,9 +20,8 @@ using http::Status;
 using std::nullopt;
 using std::string_view;
 
-GCodePreview::GCodePreview(AnyGcodeFormatReader f, const char *path, bool can_keep_alive, bool json_errors, uint16_t width, uint16_t height, bool allow_larger, uint32_t if_none_match)
-    : gcode(std::move(f))
-    , can_keep_alive(can_keep_alive)
+GCodePreview::GCodePreview(const char *path, bool can_keep_alive, bool json_errors, uint16_t width, uint16_t height, bool allow_larger, uint32_t if_none_match)
+    : can_keep_alive(can_keep_alive)
     , json_errors(json_errors)
     , width(width)
     , height(height)
