@@ -91,6 +91,9 @@ namespace deprecated_ids {
         decltype(DeprecatedStore::filament_auto_retracted_bitset)::hashed_id,
     };
 #endif
+    inline constexpr uint16_t printer_setup_done[] {
+        decltype(DeprecatedStore::printer_setup_done)::hashed_id,
+    };
 } // namespace deprecated_ids
 
 namespace migrations {
@@ -129,6 +132,8 @@ namespace migrations {
 #if HAS_AUTO_RETRACT()
     void filament_auto_retract(journal::Backend &backend);
 #endif
+
+    void printer_setup_done(journal::Backend &backend);
 } // namespace migrations
 
 /**
@@ -170,6 +175,9 @@ inline constexpr journal::Backend::MigrationFunction migration_functions[] {
 #if HAS_AUTO_RETRACT()
         { migrations::filament_auto_retract, deprecated_ids::filament_auto_retracted_bitset },
 #endif
+    {
+        migrations::printer_setup_done, deprecated_ids::printer_setup_done,
+    }
 };
 
 // Span of migration versions to simplify passing it around

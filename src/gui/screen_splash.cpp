@@ -171,9 +171,19 @@ screen_splash_data_t::screen_splash_data_t()
         Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<ScreenMenuSTSWizard>);
     }
 #endif
-    if (!config_store().printer_setup_done.get()) {
+    bool network_setup_needed = !config_store().printer_network_setup_done.get();
+    bool hw_config_needed = !config_store().printer_hw_config_done.get();
+    if (network_setup_needed) {
         Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<PseudoScreenCallback, network_callback>);
+    }
+    if (hw_config_needed) {
         Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<ScreenPrinterSetup>);
+    }
+    if (network_setup_needed || hw_config_needed
+#if HAS_SELFTEST()
+        || run_wizard
+#endif
+    ) {
         Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<PseudoScreenCallback, pepa_callback>);
     }
 

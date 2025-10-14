@@ -22,7 +22,7 @@ MI_DONE::MI_DONE()
 }
 
 void MI_DONE::click(IWindowMenu &) {
-    config_store().printer_setup_done.set(true);
+    config_store().printer_hw_config_done.set(true);
 
 #if HAS_SELFTEST()
     // If the screen was open as a part of RevisePrinterStatus selftest part, goes to the next part

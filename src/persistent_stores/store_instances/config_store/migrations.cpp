@@ -362,5 +362,24 @@ namespace migrations {
         }
     }
 #endif
+
+    void printer_setup_done(journal::Backend &backend) {
+        using FirstNewItem = decltype(CurrentStore::printer_hw_config_done);
+        using SecondNewItem = decltype(CurrentStore::printer_network_setup_done);
+        using OldItem = decltype(DeprecatedStore::printer_setup_done);
+
+        OldItem::value_type old_value = OldItem::default_val;
+
+        auto callback = [&](journal::Backend::ItemHeader header, std::array<uint8_t, journal::Backend::MAX_ITEM_SIZE> &buffer) -> void {
+            if (header.id == OldItem::hashed_id) {
+                memcpy(&old_value, buffer.data(), header.len);
+            }
+        };
+
+        backend.read_items_for_migrations(callback);
+
+        backend.save_migration_item<FirstNewItem::value_type>(FirstNewItem::hashed_id, old_value);
+        backend.save_migration_item<SecondNewItem::value_type>(SecondNewItem::hashed_id, old_value);
+    }
 } // namespace migrations
 } // namespace config_store_ns

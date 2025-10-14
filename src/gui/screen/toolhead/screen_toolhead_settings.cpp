@@ -301,7 +301,7 @@ ScreenToolheadDetail::ScreenToolheadDetail(Toolhead toolhead)
     menu_set_toolhead(container, toolhead);
 
     // Do not show certain items until printer setup is done
-    if (!config_store().printer_setup_done.get()) {
+    if (!config_store().printer_hw_config_done.get()) {
 #if HAS_TOOLCHANGER()
         container.Item<MI_DOCK>().set_is_hidden();
         container.Item<MI_NOZZLE_OFFSET>().set_is_hidden();

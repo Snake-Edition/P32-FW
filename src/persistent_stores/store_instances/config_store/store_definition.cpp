@@ -41,14 +41,6 @@ void CurrentStore::perform_config_check() {
     /// Whether this is the first run of the printer after assembly/factory reset
     [[maybe_unused]] const bool is_first_run = (config_store_init_result() == InitResult::cold_start);
 
-#if HAS_SELFTEST()
-    // Do not show pritner setup screen if the user has run any selftests
-    // This is for backwards compatibility - we don't want to show the screen after the firmware update introducing it for already configured printers
-    if (selftest_result.get() != selftest_result.default_val) {
-        printer_setup_done.set(true);
-    }
-#endif
-
     // We cannot change a default value of config store items for backwards compatibility reasons.
     // So this is a place to instead set them to something for new installations
     if (is_first_run || force_default_hw_config.get()) {
@@ -138,6 +130,17 @@ void CurrentStore::perform_config_migrations() {
         SelftestTool st = get_selftest_result_tool(0);
         st.gears = selftest_result.get().deprecated_gears;
         set_selftest_result_tool(0, st);
+    }
+#endif
+#if HAS_SELFTEST()
+    if (should_migrate<3>()) {
+        // BFW-7867
+        // Do not show pritner setup screen if the user has run any selftests
+        // This is for backwards compatibility - we don't want to show the screen after the firmware update introducing it for already configured printers
+        if (selftest_result.get() != selftest_result.default_val) {
+            printer_hw_config_done.set(true);
+            printer_network_setup_done.set(true);
+        }
     }
 #endif
     // To add a migration:
