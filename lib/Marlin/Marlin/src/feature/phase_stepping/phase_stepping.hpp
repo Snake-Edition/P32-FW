@@ -116,7 +116,10 @@ struct AxisState {
         ///
         /// To be called from the stepping interrupt.
         void set(const MoveTarget &v) {
-            state.store(State::updating, std::memory_order_acquire);
+            // We don't really _need_ the old value, but unfortunately, acquire
+            // memory order needs to be on an operation that reads.
+            [[maybe_unused]] State old = state.exchange(State::updating, std::memory_order_acquire);
+            assert(old != State::updating);
             value = v;
             state.store(State::full, std::memory_order_release);
         }
