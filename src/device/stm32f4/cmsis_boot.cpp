@@ -163,7 +163,7 @@ static void SystemInit_ExtMemCtl(void);
  * @retval None
  */
 void SystemInit(void) {
-/* FPU settings ------------------------------------------------------------*/
+    /* FPU settings ------------------------------------------------------------*/
 #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
     SCB->CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2)); /* set CP10 and CP11 Full Access */
 #endif
@@ -185,6 +185,19 @@ void SystemInit(void) {
 
     /* Disable all interrupts */
     RCC->CIR = 0x00000000;
+
+    // Reset all peripherals - bootloader might have left them in a messy state (BFW-7880)
+    __HAL_RCC_AHB1_FORCE_RESET();
+    __HAL_RCC_AHB2_FORCE_RESET();
+    __HAL_RCC_AHB3_FORCE_RESET();
+    __HAL_RCC_APB1_FORCE_RESET();
+    __HAL_RCC_APB2_FORCE_RESET();
+
+    __HAL_RCC_AHB1_RELEASE_RESET();
+    __HAL_RCC_AHB2_RELEASE_RESET();
+    __HAL_RCC_AHB3_RELEASE_RESET();
+    __HAL_RCC_APB1_RELEASE_RESET();
+    __HAL_RCC_APB2_RELEASE_RESET();
 
 #if defined(DATA_IN_ExtSRAM) || defined(DATA_IN_ExtSDRAM)
     SystemInit_ExtMemCtl();
