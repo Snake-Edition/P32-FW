@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: info@prusa3d.com\n"
-"POT-Creation-Date: 2025-09-03 10:29+0200\n"
+"POT-Creation-Date: 2025-10-08 08:41+0000\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -38,6 +38,14 @@ msgstr ""
 "\n"
 "Завантаження налаштувань завершено.\n"
 "\n"
+
+#: src/gui/screen/screen_nozzle_cleaning_failed.cpp:16
+msgid ""
+"\n"
+"Nozzle cleaning failed."
+msgstr ""
+"\n"
+"Не вдалося очистити сопло."
 
 #: src/gui/screen_menu_tools.hpp:33
 msgid "  Tool 1"
@@ -90,58 +98,58 @@ msgstr "%d Калібрування положення док-станції"
 msgid "%d Door Sensor"
 msgstr "%d Датчик дверей"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:129
+#: src/gui/include_MINI/selftest_snake_config.hpp:76
 #: src/gui/include_COREONE/selftest_snake_config.hpp:85
 #: src/gui/include_MK3.5/selftest_snake_config.hpp:77
-#: src/gui/include_MINI/selftest_snake_config.hpp:76
-#: src/gui/include_iX/selftest_snake_config.hpp:84
+#: src/gui/include_XL/selftest_snake_config.hpp:129
 #: src/gui/include_MK4/selftest_snake_config.hpp:79
+#: src/gui/include_iX/selftest_snake_config.hpp:84
 #, c-format
 msgid "%d Fan Test"
 msgstr "%d Тест вентилятора"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:141
 #: src/gui/include_COREONE/selftest_snake_config.hpp:97
-#: src/gui/include_iX/selftest_snake_config.hpp:94
+#: src/gui/include_XL/selftest_snake_config.hpp:141
 #: src/gui/include_MK4/selftest_snake_config.hpp:86
+#: src/gui/include_iX/selftest_snake_config.hpp:94
 #, c-format
 msgid "%d Filament Sensor Calibration"
 msgstr "%d Калібрування датчика філаменту"
 
-#: src/gui/include_MK3.5/selftest_snake_config.hpp:82
 #: src/gui/include_MINI/selftest_snake_config.hpp:80
+#: src/gui/include_MK3.5/selftest_snake_config.hpp:82
 #, c-format
 msgid "%d First Layer Calibration"
 msgstr "%d Калібрування першого шару"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:145
 #: src/gui/include_COREONE/selftest_snake_config.hpp:96
+#: src/gui/include_XL/selftest_snake_config.hpp:145
 #: src/gui/include_MK4/selftest_snake_config.hpp:85
 #, c-format
 msgid "%d Gearbox Alignment"
 msgstr "%d Вирівнювання редуктора"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:140
+#: src/gui/include_MINI/selftest_snake_config.hpp:79
 #: src/gui/include_COREONE/selftest_snake_config.hpp:95
 #: src/gui/include_MK3.5/selftest_snake_config.hpp:81
-#: src/gui/include_MINI/selftest_snake_config.hpp:79
-#: src/gui/include_iX/selftest_snake_config.hpp:93
+#: src/gui/include_XL/selftest_snake_config.hpp:140
 #: src/gui/include_MK4/selftest_snake_config.hpp:84
+#: src/gui/include_iX/selftest_snake_config.hpp:93
 #, c-format
 msgid "%d Heater Test"
 msgstr "%d Тест нагрівача"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:134
 #: src/gui/include_COREONE/selftest_snake_config.hpp:91
+#: src/gui/include_XL/selftest_snake_config.hpp:134
 #: src/gui/include_iX/selftest_snake_config.hpp:89
 #, c-format
 msgid "%d Homing Calibration"
 msgstr "%d Калібрування початкової позиції"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:137
 #: src/gui/include_COREONE/selftest_snake_config.hpp:93
-#: src/gui/include_iX/selftest_snake_config.hpp:91
+#: src/gui/include_XL/selftest_snake_config.hpp:137
 #: src/gui/include_MK4/selftest_snake_config.hpp:82
+#: src/gui/include_iX/selftest_snake_config.hpp:91
 #, c-format
 msgid "%d Loadcell Test"
 msgstr "%d Тест датчика навантаження"
@@ -162,42 +170,42 @@ msgstr "%d Калібрування фазового кроку"
 msgid "%d Tool Offset Calibration"
 msgstr "%d Калібрування зсуву інструмента"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:132
 #: src/gui/include_COREONE/selftest_snake_config.hpp:89
+#: src/gui/include_XL/selftest_snake_config.hpp:132
 #: src/gui/include_iX/selftest_snake_config.hpp:87
 #, c-format
 msgid "%d X Axis Test"
 msgstr "%d Тест осі X"
 
-#: src/gui/include_MK3.5/selftest_snake_config.hpp:79
 #: src/gui/include_MINI/selftest_snake_config.hpp:77
+#: src/gui/include_MK3.5/selftest_snake_config.hpp:79
 #: src/gui/include_MK4/selftest_snake_config.hpp:81
 #, c-format
 msgid "%d XY Axis Test"
 msgstr "%d Тест осей XY"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:131
 #: src/gui/include_COREONE/selftest_snake_config.hpp:88
+#: src/gui/include_XL/selftest_snake_config.hpp:131
 #: src/gui/include_iX/selftest_snake_config.hpp:86
 #, c-format
 msgid "%d Y Axis Test"
 msgstr "%d Тест осі Y"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:130
 #: src/gui/include_COREONE/selftest_snake_config.hpp:87
 #: src/gui/include_MK3.5/selftest_snake_config.hpp:78
-#: src/gui/include_iX/selftest_snake_config.hpp:85
+#: src/gui/include_XL/selftest_snake_config.hpp:130
 #: src/gui/include_MK4/selftest_snake_config.hpp:80
+#: src/gui/include_iX/selftest_snake_config.hpp:85
 #, c-format
 msgid "%d Z Alignment Calibration"
 msgstr "%d Калібрування вирівнювання осі Z"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:139
+#: src/gui/include_MINI/selftest_snake_config.hpp:78
 #: src/gui/include_COREONE/selftest_snake_config.hpp:94
 #: src/gui/include_MK3.5/selftest_snake_config.hpp:80
-#: src/gui/include_MINI/selftest_snake_config.hpp:78
-#: src/gui/include_iX/selftest_snake_config.hpp:92
+#: src/gui/include_XL/selftest_snake_config.hpp:139
 #: src/gui/include_MK4/selftest_snake_config.hpp:83
+#: src/gui/include_iX/selftest_snake_config.hpp:92
 #, c-format
 msgid "%d Z Axis Test"
 msgstr "%d Тест осі Z"
@@ -229,8 +237,8 @@ msgstr "%u %% / заклинило"
 msgid "%u %% / unknown"
 msgstr "%u %% / невідомо"
 
-#: src/gui/screen/toolhead/screen_toolhead_settings.cpp:20
 #: src/gui/screen/toolhead/screen_toolhead_settings_fs.cpp:8
+#: src/gui/screen/toolhead/screen_toolhead_settings.cpp:20
 msgid "-"
 msgstr "-"
 
@@ -262,7 +270,7 @@ msgstr ""
 "- Зніміть лист з нагрівального столу.\n"
 "- Встановіть калібрувальний штифт."
 
-#: src/gui/screen_menu_connect.cpp:67 src/gui/screen/screen_preheat.cpp:194
+#: src/gui/screen/screen_preheat.cpp:193 src/gui/screen_menu_connect.cpp:67
 msgid "---"
 msgstr "---"
 
@@ -329,11 +337,11 @@ msgid "A crash dump report (file dump.bin) has been saved to the USB drive."
 msgstr ""
 "Звіт про аварійне завершення (файл dump.bin) збережено на USB-накопичувач."
 
-#: tmp_error_headers/error_list_xl.hpp:730
-#: tmp_error_headers/error_list_ix.hpp:695
-#: tmp_error_headers/error_list_mk4.hpp:513
 #: tmp_error_headers/error_list_mk35.hpp:485
 #: tmp_error_headers/error_list_coreone.hpp:681
+#: tmp_error_headers/error_list_xl.hpp:730
+#: tmp_error_headers/error_list_mk4.hpp:513
+#: tmp_error_headers/error_list_ix.hpp:695
 msgid "A filament specified in the G-code is either not loaded or wrong type."
 msgstr ""
 "Філамент, вказаний у G-коді, або не завантажений, або неправильного типу."
@@ -359,12 +367,12 @@ msgstr "ПЕРЕРВАТИ"
 msgid "ABORTING ..."
 msgstr "ПЕРЕРИВАННЯ..."
 
-#: tmp_error_headers/error_list_mini.hpp:211
-#: tmp_error_headers/error_list_xl.hpp:372
-#: tmp_error_headers/error_list_ix.hpp:358
-#: tmp_error_headers/error_list_mk4.hpp:253
 #: tmp_error_headers/error_list_mk35.hpp:239
 #: tmp_error_headers/error_list_coreone.hpp:337
+#: tmp_error_headers/error_list_xl.hpp:372
+#: tmp_error_headers/error_list_mini.hpp:211
+#: tmp_error_headers/error_list_mk4.hpp:253
+#: tmp_error_headers/error_list_ix.hpp:358
 msgid "ACCELEROMETER COMMUNICATION FAILED"
 msgstr "ПОМИЛКА ЗВ'ЯЗКУ З АКСЕЛЕРОМЕТРОМ"
 
@@ -379,6 +387,10 @@ msgstr "УСІ ІНСТРУМЕНТИ"
 #: src/common/client_response_texts.hpp:20
 msgid "ALWAYS"
 msgstr "ЗАВЖДИ"
+
+#: src/gui/screen/dialog_safety_timer.cpp:24
+msgid "Abort print?"
+msgstr "Перервати друк?"
 
 #: lib/Marlin/Marlin/src/feature/phase_stepping/calibration.cpp:2067
 msgid "Aborted."
@@ -419,9 +431,9 @@ msgstr "Додати принтер до Connect"
 msgid "Additional probing"
 msgstr "Додаткове зондування"
 
+#: tmp_error_headers/error_list_coreone.hpp:373
 #: tmp_error_headers/error_list_xl.hpp:422
 #: tmp_error_headers/error_list_ix.hpp:401
-#: tmp_error_headers/error_list_coreone.hpp:373
 msgid "Address assignment error"
 msgstr "Помилка призначення адреси"
 
@@ -434,7 +446,7 @@ msgid "Adjust belt tensioners"
 msgstr "Відрегулюйте натягувачі ременя"
 
 #. / title text
-#: src/gui/dialogs/liveadjust_z.cpp:204
+#: src/gui/dialogs/liveadjust_z.cpp:192
 msgid "Adjust the nozzle height above the heatbed by turning the knob"
 msgstr "Відрегулюйте висоту сопла над нагрівальним столом, обертаючи ручку"
 
@@ -512,13 +524,26 @@ msgstr ""
 msgid "Approx. %d min"
 msgstr "Прибл. %d хв"
 
-#: src/gui/wizard/screen_belt_tuning_wizard.cpp:194
+#: src/gui/wizard/screen_belt_tuning_wizard.cpp:197
 msgid "Are the belts vibrating?"
 msgstr "Чи вібрують ремені?"
 
 #: src/gui/screen_printing_serial.cpp:80 src/gui/screen_printing.cpp:122
 msgid "Are you sure to stop this printing?"
 msgstr "Ви впевнені, що хочете зупинити цей друк?"
+
+#: tmp_error_headers/error_list_coreone.hpp:940
+#: tmp_error_headers/error_list_xl.hpp:989
+#: tmp_error_headers/error_list_mk4.hpp:730
+#: tmp_error_headers/error_list_ix.hpp:863
+msgid ""
+"Are you sure you want to abort the print?\n"
+"\n"
+"The current print will be cancelled and you will need to start over."
+msgstr ""
+"Ви впевнені, що хочете перервати друк?\n"
+"\n"
+"Поточний друк буде скасовано, і вам доведеться починати спочатку."
 
 #: src/feature/door_sensor_calibration/screen_door_sensor_calibration.cpp:21
 msgid "Are you sure you want to skip the door sensor calibration for now?"
@@ -571,6 +596,20 @@ msgstr "Авто"
 msgid "Auto Home"
 msgstr "Автопаркування"
 
+#: src/gui/screen/filament/screen_filament_detail.cpp:134
+#: src/gui/menu_item/specific/menu_items_auto_retract.cpp:7
+msgid "Auto Retract"
+msgstr "Автоматичне втягування"
+
+#: src/gui/menu_item/specific/menu_items_auto_retract.cpp:10
+msgid ""
+"Auto Retract allows faster filament unloads and helps nozzle cleaning "
+"failures.\n"
+"Are you sure you want to disable it?"
+msgstr ""
+"Авто-ретракція прискорює вивантаження філаменту та допомагає уникнути збоїв "
+"очищення сопла. Вимкнути?"
+
 #: src/common/feature/print_status_message/print_status_message_formatter_buddy.cpp:39
 msgid "Auto-retracting"
 msgstr "Автоматичне втягування"
@@ -580,8 +619,8 @@ msgid "Auto-retracting filament"
 msgstr "Автоматичне втягування філаменту"
 
 #. //MSG_PROGRESS_FEED_NOZZLE c=20
-#: src/mmu2/mmu2_progress_converter.cpp:15
 #: src/gui/dialogs/DialogLoadUnload.cpp:73
+#: src/mmu2/mmu2_progress_converter.cpp:15
 msgid "Avoiding grind"
 msgstr "Уникнення зносу"
 
@@ -602,30 +641,30 @@ msgstr ""
 msgid "BACK"
 msgstr "НАЗАД"
 
-#: tmp_error_headers/error_list_mini.hpp:246
-#: tmp_error_headers/error_list_xl.hpp:533
-#: tmp_error_headers/error_list_ix.hpp:512
-#: tmp_error_headers/error_list_mk4.hpp:316
 #: tmp_error_headers/error_list_mk35.hpp:288
 #: tmp_error_headers/error_list_coreone.hpp:484
+#: tmp_error_headers/error_list_xl.hpp:533
+#: tmp_error_headers/error_list_mini.hpp:246
+#: tmp_error_headers/error_list_mk4.hpp:316
+#: tmp_error_headers/error_list_ix.hpp:512
 msgid "BBF ALLOCATION FAILED"
 msgstr "ПОМИЛКА ВИДІЛЕННЯ BBF"
 
-#: tmp_error_headers/error_list_mini.hpp:253
-#: tmp_error_headers/error_list_xl.hpp:540
-#: tmp_error_headers/error_list_ix.hpp:519
-#: tmp_error_headers/error_list_mk4.hpp:323
 #: tmp_error_headers/error_list_mk35.hpp:295
 #: tmp_error_headers/error_list_coreone.hpp:491
+#: tmp_error_headers/error_list_xl.hpp:540
+#: tmp_error_headers/error_list_mini.hpp:253
+#: tmp_error_headers/error_list_mk4.hpp:323
+#: tmp_error_headers/error_list_ix.hpp:519
 msgid "BBF INITIALIZATION FAILED"
 msgstr "ПОМИЛКА ІНІЦІАЛІЗАЦІЇ BBF"
 
-#: tmp_error_headers/error_list_mini.hpp:254
-#: tmp_error_headers/error_list_xl.hpp:541
-#: tmp_error_headers/error_list_ix.hpp:520
-#: tmp_error_headers/error_list_mk4.hpp:324
 #: tmp_error_headers/error_list_mk35.hpp:296
 #: tmp_error_headers/error_list_coreone.hpp:492
+#: tmp_error_headers/error_list_xl.hpp:541
+#: tmp_error_headers/error_list_mini.hpp:254
+#: tmp_error_headers/error_list_mk4.hpp:324
+#: tmp_error_headers/error_list_ix.hpp:520
 msgid "BBF initialization failed, repeat the action or try another USB drive."
 msgstr ""
 "Ініціалізація BBF не вдалася, повторіть дію або спробуйте інший USB-"
@@ -635,7 +674,7 @@ msgstr ""
 msgid "BED LEVEL CORRECTION"
 msgstr "КОРЕКЦІЯ РІВНЯ СТОЛУ"
 
-#: src/gui/wizard/screen_belt_tuning_wizard.cpp:239
+#: src/gui/wizard/screen_belt_tuning_wizard.cpp:242
 msgid "BELT TUNING"
 msgstr "НАЛАШТУВАННЯ РЕМЕНЯ"
 
@@ -667,11 +706,11 @@ msgstr "Корекція рівня столу"
 msgid "Bed MCU Temp"
 msgstr "Температура MCU столу"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:79
+#: src/gui/screen/filament/screen_filament_detail.cpp:87
 msgid "Bed Temp"
 msgstr "Темп. столу"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:79
+#: src/gui/screen/filament/screen_filament_detail.cpp:87
 #: src/gui/MItem_tools.cpp:501
 msgid "Bed Temperature"
 msgstr "Температура столу"
@@ -688,12 +727,12 @@ msgstr ""
 "Якщо ви забули покласти сталевий лист на нагрівальний стіл, покладіть його "
 "та натисніть «Повторити»."
 
-#: tmp_error_headers/error_list_mini.hpp:555
-#: tmp_error_headers/error_list_xl.hpp:912
-#: tmp_error_headers/error_list_ix.hpp:828
-#: tmp_error_headers/error_list_mk4.hpp:660
 #: tmp_error_headers/error_list_mk35.hpp:639
 #: tmp_error_headers/error_list_coreone.hpp:842
+#: tmp_error_headers/error_list_xl.hpp:912
+#: tmp_error_headers/error_list_mini.hpp:555
+#: tmp_error_headers/error_list_mk4.hpp:660
+#: tmp_error_headers/error_list_ix.hpp:828
 msgid "Bed leveling failed. Try again?"
 msgstr "Вирівнювання столу не вдалося. Спробувати ще раз?"
 
@@ -742,7 +781,7 @@ msgid "Before you proceed, make sure filament is unloaded from the Nextruder."
 msgstr ""
 "Перш ніж продовжити, переконайтеся, що філамент вивантажено з Nextruder."
 
-#: src/gui/MItem_tools.hpp:634
+#: src/gui/MItem_tools.hpp:635
 msgid "Belt Tuning"
 msgstr "Налаштування ременя"
 
@@ -766,11 +805,11 @@ msgstr "Чорний"
 msgid "Board Temperature"
 msgstr "Температура плати"
 
-#: src/gui/MItem_tools.hpp:234
+#: src/gui/MItem_tools.hpp:235
 msgid "Bootloader Version"
 msgstr "Версія завантажувача"
 
-#: src/gui/MItem_tools.hpp:248
+#: src/gui/MItem_tools.hpp:249
 msgid "Buddy Board"
 msgstr "Плата Buddy"
 
@@ -782,9 +821,9 @@ msgstr "Помилка"
 msgid "CALIBRATE"
 msgstr "КАЛІБРУВАТИ"
 
+#: tmp_error_headers/error_list_coreone.hpp:99
 #: tmp_error_headers/error_list_xl.hpp:92
 #: tmp_error_headers/error_list_ix.hpp:57
-#: tmp_error_headers/error_list_coreone.hpp:99
 msgid "CALIBRATE HOMING FROM MENU"
 msgstr "ВІДКАЛІБРУВАТИ ПАРКУВАННЯ З МЕНЮ"
 
@@ -816,8 +855,8 @@ msgstr "ПОМИЛКА МАКСИМАЛЬНОЇ ТЕМПЕРАТУРИ КАМЕ�
 msgid "CHAMBER MINTEMP ERROR"
 msgstr "ПОМИЛКА МІНІМАЛЬНОЇ ТЕМПЕРАТУРИ КАМЕРИ"
 
-#: tmp_error_headers/error_list_xl.hpp:211
 #: tmp_error_headers/error_list_coreone.hpp:197
+#: tmp_error_headers/error_list_xl.hpp:211
 msgid "CHAMBER WARMING UP"
 msgstr "НАГРІВАННЯ КАМЕРИ"
 
@@ -841,12 +880,12 @@ msgstr "ХОЛОДНЕ ВИТЯГУВАННЯ"
 msgid "COMMUNICATION ERROR"
 msgstr "ПОМИЛКА ЗВ'ЯЗКУ"
 
-#: tmp_error_headers/error_list_mini.hpp:218
-#: tmp_error_headers/error_list_xl.hpp:386
-#: tmp_error_headers/error_list_ix.hpp:372
-#: tmp_error_headers/error_list_mk4.hpp:267
 #: tmp_error_headers/error_list_mk35.hpp:253
 #: tmp_error_headers/error_list_coreone.hpp:351
+#: tmp_error_headers/error_list_xl.hpp:386
+#: tmp_error_headers/error_list_mini.hpp:218
+#: tmp_error_headers/error_list_mk4.hpp:267
+#: tmp_error_headers/error_list_ix.hpp:372
 msgid "CONNECT REGISTRATION FAILED"
 msgstr "ПОМИЛКА РЕЄСТРАЦІЇ В CONNECT"
 
@@ -864,23 +903,6 @@ msgstr "ОХОЛОДИТИ"
 
 #. don't close on menu timeout
 #: src/gui/screen_crash_recovery.cpp:266
-#: tmp_error_headers/error_list_mini.hpp:449
-#: tmp_error_headers/error_list_mini.hpp:456
-#: tmp_error_headers/error_list_mini.hpp:463
-#: tmp_error_headers/error_list_mini.hpp:470
-#: tmp_error_headers/error_list_xl.hpp:750
-#: tmp_error_headers/error_list_xl.hpp:757
-#: tmp_error_headers/error_list_xl.hpp:764
-#: tmp_error_headers/error_list_xl.hpp:771
-#: tmp_error_headers/error_list_xl.hpp:778
-#: tmp_error_headers/error_list_ix.hpp:715
-#: tmp_error_headers/error_list_ix.hpp:722
-#: tmp_error_headers/error_list_ix.hpp:729
-#: tmp_error_headers/error_list_ix.hpp:736
-#: tmp_error_headers/error_list_mk4.hpp:540
-#: tmp_error_headers/error_list_mk4.hpp:547
-#: tmp_error_headers/error_list_mk4.hpp:554
-#: tmp_error_headers/error_list_mk4.hpp:561
 #: tmp_error_headers/error_list_mk35.hpp:512
 #: tmp_error_headers/error_list_mk35.hpp:519
 #: tmp_error_headers/error_list_mk35.hpp:526
@@ -889,10 +911,27 @@ msgstr "ОХОЛОДИТИ"
 #: tmp_error_headers/error_list_coreone.hpp:715
 #: tmp_error_headers/error_list_coreone.hpp:722
 #: tmp_error_headers/error_list_coreone.hpp:729
+#: tmp_error_headers/error_list_xl.hpp:750
+#: tmp_error_headers/error_list_xl.hpp:757
+#: tmp_error_headers/error_list_xl.hpp:764
+#: tmp_error_headers/error_list_xl.hpp:771
+#: tmp_error_headers/error_list_xl.hpp:778
+#: tmp_error_headers/error_list_mini.hpp:449
+#: tmp_error_headers/error_list_mini.hpp:456
+#: tmp_error_headers/error_list_mini.hpp:463
+#: tmp_error_headers/error_list_mini.hpp:470
+#: tmp_error_headers/error_list_mk4.hpp:540
+#: tmp_error_headers/error_list_mk4.hpp:547
+#: tmp_error_headers/error_list_mk4.hpp:554
+#: tmp_error_headers/error_list_mk4.hpp:561
+#: tmp_error_headers/error_list_ix.hpp:715
+#: tmp_error_headers/error_list_ix.hpp:722
+#: tmp_error_headers/error_list_ix.hpp:729
+#: tmp_error_headers/error_list_ix.hpp:736
 msgid "CRASH DETECTED"
 msgstr "ВИЯВЛЕНО ЗІТКНЕННЯ"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:156
+#: src/gui/screen/filament/screen_filament_detail.cpp:166
 msgid "CUSTOM PARAMETERS"
 msgstr "КОРИСТУВАЦЬКІ ПАРАМЕТРИ"
 
@@ -916,8 +955,8 @@ msgstr "Калібрувати док-станцію 4"
 msgid "Calibrate Dock 5"
 msgstr "Калібрувати док-станцію 5"
 
-#: src/gui/MItem_tools.hpp:623
 #: src/gui/screen/toolhead/screen_toolhead_settings_dock.cpp:51
+#: src/gui/MItem_tools.hpp:624
 msgid "Calibrate Dock Position"
 msgstr "Калібрувати положення док-станції"
 
@@ -1060,7 +1099,7 @@ msgstr "Камера"
 msgid "Chamber Cooling Fan Error"
 msgstr "Помилка вентилятора охолодження камери"
 
-#: src/gui/MItem_tools.hpp:578
+#: src/gui/MItem_tools.hpp:579
 msgid "Chamber Dimming"
 msgstr "Затемнення камери"
 
@@ -1085,32 +1124,32 @@ msgstr "Обмеження вентиляторів камери"
 msgid "Chamber Filtration"
 msgstr "Фільтрація камери"
 
-#: tmp_error_headers/error_list_xl.hpp:939
 #: tmp_error_headers/error_list_coreone.hpp:890
+#: tmp_error_headers/error_list_xl.hpp:939
 msgid "Chamber Filtration Fan Error"
 msgstr "Помилка вентилятора фільтрації камери"
 
-#: src/gui/MItem_tools.hpp:550
+#: src/gui/MItem_tools.hpp:551
 msgid "Chamber Lights"
 msgstr "Освітлення камери"
 
-#: src/gui/MItem_tools.hpp:564
+#: src/gui/MItem_tools.hpp:565
 msgid "Chamber Lights Dimmed"
 msgstr "Підсвітка камери приглушена"
 
-#: tmp_error_headers/error_list_xl.hpp:218
 #: tmp_error_headers/error_list_coreone.hpp:204
+#: tmp_error_headers/error_list_xl.hpp:218
 msgid "Chamber Overheating"
 msgstr "Перегрів камери"
 
-#: src/gui/screen_menu_temperature.hpp:26
 #: src/gui/menu_item/specific/menu_items_chamber.hpp:8
 #: src/gui/menu_item/specific/menu_items_chamber.hpp:17
+#: src/gui/screen_menu_temperature.hpp:26
 msgid "Chamber Temperature"
 msgstr "Температура камери"
 
-#: tmp_error_headers/error_list_xl.hpp:225
 #: tmp_error_headers/error_list_coreone.hpp:211
+#: tmp_error_headers/error_list_xl.hpp:225
 msgid "Chamber Temperature Is Critical"
 msgstr "Критична температура камери"
 
@@ -1122,8 +1161,8 @@ msgstr ""
 "Вентилятор охолодження камери не обертається. Перевірте його на наявність "
 "засмічень, потім огляньте проводку."
 
-#: tmp_error_headers/error_list_xl.hpp:940
 #: tmp_error_headers/error_list_coreone.hpp:891
+#: tmp_error_headers/error_list_xl.hpp:940
 msgid ""
 "Chamber filtration fan is not spinning. Check it for possible debris, then "
 "inspect the wiring."
@@ -1136,13 +1175,13 @@ msgstr ""
 msgid "Chamber temperature"
 msgstr "Температура камери"
 
-#: tmp_error_headers/error_list_xl.hpp:219
 #: tmp_error_headers/error_list_coreone.hpp:205
+#: tmp_error_headers/error_list_xl.hpp:219
 msgid "Chamber temperature above safety limit. Ensure better ventilation."
 msgstr "Температура в камері вище безпечної межі. Забезпечте кращу вентиляцію."
 
-#: tmp_error_headers/error_list_xl.hpp:226
 #: tmp_error_headers/error_list_coreone.hpp:212
+#: tmp_error_headers/error_list_xl.hpp:226
 msgid "Chamber temperature critical. Aborting print to prevent printer damage."
 msgstr ""
 "Критична температура в камері. Друк буде зупинено, щоб запобігти пошкодженню "
@@ -1160,7 +1199,7 @@ msgstr "Замінити філамент у всіх інструментах"
 msgid "Change Filter"
 msgstr "Замінити фільтр"
 
-#: src/gui/MItem_tools.hpp:519
+#: src/gui/MItem_tools.hpp:520
 msgid "Change Wave Table XYZ"
 msgstr "Змінити таблицю хвиль XYZ"
 
@@ -1179,10 +1218,10 @@ msgstr ""
 msgid "Change to"
 msgstr "Змінити на"
 
-#: tmp_error_headers/error_list_xl.hpp:786
-#: tmp_error_headers/error_list_mk4.hpp:569
 #: tmp_error_headers/error_list_mk35.hpp:541
 #: tmp_error_headers/error_list_coreone.hpp:737
+#: tmp_error_headers/error_list_xl.hpp:786
+#: tmp_error_headers/error_list_mk4.hpp:569
 msgid ""
 "Changes of mapping available only in the Printer UI. Select Print to start "
 "the print with defaults."
@@ -1211,12 +1250,12 @@ msgid "Check all tools if they are properly parked or picked."
 msgstr ""
 "Перевірте, чи всі інструменти належним чином запарковані або підібрані."
 
-#: tmp_error_headers/error_list_mini.hpp:212
-#: tmp_error_headers/error_list_xl.hpp:373
-#: tmp_error_headers/error_list_ix.hpp:359
-#: tmp_error_headers/error_list_mk4.hpp:254
 #: tmp_error_headers/error_list_mk35.hpp:240
 #: tmp_error_headers/error_list_coreone.hpp:338
+#: tmp_error_headers/error_list_xl.hpp:373
+#: tmp_error_headers/error_list_mini.hpp:212
+#: tmp_error_headers/error_list_mk4.hpp:254
+#: tmp_error_headers/error_list_ix.hpp:359
 msgid "Check that the accelerometer cable is plugged in and not damaged."
 msgstr ""
 "Перевірте, чи підключено кабель акселерометра та чи не пошкоджено його."
@@ -1226,48 +1265,48 @@ msgstr ""
 msgid "Check the chamber thermistor wiring for possible damage."
 msgstr "Перевірте проводку термістора камери на можливі пошкодження."
 
-#: tmp_error_headers/error_list_mini.hpp:23
-#: tmp_error_headers/error_list_ix.hpp:65
-#: tmp_error_headers/error_list_mk4.hpp:58
 #: tmp_error_headers/error_list_mk35.hpp:44
 #: tmp_error_headers/error_list_coreone.hpp:107
+#: tmp_error_headers/error_list_mini.hpp:23
+#: tmp_error_headers/error_list_mk4.hpp:58
+#: tmp_error_headers/error_list_ix.hpp:65
 msgid "Check the heatbed heater & thermistor wiring for possible damage."
 msgstr ""
 "Перевірте проводку нагрівача та термістора нагрівального столу на можливі "
 "пошкодження."
 
-#: tmp_error_headers/error_list_mini.hpp:37
-#: tmp_error_headers/error_list_mini.hpp:51
-#: tmp_error_headers/error_list_mini.hpp:65
-#: tmp_error_headers/error_list_xl.hpp:107
-#: tmp_error_headers/error_list_ix.hpp:79
-#: tmp_error_headers/error_list_ix.hpp:93
-#: tmp_error_headers/error_list_ix.hpp:107
-#: tmp_error_headers/error_list_mk4.hpp:72
-#: tmp_error_headers/error_list_mk4.hpp:86
-#: tmp_error_headers/error_list_mk4.hpp:100
 #: tmp_error_headers/error_list_mk35.hpp:58
 #: tmp_error_headers/error_list_mk35.hpp:72
 #: tmp_error_headers/error_list_mk35.hpp:86
 #: tmp_error_headers/error_list_coreone.hpp:121
 #: tmp_error_headers/error_list_coreone.hpp:135
 #: tmp_error_headers/error_list_coreone.hpp:149
+#: tmp_error_headers/error_list_xl.hpp:107
+#: tmp_error_headers/error_list_mini.hpp:37
+#: tmp_error_headers/error_list_mini.hpp:51
+#: tmp_error_headers/error_list_mini.hpp:65
+#: tmp_error_headers/error_list_mk4.hpp:72
+#: tmp_error_headers/error_list_mk4.hpp:86
+#: tmp_error_headers/error_list_mk4.hpp:100
+#: tmp_error_headers/error_list_ix.hpp:79
+#: tmp_error_headers/error_list_ix.hpp:93
+#: tmp_error_headers/error_list_ix.hpp:107
 msgid "Check the heatbed thermistor wiring for possible damage."
 msgstr ""
 "Перевірте проводку термістора нагрівального столу на можливі пошкодження."
 
-#: tmp_error_headers/error_list_mini.hpp:79
-#: tmp_error_headers/error_list_mini.hpp:86
-#: tmp_error_headers/error_list_xl.hpp:135
-#: tmp_error_headers/error_list_xl.hpp:142
-#: tmp_error_headers/error_list_ix.hpp:121
-#: tmp_error_headers/error_list_ix.hpp:128
-#: tmp_error_headers/error_list_mk4.hpp:114
-#: tmp_error_headers/error_list_mk4.hpp:121
 #: tmp_error_headers/error_list_mk35.hpp:100
 #: tmp_error_headers/error_list_mk35.hpp:107
 #: tmp_error_headers/error_list_coreone.hpp:163
 #: tmp_error_headers/error_list_coreone.hpp:170
+#: tmp_error_headers/error_list_xl.hpp:135
+#: tmp_error_headers/error_list_xl.hpp:142
+#: tmp_error_headers/error_list_mini.hpp:79
+#: tmp_error_headers/error_list_mini.hpp:86
+#: tmp_error_headers/error_list_mk4.hpp:114
+#: tmp_error_headers/error_list_mk4.hpp:121
+#: tmp_error_headers/error_list_ix.hpp:121
+#: tmp_error_headers/error_list_ix.hpp:128
 msgid "Check the heatbreak thermistor wiring for possible damage."
 msgstr "Перевірте проводку термістора термобар'єру на можливі пошкодження."
 
@@ -1275,31 +1314,31 @@ msgstr "Перевірте проводку термістора термоба�
 msgid "Check the heater and thermistor wiring for potential damage."
 msgstr "Перевірте проводку нагрівача та термістора на можливі пошкодження."
 
-#: tmp_error_headers/error_list_mini.hpp:30
-#: tmp_error_headers/error_list_ix.hpp:72
-#: tmp_error_headers/error_list_mk4.hpp:65
 #: tmp_error_headers/error_list_mk35.hpp:51
 #: tmp_error_headers/error_list_coreone.hpp:114
+#: tmp_error_headers/error_list_mini.hpp:30
+#: tmp_error_headers/error_list_mk4.hpp:65
+#: tmp_error_headers/error_list_ix.hpp:72
 msgid "Check the print head heater & thermistor wiring for possible damage."
 msgstr ""
 "Перевірте проводку нагрівача та термістора друкуючої головки на можливі "
 "пошкодження."
 
-#: tmp_error_headers/error_list_mini.hpp:44
-#: tmp_error_headers/error_list_mini.hpp:58
-#: tmp_error_headers/error_list_mini.hpp:72
-#: tmp_error_headers/error_list_ix.hpp:86
-#: tmp_error_headers/error_list_ix.hpp:100
-#: tmp_error_headers/error_list_ix.hpp:114
-#: tmp_error_headers/error_list_mk4.hpp:79
-#: tmp_error_headers/error_list_mk4.hpp:93
-#: tmp_error_headers/error_list_mk4.hpp:107
 #: tmp_error_headers/error_list_mk35.hpp:65
 #: tmp_error_headers/error_list_mk35.hpp:79
 #: tmp_error_headers/error_list_mk35.hpp:93
 #: tmp_error_headers/error_list_coreone.hpp:128
 #: tmp_error_headers/error_list_coreone.hpp:142
 #: tmp_error_headers/error_list_coreone.hpp:156
+#: tmp_error_headers/error_list_mini.hpp:44
+#: tmp_error_headers/error_list_mini.hpp:58
+#: tmp_error_headers/error_list_mini.hpp:72
+#: tmp_error_headers/error_list_mk4.hpp:79
+#: tmp_error_headers/error_list_mk4.hpp:93
+#: tmp_error_headers/error_list_mk4.hpp:107
+#: tmp_error_headers/error_list_ix.hpp:86
+#: tmp_error_headers/error_list_ix.hpp:100
+#: tmp_error_headers/error_list_ix.hpp:114
 msgid "Check the print head thermistor wiring for possible damage."
 msgstr ""
 "Перевірте проводку термістора друкуючої головки на можливі пошкодження."
@@ -1335,6 +1374,24 @@ msgstr "Очистьте сталевий лист."
 msgid "Cleaning nozzle"
 msgstr "Очищення сопла"
 
+#: tmp_error_headers/error_list_coreone.hpp:897
+#: tmp_error_headers/error_list_coreone.hpp:904
+#: tmp_error_headers/error_list_coreone.hpp:911
+#: tmp_error_headers/error_list_coreone.hpp:918
+#: tmp_error_headers/error_list_coreone.hpp:925
+#: tmp_error_headers/error_list_xl.hpp:946
+#: tmp_error_headers/error_list_xl.hpp:953
+#: tmp_error_headers/error_list_xl.hpp:960
+#: tmp_error_headers/error_list_xl.hpp:967
+#: tmp_error_headers/error_list_xl.hpp:974
+#: tmp_error_headers/error_list_mk4.hpp:687
+#: tmp_error_headers/error_list_mk4.hpp:694
+#: tmp_error_headers/error_list_mk4.hpp:701
+#: tmp_error_headers/error_list_mk4.hpp:708
+#: tmp_error_headers/error_list_mk4.hpp:715
+msgid "Cleaning the nozzle"
+msgstr "Очищення сопла"
+
 #: src/gui/screen_move_z.hpp:21
 msgid "Click the knob to close"
 msgstr "Натисніть на ручку, щоб закрити"
@@ -1362,10 +1419,10 @@ msgstr ""
 msgid "Code: %s"
 msgstr "Код: %s"
 
-#: src/gui/MItem_tools.hpp:491 tmp_error_headers/error_list_xl.hpp:687
-#: tmp_error_headers/error_list_mk4.hpp:470
-#: tmp_error_headers/error_list_mk35.hpp:442
+#: src/gui/MItem_tools.hpp:492 tmp_error_headers/error_list_mk35.hpp:442
 #: tmp_error_headers/error_list_coreone.hpp:638
+#: tmp_error_headers/error_list_xl.hpp:687
+#: tmp_error_headers/error_list_mk4.hpp:470
 msgid "Cold Pull"
 msgstr "Холодне витягування"
 
@@ -1408,11 +1465,11 @@ msgstr ""
 msgid "Computing best shaper..."
 msgstr "Обчислення найкращого шейпера..."
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:145
+#: src/gui/screen/filament/screen_filament_detail.cpp:155
 msgid "Confirm"
 msgstr "Підтвердити"
 
-#: src/gui/MItem_tools.cpp:827 src/gui/screen_menu_network_status.hpp:39
+#: src/gui/screen_menu_network_status.hpp:39 src/gui/MItem_tools.cpp:827
 msgid "Connect"
 msgstr "Підключити"
 
@@ -1453,7 +1510,7 @@ msgstr "Продовжити виконання калібрувань та те
 msgid "Control"
 msgstr "Керування"
 
-#: src/gui/screen_menu_temperature.hpp:29 src/gui/screen_menu_move.hpp:33
+#: src/gui/screen_menu_move.hpp:33 src/gui/screen_menu_temperature.hpp:29
 msgid "Cooldown"
 msgstr "Охолодження"
 
@@ -1550,11 +1607,11 @@ msgstr "Вимкнути датчик філаменту"
 msgid "DISABLE MMU"
 msgstr "Вимкнути MMU"
 
-#: tmp_error_headers/error_list_xl.hpp:379
-#: tmp_error_headers/error_list_ix.hpp:365
-#: tmp_error_headers/error_list_mk4.hpp:260
 #: tmp_error_headers/error_list_mk35.hpp:246
 #: tmp_error_headers/error_list_coreone.hpp:344
+#: tmp_error_headers/error_list_xl.hpp:379
+#: tmp_error_headers/error_list_mk4.hpp:260
+#: tmp_error_headers/error_list_ix.hpp:365
 msgid "DISPLAY PROBLEM DETECTED"
 msgstr "Виявлено проблему з дисплеєм"
 
@@ -1562,7 +1619,7 @@ msgstr "Виявлено проблему з дисплеєм"
 msgid "DIY"
 msgstr "Зроби сам"
 
-#: src/gui/MItem_network.hpp:160 src/gui/screen_menu_network_status.hpp:31
+#: src/gui/screen_menu_network_status.hpp:31 src/gui/MItem_network.hpp:160
 msgid "DNS"
 msgstr "DNS"
 
@@ -1647,11 +1704,11 @@ msgstr ""
 msgid "Detecting steel sheet"
 msgstr "Виявлення сталевого листа"
 
-#: src/gui/MItem_tools.hpp:511
+#: src/gui/MItem_tools.hpp:512
 msgid "Device Hash in QR"
 msgstr "Хеш пристрою в QR-коді"
 
-#: src/gui/MItem_tools.hpp:100
+#: src/gui/MItem_tools.hpp:101
 msgid "Disable Motors"
 msgstr "Вимкнути двигуни"
 
@@ -1664,8 +1721,8 @@ msgid "Disconnect"
 msgstr "Від'єднати"
 
 #. //MSG_PROGRESS_ENGAGE_IDLER c=20
-#: src/mmu2/mmu2_progress_converter.cpp:9
 #: src/gui/dialogs/DialogLoadUnload.cpp:67
+#: src/mmu2/mmu2_progress_converter.cpp:9
 msgid "Disengaging idler"
 msgstr "Від'єднання холостого ходу"
 
@@ -1673,11 +1730,11 @@ msgstr "Від'єднання холостого ходу"
 msgid "Display Refresh Speed"
 msgstr "Швидкість оновлення дисплея"
 
-#: tmp_error_headers/error_list_xl.hpp:380
-#: tmp_error_headers/error_list_ix.hpp:366
-#: tmp_error_headers/error_list_mk4.hpp:261
 #: tmp_error_headers/error_list_mk35.hpp:247
 #: tmp_error_headers/error_list_coreone.hpp:345
+#: tmp_error_headers/error_list_xl.hpp:380
+#: tmp_error_headers/error_list_mk4.hpp:261
+#: tmp_error_headers/error_list_ix.hpp:366
 msgid ""
 "Display issues detected. Reducing the refresh rate will possibly solve the "
 "problem. Proceed?"
@@ -1709,6 +1766,10 @@ msgstr ""
 #: src/gui/wizard/selftest_frame_dock.cpp:52
 msgid "Do not touch the printer. Be careful around the moving parts."
 msgstr "Не торкайтеся принтера. Будьте обережні поблизу рухомих частин."
+
+#: src/gui/screen/dialog_safety_timer.cpp:24
+msgid "Do you really want to abort the print?"
+msgstr "Ви дійсно хочете перервати друк?"
 
 #: src/gui/screen/filament/screen_filaments_reorder.cpp:153
 msgid "Do you really want to restore default filament ordering?"
@@ -1832,7 +1893,7 @@ msgstr "Не торкайтеся екструдера."
 msgid "Done"
 msgstr "Готово"
 
-#: src/gui/MItem_tools.cpp:661 src/gui/MItem_hardware.hpp:68
+#: src/gui/MItem_hardware.hpp:68 src/gui/MItem_tools.cpp:661
 msgid "Door Sensor"
 msgstr "Датчик дверей"
 
@@ -1854,7 +1915,7 @@ msgstr "Завантажте файл прошивки (.bbf) на USB-нако�
 msgid "Downloading..."
 msgstr "Завантаження..."
 
-#: src/gui/MItem_tools.hpp:130
+#: src/gui/MItem_tools.hpp:131
 msgid "Dry run (no extrusion)"
 msgstr "Сухий запуск (без екструзії)"
 
@@ -1903,12 +1964,12 @@ msgstr "E3D Revo"
 msgid "EJECT FROM MMU"
 msgstr "ВИЙНЯТИ З MMU"
 
-#: tmp_error_headers/error_list_mini.hpp:232
-#: tmp_error_headers/error_list_xl.hpp:414
-#: tmp_error_headers/error_list_ix.hpp:393
-#: tmp_error_headers/error_list_mk4.hpp:281
 #: tmp_error_headers/error_list_mk35.hpp:267
 #: tmp_error_headers/error_list_coreone.hpp:365
+#: tmp_error_headers/error_list_xl.hpp:414
+#: tmp_error_headers/error_list_mini.hpp:232
+#: tmp_error_headers/error_list_mk4.hpp:281
+#: tmp_error_headers/error_list_ix.hpp:393
 msgid "EMERGENCY STOP"
 msgstr "АВАРІЙНА ЗУПИНКА"
 
@@ -1930,14 +1991,14 @@ msgid "ERR Helping filament"
 msgstr "ПОМИЛКА Допомога філаменту"
 
 #. //MSG_PROGRESS_WAIT_USER c=20
-#: src/mmu2/mmu2_progress_converter.cpp:18
 #: src/gui/dialogs/DialogLoadUnload.cpp:75
+#: src/mmu2/mmu2_progress_converter.cpp:18
 msgid "ERR Internal"
 msgstr "ПОМИЛКА Внутрішня"
 
 #. //MSG_PROGRESS_ERR_HELP_FIL c=20
-#: src/mmu2/mmu2_progress_converter.cpp:20
 #: src/gui/dialogs/DialogLoadUnload.cpp:77
+#: src/mmu2/mmu2_progress_converter.cpp:20
 msgid "ERR TMC failed"
 msgstr "ПОМИЛКА TMC не вдалося"
 
@@ -1974,12 +2035,12 @@ msgstr "ПОМИЛКА МАКСИМАЛЬНОЇ ТЕМПЕРАТУРИ ЕКСТ�
 msgid "EXTRUDER MINTEMP ERROR"
 msgstr "ПОМИЛКА МІНІМАЛЬНОЇ ТЕМПЕРАТУРИ ЕКСТРУДЕРА"
 
-#: tmp_error_headers/error_list_mini.hpp:386
-#: tmp_error_headers/error_list_xl.hpp:680
-#: tmp_error_headers/error_list_ix.hpp:652
-#: tmp_error_headers/error_list_mk4.hpp:456
 #: tmp_error_headers/error_list_mk35.hpp:428
 #: tmp_error_headers/error_list_coreone.hpp:624
+#: tmp_error_headers/error_list_xl.hpp:680
+#: tmp_error_headers/error_list_mini.hpp:386
+#: tmp_error_headers/error_list_mk4.hpp:456
+#: tmp_error_headers/error_list_ix.hpp:652
 msgid "EXTRUDER NOT DETECTED"
 msgstr "ЕКСТРУДЕР НЕ ВИЯВЛЕНО"
 
@@ -2004,18 +2065,18 @@ msgid "Ejecting"
 msgstr "Виймання"
 
 #. //MSG_PROGRESS_PARK_SELECTOR c=20
-#: src/mmu2/mmu2_progress_converter.cpp:29
 #: src/gui/dialogs/DialogLoadUnload.cpp:86
 #: src/gui/dialogs/DialogLoadUnload.cpp:497
+#: src/mmu2/mmu2_progress_converter.cpp:29
 msgid "Ejecting filament"
 msgstr "Виймання філаменту"
 
-#: tmp_error_headers/error_list_mini.hpp:233
-#: tmp_error_headers/error_list_xl.hpp:415
-#: tmp_error_headers/error_list_ix.hpp:394
-#: tmp_error_headers/error_list_mk4.hpp:282
 #: tmp_error_headers/error_list_mk35.hpp:268
 #: tmp_error_headers/error_list_coreone.hpp:366
+#: tmp_error_headers/error_list_xl.hpp:415
+#: tmp_error_headers/error_list_mini.hpp:233
+#: tmp_error_headers/error_list_mk4.hpp:282
+#: tmp_error_headers/error_list_ix.hpp:394
 msgid "Emergency stop invoked by G-code (M112)."
 msgstr "Аварійна зупинка, викликана G-кодом (M112)."
 
@@ -2031,7 +2092,7 @@ msgstr "Увімкнути філаменти"
 msgid "Enable Metrics"
 msgstr "Увімкнути метрики"
 
-#: src/gui/screen_menu_connect.hpp:12 src/gui/screen_prusa_link.hpp:29
+#: src/gui/screen_prusa_link.hpp:29 src/gui/screen_menu_connect.hpp:12
 msgid "Enabled"
 msgstr "Увімкнено"
 
@@ -2064,10 +2125,10 @@ msgstr "Температура в корпусі"
 msgid "End of test"
 msgstr "Кінець тесту"
 
-#. //MSG_PROGRESS_OK c=4
 #. MMU-related
-#: src/mmu2/mmu2_progress_converter.cpp:8
+#. //MSG_PROGRESS_OK c=4
 #: src/gui/dialogs/DialogLoadUnload.cpp:66
+#: src/mmu2/mmu2_progress_converter.cpp:8
 msgid "Engaging idler"
 msgstr "Зачеплення холостого ходу"
 
@@ -2088,19 +2149,18 @@ msgstr ""
 msgid "Enter credentials manually"
 msgstr "Ввести облікові дані вручну"
 
-#: src/guiapi/src/window_msgbox.cpp:300 src/gui/screen_menu_connect.cpp:50
-#: src/gui/screen_menu_connect.hpp:33
 #: src/gui/wizard/screen_belt_tuning_wizard.cpp:25
-#: src/gui/screen_network_setup.cpp:340
+#: src/gui/screen_menu_connect.cpp:50 src/gui/screen_network_setup.cpp:340
+#: src/gui/screen_menu_connect.hpp:33 src/guiapi/src/window_msgbox.cpp:300
 msgid "Error"
 msgstr "Помилка"
 
-#: tmp_error_headers/error_list_mini.hpp:317
-#: tmp_error_headers/error_list_xl.hpp:611
-#: tmp_error_headers/error_list_ix.hpp:583
-#: tmp_error_headers/error_list_mk4.hpp:387
 #: tmp_error_headers/error_list_mk35.hpp:359
 #: tmp_error_headers/error_list_coreone.hpp:555
+#: tmp_error_headers/error_list_xl.hpp:611
+#: tmp_error_headers/error_list_mini.hpp:317
+#: tmp_error_headers/error_list_mk4.hpp:387
+#: tmp_error_headers/error_list_ix.hpp:583
 msgid ""
 "Error erasing\n"
 " flash! Restart\n"
@@ -2194,7 +2254,7 @@ msgstr "ФІЛАМЕНТ"
 msgid "FILAMENT CHANGE"
 msgstr "ЗАМІНА ФІЛАМЕНТА"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:153
+#: src/gui/screen/filament/screen_filament_detail.cpp:163
 msgid "FILAMENT DETAIL"
 msgstr "ДЕТАЛІ ФІЛАМЕНТА"
 
@@ -2284,21 +2344,21 @@ msgstr ""
 msgid "FINISHED"
 msgstr "ЗАВЕРШЕНО"
 
-#: tmp_error_headers/error_list_mini.hpp:365
-#: tmp_error_headers/error_list_xl.hpp:659
-#: tmp_error_headers/error_list_ix.hpp:631
-#: tmp_error_headers/error_list_mk4.hpp:435
 #: tmp_error_headers/error_list_mk35.hpp:407
 #: tmp_error_headers/error_list_coreone.hpp:603
+#: tmp_error_headers/error_list_xl.hpp:659
+#: tmp_error_headers/error_list_mini.hpp:365
+#: tmp_error_headers/error_list_mk4.hpp:435
+#: tmp_error_headers/error_list_ix.hpp:631
 msgid "FIRMWARE MISSING"
 msgstr "ВІДСУТНЯ ПРОШИВКА"
 
-#: tmp_error_headers/error_list_mini.hpp:344
-#: tmp_error_headers/error_list_xl.hpp:638
-#: tmp_error_headers/error_list_ix.hpp:610
-#: tmp_error_headers/error_list_mk4.hpp:414
 #: tmp_error_headers/error_list_mk35.hpp:386
 #: tmp_error_headers/error_list_coreone.hpp:582
+#: tmp_error_headers/error_list_xl.hpp:638
+#: tmp_error_headers/error_list_mini.hpp:344
+#: tmp_error_headers/error_list_mk4.hpp:414
+#: tmp_error_headers/error_list_ix.hpp:610
 msgid "FIRMWARExPRINTER MISMATCH"
 msgstr "НЕСУМІСНІСТЬ ПРОШИВКИ ТА ПРИНТЕРА"
 
@@ -2306,12 +2366,12 @@ msgstr "НЕСУМІСНІСТЬ ПРОШИВКИ ТА ПРИНТЕРА"
 msgid "FIRST LAYER CALIBRATION"
 msgstr "КАЛІБРУВАННЯ ПЕРШОГО ШАРУ"
 
-#: tmp_error_headers/error_list_mini.hpp:316
-#: tmp_error_headers/error_list_xl.hpp:610
-#: tmp_error_headers/error_list_ix.hpp:582
-#: tmp_error_headers/error_list_mk4.hpp:386
 #: tmp_error_headers/error_list_mk35.hpp:358
 #: tmp_error_headers/error_list_coreone.hpp:554
+#: tmp_error_headers/error_list_xl.hpp:610
+#: tmp_error_headers/error_list_mini.hpp:316
+#: tmp_error_headers/error_list_mk4.hpp:386
+#: tmp_error_headers/error_list_ix.hpp:582
 msgid "FLASH ERASE ERROR"
 msgstr "ПОМИЛКА ВИДАЛЕННЯ FLASH-ПАМ'ЯТІ"
 
@@ -2355,12 +2415,12 @@ msgstr "Бічний датчик філаменту"
 msgid "FSensors Disabled"
 msgstr "Датчики філаменту вимкнено"
 
-#: tmp_error_headers/error_list_mini.hpp:337
-#: tmp_error_headers/error_list_xl.hpp:631
-#: tmp_error_headers/error_list_ix.hpp:603
-#: tmp_error_headers/error_list_mk4.hpp:407
 #: tmp_error_headers/error_list_mk35.hpp:379
 #: tmp_error_headers/error_list_coreone.hpp:575
+#: tmp_error_headers/error_list_xl.hpp:631
+#: tmp_error_headers/error_list_mini.hpp:337
+#: tmp_error_headers/error_list_mk4.hpp:407
+#: tmp_error_headers/error_list_ix.hpp:603
 msgid "FW IN INTERNAL FLASH CORRUPTED"
 msgstr "ПОШКОДЖЕНО ПРОШИВКУ У ВНУТРІШНІЙ FLASH-ПАМ'ЯТІ"
 
@@ -2372,7 +2432,7 @@ msgstr "ПОМИЛКА ВИКОНАННЯ ПРОШИВКИ"
 msgid "FW ok"
 msgstr "Прошивка ОК"
 
-#: src/gui/screen_menu_settings.hpp:36
+#: src/gui/screen_menu_settings.hpp:41
 msgid "FW update"
 msgstr "Оновлення прошивки"
 
@@ -2400,8 +2460,8 @@ msgstr ""
 "Не вдалося відкалібрувати паркування. Продовження може спричинити зсуви "
 "шарів після повторного паркування та проблеми зі зміною інструмента."
 
-#: tmp_error_headers/error_list_ix.hpp:16
 #: tmp_error_headers/error_list_coreone.hpp:16
+#: tmp_error_headers/error_list_ix.hpp:16
 msgid ""
 "Failed to calibrate homing. Continuing can cause layer shifts after rehoming."
 msgstr ""
@@ -2428,10 +2488,10 @@ msgstr ""
 "Не вдалося виконати калібрування початкової позиції осі Y. Переконайтеся, що "
 "на осі X або Y немає перешкод."
 
-#: tmp_error_headers/error_list_mini.hpp:114
-#: tmp_error_headers/error_list_mk4.hpp:149
 #: tmp_error_headers/error_list_mk35.hpp:135
 #: tmp_error_headers/error_list_coreone.hpp:233
+#: tmp_error_headers/error_list_mini.hpp:114
+#: tmp_error_headers/error_list_mk4.hpp:149
 msgid "Failed to home the Y-axis, make sure there is no obstacle on Y-axis."
 msgstr ""
 "Не вдалося виконати калібрування початкової позиції осі Y. Переконайтеся, що "
@@ -2443,11 +2503,11 @@ msgstr ""
 "Не вдалося виконати калібрування початкової позиції осі Z. Переконайтеся, що "
 "датчик навантаження працює."
 
-#: tmp_error_headers/error_list_mini.hpp:107
-#: tmp_error_headers/error_list_ix.hpp:233
-#: tmp_error_headers/error_list_mk4.hpp:142
 #: tmp_error_headers/error_list_mk35.hpp:128
 #: tmp_error_headers/error_list_coreone.hpp:226
+#: tmp_error_headers/error_list_mini.hpp:107
+#: tmp_error_headers/error_list_mk4.hpp:142
+#: tmp_error_headers/error_list_ix.hpp:233
 msgid ""
 "Failed to home the extruder in X-axis, make sure there is no obstacle on X-"
 "axis."
@@ -2463,9 +2523,9 @@ msgstr ""
 "Не вдалося виконати калібрування початкової позиції екструдера по осі Y. "
 "Переконайтеся, що на осі Y немає перешкод."
 
-#: tmp_error_headers/error_list_ix.hpp:212
-#: tmp_error_headers/error_list_mk4.hpp:135
 #: tmp_error_headers/error_list_coreone.hpp:219
+#: tmp_error_headers/error_list_mk4.hpp:135
+#: tmp_error_headers/error_list_ix.hpp:212
 msgid ""
 "Failed to home the extruder in Z-axis, make sure the loadcell is working."
 msgstr ""
@@ -2502,7 +2562,7 @@ msgstr "Не вдалося відновити дані калібрування
 msgid "Failed to save calibration data"
 msgstr "Не вдалося зберегти дані калібрування"
 
-#: src/gui/MItem_tools.hpp:217
+#: src/gui/MItem_tools.hpp:218
 msgid "Fan Check"
 msgstr "Перевірка вентилятора"
 
@@ -2519,8 +2579,8 @@ msgid "Features required:"
 msgstr "Необхідні функції:"
 
 #. //MSG_PROGRESS_UNLOAD_PULLEY c=20
-#: src/mmu2/mmu2_progress_converter.cpp:12
 #: src/gui/dialogs/DialogLoadUnload.cpp:70
+#: src/mmu2/mmu2_progress_converter.cpp:12
 msgid "Feeding to FINDA"
 msgstr "Подача до FINDA"
 
@@ -2543,25 +2603,25 @@ msgid "Feeding to fsensor"
 msgstr "Подача до датчика філаменту"
 
 #. //MSG_PROGRESS_FEED_EXTRUDER c=20
-#: src/mmu2/mmu2_progress_converter.cpp:14
 #: src/gui/dialogs/DialogLoadUnload.cpp:72
+#: src/mmu2/mmu2_progress_converter.cpp:14
 msgid "Feeding to nozzle"
 msgstr "Подача до сопла"
 
-#: tmp_error_headers/error_list_xl.hpp:64
-#: tmp_error_headers/error_list_ix.hpp:29
-#: tmp_error_headers/error_list_mk4.hpp:22
-#: tmp_error_headers/error_list_mk4.hpp:29
 #: tmp_error_headers/error_list_mk35.hpp:8
 #: tmp_error_headers/error_list_mk35.hpp:15
 #: tmp_error_headers/error_list_coreone.hpp:50
 #: tmp_error_headers/error_list_coreone.hpp:57
+#: tmp_error_headers/error_list_xl.hpp:64
+#: tmp_error_headers/error_list_mk4.hpp:22
+#: tmp_error_headers/error_list_mk4.hpp:29
+#: tmp_error_headers/error_list_ix.hpp:29
 msgid "Fil. Sensor Troubleshooting"
 msgstr "Усунення несправностей датчика філаменту"
 
-#: src/common/footer_def.cpp:12 src/gui/MItem_tools.hpp:348
+#: src/common/footer_def.cpp:12
 #: src/gui/screen/filament/screen_filaments_loaded.cpp:30
-#: src/gui/screen_home.cpp:136
+#: src/gui/screen_home.cpp:136 src/gui/MItem_tools.hpp:349
 msgid "Filament"
 msgstr "Філамент"
 
@@ -2579,7 +2639,7 @@ msgstr ""
 "Філамент '%s' є абразивним, але у вас не встановлено загартоване сопло. Ви "
 "дійсно хочете продовжити?"
 
-#: src/gui/MItem_tools.hpp:262
+#: src/gui/MItem_tools.hpp:263
 msgid "Filament Autoloading"
 msgstr "Автозавантаження філаменту"
 
@@ -2588,19 +2648,19 @@ msgid "Filament Change"
 msgstr "Заміна філаменту"
 
 #. If the printer has filament sensors menu, this item is inside it and is supposed to be called differently (BFW-4973)
-#: src/gui/MItem_tools.hpp:37
+#: src/gui/MItem_tools.hpp:38
 msgid "Filament Sensing"
 msgstr "Розпізнавання філаменту"
 
-#: src/gui/MItem_tools.hpp:37 src/gui/MItem_tools.cpp:542
+#: src/gui/MItem_tools.cpp:542 src/gui/MItem_tools.hpp:38
 msgid "Filament Sensor"
 msgstr "Датчик філаменту"
 
-#: tmp_error_headers/error_list_xl.hpp:71
-#: tmp_error_headers/error_list_ix.hpp:36
-#: tmp_error_headers/error_list_mk4.hpp:36
 #: tmp_error_headers/error_list_mk35.hpp:22
 #: tmp_error_headers/error_list_coreone.hpp:64
+#: tmp_error_headers/error_list_xl.hpp:71
+#: tmp_error_headers/error_list_mk4.hpp:36
+#: tmp_error_headers/error_list_ix.hpp:36
 msgid "Filament Sensors Disabled"
 msgstr "Датчики філаменту вимкнено"
 
@@ -2628,9 +2688,9 @@ msgstr ""
 "Неочікувано виявлено філамент. Переконайтеся, що філамент не завантажено. "
 "Перевірте датчики та проводку."
 
-#: tmp_error_headers/error_list_mk4.hpp:520
 #: tmp_error_headers/error_list_mk35.hpp:492
 #: tmp_error_headers/error_list_coreone.hpp:688
+#: tmp_error_headers/error_list_mk4.hpp:520
 msgid ""
 "Filament detected. Unload filament now? Select NO to start the print with "
 "the currently loaded filament."
@@ -2646,12 +2706,12 @@ msgstr "Філамент вставлено, натисніть «Продовж
 msgid "Filament is not customizable"
 msgstr "Цей філамент не можна налаштувати"
 
-#: tmp_error_headers/error_list_mini.hpp:569
-#: tmp_error_headers/error_list_xl.hpp:933
-#: tmp_error_headers/error_list_ix.hpp:849
-#: tmp_error_headers/error_list_mk4.hpp:681
 #: tmp_error_headers/error_list_mk35.hpp:653
 #: tmp_error_headers/error_list_coreone.hpp:863
+#: tmp_error_headers/error_list_xl.hpp:933
+#: tmp_error_headers/error_list_mini.hpp:569
+#: tmp_error_headers/error_list_mk4.hpp:681
+#: tmp_error_headers/error_list_ix.hpp:849
 msgid "Filament loading timed out."
 msgstr "Вийшов час очікування завантаження філаменту."
 
@@ -2659,12 +2719,12 @@ msgstr "Вийшов час очікування завантаження філ
 msgid "Filament needs to be heated and pushed back to the nozzle."
 msgstr "Філамент потрібно нагріти і подати назад до сопла."
 
-#: tmp_error_headers/error_list_mini.hpp:422
-#: tmp_error_headers/error_list_xl.hpp:723
-#: tmp_error_headers/error_list_ix.hpp:688
-#: tmp_error_headers/error_list_mk4.hpp:506
 #: tmp_error_headers/error_list_mk35.hpp:478
 #: tmp_error_headers/error_list_coreone.hpp:674
+#: tmp_error_headers/error_list_xl.hpp:723
+#: tmp_error_headers/error_list_mini.hpp:422
+#: tmp_error_headers/error_list_mk4.hpp:506
+#: tmp_error_headers/error_list_ix.hpp:688
 msgid ""
 "Filament not detected. Load filament now?\n"
 "Select NO to cancel the print.\n"
@@ -2727,12 +2787,12 @@ msgstr ""
 msgid "Filament sensors"
 msgstr "Датчики філаменту"
 
-#: tmp_error_headers/error_list_mini.hpp:16
-#: tmp_error_headers/error_list_xl.hpp:72
-#: tmp_error_headers/error_list_ix.hpp:37
-#: tmp_error_headers/error_list_mk4.hpp:37
 #: tmp_error_headers/error_list_mk35.hpp:23
 #: tmp_error_headers/error_list_coreone.hpp:65
+#: tmp_error_headers/error_list_xl.hpp:72
+#: tmp_error_headers/error_list_mini.hpp:16
+#: tmp_error_headers/error_list_mk4.hpp:37
+#: tmp_error_headers/error_list_ix.hpp:37
 msgid "Filament sensors are disabled. Enable them manually after printing."
 msgstr "Датчики філаменту вимкнено. Увімкніть їх вручну після друку."
 
@@ -2744,9 +2804,9 @@ msgstr "Датчики філаменту відкалібровано."
 msgid "Filament sensors calibration"
 msgstr "Калібрування датчиків філаменту"
 
+#: tmp_error_headers/error_list_coreone.hpp:93
 #: tmp_error_headers/error_list_xl.hpp:86
 #: tmp_error_headers/error_list_ix.hpp:51
-#: tmp_error_headers/error_list_coreone.hpp:93
 msgid ""
 "Filament was detected in the extruder filament sensor. Please remove it "
 "manually before proceeding."
@@ -2766,18 +2826,18 @@ msgstr "Файл пошкоджено"
 msgid "File doesn't contain any print instructions"
 msgstr "Файл не містить інструкцій для друку"
 
-#: tmp_error_headers/error_list_mini.hpp:435
-#: tmp_error_headers/error_list_mini.hpp:436
-#: tmp_error_headers/error_list_xl.hpp:736
-#: tmp_error_headers/error_list_xl.hpp:737
-#: tmp_error_headers/error_list_ix.hpp:701
-#: tmp_error_headers/error_list_ix.hpp:702
-#: tmp_error_headers/error_list_mk4.hpp:526
-#: tmp_error_headers/error_list_mk4.hpp:527
 #: tmp_error_headers/error_list_mk35.hpp:498
 #: tmp_error_headers/error_list_mk35.hpp:499
 #: tmp_error_headers/error_list_coreone.hpp:694
 #: tmp_error_headers/error_list_coreone.hpp:695
+#: tmp_error_headers/error_list_xl.hpp:736
+#: tmp_error_headers/error_list_xl.hpp:737
+#: tmp_error_headers/error_list_mini.hpp:435
+#: tmp_error_headers/error_list_mini.hpp:436
+#: tmp_error_headers/error_list_mk4.hpp:526
+#: tmp_error_headers/error_list_mk4.hpp:527
+#: tmp_error_headers/error_list_ix.hpp:701
+#: tmp_error_headers/error_list_ix.hpp:702
 msgid "File error"
 msgstr "Помилка файлу"
 
@@ -2789,12 +2849,12 @@ msgstr "Помилка читання файлу"
 msgid "File removed or transfer aborted"
 msgstr "Файл видалено або передачу перервано"
 
-#: tmp_error_headers/error_list_mini.hpp:373
-#: tmp_error_headers/error_list_xl.hpp:667
-#: tmp_error_headers/error_list_ix.hpp:639
-#: tmp_error_headers/error_list_mk4.hpp:443
 #: tmp_error_headers/error_list_mk35.hpp:415
 #: tmp_error_headers/error_list_coreone.hpp:611
+#: tmp_error_headers/error_list_xl.hpp:667
+#: tmp_error_headers/error_list_mini.hpp:373
+#: tmp_error_headers/error_list_mk4.hpp:443
+#: tmp_error_headers/error_list_ix.hpp:639
 msgid ""
 "File system error!\n"
 "Try a different USB\n"
@@ -2826,8 +2886,8 @@ msgstr "Використання фільтра"
 msgid "Filtration Fan"
 msgstr "Вентилятор фільтрації"
 
-#: src/gui/menu_item/specific/menu_items_xbuddy_extension.cpp:96
 #: src/gui/wizard/screen_fan_selftest.cpp:65
+#: src/gui/menu_item/specific/menu_items_xbuddy_extension.cpp:96
 msgid "Filtration fan"
 msgstr "Вентилятор фільтрації"
 
@@ -2840,8 +2900,8 @@ msgid "Finishing buffered gcodes"
 msgstr "Завершення буферизованих g-кодів"
 
 #. //MSG_PROGRESS_AVOID_GRIND c=20
-#: src/mmu2/mmu2_progress_converter.cpp:16
 #: src/gui/dialogs/DialogLoadUnload.cpp:74
+#: src/mmu2/mmu2_progress_converter.cpp:16
 msgid "Finishing moves"
 msgstr "Завершення рухів"
 
@@ -2863,13 +2923,13 @@ msgstr ""
 "Міцно прикріпіть акселерометр до нагрівального столу. На наступному кроці "
 "нагрівальний стіл почне рухатися, і буде зібрано дані калібрування."
 
-#: tmp_error_headers/error_list_mk4.hpp:463
 #: tmp_error_headers/error_list_mk35.hpp:435
 #: tmp_error_headers/error_list_coreone.hpp:631
+#: tmp_error_headers/error_list_mk4.hpp:463
 msgid "Firmware Update Required"
 msgstr "ПОТРІБНО ОНОВИТИ ПРОШИВКУ"
 
-#: src/gui/MItem_tools.hpp:227 include/common/hw_check.hpp:34
+#: src/gui/MItem_tools.hpp:228 include/common/hw_check.hpp:34
 msgid "Firmware Version"
 msgstr "Версія прошивки"
 
@@ -2893,11 +2953,11 @@ msgstr ""
 "правильний файл прошивки\n"
 "для вашого принтера."
 
-#: tmp_error_headers/error_list_xl.hpp:639
-#: tmp_error_headers/error_list_ix.hpp:611
-#: tmp_error_headers/error_list_mk4.hpp:415
 #: tmp_error_headers/error_list_mk35.hpp:387
 #: tmp_error_headers/error_list_coreone.hpp:583
+#: tmp_error_headers/error_list_xl.hpp:639
+#: tmp_error_headers/error_list_mk4.hpp:415
+#: tmp_error_headers/error_list_ix.hpp:611
 msgid ""
 "Firmware and hardware versions do\n"
 "not match. Make sure you have\n"
@@ -2908,12 +2968,12 @@ msgstr ""
 "Переконайтеся, що у вас правильний файл прошивки\n"
 "для вашої моделі принтера."
 
-#: tmp_error_headers/error_list_mini.hpp:310
-#: tmp_error_headers/error_list_xl.hpp:604
-#: tmp_error_headers/error_list_ix.hpp:576
-#: tmp_error_headers/error_list_mk4.hpp:380
 #: tmp_error_headers/error_list_mk35.hpp:352
 #: tmp_error_headers/error_list_coreone.hpp:548
+#: tmp_error_headers/error_list_xl.hpp:604
+#: tmp_error_headers/error_list_mini.hpp:310
+#: tmp_error_headers/error_list_mk4.hpp:380
+#: tmp_error_headers/error_list_ix.hpp:576
 msgid ""
 "Firmware file\n"
 "missing in the USB\n"
@@ -2923,12 +2983,12 @@ msgstr ""
 "відсутній на USB-\n"
 "накопичувачі!"
 
-#: tmp_error_headers/error_list_mini.hpp:303
-#: tmp_error_headers/error_list_xl.hpp:597
-#: tmp_error_headers/error_list_ix.hpp:569
-#: tmp_error_headers/error_list_mk4.hpp:373
 #: tmp_error_headers/error_list_mk35.hpp:345
 #: tmp_error_headers/error_list_coreone.hpp:541
+#: tmp_error_headers/error_list_xl.hpp:597
+#: tmp_error_headers/error_list_mini.hpp:303
+#: tmp_error_headers/error_list_mk4.hpp:373
+#: tmp_error_headers/error_list_ix.hpp:569
 msgid ""
 "Firmware file has\n"
 "invalid size!\n"
@@ -2942,12 +3002,12 @@ msgstr ""
 "USB-накопичувачі\n"
 "та спробуйте знову."
 
-#: tmp_error_headers/error_list_mini.hpp:331
-#: tmp_error_headers/error_list_xl.hpp:625
-#: tmp_error_headers/error_list_ix.hpp:597
-#: tmp_error_headers/error_list_mk4.hpp:401
 #: tmp_error_headers/error_list_mk35.hpp:373
 #: tmp_error_headers/error_list_coreone.hpp:569
+#: tmp_error_headers/error_list_xl.hpp:625
+#: tmp_error_headers/error_list_mini.hpp:331
+#: tmp_error_headers/error_list_mk4.hpp:401
+#: tmp_error_headers/error_list_ix.hpp:597
 msgid ""
 "Firmware hash\n"
 "verification failed!\n"
@@ -2965,12 +3025,12 @@ msgstr ""
 "скопіювати його на\n"
 "USB-накопичувач знову."
 
-#: tmp_error_headers/error_list_mini.hpp:338
-#: tmp_error_headers/error_list_xl.hpp:632
-#: tmp_error_headers/error_list_ix.hpp:604
-#: tmp_error_headers/error_list_mk4.hpp:408
 #: tmp_error_headers/error_list_mk35.hpp:380
 #: tmp_error_headers/error_list_coreone.hpp:576
+#: tmp_error_headers/error_list_xl.hpp:632
+#: tmp_error_headers/error_list_mini.hpp:338
+#: tmp_error_headers/error_list_mk4.hpp:408
+#: tmp_error_headers/error_list_ix.hpp:604
 msgid ""
 "Firmware in the\n"
 "internal flash\n"
@@ -2984,12 +3044,12 @@ msgstr ""
 "Будь ласка, перепрошийте\n"
 "прошивку."
 
-#: tmp_error_headers/error_list_mini.hpp:324
-#: tmp_error_headers/error_list_xl.hpp:618
-#: tmp_error_headers/error_list_ix.hpp:590
-#: tmp_error_headers/error_list_mk4.hpp:394
 #: tmp_error_headers/error_list_mk35.hpp:366
 #: tmp_error_headers/error_list_coreone.hpp:562
+#: tmp_error_headers/error_list_xl.hpp:618
+#: tmp_error_headers/error_list_mini.hpp:324
+#: tmp_error_headers/error_list_mk4.hpp:394
+#: tmp_error_headers/error_list_ix.hpp:590
 msgid ""
 "Firmware signature\n"
 "verification failed!\n"
@@ -3003,12 +3063,12 @@ msgstr ""
 "лише офіційну\n"
 "підписану прошивку."
 
-#: tmp_error_headers/error_list_mini.hpp:352
-#: tmp_error_headers/error_list_xl.hpp:646
-#: tmp_error_headers/error_list_ix.hpp:618
-#: tmp_error_headers/error_list_mk4.hpp:422
 #: tmp_error_headers/error_list_mk35.hpp:394
 #: tmp_error_headers/error_list_coreone.hpp:590
+#: tmp_error_headers/error_list_xl.hpp:646
+#: tmp_error_headers/error_list_mini.hpp:352
+#: tmp_error_headers/error_list_mk4.hpp:422
+#: tmp_error_headers/error_list_ix.hpp:618
 msgid ""
 "Firmware/printer\n"
 "types do not match.\n"
@@ -3024,12 +3084,12 @@ msgstr ""
 "для вашої моделі\n"
 "принтера."
 
-#: tmp_error_headers/error_list_mini.hpp:359
-#: tmp_error_headers/error_list_xl.hpp:653
-#: tmp_error_headers/error_list_ix.hpp:625
-#: tmp_error_headers/error_list_mk4.hpp:429
 #: tmp_error_headers/error_list_mk35.hpp:401
 #: tmp_error_headers/error_list_coreone.hpp:597
+#: tmp_error_headers/error_list_xl.hpp:653
+#: tmp_error_headers/error_list_mini.hpp:359
+#: tmp_error_headers/error_list_mk4.hpp:429
+#: tmp_error_headers/error_list_ix.hpp:625
 msgid ""
 "Firmware/printer\n"
 "versions do not\n"
@@ -3111,12 +3171,12 @@ msgstr "Передня сторона [мкм]"
 msgid "Full Reset"
 msgstr "Повне скидання"
 
-#: tmp_error_headers/error_list_mini.hpp:225
-#: tmp_error_headers/error_list_xl.hpp:393
-#: tmp_error_headers/error_list_ix.hpp:379
-#: tmp_error_headers/error_list_mk4.hpp:274
 #: tmp_error_headers/error_list_mk35.hpp:260
 #: tmp_error_headers/error_list_coreone.hpp:358
+#: tmp_error_headers/error_list_xl.hpp:393
+#: tmp_error_headers/error_list_mini.hpp:225
+#: tmp_error_headers/error_list_mk4.hpp:274
+#: tmp_error_headers/error_list_ix.hpp:379
 msgid "G-CODE METRICS CONFIG CHANGE"
 msgstr "ЗМІНА КОНФІГУРАЦІЇ МЕТРИК G-КОДУ"
 
@@ -3136,12 +3196,12 @@ msgstr "Рівень G-коду"
 msgid "G-Code filaments"
 msgstr "Філаменти G-коду"
 
-#: tmp_error_headers/error_list_mini.hpp:527
-#: tmp_error_headers/error_list_xl.hpp:849
-#: tmp_error_headers/error_list_ix.hpp:793
-#: tmp_error_headers/error_list_mk4.hpp:632
 #: tmp_error_headers/error_list_mk35.hpp:611
 #: tmp_error_headers/error_list_coreone.hpp:800
+#: tmp_error_headers/error_list_xl.hpp:849
+#: tmp_error_headers/error_list_mini.hpp:527
+#: tmp_error_headers/error_list_mk4.hpp:632
+#: tmp_error_headers/error_list_ix.hpp:793
 msgid ""
 "G-Code transfer running too slow. Check your network for issues or use "
 "different USB drive. Press Continue to resume printing."
@@ -3150,12 +3210,12 @@ msgstr ""
 "проблем або скористайтеся іншим USB-накопичувачем. Натисніть «Продовжити», "
 "щоб відновити друк."
 
-#: tmp_error_headers/error_list_mini.hpp:268
-#: tmp_error_headers/error_list_xl.hpp:555
-#: tmp_error_headers/error_list_ix.hpp:534
-#: tmp_error_headers/error_list_mk4.hpp:338
 #: tmp_error_headers/error_list_mk35.hpp:310
 #: tmp_error_headers/error_list_coreone.hpp:506
+#: tmp_error_headers/error_list_xl.hpp:555
+#: tmp_error_headers/error_list_mini.hpp:268
+#: tmp_error_headers/error_list_mk4.hpp:338
+#: tmp_error_headers/error_list_ix.hpp:534
 msgid ""
 "G-code command was too long and did not fit in the internal buffers. As a "
 "result, it may have been executed incorrectly."
@@ -3183,34 +3243,34 @@ msgstr "ВИРІВНЮВАННЯ РЕДУКТОРА"
 msgid "GEARBOX ALIGNMENT"
 msgstr "ВИРІВНЮВАННЯ РЕДУКТОРА"
 
-#: src/gui/MItem_network.hpp:151 src/gui/screen_menu_network_status.hpp:24
+#: src/gui/screen_menu_network_status.hpp:24 src/gui/MItem_network.hpp:151
 msgid "Gateway"
 msgstr "Шлюз"
 
-#: tmp_error_headers/error_list_mini.hpp:260
-#: tmp_error_headers/error_list_xl.hpp:547
-#: tmp_error_headers/error_list_ix.hpp:526
-#: tmp_error_headers/error_list_mk4.hpp:330
 #: tmp_error_headers/error_list_mk35.hpp:302
 #: tmp_error_headers/error_list_coreone.hpp:498
+#: tmp_error_headers/error_list_xl.hpp:547
+#: tmp_error_headers/error_list_mini.hpp:260
+#: tmp_error_headers/error_list_mk4.hpp:330
+#: tmp_error_headers/error_list_ix.hpp:526
 msgid "Gcode Corruption"
 msgstr "Пошкодження G-коду"
 
-#: tmp_error_headers/error_list_mini.hpp:267
-#: tmp_error_headers/error_list_xl.hpp:554
-#: tmp_error_headers/error_list_ix.hpp:533
-#: tmp_error_headers/error_list_mk4.hpp:337
 #: tmp_error_headers/error_list_mk35.hpp:309
 #: tmp_error_headers/error_list_coreone.hpp:505
+#: tmp_error_headers/error_list_xl.hpp:554
+#: tmp_error_headers/error_list_mini.hpp:267
+#: tmp_error_headers/error_list_mk4.hpp:337
+#: tmp_error_headers/error_list_ix.hpp:533
 msgid "Gcode Cropped"
 msgstr "G-код обрізано"
 
-#: tmp_error_headers/error_list_mini.hpp:226
-#: tmp_error_headers/error_list_xl.hpp:394
-#: tmp_error_headers/error_list_ix.hpp:380
-#: tmp_error_headers/error_list_mk4.hpp:275
 #: tmp_error_headers/error_list_mk35.hpp:261
 #: tmp_error_headers/error_list_coreone.hpp:359
+#: tmp_error_headers/error_list_xl.hpp:394
+#: tmp_error_headers/error_list_mini.hpp:226
+#: tmp_error_headers/error_list_mk4.hpp:275
+#: tmp_error_headers/error_list_ix.hpp:380
 msgid ""
 "Gcode is trying to change metrics configuration.\n"
 "\n"
@@ -3220,12 +3280,12 @@ msgstr ""
 "\n"
 "Дозволити зміни?"
 
-#: tmp_error_headers/error_list_mini.hpp:261
-#: tmp_error_headers/error_list_xl.hpp:548
-#: tmp_error_headers/error_list_ix.hpp:527
-#: tmp_error_headers/error_list_mk4.hpp:331
 #: tmp_error_headers/error_list_mk35.hpp:303
 #: tmp_error_headers/error_list_coreone.hpp:499
+#: tmp_error_headers/error_list_xl.hpp:548
+#: tmp_error_headers/error_list_mini.hpp:261
+#: tmp_error_headers/error_list_mk4.hpp:331
+#: tmp_error_headers/error_list_ix.hpp:527
 msgid "Gcode on the USB drive is corrupt. Fix manually before resuming."
 msgstr ""
 "G-код на USB-накопичувачі пошкоджено. Виправте вручну перед продовженням."
@@ -3254,75 +3314,75 @@ msgstr ""
 "Візьміться за дверцята посередині, покладіть пальці за них і закрийте, як "
 "показано на малюнку. Потім підтвердьте."
 
-#: tmp_error_headers/error_list_mini.hpp:191
-#: tmp_error_headers/error_list_xl.hpp:324
-#: tmp_error_headers/error_list_ix.hpp:317
-#: tmp_error_headers/error_list_mk4.hpp:226
 #: tmp_error_headers/error_list_mk35.hpp:212
 #: tmp_error_headers/error_list_coreone.hpp:310
+#: tmp_error_headers/error_list_xl.hpp:324
+#: tmp_error_headers/error_list_mini.hpp:191
+#: tmp_error_headers/error_list_mk4.hpp:226
+#: tmp_error_headers/error_list_ix.hpp:317
 msgid "HAL detected an I2C busy state when receiving data via I2C."
 msgstr "HAL виявив зайнятий стан шини I2C під час отримання даних через I2C."
 
-#: tmp_error_headers/error_list_mini.hpp:163
-#: tmp_error_headers/error_list_xl.hpp:296
-#: tmp_error_headers/error_list_ix.hpp:289
-#: tmp_error_headers/error_list_mk4.hpp:198
 #: tmp_error_headers/error_list_mk35.hpp:184
 #: tmp_error_headers/error_list_coreone.hpp:282
+#: tmp_error_headers/error_list_xl.hpp:296
+#: tmp_error_headers/error_list_mini.hpp:163
+#: tmp_error_headers/error_list_mk4.hpp:198
+#: tmp_error_headers/error_list_ix.hpp:289
 msgid "HAL detected an I2C busy state when sending data via I2C."
 msgstr "HAL виявив зайнятий стан шини I2C під час надсилання даних через I2C."
 
-#: tmp_error_headers/error_list_mini.hpp:184
-#: tmp_error_headers/error_list_xl.hpp:317
-#: tmp_error_headers/error_list_ix.hpp:310
-#: tmp_error_headers/error_list_mk4.hpp:219
 #: tmp_error_headers/error_list_mk35.hpp:205
 #: tmp_error_headers/error_list_coreone.hpp:303
+#: tmp_error_headers/error_list_xl.hpp:317
+#: tmp_error_headers/error_list_mini.hpp:184
+#: tmp_error_headers/error_list_mk4.hpp:219
+#: tmp_error_headers/error_list_ix.hpp:310
 msgid "HAL detected an I2C error when receiving data via I2C."
 msgstr "HAL виявив помилку I2C під час отримання даних через I2C."
 
-#: tmp_error_headers/error_list_mini.hpp:156
-#: tmp_error_headers/error_list_xl.hpp:289
-#: tmp_error_headers/error_list_ix.hpp:282
-#: tmp_error_headers/error_list_mk4.hpp:191
 #: tmp_error_headers/error_list_mk35.hpp:177
 #: tmp_error_headers/error_list_coreone.hpp:275
+#: tmp_error_headers/error_list_xl.hpp:289
+#: tmp_error_headers/error_list_mini.hpp:156
+#: tmp_error_headers/error_list_mk4.hpp:191
+#: tmp_error_headers/error_list_ix.hpp:282
 msgid "HAL detected an I2C error when sending data via I2C."
 msgstr "HAL виявив помилку I2C під час надсилання даних через I2C."
 
-#: tmp_error_headers/error_list_mini.hpp:198
-#: tmp_error_headers/error_list_xl.hpp:331
-#: tmp_error_headers/error_list_ix.hpp:324
-#: tmp_error_headers/error_list_mk4.hpp:233
 #: tmp_error_headers/error_list_mk35.hpp:219
 #: tmp_error_headers/error_list_coreone.hpp:317
+#: tmp_error_headers/error_list_xl.hpp:331
+#: tmp_error_headers/error_list_mini.hpp:198
+#: tmp_error_headers/error_list_mk4.hpp:233
+#: tmp_error_headers/error_list_ix.hpp:324
 msgid "HAL detected an I2C timeout when receiving data via I2C."
 msgstr "HAL виявив тайм-аут I2C під час отримання даних через I2C."
 
-#: tmp_error_headers/error_list_mini.hpp:170
-#: tmp_error_headers/error_list_xl.hpp:303
-#: tmp_error_headers/error_list_ix.hpp:296
-#: tmp_error_headers/error_list_mk4.hpp:205
 #: tmp_error_headers/error_list_mk35.hpp:191
 #: tmp_error_headers/error_list_coreone.hpp:289
+#: tmp_error_headers/error_list_xl.hpp:303
+#: tmp_error_headers/error_list_mini.hpp:170
+#: tmp_error_headers/error_list_mk4.hpp:205
+#: tmp_error_headers/error_list_ix.hpp:296
 msgid "HAL detected an I2C timeout when sending data via I2C."
 msgstr "HAL виявив тайм-аут I2C під час надсилання даних через I2C."
 
-#: tmp_error_headers/error_list_mini.hpp:205
-#: tmp_error_headers/error_list_xl.hpp:338
-#: tmp_error_headers/error_list_ix.hpp:331
-#: tmp_error_headers/error_list_mk4.hpp:240
 #: tmp_error_headers/error_list_mk35.hpp:226
 #: tmp_error_headers/error_list_coreone.hpp:324
+#: tmp_error_headers/error_list_xl.hpp:338
+#: tmp_error_headers/error_list_mini.hpp:205
+#: tmp_error_headers/error_list_mk4.hpp:240
+#: tmp_error_headers/error_list_ix.hpp:331
 msgid "HAL detected an I2C undefined error when receiving data via I2C."
 msgstr "HAL виявив невизначену помилку I2C під час отримання даних через I2C."
 
-#: tmp_error_headers/error_list_mini.hpp:177
-#: tmp_error_headers/error_list_xl.hpp:310
-#: tmp_error_headers/error_list_ix.hpp:303
-#: tmp_error_headers/error_list_mk4.hpp:212
 #: tmp_error_headers/error_list_mk35.hpp:198
 #: tmp_error_headers/error_list_coreone.hpp:296
+#: tmp_error_headers/error_list_xl.hpp:310
+#: tmp_error_headers/error_list_mini.hpp:177
+#: tmp_error_headers/error_list_mk4.hpp:212
+#: tmp_error_headers/error_list_ix.hpp:303
 msgid "HAL detected an I2C undefined error when sending data via I2C."
 msgstr "HAL виявив невизначену помилку I2C під час надсилання даних через I2C."
 
@@ -3330,25 +3390,25 @@ msgstr "HAL виявив невизначену помилку I2C під час
 msgid "HARD RESET"
 msgstr "ЖОРСТКЕ ПЕРЕЗАВАНТАЖЕННЯ"
 
+#: src/gui/screen_menu_hardware.hpp:115
 #: src/gui/screen_menu_hardware_tune.hpp:24
-#: src/gui/screen_menu_hardware.hpp:111
 msgid "HARDWARE"
 msgstr "ОБЛАДНАННЯ"
 
-#: tmp_error_headers/error_list_mini.hpp:330
-#: tmp_error_headers/error_list_xl.hpp:624
-#: tmp_error_headers/error_list_ix.hpp:596
-#: tmp_error_headers/error_list_mk4.hpp:400
 #: tmp_error_headers/error_list_mk35.hpp:372
 #: tmp_error_headers/error_list_coreone.hpp:568
+#: tmp_error_headers/error_list_xl.hpp:624
+#: tmp_error_headers/error_list_mini.hpp:330
+#: tmp_error_headers/error_list_mk4.hpp:400
+#: tmp_error_headers/error_list_ix.hpp:596
 msgid "HASH VERIFICATION FAILED"
 msgstr "ПОМИЛКА ПЕРЕВІРКИ ХЕШ-СУМИ"
 
-#: tmp_error_headers/error_list_mini.hpp:141
-#: tmp_error_headers/error_list_ix.hpp:267
-#: tmp_error_headers/error_list_mk4.hpp:176
 #: tmp_error_headers/error_list_mk35.hpp:162
 #: tmp_error_headers/error_list_coreone.hpp:260
+#: tmp_error_headers/error_list_mini.hpp:141
+#: tmp_error_headers/error_list_mk4.hpp:176
+#: tmp_error_headers/error_list_ix.hpp:267
 msgid "HEATBED PORT OVERCURRENT"
 msgstr "ПЕРЕВАНТАЖЕННЯ СТРУМУ ПОРТУ НАГРІВАЛЬНОГО СТОЛУ"
 
@@ -3356,21 +3416,21 @@ msgstr "ПЕРЕВАНТАЖЕННЯ СТРУМУ ПОРТУ НАГРІВАЛЬ�
 msgid "HEATBREAK COOLING TOO SLOW"
 msgstr "НАДТО ПОВІЛЬНЕ ОХОЛОДЖЕННЯ ТЕРМОБАР'ЄРА"
 
-#: tmp_error_headers/error_list_mini.hpp:85
-#: tmp_error_headers/error_list_xl.hpp:141
-#: tmp_error_headers/error_list_ix.hpp:127
-#: tmp_error_headers/error_list_mk4.hpp:120
 #: tmp_error_headers/error_list_mk35.hpp:106
 #: tmp_error_headers/error_list_coreone.hpp:169
+#: tmp_error_headers/error_list_xl.hpp:141
+#: tmp_error_headers/error_list_mini.hpp:85
+#: tmp_error_headers/error_list_mk4.hpp:120
+#: tmp_error_headers/error_list_ix.hpp:127
 msgid "HEATBREAK MAXTEMP ERROR"
 msgstr "ПОМИЛКА МАКСИМАЛЬНОЇ ТЕМПЕРАТУРИ ТЕРМОБАР'ЄРУ"
 
-#: tmp_error_headers/error_list_mini.hpp:78
-#: tmp_error_headers/error_list_xl.hpp:134
-#: tmp_error_headers/error_list_ix.hpp:120
-#: tmp_error_headers/error_list_mk4.hpp:113
 #: tmp_error_headers/error_list_mk35.hpp:99
 #: tmp_error_headers/error_list_coreone.hpp:162
+#: tmp_error_headers/error_list_xl.hpp:134
+#: tmp_error_headers/error_list_mini.hpp:78
+#: tmp_error_headers/error_list_mk4.hpp:113
+#: tmp_error_headers/error_list_ix.hpp:120
 msgid "HEATBREAK MINTEMP ERROR"
 msgstr "ПОМИЛКА МІНІМАЛЬНОЇ ТЕМПЕРАТУРИ ТЕРМОБАР'ЄРУ"
 
@@ -3390,36 +3450,36 @@ msgstr "Термін дії HEPA-фільтра закінчився"
 msgid "HEPA Filter Expiring"
 msgstr "Термін дії HEPA-фільтра закінчується"
 
+#: tmp_error_headers/error_list_coreone.hpp:85
 #: tmp_error_headers/error_list_xl.hpp:78
 #: tmp_error_headers/error_list_ix.hpp:43
-#: tmp_error_headers/error_list_coreone.hpp:85
 msgid "HOMING CALIBRATION NEEDED"
 msgstr "Необхідне калібрування початкового положення"
 
-#: tmp_error_headers/error_list_mini.hpp:106
-#: tmp_error_headers/error_list_xl.hpp:253
-#: tmp_error_headers/error_list_ix.hpp:232
-#: tmp_error_headers/error_list_mk4.hpp:141
 #: tmp_error_headers/error_list_mk35.hpp:127
 #: tmp_error_headers/error_list_coreone.hpp:225
+#: tmp_error_headers/error_list_xl.hpp:253
+#: tmp_error_headers/error_list_mini.hpp:106
+#: tmp_error_headers/error_list_mk4.hpp:141
+#: tmp_error_headers/error_list_ix.hpp:232
 msgid "HOMING ERROR X"
 msgstr "ПОМИЛКА КАЛІБРУВАННЯ ПОЧАТКОВОЇ ПОЗИЦІЇ ОСІ X"
 
-#: tmp_error_headers/error_list_mini.hpp:113
-#: tmp_error_headers/error_list_xl.hpp:260
-#: tmp_error_headers/error_list_ix.hpp:239
-#: tmp_error_headers/error_list_mk4.hpp:148
 #: tmp_error_headers/error_list_mk35.hpp:134
 #: tmp_error_headers/error_list_coreone.hpp:232
+#: tmp_error_headers/error_list_xl.hpp:260
+#: tmp_error_headers/error_list_mini.hpp:113
+#: tmp_error_headers/error_list_mk4.hpp:148
+#: tmp_error_headers/error_list_ix.hpp:239
 msgid "HOMING ERROR Y"
 msgstr "ПОМИЛКА КАЛІБРУВАННЯ ПОЧАТКОВОЇ ПОЗИЦІЇ ОСІ Y"
 
-#: tmp_error_headers/error_list_mini.hpp:99
-#: tmp_error_headers/error_list_xl.hpp:232
-#: tmp_error_headers/error_list_ix.hpp:211
-#: tmp_error_headers/error_list_mk4.hpp:134
 #: tmp_error_headers/error_list_mk35.hpp:120
 #: tmp_error_headers/error_list_coreone.hpp:218
+#: tmp_error_headers/error_list_xl.hpp:232
+#: tmp_error_headers/error_list_mini.hpp:99
+#: tmp_error_headers/error_list_mk4.hpp:134
+#: tmp_error_headers/error_list_ix.hpp:211
 msgid "HOMING ERROR Z"
 msgstr "ПОМИЛКА КАЛІБРУВАННЯ ПОЧАТКОВОЇ ПОЗИЦІЇ ОСІ Z"
 
@@ -3584,12 +3644,12 @@ msgstr "Термобар'єр"
 msgid "Heatbreak Fan"
 msgstr "Вентилятор термобар'єру"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:83
+#: src/gui/screen/filament/screen_filament_detail.cpp:91
 #: src/gui/MItem_print.cpp:70
 msgid "Heatbreak Temp"
 msgstr "Температура термобар'єру"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:83
+#: src/gui/screen/filament/screen_filament_detail.cpp:91
 msgid "Heatbreak Temperature"
 msgstr "Температура термобар'єру"
 
@@ -3597,12 +3657,12 @@ msgstr "Температура термобар'єру"
 msgid "Heatbreak status"
 msgstr "Стан термобар'єру"
 
-#: tmp_error_headers/error_list_mini.hpp:520
-#: tmp_error_headers/error_list_xl.hpp:835
-#: tmp_error_headers/error_list_ix.hpp:786
-#: tmp_error_headers/error_list_mk4.hpp:625
 #: tmp_error_headers/error_list_mk35.hpp:597
 #: tmp_error_headers/error_list_coreone.hpp:793
+#: tmp_error_headers/error_list_xl.hpp:835
+#: tmp_error_headers/error_list_mini.hpp:520
+#: tmp_error_headers/error_list_mk4.hpp:625
+#: tmp_error_headers/error_list_ix.hpp:786
 msgid "Heatbreak thermistor is disconnected. Inspect the wiring."
 msgstr "Термістор термобар'єру від'єднано. Перевірте проводку."
 
@@ -3631,16 +3691,16 @@ msgstr "Нагрівання"
 msgid "Heating disabled due to 10 minutes of inactivity."
 msgstr "Нагрівання вимкнено через 10 хвилин бездіяльності."
 
-#: tmp_error_headers/error_list_mini.hpp:485
-#: tmp_error_headers/error_list_mini.hpp:499
-#: tmp_error_headers/error_list_xl.hpp:800
-#: tmp_error_headers/error_list_xl.hpp:814
-#: tmp_error_headers/error_list_mk4.hpp:590
-#: tmp_error_headers/error_list_mk4.hpp:604
 #: tmp_error_headers/error_list_mk35.hpp:562
 #: tmp_error_headers/error_list_mk35.hpp:576
 #: tmp_error_headers/error_list_coreone.hpp:758
 #: tmp_error_headers/error_list_coreone.hpp:772
+#: tmp_error_headers/error_list_xl.hpp:800
+#: tmp_error_headers/error_list_xl.hpp:814
+#: tmp_error_headers/error_list_mini.hpp:485
+#: tmp_error_headers/error_list_mini.hpp:499
+#: tmp_error_headers/error_list_mk4.hpp:590
+#: tmp_error_headers/error_list_mk4.hpp:604
 msgid "Heating disabled due to 30 minutes of inactivity."
 msgstr "Нагрівання вимкнено через 30 хвилин бездіяльності."
 
@@ -3738,10 +3798,10 @@ msgid "Home"
 msgstr "Додому"
 
 #. //MSG_PROGRESS_RETRACT_FINDA c=20
-#: src/mmu2/mmu2_progress_converter.cpp:31
 #: src/common/feature/print_status_message/print_status_message_formatter_buddy.cpp:13
+#: src/gui/dialogs/DialogLoadUnload.cpp:88
 #: src/gui/screen_phase_stepping_calibration.cpp:33
-#: src/gui/dialogs/DialogLoadUnload.cpp:88 src/gui/screen_crash_recovery.cpp:93
+#: src/gui/screen_crash_recovery.cpp:93 src/mmu2/mmu2_progress_converter.cpp:31
 msgid "Homing"
 msgstr "Калібрування початкових позицій"
 
@@ -3749,9 +3809,9 @@ msgstr "Калібрування початкових позицій"
 msgid "Homing Calibration"
 msgstr "Калібрування початкової позиції"
 
+#: tmp_error_headers/error_list_coreone.hpp:86
 #: tmp_error_headers/error_list_xl.hpp:79
 #: tmp_error_headers/error_list_ix.hpp:44
-#: tmp_error_headers/error_list_coreone.hpp:86
 msgid "Homing calibration is needed to ensure repeatable homing."
 msgstr "Калібрування вихідної точки потрібне для стабільного позиціонування."
 
@@ -3760,8 +3820,8 @@ msgid "Host"
 msgstr "Хост"
 
 #. Printer's name within network
-#: src/gui/screen_menu_connect.hpp:42 src/gui/MItem_network.hpp:80
-#: src/gui/MItem_network.cpp:161
+#: src/gui/MItem_network.cpp:161 src/gui/MItem_network.hpp:80
+#: src/gui/screen_menu_connect.hpp:42
 msgid "Hostname"
 msgstr "Ім'я хоста"
 
@@ -3795,12 +3855,12 @@ msgstr "Вентилятор екструдера"
 msgid "Hotend fan (test disabled)"
 msgstr "Вентилятор екструдера (тест вимкнено)"
 
-#: tmp_error_headers/error_list_mini.hpp:541
-#: tmp_error_headers/error_list_xl.hpp:877
-#: tmp_error_headers/error_list_ix.hpp:814
-#: tmp_error_headers/error_list_mk4.hpp:646
 #: tmp_error_headers/error_list_mk35.hpp:625
 #: tmp_error_headers/error_list_coreone.hpp:814
+#: tmp_error_headers/error_list_xl.hpp:877
+#: tmp_error_headers/error_list_mini.hpp:541
+#: tmp_error_headers/error_list_mk4.hpp:646
+#: tmp_error_headers/error_list_ix.hpp:814
 msgid ""
 "Hotend fan not spinning. Check it for possible debris, then inspect the "
 "wiring."
@@ -3812,75 +3872,75 @@ msgstr ""
 msgid "How to update firmware?"
 msgstr "Як оновити прошивку?"
 
-#: tmp_error_headers/error_list_mini.hpp:190
-#: tmp_error_headers/error_list_xl.hpp:323
-#: tmp_error_headers/error_list_ix.hpp:316
-#: tmp_error_headers/error_list_mk4.hpp:225
 #: tmp_error_headers/error_list_mk35.hpp:211
 #: tmp_error_headers/error_list_coreone.hpp:309
+#: tmp_error_headers/error_list_xl.hpp:323
+#: tmp_error_headers/error_list_mini.hpp:190
+#: tmp_error_headers/error_list_mk4.hpp:225
+#: tmp_error_headers/error_list_ix.hpp:316
 msgid "I2C RECEIVE BUSY"
 msgstr "ШИНА I2C ЗАЙНЯТА (ОТРИМАННЯ)"
 
-#: tmp_error_headers/error_list_mini.hpp:183
-#: tmp_error_headers/error_list_xl.hpp:316
-#: tmp_error_headers/error_list_ix.hpp:309
-#: tmp_error_headers/error_list_mk4.hpp:218
 #: tmp_error_headers/error_list_mk35.hpp:204
 #: tmp_error_headers/error_list_coreone.hpp:302
+#: tmp_error_headers/error_list_xl.hpp:316
+#: tmp_error_headers/error_list_mini.hpp:183
+#: tmp_error_headers/error_list_mk4.hpp:218
+#: tmp_error_headers/error_list_ix.hpp:309
 msgid "I2C RECEIVE FAILED"
 msgstr "ПОМИЛКА I2C (ОТРИМАННЯ)"
 
-#: tmp_error_headers/error_list_mini.hpp:197
-#: tmp_error_headers/error_list_xl.hpp:330
-#: tmp_error_headers/error_list_ix.hpp:323
-#: tmp_error_headers/error_list_mk4.hpp:232
 #: tmp_error_headers/error_list_mk35.hpp:218
 #: tmp_error_headers/error_list_coreone.hpp:316
+#: tmp_error_headers/error_list_xl.hpp:330
+#: tmp_error_headers/error_list_mini.hpp:197
+#: tmp_error_headers/error_list_mk4.hpp:232
+#: tmp_error_headers/error_list_ix.hpp:323
 msgid "I2C RECEIVE TIMEOUT"
 msgstr "ТАЙМ-АУТ I2C (ОТРИМАННЯ)"
 
-#: tmp_error_headers/error_list_mini.hpp:204
-#: tmp_error_headers/error_list_xl.hpp:337
-#: tmp_error_headers/error_list_ix.hpp:330
-#: tmp_error_headers/error_list_mk4.hpp:239
 #: tmp_error_headers/error_list_mk35.hpp:225
 #: tmp_error_headers/error_list_coreone.hpp:323
+#: tmp_error_headers/error_list_xl.hpp:337
+#: tmp_error_headers/error_list_mini.hpp:204
+#: tmp_error_headers/error_list_mk4.hpp:239
+#: tmp_error_headers/error_list_ix.hpp:330
 msgid "I2C RECEIVE UNDEFINED"
 msgstr "НЕВИЗНАЧЕНА ПОМИЛКА I2C (ОТРИМАННЯ)"
 
-#: tmp_error_headers/error_list_mini.hpp:162
-#: tmp_error_headers/error_list_xl.hpp:295
-#: tmp_error_headers/error_list_ix.hpp:288
-#: tmp_error_headers/error_list_mk4.hpp:197
 #: tmp_error_headers/error_list_mk35.hpp:183
 #: tmp_error_headers/error_list_coreone.hpp:281
+#: tmp_error_headers/error_list_xl.hpp:295
+#: tmp_error_headers/error_list_mini.hpp:162
+#: tmp_error_headers/error_list_mk4.hpp:197
+#: tmp_error_headers/error_list_ix.hpp:288
 msgid "I2C SEND BUSY"
 msgstr "ШИНА I2C ЗАЙНЯТА (НАДСИЛАННЯ)"
 
-#: tmp_error_headers/error_list_mini.hpp:155
-#: tmp_error_headers/error_list_xl.hpp:288
-#: tmp_error_headers/error_list_ix.hpp:281
-#: tmp_error_headers/error_list_mk4.hpp:190
 #: tmp_error_headers/error_list_mk35.hpp:176
 #: tmp_error_headers/error_list_coreone.hpp:274
+#: tmp_error_headers/error_list_xl.hpp:288
+#: tmp_error_headers/error_list_mini.hpp:155
+#: tmp_error_headers/error_list_mk4.hpp:190
+#: tmp_error_headers/error_list_ix.hpp:281
 msgid "I2C SEND FAILED"
 msgstr "ПОМИЛКА I2C (НАДСИЛАННЯ)"
 
-#: tmp_error_headers/error_list_mini.hpp:169
-#: tmp_error_headers/error_list_xl.hpp:302
-#: tmp_error_headers/error_list_ix.hpp:295
-#: tmp_error_headers/error_list_mk4.hpp:204
 #: tmp_error_headers/error_list_mk35.hpp:190
 #: tmp_error_headers/error_list_coreone.hpp:288
+#: tmp_error_headers/error_list_xl.hpp:302
+#: tmp_error_headers/error_list_mini.hpp:169
+#: tmp_error_headers/error_list_mk4.hpp:204
+#: tmp_error_headers/error_list_ix.hpp:295
 msgid "I2C SEND TIMEOUT"
 msgstr "ТАЙМ-АУТ I2C (НАДСИЛАННЯ)"
 
-#: tmp_error_headers/error_list_mini.hpp:176
-#: tmp_error_headers/error_list_xl.hpp:309
-#: tmp_error_headers/error_list_ix.hpp:302
-#: tmp_error_headers/error_list_mk4.hpp:211
 #: tmp_error_headers/error_list_mk35.hpp:197
 #: tmp_error_headers/error_list_coreone.hpp:295
+#: tmp_error_headers/error_list_xl.hpp:309
+#: tmp_error_headers/error_list_mini.hpp:176
+#: tmp_error_headers/error_list_mk4.hpp:211
+#: tmp_error_headers/error_list_ix.hpp:302
 msgid "I2C SEND UNDEFINED"
 msgstr "НЕВИЗНАЧЕНА ПОМИЛКА I2C (НАДСИЛАННЯ)"
 
@@ -3896,12 +3956,12 @@ msgstr "ХОЛОСТИЙ ХІД НЕ МОЖЕ РУХАТИСЯ"
 msgid "IGNORE"
 msgstr "ІГНОРУВАТИ"
 
-#: tmp_error_headers/error_list_mini.hpp:323
-#: tmp_error_headers/error_list_xl.hpp:617
-#: tmp_error_headers/error_list_ix.hpp:589
-#: tmp_error_headers/error_list_mk4.hpp:393
 #: tmp_error_headers/error_list_mk35.hpp:365
 #: tmp_error_headers/error_list_coreone.hpp:561
+#: tmp_error_headers/error_list_xl.hpp:617
+#: tmp_error_headers/error_list_mini.hpp:323
+#: tmp_error_headers/error_list_mk4.hpp:393
+#: tmp_error_headers/error_list_ix.hpp:589
 msgid "IMPOSTER! FAKE SIGNATURE"
 msgstr "ІМІТАТОР! ПІДРОБНИЙ ПІДПИС"
 
@@ -3921,21 +3981,21 @@ msgstr "КАЛІБРУВАННЯ ФОРМУВАЧА ВХІДНОГО СИГНА�
 msgid "INSPECT FINDA"
 msgstr "ОГЛЯНЬТЕ FINDA"
 
-#: tmp_error_headers/error_list_mini.hpp:281
-#: tmp_error_headers/error_list_xl.hpp:575
-#: tmp_error_headers/error_list_ix.hpp:547
-#: tmp_error_headers/error_list_mk4.hpp:351
 #: tmp_error_headers/error_list_mk35.hpp:323
 #: tmp_error_headers/error_list_coreone.hpp:519
+#: tmp_error_headers/error_list_xl.hpp:575
+#: tmp_error_headers/error_list_mini.hpp:281
+#: tmp_error_headers/error_list_mk4.hpp:351
+#: tmp_error_headers/error_list_ix.hpp:547
 msgid "INTERNAL ERROR"
 msgstr "ВНУТРІШНЯ ПОМИЛКА"
 
-#: tmp_error_headers/error_list_mini.hpp:302
-#: tmp_error_headers/error_list_xl.hpp:596
-#: tmp_error_headers/error_list_ix.hpp:568
-#: tmp_error_headers/error_list_mk4.hpp:372
 #: tmp_error_headers/error_list_mk35.hpp:344
 #: tmp_error_headers/error_list_coreone.hpp:540
+#: tmp_error_headers/error_list_xl.hpp:596
+#: tmp_error_headers/error_list_mini.hpp:302
+#: tmp_error_headers/error_list_mk4.hpp:372
+#: tmp_error_headers/error_list_ix.hpp:568
 msgid "INVALID FW SIZE ON USB FLASH DRIVE"
 msgstr "НЕДІЙСНИЙ РОЗМІР ПРОШИВКИ НА USB-НАКОПИЧУВАЧІ"
 
@@ -3959,18 +4019,18 @@ msgstr "IPv4-ШЛЮЗ"
 msgid "IPv4 Netmask"
 msgstr "IPv4-МАСКА ПІДСІТІ"
 
-#: tmp_error_headers/error_list_mk4.hpp:30
 #: tmp_error_headers/error_list_mk35.hpp:16
 #: tmp_error_headers/error_list_coreone.hpp:58
+#: tmp_error_headers/error_list_mk4.hpp:30
 msgid "If the filament sensor is unresponsive, clean it from debris."
 msgstr "Якщо датчик філаменту не відповідає, очистіть його від сміття."
 
-#: tmp_error_headers/error_list_mini.hpp:9
-#: tmp_error_headers/error_list_xl.hpp:65
-#: tmp_error_headers/error_list_ix.hpp:30
-#: tmp_error_headers/error_list_mk4.hpp:23
 #: tmp_error_headers/error_list_mk35.hpp:9
 #: tmp_error_headers/error_list_coreone.hpp:51
+#: tmp_error_headers/error_list_xl.hpp:65
+#: tmp_error_headers/error_list_mini.hpp:9
+#: tmp_error_headers/error_list_mk4.hpp:23
+#: tmp_error_headers/error_list_ix.hpp:30
 msgid ""
 "If the filament sensor is unresponsive, clean it from debris. Alternatively, "
 "you can disable it."
@@ -4002,11 +4062,11 @@ msgstr "Неактивно"
 msgid "Increasing distance to bed"
 msgstr "Збільшення відстані до столу"
 
-#: src/gui/MItem_menus.hpp:129 src/gui/screen_home.cpp:139
+#: src/gui/screen_home.cpp:139 src/gui/MItem_menus.hpp:129
 msgid "Info"
 msgstr "Інформація"
 
-#: src/guiapi/src/window_msgbox.cpp:324 src/gui/MItem_tools.cpp:82
+#: src/gui/MItem_tools.cpp:82 src/guiapi/src/window_msgbox.cpp:324
 msgid "Information"
 msgstr "Інформація"
 
@@ -4115,13 +4175,9 @@ msgstr "Недійсний заголовок файлу BGCODE"
 msgid "Invoke MMU maintenance"
 msgstr "Запустити обслуговування MMU"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:122
+#: src/gui/screen/filament/screen_filament_detail.cpp:130
 msgid "Is Abrasive"
 msgstr "Абразивний"
-
-#: src/gui/screen/filament/screen_filament_detail.cpp:126
-msgid "Is Flexible"
-msgstr "Гнучкий"
 
 #: src/gui/wizard/screen_fan_selftest.cpp:70
 msgid "Is Hotend fan (left) spinning?"
@@ -4175,11 +4231,11 @@ msgstr "МОВА ТА ЧАС"
 msgid "LANGUAGES"
 msgstr "МОВИ"
 
-#: tmp_error_headers/error_list_xl.hpp:519
-#: tmp_error_headers/error_list_ix.hpp:498
-#: tmp_error_headers/error_list_mk4.hpp:302
 #: tmp_error_headers/error_list_mk35.hpp:274
 #: tmp_error_headers/error_list_coreone.hpp:470
+#: tmp_error_headers/error_list_xl.hpp:519
+#: tmp_error_headers/error_list_mk4.hpp:302
+#: tmp_error_headers/error_list_ix.hpp:498
 msgid "LED MEMORY ERROR"
 msgstr "ПОМИЛКА ПАМ'ЯТІ LED"
 
@@ -4199,10 +4255,10 @@ msgstr "ЗАВАНТАЖИТИ"
 msgid "LOAD TO EXTR. FAILED"
 msgstr "НЕ ВДАЛОСЯ ЗАВАНТАЖИТИ В ЕКСТРУДЕР"
 
-#: tmp_error_headers/error_list_xl.hpp:505
-#: tmp_error_headers/error_list_ix.hpp:484
-#: tmp_error_headers/error_list_mk4.hpp:288
 #: tmp_error_headers/error_list_coreone.hpp:456
+#: tmp_error_headers/error_list_xl.hpp:505
+#: tmp_error_headers/error_list_mk4.hpp:288
+#: tmp_error_headers/error_list_ix.hpp:484
 msgid "LOADCELL MEASURE FAILED"
 msgstr "НЕ ВДАЛОСЯ ВИМІРЯТИ ДАТЧИКОМ НАВАНТАЖЕННЯ"
 
@@ -4210,10 +4266,10 @@ msgstr "НЕ ВДАЛОСЯ ВИМІРЯТИ ДАТЧИКОМ НАВАНТАЖЕ
 msgid "LOADCELL TEST"
 msgstr "ТЕСТ ДАТЧИКА НАВАНТАЖЕННЯ"
 
-#: tmp_error_headers/error_list_xl.hpp:512
-#: tmp_error_headers/error_list_ix.hpp:491
-#: tmp_error_headers/error_list_mk4.hpp:295
 #: tmp_error_headers/error_list_coreone.hpp:463
+#: tmp_error_headers/error_list_xl.hpp:512
+#: tmp_error_headers/error_list_mk4.hpp:295
+#: tmp_error_headers/error_list_ix.hpp:491
 msgid "LOADCELL TIMEOUT"
 msgstr "ТАЙМ-АУТ ДАТЧИКА НАВАНТАЖЕННЯ"
 
@@ -4221,9 +4277,9 @@ msgstr "ТАЙМ-АУТ ДАТЧИКА НАВАНТАЖЕННЯ"
 msgid "LOADED FILAMENTS"
 msgstr "ЗАВАНТАЖЕНІ ФІЛАМЕНТИ"
 
+#: tmp_error_headers/error_list_coreone.hpp:92
 #: tmp_error_headers/error_list_xl.hpp:85
 #: tmp_error_headers/error_list_ix.hpp:50
-#: tmp_error_headers/error_list_coreone.hpp:92
 msgid "LOADING OBSTRUCTION"
 msgstr "Перешкода під час завантаження"
 
@@ -4256,12 +4312,12 @@ msgstr "Ліва сторона"
 msgid "Left Side [um]"
 msgstr "Ліва сторона [мкм]"
 
-#: tmp_error_headers/error_list_mini.hpp:450
-#: tmp_error_headers/error_list_xl.hpp:751
-#: tmp_error_headers/error_list_ix.hpp:716
-#: tmp_error_headers/error_list_mk4.hpp:541
 #: tmp_error_headers/error_list_mk35.hpp:513
 #: tmp_error_headers/error_list_coreone.hpp:709
+#: tmp_error_headers/error_list_xl.hpp:751
+#: tmp_error_headers/error_list_mini.hpp:450
+#: tmp_error_headers/error_list_mk4.hpp:541
+#: tmp_error_headers/error_list_ix.hpp:716
 msgid ""
 "Length of an axis is too long.\n"
 "Motor current is too low, probably.\n"
@@ -4271,12 +4327,12 @@ msgstr ""
 "Ймовірно, занадто низький струм двигуна.\n"
 "Повторити перевірку, призупинити чи відновити друк?"
 
-#: tmp_error_headers/error_list_mini.hpp:457
-#: tmp_error_headers/error_list_xl.hpp:758
-#: tmp_error_headers/error_list_ix.hpp:723
-#: tmp_error_headers/error_list_mk4.hpp:548
 #: tmp_error_headers/error_list_mk35.hpp:520
 #: tmp_error_headers/error_list_coreone.hpp:716
+#: tmp_error_headers/error_list_xl.hpp:758
+#: tmp_error_headers/error_list_mini.hpp:457
+#: tmp_error_headers/error_list_mk4.hpp:548
+#: tmp_error_headers/error_list_ix.hpp:723
 msgid ""
 "Length of an axis is too short.\n"
 "There's an obstacle or bearing issue.\n"
@@ -4305,7 +4361,7 @@ msgstr ""
 "Посилання дійсне лише за умови підключення до тієї самої мережі, що й "
 "принтер."
 
-#: src/gui/MItem_tools.hpp:72
+#: src/gui/MItem_tools.hpp:73
 msgid "Live Adjust Z"
 msgstr "Налаштування Z в реальному часі"
 
@@ -4329,7 +4385,7 @@ msgstr "Завантажити філамент"
 msgid "Load Settings"
 msgstr "Завантажити налаштування"
 
-#: src/gui/MItem_tools.hpp:527
+#: src/gui/MItem_tools.hpp:528
 msgid "Load Settings from File"
 msgstr "Завантажити налаштування з файлу"
 
@@ -4368,10 +4424,10 @@ msgstr ""
 "Дані датчика навантаження шумні. Переконайтеся, що принтер стоїть на "
 "стабільній поверхні. Спробувати ще раз?"
 
-#: tmp_error_headers/error_list_xl.hpp:506
-#: tmp_error_headers/error_list_ix.hpp:485
-#: tmp_error_headers/error_list_mk4.hpp:289
 #: tmp_error_headers/error_list_coreone.hpp:457
+#: tmp_error_headers/error_list_xl.hpp:506
+#: tmp_error_headers/error_list_mk4.hpp:289
+#: tmp_error_headers/error_list_ix.hpp:485
 msgid "Loadcell measured an inifinite or undefined load value."
 msgstr ""
 "Датчик навантаження виміряв нескінченне або невизначене значення "
@@ -4410,19 +4466,19 @@ msgstr "Успішно завантажено. Увімкніть Prusa Connect 
 msgid "Loading Test"
 msgstr "Тест завантаження"
 
-#: tmp_error_headers/error_list_mini.hpp:568
-#: tmp_error_headers/error_list_xl.hpp:932
-#: tmp_error_headers/error_list_ix.hpp:848
-#: tmp_error_headers/error_list_mk4.hpp:680
 #: tmp_error_headers/error_list_mk35.hpp:652
 #: tmp_error_headers/error_list_coreone.hpp:862
+#: tmp_error_headers/error_list_xl.hpp:932
+#: tmp_error_headers/error_list_mini.hpp:568
+#: tmp_error_headers/error_list_mk4.hpp:680
+#: tmp_error_headers/error_list_ix.hpp:848
 msgid "Loading Timeout"
 msgstr "Тайм-аут завантаження"
 
 #. //MSG_PROGRESS_UNLOADING_FILAMENT c=20
-#: src/mmu2/mmu2_progress_converter.cpp:22
 #: src/gui/dialogs/DialogLoadUnload.cpp:79
 #: src/gui/dialogs/DialogLoadUnload.cpp:485
+#: src/mmu2/mmu2_progress_converter.cpp:22
 msgid "Loading filament"
 msgstr "Завантаження філаменту"
 
@@ -4455,7 +4511,7 @@ msgid "Logging has been turned off. You can now safely remove the USB drive."
 msgstr ""
 "Запис журналу вимкнено. Тепер ви можете безпечно вийняти USB-накопичувач."
 
-#: src/gui/wizard/screen_belt_tuning_wizard.cpp:201
+#: src/gui/wizard/screen_belt_tuning_wizard.cpp:204
 #, c-format
 msgid "Loosen by %.1f turns"
 msgstr "Послабити на %.1f обертів"
@@ -4509,46 +4565,46 @@ msgstr "MAC"
 msgid "MAC Address"
 msgstr "MAC-адреса"
 
-#: tmp_error_headers/error_list_mk4.hpp:43
 #: tmp_error_headers/error_list_mk35.hpp:29
 #: tmp_error_headers/error_list_coreone.hpp:71
+#: tmp_error_headers/error_list_mk4.hpp:43
 msgid "MAINTENANCE FAILURE WARNING"
 msgstr "ПОПЕРЕДЖЕННЯ ПРО ПОМИЛКУ ОБСЛУГОВУВАННЯ"
 
-#: tmp_error_headers/error_list_mk4.hpp:50
 #: tmp_error_headers/error_list_mk35.hpp:36
 #: tmp_error_headers/error_list_coreone.hpp:78
+#: tmp_error_headers/error_list_mk4.hpp:50
 msgid "MAINTENANCE WARNING"
 msgstr "ПОПЕРЕДЖЕННЯ ПРО ОБСЛУГОВУВАННЯ"
 
-#: tmp_error_headers/error_list_mini.hpp:239
-#: tmp_error_headers/error_list_xl.hpp:526
-#: tmp_error_headers/error_list_ix.hpp:505
-#: tmp_error_headers/error_list_mk4.hpp:309
 #: tmp_error_headers/error_list_mk35.hpp:281
 #: tmp_error_headers/error_list_coreone.hpp:477
+#: tmp_error_headers/error_list_xl.hpp:526
+#: tmp_error_headers/error_list_mini.hpp:239
+#: tmp_error_headers/error_list_mk4.hpp:309
+#: tmp_error_headers/error_list_ix.hpp:505
 msgid "MARLIN REQUEST TIMEOUT"
 msgstr "ТАЙМ-АУТ ЗАПИТУ MARLIN"
 
-#: tmp_error_headers/error_list_mini.hpp:50
-#: tmp_error_headers/error_list_mini.hpp:57
-#: tmp_error_headers/error_list_ix.hpp:92
-#: tmp_error_headers/error_list_ix.hpp:99
-#: tmp_error_headers/error_list_mk4.hpp:85
-#: tmp_error_headers/error_list_mk4.hpp:92
 #: tmp_error_headers/error_list_mk35.hpp:71
 #: tmp_error_headers/error_list_mk35.hpp:78
 #: tmp_error_headers/error_list_coreone.hpp:134
 #: tmp_error_headers/error_list_coreone.hpp:141
+#: tmp_error_headers/error_list_mini.hpp:50
+#: tmp_error_headers/error_list_mini.hpp:57
+#: tmp_error_headers/error_list_mk4.hpp:85
+#: tmp_error_headers/error_list_mk4.hpp:92
+#: tmp_error_headers/error_list_ix.hpp:92
+#: tmp_error_headers/error_list_ix.hpp:99
 msgid "MAXTEMP ERROR"
 msgstr "ПОМИЛКА МАКСИМАЛЬНОЇ ТЕМПЕРАТУРИ"
 
-#: tmp_error_headers/error_list_mini.hpp:92
-#: tmp_error_headers/error_list_xl.hpp:148
-#: tmp_error_headers/error_list_ix.hpp:134
-#: tmp_error_headers/error_list_mk4.hpp:127
 #: tmp_error_headers/error_list_mk35.hpp:113
 #: tmp_error_headers/error_list_coreone.hpp:176
+#: tmp_error_headers/error_list_xl.hpp:148
+#: tmp_error_headers/error_list_mini.hpp:92
+#: tmp_error_headers/error_list_mk4.hpp:127
+#: tmp_error_headers/error_list_ix.hpp:134
 msgid "MCU MAXTEMP ERROR"
 msgstr "ПОМИЛКА МАКСИМАЛЬНОЇ ТЕМПЕРАТУРИ MCU"
 
@@ -4556,22 +4612,22 @@ msgstr "ПОМИЛКА МАКСИМАЛЬНОЇ ТЕМПЕРАТУРИ MCU"
 msgid "MCU Temperature"
 msgstr "Температура MCU"
 
-#: tmp_error_headers/error_list_mini.hpp:93
-#: tmp_error_headers/error_list_xl.hpp:149
-#: tmp_error_headers/error_list_ix.hpp:135
-#: tmp_error_headers/error_list_mk4.hpp:128
 #: tmp_error_headers/error_list_mk35.hpp:114
 #: tmp_error_headers/error_list_coreone.hpp:177
+#: tmp_error_headers/error_list_xl.hpp:149
+#: tmp_error_headers/error_list_mini.hpp:93
+#: tmp_error_headers/error_list_mk4.hpp:128
+#: tmp_error_headers/error_list_ix.hpp:135
 #, c-format
 msgid "MCU in %s is overheated."
 msgstr "MCU в %s перегрівся."
 
-#: tmp_error_headers/error_list_mini.hpp:534
-#: tmp_error_headers/error_list_xl.hpp:856
-#: tmp_error_headers/error_list_ix.hpp:800
-#: tmp_error_headers/error_list_mk4.hpp:639
 #: tmp_error_headers/error_list_mk35.hpp:618
 #: tmp_error_headers/error_list_coreone.hpp:807
+#: tmp_error_headers/error_list_xl.hpp:856
+#: tmp_error_headers/error_list_mini.hpp:534
+#: tmp_error_headers/error_list_mk4.hpp:639
+#: tmp_error_headers/error_list_ix.hpp:800
 msgid ""
 "MCU in Buddy is overheated, likely due to exceeding the printer's operating "
 "temperature. Prevent overheating for optimal performance."
@@ -4609,21 +4665,21 @@ msgstr "МЕТРИКИ ТА ЖУРНАЛ"
 msgid "METRICS LIST"
 msgstr "СПИСОК МЕТРИК"
 
-#: tmp_error_headers/error_list_mini.hpp:64
-#: tmp_error_headers/error_list_mini.hpp:71
-#: tmp_error_headers/error_list_ix.hpp:106
-#: tmp_error_headers/error_list_ix.hpp:113
-#: tmp_error_headers/error_list_mk4.hpp:99
-#: tmp_error_headers/error_list_mk4.hpp:106
 #: tmp_error_headers/error_list_mk35.hpp:85
 #: tmp_error_headers/error_list_mk35.hpp:92
 #: tmp_error_headers/error_list_coreone.hpp:148
 #: tmp_error_headers/error_list_coreone.hpp:155
+#: tmp_error_headers/error_list_mini.hpp:64
+#: tmp_error_headers/error_list_mini.hpp:71
+#: tmp_error_headers/error_list_mk4.hpp:99
+#: tmp_error_headers/error_list_mk4.hpp:106
+#: tmp_error_headers/error_list_ix.hpp:106
+#: tmp_error_headers/error_list_ix.hpp:113
 msgid "MINTEMP ERROR"
 msgstr "ПОМИЛКА МІНІМАЛЬНОЇ ТЕМПЕРАТУРИ"
 
-#: src/gui/MItem_mmu.cpp:278 src/gui/screen/screen_hw_mmu.cpp:4
-#: src/gui/MItem_menus.cpp:195
+#: src/gui/screen/screen_hw_mmu.cpp:4 src/gui/MItem_menus.cpp:195
+#: src/gui/MItem_mmu.cpp:278
 msgid "MMU"
 msgstr "MMU"
 
@@ -4635,9 +4691,9 @@ msgstr "Статус MMU BL"
 msgid "MMU Current"
 msgstr "Струм MMU"
 
-#: tmp_error_headers/error_list_mk4.hpp:575
 #: tmp_error_headers/error_list_mk35.hpp:547
 #: tmp_error_headers/error_list_coreone.hpp:743
+#: tmp_error_headers/error_list_mk4.hpp:575
 msgid "MMU Error"
 msgstr "Помилка MMU"
 
@@ -4669,12 +4725,12 @@ msgstr ""
 msgid "MMU NOT RESPONDING"
 msgstr "MMU НЕ ВІДПОВІДАЄ"
 
-#: tmp_error_headers/error_list_mini.hpp:148
-#: tmp_error_headers/error_list_xl.hpp:281
-#: tmp_error_headers/error_list_ix.hpp:274
-#: tmp_error_headers/error_list_mk4.hpp:183
 #: tmp_error_headers/error_list_mk35.hpp:169
 #: tmp_error_headers/error_list_coreone.hpp:267
+#: tmp_error_headers/error_list_xl.hpp:281
+#: tmp_error_headers/error_list_mini.hpp:148
+#: tmp_error_headers/error_list_mk4.hpp:183
+#: tmp_error_headers/error_list_ix.hpp:274
 msgid "MMU OVERCURRENT"
 msgstr "ПЕРЕВАНТАЖЕННЯ СТРУМУ MMU"
 
@@ -4688,7 +4744,7 @@ msgstr "ПОМИЛКА САМОТЕСТУ MMU"
 msgid "MMU Unit"
 msgstr "Блок MMU"
 
-#: src/gui/MItem_tools.hpp:241
+#: src/gui/MItem_tools.hpp:242
 msgid "MMU Version"
 msgstr "Версія MMU"
 
@@ -4704,7 +4760,7 @@ msgstr ""
 msgid "MMU filament"
 msgstr "Філамент MMU"
 
-#: src/gui/MItem_tools.hpp:366
+#: src/gui/MItem_tools.hpp:367
 msgid "MMU filament loads"
 msgstr "Завантаження філаменту MMU"
 
@@ -4802,8 +4858,8 @@ msgstr ""
 "Нагадування про обслуговування. Кількість замін філаменту досягла 30 тисяч. "
 "Огляньте та очистіть екструдер. Відвідайте prusa.io/mmu-care"
 
-#: tmp_error_headers/error_list_mk4.hpp:51
 #: tmp_error_headers/error_list_coreone.hpp:79
+#: tmp_error_headers/error_list_mk4.hpp:51
 msgid ""
 "Maintenance Reminder. Filament changes have reached main-plate lifespan. "
 "Inspect the part and ensure you have a spare plate available. Visit prusa.io/"
@@ -4821,16 +4877,16 @@ msgstr "Переконайтеся, що філамент вставлено ч�
 msgid "Manage Filaments"
 msgstr "Керування філаментами"
 
-#: src/gui/MItem_tools.hpp:638
+#: src/gui/MItem_tools.hpp:639
 msgid "Manual Belt Tuning"
 msgstr "Ручне налаштування ременя"
 
-#: tmp_error_headers/error_list_mini.hpp:240
-#: tmp_error_headers/error_list_xl.hpp:527
-#: tmp_error_headers/error_list_ix.hpp:506
-#: tmp_error_headers/error_list_mk4.hpp:310
 #: tmp_error_headers/error_list_mk35.hpp:282
 #: tmp_error_headers/error_list_coreone.hpp:478
+#: tmp_error_headers/error_list_xl.hpp:527
+#: tmp_error_headers/error_list_mini.hpp:240
+#: tmp_error_headers/error_list_mk4.hpp:310
+#: tmp_error_headers/error_list_ix.hpp:506
 msgid ""
 "Marlin client could not send message to Marlin server and timeout was "
 "reached."
@@ -4847,7 +4903,7 @@ msgstr "Маска"
 msgid "Material"
 msgstr "Матеріал"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:102
+#: src/gui/screen/filament/screen_filament_detail.cpp:110
 msgid "Maximum Chamber Temperature"
 msgstr "Максимальна температура камери"
 
@@ -4859,12 +4915,12 @@ msgstr ""
 "Виміряні частоти ременів поза межами очікуваного діапазону. Будь ласка, "
 "перевірте, чи портал вирівняно належним чином, і повторіть калібрування."
 
-#: tmp_error_headers/error_list_mini.hpp:492
-#: tmp_error_headers/error_list_xl.hpp:807
-#: tmp_error_headers/error_list_ix.hpp:758
-#: tmp_error_headers/error_list_mk4.hpp:597
 #: tmp_error_headers/error_list_mk35.hpp:569
 #: tmp_error_headers/error_list_coreone.hpp:765
+#: tmp_error_headers/error_list_xl.hpp:807
+#: tmp_error_headers/error_list_mini.hpp:492
+#: tmp_error_headers/error_list_mk4.hpp:597
+#: tmp_error_headers/error_list_ix.hpp:758
 msgid ""
 "Measured temperature is not matching expected value. Check the thermistor is "
 "in contact with hotend. In case of damage, replace it."
@@ -4897,19 +4953,19 @@ msgstr "Вимірювання натягу паска"
 msgid "Medium"
 msgstr "Середня"
 
-#: tmp_error_headers/error_list_xl.hpp:520
-#: tmp_error_headers/error_list_ix.hpp:499
-#: tmp_error_headers/error_list_mk4.hpp:303
 #: tmp_error_headers/error_list_mk35.hpp:275
 #: tmp_error_headers/error_list_coreone.hpp:471
+#: tmp_error_headers/error_list_xl.hpp:520
+#: tmp_error_headers/error_list_mk4.hpp:303
+#: tmp_error_headers/error_list_ix.hpp:499
 msgid "Memory allocation failed for scheduled LED animation"
 msgstr "Не вдалося виділити пам'ять для запланованої LED-анімації."
 
-#: src/gui/MItem_tools.hpp:140
+#: src/gui/MItem_tools.hpp:141
 msgid "Menu Timeout"
 msgstr "Тайм-аут меню"
 
-#: src/gui/MItem_tools.hpp:90
+#: src/gui/MItem_tools.hpp:91
 msgid "Mesh Bed Leveling"
 msgstr "Вирівнювання столу за сіткою"
 
@@ -4929,7 +4985,7 @@ msgstr "Список метрик"
 msgid "Metrics Port"
 msgstr "Порт метрик"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:96
+#: src/gui/screen/filament/screen_filament_detail.cpp:104
 msgid "Minimum Chamber Temperature"
 msgstr "Мінімальна температура камери"
 
@@ -4950,8 +5006,8 @@ msgstr "Невідповідність діаметрів сопел"
 msgid "Mon"
 msgstr "Пн"
 
-#: src/gui/screen_qr_error.cpp:30 src/gui/screen_fatal_warning.cpp:35
-#: src/gui/dialogs/DialogConnectReg.hpp:23
+#: src/gui/dialogs/DialogConnectReg.hpp:23 src/gui/screen_fatal_warning.cpp:35
+#: src/gui/screen_qr_error.cpp:30
 msgid "More detail at"
 msgstr "Детальніше на"
 
@@ -4998,8 +5054,8 @@ msgid "Moving away."
 msgstr "Відсування."
 
 #. //MSG_PROGRESS_HOMING c=20
-#: src/mmu2/mmu2_progress_converter.cpp:32
 #: src/gui/dialogs/DialogLoadUnload.cpp:89
+#: src/mmu2/mmu2_progress_converter.cpp:32
 msgid "Moving selector"
 msgstr "Переміщення селектора"
 
@@ -5052,12 +5108,12 @@ msgstr "NINS / 0"
 msgid "NO"
 msgstr "НІ"
 
-#: tmp_error_headers/error_list_mini.hpp:309
-#: tmp_error_headers/error_list_xl.hpp:603
-#: tmp_error_headers/error_list_ix.hpp:575
-#: tmp_error_headers/error_list_mk4.hpp:379
 #: tmp_error_headers/error_list_mk35.hpp:351
 #: tmp_error_headers/error_list_coreone.hpp:547
+#: tmp_error_headers/error_list_xl.hpp:603
+#: tmp_error_headers/error_list_mini.hpp:309
+#: tmp_error_headers/error_list_mk4.hpp:379
+#: tmp_error_headers/error_list_ix.hpp:575
 msgid "NO FW ON USB FLASH DRIVE"
 msgstr "НА USB-НАКОПИЧУВАЧІ ВІДСУТНЯ ПРОШИВКА"
 
@@ -5069,11 +5125,11 @@ msgstr "НЕ ЗАРАЗ"
 msgid "NOW"
 msgstr "ЗАРАЗ"
 
-#: tmp_error_headers/error_list_mini.hpp:134
-#: tmp_error_headers/error_list_ix.hpp:260
-#: tmp_error_headers/error_list_mk4.hpp:169
 #: tmp_error_headers/error_list_mk35.hpp:155
 #: tmp_error_headers/error_list_coreone.hpp:253
+#: tmp_error_headers/error_list_mini.hpp:134
+#: tmp_error_headers/error_list_mk4.hpp:169
+#: tmp_error_headers/error_list_ix.hpp:260
 msgid "NOZZLE HEATER OVERCURRENT"
 msgstr "ПЕРЕВАНТАЖЕННЯ СТРУМУ НАГРІВАЧА СОПЛА"
 
@@ -5081,7 +5137,7 @@ msgstr "ПЕРЕВАНТАЖЕННЯ СТРУМУ НАГРІВАЧА СОПЛА"
 msgid "NOZZLE_OFFSET"
 msgstr "ЗМІЩЕННЯ СОПЛА"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:35
+#: src/gui/screen/filament/screen_filament_detail.cpp:43
 #: src/gui/MItem_tools.cpp:352
 msgid "Name"
 msgstr "Назва"
@@ -5102,7 +5158,7 @@ msgstr "Назва не може бути порожньою"
 msgid "Net fail"
 msgstr "Помилка мережі"
 
-#: src/gui/MItem_menus.hpp:111 src/gui/MItem_tools.cpp:824
+#: src/gui/MItem_tools.cpp:824 src/gui/MItem_menus.hpp:111
 msgid "Network"
 msgstr "Мережа"
 
@@ -5122,11 +5178,11 @@ msgstr "НІКОЛИ"
 msgid "New FW available"
 msgstr "Доступна нова прошивка"
 
-#: tmp_error_headers/error_list_xl.hpp:709
-#: tmp_error_headers/error_list_ix.hpp:674
-#: tmp_error_headers/error_list_mk4.hpp:492
 #: tmp_error_headers/error_list_mk35.hpp:464
 #: tmp_error_headers/error_list_coreone.hpp:660
+#: tmp_error_headers/error_list_xl.hpp:709
+#: tmp_error_headers/error_list_mk4.hpp:492
+#: tmp_error_headers/error_list_ix.hpp:674
 msgid "New firmware available"
 msgstr "Доступна нова прошивка"
 
@@ -5172,12 +5228,12 @@ msgstr "Немає USB"
 msgid "No crash dump to save."
 msgstr "Немає дампа аварії для збереження."
 
-#: tmp_error_headers/error_list_mini.hpp:366
-#: tmp_error_headers/error_list_xl.hpp:660
-#: tmp_error_headers/error_list_ix.hpp:632
-#: tmp_error_headers/error_list_mk4.hpp:436
 #: tmp_error_headers/error_list_mk35.hpp:408
 #: tmp_error_headers/error_list_coreone.hpp:604
+#: tmp_error_headers/error_list_xl.hpp:660
+#: tmp_error_headers/error_list_mini.hpp:366
+#: tmp_error_headers/error_list_mk4.hpp:436
+#: tmp_error_headers/error_list_ix.hpp:632
 msgid ""
 "No firmware found\n"
 "in the internal\n"
@@ -5210,7 +5266,7 @@ msgstr "Немає мережевого інтерфейсу"
 msgid "No peaks found."
 msgstr "Піків не знайдено"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:108
+#: src/gui/screen/filament/screen_filament_detail.cpp:116
 msgid "Nominal Chamber Temperature"
 msgstr "Номінальна температура камери"
 
@@ -5263,8 +5319,8 @@ msgid ""
 msgstr "Тепер відкалібруємо відстань між кінчиком сопла та листом."
 
 #: src/common/footer_def.cpp:10 src/gui/MItem_print.hpp:14
-#: src/gui/MItem_print.hpp:49 src/gui/MItem_tools.cpp:706
-#: src/gui/wizard/selftest_result_heaters.cpp:13 include/common/hw_check.hpp:32
+#: src/gui/MItem_print.hpp:49 src/gui/wizard/selftest_result_heaters.cpp:13
+#: src/gui/MItem_tools.cpp:706 include/common/hw_check.hpp:32
 msgid "Nozzle"
 msgstr "Сопло"
 
@@ -5288,6 +5344,10 @@ msgstr "Температура сопла 4"
 msgid "Nozzle 5 Temperature"
 msgstr "Температура сопла 5"
 
+#: src/gui/MItem_tools.cpp:996
+msgid "Nozzle Cleaning Retraction"
+msgstr "Ретракція для очищення сопла"
+
 #: src/gui/screen/toolhead/screen_toolhead_settings.cpp:26
 msgid "Nozzle Diameter"
 msgstr "Діаметр сопла"
@@ -5308,16 +5368,16 @@ msgstr "Зміщення сопла"
 msgid "Nozzle PWM"
 msgstr "ШІМ сопла"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:75
+#: src/gui/screen/filament/screen_filament_detail.cpp:83
 msgid "Nozzle Preheat Temperature"
 msgstr "Температура попереднього нагріву сопла"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:71
+#: src/gui/screen/filament/screen_filament_detail.cpp:79
 #: src/gui/MItem_print.cpp:52
 msgid "Nozzle Temp"
 msgstr "Температура сопла"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:71
+#: src/gui/screen/filament/screen_filament_detail.cpp:79
 #: src/gui/MItem_print.hpp:16 src/gui/MItem_print.hpp:51
 msgid "Nozzle Temperature"
 msgstr "Температура сопла"
@@ -5326,10 +5386,17 @@ msgstr "Температура сопла"
 msgid "Nozzle cleaning"
 msgstr "Очищення сопла"
 
-#: tmp_error_headers/error_list_xl.hpp:919
-#: tmp_error_headers/error_list_ix.hpp:835
-#: tmp_error_headers/error_list_mk4.hpp:667
+#: tmp_error_headers/error_list_coreone.hpp:932
+#: tmp_error_headers/error_list_xl.hpp:981
+#: tmp_error_headers/error_list_mk4.hpp:722
+#: tmp_error_headers/error_list_ix.hpp:855
+msgid "Nozzle cleaning failed"
+msgstr "Не вдалося очистити сопло."
+
 #: tmp_error_headers/error_list_coreone.hpp:849
+#: tmp_error_headers/error_list_xl.hpp:919
+#: tmp_error_headers/error_list_mk4.hpp:667
+#: tmp_error_headers/error_list_ix.hpp:835
 msgid "Nozzle cleaning failed."
 msgstr "Не вдалося очистити сопло."
 
@@ -5341,8 +5408,8 @@ msgstr "Діаметр сопла"
 msgid "Nozzle diameter doesn't match"
 msgstr "Діаметр сопла не збігається"
 
-#: tmp_error_headers/error_list_xl.hpp:842
 #: tmp_error_headers/error_list_mk35.hpp:604
+#: tmp_error_headers/error_list_xl.hpp:842
 msgid ""
 "Nozzle doesn't seem to have round cross section. Make sure it is clean and "
 "perpendicular to the bed."
@@ -5390,8 +5457,8 @@ msgstr "ВИМК."
 
 #. clang-format off
 #. 01234567890123456789
-#: src/mmu2/mmu2_progress_converter.cpp:7
 #: src/common/client_response_texts.hpp:64
+#: src/mmu2/mmu2_progress_converter.cpp:7
 msgid "OK"
 msgstr "OK"
 
@@ -5408,8 +5475,8 @@ msgid "Object"
 msgstr "Об'єкт"
 
 #. / Display string of the nullopt value
-#: src/guiapi/include/numeric_input_config.hpp:31
 #: src/gui/screen_menu_connect.cpp:46
+#: src/guiapi/include/numeric_input_config.hpp:31
 msgid "Off"
 msgstr "Вимкнено"
 
@@ -5474,12 +5541,12 @@ msgstr ""
 "Відкрийте дверцята та затягніть натяжний гвинт приблизно на пів оберта. "
 "Потім закрийте дверцята та підтвердьте."
 
-#: tmp_error_headers/error_list_mini.hpp:121
-#: tmp_error_headers/error_list_xl.hpp:268
-#: tmp_error_headers/error_list_ix.hpp:247
-#: tmp_error_headers/error_list_mk4.hpp:156
 #: tmp_error_headers/error_list_mk35.hpp:142
 #: tmp_error_headers/error_list_coreone.hpp:240
+#: tmp_error_headers/error_list_xl.hpp:268
+#: tmp_error_headers/error_list_mini.hpp:121
+#: tmp_error_headers/error_list_mk4.hpp:156
+#: tmp_error_headers/error_list_ix.hpp:247
 msgid "Overcurrent detected on USB port."
 msgstr "Виявлено перевантаження струму на USB-порті."
 
@@ -5489,38 +5556,38 @@ msgstr ""
 "Виявлено перевантаження струму на порту нагрівального столу, від'єднайте "
 "пристрій."
 
-#: tmp_error_headers/error_list_mini.hpp:135
-#: tmp_error_headers/error_list_ix.hpp:261
-#: tmp_error_headers/error_list_mk4.hpp:170
 #: tmp_error_headers/error_list_mk35.hpp:156
 #: tmp_error_headers/error_list_coreone.hpp:254
+#: tmp_error_headers/error_list_mini.hpp:135
+#: tmp_error_headers/error_list_mk4.hpp:170
+#: tmp_error_headers/error_list_ix.hpp:261
 msgid "Overcurrent detected on nozzle heater."
 msgstr "Виявлено перевантаження струму на нагрівачі сопла."
 
-#: tmp_error_headers/error_list_mini.hpp:149
-#: tmp_error_headers/error_list_xl.hpp:282
-#: tmp_error_headers/error_list_ix.hpp:275
-#: tmp_error_headers/error_list_mk4.hpp:184
 #: tmp_error_headers/error_list_mk35.hpp:170
 #: tmp_error_headers/error_list_coreone.hpp:268
+#: tmp_error_headers/error_list_xl.hpp:282
+#: tmp_error_headers/error_list_mini.hpp:149
+#: tmp_error_headers/error_list_mk4.hpp:184
+#: tmp_error_headers/error_list_ix.hpp:275
 msgid "Overcurrent detected on the MMU port, disconnect the device."
 msgstr "Виявлено перевантаження струму на порту MMU, від'єднайте пристрій."
 
-#: tmp_error_headers/error_list_mini.hpp:128
-#: tmp_error_headers/error_list_xl.hpp:275
-#: tmp_error_headers/error_list_ix.hpp:254
-#: tmp_error_headers/error_list_mk4.hpp:163
 #: tmp_error_headers/error_list_mk35.hpp:149
 #: tmp_error_headers/error_list_coreone.hpp:247
+#: tmp_error_headers/error_list_xl.hpp:275
+#: tmp_error_headers/error_list_mini.hpp:128
+#: tmp_error_headers/error_list_mk4.hpp:163
+#: tmp_error_headers/error_list_ix.hpp:254
 msgid "Overcurrent detected on the connected USB device, disconnect it."
 msgstr ""
 "Виявлено перевантаження струму на підключеному USB-пристрої, від'єднайте "
 "його."
 
-#: tmp_error_headers/error_list_ix.hpp:268
-#: tmp_error_headers/error_list_mk4.hpp:177
 #: tmp_error_headers/error_list_mk35.hpp:163
 #: tmp_error_headers/error_list_coreone.hpp:261
+#: tmp_error_headers/error_list_mk4.hpp:177
+#: tmp_error_headers/error_list_ix.hpp:268
 msgid "Overcurrent detected on xBuddy heatbed port, disconnect the device."
 msgstr ""
 "Виявлено перевантаження струму на порту нагрівального столу xBuddy, "
@@ -5568,30 +5635,30 @@ msgstr "ШТИФТ НЕ ДОСЯГНУТО"
 msgid "POSTPONE"
 msgstr "ВІДКЛАСТИ"
 
-#: tmp_error_headers/error_list_xl.hpp:358
-#: tmp_error_headers/error_list_ix.hpp:351
-#: tmp_error_headers/error_list_mk4.hpp:246
 #: tmp_error_headers/error_list_mk35.hpp:232
 #: tmp_error_headers/error_list_coreone.hpp:330
+#: tmp_error_headers/error_list_xl.hpp:358
+#: tmp_error_headers/error_list_mk4.hpp:246
+#: tmp_error_headers/error_list_ix.hpp:351
 msgid "POWER PANIC"
 msgstr "ВІДКЛЮЧЕННЯ ЖИВЛЕННЯ"
 
+#: tmp_error_headers/error_list_coreone.hpp:15
 #: tmp_error_headers/error_list_xl.hpp:15
 #: tmp_error_headers/error_list_ix.hpp:15
-#: tmp_error_headers/error_list_coreone.hpp:15
 msgid "PRECISE HOMING FAILED"
 msgstr "ПОМИЛКА ТОЧНОГО ПАРКУВАННЯ"
 
-#: tmp_error_headers/error_list_mini.hpp:22
-#: tmp_error_headers/error_list_mini.hpp:29
-#: tmp_error_headers/error_list_ix.hpp:64
-#: tmp_error_headers/error_list_ix.hpp:71
-#: tmp_error_headers/error_list_mk4.hpp:57
-#: tmp_error_headers/error_list_mk4.hpp:64
 #: tmp_error_headers/error_list_mk35.hpp:43
 #: tmp_error_headers/error_list_mk35.hpp:50
 #: tmp_error_headers/error_list_coreone.hpp:106
 #: tmp_error_headers/error_list_coreone.hpp:113
+#: tmp_error_headers/error_list_mini.hpp:22
+#: tmp_error_headers/error_list_mini.hpp:29
+#: tmp_error_headers/error_list_mk4.hpp:57
+#: tmp_error_headers/error_list_mk4.hpp:64
+#: tmp_error_headers/error_list_ix.hpp:64
+#: tmp_error_headers/error_list_ix.hpp:71
 msgid "PREHEAT ERROR"
 msgstr "ПОМИЛКА ПОПЕРЕДНЬОГО НАГРІВУ"
 
@@ -5622,7 +5689,7 @@ msgid "PROJECTS"
 msgstr "ПРОЄКТИ"
 
 #. TODO: Doesn't fit
-#: src/gui/screen_menu_connect.hpp:75 src/gui/dialogs/DialogConnectReg.hpp:22
+#: src/gui/dialogs/DialogConnectReg.hpp:22 src/gui/screen_menu_connect.hpp:75
 msgid "PRUSA CONNECT"
 msgstr "PRUSA CONNECT"
 
@@ -5634,6 +5701,18 @@ msgstr "PRUSALINK"
 msgid "PULLEY CANNOT MOVE"
 msgstr "ШКІВ НЕ МОЖЕ РУХАТИСЯ"
 
+#: tmp_error_headers/error_list_coreone.hpp:372
+#: tmp_error_headers/error_list_coreone.hpp:379
+#: tmp_error_headers/error_list_coreone.hpp:386
+#: tmp_error_headers/error_list_coreone.hpp:393
+#: tmp_error_headers/error_list_coreone.hpp:400
+#: tmp_error_headers/error_list_coreone.hpp:407
+#: tmp_error_headers/error_list_coreone.hpp:414
+#: tmp_error_headers/error_list_coreone.hpp:421
+#: tmp_error_headers/error_list_coreone.hpp:428
+#: tmp_error_headers/error_list_coreone.hpp:435
+#: tmp_error_headers/error_list_coreone.hpp:442
+#: tmp_error_headers/error_list_coreone.hpp:449
 #: tmp_error_headers/error_list_xl.hpp:421
 #: tmp_error_headers/error_list_xl.hpp:428
 #: tmp_error_headers/error_list_xl.hpp:435
@@ -5658,18 +5737,6 @@ msgstr "ШКІВ НЕ МОЖЕ РУХАТИСЯ"
 #: tmp_error_headers/error_list_ix.hpp:463
 #: tmp_error_headers/error_list_ix.hpp:470
 #: tmp_error_headers/error_list_ix.hpp:477
-#: tmp_error_headers/error_list_coreone.hpp:372
-#: tmp_error_headers/error_list_coreone.hpp:379
-#: tmp_error_headers/error_list_coreone.hpp:386
-#: tmp_error_headers/error_list_coreone.hpp:393
-#: tmp_error_headers/error_list_coreone.hpp:400
-#: tmp_error_headers/error_list_coreone.hpp:407
-#: tmp_error_headers/error_list_coreone.hpp:414
-#: tmp_error_headers/error_list_coreone.hpp:421
-#: tmp_error_headers/error_list_coreone.hpp:428
-#: tmp_error_headers/error_list_coreone.hpp:435
-#: tmp_error_headers/error_list_coreone.hpp:442
-#: tmp_error_headers/error_list_coreone.hpp:449
 msgid "PUPPY ERROR"
 msgstr "ПОМИЛКА PUPPY"
 
@@ -5696,8 +5763,8 @@ msgid "Parking"
 msgstr "Паркування"
 
 #. //MSG_PROGRESS_RETURN_SELECTOR c=20
-#: src/mmu2/mmu2_progress_converter.cpp:28
 #: src/gui/dialogs/DialogLoadUnload.cpp:85
+#: src/mmu2/mmu2_progress_converter.cpp:28
 msgid "Parking selector"
 msgstr "Паркування селектора"
 
@@ -5719,8 +5786,8 @@ msgstr ""
 msgid "Parking tool"
 msgstr "Паркування інструменту"
 
-#: src/gui/screen_prusa_link.hpp:39 src/gui/screen_prusa_link.cpp:55
-#: src/gui/screen_network_setup.cpp:32
+#: src/gui/screen_prusa_link.cpp:55 src/gui/screen_network_setup.cpp:32
+#: src/gui/screen_prusa_link.hpp:39
 msgid "Password"
 msgstr "Пароль"
 
@@ -5732,7 +5799,7 @@ msgstr "Пауза"
 msgid "Pausing..."
 msgstr "Пауза..."
 
-#: src/gui/wizard/screen_belt_tuning_wizard.cpp:199
+#: src/gui/wizard/screen_belt_tuning_wizard.cpp:202
 msgid "Perfect!"
 msgstr "Ідеально!"
 
@@ -5745,8 +5812,8 @@ msgstr ""
 "калібрування датчиків філаменту."
 
 #. //MSG_PROGRESS_PUSH_FILAMENT c=20
-#: src/mmu2/mmu2_progress_converter.cpp:26
 #: src/gui/dialogs/DialogLoadUnload.cpp:83
+#: src/mmu2/mmu2_progress_converter.cpp:26
 msgid "Performing cut"
 msgstr "Виконання обрізання"
 
@@ -5823,7 +5890,7 @@ msgstr "Вибрати інструмент 5"
 msgid "Pick Tool 5 (Current)"
 msgstr "Вибрати інструмент 5 (поточний)"
 
-#: src/gui/MItem_tools.hpp:613
+#: src/gui/MItem_tools.hpp:614
 msgid "Pick/Park Tool"
 msgstr "Вибрати/Запаркувати інструмент"
 
@@ -5835,12 +5902,12 @@ msgstr "Пінг | Втрати"
 msgid "Please assign a tool to the filament"
 msgstr "Будь ласка, призначте інструмент для філаменту"
 
-#: tmp_error_headers/error_list_mini.hpp:401
-#: tmp_error_headers/error_list_xl.hpp:702
-#: tmp_error_headers/error_list_ix.hpp:667
-#: tmp_error_headers/error_list_mk4.hpp:485
 #: tmp_error_headers/error_list_mk35.hpp:457
 #: tmp_error_headers/error_list_coreone.hpp:653
+#: tmp_error_headers/error_list_xl.hpp:702
+#: tmp_error_headers/error_list_mini.hpp:401
+#: tmp_error_headers/error_list_mk4.hpp:485
+#: tmp_error_headers/error_list_ix.hpp:667
 msgid "Please complete Calibrations & Tests before using the printer."
 msgstr ""
 "Будь ласка, завершіть калібрування та тести перед використанням принтера."
@@ -5891,18 +5958,18 @@ msgstr "Будь ласка, видаліть філамент із датчик
 msgid "Please remove the belt dampeners."
 msgstr "Будь ласка, зніміть демпфери паска."
 
-#: tmp_error_headers/error_list_mini.hpp:548
-#: tmp_error_headers/error_list_xl.hpp:884
-#: tmp_error_headers/error_list_ix.hpp:821
-#: tmp_error_headers/error_list_mk4.hpp:653
 #: tmp_error_headers/error_list_mk35.hpp:632
 #: tmp_error_headers/error_list_coreone.hpp:821
+#: tmp_error_headers/error_list_xl.hpp:884
+#: tmp_error_headers/error_list_mini.hpp:548
+#: tmp_error_headers/error_list_mk4.hpp:653
+#: tmp_error_headers/error_list_ix.hpp:821
 msgid "Please replace filament."
 msgstr "Будь ласка, замініть філамент."
 
+#: tmp_error_headers/error_list_coreone.hpp:100
 #: tmp_error_headers/error_list_xl.hpp:93
 #: tmp_error_headers/error_list_ix.hpp:58
-#: tmp_error_headers/error_list_coreone.hpp:100
 msgid ""
 "Please run homing calibration from the Calibrations menu. Continuing can "
 "result in homing shifts and toolcrashes."
@@ -5915,7 +5982,7 @@ msgstr ""
 msgid "Please select a filament."
 msgstr "Будь ласка, виберіть філамент."
 
-#: src/gui/screen_cold_pull.cpp:182 src/gui/dialogs/window_dlg_wait.cpp:27
+#: src/gui/dialogs/window_dlg_wait.cpp:27 src/gui/screen_cold_pull.cpp:182
 msgid "Please wait"
 msgstr "Будь ласка, зачекайте"
 
@@ -5957,11 +6024,11 @@ msgstr "Збій живлення"
 msgid "Power panic"
 msgstr "Аварія живлення"
 
-#: tmp_error_headers/error_list_xl.hpp:359
-#: tmp_error_headers/error_list_ix.hpp:352
-#: tmp_error_headers/error_list_mk4.hpp:247
 #: tmp_error_headers/error_list_mk35.hpp:233
 #: tmp_error_headers/error_list_coreone.hpp:331
+#: tmp_error_headers/error_list_xl.hpp:359
+#: tmp_error_headers/error_list_mk4.hpp:247
+#: tmp_error_headers/error_list_ix.hpp:352
 msgid "Power panic detected on startup. Check power panic cable."
 msgstr ""
 "Виявлено аварію живлення під час запуску. Перевірте кабель аварії живлення."
@@ -5974,25 +6041,25 @@ msgstr "Попередній нагрів"
 msgid "Preheat Error"
 msgstr "Помилка попереднього нагріву"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:75
+#: src/gui/screen/filament/screen_filament_detail.cpp:83
 msgid "Preheat Temp"
 msgstr "Темп. попереднього нагріву"
 
-#: src/gui/screen/screen_preheat.cpp:179
+#: src/gui/screen/screen_preheat.cpp:178
 msgid "Preheating"
 msgstr "Попередній нагрів"
 
 #. use load caption, not a bug
-#: src/gui/screen/screen_preheat.cpp:184
+#: src/gui/screen/screen_preheat.cpp:183
 msgid "Preheating for load"
 msgstr "Попередній нагрів для завантаження"
 
-#: src/gui/screen/screen_preheat.cpp:191
+#: src/gui/screen/screen_preheat.cpp:190
 msgid "Preheating for purge"
 msgstr "Попередній нагрів для продування"
 
 #. use unload caption, not a bug
-#: src/gui/screen/screen_preheat.cpp:188
+#: src/gui/screen/screen_preheat.cpp:187
 msgid "Preheating for unload"
 msgstr "Попередній нагрів для вивантаження"
 
@@ -6000,7 +6067,7 @@ msgstr "Попередній нагрів для вивантаження"
 msgid "Preload All"
 msgstr "Попередньо завантажити все"
 
-#: src/gui/screen_menu_mmu_preload_to_mmu.hpp:18 src/gui/MItem_mmu.hpp:22
+#: src/gui/MItem_mmu.hpp:22 src/gui/screen_menu_mmu_preload_to_mmu.hpp:18
 msgid "Preload to MMU"
 msgstr "Попередньо завантажити в MMU"
 
@@ -6008,14 +6075,14 @@ msgstr "Попередньо завантажити в MMU"
 msgid "Preload to MMU Advanced"
 msgstr "Розширене попереднє завантаження в MMU"
 
-#: src/gui/wizard/selftest_frame_temp.cpp:61
 #: src/gui/wizard/screen_belt_tuning_wizard.cpp:22
+#: src/gui/wizard/selftest_frame_temp.cpp:61
 msgid "Preparing"
 msgstr "Підготовка"
 
 #. //MSG_PROGRESS_SELECT_SLOT c=20
-#: src/mmu2/mmu2_progress_converter.cpp:24
 #: src/gui/dialogs/DialogLoadUnload.cpp:81
+#: src/mmu2/mmu2_progress_converter.cpp:24
 msgid "Preparing blade"
 msgstr "Підготовка леза"
 
@@ -6070,7 +6137,7 @@ msgstr "Тип вентилятора обдуву"
 msgid "Print Filtration"
 msgstr "Фільтрація під час друку"
 
-#: src/gui/MItem_tools.hpp:306
+#: src/gui/MItem_tools.hpp:307
 msgid "Print Progress Screen"
 msgstr "Екран прогресу друку"
 
@@ -6083,7 +6150,7 @@ msgid "Print Statistics"
 msgstr "Статистика друку"
 
 #. First line - Print Time
-#: src/gui/MItem_tools.hpp:373 src/gui/gcode_description.cpp:144
+#: src/gui/gcode_description.cpp:144 src/gui/MItem_tools.hpp:374
 msgid "Print Time"
 msgstr "Час друку"
 
@@ -6096,12 +6163,12 @@ msgstr "Друк завершено"
 msgid "Print fan"
 msgstr "Вентилятор друку"
 
-#: tmp_error_headers/error_list_mini.hpp:478
-#: tmp_error_headers/error_list_xl.hpp:793
-#: tmp_error_headers/error_list_ix.hpp:744
-#: tmp_error_headers/error_list_mk4.hpp:583
 #: tmp_error_headers/error_list_mk35.hpp:555
 #: tmp_error_headers/error_list_coreone.hpp:751
+#: tmp_error_headers/error_list_xl.hpp:793
+#: tmp_error_headers/error_list_mini.hpp:478
+#: tmp_error_headers/error_list_mk4.hpp:583
+#: tmp_error_headers/error_list_ix.hpp:744
 msgid ""
 "Print fan not spinning. Check it for possible debris, then inspect the "
 "wiring."
@@ -6149,8 +6216,8 @@ msgstr "Тип принтера"
 msgid "Printer doesn't have enough tools"
 msgstr "Принтеру не вистачає інструментів."
 
-#: tmp_error_headers/error_list_mk4.hpp:44
 #: tmp_error_headers/error_list_coreone.hpp:72
+#: tmp_error_headers/error_list_mk4.hpp:44
 msgid ""
 "Printer has detected multiple consecutive filament loading errors. We "
 "recommend checking Nextruder main-plate. Visit prusa.io/mmu-care"
@@ -6176,7 +6243,7 @@ msgstr "Принтер зайнятий. Будь ласка, повторіть
 msgid "Printer is homing, please wait."
 msgstr "Принтер паркується, будь ласка, зачекайте."
 
-#: src/gui/MItem_tools.cpp:88 src/gui/dialogs/window_dlg_wait.cpp:21
+#: src/gui/dialogs/window_dlg_wait.cpp:21 src/gui/MItem_tools.cpp:88
 msgid "Printer may vibrate and be noisier during homing."
 msgstr ""
 "Під час калібрування початкових позицій принтер може вібрувати та бути "
@@ -6264,43 +6331,43 @@ msgstr ""
 "Двигун шківа зупинився. Переконайтеся, що шків може рухатися, і перевірте "
 "проводку."
 
+#: tmp_error_headers/error_list_coreone.hpp:436
 #: tmp_error_headers/error_list_xl.hpp:485
 #: tmp_error_headers/error_list_ix.hpp:464
-#: tmp_error_headers/error_list_coreone.hpp:436
 #, c-format
 msgid "Puppy %s firmware fingerprint mismatch"
 msgstr "Не збігається відбиток прошивки Puppy %s"
 
+#: tmp_error_headers/error_list_coreone.hpp:422
 #: tmp_error_headers/error_list_xl.hpp:471
 #: tmp_error_headers/error_list_ix.hpp:450
-#: tmp_error_headers/error_list_coreone.hpp:422
 #, c-format
 msgid "Puppy %s firmware not found"
 msgstr "Прошивку Puppy %s не знайдено"
 
+#: tmp_error_headers/error_list_coreone.hpp:429
 #: tmp_error_headers/error_list_xl.hpp:478
 #: tmp_error_headers/error_list_ix.hpp:457
-#: tmp_error_headers/error_list_coreone.hpp:429
 #, c-format
 msgid "Puppy %s flash writing failed"
 msgstr "Не вдалося записати флеш-пам'ять Puppy %s"
 
+#: tmp_error_headers/error_list_coreone.hpp:394
 #: tmp_error_headers/error_list_xl.hpp:443
 #: tmp_error_headers/error_list_ix.hpp:422
-#: tmp_error_headers/error_list_coreone.hpp:394
 #, c-format
 msgid "Puppy %s not responding"
 msgstr "Puppy %s не відповідає"
 
+#: tmp_error_headers/error_list_coreone.hpp:387
 #: tmp_error_headers/error_list_xl.hpp:436
 #: tmp_error_headers/error_list_ix.hpp:415
-#: tmp_error_headers/error_list_coreone.hpp:387
 msgid "Puppy discovery error. No puppy found"
 msgstr "Помилка виявлення Puppy. Puppy не знайдено"
 
+#: tmp_error_headers/error_list_coreone.hpp:401
 #: tmp_error_headers/error_list_xl.hpp:450
 #: tmp_error_headers/error_list_ix.hpp:429
-#: tmp_error_headers/error_list_coreone.hpp:401
 #, c-format
 msgid ""
 "Puppy uses incompatible bootloader protocol %04x, Buddy FW requires %04x"
@@ -6320,9 +6387,21 @@ msgstr "Продування"
 msgid "Purging filament"
 msgstr "Продування філаменту"
 
+#: tmp_error_headers/error_list_coreone.hpp:912
+#: tmp_error_headers/error_list_xl.hpp:961
+#: tmp_error_headers/error_list_mk4.hpp:702
+msgid ""
+"Purging the filament.\n"
+"\n"
+"Please wait until the purge is complete."
+msgstr ""
+"Очищення філаменту.\n"
+"\n"
+"Зачекайте, доки процес не завершиться."
+
 #. //MSG_PROGRESS_PREPARE_BLADE c=20
-#: src/mmu2/mmu2_progress_converter.cpp:25
 #: src/gui/dialogs/DialogLoadUnload.cpp:82
+#: src/mmu2/mmu2_progress_converter.cpp:25
 msgid "Pushing filament"
 msgstr "Проштовхування філаменту"
 
@@ -6346,12 +6425,12 @@ msgstr "ВИЙТИ"
 msgid "Question"
 msgstr "Питання"
 
-#: tmp_error_headers/error_list_mini.hpp:561
-#: tmp_error_headers/error_list_xl.hpp:925
-#: tmp_error_headers/error_list_ix.hpp:841
-#: tmp_error_headers/error_list_mk4.hpp:673
 #: tmp_error_headers/error_list_mk35.hpp:645
 #: tmp_error_headers/error_list_coreone.hpp:855
+#: tmp_error_headers/error_list_xl.hpp:925
+#: tmp_error_headers/error_list_mini.hpp:561
+#: tmp_error_headers/error_list_mk4.hpp:673
+#: tmp_error_headers/error_list_ix.hpp:841
 msgid "Quick Pause"
 msgstr "Швидка пауза"
 
@@ -6383,19 +6462,19 @@ msgstr "ВІДНОВИТИ"
 msgid "RETRY"
 msgstr "ПОВТОРИТИ"
 
-#: src/gui/MItem_tools.hpp:552
+#: src/gui/MItem_tools.hpp:553
 msgid "RGB Side Strip"
 msgstr "Бічна RGB-смужка"
 
-#: src/gui/MItem_tools.hpp:566
+#: src/gui/MItem_tools.hpp:567
 msgid "RGB Side Strip Dimmed"
 msgstr "Бічна RGB-стрічка приглушена"
 
-#: src/gui/MItem_tools.hpp:580
+#: src/gui/MItem_tools.hpp:581
 msgid "RGB Side Strip Dimming"
 msgstr "Затемнення бічної RGB-смужки"
 
-#: src/gui/MItem_tools.hpp:537
+#: src/gui/MItem_tools.hpp:538
 msgid "RGB Status Bar"
 msgstr "RGB рядок стану"
 
@@ -6461,12 +6540,12 @@ msgstr "Реєстрація принтера в Prusa Connect..."
 msgid "Registration successful, continue at connect.prusa3d.com"
 msgstr "Реєстрацію успішно завершено, продовжте на connect.prusa3d.com"
 
-#: tmp_error_headers/error_list_mini.hpp:219
-#: tmp_error_headers/error_list_xl.hpp:387
-#: tmp_error_headers/error_list_ix.hpp:373
-#: tmp_error_headers/error_list_mk4.hpp:268
 #: tmp_error_headers/error_list_mk35.hpp:254
 #: tmp_error_headers/error_list_coreone.hpp:352
+#: tmp_error_headers/error_list_xl.hpp:387
+#: tmp_error_headers/error_list_mini.hpp:219
+#: tmp_error_headers/error_list_mk4.hpp:268
+#: tmp_error_headers/error_list_ix.hpp:373
 msgid "Registration to Prusa Connect failed due to:"
 msgstr "Не вдалася реєстрація в Prusa Connect через:"
 
@@ -6500,6 +6579,18 @@ msgstr ""
 msgid "Remove the filament manually"
 msgstr "Видаліть філамент вручну"
 
+#: tmp_error_headers/error_list_coreone.hpp:926
+#: tmp_error_headers/error_list_xl.hpp:975
+#: tmp_error_headers/error_list_mk4.hpp:716
+msgid ""
+"Remove the purged filament and ensure the nozzle is clean and ready.\n"
+"\n"
+"Be careful, the nozzle is hot!"
+msgstr ""
+"Видаліть очищений філамент і переконайтеся, що сопло чисте й готове.\n"
+"\n"
+"Обережно, сопло гаряче!"
+
 #: src/gui/screen_menu_steel_sheets.hpp:51
 msgid "Rename"
 msgstr "Перейменувати"
@@ -6508,12 +6599,12 @@ msgstr "Перейменувати"
 msgid "Reorder Filaments"
 msgstr "Змінити порядок філаментів"
 
-#: tmp_error_headers/error_list_mini.hpp:464
-#: tmp_error_headers/error_list_xl.hpp:765
-#: tmp_error_headers/error_list_ix.hpp:730
-#: tmp_error_headers/error_list_mk4.hpp:555
 #: tmp_error_headers/error_list_mk35.hpp:527
 #: tmp_error_headers/error_list_coreone.hpp:723
+#: tmp_error_headers/error_list_xl.hpp:765
+#: tmp_error_headers/error_list_mini.hpp:464
+#: tmp_error_headers/error_list_mk4.hpp:555
+#: tmp_error_headers/error_list_ix.hpp:730
 msgid ""
 "Repeated collision has been detected.\n"
 "Do you want to resume or pause the print?"
@@ -6521,12 +6612,12 @@ msgstr ""
 "Виявлено повторне зіткнення.\n"
 "Бажаєте відновити або призупинити друк?"
 
-#: tmp_error_headers/error_list_mini.hpp:547
-#: tmp_error_headers/error_list_xl.hpp:883
-#: tmp_error_headers/error_list_ix.hpp:820
-#: tmp_error_headers/error_list_mk4.hpp:652
 #: tmp_error_headers/error_list_mk35.hpp:631
 #: tmp_error_headers/error_list_coreone.hpp:820
+#: tmp_error_headers/error_list_xl.hpp:883
+#: tmp_error_headers/error_list_mini.hpp:547
+#: tmp_error_headers/error_list_mk4.hpp:652
+#: tmp_error_headers/error_list_ix.hpp:820
 msgid "Replace filament"
 msgstr "Замінити філамент"
 
@@ -6542,14 +6633,14 @@ msgstr ""
 "Запитаний інструмент для філаменту недоступний на цьому обладнанні. "
 "Перевірте G-код на наявність індексу інструмента поза діапазоном (T0-T4)."
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:116
+#: src/gui/screen/filament/screen_filament_detail.cpp:124
 msgid "Requires Filtration"
 msgstr "Потребує фільтрації"
 
 #: src/common/feature/factory_reset/factory_reset.cpp:103
-#: src/gui/MItem_tools.hpp:444 src/gui/screen/screen_factory_reset.cpp:56
-#: src/gui/screen_menu_steel_sheets.hpp:61
+#: src/gui/screen/screen_factory_reset.cpp:56
 #: src/gui/screen_menu_bed_level_correction.hpp:92
+#: src/gui/screen_menu_steel_sheets.hpp:61 src/gui/MItem_tools.hpp:445
 msgid "Reset"
 msgstr "Скинути"
 
@@ -6581,8 +6672,8 @@ msgstr "Перезапуск MMU"
 msgid "Restore Calibration from USB"
 msgstr "Відновити калібрування з USB"
 
-#: src/gui/screen_menu_phase_stepping.hpp:17 src/gui/MItem_input_shaper.hpp:53
 #: src/gui/screen/filament/screen_filaments_reorder.cpp:162
+#: src/gui/screen_menu_phase_stepping.hpp:17 src/gui/MItem_input_shaper.hpp:53
 #: src/gui/screen_menu_filament_sensors.hpp:15
 msgid "Restore Defaults"
 msgstr "Відновити за замовчуванням"
@@ -6590,6 +6681,14 @@ msgstr "Відновити за замовчуванням"
 #: src/gui/ScreenPrintingModel.cpp:20
 msgid "Resume"
 msgstr "Відновити"
+
+#: src/gui/screen/dialog_safety_timer.cpp:14
+msgid "Resuming temperatures"
+msgstr "Відновлення нагрівання"
+
+#: src/gui/screen/dialog_safety_timer.cpp:14
+msgid "Resuming to print temperatures after safety timer timeout."
+msgstr "Відновлення нагрівання після тайм-ауту таймера безпеки."
 
 #: src/gui/ScreenPrintingModel.cpp:21
 msgid "Resuming..."
@@ -6604,16 +6703,16 @@ msgstr "Витягнути з FINDA"
 msgid "Retracting from FINDA"
 msgstr "Витягування з FINDA"
 
-#: src/guiapi/include/WindowMenuItems.hpp:41
-#: src/guiapi/include/window_tool_action_box.hpp:100
 #: src/gui/screen/screen_preheat.cpp:102 src/gui/screen_network_setup.cpp:33
 #: src/gui/screen_network_setup.cpp:39 src/gui/screen_network_setup.cpp:143
+#: src/guiapi/include/WindowMenuItems.hpp:41
+#: src/guiapi/include/window_tool_action_box.hpp:100
 msgid "Return"
 msgstr "Назад"
 
 #. //MSG_PROGRESS_PERFORM_CUT c=20
-#: src/mmu2/mmu2_progress_converter.cpp:27
 #: src/gui/dialogs/DialogLoadUnload.cpp:84
+#: src/mmu2/mmu2_progress_converter.cpp:27
 msgid "Returning selector"
 msgstr "Повернення селектора"
 
@@ -6657,16 +6756,16 @@ msgstr "СЕЛЕКТОР НЕ МОЖЕ ЗНАЙТИ ПОЧАТКОВУ ПОЗИ�
 msgid "SELECTOR CANNOT MOVE"
 msgstr "СЕЛЕКТОР НЕ МОЖЕ РУХАТИСЯ"
 
-#: src/gui/ScreenSelftest.hpp:40 src/gui/wizard/screen_fan_selftest.cpp:49
+#: src/gui/wizard/screen_fan_selftest.cpp:49 src/gui/ScreenSelftest.hpp:40
 msgid "SELFTEST"
 msgstr "САМОТЕСТ"
 
-#: tmp_error_headers/error_list_mini.hpp:274
-#: tmp_error_headers/error_list_xl.hpp:568
-#: tmp_error_headers/error_list_ix.hpp:540
-#: tmp_error_headers/error_list_mk4.hpp:344
 #: tmp_error_headers/error_list_mk35.hpp:316
 #: tmp_error_headers/error_list_coreone.hpp:512
+#: tmp_error_headers/error_list_xl.hpp:568
+#: tmp_error_headers/error_list_mini.hpp:274
+#: tmp_error_headers/error_list_mk4.hpp:344
+#: tmp_error_headers/error_list_ix.hpp:540
 msgid "SELFTEST NOT PASSED"
 msgstr "САМОТЕСТУВАННЯ НЕ ПРОЙДЕНО"
 
@@ -6698,9 +6797,9 @@ msgstr "З'ЄДНАННЯ КАТУШОК"
 msgid "SSID"
 msgstr "SSID"
 
-#: tmp_error_headers/error_list_ix.hpp:22
-#: tmp_error_headers/error_list_mk4.hpp:15
 #: tmp_error_headers/error_list_coreone.hpp:22
+#: tmp_error_headers/error_list_mk4.hpp:15
+#: tmp_error_headers/error_list_ix.hpp:22
 msgid "STEEL SHEEL NOT DETECTED"
 msgstr "СТАЛЕВИЙ ЛИСТ НЕ ВИЯВЛЕНО"
 
@@ -6712,9 +6811,9 @@ msgstr "СТОП"
 msgid "STOPPED"
 msgstr "ЗУПИНЕНО"
 
-#: tmp_error_headers/error_list_xl.hpp:57 tmp_error_headers/error_list_ix.hpp:8
-#: tmp_error_headers/error_list_mk4.hpp:8
 #: tmp_error_headers/error_list_coreone.hpp:8
+#: tmp_error_headers/error_list_xl.hpp:57
+#: tmp_error_headers/error_list_mk4.hpp:8 tmp_error_headers/error_list_ix.hpp:8
 msgid "STUCK FILAMENT DETECTED"
 msgstr "ВИЯВЛЕНО ЗАСТРЯГЛИЙ ФІЛАМЕНТ"
 
@@ -6735,7 +6834,7 @@ msgstr "Струм 5V плати Sandwich"
 msgid "Sat"
 msgstr "Сб"
 
-#: src/gui/MItem_tools.hpp:110
+#: src/gui/MItem_tools.hpp:111
 msgid "Save Crash Dump"
 msgstr "Зберегти дамп аварії"
 
@@ -6807,7 +6906,7 @@ msgstr ""
 msgid "Sensor Info"
 msgstr "Інформація про датчики"
 
-#: src/gui/MItem_tools.hpp:255
+#: src/gui/MItem_tools.hpp:256
 msgid "Serial Number"
 msgstr "Серійний номер"
 
@@ -6815,7 +6914,7 @@ msgstr "Серійний номер"
 msgid "Serial Printing Screen"
 msgstr "Екран друку через серійний порт"
 
-#: src/gui/MItem_tools.hpp:463 src/gui/ScreenPrintingModel.cpp:27
+#: src/gui/MItem_tools.hpp:464 src/gui/ScreenPrintingModel.cpp:27
 msgid "Set Ready"
 msgstr "Готово"
 
@@ -6955,20 +7054,20 @@ msgstr ""
 msgid "Sort Files"
 msgstr "Сортувати файли"
 
-#: src/gui/MItem_tools.hpp:153 src/gui/MItem_tools.cpp:326
+#: src/gui/MItem_tools.cpp:326 src/gui/MItem_tools.hpp:154
 msgid "Sound Mode"
 msgstr "Режим звуку"
 
-#: src/gui/MItem_tools.hpp:169
+#: src/gui/MItem_tools.hpp:170
 msgid "Sound Volume"
 msgstr "Гучність звуку"
 
-#: tmp_error_headers/error_list_mini.hpp:247
-#: tmp_error_headers/error_list_xl.hpp:534
-#: tmp_error_headers/error_list_ix.hpp:513
-#: tmp_error_headers/error_list_mk4.hpp:317
 #: tmp_error_headers/error_list_mk35.hpp:289
 #: tmp_error_headers/error_list_coreone.hpp:485
+#: tmp_error_headers/error_list_xl.hpp:534
+#: tmp_error_headers/error_list_mini.hpp:247
+#: tmp_error_headers/error_list_mk4.hpp:317
+#: tmp_error_headers/error_list_ix.hpp:513
 msgid ""
 "Space allocation for firmware BBF file failed. Repeat the action or try "
 "another USB drive."
@@ -7009,11 +7108,11 @@ msgstr "Статичний зліва"
 msgid "Statistics"
 msgstr "Статистика"
 
-#: src/gui/screen_menu_connect.hpp:24 src/gui/MItem_network.hpp:42
+#: src/gui/MItem_network.hpp:42 src/gui/screen_menu_connect.hpp:24
 msgid "Status"
 msgstr "Статус"
 
-#: src/gui/MItem_tools.hpp:62 src/gui/MItem_mmu.hpp:230
+#: src/gui/MItem_mmu.hpp:230 src/gui/MItem_tools.hpp:63
 msgid "Stealth Mode"
 msgstr "Режим Stealth(повільний)"
 
@@ -7021,9 +7120,9 @@ msgstr "Режим Stealth(повільний)"
 msgid "Steel Sheets"
 msgstr "Сталеві листи"
 
-#: tmp_error_headers/error_list_ix.hpp:23
-#: tmp_error_headers/error_list_mk4.hpp:16
 #: tmp_error_headers/error_list_coreone.hpp:23
+#: tmp_error_headers/error_list_mk4.hpp:16
+#: tmp_error_headers/error_list_ix.hpp:23
 msgid ""
 "Steel sheet was not detected. Please put the sheet on to prevent printer "
 "damage."
@@ -7031,12 +7130,12 @@ msgstr ""
 "Сталевий лист не виявлено. Будь ласка, встановіть лист, щоб запобігти "
 "пошкодженню принтера."
 
-#: tmp_error_headers/error_list_mini.hpp:506
-#: tmp_error_headers/error_list_xl.hpp:821
-#: tmp_error_headers/error_list_ix.hpp:772
-#: tmp_error_headers/error_list_mk4.hpp:611
 #: tmp_error_headers/error_list_mk35.hpp:583
 #: tmp_error_headers/error_list_coreone.hpp:779
+#: tmp_error_headers/error_list_xl.hpp:821
+#: tmp_error_headers/error_list_mini.hpp:506
+#: tmp_error_headers/error_list_mk4.hpp:611
+#: tmp_error_headers/error_list_ix.hpp:772
 msgid "Steppers disabled due to inactivity."
 msgstr "Крокові двигуни вимкнено через бездіяльність."
 
@@ -7056,7 +7155,7 @@ msgstr "Зупинка MMU"
 msgid "Strict"
 msgstr "Строгий"
 
-#: src/gui/MItem_tools.hpp:50
+#: src/gui/MItem_tools.hpp:51
 msgid "Stuck Filament Detection"
 msgstr "Виявлення застряглого філаменту"
 
@@ -7125,17 +7224,17 @@ msgstr "ТЕМПЕРАТУРА"
 msgid "TEST ERROR"
 msgstr "ПОМИЛКА ТЕСТУ"
 
-#: tmp_error_headers/error_list_mini.hpp:36
-#: tmp_error_headers/error_list_mini.hpp:43
-#: tmp_error_headers/error_list_xl.hpp:106
-#: tmp_error_headers/error_list_ix.hpp:78
-#: tmp_error_headers/error_list_ix.hpp:85
-#: tmp_error_headers/error_list_mk4.hpp:71
-#: tmp_error_headers/error_list_mk4.hpp:78
 #: tmp_error_headers/error_list_mk35.hpp:57
 #: tmp_error_headers/error_list_mk35.hpp:64
 #: tmp_error_headers/error_list_coreone.hpp:120
 #: tmp_error_headers/error_list_coreone.hpp:127
+#: tmp_error_headers/error_list_xl.hpp:106
+#: tmp_error_headers/error_list_mini.hpp:36
+#: tmp_error_headers/error_list_mini.hpp:43
+#: tmp_error_headers/error_list_mk4.hpp:71
+#: tmp_error_headers/error_list_mk4.hpp:78
+#: tmp_error_headers/error_list_ix.hpp:78
+#: tmp_error_headers/error_list_ix.hpp:85
 msgid "THERMAL RUNAWAY"
 msgstr "ТЕРМІЧНА НЕСТАБІЛЬНІСТЬ"
 
@@ -7310,12 +7409,12 @@ msgstr "Торкніться сопла"
 msgid "Tap the nozzle on beep"
 msgstr "Торкніться сопла після звукового сигналу"
 
-#: src/gui/wizard/screen_belt_tuning_wizard.cpp:207
+#: src/gui/wizard/screen_belt_tuning_wizard.cpp:210
 msgid "Target"
 msgstr "Ціль"
 
-#: tmp_error_headers/error_list_xl.hpp:212
 #: tmp_error_headers/error_list_coreone.hpp:198
+#: tmp_error_headers/error_list_xl.hpp:212
 msgid "Target temperature not yet reached. Continue waiting?"
 msgstr "Цільової температури ще не досягнуто. Продовжити очікування?"
 
@@ -7375,12 +7474,12 @@ msgstr ""
 msgid "Testing filament"
 msgstr "Тестування філаменту"
 
-#: tmp_error_headers/error_list_mini.hpp:415
-#: tmp_error_headers/error_list_xl.hpp:716
-#: tmp_error_headers/error_list_ix.hpp:681
-#: tmp_error_headers/error_list_mk4.hpp:499
 #: tmp_error_headers/error_list_mk35.hpp:471
 #: tmp_error_headers/error_list_coreone.hpp:667
+#: tmp_error_headers/error_list_xl.hpp:716
+#: tmp_error_headers/error_list_mini.hpp:415
+#: tmp_error_headers/error_list_mk4.hpp:499
+#: tmp_error_headers/error_list_ix.hpp:681
 msgid "The G-code isn't fully compatible"
 msgstr "G-код не повністю сумісний"
 
@@ -7472,6 +7571,19 @@ msgstr ""
 "Вставте модуль, спробуйте перезавантажити принтер або скористайтеся кабелем "
 "Ethernet."
 
+#: tmp_error_headers/error_list_coreone.hpp:933
+#: tmp_error_headers/error_list_xl.hpp:982
+#: tmp_error_headers/error_list_mk4.hpp:723
+#: tmp_error_headers/error_list_ix.hpp:856
+msgid ""
+"The auto-retract feature is disabled, which might have caused the failure.\n"
+"\n"
+"Do you want to enable auto-retract?"
+msgstr ""
+"Авто-ретракцію вимкнено, що могло спричинити збій.\n"
+"\n"
+"Увімкнути авто-ретракцію?"
+
 #: tmp_error_headers/error_list_coreone.hpp:37
 msgid "The bed doesn't seem to be aligned properly. Run Z alignment procedure?"
 msgstr ""
@@ -7500,9 +7612,21 @@ msgstr "Калібрування займе трохи більше 7 хвили
 msgid "The door sensor is successfully calibrated now."
 msgstr "Датчик дверей успішно відкалібровано."
 
-#: tmp_error_headers/error_list_xl.hpp:58 tmp_error_headers/error_list_ix.hpp:9
-#: tmp_error_headers/error_list_mk4.hpp:9
+#: tmp_error_headers/error_list_coreone.hpp:919
+#: tmp_error_headers/error_list_xl.hpp:968
+#: tmp_error_headers/error_list_mk4.hpp:709
+msgid ""
+"The filament has been purged.\n"
+"\n"
+"The nozzle will now retract the filament to prevent oozing."
+msgstr ""
+"Філамент очищено.\n"
+"\n"
+"Сопло втягне філамент, щоб запобігти витіканню."
+
 #: tmp_error_headers/error_list_coreone.hpp:9
+#: tmp_error_headers/error_list_xl.hpp:58
+#: tmp_error_headers/error_list_mk4.hpp:9 tmp_error_headers/error_list_ix.hpp:9
 msgid ""
 "The filament seems to be stuck, please unload it from nextruder and load it "
 "again."
@@ -7549,12 +7673,12 @@ msgstr ""
 "Вирівнювання редуктора необхідне лише для редукторів, зібраних або "
 "обслужених користувачем. В усіх інших випадках ви можете пропустити цей крок."
 
-#: tmp_error_headers/error_list_mini.hpp:443
-#: tmp_error_headers/error_list_xl.hpp:744
-#: tmp_error_headers/error_list_ix.hpp:709
-#: tmp_error_headers/error_list_mk4.hpp:534
 #: tmp_error_headers/error_list_mk35.hpp:506
 #: tmp_error_headers/error_list_coreone.hpp:702
+#: tmp_error_headers/error_list_xl.hpp:744
+#: tmp_error_headers/error_list_mini.hpp:443
+#: tmp_error_headers/error_list_mk4.hpp:534
+#: tmp_error_headers/error_list_ix.hpp:709
 msgid ""
 "The heatbed cooled down during the power outage, printed object might have "
 "detached. Inspect it before continuing."
@@ -7577,12 +7701,12 @@ msgstr ""
 msgid "The path does not exist"
 msgstr "Шлях не існує"
 
-#: tmp_error_headers/error_list_mini.hpp:275
-#: tmp_error_headers/error_list_xl.hpp:569
-#: tmp_error_headers/error_list_ix.hpp:541
-#: tmp_error_headers/error_list_mk4.hpp:345
 #: tmp_error_headers/error_list_mk35.hpp:317
 #: tmp_error_headers/error_list_coreone.hpp:513
+#: tmp_error_headers/error_list_xl.hpp:569
+#: tmp_error_headers/error_list_mini.hpp:275
+#: tmp_error_headers/error_list_mk4.hpp:345
+#: tmp_error_headers/error_list_ix.hpp:541
 msgid "The previous tests must be completed before this one."
 msgstr "Попередні тести повинні бути завершені перед цим."
 
@@ -7624,10 +7748,10 @@ msgstr ""
 "Може виникнути невеликий опір.\n"
 "Якщо філамент застряг, відкрийте важіль холостого ходу."
 
-#: tmp_error_headers/error_list_xl.hpp:513
-#: tmp_error_headers/error_list_ix.hpp:492
-#: tmp_error_headers/error_list_mk4.hpp:296
 #: tmp_error_headers/error_list_coreone.hpp:464
+#: tmp_error_headers/error_list_xl.hpp:513
+#: tmp_error_headers/error_list_mk4.hpp:296
+#: tmp_error_headers/error_list_ix.hpp:492
 msgid ""
 "There was a timeout while waiting for measurement sample, please repeat the "
 "action."
@@ -7656,12 +7780,12 @@ msgid "This change will apply to all toolheads. Do you want to continue?"
 msgstr ""
 "Ця зміна буде застосована до всіх головок інструментів. Бажаєте продовжити?"
 
-#: tmp_error_headers/error_list_mini.hpp:289
-#: tmp_error_headers/error_list_xl.hpp:583
-#: tmp_error_headers/error_list_ix.hpp:555
-#: tmp_error_headers/error_list_mk4.hpp:359
 #: tmp_error_headers/error_list_mk35.hpp:331
 #: tmp_error_headers/error_list_coreone.hpp:527
+#: tmp_error_headers/error_list_xl.hpp:583
+#: tmp_error_headers/error_list_mini.hpp:289
+#: tmp_error_headers/error_list_mk4.hpp:359
+#: tmp_error_headers/error_list_ix.hpp:555
 msgid ""
 "This error code is not found\n"
 "in our database.\n"
@@ -7742,7 +7866,7 @@ msgstr "Це змінить поведінку датчика філаменту
 msgid "Thr"
 msgstr "Чт"
 
-#: src/gui/wizard/screen_belt_tuning_wizard.cpp:201
+#: src/gui/wizard/screen_belt_tuning_wizard.cpp:204
 #, c-format
 msgid "Tighten by %.1f turns"
 msgstr "Затягнути на %.1f обертів"
@@ -7781,7 +7905,7 @@ msgstr "Час"
 msgid "Time Format"
 msgstr "Формат часу"
 
-#: src/gui/MItem_tools.hpp:178
+#: src/gui/MItem_tools.hpp:179
 msgid "Time Zone Hour Offset"
 msgstr "Зміщення часової зони (години)"
 
@@ -7789,7 +7913,7 @@ msgstr "Зміщення часової зони (години)"
 msgid "Time Zone Minute Offset"
 msgstr "Зміщення часової зони (хвилини)"
 
-#: src/gui/MItem_tools.hpp:192
+#: src/gui/MItem_tools.hpp:193
 msgid "Time Zone Summertime"
 msgstr "Літній час"
 
@@ -7952,7 +8076,7 @@ msgstr "Тест датчика навантаження інструмента 
 msgid "Tool Filament sensor"
 msgstr "Датчик філаменту інструмента"
 
-#: src/gui/MItem_tools.hpp:591
+#: src/gui/MItem_tools.hpp:592
 msgid "Tool Light"
 msgstr "Освітлення інструмента"
 
@@ -7960,10 +8084,10 @@ msgstr "Освітлення інструмента"
 msgid "Tool Offsets Calibration"
 msgstr "Калібрування зміщень інструментів"
 
-#: tmp_error_headers/error_list_xl.hpp:785
-#: tmp_error_headers/error_list_mk4.hpp:568
 #: tmp_error_headers/error_list_mk35.hpp:540
 #: tmp_error_headers/error_list_coreone.hpp:736
+#: tmp_error_headers/error_list_xl.hpp:785
+#: tmp_error_headers/error_list_mk4.hpp:568
 msgid "Tool mapping"
 msgstr "Відображення інструментів"
 
@@ -8009,7 +8133,7 @@ msgstr "Датчик філаменту головки інструмента"
 msgid "Tools"
 msgstr "Інструменти"
 
-#: src/gui/MItem_tools.hpp:357
+#: src/gui/MItem_tools.hpp:358
 msgid "Tools Changed"
 msgstr "Інструменти змінено"
 
@@ -8033,7 +8157,7 @@ msgstr "Обхід помилки сенсорного сигналу"
 msgid "Touch driver failed to initialize, touch functionality disabled"
 msgstr "Не вдалося ініціалізувати драйвер сенсора, функцію сенсора вимкнено."
 
-#: src/gui/MItem_tools.hpp:601
+#: src/gui/MItem_tools.hpp:602
 msgid "Trigger Power Panic"
 msgstr "Викликати аварію живлення"
 
@@ -8124,13 +8248,13 @@ msgstr "Налаштування інтерфейсу"
 msgid "UNEVEN BED"
 msgstr "НЕРІВНИЙ СТІЛ"
 
-#: tmp_error_headers/error_list_mini.hpp:288
-#: tmp_error_headers/error_list_xl.hpp:582
-#: tmp_error_headers/error_list_ix.hpp:554
-#: tmp_error_headers/error_list_mk4.hpp:358
-#: tmp_error_headers/error_list_mmu.hpp:318
 #: tmp_error_headers/error_list_mk35.hpp:330
 #: tmp_error_headers/error_list_coreone.hpp:526
+#: tmp_error_headers/error_list_xl.hpp:582
+#: tmp_error_headers/error_list_mini.hpp:288
+#: tmp_error_headers/error_list_mmu.hpp:318
+#: tmp_error_headers/error_list_mk4.hpp:358
+#: tmp_error_headers/error_list_ix.hpp:554
 msgid "UNKNOWN ERROR"
 msgstr "НЕВІДОМА ПОМИЛКА"
 
@@ -8142,30 +8266,30 @@ msgstr "ВИВАНТАЖИТИ"
 msgid "UNLOAD MANUALLY"
 msgstr "ВИВАНТАЖИТИ ВРУЧНУ"
 
-#: tmp_error_headers/error_list_mini.hpp:358
-#: tmp_error_headers/error_list_xl.hpp:652
-#: tmp_error_headers/error_list_ix.hpp:624
-#: tmp_error_headers/error_list_mk4.hpp:428
 #: tmp_error_headers/error_list_mk35.hpp:400
 #: tmp_error_headers/error_list_coreone.hpp:596
+#: tmp_error_headers/error_list_xl.hpp:652
+#: tmp_error_headers/error_list_mini.hpp:358
+#: tmp_error_headers/error_list_mk4.hpp:428
+#: tmp_error_headers/error_list_ix.hpp:624
 msgid "UNSUPPORTED BUDDY FW"
 msgstr "НЕПІДТРИМУВАНА ПРОШИВКА BUDDY"
 
-#: tmp_error_headers/error_list_mini.hpp:379
-#: tmp_error_headers/error_list_xl.hpp:673
-#: tmp_error_headers/error_list_ix.hpp:645
-#: tmp_error_headers/error_list_mk4.hpp:449
 #: tmp_error_headers/error_list_mk35.hpp:421
 #: tmp_error_headers/error_list_coreone.hpp:617
+#: tmp_error_headers/error_list_xl.hpp:673
+#: tmp_error_headers/error_list_mini.hpp:379
+#: tmp_error_headers/error_list_mk4.hpp:449
+#: tmp_error_headers/error_list_ix.hpp:645
 msgid "UNSUPPORTED FIRMWARE BBF FILE"
 msgstr "НЕПІДТРИМУВАНИЙ ФАЙЛ ПРОШИВКИ BBF"
 
-#: tmp_error_headers/error_list_mini.hpp:351
-#: tmp_error_headers/error_list_xl.hpp:645
-#: tmp_error_headers/error_list_ix.hpp:617
-#: tmp_error_headers/error_list_mk4.hpp:421
 #: tmp_error_headers/error_list_mk35.hpp:393
 #: tmp_error_headers/error_list_coreone.hpp:589
+#: tmp_error_headers/error_list_xl.hpp:645
+#: tmp_error_headers/error_list_mini.hpp:351
+#: tmp_error_headers/error_list_mk4.hpp:421
+#: tmp_error_headers/error_list_ix.hpp:617
 msgid "UNSUPPORTED PRINTER MODEL"
 msgstr "НЕПІДТРИМУВАНА МОДЕЛЬ ПРИНТЕРА"
 
@@ -8173,48 +8297,48 @@ msgstr "НЕПІДТРИМУВАНА МОДЕЛЬ ПРИНТЕРА"
 msgid "UP"
 msgstr "ВГОРУ"
 
-#: tmp_error_headers/error_list_mini.hpp:127
-#: tmp_error_headers/error_list_xl.hpp:274
-#: tmp_error_headers/error_list_ix.hpp:253
-#: tmp_error_headers/error_list_mk4.hpp:162
 #: tmp_error_headers/error_list_mk35.hpp:148
 #: tmp_error_headers/error_list_coreone.hpp:246
+#: tmp_error_headers/error_list_xl.hpp:274
+#: tmp_error_headers/error_list_mini.hpp:127
+#: tmp_error_headers/error_list_mk4.hpp:162
+#: tmp_error_headers/error_list_ix.hpp:253
 msgid "USB DEVICE OVERCURRENT"
 msgstr "ПЕРЕВАНТАЖЕННЯ СТРУМУ USB-ПРИСТРОЮ"
 
-#: tmp_error_headers/error_list_mini.hpp:295
-#: tmp_error_headers/error_list_xl.hpp:589
-#: tmp_error_headers/error_list_ix.hpp:561
-#: tmp_error_headers/error_list_mk4.hpp:365
 #: tmp_error_headers/error_list_mk35.hpp:337
 #: tmp_error_headers/error_list_coreone.hpp:533
+#: tmp_error_headers/error_list_xl.hpp:589
+#: tmp_error_headers/error_list_mini.hpp:295
+#: tmp_error_headers/error_list_mk4.hpp:365
+#: tmp_error_headers/error_list_ix.hpp:561
 msgid "USB FLASH DRIVE NOT CONNECTED"
 msgstr "USB-НАКОПИЧУВАЧ НЕ ПІДКЛЮЧЕНО"
 
-#: tmp_error_headers/error_list_mini.hpp:372
-#: tmp_error_headers/error_list_xl.hpp:666
-#: tmp_error_headers/error_list_ix.hpp:638
-#: tmp_error_headers/error_list_mk4.hpp:442
 #: tmp_error_headers/error_list_mk35.hpp:414
 #: tmp_error_headers/error_list_coreone.hpp:610
+#: tmp_error_headers/error_list_xl.hpp:666
+#: tmp_error_headers/error_list_mini.hpp:372
+#: tmp_error_headers/error_list_mk4.hpp:442
+#: tmp_error_headers/error_list_ix.hpp:638
 msgid "USB FLASH ERROR"
 msgstr "ПОМИЛКА USB-НАКОПИЧУВАЧА"
 
-#: tmp_error_headers/error_list_mini.hpp:120
-#: tmp_error_headers/error_list_xl.hpp:267
-#: tmp_error_headers/error_list_ix.hpp:246
-#: tmp_error_headers/error_list_mk4.hpp:155
 #: tmp_error_headers/error_list_mk35.hpp:141
 #: tmp_error_headers/error_list_coreone.hpp:239
+#: tmp_error_headers/error_list_xl.hpp:267
+#: tmp_error_headers/error_list_mini.hpp:120
+#: tmp_error_headers/error_list_mk4.hpp:155
+#: tmp_error_headers/error_list_ix.hpp:246
 msgid "USB PORT OVERCURRENT"
 msgstr "ПЕРЕВАНТАЖЕННЯ СТРУМУ USB-ПОРТУ"
 
-#: tmp_error_headers/error_list_mini.hpp:296
-#: tmp_error_headers/error_list_xl.hpp:590
-#: tmp_error_headers/error_list_ix.hpp:562
-#: tmp_error_headers/error_list_mk4.hpp:366
 #: tmp_error_headers/error_list_mk35.hpp:338
 #: tmp_error_headers/error_list_coreone.hpp:534
+#: tmp_error_headers/error_list_xl.hpp:590
+#: tmp_error_headers/error_list_mini.hpp:296
+#: tmp_error_headers/error_list_mk4.hpp:366
+#: tmp_error_headers/error_list_ix.hpp:562
 msgid ""
 "USB drive not\n"
 "connected! Please\n"
@@ -8228,23 +8352,23 @@ msgstr ""
 "з дійсним файлом\n"
 "прошивки."
 
-#: tmp_error_headers/error_list_mini.hpp:513
-#: tmp_error_headers/error_list_xl.hpp:828
-#: tmp_error_headers/error_list_ix.hpp:779
-#: tmp_error_headers/error_list_mk4.hpp:618
 #: tmp_error_headers/error_list_mk35.hpp:590
 #: tmp_error_headers/error_list_coreone.hpp:786
+#: tmp_error_headers/error_list_xl.hpp:828
+#: tmp_error_headers/error_list_mini.hpp:513
+#: tmp_error_headers/error_list_mk4.hpp:618
+#: tmp_error_headers/error_list_ix.hpp:779
 msgid "USB drive or file error, the print is now paused. Reconnect the drive."
 msgstr ""
 "Помилка USB-накопичувача або файлу, друк призупинено. Перепідключіть "
 "накопичувач."
 
-#: tmp_error_headers/error_list_mini.hpp:380
-#: tmp_error_headers/error_list_xl.hpp:674
-#: tmp_error_headers/error_list_ix.hpp:646
-#: tmp_error_headers/error_list_mk4.hpp:450
 #: tmp_error_headers/error_list_mk35.hpp:422
 #: tmp_error_headers/error_list_coreone.hpp:618
+#: tmp_error_headers/error_list_xl.hpp:674
+#: tmp_error_headers/error_list_mini.hpp:380
+#: tmp_error_headers/error_list_mk4.hpp:450
+#: tmp_error_headers/error_list_ix.hpp:646
 msgid ""
 "USB flash drive contains\n"
 "unsupported firmware BBF file."
@@ -8256,12 +8380,12 @@ msgstr ""
 msgid "USER INTERFACE"
 msgstr "ІНТЕРФЕЙС КОРИСТУВАЧА"
 
-#: tmp_error_headers/error_list_mini.hpp:471
-#: tmp_error_headers/error_list_xl.hpp:772
-#: tmp_error_headers/error_list_ix.hpp:737
-#: tmp_error_headers/error_list_mk4.hpp:562
 #: tmp_error_headers/error_list_mk35.hpp:534
 #: tmp_error_headers/error_list_coreone.hpp:730
+#: tmp_error_headers/error_list_xl.hpp:772
+#: tmp_error_headers/error_list_mini.hpp:471
+#: tmp_error_headers/error_list_mk4.hpp:562
+#: tmp_error_headers/error_list_ix.hpp:737
 msgid ""
 "Unable to home the printer.\n"
 "Do you want to try again?"
@@ -8269,18 +8393,18 @@ msgstr ""
 "Не вдалося виконати калібрування початкових позицій принтера.\n"
 "Бажаєте спробувати знову?"
 
+#: tmp_error_headers/error_list_coreone.hpp:415
 #: tmp_error_headers/error_list_xl.hpp:464
 #: tmp_error_headers/error_list_ix.hpp:443
-#: tmp_error_headers/error_list_coreone.hpp:415
 msgid "Unable to start puppy application"
 msgstr "Не вдалося запустити застосунок puppy"
 
-#: tmp_error_headers/error_list_mini.hpp:387
-#: tmp_error_headers/error_list_xl.hpp:681
-#: tmp_error_headers/error_list_ix.hpp:653
-#: tmp_error_headers/error_list_mk4.hpp:457
 #: tmp_error_headers/error_list_mk35.hpp:429
 #: tmp_error_headers/error_list_coreone.hpp:625
+#: tmp_error_headers/error_list_xl.hpp:681
+#: tmp_error_headers/error_list_mini.hpp:387
+#: tmp_error_headers/error_list_mk4.hpp:457
+#: tmp_error_headers/error_list_ix.hpp:653
 msgid "Unable to verify the extruder type, check the wiring and connectors."
 msgstr "Не вдалося перевірити тип екструдера, перевірте проводку та роз'єми."
 
@@ -8288,9 +8412,9 @@ msgstr "Не вдалося перевірити тип екструдера, п
 msgid "Unassigned G-Code filament(s)"
 msgstr "Непризначені філаменти G-коду"
 
+#: tmp_error_headers/error_list_coreone.hpp:380
 #: tmp_error_headers/error_list_xl.hpp:429
 #: tmp_error_headers/error_list_ix.hpp:408
-#: tmp_error_headers/error_list_coreone.hpp:380
 msgid "Unassigned puppy found"
 msgstr "Знайдено непризначений puppy"
 
@@ -8307,11 +8431,11 @@ msgstr "Сталася неочікувана помилка."
 msgid "Unexpected invalid current."
 msgstr "Виявлено неочікуваний недійсний струм."
 
-#: src/gui/screen_menu_connect.cpp:45 src/gui/MItem_network.cpp:78
+#: src/gui/MItem_network.cpp:78 src/gui/screen_menu_connect.cpp:45
 msgid "Unknown"
 msgstr "Невідомо"
 
-#: src/gui/screen_qr_error.cpp:31 src/gui/screen_fatal_warning.cpp:36
+#: src/gui/screen_fatal_warning.cpp:36 src/gui/screen_qr_error.cpp:31
 msgid "Unknown Error"
 msgstr "Невідома помилка"
 
@@ -8319,18 +8443,18 @@ msgstr "Невідома помилка"
 msgid "Unknown file error"
 msgstr "Невідома помилка файлу"
 
-#: tmp_error_headers/error_list_mini.hpp:393
-#: tmp_error_headers/error_list_xl.hpp:694
-#: tmp_error_headers/error_list_ix.hpp:659
-#: tmp_error_headers/error_list_mk4.hpp:477
 #: tmp_error_headers/error_list_mk35.hpp:449
 #: tmp_error_headers/error_list_coreone.hpp:645
+#: tmp_error_headers/error_list_xl.hpp:694
+#: tmp_error_headers/error_list_mini.hpp:393
+#: tmp_error_headers/error_list_mk4.hpp:477
+#: tmp_error_headers/error_list_ix.hpp:659
 msgid "Unknown file system"
 msgstr "Невідома файлова система"
 
+#: tmp_error_headers/error_list_coreone.hpp:408
 #: tmp_error_headers/error_list_xl.hpp:457
 #: tmp_error_headers/error_list_ix.hpp:436
-#: tmp_error_headers/error_list_coreone.hpp:408
 msgid "Unknown puppy type"
 msgstr "Невідомий тип puppy"
 
@@ -8338,7 +8462,7 @@ msgstr "Невідомий тип puppy"
 msgid "Unload"
 msgstr "Вивантажити"
 
-#: src/gui/MItem_filament.hpp:20 src/gui/MItem_mmu.hpp:154
+#: src/gui/MItem_mmu.hpp:154 src/gui/MItem_filament.hpp:20
 msgid "Unload Filament"
 msgstr "Вивантажити філамент"
 
@@ -8346,26 +8470,26 @@ msgstr "Вивантажити філамент"
 msgid "Unload filament"
 msgstr "Вивантажити філамент"
 
-#: src/gui/screen_cold_pull.cpp:313 src/gui/dialogs/DialogLoadUnload.cpp:46
+#: src/gui/dialogs/DialogLoadUnload.cpp:46 src/gui/screen_cold_pull.cpp:313
 msgid "Unloading"
 msgstr "Вивантаження"
 
 #. //MSG_PROGRESS_ERR_TMC c=20
-#: src/mmu2/mmu2_progress_converter.cpp:21
 #: src/gui/dialogs/DialogLoadUnload.cpp:78
 #: src/gui/dialogs/DialogLoadUnload.cpp:487
+#: src/mmu2/mmu2_progress_converter.cpp:21
 msgid "Unloading filament"
 msgstr "Вивантаження філаменту"
 
 #. //MSG_PROGRESS_DISENGAGE_IDLER c=20
-#: src/mmu2/mmu2_progress_converter.cpp:10
 #: src/gui/dialogs/DialogLoadUnload.cpp:68
+#: src/mmu2/mmu2_progress_converter.cpp:10
 msgid "Unloading to FINDA"
 msgstr "Вивантаження до FINDA"
 
 #. //MSG_PROGRESS_UNLOAD_FINDA c=20
-#: src/mmu2/mmu2_progress_converter.cpp:11
 #: src/gui/dialogs/DialogLoadUnload.cpp:69
+#: src/mmu2/mmu2_progress_converter.cpp:11
 msgid "Unloading to pulley"
 msgstr "Вивантаження до шківа"
 
@@ -8392,17 +8516,17 @@ msgstr ""
 "Верхній ремінь: %.1f Гц\n"
 "Нижній ремінь: %.1f Гц\n"
 "\n"
-"Оптимальний натяг становить від %u до %u Гц\n"
+"Оптимальний натяг: від %u до %u Гц\n"
 "\n"
-"Готово до розрахунку регулювання гвинта.\n"
-"Натисніть Продовжити, щоб перейти."
+"Готово до розрахунку регулювання гвинтів.\n"
+"Натисніть \"Продовжити\"."
 
-#: tmp_error_headers/error_list_mini.hpp:394
-#: tmp_error_headers/error_list_xl.hpp:695
-#: tmp_error_headers/error_list_ix.hpp:660
-#: tmp_error_headers/error_list_mk4.hpp:478
 #: tmp_error_headers/error_list_mk35.hpp:450
 #: tmp_error_headers/error_list_coreone.hpp:646
+#: tmp_error_headers/error_list_xl.hpp:695
+#: tmp_error_headers/error_list_mini.hpp:394
+#: tmp_error_headers/error_list_mk4.hpp:478
+#: tmp_error_headers/error_list_ix.hpp:660
 msgid ""
 "Use a different USB drive or reformat this one to the supported FAT32 file "
 "system."
@@ -8437,7 +8561,7 @@ msgstr "ІНФОРМАЦІЯ ПРО ВЕРСІЮ"
 msgid "Validity check"
 msgstr "Перевірка дійсності"
 
-#: src/gui/MItem_tools.hpp:503
+#: src/gui/MItem_tools.hpp:504
 msgid "Verify GCode"
 msgstr "Перевірити G-код"
 
@@ -8445,9 +8569,13 @@ msgstr "Перевірити G-код"
 msgid "Version Info"
 msgstr "Інформація про версію"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:130
+#: src/gui/screen/filament/screen_filament_detail.cpp:140
 msgid "Visible"
 msgstr "Видимий"
+
+#: src/gui/screen/screen_nozzle_cleaning_failed.cpp:50
+msgid "WARNING"
+msgstr "ПОПЕРЕДЖЕННЯ"
 
 #: tmp_error_headers/error_list_mmu.hpp:94
 #: tmp_error_headers/error_list_mmu.hpp:101
@@ -8479,9 +8607,9 @@ msgstr "Очікування нагрівального столу"
 msgid "Waiting for chamber"
 msgstr "Очікування камери"
 
+#: tmp_error_headers/error_list_coreone.hpp:443
 #: tmp_error_headers/error_list_xl.hpp:492
 #: tmp_error_headers/error_list_ix.hpp:471
-#: tmp_error_headers/error_list_coreone.hpp:443
 msgid "Waiting for fingerprint timed out"
 msgstr "Вийшов час очікування відбитка пальця"
 
@@ -8494,13 +8622,19 @@ msgid "Waiting for hotends to stabilize at calibration temperature:"
 msgstr ""
 "Очікування стабілізації температури екструдерів на температурі калібрування:"
 
+#: tmp_error_headers/error_list_coreone.hpp:905
+#: tmp_error_headers/error_list_xl.hpp:954
+#: tmp_error_headers/error_list_mk4.hpp:695
+msgid "Waiting for nozzle temperature..."
+msgstr "Очікування температури сопла..."
+
 #: src/gui/frame_calibration_common.cpp:22
 msgid "Waiting for nozzle to cool down"
 msgstr "Очікування охолодження сопла"
 
+#: tmp_error_headers/error_list_coreone.hpp:450
 #: tmp_error_headers/error_list_xl.hpp:499
 #: tmp_error_headers/error_list_ix.hpp:478
-#: tmp_error_headers/error_list_coreone.hpp:450
 msgid "Waiting for puppies to start timed out"
 msgstr "Вийшов час очікування запуску puppy"
 
@@ -8508,19 +8642,19 @@ msgstr "Вийшов час очікування запуску puppy"
 msgid "Waiting for temperature"
 msgstr "Очікування температури"
 
-#: tmp_error_headers/error_list_mini.hpp:562
-#: tmp_error_headers/error_list_xl.hpp:926
-#: tmp_error_headers/error_list_ix.hpp:842
-#: tmp_error_headers/error_list_mk4.hpp:674
 #: tmp_error_headers/error_list_mk35.hpp:646
 #: tmp_error_headers/error_list_coreone.hpp:856
+#: tmp_error_headers/error_list_xl.hpp:926
+#: tmp_error_headers/error_list_mini.hpp:562
+#: tmp_error_headers/error_list_mk4.hpp:674
+#: tmp_error_headers/error_list_ix.hpp:842
 msgid "Waiting for the user. Press \"Resume\" once the printer is ready."
 msgstr ""
 "Очікування дій користувача. Натисніть «Відновити», коли принтер буде готовий."
 
-#: tmp_error_headers/error_list_mk4.hpp:576
 #: tmp_error_headers/error_list_mk35.hpp:548
 #: tmp_error_headers/error_list_coreone.hpp:744
+#: tmp_error_headers/error_list_mk4.hpp:576
 msgid "Waiting for user input"
 msgstr "Очікування введення користувача"
 
@@ -8529,85 +8663,6 @@ msgid "Warn"
 msgstr "Попередження"
 
 #: src/guiapi/src/window_msgbox.cpp:316
-#: tmp_error_headers/error_list_mini.hpp:400
-#: tmp_error_headers/error_list_mini.hpp:407
-#: tmp_error_headers/error_list_mini.hpp:414
-#: tmp_error_headers/error_list_mini.hpp:421
-#: tmp_error_headers/error_list_mini.hpp:428
-#: tmp_error_headers/error_list_mini.hpp:442
-#: tmp_error_headers/error_list_mini.hpp:477
-#: tmp_error_headers/error_list_mini.hpp:484
-#: tmp_error_headers/error_list_mini.hpp:491
-#: tmp_error_headers/error_list_mini.hpp:498
-#: tmp_error_headers/error_list_mini.hpp:505
-#: tmp_error_headers/error_list_mini.hpp:512
-#: tmp_error_headers/error_list_mini.hpp:519
-#: tmp_error_headers/error_list_mini.hpp:526
-#: tmp_error_headers/error_list_mini.hpp:533
-#: tmp_error_headers/error_list_mini.hpp:540
-#: tmp_error_headers/error_list_mini.hpp:554
-#: tmp_error_headers/error_list_xl.hpp:701
-#: tmp_error_headers/error_list_xl.hpp:708
-#: tmp_error_headers/error_list_xl.hpp:715
-#: tmp_error_headers/error_list_xl.hpp:722
-#: tmp_error_headers/error_list_xl.hpp:729
-#: tmp_error_headers/error_list_xl.hpp:743
-#: tmp_error_headers/error_list_xl.hpp:792
-#: tmp_error_headers/error_list_xl.hpp:799
-#: tmp_error_headers/error_list_xl.hpp:806
-#: tmp_error_headers/error_list_xl.hpp:813
-#: tmp_error_headers/error_list_xl.hpp:820
-#: tmp_error_headers/error_list_xl.hpp:827
-#: tmp_error_headers/error_list_xl.hpp:834
-#: tmp_error_headers/error_list_xl.hpp:841
-#: tmp_error_headers/error_list_xl.hpp:848
-#: tmp_error_headers/error_list_xl.hpp:855
-#: tmp_error_headers/error_list_xl.hpp:862
-#: tmp_error_headers/error_list_xl.hpp:869
-#: tmp_error_headers/error_list_xl.hpp:876
-#: tmp_error_headers/error_list_xl.hpp:890
-#: tmp_error_headers/error_list_xl.hpp:897
-#: tmp_error_headers/error_list_xl.hpp:904
-#: tmp_error_headers/error_list_xl.hpp:911
-#: tmp_error_headers/error_list_xl.hpp:918
-#: tmp_error_headers/error_list_ix.hpp:666
-#: tmp_error_headers/error_list_ix.hpp:673
-#: tmp_error_headers/error_list_ix.hpp:680
-#: tmp_error_headers/error_list_ix.hpp:687
-#: tmp_error_headers/error_list_ix.hpp:694
-#: tmp_error_headers/error_list_ix.hpp:708
-#: tmp_error_headers/error_list_ix.hpp:743
-#: tmp_error_headers/error_list_ix.hpp:750
-#: tmp_error_headers/error_list_ix.hpp:757
-#: tmp_error_headers/error_list_ix.hpp:764
-#: tmp_error_headers/error_list_ix.hpp:771
-#: tmp_error_headers/error_list_ix.hpp:778
-#: tmp_error_headers/error_list_ix.hpp:785
-#: tmp_error_headers/error_list_ix.hpp:792
-#: tmp_error_headers/error_list_ix.hpp:799
-#: tmp_error_headers/error_list_ix.hpp:806
-#: tmp_error_headers/error_list_ix.hpp:813
-#: tmp_error_headers/error_list_ix.hpp:827
-#: tmp_error_headers/error_list_ix.hpp:834
-#: tmp_error_headers/error_list_mk4.hpp:484
-#: tmp_error_headers/error_list_mk4.hpp:491
-#: tmp_error_headers/error_list_mk4.hpp:498
-#: tmp_error_headers/error_list_mk4.hpp:505
-#: tmp_error_headers/error_list_mk4.hpp:512
-#: tmp_error_headers/error_list_mk4.hpp:519
-#: tmp_error_headers/error_list_mk4.hpp:533
-#: tmp_error_headers/error_list_mk4.hpp:582
-#: tmp_error_headers/error_list_mk4.hpp:589
-#: tmp_error_headers/error_list_mk4.hpp:596
-#: tmp_error_headers/error_list_mk4.hpp:603
-#: tmp_error_headers/error_list_mk4.hpp:610
-#: tmp_error_headers/error_list_mk4.hpp:617
-#: tmp_error_headers/error_list_mk4.hpp:624
-#: tmp_error_headers/error_list_mk4.hpp:631
-#: tmp_error_headers/error_list_mk4.hpp:638
-#: tmp_error_headers/error_list_mk4.hpp:645
-#: tmp_error_headers/error_list_mk4.hpp:659
-#: tmp_error_headers/error_list_mk4.hpp:666
 #: tmp_error_headers/error_list_mk35.hpp:456
 #: tmp_error_headers/error_list_mk35.hpp:463
 #: tmp_error_headers/error_list_mk35.hpp:470
@@ -8646,6 +8701,89 @@ msgstr "Попередження"
 #: tmp_error_headers/error_list_coreone.hpp:813
 #: tmp_error_headers/error_list_coreone.hpp:841
 #: tmp_error_headers/error_list_coreone.hpp:848
+#: tmp_error_headers/error_list_coreone.hpp:939
+#: tmp_error_headers/error_list_xl.hpp:701
+#: tmp_error_headers/error_list_xl.hpp:708
+#: tmp_error_headers/error_list_xl.hpp:715
+#: tmp_error_headers/error_list_xl.hpp:722
+#: tmp_error_headers/error_list_xl.hpp:729
+#: tmp_error_headers/error_list_xl.hpp:743
+#: tmp_error_headers/error_list_xl.hpp:792
+#: tmp_error_headers/error_list_xl.hpp:799
+#: tmp_error_headers/error_list_xl.hpp:806
+#: tmp_error_headers/error_list_xl.hpp:813
+#: tmp_error_headers/error_list_xl.hpp:820
+#: tmp_error_headers/error_list_xl.hpp:827
+#: tmp_error_headers/error_list_xl.hpp:834
+#: tmp_error_headers/error_list_xl.hpp:841
+#: tmp_error_headers/error_list_xl.hpp:848
+#: tmp_error_headers/error_list_xl.hpp:855
+#: tmp_error_headers/error_list_xl.hpp:862
+#: tmp_error_headers/error_list_xl.hpp:869
+#: tmp_error_headers/error_list_xl.hpp:876
+#: tmp_error_headers/error_list_xl.hpp:890
+#: tmp_error_headers/error_list_xl.hpp:897
+#: tmp_error_headers/error_list_xl.hpp:904
+#: tmp_error_headers/error_list_xl.hpp:911
+#: tmp_error_headers/error_list_xl.hpp:918
+#: tmp_error_headers/error_list_xl.hpp:988
+#: tmp_error_headers/error_list_mini.hpp:400
+#: tmp_error_headers/error_list_mini.hpp:407
+#: tmp_error_headers/error_list_mini.hpp:414
+#: tmp_error_headers/error_list_mini.hpp:421
+#: tmp_error_headers/error_list_mini.hpp:428
+#: tmp_error_headers/error_list_mini.hpp:442
+#: tmp_error_headers/error_list_mini.hpp:477
+#: tmp_error_headers/error_list_mini.hpp:484
+#: tmp_error_headers/error_list_mini.hpp:491
+#: tmp_error_headers/error_list_mini.hpp:498
+#: tmp_error_headers/error_list_mini.hpp:505
+#: tmp_error_headers/error_list_mini.hpp:512
+#: tmp_error_headers/error_list_mini.hpp:519
+#: tmp_error_headers/error_list_mini.hpp:526
+#: tmp_error_headers/error_list_mini.hpp:533
+#: tmp_error_headers/error_list_mini.hpp:540
+#: tmp_error_headers/error_list_mini.hpp:554
+#: tmp_error_headers/error_list_mk4.hpp:484
+#: tmp_error_headers/error_list_mk4.hpp:491
+#: tmp_error_headers/error_list_mk4.hpp:498
+#: tmp_error_headers/error_list_mk4.hpp:505
+#: tmp_error_headers/error_list_mk4.hpp:512
+#: tmp_error_headers/error_list_mk4.hpp:519
+#: tmp_error_headers/error_list_mk4.hpp:533
+#: tmp_error_headers/error_list_mk4.hpp:582
+#: tmp_error_headers/error_list_mk4.hpp:589
+#: tmp_error_headers/error_list_mk4.hpp:596
+#: tmp_error_headers/error_list_mk4.hpp:603
+#: tmp_error_headers/error_list_mk4.hpp:610
+#: tmp_error_headers/error_list_mk4.hpp:617
+#: tmp_error_headers/error_list_mk4.hpp:624
+#: tmp_error_headers/error_list_mk4.hpp:631
+#: tmp_error_headers/error_list_mk4.hpp:638
+#: tmp_error_headers/error_list_mk4.hpp:645
+#: tmp_error_headers/error_list_mk4.hpp:659
+#: tmp_error_headers/error_list_mk4.hpp:666
+#: tmp_error_headers/error_list_mk4.hpp:729
+#: tmp_error_headers/error_list_ix.hpp:666
+#: tmp_error_headers/error_list_ix.hpp:673
+#: tmp_error_headers/error_list_ix.hpp:680
+#: tmp_error_headers/error_list_ix.hpp:687
+#: tmp_error_headers/error_list_ix.hpp:694
+#: tmp_error_headers/error_list_ix.hpp:708
+#: tmp_error_headers/error_list_ix.hpp:743
+#: tmp_error_headers/error_list_ix.hpp:750
+#: tmp_error_headers/error_list_ix.hpp:757
+#: tmp_error_headers/error_list_ix.hpp:764
+#: tmp_error_headers/error_list_ix.hpp:771
+#: tmp_error_headers/error_list_ix.hpp:778
+#: tmp_error_headers/error_list_ix.hpp:785
+#: tmp_error_headers/error_list_ix.hpp:792
+#: tmp_error_headers/error_list_ix.hpp:799
+#: tmp_error_headers/error_list_ix.hpp:806
+#: tmp_error_headers/error_list_ix.hpp:813
+#: tmp_error_headers/error_list_ix.hpp:827
+#: tmp_error_headers/error_list_ix.hpp:834
+#: tmp_error_headers/error_list_ix.hpp:862
 msgid "Warning"
 msgstr "Попередження"
 
@@ -8653,12 +8791,12 @@ msgstr "Попередження"
 msgid "Was filament unload successful?"
 msgstr "Вивантаження філаменту пройшло успішно?"
 
-#: tmp_error_headers/error_list_mini.hpp:282
-#: tmp_error_headers/error_list_xl.hpp:576
-#: tmp_error_headers/error_list_ix.hpp:548
-#: tmp_error_headers/error_list_mk4.hpp:352
 #: tmp_error_headers/error_list_mk35.hpp:324
 #: tmp_error_headers/error_list_coreone.hpp:520
+#: tmp_error_headers/error_list_xl.hpp:576
+#: tmp_error_headers/error_list_mini.hpp:282
+#: tmp_error_headers/error_list_mk4.hpp:352
+#: tmp_error_headers/error_list_ix.hpp:548
 msgid ""
 "We are actively working on resolving these issues. Please send the crash "
 "dump, saved upon reset, to our support team."
@@ -8705,10 +8843,10 @@ msgstr ""
 msgid "Wed"
 msgstr "Ср"
 
-#: tmp_error_headers/error_list_xl.hpp:688
-#: tmp_error_headers/error_list_mk4.hpp:471
 #: tmp_error_headers/error_list_mk35.hpp:443
 #: tmp_error_headers/error_list_coreone.hpp:639
+#: tmp_error_headers/error_list_xl.hpp:688
+#: tmp_error_headers/error_list_mk4.hpp:471
 msgid ""
 "Welcome to the Cold Pull wizard. Prepare a 30cm piece of PLA filament and "
 "follow the instructions. For more details, visit:"
@@ -8778,6 +8916,18 @@ msgstr "З носком"
 msgid "Wizard"
 msgstr "Майстер"
 
+#: tmp_error_headers/error_list_coreone.hpp:898
+#: tmp_error_headers/error_list_xl.hpp:947
+#: tmp_error_headers/error_list_mk4.hpp:688
+msgid ""
+"Would you like to purge the filament?\n"
+"\n"
+"It will then retract to prevent oozing. Be careful, the nozzle is hot!"
+msgstr ""
+"Очистити філамент?\n"
+"\n"
+"Він буде втягнутий, щоб запобігти витіканню. Обережно, сопло гаряче!"
+
 #: src/gui/MItem_experimental_tools.cpp:103
 msgid "Wrong"
 msgstr "Неправильно"
@@ -8790,7 +8940,7 @@ msgstr "Неправильне обладнання"
 msgid "X"
 msgstr "X"
 
-#: src/gui/MItem_tools.hpp:328
+#: src/gui/MItem_tools.hpp:329
 msgid "X Axis"
 msgstr "Вісь X"
 
@@ -8843,7 +8993,7 @@ msgstr ""
 msgid "Y"
 msgstr "Y"
 
-#: src/gui/MItem_tools.hpp:334
+#: src/gui/MItem_tools.hpp:335
 msgid "Y Axis"
 msgstr "Вісь Y"
 
@@ -8929,7 +9079,7 @@ msgstr "Z"
 msgid "Z AXIS MOVE"
 msgstr "РУХ ПО ОСІ Z"
 
-#: src/gui/MItem_tools.hpp:340
+#: src/gui/MItem_tools.hpp:341
 msgid "Z Axis"
 msgstr "Вісь Z"
 
@@ -8965,12 +9115,12 @@ msgstr "Довжина осі Z"
 msgid "Z-axis steps per unit"
 msgstr "Кількість кроків осі Z на одиницю"
 
-#: src/gui/wizard/selftest_result_axis.cpp:14
-#: src/gui/wizard/selftest_result_axis.cpp:15
-#: src/gui/wizard/selftest_result_axis.cpp:16
 #: src/gui/wizard/selftest_frame_axis.cpp:29
 #: src/gui/wizard/selftest_frame_axis.cpp:30
 #: src/gui/wizard/selftest_frame_axis.cpp:31
+#: src/gui/wizard/selftest_result_axis.cpp:14
+#: src/gui/wizard/selftest_result_axis.cpp:15
+#: src/gui/wizard/selftest_result_axis.cpp:16
 msgid "axis"
 msgstr "вісь"
 
@@ -9034,7 +9184,7 @@ msgstr "prusa.io/dock-setup"
 msgid "tighten"
 msgstr "Затягнути"
 
-#: src/gui/MItem_tools.hpp:358
+#: src/gui/MItem_tools.hpp:359
 msgid "times"
 msgstr "разів"
 

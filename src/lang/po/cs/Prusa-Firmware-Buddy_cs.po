@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: info@prusa3d.com\n"
-"POT-Creation-Date: 2025-09-03 10:29+0200\n"
+"POT-Creation-Date: 2025-10-08 08:41+0000\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -39,6 +39,14 @@ msgstr ""
 "\n"
 "Nahrání nastavení dokončeo.\n"
 "\n"
+
+#: src/gui/screen/screen_nozzle_cleaning_failed.cpp:16
+msgid ""
+"\n"
+"Nozzle cleaning failed."
+msgstr ""
+"\n"
+"Čištění trysky selhalo."
 
 #: src/gui/screen_menu_tools.hpp:33
 msgid "  Tool 1"
@@ -91,58 +99,58 @@ msgstr "%d Kalibrace pozice doku"
 msgid "%d Door Sensor"
 msgstr "%d Senzor Dveří"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:129
+#: src/gui/include_MINI/selftest_snake_config.hpp:76
 #: src/gui/include_COREONE/selftest_snake_config.hpp:85
 #: src/gui/include_MK3.5/selftest_snake_config.hpp:77
-#: src/gui/include_MINI/selftest_snake_config.hpp:76
-#: src/gui/include_iX/selftest_snake_config.hpp:84
+#: src/gui/include_XL/selftest_snake_config.hpp:129
 #: src/gui/include_MK4/selftest_snake_config.hpp:79
+#: src/gui/include_iX/selftest_snake_config.hpp:84
 #, c-format
 msgid "%d Fan Test"
 msgstr "%d Test ventilátorů"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:141
 #: src/gui/include_COREONE/selftest_snake_config.hpp:97
-#: src/gui/include_iX/selftest_snake_config.hpp:94
+#: src/gui/include_XL/selftest_snake_config.hpp:141
 #: src/gui/include_MK4/selftest_snake_config.hpp:86
+#: src/gui/include_iX/selftest_snake_config.hpp:94
 #, c-format
 msgid "%d Filament Sensor Calibration"
 msgstr "%d Kalibrace senzoru filamentu"
 
-#: src/gui/include_MK3.5/selftest_snake_config.hpp:82
 #: src/gui/include_MINI/selftest_snake_config.hpp:80
+#: src/gui/include_MK3.5/selftest_snake_config.hpp:82
 #, c-format
 msgid "%d First Layer Calibration"
 msgstr "%d Kalibrace první vrstvy"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:145
 #: src/gui/include_COREONE/selftest_snake_config.hpp:96
+#: src/gui/include_XL/selftest_snake_config.hpp:145
 #: src/gui/include_MK4/selftest_snake_config.hpp:85
 #, c-format
 msgid "%d Gearbox Alignment"
 msgstr "%d Zarovnání převodovky"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:140
+#: src/gui/include_MINI/selftest_snake_config.hpp:79
 #: src/gui/include_COREONE/selftest_snake_config.hpp:95
 #: src/gui/include_MK3.5/selftest_snake_config.hpp:81
-#: src/gui/include_MINI/selftest_snake_config.hpp:79
-#: src/gui/include_iX/selftest_snake_config.hpp:93
+#: src/gui/include_XL/selftest_snake_config.hpp:140
 #: src/gui/include_MK4/selftest_snake_config.hpp:84
+#: src/gui/include_iX/selftest_snake_config.hpp:93
 #, c-format
 msgid "%d Heater Test"
 msgstr "%d Test vyhřívání"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:134
 #: src/gui/include_COREONE/selftest_snake_config.hpp:91
+#: src/gui/include_XL/selftest_snake_config.hpp:134
 #: src/gui/include_iX/selftest_snake_config.hpp:89
 #, c-format
 msgid "%d Homing Calibration"
 msgstr "%d Kalibrace Homingu"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:137
 #: src/gui/include_COREONE/selftest_snake_config.hpp:93
-#: src/gui/include_iX/selftest_snake_config.hpp:91
+#: src/gui/include_XL/selftest_snake_config.hpp:137
 #: src/gui/include_MK4/selftest_snake_config.hpp:82
+#: src/gui/include_iX/selftest_snake_config.hpp:91
 #, c-format
 msgid "%d Loadcell Test"
 msgstr "%d Test loadcell senzoru"
@@ -163,42 +171,42 @@ msgstr "%d Kalibrace Phase Stepping"
 msgid "%d Tool Offset Calibration"
 msgstr "%d Kalibrace offsetu nástroje"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:132
 #: src/gui/include_COREONE/selftest_snake_config.hpp:89
+#: src/gui/include_XL/selftest_snake_config.hpp:132
 #: src/gui/include_iX/selftest_snake_config.hpp:87
 #, c-format
 msgid "%d X Axis Test"
 msgstr "%d Test osy X"
 
-#: src/gui/include_MK3.5/selftest_snake_config.hpp:79
 #: src/gui/include_MINI/selftest_snake_config.hpp:77
+#: src/gui/include_MK3.5/selftest_snake_config.hpp:79
 #: src/gui/include_MK4/selftest_snake_config.hpp:81
 #, c-format
 msgid "%d XY Axis Test"
 msgstr "%d Test os XY"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:131
 #: src/gui/include_COREONE/selftest_snake_config.hpp:88
+#: src/gui/include_XL/selftest_snake_config.hpp:131
 #: src/gui/include_iX/selftest_snake_config.hpp:86
 #, c-format
 msgid "%d Y Axis Test"
 msgstr "%d Test osy Y"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:130
 #: src/gui/include_COREONE/selftest_snake_config.hpp:87
 #: src/gui/include_MK3.5/selftest_snake_config.hpp:78
-#: src/gui/include_iX/selftest_snake_config.hpp:85
+#: src/gui/include_XL/selftest_snake_config.hpp:130
 #: src/gui/include_MK4/selftest_snake_config.hpp:80
+#: src/gui/include_iX/selftest_snake_config.hpp:85
 #, c-format
 msgid "%d Z Alignment Calibration"
 msgstr "%d Kalibrace zarovnání Z"
 
-#: src/gui/include_XL/selftest_snake_config.hpp:139
+#: src/gui/include_MINI/selftest_snake_config.hpp:78
 #: src/gui/include_COREONE/selftest_snake_config.hpp:94
 #: src/gui/include_MK3.5/selftest_snake_config.hpp:80
-#: src/gui/include_MINI/selftest_snake_config.hpp:78
-#: src/gui/include_iX/selftest_snake_config.hpp:92
+#: src/gui/include_XL/selftest_snake_config.hpp:139
 #: src/gui/include_MK4/selftest_snake_config.hpp:83
+#: src/gui/include_iX/selftest_snake_config.hpp:92
 #, c-format
 msgid "%d Z Axis Test"
 msgstr "%d Test osy Z"
@@ -231,8 +239,8 @@ msgstr "%u %% / zaseklý"
 msgid "%u %% / unknown"
 msgstr "%u %% / neznámé"
 
-#: src/gui/screen/toolhead/screen_toolhead_settings.cpp:20
 #: src/gui/screen/toolhead/screen_toolhead_settings_fs.cpp:8
+#: src/gui/screen/toolhead/screen_toolhead_settings.cpp:20
 msgid "-"
 msgstr "-"
 
@@ -264,7 +272,7 @@ msgstr ""
 "- Odstraňte tiskový plát.\n"
 "- Nainstalujte kalibrační pin."
 
-#: src/gui/screen_menu_connect.cpp:67 src/gui/screen/screen_preheat.cpp:194
+#: src/gui/screen/screen_preheat.cpp:193 src/gui/screen_menu_connect.cpp:67
 msgid "---"
 msgstr "---"
 
@@ -329,11 +337,11 @@ msgstr "Ukládá se výpis chyby."
 msgid "A crash dump report (file dump.bin) has been saved to the USB drive."
 msgstr "Výpis chyb (soubor dump.bin) byl zapsán na USB disk."
 
-#: tmp_error_headers/error_list_xl.hpp:730
-#: tmp_error_headers/error_list_ix.hpp:695
-#: tmp_error_headers/error_list_mk4.hpp:513
 #: tmp_error_headers/error_list_mk35.hpp:485
 #: tmp_error_headers/error_list_coreone.hpp:681
+#: tmp_error_headers/error_list_xl.hpp:730
+#: tmp_error_headers/error_list_mk4.hpp:513
+#: tmp_error_headers/error_list_ix.hpp:695
 msgid "A filament specified in the G-code is either not loaded or wrong type."
 msgstr "Filament specifikovaný v G-Codu není zaveden nebo je špatného typu."
 
@@ -360,12 +368,12 @@ msgstr "ZRUŠIT"
 msgid "ABORTING ..."
 msgstr "RUŠÍM..."
 
-#: tmp_error_headers/error_list_mini.hpp:211
-#: tmp_error_headers/error_list_xl.hpp:372
-#: tmp_error_headers/error_list_ix.hpp:358
-#: tmp_error_headers/error_list_mk4.hpp:253
 #: tmp_error_headers/error_list_mk35.hpp:239
 #: tmp_error_headers/error_list_coreone.hpp:337
+#: tmp_error_headers/error_list_xl.hpp:372
+#: tmp_error_headers/error_list_mini.hpp:211
+#: tmp_error_headers/error_list_mk4.hpp:253
+#: tmp_error_headers/error_list_ix.hpp:358
 msgid "ACCELEROMETER COMMUNICATION FAILED"
 msgstr "CHYBA KOMUNIKACE S AKCELEROMETREM"
 
@@ -380,6 +388,10 @@ msgstr "VŠECHNY NÁSTROJE"
 #: src/common/client_response_texts.hpp:20
 msgid "ALWAYS"
 msgstr "VŽDY"
+
+#: src/gui/screen/dialog_safety_timer.cpp:24
+msgid "Abort print?"
+msgstr "Zrušit tisk?"
 
 #: lib/Marlin/Marlin/src/feature/phase_stepping/calibration.cpp:2067
 msgid "Aborted."
@@ -420,9 +432,9 @@ msgstr "Přidat tiskárnu do Connectu"
 msgid "Additional probing"
 msgstr "Dodatečné měření"
 
+#: tmp_error_headers/error_list_coreone.hpp:373
 #: tmp_error_headers/error_list_xl.hpp:422
 #: tmp_error_headers/error_list_ix.hpp:401
-#: tmp_error_headers/error_list_coreone.hpp:373
 msgid "Address assignment error"
 msgstr "Chyba přiřazení adresy."
 
@@ -435,7 +447,7 @@ msgid "Adjust belt tensioners"
 msgstr "Upravte napínáky řemene"
 
 #. / title text
-#: src/gui/dialogs/liveadjust_z.cpp:204
+#: src/gui/dialogs/liveadjust_z.cpp:192
 msgid "Adjust the nozzle height above the heatbed by turning the knob"
 msgstr "K doladění výšky trysky nad podložkou otáčejte ovládacím tlačítkem"
 
@@ -513,13 +525,26 @@ msgstr ""
 msgid "Approx. %d min"
 msgstr "Odhad %d min"
 
-#: src/gui/wizard/screen_belt_tuning_wizard.cpp:194
+#: src/gui/wizard/screen_belt_tuning_wizard.cpp:197
 msgid "Are the belts vibrating?"
 msgstr "Vibrují řemeny?"
 
 #: src/gui/screen_printing_serial.cpp:80 src/gui/screen_printing.cpp:122
 msgid "Are you sure to stop this printing?"
 msgstr "Chcete zrušit tisk?"
+
+#: tmp_error_headers/error_list_coreone.hpp:940
+#: tmp_error_headers/error_list_xl.hpp:989
+#: tmp_error_headers/error_list_mk4.hpp:730
+#: tmp_error_headers/error_list_ix.hpp:863
+msgid ""
+"Are you sure you want to abort the print?\n"
+"\n"
+"The current print will be cancelled and you will need to start over."
+msgstr ""
+"Jste si jist, že chcete zrušit tisk?\n"
+"\n"
+"Aktuální tisková operace bude zrušena a budete muset začít znovu."
 
 #: src/feature/door_sensor_calibration/screen_door_sensor_calibration.cpp:21
 msgid "Are you sure you want to skip the door sensor calibration for now?"
@@ -570,6 +595,21 @@ msgstr "Auto"
 msgid "Auto Home"
 msgstr "Auto Home"
 
+#: src/gui/screen/filament/screen_filament_detail.cpp:134
+#: src/gui/menu_item/specific/menu_items_auto_retract.cpp:7
+msgid "Auto Retract"
+msgstr "Automatická retrakce"
+
+#: src/gui/menu_item/specific/menu_items_auto_retract.cpp:10
+msgid ""
+"Auto Retract allows faster filament unloads and helps nozzle cleaning "
+"failures.\n"
+"Are you sure you want to disable it?"
+msgstr ""
+"Automatická retrakce umožňuje rychlejší vyjmutí filamentu a předchází chybám "
+"spojeným s čištěním trysky.\n"
+"Opravdu chcete funkci vypnout?"
+
 #: src/common/feature/print_status_message/print_status_message_formatter_buddy.cpp:39
 msgid "Auto-retracting"
 msgstr "Autoretrakce"
@@ -579,8 +619,8 @@ msgid "Auto-retracting filament"
 msgstr "Autoretrakce filamentu"
 
 #. //MSG_PROGRESS_FEED_NOZZLE c=20
-#: src/mmu2/mmu2_progress_converter.cpp:15
 #: src/gui/dialogs/DialogLoadUnload.cpp:73
+#: src/mmu2/mmu2_progress_converter.cpp:15
 msgid "Avoiding grind"
 msgstr "Prevence obroušení"
 
@@ -600,30 +640,30 @@ msgstr "Test os přeskočen, protože selhal test Loadcellu."
 msgid "BACK"
 msgstr "ZPĚT"
 
-#: tmp_error_headers/error_list_mini.hpp:246
-#: tmp_error_headers/error_list_xl.hpp:533
-#: tmp_error_headers/error_list_ix.hpp:512
-#: tmp_error_headers/error_list_mk4.hpp:316
 #: tmp_error_headers/error_list_mk35.hpp:288
 #: tmp_error_headers/error_list_coreone.hpp:484
+#: tmp_error_headers/error_list_xl.hpp:533
+#: tmp_error_headers/error_list_mini.hpp:246
+#: tmp_error_headers/error_list_mk4.hpp:316
+#: tmp_error_headers/error_list_ix.hpp:512
 msgid "BBF ALLOCATION FAILED"
 msgstr "ALOKACE BBF SELHALA"
 
-#: tmp_error_headers/error_list_mini.hpp:253
-#: tmp_error_headers/error_list_xl.hpp:540
-#: tmp_error_headers/error_list_ix.hpp:519
-#: tmp_error_headers/error_list_mk4.hpp:323
 #: tmp_error_headers/error_list_mk35.hpp:295
 #: tmp_error_headers/error_list_coreone.hpp:491
+#: tmp_error_headers/error_list_xl.hpp:540
+#: tmp_error_headers/error_list_mini.hpp:253
+#: tmp_error_headers/error_list_mk4.hpp:323
+#: tmp_error_headers/error_list_ix.hpp:519
 msgid "BBF INITIALIZATION FAILED"
 msgstr "INICIALIZACE BBF SELHALA"
 
-#: tmp_error_headers/error_list_mini.hpp:254
-#: tmp_error_headers/error_list_xl.hpp:541
-#: tmp_error_headers/error_list_ix.hpp:520
-#: tmp_error_headers/error_list_mk4.hpp:324
 #: tmp_error_headers/error_list_mk35.hpp:296
 #: tmp_error_headers/error_list_coreone.hpp:492
+#: tmp_error_headers/error_list_xl.hpp:541
+#: tmp_error_headers/error_list_mini.hpp:254
+#: tmp_error_headers/error_list_mk4.hpp:324
+#: tmp_error_headers/error_list_ix.hpp:520
 msgid "BBF initialization failed, repeat the action or try another USB drive."
 msgstr "Inicializace BBF selhala. Opakujte akci nebo zkuste jiný USB disk."
 
@@ -631,7 +671,7 @@ msgstr "Inicializace BBF selhala. Opakujte akci nebo zkuste jiný USB disk."
 msgid "BED LEVEL CORRECTION"
 msgstr "KOREKCE PODLOŽKY"
 
-#: src/gui/wizard/screen_belt_tuning_wizard.cpp:239
+#: src/gui/wizard/screen_belt_tuning_wizard.cpp:242
 msgid "BELT TUNING"
 msgstr "LADĚNÍ ŘEMENŮ"
 
@@ -663,11 +703,11 @@ msgstr "Korekce podložky"
 msgid "Bed MCU Temp"
 msgstr "Bed MCU tep."
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:79
+#: src/gui/screen/filament/screen_filament_detail.cpp:87
 msgid "Bed Temp"
 msgstr "Tep. bedu"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:79
+#: src/gui/screen/filament/screen_filament_detail.cpp:87
 #: src/gui/MItem_tools.cpp:501
 msgid "Bed Temperature"
 msgstr "Teplota podložky"
@@ -684,12 +724,12 @@ msgstr ""
 "Pokud není na podložce umístěn tiskový plech, umístěte jej nyní a test "
 "opakujte."
 
-#: tmp_error_headers/error_list_mini.hpp:555
-#: tmp_error_headers/error_list_xl.hpp:912
-#: tmp_error_headers/error_list_ix.hpp:828
-#: tmp_error_headers/error_list_mk4.hpp:660
 #: tmp_error_headers/error_list_mk35.hpp:639
 #: tmp_error_headers/error_list_coreone.hpp:842
+#: tmp_error_headers/error_list_xl.hpp:912
+#: tmp_error_headers/error_list_mini.hpp:555
+#: tmp_error_headers/error_list_mk4.hpp:660
+#: tmp_error_headers/error_list_ix.hpp:828
 msgid "Bed leveling failed. Try again?"
 msgstr "Mesh Bed L. selhal. Opakovat?"
 
@@ -734,7 +774,7 @@ msgstr ""
 msgid "Before you proceed, make sure filament is unloaded from the Nextruder."
 msgstr "Před pokračováním se ujistěte, že v Nextruderu není filament."
 
-#: src/gui/MItem_tools.hpp:634
+#: src/gui/MItem_tools.hpp:635
 msgid "Belt Tuning"
 msgstr "Ladění řemenů"
 
@@ -758,11 +798,11 @@ msgstr "Černý"
 msgid "Board Temperature"
 msgstr "Teplota desky"
 
-#: src/gui/MItem_tools.hpp:234
+#: src/gui/MItem_tools.hpp:235
 msgid "Bootloader Version"
 msgstr "Verze bootloaderu"
 
-#: src/gui/MItem_tools.hpp:248
+#: src/gui/MItem_tools.hpp:249
 msgid "Buddy Board"
 msgstr "Deska Buddy"
 
@@ -774,9 +814,9 @@ msgstr "Chyba"
 msgid "CALIBRATE"
 msgstr "KALIBROVAT"
 
+#: tmp_error_headers/error_list_coreone.hpp:99
 #: tmp_error_headers/error_list_xl.hpp:92
 #: tmp_error_headers/error_list_ix.hpp:57
-#: tmp_error_headers/error_list_coreone.hpp:99
 msgid "CALIBRATE HOMING FROM MENU"
 msgstr "ZKALIBRUJTE HOMING SKRZ MENU"
 
@@ -808,8 +848,8 @@ msgstr "CHYBA MAXTEMP (KOMORA)"
 msgid "CHAMBER MINTEMP ERROR"
 msgstr "CHYBA MINTEMP (KOMORA)"
 
-#: tmp_error_headers/error_list_xl.hpp:211
 #: tmp_error_headers/error_list_coreone.hpp:197
+#: tmp_error_headers/error_list_xl.hpp:211
 msgid "CHAMBER WARMING UP"
 msgstr "ZAHŘÍVÁNÍ KOMORY"
 
@@ -833,12 +873,12 @@ msgstr "COLD PULL"
 msgid "COMMUNICATION ERROR"
 msgstr "CHYBA KOMUNIKACE"
 
-#: tmp_error_headers/error_list_mini.hpp:218
-#: tmp_error_headers/error_list_xl.hpp:386
-#: tmp_error_headers/error_list_ix.hpp:372
-#: tmp_error_headers/error_list_mk4.hpp:267
 #: tmp_error_headers/error_list_mk35.hpp:253
 #: tmp_error_headers/error_list_coreone.hpp:351
+#: tmp_error_headers/error_list_xl.hpp:386
+#: tmp_error_headers/error_list_mini.hpp:218
+#: tmp_error_headers/error_list_mk4.hpp:267
+#: tmp_error_headers/error_list_ix.hpp:372
 msgid "CONNECT REGISTRATION FAILED"
 msgstr "REGISTRACE DO CONNECTU SELHALA"
 
@@ -856,23 +896,6 @@ msgstr "ZCHLADIT"
 
 #. don't close on menu timeout
 #: src/gui/screen_crash_recovery.cpp:266
-#: tmp_error_headers/error_list_mini.hpp:449
-#: tmp_error_headers/error_list_mini.hpp:456
-#: tmp_error_headers/error_list_mini.hpp:463
-#: tmp_error_headers/error_list_mini.hpp:470
-#: tmp_error_headers/error_list_xl.hpp:750
-#: tmp_error_headers/error_list_xl.hpp:757
-#: tmp_error_headers/error_list_xl.hpp:764
-#: tmp_error_headers/error_list_xl.hpp:771
-#: tmp_error_headers/error_list_xl.hpp:778
-#: tmp_error_headers/error_list_ix.hpp:715
-#: tmp_error_headers/error_list_ix.hpp:722
-#: tmp_error_headers/error_list_ix.hpp:729
-#: tmp_error_headers/error_list_ix.hpp:736
-#: tmp_error_headers/error_list_mk4.hpp:540
-#: tmp_error_headers/error_list_mk4.hpp:547
-#: tmp_error_headers/error_list_mk4.hpp:554
-#: tmp_error_headers/error_list_mk4.hpp:561
 #: tmp_error_headers/error_list_mk35.hpp:512
 #: tmp_error_headers/error_list_mk35.hpp:519
 #: tmp_error_headers/error_list_mk35.hpp:526
@@ -881,10 +904,27 @@ msgstr "ZCHLADIT"
 #: tmp_error_headers/error_list_coreone.hpp:715
 #: tmp_error_headers/error_list_coreone.hpp:722
 #: tmp_error_headers/error_list_coreone.hpp:729
+#: tmp_error_headers/error_list_xl.hpp:750
+#: tmp_error_headers/error_list_xl.hpp:757
+#: tmp_error_headers/error_list_xl.hpp:764
+#: tmp_error_headers/error_list_xl.hpp:771
+#: tmp_error_headers/error_list_xl.hpp:778
+#: tmp_error_headers/error_list_mini.hpp:449
+#: tmp_error_headers/error_list_mini.hpp:456
+#: tmp_error_headers/error_list_mini.hpp:463
+#: tmp_error_headers/error_list_mini.hpp:470
+#: tmp_error_headers/error_list_mk4.hpp:540
+#: tmp_error_headers/error_list_mk4.hpp:547
+#: tmp_error_headers/error_list_mk4.hpp:554
+#: tmp_error_headers/error_list_mk4.hpp:561
+#: tmp_error_headers/error_list_ix.hpp:715
+#: tmp_error_headers/error_list_ix.hpp:722
+#: tmp_error_headers/error_list_ix.hpp:729
+#: tmp_error_headers/error_list_ix.hpp:736
 msgid "CRASH DETECTED"
 msgstr "DETEKOVÁN NÁRAZ"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:156
+#: src/gui/screen/filament/screen_filament_detail.cpp:166
 msgid "CUSTOM PARAMETERS"
 msgstr "VLASTNÍ PARAMETRY"
 
@@ -908,8 +948,8 @@ msgstr "Kalibrovat dok 4"
 msgid "Calibrate Dock 5"
 msgstr "Kalibrovat dok 5"
 
-#: src/gui/MItem_tools.hpp:623
 #: src/gui/screen/toolhead/screen_toolhead_settings_dock.cpp:51
+#: src/gui/MItem_tools.hpp:624
 msgid "Calibrate Dock Position"
 msgstr "Kalibrovat pozici doku"
 
@@ -1048,7 +1088,7 @@ msgstr "Komora"
 msgid "Chamber Cooling Fan Error"
 msgstr "Chyba ventilátoru komory"
 
-#: src/gui/MItem_tools.hpp:578
+#: src/gui/MItem_tools.hpp:579
 msgid "Chamber Dimming"
 msgstr "Tlumení osvícení komory"
 
@@ -1073,32 +1113,32 @@ msgstr "Limit vent. v komoře"
 msgid "Chamber Filtration"
 msgstr "Filtrace komory"
 
-#: tmp_error_headers/error_list_xl.hpp:939
 #: tmp_error_headers/error_list_coreone.hpp:890
+#: tmp_error_headers/error_list_xl.hpp:939
 msgid "Chamber Filtration Fan Error"
 msgstr "Chyba ventilátoru filtrace v komoře"
 
-#: src/gui/MItem_tools.hpp:550
+#: src/gui/MItem_tools.hpp:551
 msgid "Chamber Lights"
 msgstr "Světlo v komoře"
 
-#: src/gui/MItem_tools.hpp:564
+#: src/gui/MItem_tools.hpp:565
 msgid "Chamber Lights Dimmed"
 msgstr "Světla v komoře ztlumena"
 
-#: tmp_error_headers/error_list_xl.hpp:218
 #: tmp_error_headers/error_list_coreone.hpp:204
+#: tmp_error_headers/error_list_xl.hpp:218
 msgid "Chamber Overheating"
 msgstr "Komora se přehřívá"
 
-#: src/gui/screen_menu_temperature.hpp:26
 #: src/gui/menu_item/specific/menu_items_chamber.hpp:8
 #: src/gui/menu_item/specific/menu_items_chamber.hpp:17
+#: src/gui/screen_menu_temperature.hpp:26
 msgid "Chamber Temperature"
 msgstr "Teplota komory"
 
-#: tmp_error_headers/error_list_xl.hpp:225
 #: tmp_error_headers/error_list_coreone.hpp:211
+#: tmp_error_headers/error_list_xl.hpp:225
 msgid "Chamber Temperature Is Critical"
 msgstr "Kritická teplota v komoře"
 
@@ -1110,8 +1150,8 @@ msgstr ""
 "Ventilátor komory se neotáčí. Zkontrolujte, zda ho neblokují nečistoty, a "
 "zda je správně zapojen."
 
-#: tmp_error_headers/error_list_xl.hpp:940
 #: tmp_error_headers/error_list_coreone.hpp:891
+#: tmp_error_headers/error_list_xl.hpp:940
 msgid ""
 "Chamber filtration fan is not spinning. Check it for possible debris, then "
 "inspect the wiring."
@@ -1124,13 +1164,13 @@ msgstr ""
 msgid "Chamber temperature"
 msgstr "Teplota komory"
 
-#: tmp_error_headers/error_list_xl.hpp:219
 #: tmp_error_headers/error_list_coreone.hpp:205
+#: tmp_error_headers/error_list_xl.hpp:219
 msgid "Chamber temperature above safety limit. Ensure better ventilation."
 msgstr "Teplota v komoře nad bezpečným limitem. Zajistěte lepší ventilaci."
 
-#: tmp_error_headers/error_list_xl.hpp:226
 #: tmp_error_headers/error_list_coreone.hpp:212
+#: tmp_error_headers/error_list_xl.hpp:226
 msgid "Chamber temperature critical. Aborting print to prevent printer damage."
 msgstr "Teplota v komoře je kritická. Ruším tisk, aby se předešlo poškození."
 
@@ -1146,7 +1186,7 @@ msgstr "Vyměnit všechny filamenty"
 msgid "Change Filter"
 msgstr "Výměna filtru"
 
-#: src/gui/MItem_tools.hpp:519
+#: src/gui/MItem_tools.hpp:520
 msgid "Change Wave Table XYZ"
 msgstr "Úprava XYZ Wave Table"
 
@@ -1165,10 +1205,10 @@ msgstr ""
 msgid "Change to"
 msgstr "Změnit na"
 
-#: tmp_error_headers/error_list_xl.hpp:786
-#: tmp_error_headers/error_list_mk4.hpp:569
 #: tmp_error_headers/error_list_mk35.hpp:541
 #: tmp_error_headers/error_list_coreone.hpp:737
+#: tmp_error_headers/error_list_xl.hpp:786
+#: tmp_error_headers/error_list_mk4.hpp:569
 msgid ""
 "Changes of mapping available only in the Printer UI. Select Print to start "
 "the print with defaults."
@@ -1196,12 +1236,12 @@ msgstr "Kontrola pravúhlosti osy X"
 msgid "Check all tools if they are properly parked or picked."
 msgstr "Jsou všechny nástroje správně dokovány a vybírány?"
 
-#: tmp_error_headers/error_list_mini.hpp:212
-#: tmp_error_headers/error_list_xl.hpp:373
-#: tmp_error_headers/error_list_ix.hpp:359
-#: tmp_error_headers/error_list_mk4.hpp:254
 #: tmp_error_headers/error_list_mk35.hpp:240
 #: tmp_error_headers/error_list_coreone.hpp:338
+#: tmp_error_headers/error_list_xl.hpp:373
+#: tmp_error_headers/error_list_mini.hpp:212
+#: tmp_error_headers/error_list_mk4.hpp:254
+#: tmp_error_headers/error_list_ix.hpp:359
 msgid "Check that the accelerometer cable is plugged in and not damaged."
 msgstr "Ujistěte se, že kabel akcelerometru je zapojen a není poškozen."
 
@@ -1210,46 +1250,46 @@ msgstr "Ujistěte se, že kabel akcelerometru je zapojen a není poškozen."
 msgid "Check the chamber thermistor wiring for possible damage."
 msgstr "Zkontrolujte zapojení termistoru v komoře a případné poškození."
 
-#: tmp_error_headers/error_list_mini.hpp:23
-#: tmp_error_headers/error_list_ix.hpp:65
-#: tmp_error_headers/error_list_mk4.hpp:58
 #: tmp_error_headers/error_list_mk35.hpp:44
 #: tmp_error_headers/error_list_coreone.hpp:107
+#: tmp_error_headers/error_list_mini.hpp:23
+#: tmp_error_headers/error_list_mk4.hpp:58
+#: tmp_error_headers/error_list_ix.hpp:65
 msgid "Check the heatbed heater & thermistor wiring for possible damage."
 msgstr ""
 "Zkontrolujte, zda nejsou poškozeny kabely vyhřívané podložky a termistoru."
 
-#: tmp_error_headers/error_list_mini.hpp:37
-#: tmp_error_headers/error_list_mini.hpp:51
-#: tmp_error_headers/error_list_mini.hpp:65
-#: tmp_error_headers/error_list_xl.hpp:107
-#: tmp_error_headers/error_list_ix.hpp:79
-#: tmp_error_headers/error_list_ix.hpp:93
-#: tmp_error_headers/error_list_ix.hpp:107
-#: tmp_error_headers/error_list_mk4.hpp:72
-#: tmp_error_headers/error_list_mk4.hpp:86
-#: tmp_error_headers/error_list_mk4.hpp:100
 #: tmp_error_headers/error_list_mk35.hpp:58
 #: tmp_error_headers/error_list_mk35.hpp:72
 #: tmp_error_headers/error_list_mk35.hpp:86
 #: tmp_error_headers/error_list_coreone.hpp:121
 #: tmp_error_headers/error_list_coreone.hpp:135
 #: tmp_error_headers/error_list_coreone.hpp:149
+#: tmp_error_headers/error_list_xl.hpp:107
+#: tmp_error_headers/error_list_mini.hpp:37
+#: tmp_error_headers/error_list_mini.hpp:51
+#: tmp_error_headers/error_list_mini.hpp:65
+#: tmp_error_headers/error_list_mk4.hpp:72
+#: tmp_error_headers/error_list_mk4.hpp:86
+#: tmp_error_headers/error_list_mk4.hpp:100
+#: tmp_error_headers/error_list_ix.hpp:79
+#: tmp_error_headers/error_list_ix.hpp:93
+#: tmp_error_headers/error_list_ix.hpp:107
 msgid "Check the heatbed thermistor wiring for possible damage."
 msgstr "Zkontrolujte, zda není poškozen kabel termistoru vyhřívané podložky."
 
-#: tmp_error_headers/error_list_mini.hpp:79
-#: tmp_error_headers/error_list_mini.hpp:86
-#: tmp_error_headers/error_list_xl.hpp:135
-#: tmp_error_headers/error_list_xl.hpp:142
-#: tmp_error_headers/error_list_ix.hpp:121
-#: tmp_error_headers/error_list_ix.hpp:128
-#: tmp_error_headers/error_list_mk4.hpp:114
-#: tmp_error_headers/error_list_mk4.hpp:121
 #: tmp_error_headers/error_list_mk35.hpp:100
 #: tmp_error_headers/error_list_mk35.hpp:107
 #: tmp_error_headers/error_list_coreone.hpp:163
 #: tmp_error_headers/error_list_coreone.hpp:170
+#: tmp_error_headers/error_list_xl.hpp:135
+#: tmp_error_headers/error_list_xl.hpp:142
+#: tmp_error_headers/error_list_mini.hpp:79
+#: tmp_error_headers/error_list_mini.hpp:86
+#: tmp_error_headers/error_list_mk4.hpp:114
+#: tmp_error_headers/error_list_mk4.hpp:121
+#: tmp_error_headers/error_list_ix.hpp:121
+#: tmp_error_headers/error_list_ix.hpp:128
 msgid "Check the heatbreak thermistor wiring for possible damage."
 msgstr "Zkontrolujte kabeláž termistoru pro heatbreak, zda není poškozená."
 
@@ -1257,31 +1297,31 @@ msgstr "Zkontrolujte kabeláž termistoru pro heatbreak, zda není poškozená."
 msgid "Check the heater and thermistor wiring for potential damage."
 msgstr "Zkontrolujte, zda není poškozen kabel vyhřívání nebo termistoru."
 
-#: tmp_error_headers/error_list_mini.hpp:30
-#: tmp_error_headers/error_list_ix.hpp:72
-#: tmp_error_headers/error_list_mk4.hpp:65
 #: tmp_error_headers/error_list_mk35.hpp:51
 #: tmp_error_headers/error_list_coreone.hpp:114
+#: tmp_error_headers/error_list_mini.hpp:30
+#: tmp_error_headers/error_list_mk4.hpp:65
+#: tmp_error_headers/error_list_ix.hpp:72
 msgid "Check the print head heater & thermistor wiring for possible damage."
 msgstr ""
 "Zkontrolujte, zda nejsou poškozené kabely od topného bloku a termistoru "
 "tiskové hlavy."
 
-#: tmp_error_headers/error_list_mini.hpp:44
-#: tmp_error_headers/error_list_mini.hpp:58
-#: tmp_error_headers/error_list_mini.hpp:72
-#: tmp_error_headers/error_list_ix.hpp:86
-#: tmp_error_headers/error_list_ix.hpp:100
-#: tmp_error_headers/error_list_ix.hpp:114
-#: tmp_error_headers/error_list_mk4.hpp:79
-#: tmp_error_headers/error_list_mk4.hpp:93
-#: tmp_error_headers/error_list_mk4.hpp:107
 #: tmp_error_headers/error_list_mk35.hpp:65
 #: tmp_error_headers/error_list_mk35.hpp:79
 #: tmp_error_headers/error_list_mk35.hpp:93
 #: tmp_error_headers/error_list_coreone.hpp:128
 #: tmp_error_headers/error_list_coreone.hpp:142
 #: tmp_error_headers/error_list_coreone.hpp:156
+#: tmp_error_headers/error_list_mini.hpp:44
+#: tmp_error_headers/error_list_mini.hpp:58
+#: tmp_error_headers/error_list_mini.hpp:72
+#: tmp_error_headers/error_list_mk4.hpp:79
+#: tmp_error_headers/error_list_mk4.hpp:93
+#: tmp_error_headers/error_list_mk4.hpp:107
+#: tmp_error_headers/error_list_ix.hpp:86
+#: tmp_error_headers/error_list_ix.hpp:100
+#: tmp_error_headers/error_list_ix.hpp:114
 msgid "Check the print head thermistor wiring for possible damage."
 msgstr "Zkontrolujte, zda není poškozen kabel termistoru tiskové hlavy."
 
@@ -1316,6 +1356,24 @@ msgstr "Očistěte podložku."
 msgid "Cleaning nozzle"
 msgstr "Čištění trysky"
 
+#: tmp_error_headers/error_list_coreone.hpp:897
+#: tmp_error_headers/error_list_coreone.hpp:904
+#: tmp_error_headers/error_list_coreone.hpp:911
+#: tmp_error_headers/error_list_coreone.hpp:918
+#: tmp_error_headers/error_list_coreone.hpp:925
+#: tmp_error_headers/error_list_xl.hpp:946
+#: tmp_error_headers/error_list_xl.hpp:953
+#: tmp_error_headers/error_list_xl.hpp:960
+#: tmp_error_headers/error_list_xl.hpp:967
+#: tmp_error_headers/error_list_xl.hpp:974
+#: tmp_error_headers/error_list_mk4.hpp:687
+#: tmp_error_headers/error_list_mk4.hpp:694
+#: tmp_error_headers/error_list_mk4.hpp:701
+#: tmp_error_headers/error_list_mk4.hpp:708
+#: tmp_error_headers/error_list_mk4.hpp:715
+msgid "Cleaning the nozzle"
+msgstr "Čištění trysky"
+
 #: src/gui/screen_move_z.hpp:21
 msgid "Click the knob to close"
 msgstr "Stiskněte tlačítko pro ukončení"
@@ -1341,10 +1399,10 @@ msgstr "Zavřete dvířka idleru a zajistěte je sponou. Kalibrace je hotová!"
 msgid "Code: %s"
 msgstr "Kód: %s"
 
-#: src/gui/MItem_tools.hpp:491 tmp_error_headers/error_list_xl.hpp:687
-#: tmp_error_headers/error_list_mk4.hpp:470
-#: tmp_error_headers/error_list_mk35.hpp:442
+#: src/gui/MItem_tools.hpp:492 tmp_error_headers/error_list_mk35.hpp:442
 #: tmp_error_headers/error_list_coreone.hpp:638
+#: tmp_error_headers/error_list_xl.hpp:687
+#: tmp_error_headers/error_list_mk4.hpp:470
 msgid "Cold Pull"
 msgstr "Cold Pull"
 
@@ -1386,11 +1444,11 @@ msgstr ""
 msgid "Computing best shaper..."
 msgstr "Výpočet nejlepší konfigurace..."
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:145
+#: src/gui/screen/filament/screen_filament_detail.cpp:155
 msgid "Confirm"
 msgstr "Potvrdit"
 
-#: src/gui/MItem_tools.cpp:827 src/gui/screen_menu_network_status.hpp:39
+#: src/gui/screen_menu_network_status.hpp:39 src/gui/MItem_tools.cpp:827
 msgid "Connect"
 msgstr "Connect"
 
@@ -1431,7 +1489,7 @@ msgstr "Pokračovat v kalibracích a testech?"
 msgid "Control"
 msgstr "Ovládání"
 
-#: src/gui/screen_menu_temperature.hpp:29 src/gui/screen_menu_move.hpp:33
+#: src/gui/screen_menu_move.hpp:33 src/gui/screen_menu_temperature.hpp:29
 msgid "Cooldown"
 msgstr "Zchladit"
 
@@ -1528,11 +1586,11 @@ msgstr "VYPNOUT FS"
 msgid "DISABLE MMU"
 msgstr "VYPNOUT MMU"
 
-#: tmp_error_headers/error_list_xl.hpp:379
-#: tmp_error_headers/error_list_ix.hpp:365
-#: tmp_error_headers/error_list_mk4.hpp:260
 #: tmp_error_headers/error_list_mk35.hpp:246
 #: tmp_error_headers/error_list_coreone.hpp:344
+#: tmp_error_headers/error_list_xl.hpp:379
+#: tmp_error_headers/error_list_mk4.hpp:260
+#: tmp_error_headers/error_list_ix.hpp:365
 msgid "DISPLAY PROBLEM DETECTED"
 msgstr "DETEKOVÁN PROBLÉM DISPLEJE"
 
@@ -1540,7 +1598,7 @@ msgstr "DETEKOVÁN PROBLÉM DISPLEJE"
 msgid "DIY"
 msgstr "Vlastní"
 
-#: src/gui/MItem_network.hpp:160 src/gui/screen_menu_network_status.hpp:31
+#: src/gui/screen_menu_network_status.hpp:31 src/gui/MItem_network.hpp:160
 msgid "DNS"
 msgstr "DNS"
 
@@ -1624,11 +1682,11 @@ msgstr ""
 msgid "Detecting steel sheet"
 msgstr "Detekuji tiskový plát"
 
-#: src/gui/MItem_tools.hpp:511
+#: src/gui/MItem_tools.hpp:512
 msgid "Device Hash in QR"
 msgstr "Hash zařízení v QR"
 
-#: src/gui/MItem_tools.hpp:100
+#: src/gui/MItem_tools.hpp:101
 msgid "Disable Motors"
 msgstr "Vypnout motory"
 
@@ -1641,8 +1699,8 @@ msgid "Disconnect"
 msgstr "Odpojit"
 
 #. //MSG_PROGRESS_ENGAGE_IDLER c=20
-#: src/mmu2/mmu2_progress_converter.cpp:9
 #: src/gui/dialogs/DialogLoadUnload.cpp:67
+#: src/mmu2/mmu2_progress_converter.cpp:9
 msgid "Disengaging idler"
 msgstr "Odpojuji idler"
 
@@ -1650,11 +1708,11 @@ msgstr "Odpojuji idler"
 msgid "Display Refresh Speed"
 msgstr "Rychlost obnovy displeje"
 
-#: tmp_error_headers/error_list_xl.hpp:380
-#: tmp_error_headers/error_list_ix.hpp:366
-#: tmp_error_headers/error_list_mk4.hpp:261
 #: tmp_error_headers/error_list_mk35.hpp:247
 #: tmp_error_headers/error_list_coreone.hpp:345
+#: tmp_error_headers/error_list_xl.hpp:380
+#: tmp_error_headers/error_list_mk4.hpp:261
+#: tmp_error_headers/error_list_ix.hpp:366
 msgid ""
 "Display issues detected. Reducing the refresh rate will possibly solve the "
 "problem. Proceed?"
@@ -1686,6 +1744,10 @@ msgstr ""
 #: src/gui/wizard/selftest_frame_dock.cpp:52
 msgid "Do not touch the printer. Be careful around the moving parts."
 msgstr "Nedotýkejte se tiskárny. Pozor na pohyblivé části."
+
+#: src/gui/screen/dialog_safety_timer.cpp:24
+msgid "Do you really want to abort the print?"
+msgstr "Opravdu chcete přerušit tisk?"
 
 #: src/gui/screen/filament/screen_filaments_reorder.cpp:153
 msgid "Do you really want to restore default filament ordering?"
@@ -1804,7 +1866,7 @@ msgstr "Nedotýkejte se extruderu."
 msgid "Done"
 msgstr "Hotovo"
 
-#: src/gui/MItem_tools.cpp:661 src/gui/MItem_hardware.hpp:68
+#: src/gui/MItem_hardware.hpp:68 src/gui/MItem_tools.cpp:661
 msgid "Door Sensor"
 msgstr "Senzor dveří"
 
@@ -1826,7 +1888,7 @@ msgstr "Stáhněte firmware (.bbf) na USB disk."
 msgid "Downloading..."
 msgstr "Stahování..."
 
-#: src/gui/MItem_tools.hpp:130
+#: src/gui/MItem_tools.hpp:131
 msgid "Dry run (no extrusion)"
 msgstr "Běh naprázdno (bez extruze)"
 
@@ -1873,12 +1935,12 @@ msgstr "E3D Revo"
 msgid "EJECT FROM MMU"
 msgstr "PŘEDNÍ VYSUNUTÍ Z MMU"
 
-#: tmp_error_headers/error_list_mini.hpp:232
-#: tmp_error_headers/error_list_xl.hpp:414
-#: tmp_error_headers/error_list_ix.hpp:393
-#: tmp_error_headers/error_list_mk4.hpp:281
 #: tmp_error_headers/error_list_mk35.hpp:267
 #: tmp_error_headers/error_list_coreone.hpp:365
+#: tmp_error_headers/error_list_xl.hpp:414
+#: tmp_error_headers/error_list_mini.hpp:232
+#: tmp_error_headers/error_list_mk4.hpp:281
+#: tmp_error_headers/error_list_ix.hpp:393
 msgid "EMERGENCY STOP"
 msgstr "NOUZOVÉ ZASTAVENÍ"
 
@@ -1900,14 +1962,14 @@ msgid "ERR Helping filament"
 msgstr "ERR: Asist. filamentu"
 
 #. //MSG_PROGRESS_WAIT_USER c=20
-#: src/mmu2/mmu2_progress_converter.cpp:18
 #: src/gui/dialogs/DialogLoadUnload.cpp:75
+#: src/mmu2/mmu2_progress_converter.cpp:18
 msgid "ERR Internal"
 msgstr "ERR: Interní"
 
 #. //MSG_PROGRESS_ERR_HELP_FIL c=20
-#: src/mmu2/mmu2_progress_converter.cpp:20
 #: src/gui/dialogs/DialogLoadUnload.cpp:77
+#: src/mmu2/mmu2_progress_converter.cpp:20
 msgid "ERR TMC failed"
 msgstr "ERR: selhání TMC"
 
@@ -1944,12 +2006,12 @@ msgstr "EXTRUDER: CHYBA MAXTEMP"
 msgid "EXTRUDER MINTEMP ERROR"
 msgstr "EXTRUDER: CHYBA MINTEMP"
 
-#: tmp_error_headers/error_list_mini.hpp:386
-#: tmp_error_headers/error_list_xl.hpp:680
-#: tmp_error_headers/error_list_ix.hpp:652
-#: tmp_error_headers/error_list_mk4.hpp:456
 #: tmp_error_headers/error_list_mk35.hpp:428
 #: tmp_error_headers/error_list_coreone.hpp:624
+#: tmp_error_headers/error_list_xl.hpp:680
+#: tmp_error_headers/error_list_mini.hpp:386
+#: tmp_error_headers/error_list_mk4.hpp:456
+#: tmp_error_headers/error_list_ix.hpp:652
 msgid "EXTRUDER NOT DETECTED"
 msgstr "EXTRUDER NEBYL DETEKOVÁN"
 
@@ -1974,18 +2036,18 @@ msgid "Ejecting"
 msgstr "Vysouvání"
 
 #. //MSG_PROGRESS_PARK_SELECTOR c=20
-#: src/mmu2/mmu2_progress_converter.cpp:29
 #: src/gui/dialogs/DialogLoadUnload.cpp:86
 #: src/gui/dialogs/DialogLoadUnload.cpp:497
+#: src/mmu2/mmu2_progress_converter.cpp:29
 msgid "Ejecting filament"
 msgstr "Vysunutí z MMU"
 
-#: tmp_error_headers/error_list_mini.hpp:233
-#: tmp_error_headers/error_list_xl.hpp:415
-#: tmp_error_headers/error_list_ix.hpp:394
-#: tmp_error_headers/error_list_mk4.hpp:282
 #: tmp_error_headers/error_list_mk35.hpp:268
 #: tmp_error_headers/error_list_coreone.hpp:366
+#: tmp_error_headers/error_list_xl.hpp:415
+#: tmp_error_headers/error_list_mini.hpp:233
+#: tmp_error_headers/error_list_mk4.hpp:282
+#: tmp_error_headers/error_list_ix.hpp:394
 msgid "Emergency stop invoked by G-code (M112)."
 msgstr "G-Code M112 aktivoval nouzové zastavení."
 
@@ -2001,7 +2063,7 @@ msgstr "Povolit filamenty"
 msgid "Enable Metrics"
 msgstr "Povolit metriky"
 
-#: src/gui/screen_menu_connect.hpp:12 src/gui/screen_prusa_link.hpp:29
+#: src/gui/screen_prusa_link.hpp:29 src/gui/screen_menu_connect.hpp:12
 msgid "Enabled"
 msgstr "Zapnuto"
 
@@ -2034,10 +2096,10 @@ msgstr "Teplota v boxu"
 msgid "End of test"
 msgstr "Konec testu"
 
-#. //MSG_PROGRESS_OK c=4
 #. MMU-related
-#: src/mmu2/mmu2_progress_converter.cpp:8
+#. //MSG_PROGRESS_OK c=4
 #: src/gui/dialogs/DialogLoadUnload.cpp:66
+#: src/mmu2/mmu2_progress_converter.cpp:8
 msgid "Engaging idler"
 msgstr "Aktivace idleru"
 
@@ -2057,19 +2119,18 @@ msgstr ""
 msgid "Enter credentials manually"
 msgstr "Vložit údaje ručně"
 
-#: src/guiapi/src/window_msgbox.cpp:300 src/gui/screen_menu_connect.cpp:50
-#: src/gui/screen_menu_connect.hpp:33
 #: src/gui/wizard/screen_belt_tuning_wizard.cpp:25
-#: src/gui/screen_network_setup.cpp:340
+#: src/gui/screen_menu_connect.cpp:50 src/gui/screen_network_setup.cpp:340
+#: src/gui/screen_menu_connect.hpp:33 src/guiapi/src/window_msgbox.cpp:300
 msgid "Error"
 msgstr "Chyba"
 
-#: tmp_error_headers/error_list_mini.hpp:317
-#: tmp_error_headers/error_list_xl.hpp:611
-#: tmp_error_headers/error_list_ix.hpp:583
-#: tmp_error_headers/error_list_mk4.hpp:387
 #: tmp_error_headers/error_list_mk35.hpp:359
 #: tmp_error_headers/error_list_coreone.hpp:555
+#: tmp_error_headers/error_list_xl.hpp:611
+#: tmp_error_headers/error_list_mini.hpp:317
+#: tmp_error_headers/error_list_mk4.hpp:387
+#: tmp_error_headers/error_list_ix.hpp:583
 msgid ""
 "Error erasing\n"
 " flash! Restart\n"
@@ -2162,7 +2223,7 @@ msgstr "FILAMENT"
 msgid "FILAMENT CHANGE"
 msgstr "VÝMĚNA FILAMENTU"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:153
+#: src/gui/screen/filament/screen_filament_detail.cpp:163
 msgid "FILAMENT DETAIL"
 msgstr "DETAIL FILAMENTU"
 
@@ -2252,21 +2313,21 @@ msgstr ""
 msgid "FINISHED"
 msgstr "DOKONČENO"
 
-#: tmp_error_headers/error_list_mini.hpp:365
-#: tmp_error_headers/error_list_xl.hpp:659
-#: tmp_error_headers/error_list_ix.hpp:631
-#: tmp_error_headers/error_list_mk4.hpp:435
 #: tmp_error_headers/error_list_mk35.hpp:407
 #: tmp_error_headers/error_list_coreone.hpp:603
+#: tmp_error_headers/error_list_xl.hpp:659
+#: tmp_error_headers/error_list_mini.hpp:365
+#: tmp_error_headers/error_list_mk4.hpp:435
+#: tmp_error_headers/error_list_ix.hpp:631
 msgid "FIRMWARE MISSING"
 msgstr "CHYBÍ FIRMWARE"
 
-#: tmp_error_headers/error_list_mini.hpp:344
-#: tmp_error_headers/error_list_xl.hpp:638
-#: tmp_error_headers/error_list_ix.hpp:610
-#: tmp_error_headers/error_list_mk4.hpp:414
 #: tmp_error_headers/error_list_mk35.hpp:386
 #: tmp_error_headers/error_list_coreone.hpp:582
+#: tmp_error_headers/error_list_xl.hpp:638
+#: tmp_error_headers/error_list_mini.hpp:344
+#: tmp_error_headers/error_list_mk4.hpp:414
+#: tmp_error_headers/error_list_ix.hpp:610
 msgid "FIRMWARExPRINTER MISMATCH"
 msgstr "NESHODA FIRMWARExTISKÁRNA"
 
@@ -2274,12 +2335,12 @@ msgstr "NESHODA FIRMWARExTISKÁRNA"
 msgid "FIRST LAYER CALIBRATION"
 msgstr "KALIBRACE PRVNÍ VRSTVY"
 
-#: tmp_error_headers/error_list_mini.hpp:316
-#: tmp_error_headers/error_list_xl.hpp:610
-#: tmp_error_headers/error_list_ix.hpp:582
-#: tmp_error_headers/error_list_mk4.hpp:386
 #: tmp_error_headers/error_list_mk35.hpp:358
 #: tmp_error_headers/error_list_coreone.hpp:554
+#: tmp_error_headers/error_list_xl.hpp:610
+#: tmp_error_headers/error_list_mini.hpp:316
+#: tmp_error_headers/error_list_mk4.hpp:386
+#: tmp_error_headers/error_list_ix.hpp:582
 msgid "FLASH ERASE ERROR"
 msgstr "CHYBA MAZÁNÍ FLASH"
 
@@ -2323,12 +2384,12 @@ msgstr "Boční senzor filamentu"
 msgid "FSensors Disabled"
 msgstr "Senzory fil. vypnuté"
 
-#: tmp_error_headers/error_list_mini.hpp:337
-#: tmp_error_headers/error_list_xl.hpp:631
-#: tmp_error_headers/error_list_ix.hpp:603
-#: tmp_error_headers/error_list_mk4.hpp:407
 #: tmp_error_headers/error_list_mk35.hpp:379
 #: tmp_error_headers/error_list_coreone.hpp:575
+#: tmp_error_headers/error_list_xl.hpp:631
+#: tmp_error_headers/error_list_mini.hpp:337
+#: tmp_error_headers/error_list_mk4.hpp:407
+#: tmp_error_headers/error_list_ix.hpp:603
 msgid "FW IN INTERNAL FLASH CORRUPTED"
 msgstr "FW V INTERNÍ PAMĚTI POŠKOZEN"
 
@@ -2340,7 +2401,7 @@ msgstr "FW RUNTIME CHYBA"
 msgid "FW ok"
 msgstr "FW OK"
 
-#: src/gui/screen_menu_settings.hpp:36
+#: src/gui/screen_menu_settings.hpp:41
 msgid "FW update"
 msgstr "Aktualizace FW"
 
@@ -2368,8 +2429,8 @@ msgstr ""
 "Nelze provést homing. Pokud budete pokračovat, může dojít k posunům vrstev "
 "po opětovném homingu nebo k problémům s toolchangerem."
 
-#: tmp_error_headers/error_list_ix.hpp:16
 #: tmp_error_headers/error_list_coreone.hpp:16
+#: tmp_error_headers/error_list_ix.hpp:16
 msgid ""
 "Failed to calibrate homing. Continuing can cause layer shifts after rehoming."
 msgstr ""
@@ -2394,10 +2455,10 @@ msgid ""
 msgstr ""
 "Selhal homing na ose Y. Ujistěte se, že na osách X a Y nejsou žádné překážky."
 
-#: tmp_error_headers/error_list_mini.hpp:114
-#: tmp_error_headers/error_list_mk4.hpp:149
 #: tmp_error_headers/error_list_mk35.hpp:135
 #: tmp_error_headers/error_list_coreone.hpp:233
+#: tmp_error_headers/error_list_mini.hpp:114
+#: tmp_error_headers/error_list_mk4.hpp:149
 msgid "Failed to home the Y-axis, make sure there is no obstacle on Y-axis."
 msgstr "Selhal homing na ose Y. Ujistěte se, že v cestě nejsou žádné překážky."
 
@@ -2405,11 +2466,11 @@ msgstr "Selhal homing na ose Y. Ujistěte se, že v cestě nejsou žádné přek
 msgid "Failed to home the Z-axis, make sure the loadcell is working."
 msgstr "Chyba při homingu osy Z - ujistěte se, že Loadcell funguje."
 
-#: tmp_error_headers/error_list_mini.hpp:107
-#: tmp_error_headers/error_list_ix.hpp:233
-#: tmp_error_headers/error_list_mk4.hpp:142
 #: tmp_error_headers/error_list_mk35.hpp:128
 #: tmp_error_headers/error_list_coreone.hpp:226
+#: tmp_error_headers/error_list_mini.hpp:107
+#: tmp_error_headers/error_list_mk4.hpp:142
+#: tmp_error_headers/error_list_ix.hpp:233
 msgid ""
 "Failed to home the extruder in X-axis, make sure there is no obstacle on X-"
 "axis."
@@ -2422,9 +2483,9 @@ msgid ""
 msgstr ""
 "Selhal homing extruderu na ose Y. Ujistěte se, že na ose nejsou překážky."
 
-#: tmp_error_headers/error_list_ix.hpp:212
-#: tmp_error_headers/error_list_mk4.hpp:135
 #: tmp_error_headers/error_list_coreone.hpp:219
+#: tmp_error_headers/error_list_mk4.hpp:135
+#: tmp_error_headers/error_list_ix.hpp:212
 msgid ""
 "Failed to home the extruder in Z-axis, make sure the loadcell is working."
 msgstr "Chyba při homingu na ose Z. Ujistěte se, že senzor Loadcell funguje."
@@ -2458,7 +2519,7 @@ msgstr "Chyba při obnově kalibračních dat"
 msgid "Failed to save calibration data"
 msgstr "Chyba při ukládání kalibračních dat"
 
-#: src/gui/MItem_tools.hpp:217
+#: src/gui/MItem_tools.hpp:218
 msgid "Fan Check"
 msgstr "Kontrola ventilátorů"
 
@@ -2475,8 +2536,8 @@ msgid "Features required:"
 msgstr "Vyžadovány funkce:"
 
 #. //MSG_PROGRESS_UNLOAD_PULLEY c=20
-#: src/mmu2/mmu2_progress_converter.cpp:12
 #: src/gui/dialogs/DialogLoadUnload.cpp:70
+#: src/mmu2/mmu2_progress_converter.cpp:12
 msgid "Feeding to FINDA"
 msgstr "Zavádím do FINDA"
 
@@ -2499,25 +2560,25 @@ msgid "Feeding to fsensor"
 msgstr "Zavádím k senzoru filamentu"
 
 #. //MSG_PROGRESS_FEED_EXTRUDER c=20
-#: src/mmu2/mmu2_progress_converter.cpp:14
 #: src/gui/dialogs/DialogLoadUnload.cpp:72
+#: src/mmu2/mmu2_progress_converter.cpp:14
 msgid "Feeding to nozzle"
 msgstr "Zavádím do trysky"
 
-#: tmp_error_headers/error_list_xl.hpp:64
-#: tmp_error_headers/error_list_ix.hpp:29
-#: tmp_error_headers/error_list_mk4.hpp:22
-#: tmp_error_headers/error_list_mk4.hpp:29
 #: tmp_error_headers/error_list_mk35.hpp:8
 #: tmp_error_headers/error_list_mk35.hpp:15
 #: tmp_error_headers/error_list_coreone.hpp:50
 #: tmp_error_headers/error_list_coreone.hpp:57
+#: tmp_error_headers/error_list_xl.hpp:64
+#: tmp_error_headers/error_list_mk4.hpp:22
+#: tmp_error_headers/error_list_mk4.hpp:29
+#: tmp_error_headers/error_list_ix.hpp:29
 msgid "Fil. Sensor Troubleshooting"
 msgstr "Řešení potíží senzorů fil."
 
-#: src/common/footer_def.cpp:12 src/gui/MItem_tools.hpp:348
+#: src/common/footer_def.cpp:12
 #: src/gui/screen/filament/screen_filaments_loaded.cpp:30
-#: src/gui/screen_home.cpp:136
+#: src/gui/screen_home.cpp:136 src/gui/MItem_tools.hpp:349
 msgid "Filament"
 msgstr "Filament"
 
@@ -2535,7 +2596,7 @@ msgstr ""
 "Filament '%s' je abrazivní, ale nemáte nainstalovanou tvrzenou trysku. "
 "Skutečně chcete pokračovat?"
 
-#: src/gui/MItem_tools.hpp:262
+#: src/gui/MItem_tools.hpp:263
 msgid "Filament Autoloading"
 msgstr "Auto zavedení filamentu"
 
@@ -2544,19 +2605,19 @@ msgid "Filament Change"
 msgstr "Výměna filamentu"
 
 #. If the printer has filament sensors menu, this item is inside it and is supposed to be called differently (BFW-4973)
-#: src/gui/MItem_tools.hpp:37
+#: src/gui/MItem_tools.hpp:38
 msgid "Filament Sensing"
 msgstr "Nastavení senzorů filamentu"
 
-#: src/gui/MItem_tools.hpp:37 src/gui/MItem_tools.cpp:542
+#: src/gui/MItem_tools.cpp:542 src/gui/MItem_tools.hpp:38
 msgid "Filament Sensor"
 msgstr "Filament senzor"
 
-#: tmp_error_headers/error_list_xl.hpp:71
-#: tmp_error_headers/error_list_ix.hpp:36
-#: tmp_error_headers/error_list_mk4.hpp:36
 #: tmp_error_headers/error_list_mk35.hpp:22
 #: tmp_error_headers/error_list_coreone.hpp:64
+#: tmp_error_headers/error_list_xl.hpp:71
+#: tmp_error_headers/error_list_mk4.hpp:36
+#: tmp_error_headers/error_list_ix.hpp:36
 msgid "Filament Sensors Disabled"
 msgstr "Senzory fil. vypnuté"
 
@@ -2582,9 +2643,9 @@ msgstr ""
 "Neočekávaná detekce filamentu. Ujistěte se, že filament není zaveden. "
 "Zkontrolujte zapojení senzoru."
 
-#: tmp_error_headers/error_list_mk4.hpp:520
 #: tmp_error_headers/error_list_mk35.hpp:492
 #: tmp_error_headers/error_list_coreone.hpp:688
+#: tmp_error_headers/error_list_mk4.hpp:520
 msgid ""
 "Filament detected. Unload filament now? Select NO to start the print with "
 "the currently loaded filament."
@@ -2600,12 +2661,12 @@ msgstr "Filament vložen, vyberte Pokračovat."
 msgid "Filament is not customizable"
 msgstr "Filament není nastavitelný"
 
-#: tmp_error_headers/error_list_mini.hpp:569
-#: tmp_error_headers/error_list_xl.hpp:933
-#: tmp_error_headers/error_list_ix.hpp:849
-#: tmp_error_headers/error_list_mk4.hpp:681
 #: tmp_error_headers/error_list_mk35.hpp:653
 #: tmp_error_headers/error_list_coreone.hpp:863
+#: tmp_error_headers/error_list_xl.hpp:933
+#: tmp_error_headers/error_list_mini.hpp:569
+#: tmp_error_headers/error_list_mk4.hpp:681
+#: tmp_error_headers/error_list_ix.hpp:849
 msgid "Filament loading timed out."
 msgstr "Vypršel čas pro zavedení filamentu."
 
@@ -2613,12 +2674,12 @@ msgstr "Vypršel čas pro zavedení filamentu."
 msgid "Filament needs to be heated and pushed back to the nozzle."
 msgstr "Filament musí být zahřán a vtlačen zpět do trysky."
 
-#: tmp_error_headers/error_list_mini.hpp:422
-#: tmp_error_headers/error_list_xl.hpp:723
-#: tmp_error_headers/error_list_ix.hpp:688
-#: tmp_error_headers/error_list_mk4.hpp:506
 #: tmp_error_headers/error_list_mk35.hpp:478
 #: tmp_error_headers/error_list_coreone.hpp:674
+#: tmp_error_headers/error_list_xl.hpp:723
+#: tmp_error_headers/error_list_mini.hpp:422
+#: tmp_error_headers/error_list_mk4.hpp:506
+#: tmp_error_headers/error_list_ix.hpp:688
 msgid ""
 "Filament not detected. Load filament now?\n"
 "Select NO to cancel the print.\n"
@@ -2680,12 +2741,12 @@ msgstr ""
 msgid "Filament sensors"
 msgstr "Senzory filamentu"
 
-#: tmp_error_headers/error_list_mini.hpp:16
-#: tmp_error_headers/error_list_xl.hpp:72
-#: tmp_error_headers/error_list_ix.hpp:37
-#: tmp_error_headers/error_list_mk4.hpp:37
 #: tmp_error_headers/error_list_mk35.hpp:23
 #: tmp_error_headers/error_list_coreone.hpp:65
+#: tmp_error_headers/error_list_xl.hpp:72
+#: tmp_error_headers/error_list_mini.hpp:16
+#: tmp_error_headers/error_list_mk4.hpp:37
+#: tmp_error_headers/error_list_ix.hpp:37
 msgid "Filament sensors are disabled. Enable them manually after printing."
 msgstr "Senzory filamentů jsou vypnuté. Po tisku je zapněte ručně."
 
@@ -2697,9 +2758,9 @@ msgstr "Senzor filamentu zkalibrován."
 msgid "Filament sensors calibration"
 msgstr "Kalibrace senzoru filamentu"
 
+#: tmp_error_headers/error_list_coreone.hpp:93
 #: tmp_error_headers/error_list_xl.hpp:86
 #: tmp_error_headers/error_list_ix.hpp:51
-#: tmp_error_headers/error_list_coreone.hpp:93
 msgid ""
 "Filament was detected in the extruder filament sensor. Please remove it "
 "manually before proceeding."
@@ -2719,18 +2780,18 @@ msgstr "Soubor poškozen"
 msgid "File doesn't contain any print instructions"
 msgstr "Soubor neobsahuje žádné tiskové instrukce"
 
-#: tmp_error_headers/error_list_mini.hpp:435
-#: tmp_error_headers/error_list_mini.hpp:436
-#: tmp_error_headers/error_list_xl.hpp:736
-#: tmp_error_headers/error_list_xl.hpp:737
-#: tmp_error_headers/error_list_ix.hpp:701
-#: tmp_error_headers/error_list_ix.hpp:702
-#: tmp_error_headers/error_list_mk4.hpp:526
-#: tmp_error_headers/error_list_mk4.hpp:527
 #: tmp_error_headers/error_list_mk35.hpp:498
 #: tmp_error_headers/error_list_mk35.hpp:499
 #: tmp_error_headers/error_list_coreone.hpp:694
 #: tmp_error_headers/error_list_coreone.hpp:695
+#: tmp_error_headers/error_list_xl.hpp:736
+#: tmp_error_headers/error_list_xl.hpp:737
+#: tmp_error_headers/error_list_mini.hpp:435
+#: tmp_error_headers/error_list_mini.hpp:436
+#: tmp_error_headers/error_list_mk4.hpp:526
+#: tmp_error_headers/error_list_mk4.hpp:527
+#: tmp_error_headers/error_list_ix.hpp:701
+#: tmp_error_headers/error_list_ix.hpp:702
 msgid "File error"
 msgstr "Chyba souboru"
 
@@ -2742,12 +2803,12 @@ msgstr "Chyba čtení souboru"
 msgid "File removed or transfer aborted"
 msgstr "Soubor odstraněn nebo přenos zrušen"
 
-#: tmp_error_headers/error_list_mini.hpp:373
-#: tmp_error_headers/error_list_xl.hpp:667
-#: tmp_error_headers/error_list_ix.hpp:639
-#: tmp_error_headers/error_list_mk4.hpp:443
 #: tmp_error_headers/error_list_mk35.hpp:415
 #: tmp_error_headers/error_list_coreone.hpp:611
+#: tmp_error_headers/error_list_xl.hpp:667
+#: tmp_error_headers/error_list_mini.hpp:373
+#: tmp_error_headers/error_list_mk4.hpp:443
+#: tmp_error_headers/error_list_ix.hpp:639
 msgid ""
 "File system error!\n"
 "Try a different USB\n"
@@ -2778,8 +2839,8 @@ msgstr "Využití filtru"
 msgid "Filtration Fan"
 msgstr "Ventilátor filtrace"
 
-#: src/gui/menu_item/specific/menu_items_xbuddy_extension.cpp:96
 #: src/gui/wizard/screen_fan_selftest.cpp:65
+#: src/gui/menu_item/specific/menu_items_xbuddy_extension.cpp:96
 msgid "Filtration fan"
 msgstr "Ventilátor filtrace"
 
@@ -2792,8 +2853,8 @@ msgid "Finishing buffered gcodes"
 msgstr "Dokončování načtených G-codů"
 
 #. //MSG_PROGRESS_AVOID_GRIND c=20
-#: src/mmu2/mmu2_progress_converter.cpp:16
 #: src/gui/dialogs/DialogLoadUnload.cpp:74
+#: src/mmu2/mmu2_progress_converter.cpp:16
 msgid "Finishing moves"
 msgstr "Dokončování pohybů"
 
@@ -2815,13 +2876,13 @@ msgstr ""
 "Důkladně připevněte akcelerometr k vyhřívané podložce. V dalším kroku se "
 "bude podložka pohybovat a budou zaznamenána kalibrační data."
 
-#: tmp_error_headers/error_list_mk4.hpp:463
 #: tmp_error_headers/error_list_mk35.hpp:435
 #: tmp_error_headers/error_list_coreone.hpp:631
+#: tmp_error_headers/error_list_mk4.hpp:463
 msgid "Firmware Update Required"
 msgstr "Nutná aktualizace firmwaru"
 
-#: src/gui/MItem_tools.hpp:227 include/common/hw_check.hpp:34
+#: src/gui/MItem_tools.hpp:228 include/common/hw_check.hpp:34
 msgid "Firmware Version"
 msgstr "Verze firmwaru"
 
@@ -2844,11 +2905,11 @@ msgstr ""
 "firmware pro vaši\n"
 "tiskárnu."
 
-#: tmp_error_headers/error_list_xl.hpp:639
-#: tmp_error_headers/error_list_ix.hpp:611
-#: tmp_error_headers/error_list_mk4.hpp:415
 #: tmp_error_headers/error_list_mk35.hpp:387
 #: tmp_error_headers/error_list_coreone.hpp:583
+#: tmp_error_headers/error_list_xl.hpp:639
+#: tmp_error_headers/error_list_mk4.hpp:415
+#: tmp_error_headers/error_list_ix.hpp:611
 msgid ""
 "Firmware and hardware versions do\n"
 "not match. Make sure you have\n"
@@ -2860,12 +2921,12 @@ msgstr ""
 "správný firmware pro\n"
 "vaši tiskárnu."
 
-#: tmp_error_headers/error_list_mini.hpp:310
-#: tmp_error_headers/error_list_xl.hpp:604
-#: tmp_error_headers/error_list_ix.hpp:576
-#: tmp_error_headers/error_list_mk4.hpp:380
 #: tmp_error_headers/error_list_mk35.hpp:352
 #: tmp_error_headers/error_list_coreone.hpp:548
+#: tmp_error_headers/error_list_xl.hpp:604
+#: tmp_error_headers/error_list_mini.hpp:310
+#: tmp_error_headers/error_list_mk4.hpp:380
+#: tmp_error_headers/error_list_ix.hpp:576
 msgid ""
 "Firmware file\n"
 "missing in the USB\n"
@@ -2875,12 +2936,12 @@ msgstr ""
 "chybí na USB\n"
 "disku!"
 
-#: tmp_error_headers/error_list_mini.hpp:303
-#: tmp_error_headers/error_list_xl.hpp:597
-#: tmp_error_headers/error_list_ix.hpp:569
-#: tmp_error_headers/error_list_mk4.hpp:373
 #: tmp_error_headers/error_list_mk35.hpp:345
 #: tmp_error_headers/error_list_coreone.hpp:541
+#: tmp_error_headers/error_list_xl.hpp:597
+#: tmp_error_headers/error_list_mini.hpp:303
+#: tmp_error_headers/error_list_mk4.hpp:373
+#: tmp_error_headers/error_list_ix.hpp:569
 msgid ""
 "Firmware file has\n"
 "invalid size!\n"
@@ -2894,12 +2955,12 @@ msgstr ""
 "soubor na USB\n"
 "a akci opakujte."
 
-#: tmp_error_headers/error_list_mini.hpp:331
-#: tmp_error_headers/error_list_xl.hpp:625
-#: tmp_error_headers/error_list_ix.hpp:597
-#: tmp_error_headers/error_list_mk4.hpp:401
 #: tmp_error_headers/error_list_mk35.hpp:373
 #: tmp_error_headers/error_list_coreone.hpp:569
+#: tmp_error_headers/error_list_xl.hpp:625
+#: tmp_error_headers/error_list_mini.hpp:331
+#: tmp_error_headers/error_list_mk4.hpp:401
+#: tmp_error_headers/error_list_ix.hpp:597
 msgid ""
 "Firmware hash\n"
 "verification failed!\n"
@@ -2915,12 +2976,12 @@ msgstr ""
 "a nakopírujte jej\n"
 "na USB disk znovu."
 
-#: tmp_error_headers/error_list_mini.hpp:338
-#: tmp_error_headers/error_list_xl.hpp:632
-#: tmp_error_headers/error_list_ix.hpp:604
-#: tmp_error_headers/error_list_mk4.hpp:408
 #: tmp_error_headers/error_list_mk35.hpp:380
 #: tmp_error_headers/error_list_coreone.hpp:576
+#: tmp_error_headers/error_list_xl.hpp:632
+#: tmp_error_headers/error_list_mini.hpp:338
+#: tmp_error_headers/error_list_mk4.hpp:408
+#: tmp_error_headers/error_list_ix.hpp:604
 msgid ""
 "Firmware in the\n"
 "internal flash\n"
@@ -2934,12 +2995,12 @@ msgstr ""
 "Nahrajte FW\n"
 "znovu."
 
-#: tmp_error_headers/error_list_mini.hpp:324
-#: tmp_error_headers/error_list_xl.hpp:618
-#: tmp_error_headers/error_list_ix.hpp:590
-#: tmp_error_headers/error_list_mk4.hpp:394
 #: tmp_error_headers/error_list_mk35.hpp:366
 #: tmp_error_headers/error_list_coreone.hpp:562
+#: tmp_error_headers/error_list_xl.hpp:618
+#: tmp_error_headers/error_list_mini.hpp:324
+#: tmp_error_headers/error_list_mk4.hpp:394
+#: tmp_error_headers/error_list_ix.hpp:590
 msgid ""
 "Firmware signature\n"
 "verification failed!\n"
@@ -2952,12 +3013,12 @@ msgstr ""
 "jen oficiální verze\n"
 "firmwaru."
 
-#: tmp_error_headers/error_list_mini.hpp:352
-#: tmp_error_headers/error_list_xl.hpp:646
-#: tmp_error_headers/error_list_ix.hpp:618
-#: tmp_error_headers/error_list_mk4.hpp:422
 #: tmp_error_headers/error_list_mk35.hpp:394
 #: tmp_error_headers/error_list_coreone.hpp:590
+#: tmp_error_headers/error_list_xl.hpp:646
+#: tmp_error_headers/error_list_mini.hpp:352
+#: tmp_error_headers/error_list_mk4.hpp:422
+#: tmp_error_headers/error_list_ix.hpp:618
 msgid ""
 "Firmware/printer\n"
 "types do not match.\n"
@@ -2973,12 +3034,12 @@ msgstr ""
 "verzi FW pro vaši\n"
 "tiskárnu."
 
-#: tmp_error_headers/error_list_mini.hpp:359
-#: tmp_error_headers/error_list_xl.hpp:653
-#: tmp_error_headers/error_list_ix.hpp:625
-#: tmp_error_headers/error_list_mk4.hpp:429
 #: tmp_error_headers/error_list_mk35.hpp:401
 #: tmp_error_headers/error_list_coreone.hpp:597
+#: tmp_error_headers/error_list_xl.hpp:653
+#: tmp_error_headers/error_list_mini.hpp:359
+#: tmp_error_headers/error_list_mk4.hpp:429
+#: tmp_error_headers/error_list_ix.hpp:625
 msgid ""
 "Firmware/printer\n"
 "versions do not\n"
@@ -3059,12 +3120,12 @@ msgstr "Přední strana [um]"
 msgid "Full Reset"
 msgstr "Kompletní obnovení"
 
-#: tmp_error_headers/error_list_mini.hpp:225
-#: tmp_error_headers/error_list_xl.hpp:393
-#: tmp_error_headers/error_list_ix.hpp:379
-#: tmp_error_headers/error_list_mk4.hpp:274
 #: tmp_error_headers/error_list_mk35.hpp:260
 #: tmp_error_headers/error_list_coreone.hpp:358
+#: tmp_error_headers/error_list_xl.hpp:393
+#: tmp_error_headers/error_list_mini.hpp:225
+#: tmp_error_headers/error_list_mk4.hpp:274
+#: tmp_error_headers/error_list_ix.hpp:379
 msgid "G-CODE METRICS CONFIG CHANGE"
 msgstr "ZMĚNA KONFIGURACE G-CODE METRIK"
 
@@ -3084,12 +3145,12 @@ msgstr "G-Code úroveň"
 msgid "G-Code filaments"
 msgstr "G-Code filamenty"
 
-#: tmp_error_headers/error_list_mini.hpp:527
-#: tmp_error_headers/error_list_xl.hpp:849
-#: tmp_error_headers/error_list_ix.hpp:793
-#: tmp_error_headers/error_list_mk4.hpp:632
 #: tmp_error_headers/error_list_mk35.hpp:611
 #: tmp_error_headers/error_list_coreone.hpp:800
+#: tmp_error_headers/error_list_xl.hpp:849
+#: tmp_error_headers/error_list_mini.hpp:527
+#: tmp_error_headers/error_list_mk4.hpp:632
+#: tmp_error_headers/error_list_ix.hpp:793
 msgid ""
 "G-Code transfer running too slow. Check your network for issues or use "
 "different USB drive. Press Continue to resume printing."
@@ -3097,12 +3158,12 @@ msgstr ""
 "Přenos G-code je moc pomalý. Zkontrolujte síť nebo použijte jiný USB disk. "
 "Vyberte Pokračovat pro navázání tisku."
 
-#: tmp_error_headers/error_list_mini.hpp:268
-#: tmp_error_headers/error_list_xl.hpp:555
-#: tmp_error_headers/error_list_ix.hpp:534
-#: tmp_error_headers/error_list_mk4.hpp:338
 #: tmp_error_headers/error_list_mk35.hpp:310
 #: tmp_error_headers/error_list_coreone.hpp:506
+#: tmp_error_headers/error_list_xl.hpp:555
+#: tmp_error_headers/error_list_mini.hpp:268
+#: tmp_error_headers/error_list_mk4.hpp:338
+#: tmp_error_headers/error_list_ix.hpp:534
 msgid ""
 "G-code command was too long and did not fit in the internal buffers. As a "
 "result, it may have been executed incorrectly."
@@ -3130,34 +3191,34 @@ msgstr "ZAROVNÁNÍ PŘEVODOVKY"
 msgid "GEARBOX ALIGNMENT"
 msgstr "ZAROVNÁNÍ PŘEVODOVKY"
 
-#: src/gui/MItem_network.hpp:151 src/gui/screen_menu_network_status.hpp:24
+#: src/gui/screen_menu_network_status.hpp:24 src/gui/MItem_network.hpp:151
 msgid "Gateway"
 msgstr "Brána"
 
-#: tmp_error_headers/error_list_mini.hpp:260
-#: tmp_error_headers/error_list_xl.hpp:547
-#: tmp_error_headers/error_list_ix.hpp:526
-#: tmp_error_headers/error_list_mk4.hpp:330
 #: tmp_error_headers/error_list_mk35.hpp:302
 #: tmp_error_headers/error_list_coreone.hpp:498
+#: tmp_error_headers/error_list_xl.hpp:547
+#: tmp_error_headers/error_list_mini.hpp:260
+#: tmp_error_headers/error_list_mk4.hpp:330
+#: tmp_error_headers/error_list_ix.hpp:526
 msgid "Gcode Corruption"
 msgstr "Poškozený G-code soubor"
 
-#: tmp_error_headers/error_list_mini.hpp:267
-#: tmp_error_headers/error_list_xl.hpp:554
-#: tmp_error_headers/error_list_ix.hpp:533
-#: tmp_error_headers/error_list_mk4.hpp:337
 #: tmp_error_headers/error_list_mk35.hpp:309
 #: tmp_error_headers/error_list_coreone.hpp:505
+#: tmp_error_headers/error_list_xl.hpp:554
+#: tmp_error_headers/error_list_mini.hpp:267
+#: tmp_error_headers/error_list_mk4.hpp:337
+#: tmp_error_headers/error_list_ix.hpp:533
 msgid "Gcode Cropped"
 msgstr "Oříznutý G-code"
 
-#: tmp_error_headers/error_list_mini.hpp:226
-#: tmp_error_headers/error_list_xl.hpp:394
-#: tmp_error_headers/error_list_ix.hpp:380
-#: tmp_error_headers/error_list_mk4.hpp:275
 #: tmp_error_headers/error_list_mk35.hpp:261
 #: tmp_error_headers/error_list_coreone.hpp:359
+#: tmp_error_headers/error_list_xl.hpp:394
+#: tmp_error_headers/error_list_mini.hpp:226
+#: tmp_error_headers/error_list_mk4.hpp:275
+#: tmp_error_headers/error_list_ix.hpp:380
 msgid ""
 "Gcode is trying to change metrics configuration.\n"
 "\n"
@@ -3167,12 +3228,12 @@ msgstr ""
 "\n"
 "Povolit změny?"
 
-#: tmp_error_headers/error_list_mini.hpp:261
-#: tmp_error_headers/error_list_xl.hpp:548
-#: tmp_error_headers/error_list_ix.hpp:527
-#: tmp_error_headers/error_list_mk4.hpp:331
 #: tmp_error_headers/error_list_mk35.hpp:303
 #: tmp_error_headers/error_list_coreone.hpp:499
+#: tmp_error_headers/error_list_xl.hpp:548
+#: tmp_error_headers/error_list_mini.hpp:261
+#: tmp_error_headers/error_list_mk4.hpp:331
+#: tmp_error_headers/error_list_ix.hpp:527
 msgid "Gcode on the USB drive is corrupt. Fix manually before resuming."
 msgstr "G-code soubor na USB disku je poškozen. Před pokračováním jej opravte."
 
@@ -3200,75 +3261,75 @@ msgstr ""
 "Uchopte dveře uprostřed, prsty umístěte za ně a zavřete je - viz obrázek. "
 "Následně krok potvrďte."
 
-#: tmp_error_headers/error_list_mini.hpp:191
-#: tmp_error_headers/error_list_xl.hpp:324
-#: tmp_error_headers/error_list_ix.hpp:317
-#: tmp_error_headers/error_list_mk4.hpp:226
 #: tmp_error_headers/error_list_mk35.hpp:212
 #: tmp_error_headers/error_list_coreone.hpp:310
+#: tmp_error_headers/error_list_xl.hpp:324
+#: tmp_error_headers/error_list_mini.hpp:191
+#: tmp_error_headers/error_list_mk4.hpp:226
+#: tmp_error_headers/error_list_ix.hpp:317
 msgid "HAL detected an I2C busy state when receiving data via I2C."
 msgstr "HAL detekoval zaneprázdněný stav I2C během přijímání dat přes I2C."
 
-#: tmp_error_headers/error_list_mini.hpp:163
-#: tmp_error_headers/error_list_xl.hpp:296
-#: tmp_error_headers/error_list_ix.hpp:289
-#: tmp_error_headers/error_list_mk4.hpp:198
 #: tmp_error_headers/error_list_mk35.hpp:184
 #: tmp_error_headers/error_list_coreone.hpp:282
+#: tmp_error_headers/error_list_xl.hpp:296
+#: tmp_error_headers/error_list_mini.hpp:163
+#: tmp_error_headers/error_list_mk4.hpp:198
+#: tmp_error_headers/error_list_ix.hpp:289
 msgid "HAL detected an I2C busy state when sending data via I2C."
 msgstr "HAL detekoval zaneprázdněný stav I2C během posílání dat přes I2C."
 
-#: tmp_error_headers/error_list_mini.hpp:184
-#: tmp_error_headers/error_list_xl.hpp:317
-#: tmp_error_headers/error_list_ix.hpp:310
-#: tmp_error_headers/error_list_mk4.hpp:219
 #: tmp_error_headers/error_list_mk35.hpp:205
 #: tmp_error_headers/error_list_coreone.hpp:303
+#: tmp_error_headers/error_list_xl.hpp:317
+#: tmp_error_headers/error_list_mini.hpp:184
+#: tmp_error_headers/error_list_mk4.hpp:219
+#: tmp_error_headers/error_list_ix.hpp:310
 msgid "HAL detected an I2C error when receiving data via I2C."
 msgstr "HAL detekoval I2C chybu během přijímání dat přes I2C."
 
-#: tmp_error_headers/error_list_mini.hpp:156
-#: tmp_error_headers/error_list_xl.hpp:289
-#: tmp_error_headers/error_list_ix.hpp:282
-#: tmp_error_headers/error_list_mk4.hpp:191
 #: tmp_error_headers/error_list_mk35.hpp:177
 #: tmp_error_headers/error_list_coreone.hpp:275
+#: tmp_error_headers/error_list_xl.hpp:289
+#: tmp_error_headers/error_list_mini.hpp:156
+#: tmp_error_headers/error_list_mk4.hpp:191
+#: tmp_error_headers/error_list_ix.hpp:282
 msgid "HAL detected an I2C error when sending data via I2C."
 msgstr "HAL detekoval I2C časový limit během odesílání dat přes I2C."
 
-#: tmp_error_headers/error_list_mini.hpp:198
-#: tmp_error_headers/error_list_xl.hpp:331
-#: tmp_error_headers/error_list_ix.hpp:324
-#: tmp_error_headers/error_list_mk4.hpp:233
 #: tmp_error_headers/error_list_mk35.hpp:219
 #: tmp_error_headers/error_list_coreone.hpp:317
+#: tmp_error_headers/error_list_xl.hpp:331
+#: tmp_error_headers/error_list_mini.hpp:198
+#: tmp_error_headers/error_list_mk4.hpp:233
+#: tmp_error_headers/error_list_ix.hpp:324
 msgid "HAL detected an I2C timeout when receiving data via I2C."
 msgstr "HAL detekoval I2C časový limit během přijímání dat přes I2C."
 
-#: tmp_error_headers/error_list_mini.hpp:170
-#: tmp_error_headers/error_list_xl.hpp:303
-#: tmp_error_headers/error_list_ix.hpp:296
-#: tmp_error_headers/error_list_mk4.hpp:205
 #: tmp_error_headers/error_list_mk35.hpp:191
 #: tmp_error_headers/error_list_coreone.hpp:289
+#: tmp_error_headers/error_list_xl.hpp:303
+#: tmp_error_headers/error_list_mini.hpp:170
+#: tmp_error_headers/error_list_mk4.hpp:205
+#: tmp_error_headers/error_list_ix.hpp:296
 msgid "HAL detected an I2C timeout when sending data via I2C."
 msgstr "HAL detekoval nedefinovanou chybu I2C při odesílání dat přes I2C."
 
-#: tmp_error_headers/error_list_mini.hpp:205
-#: tmp_error_headers/error_list_xl.hpp:338
-#: tmp_error_headers/error_list_ix.hpp:331
-#: tmp_error_headers/error_list_mk4.hpp:240
 #: tmp_error_headers/error_list_mk35.hpp:226
 #: tmp_error_headers/error_list_coreone.hpp:324
+#: tmp_error_headers/error_list_xl.hpp:338
+#: tmp_error_headers/error_list_mini.hpp:205
+#: tmp_error_headers/error_list_mk4.hpp:240
+#: tmp_error_headers/error_list_ix.hpp:331
 msgid "HAL detected an I2C undefined error when receiving data via I2C."
 msgstr "HAL detekoval nedefinovanou chybu I2C při přijímání dat přes I2C."
 
-#: tmp_error_headers/error_list_mini.hpp:177
-#: tmp_error_headers/error_list_xl.hpp:310
-#: tmp_error_headers/error_list_ix.hpp:303
-#: tmp_error_headers/error_list_mk4.hpp:212
 #: tmp_error_headers/error_list_mk35.hpp:198
 #: tmp_error_headers/error_list_coreone.hpp:296
+#: tmp_error_headers/error_list_xl.hpp:310
+#: tmp_error_headers/error_list_mini.hpp:177
+#: tmp_error_headers/error_list_mk4.hpp:212
+#: tmp_error_headers/error_list_ix.hpp:303
 msgid "HAL detected an I2C undefined error when sending data via I2C."
 msgstr "HAL detekoval nedefinovanou chybu I2C při posílání dat přes I2C."
 
@@ -3276,25 +3337,25 @@ msgstr "HAL detekoval nedefinovanou chybu I2C při posílání dat přes I2C."
 msgid "HARD RESET"
 msgstr "RESET"
 
+#: src/gui/screen_menu_hardware.hpp:115
 #: src/gui/screen_menu_hardware_tune.hpp:24
-#: src/gui/screen_menu_hardware.hpp:111
 msgid "HARDWARE"
 msgstr "HARDWARE"
 
-#: tmp_error_headers/error_list_mini.hpp:330
-#: tmp_error_headers/error_list_xl.hpp:624
-#: tmp_error_headers/error_list_ix.hpp:596
-#: tmp_error_headers/error_list_mk4.hpp:400
 #: tmp_error_headers/error_list_mk35.hpp:372
 #: tmp_error_headers/error_list_coreone.hpp:568
+#: tmp_error_headers/error_list_xl.hpp:624
+#: tmp_error_headers/error_list_mini.hpp:330
+#: tmp_error_headers/error_list_mk4.hpp:400
+#: tmp_error_headers/error_list_ix.hpp:596
 msgid "HASH VERIFICATION FAILED"
 msgstr "SELHALA VERIFIKACE HASH"
 
-#: tmp_error_headers/error_list_mini.hpp:141
-#: tmp_error_headers/error_list_ix.hpp:267
-#: tmp_error_headers/error_list_mk4.hpp:176
 #: tmp_error_headers/error_list_mk35.hpp:162
 #: tmp_error_headers/error_list_coreone.hpp:260
+#: tmp_error_headers/error_list_mini.hpp:141
+#: tmp_error_headers/error_list_mk4.hpp:176
+#: tmp_error_headers/error_list_ix.hpp:267
 msgid "HEATBED PORT OVERCURRENT"
 msgstr "NADPROUD PORTU PODLOŽKY"
 
@@ -3302,21 +3363,21 @@ msgstr "NADPROUD PORTU PODLOŽKY"
 msgid "HEATBREAK COOLING TOO SLOW"
 msgstr "POMALÉ CHLAZENÍ HEATBREAKU"
 
-#: tmp_error_headers/error_list_mini.hpp:85
-#: tmp_error_headers/error_list_xl.hpp:141
-#: tmp_error_headers/error_list_ix.hpp:127
-#: tmp_error_headers/error_list_mk4.hpp:120
 #: tmp_error_headers/error_list_mk35.hpp:106
 #: tmp_error_headers/error_list_coreone.hpp:169
+#: tmp_error_headers/error_list_xl.hpp:141
+#: tmp_error_headers/error_list_mini.hpp:85
+#: tmp_error_headers/error_list_mk4.hpp:120
+#: tmp_error_headers/error_list_ix.hpp:127
 msgid "HEATBREAK MAXTEMP ERROR"
 msgstr "CHYBA HEATBREAKU MAXTEMP"
 
-#: tmp_error_headers/error_list_mini.hpp:78
-#: tmp_error_headers/error_list_xl.hpp:134
-#: tmp_error_headers/error_list_ix.hpp:120
-#: tmp_error_headers/error_list_mk4.hpp:113
 #: tmp_error_headers/error_list_mk35.hpp:99
 #: tmp_error_headers/error_list_coreone.hpp:162
+#: tmp_error_headers/error_list_xl.hpp:134
+#: tmp_error_headers/error_list_mini.hpp:78
+#: tmp_error_headers/error_list_mk4.hpp:113
+#: tmp_error_headers/error_list_ix.hpp:120
 msgid "HEATBREAK MINTEMP ERROR"
 msgstr "CHYBA HEATBREAKU MINTEMP"
 
@@ -3336,36 +3397,36 @@ msgstr "Konec životnosti HEPA"
 msgid "HEPA Filter Expiring"
 msgstr "Konec životnosti HEPA"
 
+#: tmp_error_headers/error_list_coreone.hpp:85
 #: tmp_error_headers/error_list_xl.hpp:78
 #: tmp_error_headers/error_list_ix.hpp:43
-#: tmp_error_headers/error_list_coreone.hpp:85
 msgid "HOMING CALIBRATION NEEDED"
 msgstr "NUTNÁ KALIBRACE HOMINGU"
 
-#: tmp_error_headers/error_list_mini.hpp:106
-#: tmp_error_headers/error_list_xl.hpp:253
-#: tmp_error_headers/error_list_ix.hpp:232
-#: tmp_error_headers/error_list_mk4.hpp:141
 #: tmp_error_headers/error_list_mk35.hpp:127
 #: tmp_error_headers/error_list_coreone.hpp:225
+#: tmp_error_headers/error_list_xl.hpp:253
+#: tmp_error_headers/error_list_mini.hpp:106
+#: tmp_error_headers/error_list_mk4.hpp:141
+#: tmp_error_headers/error_list_ix.hpp:232
 msgid "HOMING ERROR X"
 msgstr "CHYBA HOMINGU X"
 
-#: tmp_error_headers/error_list_mini.hpp:113
-#: tmp_error_headers/error_list_xl.hpp:260
-#: tmp_error_headers/error_list_ix.hpp:239
-#: tmp_error_headers/error_list_mk4.hpp:148
 #: tmp_error_headers/error_list_mk35.hpp:134
 #: tmp_error_headers/error_list_coreone.hpp:232
+#: tmp_error_headers/error_list_xl.hpp:260
+#: tmp_error_headers/error_list_mini.hpp:113
+#: tmp_error_headers/error_list_mk4.hpp:148
+#: tmp_error_headers/error_list_ix.hpp:239
 msgid "HOMING ERROR Y"
 msgstr "CHYBA HOMINGU Y"
 
-#: tmp_error_headers/error_list_mini.hpp:99
-#: tmp_error_headers/error_list_xl.hpp:232
-#: tmp_error_headers/error_list_ix.hpp:211
-#: tmp_error_headers/error_list_mk4.hpp:134
 #: tmp_error_headers/error_list_mk35.hpp:120
 #: tmp_error_headers/error_list_coreone.hpp:218
+#: tmp_error_headers/error_list_xl.hpp:232
+#: tmp_error_headers/error_list_mini.hpp:99
+#: tmp_error_headers/error_list_mk4.hpp:134
+#: tmp_error_headers/error_list_ix.hpp:211
 msgid "HOMING ERROR Z"
 msgstr "CHYBA HOMINGU Z"
 
@@ -3530,12 +3591,12 @@ msgstr "Heatbreak"
 msgid "Heatbreak Fan"
 msgstr "Ventilátor heatbreaku"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:83
+#: src/gui/screen/filament/screen_filament_detail.cpp:91
 #: src/gui/MItem_print.cpp:70
 msgid "Heatbreak Temp"
 msgstr "Teplota heatbreaku"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:83
+#: src/gui/screen/filament/screen_filament_detail.cpp:91
 msgid "Heatbreak Temperature"
 msgstr "Teplota heatbreaku"
 
@@ -3543,12 +3604,12 @@ msgstr "Teplota heatbreaku"
 msgid "Heatbreak status"
 msgstr "Stav heatbreaku"
 
-#: tmp_error_headers/error_list_mini.hpp:520
-#: tmp_error_headers/error_list_xl.hpp:835
-#: tmp_error_headers/error_list_ix.hpp:786
-#: tmp_error_headers/error_list_mk4.hpp:625
 #: tmp_error_headers/error_list_mk35.hpp:597
 #: tmp_error_headers/error_list_coreone.hpp:793
+#: tmp_error_headers/error_list_xl.hpp:835
+#: tmp_error_headers/error_list_mini.hpp:520
+#: tmp_error_headers/error_list_mk4.hpp:625
+#: tmp_error_headers/error_list_ix.hpp:786
 msgid "Heatbreak thermistor is disconnected. Inspect the wiring."
 msgstr "Termistor heatbreaku je odpojen. Zkontrolujte zapojení."
 
@@ -3577,16 +3638,16 @@ msgstr "Zahřívání"
 msgid "Heating disabled due to 10 minutes of inactivity."
 msgstr "Vyhřívání vypnuto po 10 minutách neaktivity."
 
-#: tmp_error_headers/error_list_mini.hpp:485
-#: tmp_error_headers/error_list_mini.hpp:499
-#: tmp_error_headers/error_list_xl.hpp:800
-#: tmp_error_headers/error_list_xl.hpp:814
-#: tmp_error_headers/error_list_mk4.hpp:590
-#: tmp_error_headers/error_list_mk4.hpp:604
 #: tmp_error_headers/error_list_mk35.hpp:562
 #: tmp_error_headers/error_list_mk35.hpp:576
 #: tmp_error_headers/error_list_coreone.hpp:758
 #: tmp_error_headers/error_list_coreone.hpp:772
+#: tmp_error_headers/error_list_xl.hpp:800
+#: tmp_error_headers/error_list_xl.hpp:814
+#: tmp_error_headers/error_list_mini.hpp:485
+#: tmp_error_headers/error_list_mini.hpp:499
+#: tmp_error_headers/error_list_mk4.hpp:590
+#: tmp_error_headers/error_list_mk4.hpp:604
 msgid "Heating disabled due to 30 minutes of inactivity."
 msgstr "Vyhřívání vypnuto po 30 minutách neaktivity."
 
@@ -3684,10 +3745,10 @@ msgid "Home"
 msgstr "Domů"
 
 #. //MSG_PROGRESS_RETRACT_FINDA c=20
-#: src/mmu2/mmu2_progress_converter.cpp:31
 #: src/common/feature/print_status_message/print_status_message_formatter_buddy.cpp:13
+#: src/gui/dialogs/DialogLoadUnload.cpp:88
 #: src/gui/screen_phase_stepping_calibration.cpp:33
-#: src/gui/dialogs/DialogLoadUnload.cpp:88 src/gui/screen_crash_recovery.cpp:93
+#: src/gui/screen_crash_recovery.cpp:93 src/mmu2/mmu2_progress_converter.cpp:31
 msgid "Homing"
 msgstr "Homing"
 
@@ -3695,9 +3756,9 @@ msgstr "Homing"
 msgid "Homing Calibration"
 msgstr "Kalibrace homingu"
 
+#: tmp_error_headers/error_list_coreone.hpp:86
 #: tmp_error_headers/error_list_xl.hpp:79
 #: tmp_error_headers/error_list_ix.hpp:44
-#: tmp_error_headers/error_list_coreone.hpp:86
 msgid "Homing calibration is needed to ensure repeatable homing."
 msgstr "Kalibrace homingu je vyžadována pro zajištění správné opakovatelnosti."
 
@@ -3706,8 +3767,8 @@ msgid "Host"
 msgstr "Hostitel"
 
 #. Printer's name within network
-#: src/gui/screen_menu_connect.hpp:42 src/gui/MItem_network.hpp:80
-#: src/gui/MItem_network.cpp:161
+#: src/gui/MItem_network.cpp:161 src/gui/MItem_network.hpp:80
+#: src/gui/screen_menu_connect.hpp:42
 msgid "Hostname"
 msgstr "Hostname"
 
@@ -3741,12 +3802,12 @@ msgstr "Ventilátor hotendu"
 msgid "Hotend fan (test disabled)"
 msgstr "Ventilátor hotendu (test zakázán)"
 
-#: tmp_error_headers/error_list_mini.hpp:541
-#: tmp_error_headers/error_list_xl.hpp:877
-#: tmp_error_headers/error_list_ix.hpp:814
-#: tmp_error_headers/error_list_mk4.hpp:646
 #: tmp_error_headers/error_list_mk35.hpp:625
 #: tmp_error_headers/error_list_coreone.hpp:814
+#: tmp_error_headers/error_list_xl.hpp:877
+#: tmp_error_headers/error_list_mini.hpp:541
+#: tmp_error_headers/error_list_mk4.hpp:646
+#: tmp_error_headers/error_list_ix.hpp:814
 msgid ""
 "Hotend fan not spinning. Check it for possible debris, then inspect the "
 "wiring."
@@ -3758,75 +3819,75 @@ msgstr ""
 msgid "How to update firmware?"
 msgstr "Jak aktualizovat firmware?"
 
-#: tmp_error_headers/error_list_mini.hpp:190
-#: tmp_error_headers/error_list_xl.hpp:323
-#: tmp_error_headers/error_list_ix.hpp:316
-#: tmp_error_headers/error_list_mk4.hpp:225
 #: tmp_error_headers/error_list_mk35.hpp:211
 #: tmp_error_headers/error_list_coreone.hpp:309
+#: tmp_error_headers/error_list_xl.hpp:323
+#: tmp_error_headers/error_list_mini.hpp:190
+#: tmp_error_headers/error_list_mk4.hpp:225
+#: tmp_error_headers/error_list_ix.hpp:316
 msgid "I2C RECEIVE BUSY"
 msgstr "I2C PŘÍJEM - OBSAZENO"
 
-#: tmp_error_headers/error_list_mini.hpp:183
-#: tmp_error_headers/error_list_xl.hpp:316
-#: tmp_error_headers/error_list_ix.hpp:309
-#: tmp_error_headers/error_list_mk4.hpp:218
 #: tmp_error_headers/error_list_mk35.hpp:204
 #: tmp_error_headers/error_list_coreone.hpp:302
+#: tmp_error_headers/error_list_xl.hpp:316
+#: tmp_error_headers/error_list_mini.hpp:183
+#: tmp_error_headers/error_list_mk4.hpp:218
+#: tmp_error_headers/error_list_ix.hpp:309
 msgid "I2C RECEIVE FAILED"
 msgstr "I2C PŘÍJEM SELHAL"
 
-#: tmp_error_headers/error_list_mini.hpp:197
-#: tmp_error_headers/error_list_xl.hpp:330
-#: tmp_error_headers/error_list_ix.hpp:323
-#: tmp_error_headers/error_list_mk4.hpp:232
 #: tmp_error_headers/error_list_mk35.hpp:218
 #: tmp_error_headers/error_list_coreone.hpp:316
+#: tmp_error_headers/error_list_xl.hpp:330
+#: tmp_error_headers/error_list_mini.hpp:197
+#: tmp_error_headers/error_list_mk4.hpp:232
+#: tmp_error_headers/error_list_ix.hpp:323
 msgid "I2C RECEIVE TIMEOUT"
 msgstr "I2C PŘIJETÍ - ČASOVÝ LIMIT"
 
-#: tmp_error_headers/error_list_mini.hpp:204
-#: tmp_error_headers/error_list_xl.hpp:337
-#: tmp_error_headers/error_list_ix.hpp:330
-#: tmp_error_headers/error_list_mk4.hpp:239
 #: tmp_error_headers/error_list_mk35.hpp:225
 #: tmp_error_headers/error_list_coreone.hpp:323
+#: tmp_error_headers/error_list_xl.hpp:337
+#: tmp_error_headers/error_list_mini.hpp:204
+#: tmp_error_headers/error_list_mk4.hpp:239
+#: tmp_error_headers/error_list_ix.hpp:330
 msgid "I2C RECEIVE UNDEFINED"
 msgstr "I2C PŘIJETÍ - NEDEFINOVÁNO"
 
-#: tmp_error_headers/error_list_mini.hpp:162
-#: tmp_error_headers/error_list_xl.hpp:295
-#: tmp_error_headers/error_list_ix.hpp:288
-#: tmp_error_headers/error_list_mk4.hpp:197
 #: tmp_error_headers/error_list_mk35.hpp:183
 #: tmp_error_headers/error_list_coreone.hpp:281
+#: tmp_error_headers/error_list_xl.hpp:295
+#: tmp_error_headers/error_list_mini.hpp:162
+#: tmp_error_headers/error_list_mk4.hpp:197
+#: tmp_error_headers/error_list_ix.hpp:288
 msgid "I2C SEND BUSY"
 msgstr "I2C ODESLÁNÍ - OBSAZENO"
 
-#: tmp_error_headers/error_list_mini.hpp:155
-#: tmp_error_headers/error_list_xl.hpp:288
-#: tmp_error_headers/error_list_ix.hpp:281
-#: tmp_error_headers/error_list_mk4.hpp:190
 #: tmp_error_headers/error_list_mk35.hpp:176
 #: tmp_error_headers/error_list_coreone.hpp:274
+#: tmp_error_headers/error_list_xl.hpp:288
+#: tmp_error_headers/error_list_mini.hpp:155
+#: tmp_error_headers/error_list_mk4.hpp:190
+#: tmp_error_headers/error_list_ix.hpp:281
 msgid "I2C SEND FAILED"
 msgstr "I2C ODESLÁNÍ SELHALO"
 
-#: tmp_error_headers/error_list_mini.hpp:169
-#: tmp_error_headers/error_list_xl.hpp:302
-#: tmp_error_headers/error_list_ix.hpp:295
-#: tmp_error_headers/error_list_mk4.hpp:204
 #: tmp_error_headers/error_list_mk35.hpp:190
 #: tmp_error_headers/error_list_coreone.hpp:288
+#: tmp_error_headers/error_list_xl.hpp:302
+#: tmp_error_headers/error_list_mini.hpp:169
+#: tmp_error_headers/error_list_mk4.hpp:204
+#: tmp_error_headers/error_list_ix.hpp:295
 msgid "I2C SEND TIMEOUT"
 msgstr "I2C ODESLÁNÍ - ČASOVÝ LIMIT"
 
-#: tmp_error_headers/error_list_mini.hpp:176
-#: tmp_error_headers/error_list_xl.hpp:309
-#: tmp_error_headers/error_list_ix.hpp:302
-#: tmp_error_headers/error_list_mk4.hpp:211
 #: tmp_error_headers/error_list_mk35.hpp:197
 #: tmp_error_headers/error_list_coreone.hpp:295
+#: tmp_error_headers/error_list_xl.hpp:309
+#: tmp_error_headers/error_list_mini.hpp:176
+#: tmp_error_headers/error_list_mk4.hpp:211
+#: tmp_error_headers/error_list_ix.hpp:302
 msgid "I2C SEND UNDEFINED"
 msgstr "I2C ODESLÁNÍ NEDEFINOVÁNO"
 
@@ -3842,12 +3903,12 @@ msgstr "IDLER - CHYBA POHYBU"
 msgid "IGNORE"
 msgstr "IGNOROVAT"
 
-#: tmp_error_headers/error_list_mini.hpp:323
-#: tmp_error_headers/error_list_xl.hpp:617
-#: tmp_error_headers/error_list_ix.hpp:589
-#: tmp_error_headers/error_list_mk4.hpp:393
 #: tmp_error_headers/error_list_mk35.hpp:365
 #: tmp_error_headers/error_list_coreone.hpp:561
+#: tmp_error_headers/error_list_xl.hpp:617
+#: tmp_error_headers/error_list_mini.hpp:323
+#: tmp_error_headers/error_list_mk4.hpp:393
+#: tmp_error_headers/error_list_ix.hpp:589
 msgid "IMPOSTER! FAKE SIGNATURE"
 msgstr "CHYBA! FALEŠNÝ PODPIS"
 
@@ -3867,21 +3928,21 @@ msgstr "KALIBRACE INPUT SHAPER"
 msgid "INSPECT FINDA"
 msgstr "ZKONTROLUJTE FINDU"
 
-#: tmp_error_headers/error_list_mini.hpp:281
-#: tmp_error_headers/error_list_xl.hpp:575
-#: tmp_error_headers/error_list_ix.hpp:547
-#: tmp_error_headers/error_list_mk4.hpp:351
 #: tmp_error_headers/error_list_mk35.hpp:323
 #: tmp_error_headers/error_list_coreone.hpp:519
+#: tmp_error_headers/error_list_xl.hpp:575
+#: tmp_error_headers/error_list_mini.hpp:281
+#: tmp_error_headers/error_list_mk4.hpp:351
+#: tmp_error_headers/error_list_ix.hpp:547
 msgid "INTERNAL ERROR"
 msgstr "INTERNÍ CHYBA"
 
-#: tmp_error_headers/error_list_mini.hpp:302
-#: tmp_error_headers/error_list_xl.hpp:596
-#: tmp_error_headers/error_list_ix.hpp:568
-#: tmp_error_headers/error_list_mk4.hpp:372
 #: tmp_error_headers/error_list_mk35.hpp:344
 #: tmp_error_headers/error_list_coreone.hpp:540
+#: tmp_error_headers/error_list_xl.hpp:596
+#: tmp_error_headers/error_list_mini.hpp:302
+#: tmp_error_headers/error_list_mk4.hpp:372
+#: tmp_error_headers/error_list_ix.hpp:568
 msgid "INVALID FW SIZE ON USB FLASH DRIVE"
 msgstr "NEPLATNÁ VELIKOST FW NA USB"
 
@@ -3905,18 +3966,18 @@ msgstr "Brána IPv4"
 msgid "IPv4 Netmask"
 msgstr "Maska IPv4"
 
-#: tmp_error_headers/error_list_mk4.hpp:30
 #: tmp_error_headers/error_list_mk35.hpp:16
 #: tmp_error_headers/error_list_coreone.hpp:58
+#: tmp_error_headers/error_list_mk4.hpp:30
 msgid "If the filament sensor is unresponsive, clean it from debris."
 msgstr "Pokud senzor filamentu nereaguje, vyčistěte jej."
 
-#: tmp_error_headers/error_list_mini.hpp:9
-#: tmp_error_headers/error_list_xl.hpp:65
-#: tmp_error_headers/error_list_ix.hpp:30
-#: tmp_error_headers/error_list_mk4.hpp:23
 #: tmp_error_headers/error_list_mk35.hpp:9
 #: tmp_error_headers/error_list_coreone.hpp:51
+#: tmp_error_headers/error_list_xl.hpp:65
+#: tmp_error_headers/error_list_mini.hpp:9
+#: tmp_error_headers/error_list_mk4.hpp:23
+#: tmp_error_headers/error_list_ix.hpp:30
 msgid ""
 "If the filament sensor is unresponsive, clean it from debris. Alternatively, "
 "you can disable it."
@@ -3945,11 +4006,11 @@ msgstr "Neaktivní"
 msgid "Increasing distance to bed"
 msgstr "Zvětšuji vzdálenost od podložky"
 
-#: src/gui/MItem_menus.hpp:129 src/gui/screen_home.cpp:139
+#: src/gui/screen_home.cpp:139 src/gui/MItem_menus.hpp:129
 msgid "Info"
 msgstr "Info"
 
-#: src/guiapi/src/window_msgbox.cpp:324 src/gui/MItem_tools.cpp:82
+#: src/gui/MItem_tools.cpp:82 src/guiapi/src/window_msgbox.cpp:324
 msgid "Information"
 msgstr "Informace"
 
@@ -4058,13 +4119,9 @@ msgstr "Nesprávná hlavička souboru BGCODE"
 msgid "Invoke MMU maintenance"
 msgstr "Spustit údržbu MMU"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:122
+#: src/gui/screen/filament/screen_filament_detail.cpp:130
 msgid "Is Abrasive"
 msgstr "Je abrazivní"
-
-#: src/gui/screen/filament/screen_filament_detail.cpp:126
-msgid "Is Flexible"
-msgstr "Je flexibilní"
 
 #: src/gui/wizard/screen_fan_selftest.cpp:70
 msgid "Is Hotend fan (left) spinning?"
@@ -4117,11 +4174,11 @@ msgstr "JAZYK A ČAS"
 msgid "LANGUAGES"
 msgstr "JAZYKY"
 
-#: tmp_error_headers/error_list_xl.hpp:519
-#: tmp_error_headers/error_list_ix.hpp:498
-#: tmp_error_headers/error_list_mk4.hpp:302
 #: tmp_error_headers/error_list_mk35.hpp:274
 #: tmp_error_headers/error_list_coreone.hpp:470
+#: tmp_error_headers/error_list_xl.hpp:519
+#: tmp_error_headers/error_list_mk4.hpp:302
+#: tmp_error_headers/error_list_ix.hpp:498
 msgid "LED MEMORY ERROR"
 msgstr "CHYBA LED PAMĚTI"
 
@@ -4141,10 +4198,10 @@ msgstr "ZAVÉST"
 msgid "LOAD TO EXTR. FAILED"
 msgstr "ZAVEDENÍ DO EXTRUDERU SELHALO"
 
-#: tmp_error_headers/error_list_xl.hpp:505
-#: tmp_error_headers/error_list_ix.hpp:484
-#: tmp_error_headers/error_list_mk4.hpp:288
 #: tmp_error_headers/error_list_coreone.hpp:456
+#: tmp_error_headers/error_list_xl.hpp:505
+#: tmp_error_headers/error_list_mk4.hpp:288
+#: tmp_error_headers/error_list_ix.hpp:484
 msgid "LOADCELL MEASURE FAILED"
 msgstr "MĚŘENÍ LOADCELLU SELHALO"
 
@@ -4152,10 +4209,10 @@ msgstr "MĚŘENÍ LOADCELLU SELHALO"
 msgid "LOADCELL TEST"
 msgstr "TEST LOADCELLU"
 
-#: tmp_error_headers/error_list_xl.hpp:512
-#: tmp_error_headers/error_list_ix.hpp:491
-#: tmp_error_headers/error_list_mk4.hpp:295
 #: tmp_error_headers/error_list_coreone.hpp:463
+#: tmp_error_headers/error_list_xl.hpp:512
+#: tmp_error_headers/error_list_mk4.hpp:295
+#: tmp_error_headers/error_list_ix.hpp:491
 msgid "LOADCELL TIMEOUT"
 msgstr "VYPRŠEL ČASOVÝ LIMIT PRO LOADCELL"
 
@@ -4163,9 +4220,9 @@ msgstr "VYPRŠEL ČASOVÝ LIMIT PRO LOADCELL"
 msgid "LOADED FILAMENTS"
 msgstr "ZAVEDENÉ FILAMENTY"
 
+#: tmp_error_headers/error_list_coreone.hpp:92
 #: tmp_error_headers/error_list_xl.hpp:85
 #: tmp_error_headers/error_list_ix.hpp:50
-#: tmp_error_headers/error_list_coreone.hpp:92
 msgid "LOADING OBSTRUCTION"
 msgstr "PŘEKÁŽKA PŘI ZAVÁDĚNÍ"
 
@@ -4198,12 +4255,12 @@ msgstr "Levá strana"
 msgid "Left Side [um]"
 msgstr "Levá strana [um]"
 
-#: tmp_error_headers/error_list_mini.hpp:450
-#: tmp_error_headers/error_list_xl.hpp:751
-#: tmp_error_headers/error_list_ix.hpp:716
-#: tmp_error_headers/error_list_mk4.hpp:541
 #: tmp_error_headers/error_list_mk35.hpp:513
 #: tmp_error_headers/error_list_coreone.hpp:709
+#: tmp_error_headers/error_list_xl.hpp:751
+#: tmp_error_headers/error_list_mini.hpp:450
+#: tmp_error_headers/error_list_mk4.hpp:541
+#: tmp_error_headers/error_list_ix.hpp:716
 msgid ""
 "Length of an axis is too long.\n"
 "Motor current is too low, probably.\n"
@@ -4213,12 +4270,12 @@ msgstr ""
 "Nízký proud v motoru?\n"
 "Opakovat test, pozastavit nebo pokračovat v tisku?"
 
-#: tmp_error_headers/error_list_mini.hpp:457
-#: tmp_error_headers/error_list_xl.hpp:758
-#: tmp_error_headers/error_list_ix.hpp:723
-#: tmp_error_headers/error_list_mk4.hpp:548
 #: tmp_error_headers/error_list_mk35.hpp:520
 #: tmp_error_headers/error_list_coreone.hpp:716
+#: tmp_error_headers/error_list_xl.hpp:758
+#: tmp_error_headers/error_list_mini.hpp:457
+#: tmp_error_headers/error_list_mk4.hpp:548
+#: tmp_error_headers/error_list_ix.hpp:723
 msgid ""
 "Length of an axis is too short.\n"
 "There's an obstacle or bearing issue.\n"
@@ -4245,7 +4302,7 @@ msgid ""
 "Link is valid only if you are connected to the same network as the printer."
 msgstr "Odkaz platí, jen když jste připojeni ke stejné síti jako tiskárna."
 
-#: src/gui/MItem_tools.hpp:72
+#: src/gui/MItem_tools.hpp:73
 msgid "Live Adjust Z"
 msgstr "Doladit Z"
 
@@ -4269,7 +4326,7 @@ msgstr "Zavést filament"
 msgid "Load Settings"
 msgstr "Nahrát nastavení"
 
-#: src/gui/MItem_tools.hpp:527
+#: src/gui/MItem_tools.hpp:528
 msgid "Load Settings from File"
 msgstr "Nahrát nastavení ze souboru"
 
@@ -4308,10 +4365,10 @@ msgstr ""
 "Nekonzistentní data loadcellu. Ujistěte se, že je tiskárna na pevném "
 "podkladu. Opakovat?"
 
-#: tmp_error_headers/error_list_xl.hpp:506
-#: tmp_error_headers/error_list_ix.hpp:485
-#: tmp_error_headers/error_list_mk4.hpp:289
 #: tmp_error_headers/error_list_coreone.hpp:457
+#: tmp_error_headers/error_list_xl.hpp:506
+#: tmp_error_headers/error_list_mk4.hpp:289
+#: tmp_error_headers/error_list_ix.hpp:485
 msgid "Loadcell measured an inifinite or undefined load value."
 msgstr "Loadcell naměřil nekonečnou či nedefinovanou hodnotu."
 
@@ -4348,19 +4405,19 @@ msgstr "Úspěšně nahráno. K aktivaci povolte Connect."
 msgid "Loading Test"
 msgstr "Zkouška zavedení"
 
-#: tmp_error_headers/error_list_mini.hpp:568
-#: tmp_error_headers/error_list_xl.hpp:932
-#: tmp_error_headers/error_list_ix.hpp:848
-#: tmp_error_headers/error_list_mk4.hpp:680
 #: tmp_error_headers/error_list_mk35.hpp:652
 #: tmp_error_headers/error_list_coreone.hpp:862
+#: tmp_error_headers/error_list_xl.hpp:932
+#: tmp_error_headers/error_list_mini.hpp:568
+#: tmp_error_headers/error_list_mk4.hpp:680
+#: tmp_error_headers/error_list_ix.hpp:848
 msgid "Loading Timeout"
 msgstr "Timeout pro zavedení"
 
 #. //MSG_PROGRESS_UNLOADING_FILAMENT c=20
-#: src/mmu2/mmu2_progress_converter.cpp:22
 #: src/gui/dialogs/DialogLoadUnload.cpp:79
 #: src/gui/dialogs/DialogLoadUnload.cpp:485
+#: src/mmu2/mmu2_progress_converter.cpp:22
 msgid "Loading filament"
 msgstr "Zavádím filament"
 
@@ -4392,7 +4449,7 @@ msgstr "Zajistěte nástroj"
 msgid "Logging has been turned off. You can now safely remove the USB drive."
 msgstr "Logování bylo vypnuto. Nyní můžete bezpečně odebrat USB disk."
 
-#: src/gui/wizard/screen_belt_tuning_wizard.cpp:201
+#: src/gui/wizard/screen_belt_tuning_wizard.cpp:204
 #, c-format
 msgid "Loosen by %.1f turns"
 msgstr "Povolte o %.1f otáček"
@@ -4446,46 +4503,46 @@ msgstr "MAC"
 msgid "MAC Address"
 msgstr "MAC adresa"
 
-#: tmp_error_headers/error_list_mk4.hpp:43
 #: tmp_error_headers/error_list_mk35.hpp:29
 #: tmp_error_headers/error_list_coreone.hpp:71
+#: tmp_error_headers/error_list_mk4.hpp:43
 msgid "MAINTENANCE FAILURE WARNING"
 msgstr "CHYBA: UPOZORNĚNÍ NA ÚDRŽBU"
 
-#: tmp_error_headers/error_list_mk4.hpp:50
 #: tmp_error_headers/error_list_mk35.hpp:36
 #: tmp_error_headers/error_list_coreone.hpp:78
+#: tmp_error_headers/error_list_mk4.hpp:50
 msgid "MAINTENANCE WARNING"
 msgstr "UPOZORNĚNÍ NA ÚDRŽBU"
 
-#: tmp_error_headers/error_list_mini.hpp:239
-#: tmp_error_headers/error_list_xl.hpp:526
-#: tmp_error_headers/error_list_ix.hpp:505
-#: tmp_error_headers/error_list_mk4.hpp:309
 #: tmp_error_headers/error_list_mk35.hpp:281
 #: tmp_error_headers/error_list_coreone.hpp:477
+#: tmp_error_headers/error_list_xl.hpp:526
+#: tmp_error_headers/error_list_mini.hpp:239
+#: tmp_error_headers/error_list_mk4.hpp:309
+#: tmp_error_headers/error_list_ix.hpp:505
 msgid "MARLIN REQUEST TIMEOUT"
 msgstr "ČASOVÝ LIMIT POŽADAVKU NA MARLIN"
 
-#: tmp_error_headers/error_list_mini.hpp:50
-#: tmp_error_headers/error_list_mini.hpp:57
-#: tmp_error_headers/error_list_ix.hpp:92
-#: tmp_error_headers/error_list_ix.hpp:99
-#: tmp_error_headers/error_list_mk4.hpp:85
-#: tmp_error_headers/error_list_mk4.hpp:92
 #: tmp_error_headers/error_list_mk35.hpp:71
 #: tmp_error_headers/error_list_mk35.hpp:78
 #: tmp_error_headers/error_list_coreone.hpp:134
 #: tmp_error_headers/error_list_coreone.hpp:141
+#: tmp_error_headers/error_list_mini.hpp:50
+#: tmp_error_headers/error_list_mini.hpp:57
+#: tmp_error_headers/error_list_mk4.hpp:85
+#: tmp_error_headers/error_list_mk4.hpp:92
+#: tmp_error_headers/error_list_ix.hpp:92
+#: tmp_error_headers/error_list_ix.hpp:99
 msgid "MAXTEMP ERROR"
 msgstr "CHYBA MAXTEMP"
 
-#: tmp_error_headers/error_list_mini.hpp:92
-#: tmp_error_headers/error_list_xl.hpp:148
-#: tmp_error_headers/error_list_ix.hpp:134
-#: tmp_error_headers/error_list_mk4.hpp:127
 #: tmp_error_headers/error_list_mk35.hpp:113
 #: tmp_error_headers/error_list_coreone.hpp:176
+#: tmp_error_headers/error_list_xl.hpp:148
+#: tmp_error_headers/error_list_mini.hpp:92
+#: tmp_error_headers/error_list_mk4.hpp:127
+#: tmp_error_headers/error_list_ix.hpp:134
 msgid "MCU MAXTEMP ERROR"
 msgstr "CHYBA MCU MAXTEMP"
 
@@ -4493,22 +4550,22 @@ msgstr "CHYBA MCU MAXTEMP"
 msgid "MCU Temperature"
 msgstr "Teplota MCU"
 
-#: tmp_error_headers/error_list_mini.hpp:93
-#: tmp_error_headers/error_list_xl.hpp:149
-#: tmp_error_headers/error_list_ix.hpp:135
-#: tmp_error_headers/error_list_mk4.hpp:128
 #: tmp_error_headers/error_list_mk35.hpp:114
 #: tmp_error_headers/error_list_coreone.hpp:177
+#: tmp_error_headers/error_list_xl.hpp:149
+#: tmp_error_headers/error_list_mini.hpp:93
+#: tmp_error_headers/error_list_mk4.hpp:128
+#: tmp_error_headers/error_list_ix.hpp:135
 #, c-format
 msgid "MCU in %s is overheated."
 msgstr "MCU v %s se přehřívá."
 
-#: tmp_error_headers/error_list_mini.hpp:534
-#: tmp_error_headers/error_list_xl.hpp:856
-#: tmp_error_headers/error_list_ix.hpp:800
-#: tmp_error_headers/error_list_mk4.hpp:639
 #: tmp_error_headers/error_list_mk35.hpp:618
 #: tmp_error_headers/error_list_coreone.hpp:807
+#: tmp_error_headers/error_list_xl.hpp:856
+#: tmp_error_headers/error_list_mini.hpp:534
+#: tmp_error_headers/error_list_mk4.hpp:639
+#: tmp_error_headers/error_list_ix.hpp:800
 msgid ""
 "MCU in Buddy is overheated, likely due to exceeding the printer's operating "
 "temperature. Prevent overheating for optimal performance."
@@ -4547,21 +4604,21 @@ msgstr "METRIKY A PROTOKOL"
 msgid "METRICS LIST"
 msgstr "SEZNAM METRIK"
 
-#: tmp_error_headers/error_list_mini.hpp:64
-#: tmp_error_headers/error_list_mini.hpp:71
-#: tmp_error_headers/error_list_ix.hpp:106
-#: tmp_error_headers/error_list_ix.hpp:113
-#: tmp_error_headers/error_list_mk4.hpp:99
-#: tmp_error_headers/error_list_mk4.hpp:106
 #: tmp_error_headers/error_list_mk35.hpp:85
 #: tmp_error_headers/error_list_mk35.hpp:92
 #: tmp_error_headers/error_list_coreone.hpp:148
 #: tmp_error_headers/error_list_coreone.hpp:155
+#: tmp_error_headers/error_list_mini.hpp:64
+#: tmp_error_headers/error_list_mini.hpp:71
+#: tmp_error_headers/error_list_mk4.hpp:99
+#: tmp_error_headers/error_list_mk4.hpp:106
+#: tmp_error_headers/error_list_ix.hpp:106
+#: tmp_error_headers/error_list_ix.hpp:113
 msgid "MINTEMP ERROR"
 msgstr "CHYBA MINTEMP"
 
-#: src/gui/MItem_mmu.cpp:278 src/gui/screen/screen_hw_mmu.cpp:4
-#: src/gui/MItem_menus.cpp:195
+#: src/gui/screen/screen_hw_mmu.cpp:4 src/gui/MItem_menus.cpp:195
+#: src/gui/MItem_mmu.cpp:278
 msgid "MMU"
 msgstr "MMU"
 
@@ -4573,9 +4630,9 @@ msgstr "Stav MMU BL"
 msgid "MMU Current"
 msgstr "MMU proud"
 
-#: tmp_error_headers/error_list_mk4.hpp:575
 #: tmp_error_headers/error_list_mk35.hpp:547
 #: tmp_error_headers/error_list_coreone.hpp:743
+#: tmp_error_headers/error_list_mk4.hpp:575
 msgid "MMU Error"
 msgstr "Chyba MMU"
 
@@ -4607,12 +4664,12 @@ msgstr ""
 msgid "MMU NOT RESPONDING"
 msgstr "MMU NEODPOVÍDÁ"
 
-#: tmp_error_headers/error_list_mini.hpp:148
-#: tmp_error_headers/error_list_xl.hpp:281
-#: tmp_error_headers/error_list_ix.hpp:274
-#: tmp_error_headers/error_list_mk4.hpp:183
 #: tmp_error_headers/error_list_mk35.hpp:169
 #: tmp_error_headers/error_list_coreone.hpp:267
+#: tmp_error_headers/error_list_xl.hpp:281
+#: tmp_error_headers/error_list_mini.hpp:148
+#: tmp_error_headers/error_list_mk4.hpp:183
+#: tmp_error_headers/error_list_ix.hpp:274
 msgid "MMU OVERCURRENT"
 msgstr "NADPROUD NA MMU"
 
@@ -4626,7 +4683,7 @@ msgstr "SELFTEST MMU SELHAL"
 msgid "MMU Unit"
 msgstr "MMU jednotka"
 
-#: src/gui/MItem_tools.hpp:241
+#: src/gui/MItem_tools.hpp:242
 msgid "MMU Version"
 msgstr "Verze MMU"
 
@@ -4642,7 +4699,7 @@ msgstr ""
 msgid "MMU filament"
 msgstr "MMU filament"
 
-#: src/gui/MItem_tools.hpp:366
+#: src/gui/MItem_tools.hpp:367
 msgid "MMU filament loads"
 msgstr "MMU - Zavedení filamentu"
 
@@ -4740,8 +4797,8 @@ msgstr ""
 "Připomenutí údržby - dosáhli jste 30 tisíc výměn filamentu. Zkontrolujte a "
 "vyčistěte extruder. Více na prusa.io/mmu-care"
 
-#: tmp_error_headers/error_list_mk4.hpp:51
 #: tmp_error_headers/error_list_coreone.hpp:79
+#: tmp_error_headers/error_list_mk4.hpp:51
 msgid ""
 "Maintenance Reminder. Filament changes have reached main-plate lifespan. "
 "Inspect the part and ensure you have a spare plate available. Visit prusa.io/"
@@ -4759,16 +4816,16 @@ msgstr "Ujistěte se, že je filament vložen skrz fil. senzor."
 msgid "Manage Filaments"
 msgstr "Správa filamentů"
 
-#: src/gui/MItem_tools.hpp:638
+#: src/gui/MItem_tools.hpp:639
 msgid "Manual Belt Tuning"
 msgstr "Ruční ladění řemenů"
 
-#: tmp_error_headers/error_list_mini.hpp:240
-#: tmp_error_headers/error_list_xl.hpp:527
-#: tmp_error_headers/error_list_ix.hpp:506
-#: tmp_error_headers/error_list_mk4.hpp:310
 #: tmp_error_headers/error_list_mk35.hpp:282
 #: tmp_error_headers/error_list_coreone.hpp:478
+#: tmp_error_headers/error_list_xl.hpp:527
+#: tmp_error_headers/error_list_mini.hpp:240
+#: tmp_error_headers/error_list_mk4.hpp:310
+#: tmp_error_headers/error_list_ix.hpp:506
 msgid ""
 "Marlin client could not send message to Marlin server and timeout was "
 "reached."
@@ -4785,7 +4842,7 @@ msgstr "Maska"
 msgid "Material"
 msgstr "Materiál"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:102
+#: src/gui/screen/filament/screen_filament_detail.cpp:110
 msgid "Maximum Chamber Temperature"
 msgstr "Maximální teplota komory"
 
@@ -4797,12 +4854,12 @@ msgstr ""
 "Naměřené frekvence řemenů jsou mimo očekávaný rozsah. Zkontrolujte, že "
 "sestava XY (pojezd) je správně zarovnaná. Opakujte kalibraci."
 
-#: tmp_error_headers/error_list_mini.hpp:492
-#: tmp_error_headers/error_list_xl.hpp:807
-#: tmp_error_headers/error_list_ix.hpp:758
-#: tmp_error_headers/error_list_mk4.hpp:597
 #: tmp_error_headers/error_list_mk35.hpp:569
 #: tmp_error_headers/error_list_coreone.hpp:765
+#: tmp_error_headers/error_list_xl.hpp:807
+#: tmp_error_headers/error_list_mini.hpp:492
+#: tmp_error_headers/error_list_mk4.hpp:597
+#: tmp_error_headers/error_list_ix.hpp:758
 msgid ""
 "Measured temperature is not matching expected value. Check the thermistor is "
 "in contact with hotend. In case of damage, replace it."
@@ -4835,19 +4892,19 @@ msgstr "Měření napnutí řemene"
 msgid "Medium"
 msgstr "Střední"
 
-#: tmp_error_headers/error_list_xl.hpp:520
-#: tmp_error_headers/error_list_ix.hpp:499
-#: tmp_error_headers/error_list_mk4.hpp:303
 #: tmp_error_headers/error_list_mk35.hpp:275
 #: tmp_error_headers/error_list_coreone.hpp:471
+#: tmp_error_headers/error_list_xl.hpp:520
+#: tmp_error_headers/error_list_mk4.hpp:303
+#: tmp_error_headers/error_list_ix.hpp:499
 msgid "Memory allocation failed for scheduled LED animation"
 msgstr "Pro LED animaci nelze alokovat paměť"
 
-#: src/gui/MItem_tools.hpp:140
+#: src/gui/MItem_tools.hpp:141
 msgid "Menu Timeout"
 msgstr "Automatický návrat do menu"
 
-#: src/gui/MItem_tools.hpp:90
+#: src/gui/MItem_tools.hpp:91
 msgid "Mesh Bed Leveling"
 msgstr "Mesh Bed Leveling"
 
@@ -4867,7 +4924,7 @@ msgstr "Seznam metrik"
 msgid "Metrics Port"
 msgstr "Port pro metriky"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:96
+#: src/gui/screen/filament/screen_filament_detail.cpp:104
 msgid "Minimum Chamber Temperature"
 msgstr "Minimální teplota komory"
 
@@ -4888,8 +4945,8 @@ msgstr "Nesouhlasí průměry trysek"
 msgid "Mon"
 msgstr "Po"
 
-#: src/gui/screen_qr_error.cpp:30 src/gui/screen_fatal_warning.cpp:35
-#: src/gui/dialogs/DialogConnectReg.hpp:23
+#: src/gui/dialogs/DialogConnectReg.hpp:23 src/gui/screen_fatal_warning.cpp:35
+#: src/gui/screen_qr_error.cpp:30
 msgid "More detail at"
 msgstr "Více informací"
 
@@ -4936,8 +4993,8 @@ msgid "Moving away."
 msgstr "Posouvám pryč."
 
 #. //MSG_PROGRESS_HOMING c=20
-#: src/mmu2/mmu2_progress_converter.cpp:32
 #: src/gui/dialogs/DialogLoadUnload.cpp:89
+#: src/mmu2/mmu2_progress_converter.cpp:32
 msgid "Moving selector"
 msgstr "Posouvám selektor"
 
@@ -4990,12 +5047,12 @@ msgstr "NEZAV. / 0"
 msgid "NO"
 msgstr "NE"
 
-#: tmp_error_headers/error_list_mini.hpp:309
-#: tmp_error_headers/error_list_xl.hpp:603
-#: tmp_error_headers/error_list_ix.hpp:575
-#: tmp_error_headers/error_list_mk4.hpp:379
 #: tmp_error_headers/error_list_mk35.hpp:351
 #: tmp_error_headers/error_list_coreone.hpp:547
+#: tmp_error_headers/error_list_xl.hpp:603
+#: tmp_error_headers/error_list_mini.hpp:309
+#: tmp_error_headers/error_list_mk4.hpp:379
+#: tmp_error_headers/error_list_ix.hpp:575
 msgid "NO FW ON USB FLASH DRIVE"
 msgstr "NA USB DISKU NENÍ FW"
 
@@ -5007,11 +5064,11 @@ msgstr "NYNÍ NE"
 msgid "NOW"
 msgstr "NYNÍ"
 
-#: tmp_error_headers/error_list_mini.hpp:134
-#: tmp_error_headers/error_list_ix.hpp:260
-#: tmp_error_headers/error_list_mk4.hpp:169
 #: tmp_error_headers/error_list_mk35.hpp:155
 #: tmp_error_headers/error_list_coreone.hpp:253
+#: tmp_error_headers/error_list_mini.hpp:134
+#: tmp_error_headers/error_list_mk4.hpp:169
+#: tmp_error_headers/error_list_ix.hpp:260
 msgid "NOZZLE HEATER OVERCURRENT"
 msgstr "NADPROUD VÝHŘEVU TRYSKY"
 
@@ -5019,7 +5076,7 @@ msgstr "NADPROUD VÝHŘEVU TRYSKY"
 msgid "NOZZLE_OFFSET"
 msgstr "OFFSET_TRYSKY"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:35
+#: src/gui/screen/filament/screen_filament_detail.cpp:43
 #: src/gui/MItem_tools.cpp:352
 msgid "Name"
 msgstr "Název"
@@ -5040,7 +5097,7 @@ msgstr "Jméno nesmí být prázdné"
 msgid "Net fail"
 msgstr "Selhání sítě"
 
-#: src/gui/MItem_menus.hpp:111 src/gui/MItem_tools.cpp:824
+#: src/gui/MItem_tools.cpp:824 src/gui/MItem_menus.hpp:111
 msgid "Network"
 msgstr "Síť"
 
@@ -5060,11 +5117,11 @@ msgstr "Nikdy"
 msgid "New FW available"
 msgstr "Dostupný nový FW"
 
-#: tmp_error_headers/error_list_xl.hpp:709
-#: tmp_error_headers/error_list_ix.hpp:674
-#: tmp_error_headers/error_list_mk4.hpp:492
 #: tmp_error_headers/error_list_mk35.hpp:464
 #: tmp_error_headers/error_list_coreone.hpp:660
+#: tmp_error_headers/error_list_xl.hpp:709
+#: tmp_error_headers/error_list_mk4.hpp:492
+#: tmp_error_headers/error_list_ix.hpp:674
 msgid "New firmware available"
 msgstr "Dostupný nový firmware"
 
@@ -5110,12 +5167,12 @@ msgstr "Vložte USB"
 msgid "No crash dump to save."
 msgstr "Žádný výpis k uložení."
 
-#: tmp_error_headers/error_list_mini.hpp:366
-#: tmp_error_headers/error_list_xl.hpp:660
-#: tmp_error_headers/error_list_ix.hpp:632
-#: tmp_error_headers/error_list_mk4.hpp:436
 #: tmp_error_headers/error_list_mk35.hpp:408
 #: tmp_error_headers/error_list_coreone.hpp:604
+#: tmp_error_headers/error_list_xl.hpp:660
+#: tmp_error_headers/error_list_mini.hpp:366
+#: tmp_error_headers/error_list_mk4.hpp:436
+#: tmp_error_headers/error_list_ix.hpp:632
 msgid ""
 "No firmware found\n"
 "in the internal\n"
@@ -5146,7 +5203,7 @@ msgstr "Bez síťového adaptéru"
 msgid "No peaks found."
 msgstr "Nenalezeny špičky."
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:108
+#: src/gui/screen/filament/screen_filament_detail.cpp:116
 msgid "Nominal Chamber Temperature"
 msgstr "Jmenovitá teplota komory"
 
@@ -5199,8 +5256,8 @@ msgid ""
 msgstr "Nyní zkalibrujeme vzdálenost mezi tryskou a tiskovým plátem."
 
 #: src/common/footer_def.cpp:10 src/gui/MItem_print.hpp:14
-#: src/gui/MItem_print.hpp:49 src/gui/MItem_tools.cpp:706
-#: src/gui/wizard/selftest_result_heaters.cpp:13 include/common/hw_check.hpp:32
+#: src/gui/MItem_print.hpp:49 src/gui/wizard/selftest_result_heaters.cpp:13
+#: src/gui/MItem_tools.cpp:706 include/common/hw_check.hpp:32
 msgid "Nozzle"
 msgstr "Tryska"
 
@@ -5224,6 +5281,10 @@ msgstr "Tryska 4 - Teplota"
 msgid "Nozzle 5 Temperature"
 msgstr "Tryska 5 - Teplota"
 
+#: src/gui/MItem_tools.cpp:996
+msgid "Nozzle Cleaning Retraction"
+msgstr "Retrakce při čištění trysky"
+
 #: src/gui/screen/toolhead/screen_toolhead_settings.cpp:26
 msgid "Nozzle Diameter"
 msgstr "Průměr trysky"
@@ -5244,16 +5305,16 @@ msgstr "Offset trysky"
 msgid "Nozzle PWM"
 msgstr "PWM Trysky"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:75
+#: src/gui/screen/filament/screen_filament_detail.cpp:83
 msgid "Nozzle Preheat Temperature"
 msgstr "Teplota předehřátí trysky"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:71
+#: src/gui/screen/filament/screen_filament_detail.cpp:79
 #: src/gui/MItem_print.cpp:52
 msgid "Nozzle Temp"
 msgstr "Tep. trysky"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:71
+#: src/gui/screen/filament/screen_filament_detail.cpp:79
 #: src/gui/MItem_print.hpp:16 src/gui/MItem_print.hpp:51
 msgid "Nozzle Temperature"
 msgstr "Teplota trysky"
@@ -5262,10 +5323,17 @@ msgstr "Teplota trysky"
 msgid "Nozzle cleaning"
 msgstr "Čištění trysky"
 
-#: tmp_error_headers/error_list_xl.hpp:919
-#: tmp_error_headers/error_list_ix.hpp:835
-#: tmp_error_headers/error_list_mk4.hpp:667
+#: tmp_error_headers/error_list_coreone.hpp:932
+#: tmp_error_headers/error_list_xl.hpp:981
+#: tmp_error_headers/error_list_mk4.hpp:722
+#: tmp_error_headers/error_list_ix.hpp:855
+msgid "Nozzle cleaning failed"
+msgstr "Čištění trysky selhalo"
+
 #: tmp_error_headers/error_list_coreone.hpp:849
+#: tmp_error_headers/error_list_xl.hpp:919
+#: tmp_error_headers/error_list_mk4.hpp:667
+#: tmp_error_headers/error_list_ix.hpp:835
 msgid "Nozzle cleaning failed."
 msgstr "Čištění trysky selhalo."
 
@@ -5277,8 +5345,8 @@ msgstr "Průměr trysky"
 msgid "Nozzle diameter doesn't match"
 msgstr "Průměr trysky neodpovídá"
 
-#: tmp_error_headers/error_list_xl.hpp:842
 #: tmp_error_headers/error_list_mk35.hpp:604
+#: tmp_error_headers/error_list_xl.hpp:842
 msgid ""
 "Nozzle doesn't seem to have round cross section. Make sure it is clean and "
 "perpendicular to the bed."
@@ -5325,8 +5393,8 @@ msgstr "VYP "
 
 #. clang-format off
 #. 01234567890123456789
-#: src/mmu2/mmu2_progress_converter.cpp:7
 #: src/common/client_response_texts.hpp:64
+#: src/mmu2/mmu2_progress_converter.cpp:7
 msgid "OK"
 msgstr "OK"
 
@@ -5343,8 +5411,8 @@ msgid "Object"
 msgstr "Objekt"
 
 #. / Display string of the nullopt value
-#: src/guiapi/include/numeric_input_config.hpp:31
 #: src/gui/screen_menu_connect.cpp:46
+#: src/guiapi/include/numeric_input_config.hpp:31
 msgid "Off"
 msgstr "Vyp."
 
@@ -5409,12 +5477,12 @@ msgstr ""
 "Otevřete dveře a utáhněte napínací šroub o půlotáčku. Pak zavřete dveře a "
 "stav potvrďte."
 
-#: tmp_error_headers/error_list_mini.hpp:121
-#: tmp_error_headers/error_list_xl.hpp:268
-#: tmp_error_headers/error_list_ix.hpp:247
-#: tmp_error_headers/error_list_mk4.hpp:156
 #: tmp_error_headers/error_list_mk35.hpp:142
 #: tmp_error_headers/error_list_coreone.hpp:240
+#: tmp_error_headers/error_list_xl.hpp:268
+#: tmp_error_headers/error_list_mini.hpp:121
+#: tmp_error_headers/error_list_mk4.hpp:156
+#: tmp_error_headers/error_list_ix.hpp:247
 msgid "Overcurrent detected on USB port."
 msgstr "Na portu USB byl zjištěn nadproud."
 
@@ -5422,36 +5490,36 @@ msgstr "Na portu USB byl zjištěn nadproud."
 msgid "Overcurrent detected on heatbed port, disconnect the device."
 msgstr "Na portu heatbedu zjištěn nadproud, odpojte zařízení."
 
-#: tmp_error_headers/error_list_mini.hpp:135
-#: tmp_error_headers/error_list_ix.hpp:261
-#: tmp_error_headers/error_list_mk4.hpp:170
 #: tmp_error_headers/error_list_mk35.hpp:156
 #: tmp_error_headers/error_list_coreone.hpp:254
+#: tmp_error_headers/error_list_mini.hpp:135
+#: tmp_error_headers/error_list_mk4.hpp:170
+#: tmp_error_headers/error_list_ix.hpp:261
 msgid "Overcurrent detected on nozzle heater."
 msgstr "Nadproud detekován na výhřevu trysky."
 
-#: tmp_error_headers/error_list_mini.hpp:149
-#: tmp_error_headers/error_list_xl.hpp:282
-#: tmp_error_headers/error_list_ix.hpp:275
-#: tmp_error_headers/error_list_mk4.hpp:184
 #: tmp_error_headers/error_list_mk35.hpp:170
 #: tmp_error_headers/error_list_coreone.hpp:268
+#: tmp_error_headers/error_list_xl.hpp:282
+#: tmp_error_headers/error_list_mini.hpp:149
+#: tmp_error_headers/error_list_mk4.hpp:184
+#: tmp_error_headers/error_list_ix.hpp:275
 msgid "Overcurrent detected on the MMU port, disconnect the device."
 msgstr "Na portu MMU byl zjištěn nadproud, odpojte zařízení."
 
-#: tmp_error_headers/error_list_mini.hpp:128
-#: tmp_error_headers/error_list_xl.hpp:275
-#: tmp_error_headers/error_list_ix.hpp:254
-#: tmp_error_headers/error_list_mk4.hpp:163
 #: tmp_error_headers/error_list_mk35.hpp:149
 #: tmp_error_headers/error_list_coreone.hpp:247
+#: tmp_error_headers/error_list_xl.hpp:275
+#: tmp_error_headers/error_list_mini.hpp:128
+#: tmp_error_headers/error_list_mk4.hpp:163
+#: tmp_error_headers/error_list_ix.hpp:254
 msgid "Overcurrent detected on the connected USB device, disconnect it."
 msgstr "Detekován nadproud na připojeném zařízení USB. Odpojte jej."
 
-#: tmp_error_headers/error_list_ix.hpp:268
-#: tmp_error_headers/error_list_mk4.hpp:177
 #: tmp_error_headers/error_list_mk35.hpp:163
 #: tmp_error_headers/error_list_coreone.hpp:261
+#: tmp_error_headers/error_list_mk4.hpp:177
+#: tmp_error_headers/error_list_ix.hpp:268
 msgid "Overcurrent detected on xBuddy heatbed port, disconnect the device."
 msgstr "Na portu xBuddy heatbed byl zjištěn nadproud, odpojte zařízení."
 
@@ -5497,30 +5565,30 @@ msgstr "PIN NENALEZEN"
 msgid "POSTPONE"
 msgstr "ODLOŽIT"
 
-#: tmp_error_headers/error_list_xl.hpp:358
-#: tmp_error_headers/error_list_ix.hpp:351
-#: tmp_error_headers/error_list_mk4.hpp:246
 #: tmp_error_headers/error_list_mk35.hpp:232
 #: tmp_error_headers/error_list_coreone.hpp:330
+#: tmp_error_headers/error_list_xl.hpp:358
+#: tmp_error_headers/error_list_mk4.hpp:246
+#: tmp_error_headers/error_list_ix.hpp:351
 msgid "POWER PANIC"
 msgstr "ZOTAVENÍ ZE ZTRÁTY NAPÁJENÍ"
 
+#: tmp_error_headers/error_list_coreone.hpp:15
 #: tmp_error_headers/error_list_xl.hpp:15
 #: tmp_error_headers/error_list_ix.hpp:15
-#: tmp_error_headers/error_list_coreone.hpp:15
 msgid "PRECISE HOMING FAILED"
 msgstr "PŘESNÝ HOMING SELHAL"
 
-#: tmp_error_headers/error_list_mini.hpp:22
-#: tmp_error_headers/error_list_mini.hpp:29
-#: tmp_error_headers/error_list_ix.hpp:64
-#: tmp_error_headers/error_list_ix.hpp:71
-#: tmp_error_headers/error_list_mk4.hpp:57
-#: tmp_error_headers/error_list_mk4.hpp:64
 #: tmp_error_headers/error_list_mk35.hpp:43
 #: tmp_error_headers/error_list_mk35.hpp:50
 #: tmp_error_headers/error_list_coreone.hpp:106
 #: tmp_error_headers/error_list_coreone.hpp:113
+#: tmp_error_headers/error_list_mini.hpp:22
+#: tmp_error_headers/error_list_mini.hpp:29
+#: tmp_error_headers/error_list_mk4.hpp:57
+#: tmp_error_headers/error_list_mk4.hpp:64
+#: tmp_error_headers/error_list_ix.hpp:64
+#: tmp_error_headers/error_list_ix.hpp:71
 msgid "PREHEAT ERROR"
 msgstr "CHYBA PŘEDEHŘEVU"
 
@@ -5551,7 +5619,7 @@ msgid "PROJECTS"
 msgstr "PROJEKTY"
 
 #. TODO: Doesn't fit
-#: src/gui/screen_menu_connect.hpp:75 src/gui/dialogs/DialogConnectReg.hpp:22
+#: src/gui/dialogs/DialogConnectReg.hpp:22 src/gui/screen_menu_connect.hpp:75
 msgid "PRUSA CONNECT"
 msgstr "PRUSA CONNECT"
 
@@ -5563,6 +5631,18 @@ msgstr "PRUSALINK"
 msgid "PULLEY CANNOT MOVE"
 msgstr "KLADKA SE NEOTÁČÍ"
 
+#: tmp_error_headers/error_list_coreone.hpp:372
+#: tmp_error_headers/error_list_coreone.hpp:379
+#: tmp_error_headers/error_list_coreone.hpp:386
+#: tmp_error_headers/error_list_coreone.hpp:393
+#: tmp_error_headers/error_list_coreone.hpp:400
+#: tmp_error_headers/error_list_coreone.hpp:407
+#: tmp_error_headers/error_list_coreone.hpp:414
+#: tmp_error_headers/error_list_coreone.hpp:421
+#: tmp_error_headers/error_list_coreone.hpp:428
+#: tmp_error_headers/error_list_coreone.hpp:435
+#: tmp_error_headers/error_list_coreone.hpp:442
+#: tmp_error_headers/error_list_coreone.hpp:449
 #: tmp_error_headers/error_list_xl.hpp:421
 #: tmp_error_headers/error_list_xl.hpp:428
 #: tmp_error_headers/error_list_xl.hpp:435
@@ -5587,18 +5667,6 @@ msgstr "KLADKA SE NEOTÁČÍ"
 #: tmp_error_headers/error_list_ix.hpp:463
 #: tmp_error_headers/error_list_ix.hpp:470
 #: tmp_error_headers/error_list_ix.hpp:477
-#: tmp_error_headers/error_list_coreone.hpp:372
-#: tmp_error_headers/error_list_coreone.hpp:379
-#: tmp_error_headers/error_list_coreone.hpp:386
-#: tmp_error_headers/error_list_coreone.hpp:393
-#: tmp_error_headers/error_list_coreone.hpp:400
-#: tmp_error_headers/error_list_coreone.hpp:407
-#: tmp_error_headers/error_list_coreone.hpp:414
-#: tmp_error_headers/error_list_coreone.hpp:421
-#: tmp_error_headers/error_list_coreone.hpp:428
-#: tmp_error_headers/error_list_coreone.hpp:435
-#: tmp_error_headers/error_list_coreone.hpp:442
-#: tmp_error_headers/error_list_coreone.hpp:449
 msgid "PUPPY ERROR"
 msgstr "PUPPY ERROR"
 
@@ -5625,8 +5693,8 @@ msgid "Parking"
 msgstr "Parkování"
 
 #. //MSG_PROGRESS_RETURN_SELECTOR c=20
-#: src/mmu2/mmu2_progress_converter.cpp:28
 #: src/gui/dialogs/DialogLoadUnload.cpp:85
+#: src/mmu2/mmu2_progress_converter.cpp:28
 msgid "Parking selector"
 msgstr "Parkuji selektor"
 
@@ -5648,8 +5716,8 @@ msgstr ""
 msgid "Parking tool"
 msgstr "Parkuji nástroj"
 
-#: src/gui/screen_prusa_link.hpp:39 src/gui/screen_prusa_link.cpp:55
-#: src/gui/screen_network_setup.cpp:32
+#: src/gui/screen_prusa_link.cpp:55 src/gui/screen_network_setup.cpp:32
+#: src/gui/screen_prusa_link.hpp:39
 msgid "Password"
 msgstr "Heslo"
 
@@ -5661,7 +5729,7 @@ msgstr "Pauza"
 msgid "Pausing..."
 msgstr "Pozastavení..."
 
-#: src/gui/wizard/screen_belt_tuning_wizard.cpp:199
+#: src/gui/wizard/screen_belt_tuning_wizard.cpp:202
 msgid "Perfect!"
 msgstr "Perfektní!"
 
@@ -5673,8 +5741,8 @@ msgstr ""
 "Provést kalibraci senzorů filamentu? Budou nahrazeny předchozí kalibrace."
 
 #. //MSG_PROGRESS_PUSH_FILAMENT c=20
-#: src/mmu2/mmu2_progress_converter.cpp:26
 #: src/gui/dialogs/DialogLoadUnload.cpp:83
+#: src/mmu2/mmu2_progress_converter.cpp:26
 msgid "Performing cut"
 msgstr "Provádím řez"
 
@@ -5751,7 +5819,7 @@ msgstr "Vybrat Nástroj 5"
 msgid "Pick Tool 5 (Current)"
 msgstr "Vybrat Nástroj 5 (aktuální)"
 
-#: src/gui/MItem_tools.hpp:613
+#: src/gui/MItem_tools.hpp:614
 msgid "Pick/Park Tool"
 msgstr "Vyzvednutí/Zaparkování nástroje"
 
@@ -5763,12 +5831,12 @@ msgstr "Ping | Ztráta"
 msgid "Please assign a tool to the filament"
 msgstr "Přiřaďte filamentu nástroj"
 
-#: tmp_error_headers/error_list_mini.hpp:401
-#: tmp_error_headers/error_list_xl.hpp:702
-#: tmp_error_headers/error_list_ix.hpp:667
-#: tmp_error_headers/error_list_mk4.hpp:485
 #: tmp_error_headers/error_list_mk35.hpp:457
 #: tmp_error_headers/error_list_coreone.hpp:653
+#: tmp_error_headers/error_list_xl.hpp:702
+#: tmp_error_headers/error_list_mini.hpp:401
+#: tmp_error_headers/error_list_mk4.hpp:485
+#: tmp_error_headers/error_list_ix.hpp:667
 msgid "Please complete Calibrations & Tests before using the printer."
 msgstr "Nejprve dokončete všechny kalibrace a testy."
 
@@ -5814,18 +5882,18 @@ msgstr "Vyjměte filament ze senzoru filamentu."
 msgid "Please remove the belt dampeners."
 msgstr "Odstraňte tlumiče řemenů."
 
-#: tmp_error_headers/error_list_mini.hpp:548
-#: tmp_error_headers/error_list_xl.hpp:884
-#: tmp_error_headers/error_list_ix.hpp:821
-#: tmp_error_headers/error_list_mk4.hpp:653
 #: tmp_error_headers/error_list_mk35.hpp:632
 #: tmp_error_headers/error_list_coreone.hpp:821
+#: tmp_error_headers/error_list_xl.hpp:884
+#: tmp_error_headers/error_list_mini.hpp:548
+#: tmp_error_headers/error_list_mk4.hpp:653
+#: tmp_error_headers/error_list_ix.hpp:821
 msgid "Please replace filament."
 msgstr "Prosím vyměňte filament."
 
+#: tmp_error_headers/error_list_coreone.hpp:100
 #: tmp_error_headers/error_list_xl.hpp:93
 #: tmp_error_headers/error_list_ix.hpp:58
-#: tmp_error_headers/error_list_coreone.hpp:100
 msgid ""
 "Please run homing calibration from the Calibrations menu. Continuing can "
 "result in homing shifts and toolcrashes."
@@ -5838,7 +5906,7 @@ msgstr ""
 msgid "Please select a filament."
 msgstr "Vyberte filament."
 
-#: src/gui/screen_cold_pull.cpp:182 src/gui/dialogs/window_dlg_wait.cpp:27
+#: src/gui/dialogs/window_dlg_wait.cpp:27 src/gui/screen_cold_pull.cpp:182
 msgid "Please wait"
 msgstr "Vyčkejte"
 
@@ -5880,11 +5948,11 @@ msgstr "Chyba napájení"
 msgid "Power panic"
 msgstr "Power panic"
 
-#: tmp_error_headers/error_list_xl.hpp:359
-#: tmp_error_headers/error_list_ix.hpp:352
-#: tmp_error_headers/error_list_mk4.hpp:247
 #: tmp_error_headers/error_list_mk35.hpp:233
 #: tmp_error_headers/error_list_coreone.hpp:331
+#: tmp_error_headers/error_list_xl.hpp:359
+#: tmp_error_headers/error_list_mk4.hpp:247
+#: tmp_error_headers/error_list_ix.hpp:352
 msgid "Power panic detected on startup. Check power panic cable."
 msgstr ""
 "Detekován stav \"Power panic\" při startu. Zkontrolujte Power panic kabel."
@@ -5897,25 +5965,25 @@ msgstr "Předehřev"
 msgid "Preheat Error"
 msgstr "Chyba předehřívání"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:75
+#: src/gui/screen/filament/screen_filament_detail.cpp:83
 msgid "Preheat Temp"
 msgstr "Teplota předehřátí"
 
-#: src/gui/screen/screen_preheat.cpp:179
+#: src/gui/screen/screen_preheat.cpp:178
 msgid "Preheating"
 msgstr "Předehřívání"
 
 #. use load caption, not a bug
-#: src/gui/screen/screen_preheat.cpp:184
+#: src/gui/screen/screen_preheat.cpp:183
 msgid "Preheating for load"
 msgstr "Předehřátí pro zavedení"
 
-#: src/gui/screen/screen_preheat.cpp:191
+#: src/gui/screen/screen_preheat.cpp:190
 msgid "Preheating for purge"
 msgstr "Probíhá zahřívání"
 
 #. use unload caption, not a bug
-#: src/gui/screen/screen_preheat.cpp:188
+#: src/gui/screen/screen_preheat.cpp:187
 msgid "Preheating for unload"
 msgstr "Předehřátí pro vysunutí"
 
@@ -5923,7 +5991,7 @@ msgstr "Předehřátí pro vysunutí"
 msgid "Preload All"
 msgstr "Zavést vše"
 
-#: src/gui/screen_menu_mmu_preload_to_mmu.hpp:18 src/gui/MItem_mmu.hpp:22
+#: src/gui/MItem_mmu.hpp:22 src/gui/screen_menu_mmu_preload_to_mmu.hpp:18
 msgid "Preload to MMU"
 msgstr "Zavést do MMU"
 
@@ -5931,14 +5999,14 @@ msgstr "Zavést do MMU"
 msgid "Preload to MMU Advanced"
 msgstr "Zavést do MMU (Pokročilé)"
 
-#: src/gui/wizard/selftest_frame_temp.cpp:61
 #: src/gui/wizard/screen_belt_tuning_wizard.cpp:22
+#: src/gui/wizard/selftest_frame_temp.cpp:61
 msgid "Preparing"
 msgstr "Příprava"
 
 #. //MSG_PROGRESS_SELECT_SLOT c=20
-#: src/mmu2/mmu2_progress_converter.cpp:24
 #: src/gui/dialogs/DialogLoadUnload.cpp:81
+#: src/mmu2/mmu2_progress_converter.cpp:24
 msgid "Preparing blade"
 msgstr "Připravuji čepel"
 
@@ -5993,7 +6061,7 @@ msgstr "Tiskový ventilátor"
 msgid "Print Filtration"
 msgstr "Filtrace tisku"
 
-#: src/gui/MItem_tools.hpp:306
+#: src/gui/MItem_tools.hpp:307
 msgid "Print Progress Screen"
 msgstr "Obrazovka průběhu tisku"
 
@@ -6006,7 +6074,7 @@ msgid "Print Statistics"
 msgstr "Statistiky tisku"
 
 #. First line - Print Time
-#: src/gui/MItem_tools.hpp:373 src/gui/gcode_description.cpp:144
+#: src/gui/gcode_description.cpp:144 src/gui/MItem_tools.hpp:374
 msgid "Print Time"
 msgstr "Doba tisku"
 
@@ -6019,12 +6087,12 @@ msgstr "Tisk skončil"
 msgid "Print fan"
 msgstr "Tiskový ventilátor"
 
-#: tmp_error_headers/error_list_mini.hpp:478
-#: tmp_error_headers/error_list_xl.hpp:793
-#: tmp_error_headers/error_list_ix.hpp:744
-#: tmp_error_headers/error_list_mk4.hpp:583
 #: tmp_error_headers/error_list_mk35.hpp:555
 #: tmp_error_headers/error_list_coreone.hpp:751
+#: tmp_error_headers/error_list_xl.hpp:793
+#: tmp_error_headers/error_list_mini.hpp:478
+#: tmp_error_headers/error_list_mk4.hpp:583
+#: tmp_error_headers/error_list_ix.hpp:744
 msgid ""
 "Print fan not spinning. Check it for possible debris, then inspect the "
 "wiring."
@@ -6072,8 +6140,8 @@ msgstr "Typ tiskárny"
 msgid "Printer doesn't have enough tools"
 msgstr "Tiskárna nemá dostatek nástrojových hlav"
 
-#: tmp_error_headers/error_list_mk4.hpp:44
 #: tmp_error_headers/error_list_coreone.hpp:72
+#: tmp_error_headers/error_list_mk4.hpp:44
 msgid ""
 "Printer has detected multiple consecutive filament loading errors. We "
 "recommend checking Nextruder main-plate. Visit prusa.io/mmu-care"
@@ -6098,7 +6166,7 @@ msgstr "Tiskárna je zaneprázdněná. Opakujte akci později."
 msgid "Printer is homing, please wait."
 msgstr "Provádí se homing, vyčkejte."
 
-#: src/gui/MItem_tools.cpp:88 src/gui/dialogs/window_dlg_wait.cpp:21
+#: src/gui/dialogs/window_dlg_wait.cpp:21 src/gui/MItem_tools.cpp:88
 msgid "Printer may vibrate and be noisier during homing."
 msgstr "Při homingu je tiskárna hlučnější a může vibrovat."
 
@@ -6181,43 +6249,43 @@ msgstr "PrusaLink"
 msgid "Pulley motor stalled. Ensure the pulley can move and check the wiring."
 msgstr "Pulley motor se zasekl. Zkontrolujte zapojení a zda jej nic neblokuje."
 
+#: tmp_error_headers/error_list_coreone.hpp:436
 #: tmp_error_headers/error_list_xl.hpp:485
 #: tmp_error_headers/error_list_ix.hpp:464
-#: tmp_error_headers/error_list_coreone.hpp:436
 #, c-format
 msgid "Puppy %s firmware fingerprint mismatch"
 msgstr "Puppy %s firmware fingerprint mismatch"
 
+#: tmp_error_headers/error_list_coreone.hpp:422
 #: tmp_error_headers/error_list_xl.hpp:471
 #: tmp_error_headers/error_list_ix.hpp:450
-#: tmp_error_headers/error_list_coreone.hpp:422
 #, c-format
 msgid "Puppy %s firmware not found"
 msgstr "Puppy %s firmware not found"
 
+#: tmp_error_headers/error_list_coreone.hpp:429
 #: tmp_error_headers/error_list_xl.hpp:478
 #: tmp_error_headers/error_list_ix.hpp:457
-#: tmp_error_headers/error_list_coreone.hpp:429
 #, c-format
 msgid "Puppy %s flash writing failed"
 msgstr "Puppy %s flash writing failed"
 
+#: tmp_error_headers/error_list_coreone.hpp:394
 #: tmp_error_headers/error_list_xl.hpp:443
 #: tmp_error_headers/error_list_ix.hpp:422
-#: tmp_error_headers/error_list_coreone.hpp:394
 #, c-format
 msgid "Puppy %s not responding"
 msgstr "Puppy %s not responding"
 
+#: tmp_error_headers/error_list_coreone.hpp:387
 #: tmp_error_headers/error_list_xl.hpp:436
 #: tmp_error_headers/error_list_ix.hpp:415
-#: tmp_error_headers/error_list_coreone.hpp:387
 msgid "Puppy discovery error. No puppy found"
 msgstr "Puppy discovery error. No puppy found"
 
+#: tmp_error_headers/error_list_coreone.hpp:401
 #: tmp_error_headers/error_list_xl.hpp:450
 #: tmp_error_headers/error_list_ix.hpp:429
-#: tmp_error_headers/error_list_coreone.hpp:401
 #, c-format
 msgid ""
 "Puppy uses incompatible bootloader protocol %04x, Buddy FW requires %04x"
@@ -6236,9 +6304,21 @@ msgstr "Čištění"
 msgid "Purging filament"
 msgstr "Čistím trysku"
 
+#: tmp_error_headers/error_list_coreone.hpp:912
+#: tmp_error_headers/error_list_xl.hpp:961
+#: tmp_error_headers/error_list_mk4.hpp:702
+msgid ""
+"Purging the filament.\n"
+"\n"
+"Please wait until the purge is complete."
+msgstr ""
+"Vytlačování filamentu.\n"
+"\n"
+"Počkejte na dokončení procesu."
+
 #. //MSG_PROGRESS_PREPARE_BLADE c=20
-#: src/mmu2/mmu2_progress_converter.cpp:25
 #: src/gui/dialogs/DialogLoadUnload.cpp:82
+#: src/mmu2/mmu2_progress_converter.cpp:25
 msgid "Pushing filament"
 msgstr "Posun filamentu"
 
@@ -6262,12 +6342,12 @@ msgstr "KONEC"
 msgid "Question"
 msgstr "Otázka"
 
-#: tmp_error_headers/error_list_mini.hpp:561
-#: tmp_error_headers/error_list_xl.hpp:925
-#: tmp_error_headers/error_list_ix.hpp:841
-#: tmp_error_headers/error_list_mk4.hpp:673
 #: tmp_error_headers/error_list_mk35.hpp:645
 #: tmp_error_headers/error_list_coreone.hpp:855
+#: tmp_error_headers/error_list_xl.hpp:925
+#: tmp_error_headers/error_list_mini.hpp:561
+#: tmp_error_headers/error_list_mk4.hpp:673
+#: tmp_error_headers/error_list_ix.hpp:841
 msgid "Quick Pause"
 msgstr "Rychlá pauza"
 
@@ -6299,19 +6379,19 @@ msgstr "POKRAČOVAT"
 msgid "RETRY"
 msgstr "ZNOVU"
 
-#: src/gui/MItem_tools.hpp:552
+#: src/gui/MItem_tools.hpp:553
 msgid "RGB Side Strip"
 msgstr "RGB boční pruh"
 
-#: src/gui/MItem_tools.hpp:566
+#: src/gui/MItem_tools.hpp:567
 msgid "RGB Side Strip Dimmed"
 msgstr "RGB pruh ztlumen"
 
-#: src/gui/MItem_tools.hpp:580
+#: src/gui/MItem_tools.hpp:581
 msgid "RGB Side Strip Dimming"
 msgstr "Stmívání RGB bočního pruhu"
 
-#: src/gui/MItem_tools.hpp:537
+#: src/gui/MItem_tools.hpp:538
 msgid "RGB Status Bar"
 msgstr "RGB stavový pruh"
 
@@ -6377,12 +6457,12 @@ msgstr "Registruji tiskárnu do Prusa Connect..."
 msgid "Registration successful, continue at connect.prusa3d.com"
 msgstr "Registrace úspěšná, pokračujte na connect.prusa3d.com"
 
-#: tmp_error_headers/error_list_mini.hpp:219
-#: tmp_error_headers/error_list_xl.hpp:387
-#: tmp_error_headers/error_list_ix.hpp:373
-#: tmp_error_headers/error_list_mk4.hpp:268
 #: tmp_error_headers/error_list_mk35.hpp:254
 #: tmp_error_headers/error_list_coreone.hpp:352
+#: tmp_error_headers/error_list_xl.hpp:387
+#: tmp_error_headers/error_list_mini.hpp:219
+#: tmp_error_headers/error_list_mk4.hpp:268
+#: tmp_error_headers/error_list_ix.hpp:373
 msgid "Registration to Prusa Connect failed due to:"
 msgstr "Registrace do služby Prusa Connect se nezdařila z důvodu:"
 
@@ -6416,6 +6496,19 @@ msgstr ""
 msgid "Remove the filament manually"
 msgstr "Ručně vyjměte filament"
 
+#: tmp_error_headers/error_list_coreone.hpp:926
+#: tmp_error_headers/error_list_xl.hpp:975
+#: tmp_error_headers/error_list_mk4.hpp:716
+msgid ""
+"Remove the purged filament and ensure the nozzle is clean and ready.\n"
+"\n"
+"Be careful, the nozzle is hot!"
+msgstr ""
+"Odstraňte vytlačený filament a ujistěte se, že je tryska čistá a "
+"připravená.\n"
+"\n"
+"Buďte opatrní, tryska je horká!"
+
 #: src/gui/screen_menu_steel_sheets.hpp:51
 msgid "Rename"
 msgstr "Přejmenovat"
@@ -6424,12 +6517,12 @@ msgstr "Přejmenovat"
 msgid "Reorder Filaments"
 msgstr "Změnit pořadí filamentů"
 
-#: tmp_error_headers/error_list_mini.hpp:464
-#: tmp_error_headers/error_list_xl.hpp:765
-#: tmp_error_headers/error_list_ix.hpp:730
-#: tmp_error_headers/error_list_mk4.hpp:555
 #: tmp_error_headers/error_list_mk35.hpp:527
 #: tmp_error_headers/error_list_coreone.hpp:723
+#: tmp_error_headers/error_list_xl.hpp:765
+#: tmp_error_headers/error_list_mini.hpp:464
+#: tmp_error_headers/error_list_mk4.hpp:555
+#: tmp_error_headers/error_list_ix.hpp:730
 msgid ""
 "Repeated collision has been detected.\n"
 "Do you want to resume or pause the print?"
@@ -6437,12 +6530,12 @@ msgstr ""
 "Opakovaně byl detekován náraz.\n"
 "Pokračovat nebo pozastavit tisk?"
 
-#: tmp_error_headers/error_list_mini.hpp:547
-#: tmp_error_headers/error_list_xl.hpp:883
-#: tmp_error_headers/error_list_ix.hpp:820
-#: tmp_error_headers/error_list_mk4.hpp:652
 #: tmp_error_headers/error_list_mk35.hpp:631
 #: tmp_error_headers/error_list_coreone.hpp:820
+#: tmp_error_headers/error_list_xl.hpp:883
+#: tmp_error_headers/error_list_mini.hpp:547
+#: tmp_error_headers/error_list_mk4.hpp:652
+#: tmp_error_headers/error_list_ix.hpp:820
 msgid "Replace filament"
 msgstr "Vyměnit filament"
 
@@ -6458,14 +6551,14 @@ msgstr ""
 "Požadovaný filament nástroj není k dispozici na tomto HW. V G-Codu je "
 "nástrojový index mimo rozsah (T0-T4)."
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:116
+#: src/gui/screen/filament/screen_filament_detail.cpp:124
 msgid "Requires Filtration"
 msgstr "Vyžaduje filtraci"
 
 #: src/common/feature/factory_reset/factory_reset.cpp:103
-#: src/gui/MItem_tools.hpp:444 src/gui/screen/screen_factory_reset.cpp:56
-#: src/gui/screen_menu_steel_sheets.hpp:61
+#: src/gui/screen/screen_factory_reset.cpp:56
 #: src/gui/screen_menu_bed_level_correction.hpp:92
+#: src/gui/screen_menu_steel_sheets.hpp:61 src/gui/MItem_tools.hpp:445
 msgid "Reset"
 msgstr "Reset"
 
@@ -6497,8 +6590,8 @@ msgstr "Restartuji MMU"
 msgid "Restore Calibration from USB"
 msgstr "Obnovit kalibraci z USB"
 
-#: src/gui/screen_menu_phase_stepping.hpp:17 src/gui/MItem_input_shaper.hpp:53
 #: src/gui/screen/filament/screen_filaments_reorder.cpp:162
+#: src/gui/screen_menu_phase_stepping.hpp:17 src/gui/MItem_input_shaper.hpp:53
 #: src/gui/screen_menu_filament_sensors.hpp:15
 msgid "Restore Defaults"
 msgstr "Obnovit výchozí hodnoty"
@@ -6506,6 +6599,14 @@ msgstr "Obnovit výchozí hodnoty"
 #: src/gui/ScreenPrintingModel.cpp:20
 msgid "Resume"
 msgstr "Pokračovat"
+
+#: src/gui/screen/dialog_safety_timer.cpp:14
+msgid "Resuming temperatures"
+msgstr "Návrat k tiskovým teplotám"
+
+#: src/gui/screen/dialog_safety_timer.cpp:14
+msgid "Resuming to print temperatures after safety timer timeout."
+msgstr "Návrat k tiskovým teplotám po vypršení bezpečnostního časovače."
 
 #: src/gui/ScreenPrintingModel.cpp:21
 msgid "Resuming..."
@@ -6520,16 +6621,16 @@ msgstr "Vysouvání od FINDy"
 msgid "Retracting from FINDA"
 msgstr "Vysouvání od FINDy"
 
-#: src/guiapi/include/WindowMenuItems.hpp:41
-#: src/guiapi/include/window_tool_action_box.hpp:100
 #: src/gui/screen/screen_preheat.cpp:102 src/gui/screen_network_setup.cpp:33
 #: src/gui/screen_network_setup.cpp:39 src/gui/screen_network_setup.cpp:143
+#: src/guiapi/include/WindowMenuItems.hpp:41
+#: src/guiapi/include/window_tool_action_box.hpp:100
 msgid "Return"
 msgstr "Zpět"
 
 #. //MSG_PROGRESS_PERFORM_CUT c=20
-#: src/mmu2/mmu2_progress_converter.cpp:27
 #: src/gui/dialogs/DialogLoadUnload.cpp:84
+#: src/mmu2/mmu2_progress_converter.cpp:27
 msgid "Returning selector"
 msgstr "Vracím selektor"
 
@@ -6570,16 +6671,16 @@ msgstr "SELEKTOR: CHYBA HOMINGU"
 msgid "SELECTOR CANNOT MOVE"
 msgstr "SELEKTOR SE NEHÝBE"
 
-#: src/gui/ScreenSelftest.hpp:40 src/gui/wizard/screen_fan_selftest.cpp:49
+#: src/gui/wizard/screen_fan_selftest.cpp:49 src/gui/ScreenSelftest.hpp:40
 msgid "SELFTEST"
 msgstr "SELFTEST"
 
-#: tmp_error_headers/error_list_mini.hpp:274
-#: tmp_error_headers/error_list_xl.hpp:568
-#: tmp_error_headers/error_list_ix.hpp:540
-#: tmp_error_headers/error_list_mk4.hpp:344
 #: tmp_error_headers/error_list_mk35.hpp:316
 #: tmp_error_headers/error_list_coreone.hpp:512
+#: tmp_error_headers/error_list_xl.hpp:568
+#: tmp_error_headers/error_list_mini.hpp:274
+#: tmp_error_headers/error_list_mk4.hpp:344
+#: tmp_error_headers/error_list_ix.hpp:540
 msgid "SELFTEST NOT PASSED"
 msgstr "SELFTEST NEDOKONČEN"
 
@@ -6611,9 +6712,9 @@ msgstr "SPOOLJOIN"
 msgid "SSID"
 msgstr "SSID"
 
-#: tmp_error_headers/error_list_ix.hpp:22
-#: tmp_error_headers/error_list_mk4.hpp:15
 #: tmp_error_headers/error_list_coreone.hpp:22
+#: tmp_error_headers/error_list_mk4.hpp:15
+#: tmp_error_headers/error_list_ix.hpp:22
 msgid "STEEL SHEEL NOT DETECTED"
 msgstr "CHYBÍ TISKOVÝ PLÁT"
 
@@ -6625,9 +6726,9 @@ msgstr "STOP"
 msgid "STOPPED"
 msgstr "ZASTAVENO"
 
-#: tmp_error_headers/error_list_xl.hpp:57 tmp_error_headers/error_list_ix.hpp:8
-#: tmp_error_headers/error_list_mk4.hpp:8
 #: tmp_error_headers/error_list_coreone.hpp:8
+#: tmp_error_headers/error_list_xl.hpp:57
+#: tmp_error_headers/error_list_mk4.hpp:8 tmp_error_headers/error_list_ix.hpp:8
 msgid "STUCK FILAMENT DETECTED"
 msgstr "DETEKOVÁN ZASEKLÝ FILAMENT"
 
@@ -6648,7 +6749,7 @@ msgstr "Sandwich 5V proud"
 msgid "Sat"
 msgstr "So"
 
-#: src/gui/MItem_tools.hpp:110
+#: src/gui/MItem_tools.hpp:111
 msgid "Save Crash Dump"
 msgstr "Uložit výpis chyb"
 
@@ -6720,7 +6821,7 @@ msgstr ""
 msgid "Sensor Info"
 msgstr "Stav senzoru"
 
-#: src/gui/MItem_tools.hpp:255
+#: src/gui/MItem_tools.hpp:256
 msgid "Serial Number"
 msgstr "Sériové číslo"
 
@@ -6728,7 +6829,7 @@ msgstr "Sériové číslo"
 msgid "Serial Printing Screen"
 msgstr "Obrazovka sériového tisku"
 
-#: src/gui/MItem_tools.hpp:463 src/gui/ScreenPrintingModel.cpp:27
+#: src/gui/MItem_tools.hpp:464 src/gui/ScreenPrintingModel.cpp:27
 msgid "Set Ready"
 msgstr "Připravit"
 
@@ -6868,20 +6969,20 @@ msgstr ""
 msgid "Sort Files"
 msgstr "Řadit soubory"
 
-#: src/gui/MItem_tools.hpp:153 src/gui/MItem_tools.cpp:326
+#: src/gui/MItem_tools.cpp:326 src/gui/MItem_tools.hpp:154
 msgid "Sound Mode"
 msgstr "Zvuk"
 
-#: src/gui/MItem_tools.hpp:169
+#: src/gui/MItem_tools.hpp:170
 msgid "Sound Volume"
 msgstr "Hlasitost"
 
-#: tmp_error_headers/error_list_mini.hpp:247
-#: tmp_error_headers/error_list_xl.hpp:534
-#: tmp_error_headers/error_list_ix.hpp:513
-#: tmp_error_headers/error_list_mk4.hpp:317
 #: tmp_error_headers/error_list_mk35.hpp:289
 #: tmp_error_headers/error_list_coreone.hpp:485
+#: tmp_error_headers/error_list_xl.hpp:534
+#: tmp_error_headers/error_list_mini.hpp:247
+#: tmp_error_headers/error_list_mk4.hpp:317
+#: tmp_error_headers/error_list_ix.hpp:513
 msgid ""
 "Space allocation for firmware BBF file failed. Repeat the action or try "
 "another USB drive."
@@ -6922,11 +7023,11 @@ msgstr "Statický-levá"
 msgid "Statistics"
 msgstr "Statistiky"
 
-#: src/gui/screen_menu_connect.hpp:24 src/gui/MItem_network.hpp:42
+#: src/gui/MItem_network.hpp:42 src/gui/screen_menu_connect.hpp:24
 msgid "Status"
 msgstr "Stav"
 
-#: src/gui/MItem_tools.hpp:62 src/gui/MItem_mmu.hpp:230
+#: src/gui/MItem_mmu.hpp:230 src/gui/MItem_tools.hpp:63
 msgid "Stealth Mode"
 msgstr "Tichý režim"
 
@@ -6934,9 +7035,9 @@ msgstr "Tichý režim"
 msgid "Steel Sheets"
 msgstr "Tiskové pláty"
 
-#: tmp_error_headers/error_list_ix.hpp:23
-#: tmp_error_headers/error_list_mk4.hpp:16
 #: tmp_error_headers/error_list_coreone.hpp:23
+#: tmp_error_headers/error_list_mk4.hpp:16
+#: tmp_error_headers/error_list_ix.hpp:23
 msgid ""
 "Steel sheet was not detected. Please put the sheet on to prevent printer "
 "damage."
@@ -6944,12 +7045,12 @@ msgstr ""
 "Tiskový plát nebyl detekován. Umístěte jej na vyhřívanou podložku, aby "
 "nedošlo k poškození tiskárny."
 
-#: tmp_error_headers/error_list_mini.hpp:506
-#: tmp_error_headers/error_list_xl.hpp:821
-#: tmp_error_headers/error_list_ix.hpp:772
-#: tmp_error_headers/error_list_mk4.hpp:611
 #: tmp_error_headers/error_list_mk35.hpp:583
 #: tmp_error_headers/error_list_coreone.hpp:779
+#: tmp_error_headers/error_list_xl.hpp:821
+#: tmp_error_headers/error_list_mini.hpp:506
+#: tmp_error_headers/error_list_mk4.hpp:611
+#: tmp_error_headers/error_list_ix.hpp:772
 msgid "Steppers disabled due to inactivity."
 msgstr "Motory vypnuty z důvodů neaktivity."
 
@@ -6969,7 +7070,7 @@ msgstr "Zastavuji MMU"
 msgid "Strict"
 msgstr "Přísný"
 
-#: src/gui/MItem_tools.hpp:50
+#: src/gui/MItem_tools.hpp:51
 msgid "Stuck Filament Detection"
 msgstr "Detekce zaseklého filamentu"
 
@@ -7037,17 +7138,17 @@ msgstr "TEPLOTA"
 msgid "TEST ERROR"
 msgstr "CHYBA TESTU"
 
-#: tmp_error_headers/error_list_mini.hpp:36
-#: tmp_error_headers/error_list_mini.hpp:43
-#: tmp_error_headers/error_list_xl.hpp:106
-#: tmp_error_headers/error_list_ix.hpp:78
-#: tmp_error_headers/error_list_ix.hpp:85
-#: tmp_error_headers/error_list_mk4.hpp:71
-#: tmp_error_headers/error_list_mk4.hpp:78
 #: tmp_error_headers/error_list_mk35.hpp:57
 #: tmp_error_headers/error_list_mk35.hpp:64
 #: tmp_error_headers/error_list_coreone.hpp:120
 #: tmp_error_headers/error_list_coreone.hpp:127
+#: tmp_error_headers/error_list_xl.hpp:106
+#: tmp_error_headers/error_list_mini.hpp:36
+#: tmp_error_headers/error_list_mini.hpp:43
+#: tmp_error_headers/error_list_mk4.hpp:71
+#: tmp_error_headers/error_list_mk4.hpp:78
+#: tmp_error_headers/error_list_ix.hpp:78
+#: tmp_error_headers/error_list_ix.hpp:85
 msgid "THERMAL RUNAWAY"
 msgstr "THERMAL RUNAWAY"
 
@@ -7222,12 +7323,12 @@ msgstr "Dotkněte se trysky"
 msgid "Tap the nozzle on beep"
 msgstr "Při pípnutí se dotkněte trysky"
 
-#: src/gui/wizard/screen_belt_tuning_wizard.cpp:207
+#: src/gui/wizard/screen_belt_tuning_wizard.cpp:210
 msgid "Target"
 msgstr "Cíl"
 
-#: tmp_error_headers/error_list_xl.hpp:212
 #: tmp_error_headers/error_list_coreone.hpp:198
+#: tmp_error_headers/error_list_xl.hpp:212
 msgid "Target temperature not yet reached. Continue waiting?"
 msgstr "Zatím nebylo dosaženy cílové teploty. Čekat dál?"
 
@@ -7285,12 +7386,12 @@ msgstr "Testuji otáčky ventilátorů na 40% výkonu, vyčkejte."
 msgid "Testing filament"
 msgstr "Testování filamentu"
 
-#: tmp_error_headers/error_list_mini.hpp:415
-#: tmp_error_headers/error_list_xl.hpp:716
-#: tmp_error_headers/error_list_ix.hpp:681
-#: tmp_error_headers/error_list_mk4.hpp:499
 #: tmp_error_headers/error_list_mk35.hpp:471
 #: tmp_error_headers/error_list_coreone.hpp:667
+#: tmp_error_headers/error_list_xl.hpp:716
+#: tmp_error_headers/error_list_mini.hpp:415
+#: tmp_error_headers/error_list_mk4.hpp:499
+#: tmp_error_headers/error_list_ix.hpp:681
 msgid "The G-code isn't fully compatible"
 msgstr "G-Code není plně kompatibilní"
 
@@ -7378,6 +7479,19 @@ msgstr ""
 "\n"
 "Nainstalujte modul, restartujte tiskárnu, příp. použijte síťový kabel."
 
+#: tmp_error_headers/error_list_coreone.hpp:933
+#: tmp_error_headers/error_list_xl.hpp:982
+#: tmp_error_headers/error_list_mk4.hpp:723
+#: tmp_error_headers/error_list_ix.hpp:856
+msgid ""
+"The auto-retract feature is disabled, which might have caused the failure.\n"
+"\n"
+"Do you want to enable auto-retract?"
+msgstr ""
+"Automatická retrakce je vypnuta, což může vést k chybám.\n"
+"\n"
+"Chcete ji povolit?"
+
 #: tmp_error_headers/error_list_coreone.hpp:37
 msgid "The bed doesn't seem to be aligned properly. Run Z alignment procedure?"
 msgstr ""
@@ -7407,9 +7521,21 @@ msgstr "Kalibrace trvá přibližně 7 minut."
 msgid "The door sensor is successfully calibrated now."
 msgstr "Nyní je dveřní senzor úspěšně zkalibrován."
 
-#: tmp_error_headers/error_list_xl.hpp:58 tmp_error_headers/error_list_ix.hpp:9
-#: tmp_error_headers/error_list_mk4.hpp:9
+#: tmp_error_headers/error_list_coreone.hpp:919
+#: tmp_error_headers/error_list_xl.hpp:968
+#: tmp_error_headers/error_list_mk4.hpp:709
+msgid ""
+"The filament has been purged.\n"
+"\n"
+"The nozzle will now retract the filament to prevent oozing."
+msgstr ""
+"Filament byl vytlačen.\n"
+"\n"
+"Tryska nyní zatáhne filament, aby se předešlo odkapávání filamentu."
+
 #: tmp_error_headers/error_list_coreone.hpp:9
+#: tmp_error_headers/error_list_xl.hpp:58
+#: tmp_error_headers/error_list_mk4.hpp:9 tmp_error_headers/error_list_ix.hpp:9
 msgid ""
 "The filament seems to be stuck, please unload it from nextruder and load it "
 "again."
@@ -7455,12 +7581,12 @@ msgstr ""
 "Kalibrace převodovky je nutná jen u tiskárny, kterou jste právě sestavili, "
 "nebo pokud byla provedena údržba převodovky. Jinak tento krok přeskočte."
 
-#: tmp_error_headers/error_list_mini.hpp:443
-#: tmp_error_headers/error_list_xl.hpp:744
-#: tmp_error_headers/error_list_ix.hpp:709
-#: tmp_error_headers/error_list_mk4.hpp:534
 #: tmp_error_headers/error_list_mk35.hpp:506
 #: tmp_error_headers/error_list_coreone.hpp:702
+#: tmp_error_headers/error_list_xl.hpp:744
+#: tmp_error_headers/error_list_mini.hpp:443
+#: tmp_error_headers/error_list_mk4.hpp:534
+#: tmp_error_headers/error_list_ix.hpp:709
 msgid ""
 "The heatbed cooled down during the power outage, printed object might have "
 "detached. Inspect it before continuing."
@@ -7483,12 +7609,12 @@ msgstr ""
 msgid "The path does not exist"
 msgstr "Cesta neexistuje"
 
-#: tmp_error_headers/error_list_mini.hpp:275
-#: tmp_error_headers/error_list_xl.hpp:569
-#: tmp_error_headers/error_list_ix.hpp:541
-#: tmp_error_headers/error_list_mk4.hpp:345
 #: tmp_error_headers/error_list_mk35.hpp:317
 #: tmp_error_headers/error_list_coreone.hpp:513
+#: tmp_error_headers/error_list_xl.hpp:569
+#: tmp_error_headers/error_list_mini.hpp:275
+#: tmp_error_headers/error_list_mk4.hpp:345
+#: tmp_error_headers/error_list_ix.hpp:541
 msgid "The previous tests must be completed before this one."
 msgstr "Před tímto testem musíte dokončit předcházející testy."
 
@@ -7531,10 +7657,10 @@ msgstr ""
 "Může být cítit mírný odpor.\n"
 "Pokud se filament zasekl, otevřete dvířka idleru."
 
-#: tmp_error_headers/error_list_xl.hpp:513
-#: tmp_error_headers/error_list_ix.hpp:492
-#: tmp_error_headers/error_list_mk4.hpp:296
 #: tmp_error_headers/error_list_coreone.hpp:464
+#: tmp_error_headers/error_list_xl.hpp:513
+#: tmp_error_headers/error_list_mk4.hpp:296
+#: tmp_error_headers/error_list_ix.hpp:492
 msgid ""
 "There was a timeout while waiting for measurement sample, please repeat the "
 "action."
@@ -7562,12 +7688,12 @@ msgstr "Tento G-Code byl připraven pro jiný typ filamentu."
 msgid "This change will apply to all toolheads. Do you want to continue?"
 msgstr "Tato změna se aplikuje na všechny nástrojové hlavy. Pokračovat?"
 
-#: tmp_error_headers/error_list_mini.hpp:289
-#: tmp_error_headers/error_list_xl.hpp:583
-#: tmp_error_headers/error_list_ix.hpp:555
-#: tmp_error_headers/error_list_mk4.hpp:359
 #: tmp_error_headers/error_list_mk35.hpp:331
 #: tmp_error_headers/error_list_coreone.hpp:527
+#: tmp_error_headers/error_list_xl.hpp:583
+#: tmp_error_headers/error_list_mini.hpp:289
+#: tmp_error_headers/error_list_mk4.hpp:359
+#: tmp_error_headers/error_list_ix.hpp:555
 msgid ""
 "This error code is not found\n"
 "in our database.\n"
@@ -7649,7 +7775,7 @@ msgstr "Toto změní chování senzoru filamentu. Chcete pokračovat?"
 msgid "Thr"
 msgstr "Čt"
 
-#: src/gui/wizard/screen_belt_tuning_wizard.cpp:201
+#: src/gui/wizard/screen_belt_tuning_wizard.cpp:204
 #, c-format
 msgid "Tighten by %.1f turns"
 msgstr "Utáhněte o %.1f otáček"
@@ -7688,7 +7814,7 @@ msgstr "Čas"
 msgid "Time Format"
 msgstr "Formát času"
 
-#: src/gui/MItem_tools.hpp:178
+#: src/gui/MItem_tools.hpp:179
 msgid "Time Zone Hour Offset"
 msgstr "Posun časového pásma (hodiny)"
 
@@ -7696,7 +7822,7 @@ msgstr "Posun časového pásma (hodiny)"
 msgid "Time Zone Minute Offset"
 msgstr "Posun časového pásma (minuty)"
 
-#: src/gui/MItem_tools.hpp:192
+#: src/gui/MItem_tools.hpp:193
 msgid "Time Zone Summertime"
 msgstr "Časové pásmo - Letní čas"
 
@@ -7855,7 +7981,7 @@ msgstr "Nástroj 5 - Test Loadcell"
 msgid "Tool Filament sensor"
 msgstr "Senzor filamentu v nástroji"
 
-#: src/gui/MItem_tools.hpp:591
+#: src/gui/MItem_tools.hpp:592
 msgid "Tool Light"
 msgstr "Nástrojové světlo"
 
@@ -7863,10 +7989,10 @@ msgstr "Nástrojové světlo"
 msgid "Tool Offsets Calibration"
 msgstr "Kalibrace offsetu nástrojů"
 
-#: tmp_error_headers/error_list_xl.hpp:785
-#: tmp_error_headers/error_list_mk4.hpp:568
 #: tmp_error_headers/error_list_mk35.hpp:540
 #: tmp_error_headers/error_list_coreone.hpp:736
+#: tmp_error_headers/error_list_xl.hpp:785
+#: tmp_error_headers/error_list_mk4.hpp:568
 msgid "Tool mapping"
 msgstr "Mapování nástrojů"
 
@@ -7911,7 +8037,7 @@ msgstr "Senzor filamentu v nástroji"
 msgid "Tools"
 msgstr "Nástroje"
 
-#: src/gui/MItem_tools.hpp:357
+#: src/gui/MItem_tools.hpp:358
 msgid "Tools Changed"
 msgstr "Nástroje vyměněny"
 
@@ -7935,7 +8061,7 @@ msgstr "Touch Sig Workaround"
 msgid "Touch driver failed to initialize, touch functionality disabled"
 msgstr "Chyba ovladače dotykové vrstvy, dotykové ovládání vypnuto."
 
-#: src/gui/MItem_tools.hpp:601
+#: src/gui/MItem_tools.hpp:602
 msgid "Trigger Power Panic"
 msgstr "Spustit zotavení ze ztráty napájení"
 
@@ -8026,13 +8152,13 @@ msgstr "Nastavení rozhraní"
 msgid "UNEVEN BED"
 msgstr "NEROVNÁ PODLOŽKA"
 
-#: tmp_error_headers/error_list_mini.hpp:288
-#: tmp_error_headers/error_list_xl.hpp:582
-#: tmp_error_headers/error_list_ix.hpp:554
-#: tmp_error_headers/error_list_mk4.hpp:358
-#: tmp_error_headers/error_list_mmu.hpp:318
 #: tmp_error_headers/error_list_mk35.hpp:330
 #: tmp_error_headers/error_list_coreone.hpp:526
+#: tmp_error_headers/error_list_xl.hpp:582
+#: tmp_error_headers/error_list_mini.hpp:288
+#: tmp_error_headers/error_list_mmu.hpp:318
+#: tmp_error_headers/error_list_mk4.hpp:358
+#: tmp_error_headers/error_list_ix.hpp:554
 msgid "UNKNOWN ERROR"
 msgstr "NEZNÁMÁ CHYBA"
 
@@ -8044,30 +8170,30 @@ msgstr "VYJM."
 msgid "UNLOAD MANUALLY"
 msgstr "VYJMOUT RUČNĚ"
 
-#: tmp_error_headers/error_list_mini.hpp:358
-#: tmp_error_headers/error_list_xl.hpp:652
-#: tmp_error_headers/error_list_ix.hpp:624
-#: tmp_error_headers/error_list_mk4.hpp:428
 #: tmp_error_headers/error_list_mk35.hpp:400
 #: tmp_error_headers/error_list_coreone.hpp:596
+#: tmp_error_headers/error_list_xl.hpp:652
+#: tmp_error_headers/error_list_mini.hpp:358
+#: tmp_error_headers/error_list_mk4.hpp:428
+#: tmp_error_headers/error_list_ix.hpp:624
 msgid "UNSUPPORTED BUDDY FW"
 msgstr "NEPODPOROVANY BUDDY FW"
 
-#: tmp_error_headers/error_list_mini.hpp:379
-#: tmp_error_headers/error_list_xl.hpp:673
-#: tmp_error_headers/error_list_ix.hpp:645
-#: tmp_error_headers/error_list_mk4.hpp:449
 #: tmp_error_headers/error_list_mk35.hpp:421
 #: tmp_error_headers/error_list_coreone.hpp:617
+#: tmp_error_headers/error_list_xl.hpp:673
+#: tmp_error_headers/error_list_mini.hpp:379
+#: tmp_error_headers/error_list_mk4.hpp:449
+#: tmp_error_headers/error_list_ix.hpp:645
 msgid "UNSUPPORTED FIRMWARE BBF FILE"
 msgstr "NEPODPOROVANY FIRMWARE BBF SOUBOR"
 
-#: tmp_error_headers/error_list_mini.hpp:351
-#: tmp_error_headers/error_list_xl.hpp:645
-#: tmp_error_headers/error_list_ix.hpp:617
-#: tmp_error_headers/error_list_mk4.hpp:421
 #: tmp_error_headers/error_list_mk35.hpp:393
 #: tmp_error_headers/error_list_coreone.hpp:589
+#: tmp_error_headers/error_list_xl.hpp:645
+#: tmp_error_headers/error_list_mini.hpp:351
+#: tmp_error_headers/error_list_mk4.hpp:421
+#: tmp_error_headers/error_list_ix.hpp:617
 msgid "UNSUPPORTED PRINTER MODEL"
 msgstr "NEPODPOROVANY TYP TISKARNY"
 
@@ -8075,48 +8201,48 @@ msgstr "NEPODPOROVANY TYP TISKARNY"
 msgid "UP"
 msgstr "NAHORU"
 
-#: tmp_error_headers/error_list_mini.hpp:127
-#: tmp_error_headers/error_list_xl.hpp:274
-#: tmp_error_headers/error_list_ix.hpp:253
-#: tmp_error_headers/error_list_mk4.hpp:162
 #: tmp_error_headers/error_list_mk35.hpp:148
 #: tmp_error_headers/error_list_coreone.hpp:246
+#: tmp_error_headers/error_list_xl.hpp:274
+#: tmp_error_headers/error_list_mini.hpp:127
+#: tmp_error_headers/error_list_mk4.hpp:162
+#: tmp_error_headers/error_list_ix.hpp:253
 msgid "USB DEVICE OVERCURRENT"
 msgstr "NADPROUD NA USB ZAŘÍZENÍ!"
 
-#: tmp_error_headers/error_list_mini.hpp:295
-#: tmp_error_headers/error_list_xl.hpp:589
-#: tmp_error_headers/error_list_ix.hpp:561
-#: tmp_error_headers/error_list_mk4.hpp:365
 #: tmp_error_headers/error_list_mk35.hpp:337
 #: tmp_error_headers/error_list_coreone.hpp:533
+#: tmp_error_headers/error_list_xl.hpp:589
+#: tmp_error_headers/error_list_mini.hpp:295
+#: tmp_error_headers/error_list_mk4.hpp:365
+#: tmp_error_headers/error_list_ix.hpp:561
 msgid "USB FLASH DRIVE NOT CONNECTED"
 msgstr "USB DISK NEPRIPOJEN"
 
-#: tmp_error_headers/error_list_mini.hpp:372
-#: tmp_error_headers/error_list_xl.hpp:666
-#: tmp_error_headers/error_list_ix.hpp:638
-#: tmp_error_headers/error_list_mk4.hpp:442
 #: tmp_error_headers/error_list_mk35.hpp:414
 #: tmp_error_headers/error_list_coreone.hpp:610
+#: tmp_error_headers/error_list_xl.hpp:666
+#: tmp_error_headers/error_list_mini.hpp:372
+#: tmp_error_headers/error_list_mk4.hpp:442
+#: tmp_error_headers/error_list_ix.hpp:638
 msgid "USB FLASH ERROR"
 msgstr "CHYBA USB DISKU"
 
-#: tmp_error_headers/error_list_mini.hpp:120
-#: tmp_error_headers/error_list_xl.hpp:267
-#: tmp_error_headers/error_list_ix.hpp:246
-#: tmp_error_headers/error_list_mk4.hpp:155
 #: tmp_error_headers/error_list_mk35.hpp:141
 #: tmp_error_headers/error_list_coreone.hpp:239
+#: tmp_error_headers/error_list_xl.hpp:267
+#: tmp_error_headers/error_list_mini.hpp:120
+#: tmp_error_headers/error_list_mk4.hpp:155
+#: tmp_error_headers/error_list_ix.hpp:246
 msgid "USB PORT OVERCURRENT"
 msgstr "NADPROUD NA USB PORTU!"
 
-#: tmp_error_headers/error_list_mini.hpp:296
-#: tmp_error_headers/error_list_xl.hpp:590
-#: tmp_error_headers/error_list_ix.hpp:562
-#: tmp_error_headers/error_list_mk4.hpp:366
 #: tmp_error_headers/error_list_mk35.hpp:338
 #: tmp_error_headers/error_list_coreone.hpp:534
+#: tmp_error_headers/error_list_xl.hpp:590
+#: tmp_error_headers/error_list_mini.hpp:296
+#: tmp_error_headers/error_list_mk4.hpp:366
+#: tmp_error_headers/error_list_ix.hpp:562
 msgid ""
 "USB drive not\n"
 "connected! Please\n"
@@ -8130,21 +8256,21 @@ msgstr ""
 "disk s platným\n"
 "firmwarem."
 
-#: tmp_error_headers/error_list_mini.hpp:513
-#: tmp_error_headers/error_list_xl.hpp:828
-#: tmp_error_headers/error_list_ix.hpp:779
-#: tmp_error_headers/error_list_mk4.hpp:618
 #: tmp_error_headers/error_list_mk35.hpp:590
 #: tmp_error_headers/error_list_coreone.hpp:786
+#: tmp_error_headers/error_list_xl.hpp:828
+#: tmp_error_headers/error_list_mini.hpp:513
+#: tmp_error_headers/error_list_mk4.hpp:618
+#: tmp_error_headers/error_list_ix.hpp:779
 msgid "USB drive or file error, the print is now paused. Reconnect the drive."
 msgstr "Chyba USB disku nebo souboru, tisk pozastaven. Připojte disk znovu."
 
-#: tmp_error_headers/error_list_mini.hpp:380
-#: tmp_error_headers/error_list_xl.hpp:674
-#: tmp_error_headers/error_list_ix.hpp:646
-#: tmp_error_headers/error_list_mk4.hpp:450
 #: tmp_error_headers/error_list_mk35.hpp:422
 #: tmp_error_headers/error_list_coreone.hpp:618
+#: tmp_error_headers/error_list_xl.hpp:674
+#: tmp_error_headers/error_list_mini.hpp:380
+#: tmp_error_headers/error_list_mk4.hpp:450
+#: tmp_error_headers/error_list_ix.hpp:646
 msgid ""
 "USB flash drive contains\n"
 "unsupported firmware BBF file."
@@ -8156,12 +8282,12 @@ msgstr ""
 msgid "USER INTERFACE"
 msgstr "UŽIVATELSKÉ ROZHRANÍ"
 
-#: tmp_error_headers/error_list_mini.hpp:471
-#: tmp_error_headers/error_list_xl.hpp:772
-#: tmp_error_headers/error_list_ix.hpp:737
-#: tmp_error_headers/error_list_mk4.hpp:562
 #: tmp_error_headers/error_list_mk35.hpp:534
 #: tmp_error_headers/error_list_coreone.hpp:730
+#: tmp_error_headers/error_list_xl.hpp:772
+#: tmp_error_headers/error_list_mini.hpp:471
+#: tmp_error_headers/error_list_mk4.hpp:562
+#: tmp_error_headers/error_list_ix.hpp:737
 msgid ""
 "Unable to home the printer.\n"
 "Do you want to try again?"
@@ -8169,18 +8295,18 @@ msgstr ""
 "Nelze provést homing.\n"
 "Opakovat?"
 
+#: tmp_error_headers/error_list_coreone.hpp:415
 #: tmp_error_headers/error_list_xl.hpp:464
 #: tmp_error_headers/error_list_ix.hpp:443
-#: tmp_error_headers/error_list_coreone.hpp:415
 msgid "Unable to start puppy application"
 msgstr "Unable to start puppy application"
 
-#: tmp_error_headers/error_list_mini.hpp:387
-#: tmp_error_headers/error_list_xl.hpp:681
-#: tmp_error_headers/error_list_ix.hpp:653
-#: tmp_error_headers/error_list_mk4.hpp:457
 #: tmp_error_headers/error_list_mk35.hpp:429
 #: tmp_error_headers/error_list_coreone.hpp:625
+#: tmp_error_headers/error_list_xl.hpp:681
+#: tmp_error_headers/error_list_mini.hpp:387
+#: tmp_error_headers/error_list_mk4.hpp:457
+#: tmp_error_headers/error_list_ix.hpp:653
 msgid "Unable to verify the extruder type, check the wiring and connectors."
 msgstr "Nelze ověřit typ extruderu. Zkontrolujte kabeláž a konektory."
 
@@ -8188,9 +8314,9 @@ msgstr "Nelze ověřit typ extruderu. Zkontrolujte kabeláž a konektory."
 msgid "Unassigned G-Code filament(s)"
 msgstr "Nepřirazené filamenty v G-Codu"
 
+#: tmp_error_headers/error_list_coreone.hpp:380
 #: tmp_error_headers/error_list_xl.hpp:429
 #: tmp_error_headers/error_list_ix.hpp:408
-#: tmp_error_headers/error_list_coreone.hpp:380
 msgid "Unassigned puppy found"
 msgstr "Unassigned puppy found"
 
@@ -8207,11 +8333,11 @@ msgstr "Nastala nečekaná chyba."
 msgid "Unexpected invalid current."
 msgstr "Neočekávaný neplatný proud."
 
-#: src/gui/screen_menu_connect.cpp:45 src/gui/MItem_network.cpp:78
+#: src/gui/MItem_network.cpp:78 src/gui/screen_menu_connect.cpp:45
 msgid "Unknown"
 msgstr "Neznámý"
 
-#: src/gui/screen_qr_error.cpp:31 src/gui/screen_fatal_warning.cpp:36
+#: src/gui/screen_fatal_warning.cpp:36 src/gui/screen_qr_error.cpp:31
 msgid "Unknown Error"
 msgstr "Neznámá chyba"
 
@@ -8219,18 +8345,18 @@ msgstr "Neznámá chyba"
 msgid "Unknown file error"
 msgstr "Neznámá chyba souboru"
 
-#: tmp_error_headers/error_list_mini.hpp:393
-#: tmp_error_headers/error_list_xl.hpp:694
-#: tmp_error_headers/error_list_ix.hpp:659
-#: tmp_error_headers/error_list_mk4.hpp:477
 #: tmp_error_headers/error_list_mk35.hpp:449
 #: tmp_error_headers/error_list_coreone.hpp:645
+#: tmp_error_headers/error_list_xl.hpp:694
+#: tmp_error_headers/error_list_mini.hpp:393
+#: tmp_error_headers/error_list_mk4.hpp:477
+#: tmp_error_headers/error_list_ix.hpp:659
 msgid "Unknown file system"
 msgstr "Neznámý souborový systém"
 
+#: tmp_error_headers/error_list_coreone.hpp:408
 #: tmp_error_headers/error_list_xl.hpp:457
 #: tmp_error_headers/error_list_ix.hpp:436
-#: tmp_error_headers/error_list_coreone.hpp:408
 msgid "Unknown puppy type"
 msgstr "Unknown puppy type"
 
@@ -8238,7 +8364,7 @@ msgstr "Unknown puppy type"
 msgid "Unload"
 msgstr "Vyjmout"
 
-#: src/gui/MItem_filament.hpp:20 src/gui/MItem_mmu.hpp:154
+#: src/gui/MItem_mmu.hpp:154 src/gui/MItem_filament.hpp:20
 msgid "Unload Filament"
 msgstr "Vyjmout filament"
 
@@ -8246,26 +8372,26 @@ msgstr "Vyjmout filament"
 msgid "Unload filament"
 msgstr "Vysunout filament"
 
-#: src/gui/screen_cold_pull.cpp:313 src/gui/dialogs/DialogLoadUnload.cpp:46
+#: src/gui/dialogs/DialogLoadUnload.cpp:46 src/gui/screen_cold_pull.cpp:313
 msgid "Unloading"
 msgstr "Vysouvání"
 
 #. //MSG_PROGRESS_ERR_TMC c=20
-#: src/mmu2/mmu2_progress_converter.cpp:21
 #: src/gui/dialogs/DialogLoadUnload.cpp:78
 #: src/gui/dialogs/DialogLoadUnload.cpp:487
+#: src/mmu2/mmu2_progress_converter.cpp:21
 msgid "Unloading filament"
 msgstr "Vysouvám filament"
 
 #. //MSG_PROGRESS_DISENGAGE_IDLER c=20
-#: src/mmu2/mmu2_progress_converter.cpp:10
 #: src/gui/dialogs/DialogLoadUnload.cpp:68
+#: src/mmu2/mmu2_progress_converter.cpp:10
 msgid "Unloading to FINDA"
 msgstr "Vysunutí k FINDA"
 
 #. //MSG_PROGRESS_UNLOAD_FINDA c=20
-#: src/mmu2/mmu2_progress_converter.cpp:11
 #: src/gui/dialogs/DialogLoadUnload.cpp:69
+#: src/mmu2/mmu2_progress_converter.cpp:11
 msgid "Unloading to pulley"
 msgstr "Vysunutí ke kladce"
 
@@ -8294,15 +8420,15 @@ msgstr ""
 "\n"
 "Optimální napětí je mezi %u a %u Hz\n"
 "\n"
-"Připraveno k výpočtu nastavení šroubů.\n"
-"Pro pokračování stiskněte Pokračovat."
+"Připraveno k výpočtu pootočení šroubů.\n"
+"Stiskněte Pokračovat k provedení akce."
 
-#: tmp_error_headers/error_list_mini.hpp:394
-#: tmp_error_headers/error_list_xl.hpp:695
-#: tmp_error_headers/error_list_ix.hpp:660
-#: tmp_error_headers/error_list_mk4.hpp:478
 #: tmp_error_headers/error_list_mk35.hpp:450
 #: tmp_error_headers/error_list_coreone.hpp:646
+#: tmp_error_headers/error_list_xl.hpp:695
+#: tmp_error_headers/error_list_mini.hpp:394
+#: tmp_error_headers/error_list_mk4.hpp:478
+#: tmp_error_headers/error_list_ix.hpp:660
 msgid ""
 "Use a different USB drive or reformat this one to the supported FAT32 file "
 "system."
@@ -8336,7 +8462,7 @@ msgstr "INFO O VERZI"
 msgid "Validity check"
 msgstr "Kontrola platnosti"
 
-#: src/gui/MItem_tools.hpp:503
+#: src/gui/MItem_tools.hpp:504
 msgid "Verify GCode"
 msgstr "Ověřit G-code"
 
@@ -8344,9 +8470,13 @@ msgstr "Ověřit G-code"
 msgid "Version Info"
 msgstr "Info o verzi"
 
-#: src/gui/screen/filament/screen_filament_detail.cpp:130
+#: src/gui/screen/filament/screen_filament_detail.cpp:140
 msgid "Visible"
 msgstr "Viditelné"
+
+#: src/gui/screen/screen_nozzle_cleaning_failed.cpp:50
+msgid "WARNING"
+msgstr "VAROVÁNÍ"
 
 #: tmp_error_headers/error_list_mmu.hpp:94
 #: tmp_error_headers/error_list_mmu.hpp:101
@@ -8378,9 +8508,9 @@ msgstr "Čekám na podložku"
 msgid "Waiting for chamber"
 msgstr "Čekám na komoru"
 
+#: tmp_error_headers/error_list_coreone.hpp:443
 #: tmp_error_headers/error_list_xl.hpp:492
 #: tmp_error_headers/error_list_ix.hpp:471
-#: tmp_error_headers/error_list_coreone.hpp:443
 msgid "Waiting for fingerprint timed out"
 msgstr "Vypršela doba čekání na identifikátor"
 
@@ -8392,13 +8522,19 @@ msgstr "Čekám na hotend"
 msgid "Waiting for hotends to stabilize at calibration temperature:"
 msgstr "Stabilizace hotendů na kalibračních teplotách:"
 
+#: tmp_error_headers/error_list_coreone.hpp:905
+#: tmp_error_headers/error_list_xl.hpp:954
+#: tmp_error_headers/error_list_mk4.hpp:695
+msgid "Waiting for nozzle temperature..."
+msgstr "Čeká se na nahřátí trysky..."
+
 #: src/gui/frame_calibration_common.cpp:22
 msgid "Waiting for nozzle to cool down"
 msgstr "Čeká se na ochlazení trysky"
 
+#: tmp_error_headers/error_list_coreone.hpp:450
 #: tmp_error_headers/error_list_xl.hpp:499
 #: tmp_error_headers/error_list_ix.hpp:478
-#: tmp_error_headers/error_list_coreone.hpp:450
 msgid "Waiting for puppies to start timed out"
 msgstr "Waiting for puppies to start timed out"
 
@@ -8406,18 +8542,18 @@ msgstr "Waiting for puppies to start timed out"
 msgid "Waiting for temperature"
 msgstr "Nastavování provozních teplot"
 
-#: tmp_error_headers/error_list_mini.hpp:562
-#: tmp_error_headers/error_list_xl.hpp:926
-#: tmp_error_headers/error_list_ix.hpp:842
-#: tmp_error_headers/error_list_mk4.hpp:674
 #: tmp_error_headers/error_list_mk35.hpp:646
 #: tmp_error_headers/error_list_coreone.hpp:856
+#: tmp_error_headers/error_list_xl.hpp:926
+#: tmp_error_headers/error_list_mini.hpp:562
+#: tmp_error_headers/error_list_mk4.hpp:674
+#: tmp_error_headers/error_list_ix.hpp:842
 msgid "Waiting for the user. Press \"Resume\" once the printer is ready."
 msgstr "Čekám na potvrzení. Až bude tiskárna připravena, vyberte Pokračovat."
 
-#: tmp_error_headers/error_list_mk4.hpp:576
 #: tmp_error_headers/error_list_mk35.hpp:548
 #: tmp_error_headers/error_list_coreone.hpp:744
+#: tmp_error_headers/error_list_mk4.hpp:576
 msgid "Waiting for user input"
 msgstr "Čeká se na uživatele"
 
@@ -8426,85 +8562,6 @@ msgid "Warn"
 msgstr "Varovat"
 
 #: src/guiapi/src/window_msgbox.cpp:316
-#: tmp_error_headers/error_list_mini.hpp:400
-#: tmp_error_headers/error_list_mini.hpp:407
-#: tmp_error_headers/error_list_mini.hpp:414
-#: tmp_error_headers/error_list_mini.hpp:421
-#: tmp_error_headers/error_list_mini.hpp:428
-#: tmp_error_headers/error_list_mini.hpp:442
-#: tmp_error_headers/error_list_mini.hpp:477
-#: tmp_error_headers/error_list_mini.hpp:484
-#: tmp_error_headers/error_list_mini.hpp:491
-#: tmp_error_headers/error_list_mini.hpp:498
-#: tmp_error_headers/error_list_mini.hpp:505
-#: tmp_error_headers/error_list_mini.hpp:512
-#: tmp_error_headers/error_list_mini.hpp:519
-#: tmp_error_headers/error_list_mini.hpp:526
-#: tmp_error_headers/error_list_mini.hpp:533
-#: tmp_error_headers/error_list_mini.hpp:540
-#: tmp_error_headers/error_list_mini.hpp:554
-#: tmp_error_headers/error_list_xl.hpp:701
-#: tmp_error_headers/error_list_xl.hpp:708
-#: tmp_error_headers/error_list_xl.hpp:715
-#: tmp_error_headers/error_list_xl.hpp:722
-#: tmp_error_headers/error_list_xl.hpp:729
-#: tmp_error_headers/error_list_xl.hpp:743
-#: tmp_error_headers/error_list_xl.hpp:792
-#: tmp_error_headers/error_list_xl.hpp:799
-#: tmp_error_headers/error_list_xl.hpp:806
-#: tmp_error_headers/error_list_xl.hpp:813
-#: tmp_error_headers/error_list_xl.hpp:820
-#: tmp_error_headers/error_list_xl.hpp:827
-#: tmp_error_headers/error_list_xl.hpp:834
-#: tmp_error_headers/error_list_xl.hpp:841
-#: tmp_error_headers/error_list_xl.hpp:848
-#: tmp_error_headers/error_list_xl.hpp:855
-#: tmp_error_headers/error_list_xl.hpp:862
-#: tmp_error_headers/error_list_xl.hpp:869
-#: tmp_error_headers/error_list_xl.hpp:876
-#: tmp_error_headers/error_list_xl.hpp:890
-#: tmp_error_headers/error_list_xl.hpp:897
-#: tmp_error_headers/error_list_xl.hpp:904
-#: tmp_error_headers/error_list_xl.hpp:911
-#: tmp_error_headers/error_list_xl.hpp:918
-#: tmp_error_headers/error_list_ix.hpp:666
-#: tmp_error_headers/error_list_ix.hpp:673
-#: tmp_error_headers/error_list_ix.hpp:680
-#: tmp_error_headers/error_list_ix.hpp:687
-#: tmp_error_headers/error_list_ix.hpp:694
-#: tmp_error_headers/error_list_ix.hpp:708
-#: tmp_error_headers/error_list_ix.hpp:743
-#: tmp_error_headers/error_list_ix.hpp:750
-#: tmp_error_headers/error_list_ix.hpp:757
-#: tmp_error_headers/error_list_ix.hpp:764
-#: tmp_error_headers/error_list_ix.hpp:771
-#: tmp_error_headers/error_list_ix.hpp:778
-#: tmp_error_headers/error_list_ix.hpp:785
-#: tmp_error_headers/error_list_ix.hpp:792
-#: tmp_error_headers/error_list_ix.hpp:799
-#: tmp_error_headers/error_list_ix.hpp:806
-#: tmp_error_headers/error_list_ix.hpp:813
-#: tmp_error_headers/error_list_ix.hpp:827
-#: tmp_error_headers/error_list_ix.hpp:834
-#: tmp_error_headers/error_list_mk4.hpp:484
-#: tmp_error_headers/error_list_mk4.hpp:491
-#: tmp_error_headers/error_list_mk4.hpp:498
-#: tmp_error_headers/error_list_mk4.hpp:505
-#: tmp_error_headers/error_list_mk4.hpp:512
-#: tmp_error_headers/error_list_mk4.hpp:519
-#: tmp_error_headers/error_list_mk4.hpp:533
-#: tmp_error_headers/error_list_mk4.hpp:582
-#: tmp_error_headers/error_list_mk4.hpp:589
-#: tmp_error_headers/error_list_mk4.hpp:596
-#: tmp_error_headers/error_list_mk4.hpp:603
-#: tmp_error_headers/error_list_mk4.hpp:610
-#: tmp_error_headers/error_list_mk4.hpp:617
-#: tmp_error_headers/error_list_mk4.hpp:624
-#: tmp_error_headers/error_list_mk4.hpp:631
-#: tmp_error_headers/error_list_mk4.hpp:638
-#: tmp_error_headers/error_list_mk4.hpp:645
-#: tmp_error_headers/error_list_mk4.hpp:659
-#: tmp_error_headers/error_list_mk4.hpp:666
 #: tmp_error_headers/error_list_mk35.hpp:456
 #: tmp_error_headers/error_list_mk35.hpp:463
 #: tmp_error_headers/error_list_mk35.hpp:470
@@ -8543,6 +8600,89 @@ msgstr "Varovat"
 #: tmp_error_headers/error_list_coreone.hpp:813
 #: tmp_error_headers/error_list_coreone.hpp:841
 #: tmp_error_headers/error_list_coreone.hpp:848
+#: tmp_error_headers/error_list_coreone.hpp:939
+#: tmp_error_headers/error_list_xl.hpp:701
+#: tmp_error_headers/error_list_xl.hpp:708
+#: tmp_error_headers/error_list_xl.hpp:715
+#: tmp_error_headers/error_list_xl.hpp:722
+#: tmp_error_headers/error_list_xl.hpp:729
+#: tmp_error_headers/error_list_xl.hpp:743
+#: tmp_error_headers/error_list_xl.hpp:792
+#: tmp_error_headers/error_list_xl.hpp:799
+#: tmp_error_headers/error_list_xl.hpp:806
+#: tmp_error_headers/error_list_xl.hpp:813
+#: tmp_error_headers/error_list_xl.hpp:820
+#: tmp_error_headers/error_list_xl.hpp:827
+#: tmp_error_headers/error_list_xl.hpp:834
+#: tmp_error_headers/error_list_xl.hpp:841
+#: tmp_error_headers/error_list_xl.hpp:848
+#: tmp_error_headers/error_list_xl.hpp:855
+#: tmp_error_headers/error_list_xl.hpp:862
+#: tmp_error_headers/error_list_xl.hpp:869
+#: tmp_error_headers/error_list_xl.hpp:876
+#: tmp_error_headers/error_list_xl.hpp:890
+#: tmp_error_headers/error_list_xl.hpp:897
+#: tmp_error_headers/error_list_xl.hpp:904
+#: tmp_error_headers/error_list_xl.hpp:911
+#: tmp_error_headers/error_list_xl.hpp:918
+#: tmp_error_headers/error_list_xl.hpp:988
+#: tmp_error_headers/error_list_mini.hpp:400
+#: tmp_error_headers/error_list_mini.hpp:407
+#: tmp_error_headers/error_list_mini.hpp:414
+#: tmp_error_headers/error_list_mini.hpp:421
+#: tmp_error_headers/error_list_mini.hpp:428
+#: tmp_error_headers/error_list_mini.hpp:442
+#: tmp_error_headers/error_list_mini.hpp:477
+#: tmp_error_headers/error_list_mini.hpp:484
+#: tmp_error_headers/error_list_mini.hpp:491
+#: tmp_error_headers/error_list_mini.hpp:498
+#: tmp_error_headers/error_list_mini.hpp:505
+#: tmp_error_headers/error_list_mini.hpp:512
+#: tmp_error_headers/error_list_mini.hpp:519
+#: tmp_error_headers/error_list_mini.hpp:526
+#: tmp_error_headers/error_list_mini.hpp:533
+#: tmp_error_headers/error_list_mini.hpp:540
+#: tmp_error_headers/error_list_mini.hpp:554
+#: tmp_error_headers/error_list_mk4.hpp:484
+#: tmp_error_headers/error_list_mk4.hpp:491
+#: tmp_error_headers/error_list_mk4.hpp:498
+#: tmp_error_headers/error_list_mk4.hpp:505
+#: tmp_error_headers/error_list_mk4.hpp:512
+#: tmp_error_headers/error_list_mk4.hpp:519
+#: tmp_error_headers/error_list_mk4.hpp:533
+#: tmp_error_headers/error_list_mk4.hpp:582
+#: tmp_error_headers/error_list_mk4.hpp:589
+#: tmp_error_headers/error_list_mk4.hpp:596
+#: tmp_error_headers/error_list_mk4.hpp:603
+#: tmp_error_headers/error_list_mk4.hpp:610
+#: tmp_error_headers/error_list_mk4.hpp:617
+#: tmp_error_headers/error_list_mk4.hpp:624
+#: tmp_error_headers/error_list_mk4.hpp:631
+#: tmp_error_headers/error_list_mk4.hpp:638
+#: tmp_error_headers/error_list_mk4.hpp:645
+#: tmp_error_headers/error_list_mk4.hpp:659
+#: tmp_error_headers/error_list_mk4.hpp:666
+#: tmp_error_headers/error_list_mk4.hpp:729
+#: tmp_error_headers/error_list_ix.hpp:666
+#: tmp_error_headers/error_list_ix.hpp:673
+#: tmp_error_headers/error_list_ix.hpp:680
+#: tmp_error_headers/error_list_ix.hpp:687
+#: tmp_error_headers/error_list_ix.hpp:694
+#: tmp_error_headers/error_list_ix.hpp:708
+#: tmp_error_headers/error_list_ix.hpp:743
+#: tmp_error_headers/error_list_ix.hpp:750
+#: tmp_error_headers/error_list_ix.hpp:757
+#: tmp_error_headers/error_list_ix.hpp:764
+#: tmp_error_headers/error_list_ix.hpp:771
+#: tmp_error_headers/error_list_ix.hpp:778
+#: tmp_error_headers/error_list_ix.hpp:785
+#: tmp_error_headers/error_list_ix.hpp:792
+#: tmp_error_headers/error_list_ix.hpp:799
+#: tmp_error_headers/error_list_ix.hpp:806
+#: tmp_error_headers/error_list_ix.hpp:813
+#: tmp_error_headers/error_list_ix.hpp:827
+#: tmp_error_headers/error_list_ix.hpp:834
+#: tmp_error_headers/error_list_ix.hpp:862
 msgid "Warning"
 msgstr "Varování"
 
@@ -8550,12 +8690,12 @@ msgstr "Varování"
 msgid "Was filament unload successful?"
 msgstr "Proběhlo vyjmutí filamentu správně?"
 
-#: tmp_error_headers/error_list_mini.hpp:282
-#: tmp_error_headers/error_list_xl.hpp:576
-#: tmp_error_headers/error_list_ix.hpp:548
-#: tmp_error_headers/error_list_mk4.hpp:352
 #: tmp_error_headers/error_list_mk35.hpp:324
 #: tmp_error_headers/error_list_coreone.hpp:520
+#: tmp_error_headers/error_list_xl.hpp:576
+#: tmp_error_headers/error_list_mini.hpp:282
+#: tmp_error_headers/error_list_mk4.hpp:352
+#: tmp_error_headers/error_list_ix.hpp:548
 msgid ""
 "We are actively working on resolving these issues. Please send the crash "
 "dump, saved upon reset, to our support team."
@@ -8601,10 +8741,10 @@ msgstr ""
 msgid "Wed"
 msgstr "St"
 
-#: tmp_error_headers/error_list_xl.hpp:688
-#: tmp_error_headers/error_list_mk4.hpp:471
 #: tmp_error_headers/error_list_mk35.hpp:443
 #: tmp_error_headers/error_list_coreone.hpp:639
+#: tmp_error_headers/error_list_xl.hpp:688
+#: tmp_error_headers/error_list_mk4.hpp:471
 msgid ""
 "Welcome to the Cold Pull wizard. Prepare a 30cm piece of PLA filament and "
 "follow the instructions. For more details, visit:"
@@ -8674,6 +8814,19 @@ msgstr "S návlekem"
 msgid "Wizard"
 msgstr "Průvodce"
 
+#: tmp_error_headers/error_list_coreone.hpp:898
+#: tmp_error_headers/error_list_xl.hpp:947
+#: tmp_error_headers/error_list_mk4.hpp:688
+msgid ""
+"Would you like to purge the filament?\n"
+"\n"
+"It will then retract to prevent oozing. Be careful, the nozzle is hot!"
+msgstr ""
+"Chcete vytlačit filament?\n"
+"\n"
+"Poté bude zatažen zpět, aby se předešlo jeho vytékání. Buďte opatrní, tryska "
+"je horká!"
+
 #: src/gui/MItem_experimental_tools.cpp:103
 msgid "Wrong"
 msgstr "Nesprávné"
@@ -8686,7 +8839,7 @@ msgstr "Nesprávný HW"
 msgid "X"
 msgstr "X"
 
-#: src/gui/MItem_tools.hpp:328
+#: src/gui/MItem_tools.hpp:329
 msgid "X Axis"
 msgstr "Osa X"
 
@@ -8738,7 +8891,7 @@ msgstr "Testování XY selhalo kvůli nízké stabilitě měření."
 msgid "Y"
 msgstr "Y"
 
-#: src/gui/MItem_tools.hpp:334
+#: src/gui/MItem_tools.hpp:335
 msgid "Y Axis"
 msgstr "Osa Y"
 
@@ -8821,7 +8974,7 @@ msgstr "Z"
 msgid "Z AXIS MOVE"
 msgstr "POHYB OSY Z"
 
-#: src/gui/MItem_tools.hpp:340
+#: src/gui/MItem_tools.hpp:341
 msgid "Z Axis"
 msgstr "Osa Z"
 
@@ -8857,12 +9010,12 @@ msgstr "Délka osy Z"
 msgid "Z-axis steps per unit"
 msgstr "Počet kroků/jednotka (Osa Z)"
 
-#: src/gui/wizard/selftest_result_axis.cpp:14
-#: src/gui/wizard/selftest_result_axis.cpp:15
-#: src/gui/wizard/selftest_result_axis.cpp:16
 #: src/gui/wizard/selftest_frame_axis.cpp:29
 #: src/gui/wizard/selftest_frame_axis.cpp:30
 #: src/gui/wizard/selftest_frame_axis.cpp:31
+#: src/gui/wizard/selftest_result_axis.cpp:14
+#: src/gui/wizard/selftest_result_axis.cpp:15
+#: src/gui/wizard/selftest_result_axis.cpp:16
 msgid "axis"
 msgstr "osa"
 
@@ -8926,7 +9079,7 @@ msgstr "prusa.io/dock-setup"
 msgid "tighten"
 msgstr "utáhnout"
 
-#: src/gui/MItem_tools.hpp:358
+#: src/gui/MItem_tools.hpp:359
 msgid "times"
 msgstr "times"
 
