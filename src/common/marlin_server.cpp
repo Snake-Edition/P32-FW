@@ -875,9 +875,12 @@ static void pre_finalize_print([[maybe_unused]] bool finished) {
     }
 #endif
 #if ENABLED(PRUSA_MMU2)
-    if (MMU2::mmu2.Enabled() && (!finished || GCodeInfo::getInstance().is_singletool_gcode())) {
+    if (MMU2::mmu2.Enabled()) {
+        // Unloading from nozzle is handled by Slicer, do not use auto_retract (frequent filament changes cause retract_tracker cannot properly hold valid value)
         // When we are running single-filament gcode with MMU, we should unload current filament.
-        safely_unload_filament_from_nozzle_to_mmu();
+        if (!finished || GCodeInfo::getInstance().is_singletool_gcode()) {
+            safely_unload_filament_from_nozzle_to_mmu();
+        }
     } else
 #endif // ENABLED(PRUSA_MMU2)
 #if HAS_AUTO_RETRACT()
