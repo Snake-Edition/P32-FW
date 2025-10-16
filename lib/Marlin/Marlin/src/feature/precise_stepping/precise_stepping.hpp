@@ -380,9 +380,8 @@ public:
 
     // Reset the step/move queue
     static void quick_stop() {
-        bool expected = false;
-        stop_pending.compare_exchange_weak(expected, true);
-        if (!expected) {
+        bool old = stop_pending.exchange(true);
+        if (!old) {
             // only update on first trigger
             time_last_block_us = ticks_us();
         }
