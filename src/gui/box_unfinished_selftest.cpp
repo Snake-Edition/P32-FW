@@ -7,6 +7,12 @@
 #include <option/has_switched_fan_test.h>
 #include <option/has_toolchanger.h>
 #include <find_error.hpp>
+#include <marlin_server.hpp>
+#include <client_response.hpp>
+#include <window_msgbox.hpp>
+
+// Responses for unfinished selftest dialog
+inline constexpr PhaseResponses Responses_IgnoreCalibrate = { Response::Ignore, Response::Calibrate, Response::_none, Response::_none };
 
 #if HAS_TOOLCHANGER()
     #include <module/prusa/toolchanger.h>
@@ -120,9 +126,75 @@ bool selftest_warning_selftest_finished() {
 #endif
 }
 
+void mark_selftest_as_passed_and_unblock() {
+#if HAS_SELFTEST()
+    // Set all selftest results to Passed and clear run_selftest
+    auto &store = config_store();
+    {
+        auto transaction = store.get_backend().transaction_guard();
+        SelftestResult sr = store.selftest_result.get();
+        sr.xaxis = TestResult_Passed;
+        sr.yaxis = TestResult_Passed;
+        sr.zaxis = TestResult_Passed;
+        sr.bed = TestResult_Passed;
+        sr.eth = TestResultNet_Up;
+        sr.wifi = TestResultNet_Up;
+        sr.zalign = TestResult_Passed;
+        sr.gears = TestResult_Passed;
+        for (uint8_t i = 0; i < config_store_ns::max_tool_count; ++i) {
+            sr.tools[i].printFan = TestResult_Passed;
+            sr.tools[i].heatBreakFan = TestResult_Passed;
+            sr.tools[i].fansSwitched = TestResult_Passed;
+            sr.tools[i].nozzle = TestResult_Passed;
+            sr.tools[i].fsensor = TestResult_Passed;
+            sr.tools[i].loadcell = TestResult_Passed;
+            sr.tools[i].sideFsensor = TestResult_Passed;
+            sr.tools[i].dockoffset = TestResult_Passed;
+            sr.tools[i].tooloffset = TestResult_Passed;
+        }
+        store.selftest_result.set(sr);
+
+#if HAS_PHASE_STEPPING()
+        store.selftest_result_phase_stepping.set(TestResult_Passed);
+#endif
+
+#if HAS_INPUT_SHAPER_CALIBRATION()
+        store.selftest_result_input_shaper_calibration.set(TestResult_Passed);
+#endif
+
+        // Do not show selftest on next boot
+        store.run_selftest.set(false);
+    }
+
+#if HAS_SHEET_PROFILES()
+    // Ensure at least one sheet is considered calibrated
+    // If active sheet is uncalibrated, set its z offset to 0
+    const auto active = store.active_sheet.get();
+    auto sheet = store.get_sheet(active);
+    if (!(sheet.z_offset >= SteelSheets::zOffsetMin && sheet.z_offset <= SteelSheets::zOffsetMax)) {
+        sheet.z_offset = 0.0f;
+        store.set_sheet(active, sheet);
+    }
+#endif
+#endif // HAS_SELFTEST()
+}
+
 void warn_unfinished_selftest_msgbox() {
     if (!selftest_warning_selftest_finished()) {
         const auto &error = find_error(ErrCode::CONNECT_UNFINISHED_SELFTEST);
-        MsgBoxWarning(_(error.err_text), Responses_Ok);
+        Response resp = MsgBoxWarning(_(error.err_text), Responses_IgnoreCalibrate);
+        
+        switch (resp) {
+        case Response::Ignore:
+            // User chose to ignore the warning; mark tests as passed to mirror legacy behavior
+            mark_selftest_as_passed_and_unblock();
+            break;
+        case Response::Calibrate:
+            // User chose to run calibration
+            marlin_server::request_calibrations_screen();
+            break;
+        default:
+            break;
+        }
     }
 }

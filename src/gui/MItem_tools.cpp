@@ -1,4 +1,7 @@
 #include "MItem_tools.hpp"
+#include <stdint.h>
+#include "marlin_client.hpp"
+#include "../lib/Marlin/Marlin/src/inc/Conditionals_post.h"
 #include "img_resources.hpp"
 #include "marlin_client.hpp"
 #include "marlin_server.hpp"
@@ -658,20 +661,58 @@ void MI_Y_AXIS_LEN::OnClick() {
 }
 
 /* -===============================================(:>- */
-static constexpr NumericInputConfig e_load_len_spin_config {
-    .min_value = FILAMENT_CHANGE_SLOW_LOAD_LENGTH,
+static constexpr NumericInputConfig e_load_len_spin_config = {
+    .min_value = 0,
     .max_value = 999,
     .unit = Unit::millimeter,
 };
 
-uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH = 320;
+// MI_E_UNLOAD_LENGTH
+static constexpr NumericInputConfig e_unload_len_spin_config {
+    .min_value = 50,
+    .max_value = 999,
+};
 
-// MI_E_LOAD_LENGTH
-MI_E_LOAD_LENGTH::MI_E_LOAD_LENGTH()
-    : WiSpin(FILAMENT_CHANGE_FAST_LOAD_LENGTH + FILAMENT_CHANGE_SLOW_LOAD_LENGTH, e_load_len_spin_config, _(label)) {}
+MI_E_UNLOAD_LENGTH::MI_E_UNLOAD_LENGTH()
+    : WiSpin(400, e_unload_len_spin_config, _(label)) {}
 
-void MI_E_LOAD_LENGTH::OnClick() {
-    FILAMENT_CHANGE_FAST_LOAD_LENGTH = GetVal() - FILAMENT_CHANGE_SLOW_LOAD_LENGTH;
+void MI_E_UNLOAD_LENGTH::OnClick() {
+    uint16_t new_value = GetVal();
+    #if ENABLED(ADVANCED_PAUSE_FEATURE)
+    for (uint8_t e = 0; e < EXTRUDERS; e++) {
+        fc_settings[e].unload_length = new_value;
+    }
+    #endif
+}
+
+    // MI_E_SLOW_LOAD_LENGTH
+    #include "marlin/Configuration_MINI_adv.h"
+uint16_t g_slow_load_length_mm = FILAMENT_CHANGE_SLOW_LOAD_LENGTH;
+static constexpr NumericInputConfig e_slow_load_len_spin_config {
+    .min_value = 0,
+    .max_value = 100,
+    .unit = Unit::millimeter,
+};
+
+MI_E_SLOW_LOAD_LENGTH::MI_E_SLOW_LOAD_LENGTH()
+    : WiSpin(g_slow_load_length_mm, e_slow_load_len_spin_config, _(label)) {}
+
+void MI_E_SLOW_LOAD_LENGTH::OnClick() {
+    g_slow_load_length_mm = GetVal();
+}
+
+// MI_E_FAST_LOAD_LENGTH
+static constexpr NumericInputConfig e_fast_load_len_spin_config {
+    .min_value = 0,
+    .max_value = 999,
+    .unit = Unit::millimeter,
+};
+
+MI_E_FAST_LOAD_LENGTH::MI_E_FAST_LOAD_LENGTH()
+    : WiSpin(FILAMENT_CHANGE_FAST_LOAD_LENGTH, e_fast_load_len_spin_config, _(label)) {}
+
+void MI_E_FAST_LOAD_LENGTH::OnClick() {
+    FILAMENT_CHANGE_FAST_LOAD_LENGTH = GetVal();
     set_e_length_mm(FILAMENT_CHANGE_FAST_LOAD_LENGTH);
     #if ENABLED(ADVANCED_PAUSE_FEATURE)
     for (uint8_t e = 0; e < EXTRUDERS; e++) {
@@ -682,30 +723,34 @@ void MI_E_LOAD_LENGTH::OnClick() {
 #endif
 
 /* -===============================================(:>- */
+#include "marlin/Configuration_MINI_adv.h"
+uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH = 320;
+
 static constexpr NumericInputConfig xy_home_sens_spin_config {
-    .min_value = -999,
-    .max_value = 999,
+    .min_value = -127,
+    .max_value = 127,
 };
 
 MI_X_SENSITIVITY::MI_X_SENSITIVITY()
     : WiSpin(config_store().homing_sens_x.get(), xy_home_sens_spin_config, _(label)) {}
 
 void MI_X_SENSITIVITY::OnClick() {
-    config_store().homing_sens_x.set(GetVal());
-    marlin_server::enqueue_gcode_printf("M914 X%i", int(GetVal()));
+    int16_t val = GetVal();
+    config_store().homing_sens_x.set(val);
+    marlin_server::enqueue_gcode_printf("M914 X%i", val);
 }
 
 MI_Y_SENSITIVITY::MI_Y_SENSITIVITY()
     : WiSpin(config_store().homing_sens_y.get(), xy_home_sens_spin_config, _(label)) {}
 
 void MI_Y_SENSITIVITY::OnClick() {
-    config_store().homing_sens_y.set(GetVal());
-    marlin_server::enqueue_gcode_printf("M914 Y%i", int(GetVal()));
+    int16_t val = GetVal();
+    config_store().homing_sens_y.set(val);
+    marlin_server::enqueue_gcode_printf("M914 Y%i", val);
 }
 
 MI_X_SENSITIVITY_RESET::MI_X_SENSITIVITY_RESET()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
-}
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
 
 void MI_X_SENSITIVITY_RESET::click(IWindowMenu & /*window_menu*/) {
     config_store().homing_sens_x.set(config_store().homing_sens_x.default_val);
@@ -713,8 +758,7 @@ void MI_X_SENSITIVITY_RESET::click(IWindowMenu & /*window_menu*/) {
 }
 
 MI_Y_SENSITIVITY_RESET::MI_Y_SENSITIVITY_RESET()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
-}
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
 
 void MI_Y_SENSITIVITY_RESET::click(IWindowMenu & /*window_menu*/) {
     config_store().homing_sens_y.set(config_store().homing_sens_y.default_val);
@@ -812,11 +856,23 @@ static constexpr NumericInputConfig pid_param_spin_config {
     .max_decimal_places = 2,
 };
 
+static constexpr NumericInputConfig nozzle_temp_spin_config {
+    .min_value = 150,
+    .max_value = 300,
+    .unit = Unit::celsius,
+};
+
+static constexpr NumericInputConfig bed_temp_spin_config {
+    .min_value = 35,
+    .max_value = 110,
+    .unit = Unit::celsius,
+};
+
 static uint16_t nozzle_calibration_temp = 250;
 static uint8_t bed_calibration_temp = 80;
 
 MI_NOZZLE_CALIBRATION_TEMP::MI_NOZZLE_CALIBRATION_TEMP()
-    : WiSpin(nozzle_calibration_temp, xy_home_sens_spin_config, _(label)) {};
+    : WiSpin(nozzle_calibration_temp, nozzle_temp_spin_config, _(label)) {};
 
 void MI_NOZZLE_CALIBRATION_TEMP::OnClick() {
     nozzle_calibration_temp = GetVal();
@@ -831,7 +887,7 @@ void MI_CALIBRATE_NOZZLE_PID::click(IWindowMenu & /*window_menu*/) {
 }
 
 MI_BED_CALIBRATION_TEMP::MI_BED_CALIBRATION_TEMP()
-    : WiSpin(bed_calibration_temp, xy_home_sens_spin_config, _(label)) {};
+    : WiSpin(bed_calibration_temp, bed_temp_spin_config, _(label)) {};
 
 void MI_BED_CALIBRATION_TEMP::OnClick() {
     bed_calibration_temp = GetVal();

@@ -18,6 +18,8 @@
 #include <option/has_modularbed.h>
 #include <common/extended_printer_type.hpp>
 #include "MItem_basic_selftest.hpp"
+#include "MItem_extruder_profiles.hpp"
+#include "MItem_print_head_profiles.hpp"
 #include "printers.h"
 
 #if HAS_LOADCELL()
@@ -39,6 +41,8 @@ using ScreenMenuHardware__ = ScreenMenu<GuiDefaults::MenuFooter,
     MI_EXTENDED_PRINTER_TYPE,
 #endif
     MI_TOOLHEAD_SETTINGS,
+    MI_PRINT_HEAD_PROFILES,
+    MI_EXTRUDER_PROFILES,
 
 // ================================
 // Filament sensor related

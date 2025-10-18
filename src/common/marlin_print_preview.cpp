@@ -531,6 +531,8 @@ PrintPreview::Result PrintPreview::Loop() {
         switch (response) {
 
         case Response::Ignore:
+            // Mark selftest as passed so the warning won't reappear
+            mark_selftest_as_passed_and_unblock();
             ChangeState(stateFromUpdateCheck());
             break;
 
