@@ -9,9 +9,15 @@
 #include "../../../lib/Marlin/Marlin/src/feature/pause.h"
 #include "../../../lib/Marlin/Marlin/src/module/motion.h"
 #include <option/has_mmu2.h>
+#include "printers.h"
 
 // cannot be class member (externed in marlin)
 fil_change_settings_t fc_settings[EXTRUDERS];
+
+#if PRINTER_IS_PRUSA_MINI()
+// Runtime-adjustable slow load length defined in GUI (MItem_tools.cpp)
+extern uint16_t g_slow_load_length_mm;
+#endif
 
 using namespace pause;
 
@@ -38,7 +44,11 @@ float Settings::GetDefaultFastLoadLength() {
 }
 
 float Settings::GetDefaultSlowLoadLength() {
+#if PRINTER_IS_PRUSA_MINI()
+    return g_slow_load_length_mm;
+#else
     return FILAMENT_CHANGE_SLOW_LOAD_LENGTH;
+#endif
 }
 
 float Settings::GetDefaultUnloadLength() {

@@ -420,11 +420,27 @@ public:
     virtual void OnClick() override;
 };
 
-class MI_E_LOAD_LENGTH : public WiSpin {
-    constexpr static const char *const label = N_("E load length");
+class MI_E_UNLOAD_LENGTH : public WiSpin {
+    constexpr static const char *const label = N_("E unload length");
 
 public:
-    MI_E_LOAD_LENGTH();
+    MI_E_UNLOAD_LENGTH();
+    virtual void OnClick() override;
+};
+
+class MI_E_SLOW_LOAD_LENGTH : public WiSpin {
+    constexpr static const char *const label = N_("E slow load length");
+
+public:
+    MI_E_SLOW_LOAD_LENGTH();
+    virtual void OnClick() override;
+};
+
+class MI_E_FAST_LOAD_LENGTH : public WiSpin {
+    constexpr static const char *const label = N_("E fast load length");
+
+public:
+    MI_E_FAST_LOAD_LENGTH();
     virtual void OnClick() override;
 };
 #endif
