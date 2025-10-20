@@ -772,6 +772,11 @@ void Planner::recalculate(TERN_(HINTS_SAFE_EXIT_SPEED, const float safe_exit_spe
     forward_pass();
   }
   recalculate_trapezoids(TERN_(HINTS_SAFE_EXIT_SPEED, safe_exit_speed_sqr));
+
+  // Inform the move ISR that there is a new block added to the queue. If it
+  // wants one, now is a good time to pick it up when it's fresh instead of
+  // waiting up to 1ms for it to be its turn.
+  PreciseStepping::wake_up();
 }
 
 /**
