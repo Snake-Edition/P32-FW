@@ -119,6 +119,7 @@
 #endif
 
 #include <feature/safety_timer/safety_timer.hpp>
+#include <freertos/critical_section.hpp>
 
 #include <marlin_vars.hpp>
 #include "configuration_store.h"
@@ -764,14 +765,35 @@ void Planner::recalculate_trapezoids(TERN_(HINTS_SAFE_EXIT_SPEED, const float sa
 }
 
 void Planner::recalculate(TERN_(HINTS_SAFE_EXIT_SPEED, const float safe_exit_speed_sqr)) {
-  // Initialize block index to the last block in the planner buffer.
-  const uint8_t block_index = prev_block_index(block_buffer_head);
-  // If there is just one block, no planning can be done. Avoid it!
-  if (block_index != block_buffer_planned) {
-    reverse_pass(TERN_(HINTS_SAFE_EXIT_SPEED, safe_exit_speed_sqr));
-    forward_pass();
+  {
+    // During our recalculation, we block at least some of the blocks from the
+    // move ISR. That way it can't consume it all the way to standstill, which is
+    // risky.
+    //
+    // Make sure we don't get pushed aside by something while we are at it to
+    // unblock the whole movement system. All the network stuff, puppies, etc,
+    // can wait (hopefully, this is fast and it is just computation, no talk to
+    // perpipherals or other tasks).
+    //
+    // Note that we do _not_ block the actual stepping/phase stepping - these are
+    // interrupts with higher than max priority and freeRTOS doesn't disable
+    // these.
+    freertos::CriticalSection section;
+    // Check that the move interrupt has lower priority (denoted by higher
+    // _number_, yes, 0 is the highest priority) than what freertos is able to
+    // disable - that is, that we disable move interrupt by the above critical
+    // section.
+    static_assert(ISR_PRIORITY_MOVE_TIMER > configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
+
+    // Initialize block index to the last block in the planner buffer.
+    const uint8_t block_index = prev_block_index(block_buffer_head);
+    // If there is just one block, no planning can be done. Avoid it!
+    if (block_index != block_buffer_planned) {
+      reverse_pass(TERN_(HINTS_SAFE_EXIT_SPEED, safe_exit_speed_sqr));
+      forward_pass();
+    }
+    recalculate_trapezoids(TERN_(HINTS_SAFE_EXIT_SPEED, safe_exit_speed_sqr));
   }
-  recalculate_trapezoids(TERN_(HINTS_SAFE_EXIT_SPEED, safe_exit_speed_sqr));
 
   // Inform the move ISR that there is a new block added to the queue. If it
   // wants one, now is a good time to pick it up when it's fresh instead of
