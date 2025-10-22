@@ -631,6 +631,8 @@ struct CurrentStore
     StoreItem<bool, false, ItemFlag::features, journal::hash("Emergency stop enable v2")> emergency_stop_enable;
 #endif
 
+    StoreItem<bool, false, ItemFlag::features, journal::hash("Happy Printing Seen")> happy_printing_seen;
+
 #if HAS_ILI9488_DISPLAY()
     StoreItem<bool, false, ItemFlag::hw_config | ItemFlag::common_misconfigurations, journal::hash("Reduce Display Baudrate")> reduce_display_baudrate;
 #endif
