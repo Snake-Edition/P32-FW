@@ -16,6 +16,7 @@
 #include "bsod.h"
 #include <guiconfig/guiconfig.h>
 #include <feature/factory_reset/factory_reset.hpp>
+#include <window_msgbox_happy_printing.hpp>
 
 #include <option/bootloader.h>
 #include <option/developer_mode.h>
@@ -86,6 +87,8 @@ screen_splash_data_t::screen_splash_data_t()
     // don't present any screen or wizard
     return;
 #endif
+
+    Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<PseudoScreenCallback, MsgBoxHappyPrinting>);
 
 #if HAS_SELFTEST() && !PRINTER_IS_PRUSA_iX()
     const bool run_wizard =
