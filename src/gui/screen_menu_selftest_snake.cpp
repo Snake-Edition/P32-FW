@@ -9,6 +9,7 @@
 #include <option/has_door_sensor_calibration.h>
 #include <option/has_toolchanger.h>
 #include <option/has_manual_belt_tuning.h>
+#include <window_msgbox_happy_printing.hpp>
 #if HAS_TOOLCHANGER()
     #include <module/prusa/toolchanger.h>
 #endif
@@ -430,8 +431,7 @@ void ScreenMenuSTSWizard::windowEvent(window_t *sender, GUI_event_t event, void 
     }
 
     if (is_completed(get_test_result(get_last_action(), Tool::_all_tools)) && are_previous_completed(get_last_action())) {
-        MsgBoxPepaCentered(_("Happy printing!"),
-            { Response::Continue, Response::_none, Response::_none, Response::_none });
+        MsgBoxHappyPrinting();
         Screens::Access()->Close();
     }
 }
