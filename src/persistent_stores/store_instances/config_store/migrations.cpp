@@ -355,7 +355,7 @@ namespace migrations {
         backend.read_items_for_migrations(callback);
 
         std::bitset<HOTENDS> old_bitset = old_byte;
-        static constexpr uint8_t standard_ramming_target_distance = 20;
+        static constexpr uint8_t standard_ramming_target_distance = 55;
 
         for (uint8_t i = 0; i < HOTENDS; i++) {
             backend.save_migration_item<NewItem::value_type>(NewItem::hashed_id_first + i, old_bitset.test(i) ? standard_ramming_target_distance : config_store_ns::invalid_retracted_distance);
