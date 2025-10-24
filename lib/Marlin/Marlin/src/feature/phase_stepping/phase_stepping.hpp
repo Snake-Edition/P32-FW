@@ -74,7 +74,7 @@ struct AxisState {
     // will dequeue items from pending_targets and set it as the current_target. When the position
     // is reached the cycle repeats, until no more targets are present and current_target is reset.
     std::optional<MoveTarget> current_target; // Current target to move
-    AtomicCircularQueue<MoveTarget, unsigned, 128> pending_targets; // queue of pre-processed elements
+    AtomicCircularQueue<MoveTarget, unsigned, 32> pending_targets; // queue of pre-processed elements
     /// Synchronization primitive to allow phase stepping to "steal" the next target.
     ///
     /// The scenario is, the next target is "owned" by the stepper interrupt,
