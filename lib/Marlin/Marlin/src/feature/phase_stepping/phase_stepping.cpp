@@ -687,6 +687,17 @@ static FORCE_INLINE FORCE_OFAST void refresh_axis(
         if (!axis_state.pending_targets.isEmpty()) {
             // Pull new movement
             current_target = axis_state.pending_targets.dequeue();
+
+            if (axis_state.pending_targets.count() < 3) {
+                // We are running low on more segments. Try to ask the move ISR
+                // to provide a refill.
+                //
+                // If we are running low because we are stopping a print (or
+                // something similar), then we'll unfortunately bother it
+                // multiple times until we actually do run dry. But that should
+                // be mostly harmless.
+                PreciseStepping::wake_up();
+            }
         } else {
             // Running dry. Steal the next target as the last resort not to stall the stepping.
             //

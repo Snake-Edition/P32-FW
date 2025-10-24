@@ -185,7 +185,7 @@ public:
     // Process one planner block into move segments
     static void process_queue_of_blocks();
 
-    // Trigger immediate processing of the move queue
+    /// Trigger immediate processing of the move queue
     static void wake_up();
 
     // Process the move segment queue
@@ -460,6 +460,8 @@ private:
     static std::atomic<bool> stop_pending;
     static void reset_queues();
     static bool is_waiting_before_delivering();
+    // Wake up already requested, don't request more until it actually wakes up.
+    static std::atomic<bool> wakeup_requested;
 };
 
 void classic_step_generator_init(const move_t &move, classic_step_generator_t &step_generator, step_generator_state_t &step_generator_state);

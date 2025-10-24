@@ -51,6 +51,7 @@ uint32_t PreciseStepping::waiting_before_delivering_start_time = 0;
 bool PreciseStepping::initialized_ = false;
 std::atomic<bool> PreciseStepping::stop_pending = false;
 std::atomic<bool> PreciseStepping::busy = false;
+std::atomic<bool> PreciseStepping::wakeup_requested = false;
 volatile uint8_t PreciseStepping::step_dl_miss = 0;
 volatile uint8_t PreciseStepping::step_ev_miss = 0;
 volatile uint32_t PreciseStepping::time_last_block_us;
@@ -718,6 +719,11 @@ uint16_t PreciseStepping::process_one_step_event_from_queue() {
     } else {
         // The step event queue drained or ended
         Stepper::axis_did_move = 0;
+
+        // Wake up the move ISR in emergency, we want more step events
+        // generated _right now_ (hopefully, we'll have time to refill before
+        // the next step would be due).
+        wake_up();
     }
 
     return ticks_to_next_isr;
@@ -939,13 +945,30 @@ bool PreciseStepping::is_waiting_before_delivering() {
 }
 
 void PreciseStepping::wake_up() {
-    if (Planner::nonbusy_movesplanned()) {
-        MoveIsrDisabler move_guard;
-        __HAL_TIM_SET_COUNTER(&TimerHandle[MOVE_TIMER_NUM].handle, 0);
+    // In theory, both the MoveIsrDisabler and __HAL_TIM_SET_COUNTER should be
+    // cheap and handle the situation of being set multiple times in a row
+    // without the interrupt being invoked. But, for some weird reason, if we
+    // remove this wakeup_requested guard, it _doesn't_ work properly and we
+    // don't know why.
+    if (!wakeup_requested.exchange(true, std::memory_order_relaxed)) { // No wakeup scheduled yet
+        if (Planner::nonbusy_movesplanned()) {
+            MoveIsrDisabler move_guard;
+            __HAL_TIM_SET_COUNTER(&TimerHandle[MOVE_TIMER_NUM].handle, 0);
+        }
     }
 }
 
 void PreciseStepping::process_queue_of_blocks() {
+    if (Planner::is_recalculating()) {
+        // We do not want to observe the planner while it's recalculating
+        // because then we are not guaranteed to have the stopping segment
+        // available.
+        //
+        // We'll get called again once the planner finishes recalculation, it
+        // contains a wakeup.
+        return;
+    }
+
     if (is_waiting_before_delivering()) {
         return;
     }
@@ -1054,6 +1077,8 @@ void PreciseStepping::loop() {
 }
 
 void PreciseStepping::move_isr() {
+    wakeup_requested.store(false, std::memory_order_relaxed);
+
     if (stop_pending) {
         return;
     }

@@ -273,6 +273,7 @@ class Planner {
                             block_buffer_planned,     // Index of the optimally planned block
                             block_buffer_tail;        // Index of the busy block, if any
     static uint32_t delay_before_delivering;          // Initial milliseconds of delay for planner optimization
+    static std::atomic<bool> recalculating;           // Recalculating blocks.
 
 
     #if ENABLED(DISTINCT_E_FACTORS)
@@ -605,6 +606,9 @@ class Planner {
 
     // Get count of movement slots free
     FORCE_INLINE static uint8_t moves_free() { return BLOCK_BUFFER_SIZE - 1 - movesplanned(); }
+
+    // Is the planner currently recalculating the move blocks?
+    FORCE_INLINE static bool is_recalculating() { return recalculating.load(std::memory_order_acquire); }
 
     /**
      * Planner::get_next_free_block
