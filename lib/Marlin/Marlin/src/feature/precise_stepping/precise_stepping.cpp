@@ -1079,44 +1079,38 @@ void PreciseStepping::loop() {
 void PreciseStepping::move_isr() {
     wakeup_requested.store(false, std::memory_order_relaxed);
 
-    if (stop_pending) {
-        return;
-    }
+    bool produced_some_steps = false;
+    bool made_progress = true;
 
-    StepGeneratorStatus status = process_one_move_segment_from_queue();
-    if (status != STEP_GENERATOR_STATUS_NO_STEP_EVENT_PRODUCED) {
-        // if the move queue is not full yet, spare some extra time to process a new optimized block
-        // if we have at least three available: one possible sync block, followed by one for use and
-        // another to ensure the final exit speed can be still changed.
-        if (!is_move_segment_queue_full() && planner.optimized_movesplanned() > 2) {
+    /*
+     * We want to process as much as possible to keep our output buffers full (step events, pending targets for phase stepping).
+     *
+     * We stop when:
+     * * stop_pending (requested by some quick_stop or such, we are throwing everything out anyway).
+     * * We no longer make any progress.
+     * * Reach safety upper limit of attempts (this shouldn't be reached in
+     *   practice, that's just for unexpected situations).
+     */
+    for (uint16_t i = 0; !stop_pending && made_progress && (i <= Planner::movesplanned()); ++i) {
+        made_progress = false;
+        if (has_unprocessed_move_segments_queued()) {
+            StepGeneratorStatus status = process_one_move_segment_from_queue();
+
+            if (status != STEP_GENERATOR_STATUS_NO_STEP_EVENT_PRODUCED) {
+                made_progress = true;
+                produced_some_steps = true;
+            }
+        }
+
+        /*
+         * We try to consume a segment from the planner if:
+         * * We haven't created any step events because we've run out of input.
+         * * We have space and there are enough blocks in the buffer (one extra for the slowdown that can still change its speed; that's heuristic).
+         */
+        if ((!is_move_segment_queue_full() && planner.optimized_movesplanned() > 2) || !produced_some_steps) {
             assert(planner.optimized_movesplanned() <= planner.nonbusy_movesplanned());
             process_queue_of_blocks();
-        }
-        return;
-    }
-
-    // we produced no steps and/or one of the generators reached the end of the move queue:
-    // at this point we need to keep trying advancing the block queue in order to allow
-    // generators to continue producing steps or we risk that a slew of short segments
-    // causes too few steps to be produced per iteration, eventually running it dry
-    assert(status == STEP_GENERATOR_STATUS_NO_STEP_EVENT_PRODUCED);
-
-    // Until we break from this loop, no new blocks are appended into the block queue.
-    // To ensure that we are never stuck in the infinite loop (when some unexpected state happens),
-    // we will limit the number of iterations by the number of all blocks + 1.
-    // +1 is there to make one additional call when all blocks are processed because this additional
-    // call can append the ending empty move segment when all blocks were already processed.
-    for (uint16_t i = 0; i <= Planner::movesplanned(); ++i) {
-        process_queue_of_blocks();
-        if (!has_unprocessed_move_segments_queued()) {
-            // the queue didn't avance: we're stuck
-            break;
-        }
-
-        status = process_one_move_segment_from_queue();
-        if (status != STEP_GENERATOR_STATUS_NO_STEP_EVENT_PRODUCED) {
-            // all generators are finally producing steps
-            break;
+            made_progress = has_unprocessed_move_segments_queued() || made_progress;
         }
     }
 }
