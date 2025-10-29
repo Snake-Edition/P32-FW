@@ -673,9 +673,7 @@ void restore_trinamic_drivers() {
 }
 
 void reset_trinamic_drivers() {
-    if (phase_stepping::any_axis_enabled()) {
-        bsod("reset tmc hurts phase stepping");
-    }
+    phase_stepping::EnsureDisabled guard;
 
     static constexpr bool stealthchop_by_axis[] = {
 #if ENABLED(STEALTHCHOP_XY)
