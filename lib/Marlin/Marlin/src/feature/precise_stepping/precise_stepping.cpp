@@ -958,7 +958,7 @@ void PreciseStepping::wake_up() {
     }
 }
 
-void PreciseStepping::process_queue_of_blocks() {
+bool PreciseStepping::process_queue_of_blocks() {
     if (Planner::is_recalculating()) {
         // We do not want to observe the planner while it's recalculating
         // because then we are not guaranteed to have the stopping segment
@@ -966,11 +966,11 @@ void PreciseStepping::process_queue_of_blocks() {
         //
         // We'll get called again once the planner finishes recalculation, it
         // contains a wakeup.
-        return;
+        return false;
     }
 
     if (is_waiting_before_delivering()) {
-        return;
+        return false;
     }
 
     // When the ending move segment is on the bottom of the queue (then Planner::total_print_time
@@ -978,12 +978,14 @@ void PreciseStepping::process_queue_of_blocks() {
     if (PreciseStepping::total_print_time >= MAX_PRINT_TIME) {
         // ensure all motion has stopped
         if (has_blocks_queued() || phase_stepping::processing()) {
-            return;
+            return false;
         }
 
         // we can now reset to a halt
         reset_from_halt();
     }
+
+    bool processed = false;
 
     // fetch next block
     block_t *current_block;
@@ -1007,8 +1009,10 @@ void PreciseStepping::process_queue_of_blocks() {
         assert(PreciseStepping::total_print_time != 0.);
 
         if (!append_block_discarding_move()) {
-            return;
+            return processed;
         }
+
+        processed = true;
 
         // To avoid accumulating E-axis into very big numbers that are causing numerical issues, we reset
         // the E-axis position with every SYNC block.
@@ -1031,25 +1035,31 @@ void PreciseStepping::process_queue_of_blocks() {
 #if !BOARD_IS_DWARF()
             stall_count++;
 #endif
+            // We do not consider the ending empty move as a processed block
+            // for the "made some progress" purposes, so not setting processed
+            // = true.
         } else if (PreciseStepping::total_print_time == 0. && busy) {
             // motion reset has completed and there is no pending block to process, we're now free
             assert(!has_blocks_queued() && !phase_stepping::processing());
             busy = false;
         }
-        return;
+        return processed;
     }
 
     if (PreciseStepping::total_print_time == 0.) {
         // we're restarting from zero, prepend a beginning move
         if (!append_beginning_empty_move()) {
-            return;
+            return processed;
         }
         busy = true;
     }
 
     if (append_move_segments_to_queue(*current_block)) {
         Planner::discard_current_unprocessed_block();
+        processed = true;
     }
+
+    return processed;
 }
 
 void PreciseStepping::loop() {
@@ -1109,8 +1119,7 @@ void PreciseStepping::move_isr() {
          */
         if ((!is_move_segment_queue_full() && planner.optimized_movesplanned() > 2) || !produced_some_steps) {
             assert(planner.optimized_movesplanned() <= planner.nonbusy_movesplanned());
-            process_queue_of_blocks();
-            made_progress = has_unprocessed_move_segments_queued() || made_progress;
+            made_progress = process_queue_of_blocks() || made_progress;
         }
     }
 }
