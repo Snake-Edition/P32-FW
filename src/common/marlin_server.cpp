@@ -1560,6 +1560,29 @@ void clear_media_error() {
     clear_warning(WarningType::NotDownloaded);
 }
 
+std::optional<WarningType> prefetch_status_to_warning(MediaPrefetchManager::Status status) {
+    using Status = MediaPrefetchManager::Status;
+
+    switch (status) {
+
+    case Status::usb_error:
+        return WarningType::USBFlashDiskError;
+
+    case Status::corruption:
+        return WarningType::GcodeCorruption;
+
+    case Status::not_downloaded:
+        return WarningType::NotDownloaded;
+
+    case Status::ok:
+    case Status::end_of_buffer:
+    case Status::end_of_file:
+        return std::nullopt;
+    }
+
+    bsod_unreachable();
+}
+
 void media_print_loop() {
     /// Size of the gcode queue
     METRIC_DEF(metric_gcode_queue_size, "gcd_que_sz", METRIC_VALUE_INTEGER, 100, METRIC_ENABLED);
@@ -1586,18 +1609,6 @@ void media_print_loop() {
         /// Number of commands in the prefetch buffer
         METRIC_DEF(metric_prefetch_buffer_commands, "ftch_cmds", METRIC_VALUE_INTEGER, 100, METRIC_ENABLED);
         metric_record_integer(&metric_prefetch_buffer_commands, metrics.commands_in_buffer);
-
-        const auto media_error = [status](WarningType warning_type) {
-            // There's still a fetch running, this isn't completely final ‒ the
-            // fetch itself can recover from the error (and sometimes it does,
-            // but the actual recovery takes time). Wait for the final verdict.
-            if (status.fetch_active) {
-                return;
-            }
-            set_warning(warning_type);
-            schedule_media_retry();
-            print_pause();
-        };
 
         if (!print_state.file_open_reported && metrics.stream_size_estimate) {
             print_state.file_open_reported = true;
@@ -1647,16 +1658,20 @@ void media_print_loop() {
             return;
 
         case Status::usb_error:
-            media_error(WarningType::USBFlashDiskError);
-            return;
-
         case Status::corruption:
-            media_error(WarningType::GcodeCorruption);
-            return;
+        case Status::not_downloaded: {
+            if (status.fetch_active) {
+                // There's still a fetch running, this isn't completely final ‒ the
+                // fetch itself can recover from the error (and sometimes it does,
+                // but the actual recovery takes time). Wait for the final verdict.
+                return;
+            }
 
-        case Status::not_downloaded:
-            media_error(WarningType::NotDownloaded);
+            set_warning(*prefetch_status_to_warning(status.status));
+            schedule_media_retry();
+            print_pause();
             return;
+        }
         }
     }
 }
