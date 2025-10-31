@@ -2231,21 +2231,40 @@ static void _server_print_loop(void) {
     case State::Resuming_BufferData:
     case State::MediaErrorRecovery_BufferData: {
         const auto metrics = media_prefetch.get_metrics();
+        if (metrics.is_fetching) {
+            // Wait till the media prefetch finishes
+            break;
+        }
 
-        if (!metrics.is_fetching) {
-            // Fetching done.
-            if (MediaPrefetchManager::is_error(metrics.tail_status)) {
-                // Still failing.
-                schedule_media_retry();
-                media_prefetch.stop();
-                // Go back to Paused (the only state where we could come from).
-                server.print_state = State::Paused;
-            } else {
-                // Let's continue with resuming!
-                server.print_state = State::Resuming_Begin;
-                clear_media_error();
+        using Status = MediaPrefetchManager::Status;
+
+        switch (metrics.tail_status) {
+
+        case Status::ok:
+        case Status::end_of_file:
+        case Status::end_of_buffer:
+            // The media_prefetch feched something successfully, let's continue with resuming!
+            server.print_state = State::Resuming_Begin;
+            clear_media_error();
+            break;
+
+        case Status::usb_error:
+        case Status::corruption:
+        case Status::not_downloaded: {
+            // Still failing.
+            schedule_media_retry();
+            media_prefetch.stop();
+
+            // Show a warning, but only if the unpause was requested by the user explicitly
+            // Do not spam warnings when we're doing background periodic media error recoveries
+            if (server.print_state != State::MediaErrorRecovery_BufferData) {
+                set_warning(*prefetch_status_to_warning(metrics.tail_status));
             }
-        } // Else -> keep waiting for more data.
+
+            // Go back to Paused (the only state where we could have come from).
+            server.print_state = State::Paused;
+        }
+        }
         break;
     }
     case State::Resuming_Begin:
