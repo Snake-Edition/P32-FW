@@ -2896,10 +2896,6 @@ void resuming_begin(void) {
     thermalManager.set_fan_speed(0, 0); // disable print fan
 #endif
     server.print_state = State::Resuming_Reheating;
-
-    if (!server.print_is_serial) {
-        media_prefetch_start();
-    }
 }
 
 const GCodeReaderStreamRestoreInfo &stream_restore_info() {
