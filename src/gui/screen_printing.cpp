@@ -766,6 +766,7 @@ void screen_printing_data_t::change_print_state() {
         case State::Printing:
             return printing_state_t::PRINTING;
         case State::PowerPanic_AwaitingResume:
+        case State::MediaErrorRecovery_BufferData:
         case State::Paused:
             // stop_pressed = false;
             return printing_state_t::PAUSED;

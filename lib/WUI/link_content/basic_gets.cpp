@@ -79,6 +79,7 @@ JsonResult get_printer(size_t resume_point, JsonOutput &output) {
         link_state_str = "PAUSED";
         break;
     case State::Paused:
+    case State::MediaErrorRecovery_BufferData:
         printing = paused = true;
         ready = operational = false;
         link_state_str = "PAUSED";
@@ -285,6 +286,7 @@ JsonResult get_job_octoprint(size_t resume_point, JsonOutput &output) {
         state = "Pausing";
         break;
     case State::PowerPanic_AwaitingResume:
+    case State::MediaErrorRecovery_BufferData:
     case State::Paused:
         has_job = true;
         state = "Paused";

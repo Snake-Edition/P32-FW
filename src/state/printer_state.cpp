@@ -349,6 +349,7 @@ DeviceState get_print_state(State state, bool ready) {
     case State::Paused:
 
     case State::Resuming_BufferData:
+    case State::MediaErrorRecovery_BufferData:
     case State::Resuming_Begin:
     case State::Resuming_Reheating:
     case State::Pausing_Failed_Code:

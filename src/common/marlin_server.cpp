@@ -1385,6 +1385,7 @@ void print_abort(void) {
 #endif
     case State::Printing:
     case State::Paused:
+    case State::MediaErrorRecovery_BufferData:
     case State::Resuming_BufferData:
     case State::Resuming_Reheating:
     case State::Finishing_WaitIdle:
@@ -1755,10 +1756,15 @@ void try_recover_from_media_error() {
         // If we're printing, simply try issuing a fetch to make sure everything's fine
         media_prefetch.issue_fetch();
 
-    } else if (print_state.recover_media_error_backoff.get().has_value()) {
+    } else if (server.print_state == State::Paused && print_state.recover_media_error_backoff.get().has_value()) {
         // Do NOT reset - will be reset if the resume is successful
         // print_state.recover_media_error_backoff.get().reset();
-        print_resume();
+        server.print_state = State::MediaErrorRecovery_BufferData;
+        update_sfn();
+        media_prefetch_start();
+
+    } else {
+        // We cannot attempt recovery right now, but recover_media_error_backoff should make us retry sometime later
     }
 }
 
@@ -2207,7 +2213,8 @@ static void _server_print_loop(void) {
         }
 
         break;
-    case State::Resuming_BufferData: {
+    case State::Resuming_BufferData:
+    case State::MediaErrorRecovery_BufferData: {
         const auto metrics = media_prefetch.get_metrics();
 
         if (!metrics.is_fetching) {

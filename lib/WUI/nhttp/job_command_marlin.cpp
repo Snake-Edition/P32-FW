@@ -66,6 +66,7 @@ namespace {
             break;
 
         case State::Paused:
+        case State::MediaErrorRecovery_BufferData:
             simple_state = SimplePrintState::Paused;
             break;
 

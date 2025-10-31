@@ -23,7 +23,11 @@ enum class State {
     Pausing_WaitIdle,
     Pausing_ParkHead,
     Paused,
-    Resuming_BufferData, ///< Buffering data before we even try to unpause
+    /// Buffering data before we try to unpause during an automatic media recovery sequence
+    /// This should probably be considered a "paused" type state, as the printer is doing this on the background periodically during pause
+    MediaErrorRecovery_BufferData,
+    /// Buffering data before we even try to unpause
+    Resuming_BufferData,
     Resuming_Begin,
     Resuming_Reheating,
     Resuming_UnparkHead_XY,
@@ -70,7 +74,7 @@ inline bool is_pausing_state(State state) {
 }
 
 inline bool is_resuming_state(State state) {
-    return (state == State::Resuming_BufferData) || (state == State::Resuming_Begin) || (state == State::Resuming_Reheating) || (state == State::Resuming_UnparkHead_XY) || (state == State::Resuming_UnparkHead_ZE);
+    return (state == State::Resuming_BufferData) || (state == State::Resuming_Begin) || (state == State::Resuming_Reheating) || (state == State::Resuming_UnparkHead_XY) || (state == State::Resuming_UnparkHead_ZE) || (state == State::MediaErrorRecovery_BufferData);
 }
 
 inline bool is_extended_paused_state(State state) {
@@ -81,6 +85,7 @@ inline bool is_extended_paused_state(State state) {
     case State::Pausing_WaitIdle:
     case State::Pausing_ParkHead:
     case State::Resuming_BufferData:
+    case State::MediaErrorRecovery_BufferData:
     case State::Resuming_Begin:
     case State::Resuming_Reheating:
     case State::Resuming_UnparkHead_XY:

@@ -111,6 +111,7 @@ static StateAnimation marlin_to_anim_state() {
         }
     }
     case State::Paused:
+    case State::MediaErrorRecovery_BufferData:
         return StateAnimation::Warning;
 
     case State::Aborting_Begin:

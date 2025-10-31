@@ -8,6 +8,7 @@ enum class State {
     Pausing_WaitIdle,
     Pausing_ParkHead,
     Paused,
+    MediaErrorRecovery_BufferData,
     Resuming_BufferData,
     Resuming_Begin,
     Resuming_Reheating,
