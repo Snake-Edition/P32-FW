@@ -318,6 +318,11 @@ void check_state();
  **/
 extern std::array<AxisState, opts::SUPPORTED_AXIS_COUNT> axis_states;
 
+/**
+ * Returns whether init() has been called
+ */
+bool is_initialized();
+
     /**
      * Ensure init() has been called
      */

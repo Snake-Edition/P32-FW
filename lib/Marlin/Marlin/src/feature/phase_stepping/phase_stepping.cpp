@@ -291,6 +291,10 @@ step_event_info_t phase_stepping::next_step_event_input_shaping(
     return next_step_event;
 }
 
+bool phase_stepping::is_initialized() {
+    return initialized;
+}
+
 #ifdef _DEBUG
 void phase_stepping::assert_initialized() {
     // This is explicitly kept non-inline to serve as a single trap point

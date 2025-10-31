@@ -678,7 +678,12 @@ void restore_trinamic_drivers() {
 
 void reset_trinamic_drivers() {
 #if HAS_PHASE_STEPPING()
-    phase_stepping::EnsureDisabled guard;
+    // This function is once called during print boot, when the phase_stepping is not yet initialized
+    // Instantiating the guard there was triggering an assert.
+    std::optional<phase_stepping::EnsureDisabled> guard;
+    if (phase_stepping::is_initialized()) {
+        guard.emplace();
+    }
 #endif
 
     static constexpr bool stealthchop_by_axis[] = {
