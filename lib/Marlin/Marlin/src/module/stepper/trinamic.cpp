@@ -40,7 +40,11 @@
     #include <config_store/store_instance.hpp>
 #endif
 
-#include <feature/phase_stepping/phase_stepping.hpp>
+#include <option/has_phase_stepping.h>
+#if HAS_PHASE_STEPPING()
+    #include <feature/phase_stepping/phase_stepping.hpp>
+#endif
+
 #include <HardwareSerial.h>
 
 enum StealthIndex : uint8_t { STEALTH_AXIS_XY,
@@ -673,7 +677,9 @@ void restore_trinamic_drivers() {
 }
 
 void reset_trinamic_drivers() {
+#if HAS_PHASE_STEPPING()
     phase_stepping::EnsureDisabled guard;
+#endif
 
     static constexpr bool stealthchop_by_axis[] = {
 #if ENABLED(STEALTHCHOP_XY)
