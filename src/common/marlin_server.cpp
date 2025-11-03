@@ -1580,7 +1580,7 @@ std::optional<WarningType> prefetch_status_to_warning(MediaPrefetchManager::Stat
         return std::nullopt;
     }
 
-    bsod_unreachable();
+    BUDDY_UNREACHABLE();
 }
 
 void media_print_loop() {
