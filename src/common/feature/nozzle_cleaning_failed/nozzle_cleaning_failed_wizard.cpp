@@ -80,6 +80,10 @@ public:
             // Autoretract - no way to abort that one
             autoretract();
 
+            // Start cooling back to original temperature (no waiting)
+            thermalManager.setTargetHotend(temp_before, active_extruder);
+            marlin_server::set_temp_to_display(temp_before, active_extruder);
+
             // Ask the user to clean the nozzle from the ooze
             if (!ask_user_to_clean_nozzle()) {
                 print_abort();
