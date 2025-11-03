@@ -594,7 +594,7 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
     if (current_position.z > z) {
       // Probe down fast. If the probe never triggered, raise for probe clearance
       if (!do_probe_move(z, MMM_TO_MMS(Z_PROBE_SPEED_FAST))) {
-        do_blocking_move_to_z(current_position.z + Z_CLEARANCE_BETWEEN_PROBES, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+        do_blocking_move_to_z(current_position.z + Z_CLEARANCE_BETWEEN_PROBES, MMM_TO_MMS(Z_PROBE_SPEED_FAST), Segmented::yes);
       }
     }
   #endif
@@ -629,7 +629,7 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
 
         // If tare value is suspicious, lift very high and try tare again
         if (std::abs(offset) > max_tare_offset) {
-          do_blocking_move_to_z(current_position.z + Z_AFTER_PROBING, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+          do_blocking_move_to_z(current_position.z + Z_AFTER_PROBING, MMM_TO_MMS(Z_PROBE_SPEED_FAST), Segmented::yes);
           reference_tare = loadcell_retare_for_analysis(Z_FIRST_PROBE_DELAY);
 
           SERIAL_ECHO_START();
