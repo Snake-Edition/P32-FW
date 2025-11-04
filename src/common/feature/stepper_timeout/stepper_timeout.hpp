@@ -11,14 +11,14 @@ class StepperTimeoutManager : public Uncopyable {
     friend StepperTimeoutManager &stepper_timeout();
 
 public:
-    /// Returns timeout interval, in ms
-    auto interval_ms() const {
-        return timer_.interval();
-    }
-
     /// Changes the interval after which stepeprs get automatically disabled
     void set_interval_ms(uint32_t set) {
-        timer_.set_interval(set);
+        if (set == 0) {
+            enabled_ = false;
+        } else {
+            enabled_ = true;
+            timer_.set_interval(set);
+        }
     }
 
 public:
@@ -35,6 +35,7 @@ private:
 
 private:
     utils::Timer<uint32_t> timer_;
+    bool enabled_ = true;
 };
 
 StepperTimeoutManager &stepper_timeout();

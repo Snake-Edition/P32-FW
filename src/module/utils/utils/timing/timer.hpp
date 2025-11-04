@@ -40,6 +40,7 @@ public:
     }
 
     inline void set_interval(T set) {
+        assert(set > 0);
         interval_ = set;
     }
 

@@ -29,7 +29,7 @@ void StepperTimeoutManager::step() {
         timer_.restart(now);
     }
 
-    if (timer_.check(now)) {
+    if (enabled_ && timer_.check(now)) {
         trigger();
     }
 }
