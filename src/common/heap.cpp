@@ -61,7 +61,7 @@ static atomic<TaskHandle_t> fallible_request_for = nullptr;
 //
 
 #if BOARD_IS_MASTER_BOARD()
-    #define ISR_STACK_LENGTH_BYTES 1536 // #define bytes to reserve for ISR (MSP) stack
+    #define ISR_STACK_LENGTH_BYTES 1640 // #define bytes to reserve for ISR (MSP) stack
 #else
     #define ISR_STACK_LENGTH_BYTES 512 // #define bytes to reserve for ISR (MSP) stack
 #endif
