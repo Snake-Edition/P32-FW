@@ -73,7 +73,9 @@ namespace {
         // Move into the lever's Y-axis line.
         plan_to_y(Y_LEVER, lever_move_feedrate);
         // Move horizontally to engage the lever and switch it.
-        plan_to_x(wanted_state == VentState::open ? X_OPEN_END_POS : X_CLOSE_END_POS);
+        plan_to_x(wanted_state == VentState::open ? X_OPEN_END_POS : X_CLOSE_END_POS, lever_move_feedrate);
+        // Move horizontally to release the lever tension
+        plan_to_x(wanted_state == VentState::open ? X_OPEN_END_POS + X_LEVER_MOVE_AWAY : X_CLOSE_END_POS - X_LEVER_MOVE_AWAY, lever_move_feedrate);
         // Back out to the safe Y-axis position to avoid a collision on future moves.
         plan_to_y(Y_SAFE, lever_move_feedrate);
     }
