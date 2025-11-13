@@ -1,9 +1,9 @@
 /// @file
 #pragma once
 
-#include <option/has_automatic_chamber_vents.h>
+#include <option/has_chamber_vents.h>
 
-static_assert(HAS_AUTOMATIC_CHAMBER_VENTS());
+static_assert(HAS_CHAMBER_VENTS());
 
 namespace automatic_chamber_vents {
 

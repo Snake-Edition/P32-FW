@@ -4,7 +4,7 @@
 #include <client_response.hpp>
 #include <marlin_vars.hpp>
 #include <fsm/safety_timer_phases.hpp>
-#include <option/has_manual_chamber_vents.h>
+#include <option/has_chamber_vents.h>
 #include <option/has_gearbox_alignment.h>
 #include <option/has_mmu2.h>
 #include <option/has_dwarf.h>
@@ -661,7 +661,7 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
         return ErrCode::CONNECT_CHAMBER_COOLING_FAN_ERROR;
 #endif
 
-#if HAS_MANUAL_CHAMBER_VENTS()
+#if HAS_CHAMBER_VENTS()
     case WarningType::OpenChamberVents:
         return ErrCode::CONNECT_OPEN_CHAMBER_VENTS;
     case WarningType::CloseChamberVents:

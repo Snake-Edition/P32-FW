@@ -1,6 +1,6 @@
 #pragma once
 
-#include <option/has_automatic_chamber_vents.h>
+#include <option/has_chamber_vents.h>
 #include <option/has_chamber_api.h>
 #include <option/has_auto_retract.h>
 
@@ -45,7 +45,7 @@ struct PrintStatusMessage {
 #if HAS_AUTO_RETRACT()
         auto_retracting,
 #endif
-#if HAS_AUTOMATIC_CHAMBER_VENTS()
+#if HAS_CHAMBER_VENTS()
         opening_chamber_vents,
         closing_chamber_vents,
 #endif
@@ -114,7 +114,7 @@ struct PrintStatusMessage {
 #if HAS_AUTO_RETRACT()
         TypeRecord<Type::auto_retracting, PrintStatusMessageDataProgress>,
 #endif
-#if HAS_AUTOMATIC_CHAMBER_VENTS()
+#if HAS_CHAMBER_VENTS()
         TypeRecord<Type::opening_chamber_vents, std::monostate>,
         TypeRecord<Type::closing_chamber_vents, std::monostate>,
 #endif

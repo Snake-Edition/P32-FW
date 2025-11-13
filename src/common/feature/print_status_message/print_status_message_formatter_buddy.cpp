@@ -38,7 +38,7 @@ static constexpr EnumArray<Message::Type, const char *, Message::Type::_cnt> mes
 #if HAS_AUTO_RETRACT()
         { Message::Type::auto_retracting, N_("Auto-retracting") },
 #endif
-#if HAS_AUTOMATIC_CHAMBER_VENTS()
+#if HAS_CHAMBER_VENTS()
         { Message::Type::opening_chamber_vents, N_("Opening chamber vents") },
         { Message::Type::closing_chamber_vents, N_("Closing chamber vents") },
 #endif
@@ -67,7 +67,7 @@ void PrintStatusMessageFormatterBuddy::format(StringBuilder &target, const Messa
 #if ENABLED(DETECT_PRINT_SHEET)
     case Message::Type::detecting_steel_sheet:
 #endif
-#if HAS_AUTOMATIC_CHAMBER_VENTS()
+#if HAS_CHAMBER_VENTS()
     case Message::Type::opening_chamber_vents:
     case Message::Type::closing_chamber_vents:
 #endif

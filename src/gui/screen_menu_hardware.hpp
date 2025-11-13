@@ -77,7 +77,7 @@ using ScreenMenuHardware__ = ScreenMenu<GuiDefaults::MenuFooter,
     MI_HW_MMU,
 #endif
 
-#if HAS_MANUAL_CHAMBER_VENTS() || HAS_AUTOMATIC_CHAMBER_VENTS()
+#if HAS_CHAMBER_VENTS()
     MI_CHECK_MANUAL_VENT_STATE,
 #endif
 #if HAS_AUTO_RETRACT()

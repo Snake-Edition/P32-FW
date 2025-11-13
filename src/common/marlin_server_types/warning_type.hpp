@@ -2,7 +2,7 @@
 
 #include "client_response.hpp"
 #include <guiconfig/guiconfig.h>
-#include <option/has_manual_chamber_vents.h>
+#include <option/has_chamber_vents.h>
 #include <option/has_remote_bed.h>
 #include <option/has_chamber_filtration_api.h>
 #include <option/xbuddy_extension_variant_standard.h>
@@ -67,7 +67,7 @@ enum class WarningType : uint32_t {
 #if HAS_CHAMBER_API()
     FailedToReachChamberTemperature,
 #endif
-#if HAS_MANUAL_CHAMBER_VENTS()
+#if HAS_CHAMBER_VENTS()
     OpenChamberVents,
     CloseChamberVents,
 #endif

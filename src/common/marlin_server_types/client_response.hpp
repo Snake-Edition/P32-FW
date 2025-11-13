@@ -41,7 +41,7 @@
 #include <option/has_door_sensor_calibration.h>
 #include <option/has_auto_retract.h>
 #include <option/has_nozzle_cleaner.h>
-#include <option/has_manual_chamber_vents.h>
+#include <option/has_chamber_vents.h>
 #include <option/has_precise_homing_corexy.h>
 
 #include <option/has_hotend_type_support.h>
@@ -427,7 +427,7 @@ enum class PhasesWarning : PhaseUnderlyingType {
     EnclosureFilterExpiration,
 #endif
 
-#if HAS_MANUAL_CHAMBER_VENTS()
+#if HAS_CHAMBER_VENTS()
     ChamberVents,
 #endif
 
@@ -931,7 +931,7 @@ inline constexpr EnumArray<PhasesWarning, PhaseResponses, CountPhases<PhasesWarn
 #if XL_ENCLOSURE_SUPPORT() || HAS_CHAMBER_FILTRATION_API()
         { PhasesWarning::EnclosureFilterExpiration, { Response::Ignore, Response::Postpone5Days, Response::Done } },
 #endif
-#if HAS_MANUAL_CHAMBER_VENTS()
+#if HAS_CHAMBER_VENTS()
         { PhasesWarning::ChamberVents, { Response::Ok, Response::Disable } },
 #endif
         { PhasesWarning::ProbingFailed, { Response::Yes, Response::No } },

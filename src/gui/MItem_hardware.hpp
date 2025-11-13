@@ -5,8 +5,7 @@
 #include <option/has_side_fsensor.h>
 #include <option/has_toolchanger.h>
 #include <option/has_emergency_stop.h>
-#include <option/has_automatic_chamber_vents.h>
-#include <option/has_manual_chamber_vents.h>
+#include <option/has_chamber_vents.h>
 #include <common/extended_printer_type.hpp>
 #include <gui/menu_item/menu_item_select_menu.hpp>
 
@@ -76,7 +75,7 @@ protected:
 };
 #endif
 
-#if HAS_MANUAL_CHAMBER_VENTS() || HAS_AUTOMATIC_CHAMBER_VENTS()
+#if HAS_CHAMBER_VENTS()
 class MI_CHECK_MANUAL_VENT_STATE : public WI_ICON_SWITCH_OFF_ON_t {
 public:
     MI_CHECK_MANUAL_VENT_STATE();

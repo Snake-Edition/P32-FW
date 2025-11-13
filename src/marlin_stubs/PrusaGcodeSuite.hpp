@@ -14,7 +14,7 @@
 #include <option/has_emergency_stop.h>
 #include <option/buddy_enable_connect.h>
 #include <option/has_door_sensor_calibration.h>
-#include <option/has_automatic_chamber_vents.h>
+#include <option/has_chamber_vents.h>
 
 #include <gcode/gcode_parser.hpp>
 
@@ -118,7 +118,7 @@ void M864(); //< spool join control
 
 void M865(); //< Set up ad-hoc filament
 
-#if HAS_AUTOMATIC_CHAMBER_VENTS()
+#if HAS_CHAMBER_VENTS()
 void M870(); ///< Open or close ventilation intake
 #endif
 
