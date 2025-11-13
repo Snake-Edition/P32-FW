@@ -191,9 +191,7 @@ void Chamber::manage_ventilation_state() {
 
     auto open = [&]() {
         if (control_state == VentControl::automatic) {
-            if (automatic_chamber_vents::open()) {
-                vent_state_ = Chamber::VentState::open;
-            }
+            automatic_chamber_vents::open();
         } else {
             marlin_server::set_warning(WarningType::OpenChamberVents);
             vent_state_ = Chamber::VentState::open;
@@ -202,9 +200,7 @@ void Chamber::manage_ventilation_state() {
 
     auto close = [&]() {
         if (control_state == VentControl::automatic) {
-            if (automatic_chamber_vents::close()) {
-                vent_state_ = Chamber::VentState::closed;
-            }
+            automatic_chamber_vents::close();
         } else {
             marlin_server::set_warning(WarningType::CloseChamberVents);
             vent_state_ = Chamber::VentState::closed;

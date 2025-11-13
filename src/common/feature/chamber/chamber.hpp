@@ -80,6 +80,14 @@ public: // Temperature control
     /// Check the state of chamber grills (vents). Can be open/closed based on chamber target temperature
     /// !HAS TO BE CALLED FROM DEFAULT THREAD ONLY!
     void manage_ventilation_state();
+
+    enum class VentState {
+        unknown,
+        open,
+        closed,
+    };
+
+    inline void set_vent_state(VentState new_state) { vent_state_ = new_state; }
 #endif
 
 private:
@@ -88,13 +96,7 @@ private:
     std::optional<Temperature> thermistor_temperature_;
     std::optional<Temperature> target_temperature_;
 
-#if PRINTER_IS_PRUSA_COREONE()
-    enum class VentState {
-        unknown,
-        open,
-        closed,
-    };
-
+#if HAS_CHAMBER_VENTS()
     VentState vent_state_ = VentState::unknown;
 #endif
 
