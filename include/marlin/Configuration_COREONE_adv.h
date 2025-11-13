@@ -341,7 +341,7 @@
 
 // When G28 is called, this option will make Y home before X
 // X must be homed before Y to avoid Nozzle Cleaner
-#define HOME_Y_BEFORE_X false
+#define HOME_Y_BEFORE_X true
 
 // Enable this if X or Y can't home without homing the other axis first.
 #define CODEPENDENT_XY_HOMING true
