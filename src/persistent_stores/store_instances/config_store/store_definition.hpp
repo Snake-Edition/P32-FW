@@ -707,7 +707,7 @@ struct CurrentStore
 #endif
 
 #if HAS_CHAMBER_VENTS()
-    StoreItem<bool, true, ItemFlag::printer_state, journal::hash("Check chamber ventilation state")> check_chamber_vent_state;
+    StoreItem<bool, true, ItemFlag::features, journal::hash("Check chamber ventilation state")> check_chamber_vent_state;
     StoreItem<bool, true, ItemFlag::hw_config, journal::hash("Auto chamber vent enabled")> auto_chamber_vent_enabled;
 
     VentControl get_vent_control();
