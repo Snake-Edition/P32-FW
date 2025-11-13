@@ -65,6 +65,11 @@
     #include <feature/chamber_filtration/chamber_filtration_enums.hpp>
 #endif
 
+#include <option/has_chamber_vents.h>
+#if HAS_CHAMBER_VENTS()
+    #include <feature/chamber/chamber_enums.hpp>
+#endif
+
 #include <option/has_hotend_type_support.h>
 #if HAS_HOTEND_TYPE_SUPPORT()
     #include <hotend_type.hpp>
@@ -139,7 +144,7 @@ struct CurrentStore
     void perform_config_check();
 
     /// Config store "version", gets incremented each time we need to add a new config migration
-    static constexpr uint8_t newest_config_version = 3;
+    static constexpr uint8_t newest_config_version = 5;
 
     /// Stores newest_migration_version of the previous firmware
     StoreItem<uint8_t, 0, ItemFlag::special, journal::hash("Config Version")> config_version;
@@ -703,6 +708,10 @@ struct CurrentStore
 
 #if HAS_CHAMBER_VENTS()
     StoreItem<bool, true, ItemFlag::printer_state, journal::hash("Check chamber ventilation state")> check_chamber_vent_state;
+    StoreItem<bool, true, ItemFlag::hw_config, journal::hash("Auto chamber vent enabled")> auto_chamber_vent_enabled;
+
+    VentControl get_vent_control();
+    void set_vent_control(VentControl state);
 #endif
 
 #if HAS_MANUAL_BELT_TUNING()

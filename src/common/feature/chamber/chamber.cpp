@@ -8,6 +8,7 @@
 #include <option/has_chamber_vents.h>
 #include <option/has_xbuddy_extension.h>
 #include <feature/safety_timer/safety_timer.hpp>
+#include "chamber_enums.hpp"
 
 #if HAS_CHAMBER_VENTS()
     #include <marlin_stubs/feature/automatic_chamber_vents/automatic_chamber_vents.hpp>
@@ -179,34 +180,43 @@ void Chamber::reset() {
 
 #if HAS_CHAMBER_VENTS()
 void Chamber::manage_ventilation_state() {
-    const auto fil_target = config_store().get_filament_type(0).parameters().chamber_target_temperature;
-    constexpr uint8_t temp_limit = 45; // Limit for closed grills is chamber max temperature of PETG
 
-    // Don't show any vent dialog if filament doesn't support chamber temperature control
-    if (fil_target.has_value()) {
-        if (fil_target.value() > temp_limit && vent_state_ != Chamber::VentState::closed) {
-            marlin_server::set_warning(WarningType::CloseChamberVents);
-            vent_state_ = Chamber::VentState::closed;
-        } else if (fil_target.value() <= temp_limit && vent_state_ != Chamber::VentState::open) {
-            marlin_server::set_warning(WarningType::OpenChamberVents);
-            vent_state_ = Chamber::VentState::open;
-        }
+    const auto control_state = config_store().get_vent_control();
+    if (control_state == VentControl::off) {
+        return;
     }
-}
 
-void Chamber::manage_ventilation_state() {
     const auto fil_target = config_store().get_filament_type(0).parameters().chamber_target_temperature;
     constexpr uint8_t temp_limit = 45; // Limit for closed grills is chamber max temperature of PETG
 
-    if (fil_target.has_value()) {
-        if (fil_target.value() > temp_limit && vent_state_ != Chamber::VentState::closed) {
-            if (automatic_chamber_vents::close()) {
-                vent_state_ = Chamber::VentState::closed;
-            }
-        } else if (fil_target.value() <= temp_limit && vent_state_ != Chamber::VentState::open) {
+    auto open = [&]() {
+        if (control_state == VentControl::automatic) {
             if (automatic_chamber_vents::open()) {
                 vent_state_ = Chamber::VentState::open;
             }
+        } else {
+            marlin_server::set_warning(WarningType::OpenChamberVents);
+            vent_state_ = Chamber::VentState::open;
+        }
+    };
+
+    auto close = [&]() {
+        if (control_state == VentControl::automatic) {
+            if (automatic_chamber_vents::close()) {
+                vent_state_ = Chamber::VentState::closed;
+            }
+        } else {
+            marlin_server::set_warning(WarningType::CloseChamberVents);
+            vent_state_ = Chamber::VentState::closed;
+        }
+    };
+
+    // Don't show any vent dialog/manipulate grilles if filament doesn't support chamber temperature control
+    if (fil_target.has_value()) {
+        if (fil_target.value() > temp_limit && vent_state_ != Chamber::VentState::closed) {
+            close();
+        } else if (fil_target.value() <= temp_limit && vent_state_ != Chamber::VentState::open) {
+            open();
         }
     }
 }

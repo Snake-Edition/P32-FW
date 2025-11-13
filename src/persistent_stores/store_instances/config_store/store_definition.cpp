@@ -143,6 +143,19 @@ void CurrentStore::perform_config_migrations() {
         }
     }
 #endif
+    if (should_migrate<4>()) {
+        // Don't show "Happy Printing" screen when upgrading firmware
+        happy_printing_seen.set(true);
+    }
+#if PRINTER_IS_PRUSA_COREONE()
+    if (should_migrate<5>()) {
+        // Printers that are upgraded are most likely CoreOne without vent grille lever
+        // Those have to keep the manual open/close mechanism.
+        // On new CoreOne+ printers, this will be checked in HW config
+        auto_chamber_vent_enabled.set(false);
+    }
+#endif
+
     // To add a migration:
     // - increment newest_config_version
     // - add if(should_migrate<X>) { your migration code } at the END of this function
@@ -935,6 +948,32 @@ std::optional<float> CurrentStore::get_filament_retracted_distance(uint8_t tool_
     return distance;
 }
 
+#endif
+
+#if HAS_CHAMBER_VENTS()
+VentControl CurrentStore::get_vent_control() {
+    if (!check_chamber_vent_state.get()) {
+        return VentControl::off;
+    } else {
+        return auto_chamber_vent_enabled.get() ? VentControl::automatic : VentControl::manual;
+    }
+}
+
+void CurrentStore::set_vent_control(VentControl state) {
+    switch (state) {
+    case VentControl::off:
+        check_chamber_vent_state.set(false);
+        break;
+    case VentControl::automatic:
+        check_chamber_vent_state.set(true);
+        auto_chamber_vent_enabled.set(true);
+        break;
+    case VentControl::manual:
+        check_chamber_vent_state.set(true);
+        auto_chamber_vent_enabled.set(false);
+        break;
+    }
+}
 #endif
 
 } // namespace config_store_ns
