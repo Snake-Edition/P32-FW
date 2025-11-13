@@ -7,6 +7,10 @@
 #include <screen_menu_hardware_checks.hpp>
 #include <common/printer_model_data.hpp>
 
+#if HAS_CHAMBER_VENTS()
+    #include <feature/chamber/chamber_enums.hpp>
+#endif
+
 #if HAS_TOOLCHANGER()
     #include <module/prusa/toolchanger.h>
     #if HAS_SIDE_FSENSOR()
@@ -141,11 +145,19 @@ void MI_EMERGENCY_STOP_ENABLE::OnChange([[maybe_unused]] size_t old_index) {
 #endif
 
 #if HAS_CHAMBER_VENTS()
-MI_CHECK_MANUAL_VENT_STATE::MI_CHECK_MANUAL_VENT_STATE()
-    : WI_ICON_SWITCH_OFF_ON_t(config_store().check_chamber_vent_state.get(), _("Check Ventilation Grilles"), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
+static constexpr const char *chamber_vent_control_items[] = {
+    N_("Off"),
+    N_("Auto"),
+    N_("Manual"),
+};
 
-void MI_CHECK_MANUAL_VENT_STATE::OnChange([[maybe_unused]] size_t old_index) {
-    config_store().check_chamber_vent_state.set(value());
+static_assert(VentControl(0) == VentControl::off && VentControl(1) == VentControl::automatic && VentControl(2) == VentControl::manual, "menu item misalignment");
+
+MI_SWITCH_VENT_MECHANISM::MI_SWITCH_VENT_MECHANISM()
+    : MenuItemSwitch(_("Chamber Vent Control"), chamber_vent_control_items, std::to_underlying(config_store().get_vent_control())) {}
+
+void MI_SWITCH_VENT_MECHANISM::OnChange([[maybe_unused]] size_t old_index) {
+    config_store().set_vent_control(VentControl(get_index()));
 }
 #endif
 

@@ -76,9 +76,9 @@ protected:
 #endif
 
 #if HAS_CHAMBER_VENTS()
-class MI_CHECK_MANUAL_VENT_STATE : public WI_ICON_SWITCH_OFF_ON_t {
+class MI_SWITCH_VENT_MECHANISM : public MenuItemSwitch {
 public:
-    MI_CHECK_MANUAL_VENT_STATE();
+    MI_SWITCH_VENT_MECHANISM();
 
 protected:
     virtual void OnChange(size_t old_index) override;

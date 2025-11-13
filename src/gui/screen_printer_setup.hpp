@@ -8,6 +8,7 @@
 #include <WinMenuContainer.hpp>
 #include <screen_menu.hpp>
 #include <common/extended_printer_type.hpp>
+#include <option/has_chamber_vents.h>
 
 #include <MItem_menus.hpp>
 #include <option/has_mmu2.h>
@@ -47,6 +48,9 @@ using ScreenBase
 #endif
 #if HAS_XBUDDY_EXTENSION()
         MI_CAM_USB_PWR,
+#endif
+#if HAS_CHAMBER_VENTS()
+        MI_SWITCH_VENT_MECHANISM,
 #endif
         MI_DONE>;
 

@@ -18,6 +18,7 @@
 #include <option/has_modular_bed.h>
 #include <option/has_mmu2.h>
 #include <option/has_auto_retract.h>
+#include <option/has_chamber_vents.h>
 #include <common/extended_printer_type.hpp>
 #include "MItem_basic_selftest.hpp"
 #include "printers.h"
@@ -78,7 +79,7 @@ using ScreenMenuHardware__ = ScreenMenu<GuiDefaults::MenuFooter,
 #endif
 
 #if HAS_CHAMBER_VENTS()
-    MI_CHECK_MANUAL_VENT_STATE,
+    MI_SWITCH_VENT_MECHANISM,
 #endif
 #if HAS_AUTO_RETRACT()
     MI_PRE_NOZZLE_CLEANING_RETRACT,
