@@ -401,7 +401,7 @@ void ScreenMenuSTSWizard::draw() {
 }
 
 void ScreenMenuSTSWizard::windowEvent(window_t *sender, GUI_event_t event, void *param) {
-    if (GetFirstDialog()) {
+    if (event != GUI_event_t::LOOP || GetFirstDialog()) {
         return;
     }
 
