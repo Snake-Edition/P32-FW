@@ -2696,8 +2696,11 @@ static void _server_print_loop(void) {
         }
 
         if (!crash_s.is_repeated_crash()) {
-            server.print_state = State::Resuming_Begin;
             fsm_destroy(ClientFSM::CrashRecovery);
+
+            // Necessary for print_resume to work
+            server.print_state = State::Paused;
+            print_resume();
             break;
         }
     #if ENABLED(AXIS_MEASURE)
@@ -2734,11 +2737,13 @@ static void _server_print_loop(void) {
             measure_axes_and_home();
             break;
         case Response::Resume: /// ignore wrong length of axes
-            server.print_state = State::Resuming_Begin;
             fsm_destroy(ClientFSM::CrashRecovery);
     #if ENABLED(AXIS_MEASURE)
             axes_length_set_ok(); /// ignore re-test of lengths
     #endif
+            // Necessary for print_resume to work
+            server.print_state = State::Paused;
+            print_resume();
             break;
         case Response::_none:
             break;
@@ -2751,8 +2756,11 @@ static void _server_print_loop(void) {
     case State::CrashRecovery_Repeated_Crash: {
         switch (marlin_server::get_response_from_phase(PhasesCrashRecovery::repeated_crash)) {
         case Response::Resume:
-            server.print_state = State::Resuming_Begin;
             fsm_destroy(ClientFSM::CrashRecovery);
+
+            // Necessary for print_resume to work
+            server.print_state = State::Paused;
+            print_resume();
             break;
         case Response::_none:
             break;
