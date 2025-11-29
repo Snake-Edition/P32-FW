@@ -3,7 +3,7 @@
 #include <sound.hpp>
 #include <metric_handlers.h>
 #include <ScreenHandler.hpp>
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 
 using namespace screen_menu_metrics_list;
 
@@ -17,7 +17,7 @@ MI_METRIC::MI_METRIC(metric_t *metric)
 }
 
 void MI_METRIC::OnChange(size_t) {
-    metric_->enabled = index;
+    metric_->enabled = value();
 }
 
 WindowMenuMetricsList::WindowMenuMetricsList(window_t *parent, Rect16 rect)

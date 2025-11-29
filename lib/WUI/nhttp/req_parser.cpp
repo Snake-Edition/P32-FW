@@ -219,7 +219,7 @@ ExecutionControl RequestParser::event(Event event) {
     return ExecutionControl::Continue;
 }
 
-void RequestParser::step(string_view input, bool terminated_by_client, uint8_t *, size_t, Step &out) {
+void RequestParser::step(const std::string_view &input, bool terminated_by_client, uint8_t *, size_t, Step &out) {
     if (done) {
         return;
     }

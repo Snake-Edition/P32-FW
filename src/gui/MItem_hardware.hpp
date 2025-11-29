@@ -5,6 +5,7 @@
 #include <option/has_side_fsensor.h>
 #include <option/has_toolchanger.h>
 #include <option/has_emergency_stop.h>
+#include <option/has_chamber_vents.h>
 #include <common/extended_printer_type.hpp>
 #include <gui/menu_item/menu_item_select_menu.hpp>
 
@@ -71,5 +72,26 @@ public:
 
 protected:
     virtual void OnChange(size_t old_index) override;
+};
+#endif
+
+#if HAS_CHAMBER_VENTS()
+class MI_SWITCH_VENT_MECHANISM : public MenuItemSwitch {
+public:
+    MI_SWITCH_VENT_MECHANISM();
+
+protected:
+    virtual void OnChange(size_t old_index) override;
+};
+#endif
+
+#if HAS_PRECISE_HOMING_COREXY()
+/// Option whether we should automatically calibrate precise homing when needed
+class MI_AUTO_PRECISE_HOMING_CALIBRATION : public MenuItemSwitch {
+public:
+    MI_AUTO_PRECISE_HOMING_CALIBRATION();
+
+protected:
+    virtual void OnChange(size_t) override;
 };
 #endif

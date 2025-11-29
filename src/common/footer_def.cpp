@@ -2,7 +2,7 @@
 
 #include <option/has_chamber_api.h>
 
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 
 const char *footer::to_string(Item item) {
     static constexpr EnumArray<Item, const char *, Item::_count> texts {

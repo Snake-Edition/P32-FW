@@ -25,6 +25,10 @@
  */
 
 #include "../../../inc/MarlinConfig.h"
+#include <buddy/unreachable.hpp>
+#include "feature/nozzle_cleaning_failed/nozzle_cleaning_failed_wizard.hpp"
+#include <config_store/store_instance.hpp>
+#include <feature/print_status_message/print_status_message_guard.hpp>
 
 #if ENABLED(AUTO_BED_LEVELING_UBL)
 
@@ -35,6 +39,8 @@
     #include <marlin_server.hpp>
     #include <calibration_z.hpp>
     #include <option/has_uneven_bed_prompt.h>
+
+    #include <mapi/motion.hpp>
 
 /** \addtogroup G-Codes
  * @{
@@ -259,24 +265,70 @@ void GcodeSuite::G29() {
 
     while (true) {
         ubl.g29_min_max_measured_z = std::nullopt;
+        ubl.g29_nozzle_cleaning_failed = false;
+        ubl.g29_probing_failed = false;
         ubl.G29();
+
+        // Planner is draining -> there is some emergency or quickstop, abort abort uíí uíí uíí
+        if (planner.draining()) {
+            break;
+        }
+
+    #if HAS_BED_PROBE
+        if (ubl.g29_probing_failed) {
+            plan_park_move_to_xyz({ { XYZ_NOZZLE_PARK_POINT } }, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE, Segmented::yes);
+
+            if (marlin_server::prompt_warning(WarningType::ProbingFailed) != Response::Yes) {
+                marlin_server::print_abort();
+                return;
+            }
+
+            continue;
+        }
+    #endif
+
+    #if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
+        if (ubl.g29_nozzle_cleaning_failed) {
+            // Using the M600 position for this. While we are not changing
+            // filament, we want the nozzle to park at an accessible place to
+            // have it cleaned and the M600 position happens to be just what we
+            // need.
+            plan_park_move_to_xyz({ { XYZ_NOZZLE_CLEANINIG_FAILED_POINT } }, NOZZLE_PARK_XY_FEEDRATE, NOZZLE_PARK_Z_FEEDRATE, Segmented::yes);
+
+            using namespace nozzle_cleaning_failed_wizard;
+            Result result = run_wizard();
+            if(planner.draining()) return;
+            switch (result) {
+            case Result::abort:
+                return;
+            case Result::ignore:
+                // Continue without retrying
+                break;
+            case Result::retry:
+                // Retry nozzle cleaning without purge
+                continue;
+            default:
+                BUDDY_UNREACHABLE();
+            }
+        }
+    #endif
 
     #if HAS_UNEVEN_BED_PROMPT()
         // If we've done some measuring in this phase and it is too uneven, offer running Z calib
         if (
             ubl.g29_min_max_measured_z.has_value()
-            && ubl.g29_min_max_measured_z->second - ubl.g29_min_max_measured_z->first >= MBL_Z_DIFF_CALIB_WARNING_THRESHOLD
+            && ubl.g29_min_max_measured_z->max - ubl.g29_min_max_measured_z->min >= MBL_Z_DIFF_CALIB_WARNING_THRESHOLD
 
             // Hack for the supplemenary "probe near purge place" - that is done after print area MBL and we don't want to offer Z align after that
             && !parser.seenval('C') //
         ) {
-            log_warning(Marlin, "Uneven bet detected: %f - %f", (double) ubl.g29_min_max_measured_z->first, (double)ubl.g29_min_max_measured_z->second);
+            log_warning(Marlin, "Uneven bed detected: %f - %f", (double)ubl.g29_min_max_measured_z->min, (double)ubl.g29_min_max_measured_z->max);
 
             if (marlin_server::prompt_warning(WarningType::BedUnevenAlignmentPrompt) == Response::Yes) {
                 // calib_Z does not have its own holder - we have to handle that
                 marlin_server::FSM_Holder _fsm(PhasesSelftest::CalibZ);
                 selftest::calib_Z(true);
-                assert(!TEST(axis_homed, Z_AXIS));
+                assert(!axes_home_level.is_homed(Z_AXIS, AxisHomeLevel::imprecise));
                 continue;
             }
         }

@@ -53,6 +53,7 @@ public:
 using MenuBase = ScreenMenu<EFooter::Off,
     MI_RETURN,
     MI_WIFI_STATUS_t,
+    MI_WIFI_SIGNAL_t,
     MI_IP4_ADDR, MI_IP4_GWAY, MI_MAC_ADDR, MI_HOSTNAME, MI_IP4_DNS1,
 #if BUDDY_ENABLE_CONNECT()
     MI_CONNECT_HOST, MI_CONNECT_IP,

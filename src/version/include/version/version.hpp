@@ -25,9 +25,6 @@ extern const char project_version_suffix_short[];
 /// Project's build number (number of commits in a branch)
 extern const int project_build_number;
 
-/// Firmware name
-extern const char project_firmware_name[];
-
 // !!! DO NOT MODIFY, THIS IS USED TO IDENTIFY CRASH DUMPS
 // !!! IF THIS IS TO BE MODIFIED, CHANGE THE MAGIC AND ADD A CASE TO THE crash_dump_info.py SCRIPT
 struct __attribute__((packed)) BuildIdentification {
@@ -62,7 +59,5 @@ extern const BuildIdentification project_build_identification;
  * @brief Prints project_version into buffer without dots (4.0.2 -> 402)
  */
 void fill_project_version_no_dots(char *buffer, size_t buffer_size);
-
-void snake_version(char *version, int length);
 
 } // namespace version

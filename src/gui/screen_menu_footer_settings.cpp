@@ -9,7 +9,7 @@
 
 #include <common/utils/algorithm_extensions.hpp>
 
-static_assert(ftrstd::to_underlying(footer::Item::none) == 0, "Current implementation relies on none being 0");
+static_assert(std::to_underlying(footer::Item::none) == 0, "Current implementation relies on none being 0");
 
 I_MI_FOOTER::I_MI_FOOTER(int item)
     : MenuItemSelectMenu({})
@@ -43,7 +43,7 @@ MI_LEFT_ALIGN_TEMP::MI_LEFT_ALIGN_TEMP()
     : MenuItemSwitch(_("Temp. style"), temp_align_values, size_t(FooterItemHeater::GetDrawType())) {}
 
 void MI_LEFT_ALIGN_TEMP::OnChange(size_t /*old_index*/) {
-    FooterItemHeater::SetDrawType(footer::ItemDrawType(index));
+    FooterItemHeater::SetDrawType(footer::ItemDrawType(get_index()));
 }
 
 MI_SHOW_ZERO_TEMP_TARGET::MI_SHOW_ZERO_TEMP_TARGET()

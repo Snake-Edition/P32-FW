@@ -9,7 +9,7 @@ namespace buddy {
 class DoorSensor {
 public:
     /** Represents state of the door sensor. */
-    enum class State {
+    enum class State : uint8_t {
         sensor_detached,
         door_open,
         door_closed,

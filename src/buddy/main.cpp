@@ -11,11 +11,11 @@
 #include <buddy/fatfs.h>
 #include <buddy/usb_device.hpp>
 #include <buddy/unreachable.hpp>
+#include <common/st25dv64k.h>
 #include "usb_host.h"
 #include "buffered_serial.hpp"
 #include "bsod_gui.hpp"
 #include <config_store/store_instance.hpp>
-#include "sys.h"
 #include <wdt.hpp>
 #include <crash_dump/dump.hpp>
 #include "error_codes.hpp"
@@ -32,7 +32,8 @@
 #include "printers.h"
 #include "MarlinPin.h"
 #include "crc32.h"
-#include "w25x.h"
+#include <common/sys.hpp>
+#include <common/w25x.hpp>
 #include "timing.h"
 #include <buddy/filesystem.h>
 #include "adc.hpp"
@@ -47,6 +48,7 @@
 #include <option/resources.h>
 #include <option/bootloader_update.h>
 #include <option/has_side_leds.h>
+#include <option/has_advanced_power.h>
 #include <option/has_phase_stepping.h>
 #include <option/has_burst_stepping.h>
 #include <option/has_xbuddy_extension.h>
@@ -62,12 +64,13 @@
 #include "sound.hpp"
 #include <buddy/ccm_thread.hpp>
 #include <version/version.hpp>
-#include "str_utils.hpp"
 #include "data_exchange.hpp"
 #include "bootloader/bootloader.hpp"
 #include "gui_bootstrap_screen.hpp"
 #include "resources/revision.hpp"
 #include <buddy/filesystem_semihosting.h>
+#include <freertos/timing.hpp>
+#include <heap.h>
 
 #if BUDDY_ENABLE_CONNECT()
     #include "connect/run.hpp"
@@ -113,6 +116,10 @@
     #include <buddy/mmu_port.hpp>
 #endif
 
+#if HAS_ADVANCED_POWER()
+    #include <advanced_power.hpp>
+#endif
+
 using namespace crash_dump;
 
 LOG_COMPONENT_REF(Buddy);
@@ -142,34 +149,14 @@ void StartESPTask(void const *argument);
 void iwdg_warning_cb(void);
 
 /**
- * @brief Bootstrap finished
- *
  * Report bootstrap finished and firmware version.
  * This needs to be called after resources were successfully updated
- * in xFlash. This also needs to be called even if xFlash / resources
- * are unused. This needs to be output to standard USB CDC destination.
+ * in xFlash. This needs to be output to ESP UART at 115200 bauds.
  * Format of the messages can not be changed as test station
  * expect those as step in manufacturing process.
  * The board needs to be able to report this with no additional
  * dependencies to connected peripherals.
- *
- * It is expected, that the testing station opens printer's serial port at 115200 bauds to obtain these messages.
- * Beware: previous attempts to writing these messages onto USB CDC log destination (baudrate 57600) resulted
- * in cross-linked messages because the logging subsystem intentionally has no prevention (locks/mutexes) against such a situation.
- * Therefore the only reliable output is the "Marlin's" serial output (before Marlin is actually started)
- * as nothing else is actually using this serial line (therefore no cross-linked messages can appear at this spot),
- * and Marlin itself is guaranteed to not have been started by order of startup task initialization
  */
-static void manufacture_report() {
-    // The first '\n' is just a precaution - terminate any partially printed message from Marlin if any
-    static const uint8_t intro[] = "\nbootstrap finished\nfirmware version: ";
-
-    static_assert(sizeof(intro) > 1); // prevent accidental buffer underrun below
-    SerialUSB.write(intro, sizeof(intro) - 1); // -1 prevents from writing the terminating \0 onto the serial line
-    SerialUSB.write(reinterpret_cast<const uint8_t *>(version::project_version_full), strlen(version::project_version_full));
-    SerialUSB.write('\n');
-}
-
 static void manufacture_report_endless_loop() {
     // ESP reset (needed for XL, since it has embedded ESP)
     HAL_GPIO_WritePin(ESP_RST_GPIO_Port, ESP_RST_Pin, GPIO_PIN_RESET);
@@ -256,14 +243,19 @@ extern "C" void main_cpp(void) {
     hw_adc1_init();
     adcDma1.init();
 
-#if PRINTER_IS_PRUSA_XL()
-    // Read Sandwich hw revision
-    SandwichConfiguration::Instance();
-#endif
-
 #ifdef HAS_ADC3
     hw_adc3_init();
     adcDma3.init();
+#endif
+    hw_adc_irq_init();
+
+    // After initializing the adc we need to wait some time before the internal MCU temp channel is stable.
+    // Required time is at least 6us. We use 2ms to force pause of at least 1ms
+    freertos::delay(2);
+
+#if PRINTER_IS_PRUSA_XL()
+    // Read Sandwich hw revision
+    SandwichConfiguration::Instance();
 #endif
 
 #if BOARD_IS_BUDDY() || BOARD_IS_XBUDDY()
@@ -281,12 +273,7 @@ extern "C" void main_cpp(void) {
 
     hw_tim14_init();
 
-    SPI_INIT(flash);
-    // initialize SPI flash
-    w25x_spi_assign(&SPI_HANDLE_FOR(flash));
-    if (!w25x_init()) {
-        bsod("failed to initialize ext flash");
-    }
+    w25x_init();
 
     const bool want_error_screen = (dump_is_valid() && !dump_is_displayed()) || (message_is_valid() && message_get_type() != MsgType::EMPTY && !message_is_displayed());
 
@@ -297,6 +284,18 @@ extern "C" void main_cpp(void) {
 
 #if HAS_NFC()
     nfc::turn_off();
+#endif
+
+#if HAS_GUI()
+    SPI_INIT(lcd);
+#endif
+
+#if BOARD_IS_XLBUDDY()
+    hw_init_spi_side_leds();
+#endif
+
+#if PRINTER_IS_PRUSA_iX()
+    SPI_INIT(led);
 #endif
 
 #if PRINTER_IS_PRUSA_MK4() || PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_COREONE()
@@ -363,20 +362,12 @@ extern "C" void main_cpp(void) {
     hw_tim3_init();
 #endif
 
-#if HAS_GUI()
-    SPI_INIT(lcd);
-#endif
-
 #if BOARD_IS_XBUDDY() || BOARD_IS_XLBUDDY()
     I2C_INIT(usbc);
 #endif
 
 #if HAS_TOUCH()
     I2C_INIT(touch);
-#endif
-
-#if PRINTER_IS_PRUSA_iX()
-    SPI_INIT(led);
 #endif
 
 #if (BOARD_IS_XBUDDY())
@@ -400,11 +391,7 @@ extern "C" void main_cpp(void) {
 #endif
 
 #if HAS_GUI() && !(BOARD_IS_XLBUDDY())
-    hw_tim2_init(); // TIM2 is used to generate buzzer PWM, except on XL. Not needed without display.
-#endif
-
-#if BOARD_IS_XLBUDDY()
-    hw_init_spi_side_leds();
+    hw_tim2_init(); // TIM2 is used to generate buzzer PWM, except on older versions of XL. Not needed without display.
 #endif
 
 #if HAS_PUPPIES()
@@ -424,6 +411,10 @@ extern "C" void main_cpp(void) {
     if (!running_in_tester_mode()) {
         start_flash_esp_task();
     }
+
+#if HAS_ADVANCED_POWER()
+    advancedpower.ResetOvercurrentFault();
+#endif
 
     MX_USB_HOST_Init();
 
@@ -462,8 +453,7 @@ extern "C" void main_cpp(void) {
     if (bootloader_update()) {
         // Wait a while, before restart (this prevents some older board without appendix to enter internal bootloader on reset)
         osDelay(300);
-        __disable_irq();
-        HAL_NVIC_SystemReset();
+        sys_reset();
     }
 #endif
 
@@ -477,8 +467,6 @@ extern "C" void main_cpp(void) {
     metric_system_init();
     if (running_in_tester_mode()) {
         manufacture_report_endless_loop();
-    } else {
-        manufacture_report(); // TODO erase this after all printers use manufacture_report_endless_loop (== ESP UART)
     }
 
 #if HAS_TMC_UART()
@@ -506,7 +494,7 @@ extern "C" void main_cpp(void) {
     buddy::hw::io_expander2.initialize();
 #endif
 
-    osThreadCCMDef(defaultTask, StartDefaultTask, TASK_PRIORITY_DEFAULT_TASK, 0, 1152);
+    osThreadCCMDef(defaultTask, StartDefaultTask, TASK_PRIORITY_DEFAULT_TASK, 0, 1200);
     defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
 #if ENABLED(POWER_PANIC)
@@ -586,6 +574,12 @@ void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
 
     if (hspi == &SPI_HANDLE_FOR(flash)) {
         w25x_spi_receive_complete_callback();
+    }
+}
+
+void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi) {
+    if (hspi == &SPI_HANDLE_FOR(flash)) {
+        w25x_spi_error_callback();
     }
 }
 
@@ -669,15 +663,16 @@ void iwdg_warning_cb(void) {
     trigger_crash_dump();
 }
 
+extern "C" void idle_callback() {
+    check_isr_stack_overflow();
+}
+
 void init_error_screen() {
 #if HAS_TOUCH
     touchscreen.disable_till_reset();
 #endif
 
     if constexpr (option::has_gui) {
-        // init lcd spi and timer for buzzer
-        SPI_INIT(lcd);
-
 #if !(_DEBUG)
     #if HAS_GUI() && !(BOARD_IS_XLBUDDY())
         hw_tim2_init(); // TIM2 is used to generate buzzer PWM, except on XL. Not needed without display.
@@ -707,18 +702,6 @@ static void enable_segger_sysview() {
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
     SEGGER_SYSVIEW_Conf();
-}
-
-static void enable_dfu_entry() {
-#ifdef BUDDY_ENABLE_DFU_ENTRY
-    // check whether user requested to enter the DFU mode
-    // this has to be checked after having
-    //  1) initialized access to the backup domain
-    //  2) having initialized related clocks (SystemClock_Config)
-    if (sys_dfu_requested()) {
-        sys_dfu_boot_enter();
-    }
-#endif
 }
 
 static void eeprom_init_i2c() {
@@ -790,10 +773,10 @@ int main() {
     tick_timer_init();
 
     // other MCU setup
+    setup_isr_stack_overflow_trap();
     enable_trap_on_division_by_zero();
     enable_backup_domain();
     enable_segger_sysview();
-    enable_dfu_entry();
 
     // init the RAM area that serves for exchanging data with bootloader in
     // case this is a noboot build

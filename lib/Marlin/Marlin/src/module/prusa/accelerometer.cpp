@@ -1,6 +1,6 @@
 #include "accelerometer.h"
 
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 
 const char *PrusaAccelerometer::error_str() const {
     static constexpr EnumArray<Error, const char *, Error::_cnt> error_strs {

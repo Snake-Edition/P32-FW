@@ -4,7 +4,6 @@
 #include "marlin_server.hpp"
 #include "gui.hpp"
 #include "time_helper.hpp"
-#include "sys.h"
 #include "window_dlg_wait.hpp"
 #include "window_file_list.hpp"
 #include "sound.hpp"
@@ -24,8 +23,8 @@
 #include "time_tools.hpp"
 #include "footer_eeprom.hpp"
 #include <version/version.hpp>
-#include "sys.h"
-#include "w25x.h"
+#include <common/sys.hpp>
+#include <common/w25x.hpp>
 #include <bootloader/bootloader.hpp>
 #include "config_features.h"
 #include <config_store/store_instance.hpp>
@@ -38,12 +37,11 @@
 #include <option/has_side_leds.h>
 #include <option/has_coldpull.h>
 #include <RAII.hpp>
-#include <st25dv64k.h>
 #include <time.h>
 #include <footer_items_heaters.hpp>
 #include <footer_line.hpp>
 #include <freertos/critical_section.hpp>
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 #include <netdev.h>
 #include <wui.h>
 #include <power_panic.hpp>
@@ -52,8 +50,6 @@
 
 #include <type_traits>
 
-#include "../../../lib/Marlin/Marlin/src/feature/pause.h"
-
 #if ENABLED(PRUSA_TOOLCHANGER)
     #include "../../../lib/Marlin/Marlin/src/module/prusa/toolchanger.h"
     #include "screen_menu_tools.hpp"
@@ -61,11 +57,11 @@
 #endif
 
 #if HAS_LEDS()
-    #include <led_animations/animator.hpp>
+    #include <leds/status_leds_handler.hpp>
 #endif
 
 #if HAS_SIDE_LEDS()
-    #include <leds/side_strip_control.hpp>
+    #include <leds/side_strip_handler.hpp>
 #endif
 
 #if BUDDY_ENABLE_CONNECT()
@@ -75,6 +71,10 @@
 #include <option/has_xbuddy_extension.h>
 #if HAS_XBUDDY_EXTENSION()
     #include <puppies/xbuddy_extension.hpp>
+#endif
+
+#ifdef HAS_TMC_WAVETABLE
+    #include <feature/tmc_util.h>
 #endif
 
 namespace {
@@ -124,24 +124,23 @@ MI_FILAMENT_SENSOR::MI_FILAMENT_SENSOR()
 }
 
 void MI_FILAMENT_SENSOR::update() {
-    SetIndex(config_store().fsensor_enabled.get());
+    set_value(config_store().fsensor_enabled.get());
 }
 
 void MI_FILAMENT_SENSOR::OnChange(size_t old_index) {
     // Enabling/disabling FS can generate gcodes (I'm looking at you, MMU!).
     // Fail the action if there's no space in the queue.
     if (!gui_check_space_in_gcode_queue_with_msg()) {
-        // SetIndex doesn't call OnChange
-        SetIndex(old_index);
+        set_value(old_index > 0);
         return;
     }
 
     auto &fss = FSensors_instance();
-    fss.set_enabled_global(index);
+    fss.set_enabled_global(value());
 
-    if (index && !fss.gui_wait_for_init_with_msg()) {
+    if (value() && !fss.gui_wait_for_init_with_msg()) {
         FSensors_instance().set_enabled_global(false);
-        SetIndex(old_index);
+        set_value(old_index > 0);
     }
 
     // Signal to the parent to check for changed
@@ -157,7 +156,7 @@ bool MI_STUCK_FILAMENT_DETECTION::init_index() const {
 
 void MI_STUCK_FILAMENT_DETECTION::OnChange(size_t old_index) {
     if (!gui_try_gcode_with_msg(value() ? "M591 S1 P" : "M591 S0 P")) {
-        set_value(old_index, false);
+        set_value(old_index > 0);
     }
 }
 
@@ -169,7 +168,7 @@ MI_STEALTH_MODE::MI_STEALTH_MODE()
 
 void MI_STEALTH_MODE::OnChange(size_t old_index) {
     if (!gui_try_gcode_with_msg(value() ? "M9150" : "M9140")) {
-        set_value(old_index, false);
+        set_value(old_index > 0);
     }
 }
 
@@ -202,7 +201,18 @@ void MI_AUTO_HOME::click(IWindowMenu & /*window_menu*/) {
         return;
     }
 
-    marlin_client::gcode("G28 P");
+    // Note: This check is _in theory_ a bit racy - we could switch between
+    // printing / not printing between the check and the execution. However,
+    // this is highly unlikely and also somewhat harmless:
+    // * In one direction, we do precise homing even when imprecise would suffice.
+    // * In another direction, we add an imprecise homing _to the start_ of the
+    //   print, which is before the print itself does its own homing.
+    if (marlin_client::is_printing()) {
+        marlin_client::gcode("G28 P");
+    } else {
+        // Outside of a print, we are fine homing imprecisely.
+        marlin_client::gcode("G28 P I");
+    }
 }
 
 /*****************************************************************************/
@@ -237,126 +247,6 @@ void MI_DISABLE_STEP::click(IWindowMenu & /*window_menu*/) {
 }
 
 /*****************************************************************************/
-
-namespace {
-void st25dv64k_chip_erase() {
-    static constexpr uint32_t empty = 0xffffffff;
-    for (uint16_t address = 0; address <= (8096 - 4); address += 4) {
-        st25dv64k_user_write_bytes(address, &empty, sizeof(empty));
-    }
-}
-
-void msg_and_sys_reset() {
-    MsgBoxInfo(_("Reset complete. The system will now restart."), Responses_Ok);
-    sys_reset();
-}
-
-void do_factory_reset(bool wipe_fw) {
-    auto msg = MsgBoxBase(GuiDefaults::DialogFrameRect, Responses_NONE, 0, nullptr, wipe_fw ? _("Erasing everything,\nit will take some time...") : _("Erasing configuration,\nit will take some time..."));
-    msg.Draw(); // Non-blocking info
-    st25dv64k_chip_erase();
-    if (wipe_fw) {
-        w25x_chip_erase();
-#if BOOTLOADER()
-        // Invalidate firmware by erasing part of it
-        if (!buddy::bootloader::fw_invalidate()) {
-            bsod("Error invalidating firmware");
-        }
-        // Never gets here
-#endif /*BOOTLOADER()*/
-    }
-    msg_and_sys_reset();
-}
-
-#if PRINTER_IS_PRUSA_MK4()
-void do_shipping_prep() {
-    auto msg = MsgBoxBase(GuiDefaults::DialogFrameRect, Responses_NONE, 0, nullptr, // a dummy comment to break line by force
-        _("Shipping preparation\n\nErasing configuration\n(but keeping Nextruder type)\nit will take some time..."));
-    msg.Draw(); // Non-blocking info
-
-    const auto is_mmu_rework = config_store().is_mmu_rework.get();
-    const auto nozzle_is_high_flow = config_store().nozzle_is_high_flow.get();
-    const auto ext_printer_type = config_store().extended_printer_type.get();
-
-    // at this spot, we hope, that no other thread is actually writing into the EEPROM. They can read, even though it doesn't probably happen
-    // we cannot disable task switching here because osDelays stop working ... which is required for erasing the EEPROM
-    st25dv64k_chip_erase();
-    {
-        // disable task switching now while reloading the EEPROM structures
-        freertos::CriticalSection critical_section;
-
-        // Build the structures again - this is the tricky part.
-        // What an awful way of force-reinitializing the RAM data structures of config_store
-        // - unfortunately it gobbled up 3KB of code space. It would be nice to find a more subtle impl.
-        using Store = std::remove_cvref_t<decltype(config_store())>;
-        config_store().~Store();
-        new (&config_store()) Store();
-
-        init_config_store();
-        config_store().perform_config_check();
-    }
-
-    // write back the flags we want to keep
-    config_store().is_mmu_rework.set(is_mmu_rework);
-    config_store().extended_printer_type.set(ext_printer_type);
-    config_store().nozzle_is_high_flow.set(nozzle_is_high_flow);
-
-    msg_and_sys_reset();
-}
-#endif
-
-} // anonymous namespace
-
-MI_FACTORY_SOFT_RESET::MI_FACTORY_SOFT_RESET()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
-}
-
-void MI_FACTORY_SOFT_RESET::click(IWindowMenu & /*window_menu*/) {
-    if (MsgBoxWarning(_("This operation cannot be undone. Current user configuration and passwords will be lost!\nDo you want to reset the printer to factory defaults?"), Responses_YesNo, 1) == Response::Yes) {
-        do_factory_reset(false);
-    }
-}
-
-MI_FACTORY_HARD_RESET::MI_FACTORY_HARD_RESET()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
-}
-
-void MI_FACTORY_HARD_RESET::click(IWindowMenu & /*window_menu*/) {
-    static constexpr const char *fmt2Translate = N_("This operation cannot be undone. Current configuration will be lost!\nYou will need a USB drive with this firmware (%s_firmware_%s.bbf file) to start the printer again.\nDo you really want to continue?");
-
-    StringViewUtf8Parameters<20> params;
-    const string_view_utf8 str = _(fmt2Translate).formatted(params, PrinterModelInfo::current().id_str, version::project_version);
-
-    if (MsgBoxWarning(str, Responses_YesNo, 1) == Response::Yes) {
-        do_factory_reset(true);
-    }
-}
-
-#if PRINTER_IS_PRUSA_MK4()
-MI_FACTORY_SHIPPING_PREP::MI_FACTORY_SHIPPING_PREP()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
-}
-
-void MI_FACTORY_SHIPPING_PREP::click(IWindowMenu & /*window_menu*/) {
-    if (MsgBoxWarning(_("This operation cannot be undone. Current configuration will be lost!\nDo you want to perform the Factory Shipping Preparation procedure?"), Responses_YesNo, 1) == Response::Yes) {
-        do_shipping_prep();
-    }
-}
-#endif
-
-/*****************************************************************************/
-// MI_ENTER_DFU
-#ifdef BUDDY_ENABLE_DFU_ENTRY
-MI_ENTER_DFU::MI_ENTER_DFU()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev) {
-}
-
-void MI_ENTER_DFU::click(IWindowMenu &) {
-    sys_dfu_request_and_reset();
-}
-#endif
-
-/*****************************************************************************/
 // MI_SAVE_DUMP
 MI_SAVE_DUMP::MI_SAVE_DUMP()
     : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
@@ -381,45 +271,6 @@ MI_XFLASH_RESET::MI_XFLASH_RESET()
 
 void MI_XFLASH_RESET::click(IWindowMenu & /*window_menu*/) {
     crash_dump::dump_reset();
-}
-
-/*****************************************************************************/
-// MI_EE_SAVEXML
-MI_EE_SAVEXML::MI_EE_SAVEXML()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
-}
-
-void MI_EE_SAVEXML::click(IWindowMenu & /*window_menu*/) {
-    // eeprom_save_xml_to_usb("/usb/eeprom.xml"); // TODO(ConfigStore): Not yet migrated
-}
-
-/*****************************************************************************/
-// MI_EE_CLEAR
-MI_EE_CLEAR::MI_EE_CLEAR()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev) {
-}
-
-void MI_EE_CLEAR::click(IWindowMenu & /*window_menu*/) {
-    static constexpr uint32_t empty = 0xffffffff;
-    for (uint16_t address = 0; address <= (8096 - 4); address += 4) {
-        st25dv64k_user_write_bytes(address, &empty, sizeof(empty));
-    }
-}
-
-/*****************************************************************************/
-// MI_M600
-MI_M600::MI_M600()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
-}
-void MI_M600::click(IWindowMenu & /*window_menu*/) {
-    if (MsgBoxQuestion(_("Perform filament change now?"), Responses_YesNo) != Response::Yes) {
-        return;
-    }
-
-    if (!enqueued) {
-        marlin_client::inject("M600");
-        enqueued = true;
-    }
 }
 
 /*****************************************************************************/
@@ -476,7 +327,7 @@ MI_SOUND_MODE::MI_SOUND_MODE()
 }
 
 void MI_SOUND_MODE::OnChange(size_t /*old_index*/) {
-    Sound_SetMode(static_cast<eSOUND_MODE>(index));
+    Sound_SetMode(static_cast<eSOUND_MODE>(get_index()));
 }
 
 /*****************************************************************************/
@@ -542,7 +393,7 @@ MI_TIMEZONE_MIN::MI_TIMEZONE_MIN()
 }
 
 void MI_TIMEZONE_MIN::OnChange([[maybe_unused]] size_t old_index) {
-    config_store().timezone_minutes.set(static_cast<time_tools::TimezoneOffsetMinutes>(index));
+    config_store().timezone_minutes.set(static_cast<time_tools::TimezoneOffsetMinutes>(get_index()));
 }
 
 /*****************************************************************************/
@@ -551,7 +402,7 @@ MI_TIMEZONE_SUMMER::MI_TIMEZONE_SUMMER()
     : WI_ICON_SWITCH_OFF_ON_t(static_cast<uint8_t>(config_store().timezone_summer.get()), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
 
 void MI_TIMEZONE_SUMMER::OnChange([[maybe_unused]] size_t old_index) {
-    config_store().timezone_summer.set(static_cast<time_tools::TimezoneOffsetSummerTime>(index));
+    config_store().timezone_summer.set(static_cast<time_tools::TimezoneOffsetSummerTime>(value()));
 }
 
 /*****************************************************************************/
@@ -568,7 +419,7 @@ MI_TIME_FORMAT::MI_TIME_FORMAT()
 }
 
 void MI_TIME_FORMAT::OnChange([[maybe_unused]] size_t old_index) {
-    config_store().time_format.set(static_cast<time_tools::TimeFormat>(index));
+    config_store().time_format.set(static_cast<time_tools::TimeFormat>(get_index()));
 }
 
 /*****************************************************************************/
@@ -578,319 +429,6 @@ MI_TIME_NOW::MI_TIME_NOW()
 {
     ChangeInformation(time_tools::get_time());
 }
-
-#if PRINTER_IS_PRUSA_MINI()
-/* -===============================================(:>- */
-static const NumericInputConfig bright_spin_config = {
-    .min_value = 30,
-    .max_value = 150,
-};
-
-MI_BRIGHTNESS::MI_BRIGHTNESS()
-    : WiSpin(config_store().brightness.get(), bright_spin_config, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
-void MI_BRIGHTNESS::OnClick() {
-    config_store().brightness.set(GetVal());
-}
-
-static const NumericInputConfig display_reinit_timeout_spin_config = {
-    .min_value = 0,
-    .max_value = 256,
-    .special_value = 0, //< turn timeout off
-    .unit = Unit::second,
-};
-
-MI_DISPLAY_REINIT_TIMEOUT::MI_DISPLAY_REINIT_TIMEOUT()
-    : WiSpin(config_store().display_reinit_timeout.get(), display_reinit_timeout_spin_config, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
-
-void MI_DISPLAY_REINIT_TIMEOUT::OnClick() {
-    config_store().display_reinit_timeout.set(GetVal());
-}
-
-/* -===============================================(:>- */
-#endif
-
-/*****************************************************************************/
-static const NumericInputConfig skew_spin_config = {
-    .min_value = -1,
-    .max_value = 1,
-    .max_decimal_places = 4,
-};
-
-MI_SKEW_XY::MI_SKEW_XY()
-    : WiSpin(planner.skew_factor.xy, skew_spin_config, _(label), 0, is_enabled_t::no) {}
-
-/*****************************************************************************/
-MI_SKEW_XZ::MI_SKEW_XZ()
-    : WiSpin(planner.skew_factor.xz, skew_spin_config, _(label), 0, is_enabled_t::no) {}
-
-/*****************************************************************************/
-MI_SKEW_YZ::MI_SKEW_YZ()
-    : WiSpin(planner.skew_factor.yz, skew_spin_config, _(label), 0, is_enabled_t::no) {}
-
-#if PRINTER_IS_PRUSA_MINI()
-/* -===============================================(:>- */
-static constexpr NumericInputConfig xy_axis_len_spin_config {
-    .min_value = 180,
-    .max_value = 999,
-    .unit = Unit::millimeter,
-};
-
-uint16_t X_BED_SIZE = 180;
-uint16_t Y_BED_SIZE = 180;
-
-// MI_X_BED_SIZE
-MI_X_AXIS_LEN::MI_X_AXIS_LEN()
-    : WiSpin(X_BED_SIZE, xy_axis_len_spin_config, _(label)) {}
-
-void MI_X_AXIS_LEN::OnClick() {
-    X_BED_SIZE = GetVal();
-    set_x_length_mm(X_BED_SIZE);
-}
-
-/* -===============================================(:>- */
-// MI_Y_BED_SIZE
-MI_Y_AXIS_LEN::MI_Y_AXIS_LEN()
-    : WiSpin(Y_BED_SIZE, xy_axis_len_spin_config, _(label)) {}
-
-void MI_Y_AXIS_LEN::OnClick() {
-    Y_BED_SIZE = GetVal();
-    set_y_length_mm(Y_BED_SIZE);
-}
-
-/* -===============================================(:>- */
-static constexpr NumericInputConfig e_load_len_spin_config {
-    .min_value = FILAMENT_CHANGE_SLOW_LOAD_LENGTH,
-    .max_value = 999,
-    .unit = Unit::millimeter,
-};
-
-uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH = 320;
-
-// MI_E_LOAD_LENGTH
-MI_E_LOAD_LENGTH::MI_E_LOAD_LENGTH()
-    : WiSpin(FILAMENT_CHANGE_FAST_LOAD_LENGTH + FILAMENT_CHANGE_SLOW_LOAD_LENGTH, e_load_len_spin_config, _(label)) {}
-
-void MI_E_LOAD_LENGTH::OnClick() {
-    FILAMENT_CHANGE_FAST_LOAD_LENGTH = GetVal() - FILAMENT_CHANGE_SLOW_LOAD_LENGTH;
-    set_e_length_mm(FILAMENT_CHANGE_FAST_LOAD_LENGTH);
-    #if ENABLED(ADVANCED_PAUSE_FEATURE)
-    for (uint8_t e = 0; e < EXTRUDERS; e++) {
-        fc_settings[e].load_length = FILAMENT_CHANGE_FAST_LOAD_LENGTH;
-    }
-    #endif
-}
-#endif
-
-/* -===============================================(:>- */
-static constexpr NumericInputConfig xy_home_sens_spin_config {
-    .min_value = -999,
-    .max_value = 999,
-};
-
-MI_X_SENSITIVITY::MI_X_SENSITIVITY()
-    : WiSpin(config_store().homing_sens_x.get(), xy_home_sens_spin_config, _(label)) {}
-
-void MI_X_SENSITIVITY::OnClick() {
-    config_store().homing_sens_x.set(GetVal());
-    marlin_server::enqueue_gcode_printf("M914 X%i", int(GetVal()));
-}
-
-MI_Y_SENSITIVITY::MI_Y_SENSITIVITY()
-    : WiSpin(config_store().homing_sens_y.get(), xy_home_sens_spin_config, _(label)) {}
-
-void MI_Y_SENSITIVITY::OnClick() {
-    config_store().homing_sens_y.set(GetVal());
-    marlin_server::enqueue_gcode_printf("M914 Y%i", int(GetVal()));
-}
-
-MI_X_SENSITIVITY_RESET::MI_X_SENSITIVITY_RESET()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
-}
-
-void MI_X_SENSITIVITY_RESET::click(IWindowMenu & /*window_menu*/) {
-    config_store().homing_sens_x.set(config_store().homing_sens_x.default_val);
-    marlin_server::enqueue_gcode_printf("M914 X%i", config_store().homing_sens_x.default_val);
-}
-
-MI_Y_SENSITIVITY_RESET::MI_Y_SENSITIVITY_RESET()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
-}
-
-void MI_Y_SENSITIVITY_RESET::click(IWindowMenu & /*window_menu*/) {
-    config_store().homing_sens_y.set(config_store().homing_sens_y.default_val);
-    marlin_server::enqueue_gcode_printf("M914 Y%i", config_store().homing_sens_y.default_val);
-}
-
-/* -===============================================(:>- */
-
-MI_X_STEALTH::MI_X_STEALTH()
-    : WI_ICON_SWITCH_OFF_ON_t(config_store().stealth_chop_x.get() ? 0 : 1, _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
-
-void MI_X_STEALTH::OnChange(size_t /*old_index*/) {
-    config_store().stealth_chop_x.set(!index);
-    marlin_server::enqueue_gcode_printf("M569 X%s", config_store().stealth_chop_x.get() ? "S1" : "S0");
-}
-
-MI_Y_STEALTH::MI_Y_STEALTH()
-    : WI_ICON_SWITCH_OFF_ON_t(config_store().stealth_chop_y.get() ? 0 : 1, _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
-
-void MI_Y_STEALTH::OnChange(size_t /*old_index*/) {
-    config_store().stealth_chop_y.set(!index);
-    marlin_server::enqueue_gcode_printf("M569 Y%s", config_store().stealth_chop_y.get() ? "S1" : "S0");
-}
-
-MI_Z_STEALTH::MI_Z_STEALTH()
-    : WI_ICON_SWITCH_OFF_ON_t(config_store().stealth_chop_z.get() ? 0 : 1, _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
-
-void MI_Z_STEALTH::OnChange(size_t /*old_index*/) {
-    config_store().stealth_chop_z.set(!index);
-    marlin_server::enqueue_gcode_printf("M569 Z%s", config_store().stealth_chop_z.get() ? "S1" : "S0");
-}
-
-MI_E_STEALTH::MI_E_STEALTH()
-    : WI_ICON_SWITCH_OFF_ON_t(config_store().stealth_chop_e.get() ? 0 : 1, _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
-
-void MI_E_STEALTH::OnChange(size_t /*old_index*/) {
-    config_store().stealth_chop_e.set(!index);
-    marlin_server::enqueue_gcode_printf("M569 E%s", config_store().stealth_chop_e.get() ? "S1" : "S0");
-}
-/* -===============================================(:>- */
-
-static constexpr NumericInputConfig max_feedrate_spin_config = {
-    .min_value = 1,
-    .max_value = 999,
-};
-
-MI_X_MAX_FEEDRATE::MI_X_MAX_FEEDRATE()
-    : WiSpin(config_store().x_max_feedrate.get(), max_feedrate_spin_config, _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
-
-void MI_X_MAX_FEEDRATE::OnClick() {
-    config_store().x_max_feedrate.set(GetVal());
-    marlin_server::enqueue_gcode_printf("M203 X%d", int(GetVal()));
-}
-
-MI_Y_MAX_FEEDRATE::MI_Y_MAX_FEEDRATE()
-    : WiSpin(config_store().y_max_feedrate.get(), max_feedrate_spin_config, _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
-
-void MI_Y_MAX_FEEDRATE::OnClick() {
-    config_store().y_max_feedrate.set(GetVal());
-    marlin_server::enqueue_gcode_printf("M203 Y%d", int(GetVal()));
-}
-
-/* -===============================================(:>- */
-
-MI_X_HOME::MI_X_HOME()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
-}
-
-void MI_X_HOME::click(IWindowMenu & /*window_menu*/) {
-    if (marlin_vars().gqueue != 0) {
-        MsgBoxWarning(_(printer_busy_text), Responses_Ok);
-        return;
-    }
-
-    marlin_server::enqueue_gcode_printf("G28 X");
-}
-
-MI_Y_HOME::MI_Y_HOME()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
-}
-
-void MI_Y_HOME::click(IWindowMenu & /*window_menu*/) {
-    if (marlin_vars().gqueue != 0) {
-        MsgBoxWarning(_(printer_busy_text), Responses_Ok);
-        return;
-    }
-
-    marlin_server::enqueue_gcode_printf("G28 Y");
-}
-
-/* -===============================================(:>- */
-static constexpr NumericInputConfig pid_param_spin_config {
-    .min_value = -999,
-    .max_value = 999,
-    .max_decimal_places = 2,
-};
-
-static uint16_t nozzle_calibration_temp = 250;
-static uint8_t bed_calibration_temp = 80;
-
-MI_NOZZLE_CALIBRATION_TEMP::MI_NOZZLE_CALIBRATION_TEMP()
-    : WiSpin(nozzle_calibration_temp, xy_home_sens_spin_config, _(label)) {};
-
-void MI_NOZZLE_CALIBRATION_TEMP::OnClick() {
-    nozzle_calibration_temp = GetVal();
-}
-
-MI_CALIBRATE_NOZZLE_PID::MI_CALIBRATE_NOZZLE_PID()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
-}
-
-void MI_CALIBRATE_NOZZLE_PID::click(IWindowMenu & /*window_menu*/) {
-    marlin_client::gcode_printf("M303 E0 S%i", nozzle_calibration_temp);
-}
-
-MI_BED_CALIBRATION_TEMP::MI_BED_CALIBRATION_TEMP()
-    : WiSpin(bed_calibration_temp, xy_home_sens_spin_config, _(label)) {};
-
-void MI_BED_CALIBRATION_TEMP::OnClick() {
-    bed_calibration_temp = GetVal();
-}
-
-MI_CALIBRATE_BED_PID::MI_CALIBRATE_BED_PID()
-    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
-}
-
-void MI_CALIBRATE_BED_PID::click(IWindowMenu & /*window_menu*/) {
-    marlin_client::gcode_printf("M303 E-1 S%i", bed_calibration_temp);
-}
-
-// MI_PID_NOZZLE_P
-MI_PID_NOZZLE_P::MI_PID_NOZZLE_P()
-    : WiSpin(config_store().pid_nozzle_p.get(), pid_param_spin_config, _(label), nullptr, is_enabled_t::no) {}
-
-// MI_PID_NOZZLE_I
-MI_PID_NOZZLE_I::MI_PID_NOZZLE_I()
-    : WiSpin(config_store().pid_nozzle_i.get(), pid_param_spin_config, _(label), nullptr, is_enabled_t::no) {}
-
-// MI_PID_NOZZLE_D
-MI_PID_NOZZLE_D::MI_PID_NOZZLE_D()
-    : WiSpin(config_store().pid_nozzle_d.get(), pid_param_spin_config, _(label), nullptr, is_enabled_t::no) {}
-
-// MI_PID_BED_P
-MI_PID_BED_P::MI_PID_BED_P()
-    : WiSpin(config_store().pid_bed_p.get(), pid_param_spin_config, _(label), nullptr, is_enabled_t::no) {}
-
-// MI_PID_BED_I
-MI_PID_BED_I::MI_PID_BED_I()
-    : WiSpin(config_store().pid_bed_i.get(), pid_param_spin_config, _(label), nullptr, is_enabled_t::no) {}
-
-// MI_PID_BED_D
-MI_PID_BED_D::MI_PID_BED_D()
-    : WiSpin(config_store().pid_bed_d.get(), pid_param_spin_config, _(label), nullptr, is_enabled_t::no) {}
-
-/* -===============================================(:>- */
-
-uint8_t cold_mode = false;
-MI_COLD_MODE::MI_COLD_MODE()
-    : WI_ICON_SWITCH_OFF_ON_t(cold_mode, _(label), 0, is_enabled_t::yes, is_hidden_t::no) {}
-
-void MI_COLD_MODE::OnChange(size_t /*old_index*/) {
-    cold_mode = index;
-    if (cold_mode) {
-        char code[15];
-        snprintf(code, 15, "M104 T0 S%d", cold_mode_temp);
-        if (Temperature::temp_hotend[0].celsius < cold_mode_temp) {
-            marlin_server::enqueue_gcode(code);
-        }
-        snprintf(code, 15, "M140 S%d", cold_mode_temp);
-        if (Temperature::temp_bed.celsius < cold_mode_temp) {
-            marlin_server::enqueue_gcode(code);
-        }
-    }
-}
-
-/* -===============================================(:>- */
 
 /*****************************************************************************/
 // MI_FAN_CHECK
@@ -904,13 +442,6 @@ void MI_FAN_CHECK::OnChange(size_t old_index) {
 
 MI_INFO_FW::MI_INFO_FW()
     : WI_INFO_t(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
-}
-
-void MI_INFO_FW::click([[maybe_unused]] IWindowMenu &window_menu) {
-    // If we have development tools shown, click will print whole fw version string in info messagebox
-    if constexpr (GuiDefaults::ShowDevelopmentTools) {
-        MsgBoxInfo(string_view_utf8::MakeRAM((const uint8_t *)version::project_version_full), Responses_Ok);
-    }
 }
 
 MI_INFO_BOOTLOADER::MI_INFO_BOOTLOADER()
@@ -948,11 +479,10 @@ static is_hidden_t get_autoload_hide_state() {
 }
 
 MI_FS_AUTOLOAD::MI_FS_AUTOLOAD()
-    : WI_ICON_SWITCH_OFF_ON_t(bool(marlin_vars().fs_autoload_enabled), _(label), nullptr, is_enabled_t::yes, get_autoload_hide_state()) {}
+    : WI_ICON_SWITCH_OFF_ON_t(config_store().fs_autoload_enabled.get(), _(label), nullptr, is_enabled_t::yes, get_autoload_hide_state()) {}
 
-void MI_FS_AUTOLOAD::OnChange(size_t old_index) {
-    marlin_client::set_fs_autoload(!old_index);
-    config_store().fs_autoload_enabled.set(static_cast<bool>(marlin_vars().fs_autoload_enabled));
+void MI_FS_AUTOLOAD::OnChange(size_t) {
+    config_store().fs_autoload_enabled.set(value());
 }
 
 /*****************************************************************************/
@@ -1037,7 +567,7 @@ MI_INFO_PRINT_FAN::MI_INFO_PRINT_FAN()
 MI_INFO_HBR_FAN::MI_INFO_HBR_FAN()
     : WI_FAN_LABEL_t(PRINTER_IS_PRUSA_MK3_5() ? _("Hotend Fan") : _("Heatbreak Fan"),
         [](auto) { return FanPWMAndRPM {
-                       .pwm = static_cast<uint8_t>(sensor_data().hbrFan),
+                       .pwm = static_cast<uint8_t>(sensor_data().hbrFan.load()),
                        .rpm = marlin_vars().active_hotend().heatbreak_fan_rpm,
                    }; } //
     ) {}
@@ -1078,50 +608,50 @@ MI_ODOMETER_TIME::MI_ODOMETER_TIME()
 #if BOARD_IS_XBUDDY()
 MI_INFO_HEATER_VOLTAGE::MI_INFO_HEATER_VOLTAGE()
     : MenuItemAutoUpdatingLabel(_("Heater Voltage"), "%.1f V",
-        [](auto) { return sensor_data().heaterVoltage; } //
+        [](auto) { return sensor_data().heaterVoltage.load(); } //
     ) {}
 
 MI_INFO_HEATER_CURRENT::MI_INFO_HEATER_CURRENT()
     : MenuItemAutoUpdatingLabel(_("Heater Current"), "%.1f A",
-        [](auto) { return sensor_data().heaterCurrent; } //
+        [](auto) { return sensor_data().heaterCurrent.load(); } //
     ) {}
 
 MI_INFO_INPUT_CURRENT::MI_INFO_INPUT_CURRENT()
     : MenuItemAutoUpdatingLabel(_("Input Current"), "%.1f A",
-        [](auto) { return sensor_data().inputCurrent; } //
+        [](auto) { return sensor_data().inputCurrent.load(); } //
     ) {}
 
 MI_INFO_MMU_CURRENT::MI_INFO_MMU_CURRENT()
     : MenuItemAutoUpdatingLabel(_("MMU Current"), "%.1f A",
-        [](auto) { return sensor_data().mmuCurrent; } //
+        [](auto) { return sensor_data().mmuCurrent.load(); } //
     ) {}
 #endif
 
 #if BOARD_IS_XLBUDDY()
 MI_INFO_5V_VOLTAGE::MI_INFO_5V_VOLTAGE()
     : MenuItemAutoUpdatingLabel(_("5V Voltage"), "%.1f V",
-        [](auto) { return sensor_data().sandwich5VVoltage; } //
+        [](auto) { return sensor_data().sandwich5VVoltage.load(); } //
     ) {}
 
 MI_INFO_SANDWICH_5V_CURRENT::MI_INFO_SANDWICH_5V_CURRENT()
     : MenuItemAutoUpdatingLabel(_("Sandwich 5V Current"), "%.2f A",
-        [](auto) { return sensor_data().sandwich5VCurrent; } //
+        [](auto) { return sensor_data().sandwich5VCurrent.load(); } //
     ) {}
 
 MI_INFO_BUDDY_5V_CURRENT::MI_INFO_BUDDY_5V_CURRENT()
     : MenuItemAutoUpdatingLabel(_("XL Buddy 5V Current"), "%.2f A",
-        [](auto) { return sensor_data().buddy5VCurrent; } //
+        [](auto) { return sensor_data().buddy5VCurrent.load(); } //
     ) {}
 #endif
 
 MI_INFO_INPUT_VOLTAGE::MI_INFO_INPUT_VOLTAGE()
     : MenuItemAutoUpdatingLabel(_("Input Voltage"), "%.1f V",
-        [](auto) { return sensor_data().inputVoltage; } //
+        [](auto) { return sensor_data().inputVoltage.load(); } //
     ) {}
 
 MI_INFO_BOARD_TEMP::MI_INFO_BOARD_TEMP()
     : MenuItemAutoUpdatingLabel(_("Board Temperature"), standard_print_format::temp_c,
-        [](auto) { return sensor_data().boardTemp; } //
+        [](auto) { return sensor_data().boardTemp.load(); } //
     ) {
 }
 
@@ -1130,7 +660,7 @@ MI_INFO_DOOR_SENSOR::MI_INFO_DOOR_SENSOR()
     : MenuItemAutoUpdatingLabel(
         _("Door Sensor"),
         [this](const std::span<char> &buffer) { print_val(buffer); },
-        [](auto) { return sensor_data().door_sensor_detailed_state; } //
+        [](auto) { return sensor_data().door_sensor_detailed_state.load(); } //
     ) {
 }
 
@@ -1149,7 +679,7 @@ void MI_INFO_DOOR_SENSOR::print_val(const std::span<char> &buffer) const {
 
 MI_INFO_MCU_TEMP::MI_INFO_MCU_TEMP()
     : MenuItemAutoUpdatingLabel(_("MCU Temperature"), standard_print_format::temp_c,
-        [](auto) { return sensor_data().MCUTemp; } //
+        [](auto) { return sensor_data().MCUTemp.load(); } //
     ) {}
 
 MI_FOOTER_RESET::MI_FOOTER_RESET()
@@ -1198,7 +728,7 @@ void MI_SET_READY::click([[maybe_unused]] IWindowMenu &window_menu) {
 MI_PHASE_STEPPING_TOGGLE::MI_PHASE_STEPPING_TOGGLE()
     : WI_ICON_SWITCH_OFF_ON_t(0, _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
     bool phstep_enabled = config_store().get_phase_stepping_enabled();
-    set_value(phstep_enabled, false);
+    set_value(phstep_enabled);
 }
 
 void MI_PHASE_STEPPING_TOGGLE::OnChange([[maybe_unused]] size_t old_index) {
@@ -1206,22 +736,22 @@ void MI_PHASE_STEPPING_TOGGLE::OnChange([[maybe_unused]] size_t old_index) {
         return;
     }
 
-    if (index && (config_store().selftest_result_phase_stepping.get() != TestResult_Passed)) {
+    if (value() && (config_store().selftest_result_phase_stepping.get() != TestResult_Passed)) {
     #if PRINTER_IS_PRUSA_iX() || PRINTER_IS_PRUSA_COREONE()
         if (MsgBoxQuestion(_("Turn on Phase stepping uncalibrated?"), Responses_YesNo) == Response::No) {
             AutoRestore ar(event_in_progress, true);
-            set_value(old_index, false);
+            set_value(old_index);
             return;
         }
     #else
         AutoRestore ar(event_in_progress, true);
         MsgBoxWarning(_("Phase stepping not ready: perform calibration first."), Responses_Ok);
-        set_value(old_index, false);
+        set_value(old_index);
         return;
     #endif
     }
 
-    if (index) {
+    if (value()) {
         marlin_client::gcode("M970 X1 Y1"); // turn phase stepping on
     } else {
         marlin_client::gcode("M970 X0 Y0"); // turn phase stepping off
@@ -1229,11 +759,7 @@ void MI_PHASE_STEPPING_TOGGLE::OnChange([[maybe_unused]] size_t old_index) {
 
     // we need to wait until the action actually takes place so that when returning
     // to the menu (if any) the new state is already reflected
-    gui_dlg_wait([&]() {
-        if (index == config_store().get_phase_stepping_enabled()) {
-            Screens::Access()->Close();
-        }
-    });
+    window_dlg_wait_t::wait_for_gcodes_to_finish();
 }
 #endif
 
@@ -1301,56 +827,73 @@ void MI_LOAD_SETTINGS::click(IWindowMenu & /*window_menu*/) {
     build_message(msg_builder, _("Connect"), connect_client::MarlinPrinter::load_cfg_from_ini());
 #endif
 
-    MsgBoxInfo(string_view_utf8::MakeRAM((const uint8_t *)msg.data()), Responses_Ok);
+    MsgBoxInfo(string_view_utf8::MakeRAM(msg.data()), Responses_Ok);
 }
 
-/**********************************************************************************************/
-// MI_USB_MSC_ENABLE
-MI_USB_MSC_ENABLE::MI_USB_MSC_ENABLE()
-    : WI_ICON_SWITCH_OFF_ON_t(config_store().usb_msc_enabled.get(), _(label), nullptr, is_enabled_t::yes, is_hidden_t::dev) {}
-
-void MI_USB_MSC_ENABLE::OnChange(size_t old_index) {
-    config_store().usb_msc_enabled.set(!old_index);
-}
 #if HAS_LEDS()
 /**********************************************************************************************/
 // MI_LEDS_ENABLE
 MI_LEDS_ENABLE::MI_LEDS_ENABLE()
-    : WI_ICON_SWITCH_OFF_ON_t(Animator_LCD_leds().animator_state(), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
+    : WI_ICON_SWITCH_OFF_ON_t(leds::StatusLedsHandler::instance().get_active(), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
 void MI_LEDS_ENABLE::OnChange(size_t old_index) {
     if (old_index) {
-        Animator_LCD_leds().pause_animator();
+        leds::StatusLedsHandler::instance().set_active(false);
     } else {
-        Animator_LCD_leds().start_animator();
+        leds::StatusLedsHandler::instance().set_active(true);
     }
 }
 #endif
 
 #if HAS_SIDE_LEDS()
 /**********************************************************************************************/
-// MI_SIDE_LEDS_ENABLE
-MI_SIDE_LEDS_ENABLE::MI_SIDE_LEDS_ENABLE()
+// MI_SIDE_LEDS_MAX_BRIGTHNESS
+MI_SIDE_LEDS_MAX_BRIGTHNESS::MI_SIDE_LEDS_MAX_BRIGTHNESS()
     : WiSpin(
-        static_cast<float>(config_store().side_leds_max_brightness.get()) * 100 / 255,
+        static_cast<float>(leds::SideStripHandler::instance().get_max_brightness()) * 100 / 255,
         numeric_input_config::percent_with_off,
         _(label)) {
 }
 
-void MI_SIDE_LEDS_ENABLE::OnClick() {
-    leds::side_strip_control.set_max_brightness(static_cast<uint8_t>(value() * 255 / 100));
+void MI_SIDE_LEDS_MAX_BRIGTHNESS::OnClick() {
+    leds::SideStripHandler::instance().set_max_brightness(static_cast<uint8_t>(value()) * 255 / 100);
 }
 #endif
 
 #if HAS_SIDE_LEDS()
 /**********************************************************************************************/
-// MI_SIDE_LEDS_DIMMING
-MI_SIDE_LEDS_DIMMING::MI_SIDE_LEDS_DIMMING()
-    : WI_ICON_SWITCH_OFF_ON_t(config_store().side_leds_dimming_enabled.get(), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
+// MI_SIDE_LEDS_DIMMED_BRIGTHNESS
+
+MI_SIDE_LEDS_DIMMED_BRIGTHNESS::MI_SIDE_LEDS_DIMMED_BRIGTHNESS()
+    : WiSpin(
+        static_cast<float>(leds::SideStripHandler::instance().get_dimmed_brightness()) * 100 / 255,
+        numeric_input_config::percent_with_off,
+        _(label)) {
 }
-void MI_SIDE_LEDS_DIMMING::OnChange(size_t) {
-    config_store().side_leds_dimming_enabled.set(index);
-    leds::side_strip_control.set_dimming_enabled(index);
+
+void MI_SIDE_LEDS_DIMMED_BRIGTHNESS::OnClick() {
+    leds::SideStripHandler::instance().set_dimmed_brightness(static_cast<uint8_t>(value()) * 255 / 100);
+}
+
+void MI_SIDE_LEDS_DIMMED_BRIGTHNESS::Loop() {
+    set_enabled(leds::SideStripHandler::instance().get_dimming_enabled() != leds::DimmingEnabled::never);
+}
+#endif
+
+#if HAS_SIDE_LEDS()
+/**********************************************************************************************/
+// MI_SIDE_LEDS_DIMMING_ENABLE
+static constexpr EnumArray<leds::DimmingEnabled, const char *, leds::DimmingEnabled::_cnt> dimming_enabled_values {
+    { leds::DimmingEnabled::never, N_("Never") },
+    { leds::DimmingEnabled::always, N_("Always") },
+    { leds::DimmingEnabled::not_printing, N_("On Idle") },
+};
+
+MI_SIDE_LEDS_DIMMING_ENABLE::MI_SIDE_LEDS_DIMMING_ENABLE()
+    : MenuItemSwitch(_(label), dimming_enabled_values, std::to_underlying(leds::SideStripHandler::instance().get_dimming_enabled())) {
+}
+void MI_SIDE_LEDS_DIMMING_ENABLE::OnChange([[maybe_unused]] size_t old_index) {
+    leds::SideStripHandler::instance().set_dimming_enabled(static_cast<leds::DimmingEnabled>(get_index()));
 }
 #endif
 
@@ -1411,7 +954,7 @@ MI_DISPLAY_BAUDRATE::MI_DISPLAY_BAUDRATE()
 }
 
 void MI_DISPLAY_BAUDRATE::OnChange(size_t) {
-    config_store().reduce_display_baudrate.set(GetIndex());
+    config_store().reduce_display_baudrate.set(get_index());
 }
 #endif
 
@@ -1437,10 +980,22 @@ void MI_LOG_TO_TXT::OnChange(size_t) {
 
     if (!logging::file_log_enable(filepath.str())) {
         MsgBoxError(_("Failed to open file '%s' for writing.").formatted(fmt_buf, filename), Responses_Ok);
-        set_value(false, false);
+        set_value(false);
         return;
     }
+
+    log_info(Marlin, "Printer: %s", PrinterModelInfo::current().id_str);
+    log_info(Marlin, "Version: %s", version::project_version_full);
 
     MsgBoxInfo(_("The printer will now save all logs to file until restart.\n\nLog file: %s").formatted(fmt_buf, filename), Responses_Ok);
     MsgBoxWarning(_("Turn the logging off before disconnecting the USB drive, or you risk damaging the filesystem!"), Responses_Ok);
 }
+
+#if HAS_AUTO_RETRACT()
+MI_PRE_NOZZLE_CLEANING_RETRACT::MI_PRE_NOZZLE_CLEANING_RETRACT()
+    : WI_ICON_SWITCH_OFF_ON_t(config_store().pre_nozzle_cleaning_retraction_enable.get(), _("Nozzle Cleaning Retraction")) {}
+
+void MI_PRE_NOZZLE_CLEANING_RETRACT::OnChange(size_t) {
+    config_store().pre_nozzle_cleaning_retraction_enable.set(value());
+}
+#endif

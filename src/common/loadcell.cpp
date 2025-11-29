@@ -9,6 +9,7 @@
 #include <numeric>
 #include <limits>
 #include <common/sensor_data.hpp>
+#include <common/sys.hpp>
 #include "timing.h"
 #include <logging/log.hpp>
 #include "probe_position_lookback.hpp"
@@ -24,20 +25,9 @@
 LOG_COMPONENT_DEF(Loadcell, logging::Severity::info);
 
 Loadcell loadcell;
-METRIC_DEF(metric_loadcell, "loadcell", METRIC_VALUE_CUSTOM, 0, METRIC_DISABLED);
-METRIC_DEF(metric_loadcell_hp, "loadcell_hp", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
-METRIC_DEF(metric_loadcell_xy, "loadcell_xy", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
-METRIC_DEF(metric_loadcell_age, "loadcell_age", METRIC_VALUE_INTEGER, 0, METRIC_DISABLED);
-
-// To be used by sensor info screen so we don't have to parse the CUSTOM_VALUE from the loadcell metric
-METRIC_DEF(metric_loadcell_value, "loadcell_value", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
 
 Loadcell::Loadcell()
-    : scale(1)
-    , thresholdStatic(NAN)
-    , thresholdContinuous(NAN)
-    , hysteresis(0)
-    , failsOnLoadAbove(INFINITY)
+    : failsOnLoadAbove(INFINITY)
     , failsOnLoadBelow(-INFINITY)
     , highPrecision(false)
     , tareMode(TareMode::Static)
@@ -49,12 +39,12 @@ Loadcell::Loadcell()
 void Loadcell::WaitBarrier(uint32_t ticks_us) {
     // the first sample we're waiting for needs to be valid
     while (!planner.draining() && undefinedCnt) {
-        idle(true, true);
+        idle(true);
     }
 
     // now wait until the requested timestamp
     while (!planner.draining() && ticks_diff(loadcell.GetLastSampleTimeUs(), ticks_us) < 0) {
-        idle(true, true);
+        idle(true);
     }
 }
 
@@ -76,14 +66,14 @@ float Loadcell::Tare(TareMode mode) {
 
     // request tare from ISR routine
     int requestedTareCount = tareMode == TareMode::Continuous
-        ? std::max(z_filter.SETTLING_TIME, xy_filter.SETTLING_TIME)
+        ? 1 // Just to initialize the XY and Z bandpass filters
         : STATIC_TARE_SAMPLE_CNT;
     tareSum = 0;
     tareCount = requestedTareCount;
 
     // wait until we have all the samples that were requested
     while (!planner.draining() && tareCount != 0) {
-        idle(true, true);
+        idle(true);
     }
 
     // We might have exited the loop prematurely because of planner.draining()
@@ -94,11 +84,14 @@ float Loadcell::Tare(TareMode mode) {
     if (!planner.draining()) {
         if (tareMode == TareMode::Continuous) {
             // double-check filters are ready after the tare
-            assert(z_filter.settled());
-            assert(xy_filter.settled());
+            assert(z_filter.initialized());
+            assert(xy_filter.initialized());
         }
 
         offset = tareSum / requestedTareCount;
+
+        // Wait till the loadcell reports first sample with the new offset applied (BFW-7791)
+        WaitBarrier();
     }
 
     endstop = false;
@@ -131,14 +124,6 @@ bool Loadcell::GetXYEndstop() const {
     return xy_endstop;
 }
 
-void Loadcell::SetScale(float scale) {
-    this->scale = scale;
-}
-
-void Loadcell::SetHysteresis(float hysteresis) {
-    this->hysteresis = hysteresis;
-}
-
 float Loadcell::GetScale() const {
     return scale;
 }
@@ -168,7 +153,7 @@ void Loadcell::ProcessSample(int32_t loadcellRaw, uint32_t time_us) {
         this->loadcellRaw = loadcellRaw;
         this->undefinedCnt = 0;
     } else {
-        if (!HAS_LOADCELL_HX717() || (!DBGMCU->CR || (TERN0(DEBUG_LEVELING_FEATURE, DEBUGGING(LEVELING)) || DEBUGGING(ERRORS)))) {
+        if (!HAS_LOADCELL_HX717() || (!sys_debugger_attached() || (TERN0(DEBUG_LEVELING_FEATURE, DEBUGGING(LEVELING)) || DEBUGGING(ERRORS)))) {
             // see comment in hx717mux: only enable additional safety checks if HX717 is multiplexed
             // and directly attached without an active debugging session or LEVELING/ERROR flags, to
             // avoid triggering inside other breakpoints.
@@ -186,27 +171,17 @@ void Loadcell::ProcessSample(int32_t loadcellRaw, uint32_t time_us) {
         xy_filter.filter(this->loadcellRaw);
     }
 
-    // sample timestamp
-    int32_t ticks_us_from_now = ticks_diff(time_us, ticks_us());
-    uint32_t timestamp_us = ticks_us() + ticks_us_from_now;
-    last_sample_time_us = timestamp_us;
+    // save sample timestamp/age
+    last_sample_time_us = time_us;
 
-    metric_record_custom_at_time(&metric_loadcell, timestamp_us, " r=%" PRId32 "i,o=%" PRId32 "i,s=%0.4f", loadcellRaw, offset, (double)scale);
-    metric_record_integer_at_time(&metric_loadcell_age, timestamp_us, ticks_us_from_now);
-
-    // filtered loads
     const float tared_z_load = get_tared_z_load();
-    metric_record_float(&metric_loadcell_value, tared_z_load);
     sensor_data().loadCell = tared_z_load;
     if (!std::isfinite(tared_z_load)) {
         fatal_error(ErrCode::ERR_SYSTEM_LOADCELL_INFINITE_LOAD);
     }
 
     const float filtered_z_load = get_filtered_z_load();
-    metric_record_float_at_time(&metric_loadcell_hp, timestamp_us, filtered_z_load);
-
     const float filtered_xy_load = get_filtered_xy();
-    metric_record_float_at_time(&metric_loadcell_xy, timestamp_us, filtered_xy_load);
 
     if (tareCount != 0) {
         // Undergoing tare process, only use valid samples
@@ -221,7 +196,7 @@ void Loadcell::ProcessSample(int32_t loadcellRaw, uint32_t time_us) {
             loadForEndstops = tared_z_load;
             threshold = thresholdStatic;
         } else {
-            assert(!Endstops::is_z_probe_enabled() || z_filter.settled());
+            assert(!Endstops::is_z_probe_enabled() || z_filter.initialized());
             loadForEndstops = filtered_z_load;
             threshold = thresholdContinuous;
         }
@@ -240,7 +215,7 @@ void Loadcell::ProcessSample(int32_t loadcellRaw, uint32_t time_us) {
 
         // Trigger XY endstop/probe
         if (xy_endstop_enabled) {
-            assert(xy_filter.settled());
+            assert(xy_filter.initialized());
 
             // Everything as absolute values, watch for changes.
             // Load perpendicular to the sensor sense vector is not guaranteed to have defined sign.
@@ -268,7 +243,7 @@ void Loadcell::ProcessSample(int32_t loadcellRaw, uint32_t time_us) {
     // push sample for analysis
     float z_pos = buddy::probePositionLookback.get_position_at(time_us, []() { return planner.get_axis_position_mm(AxisEnum::Z_AXIS); });
     if (!std::isnan(z_pos)) {
-        analysis.StoreSample(z_pos, tared_z_load);
+        analysis.StoreSample(time_us, z_pos, tared_z_load);
     } else {
         // Temporary disabled as this causes positive feedback loop by blocking the calling thread if the logs are
         // being uploaded to a remote server. This does not solve the problem entirely. There are other logs that
@@ -282,8 +257,10 @@ void Loadcell::ProcessSample(int32_t loadcellRaw, uint32_t time_us) {
 }
 
 void Loadcell::HomingSafetyCheck() const {
-    static constexpr uint32_t MAX_LOADCELL_DATA_AGE_WHEN_HOMING_US = 100000;
-    if (ticks_us() - last_sample_time_us > MAX_LOADCELL_DATA_AGE_WHEN_HOMING_US) {
+    // We need signed int because the last sample can be slightly in the future, caused by time sync with dwarves.
+    static constexpr int32_t MAX_LOADCELL_DATA_AGE_WHEN_HOMING_US = 100000;
+    int32_t since_last = ticks_diff(ticks_us(), last_sample_time_us.load());
+    if (since_last > MAX_LOADCELL_DATA_AGE_WHEN_HOMING_US) {
         fatal_error(ErrCode::ERR_ELECTRO_HOMING_ERROR_Z);
     }
 }
@@ -304,13 +281,6 @@ Loadcell::FailureOnLoadAboveEnforcer Loadcell::CreateLoadAboveErrEnforcer(bool e
     return Loadcell::FailureOnLoadAboveEnforcer(*this, enable, grams);
 }
 
-/*****************************************************************************/
-// IFailureEnforcer
-Loadcell::IFailureEnforcer::IFailureEnforcer(Loadcell &lcell, float oldErrThreshold)
-    : lcell(lcell)
-    , oldErrThreshold(oldErrThreshold) {
-}
-
 /**
  *
  * @param lcell
@@ -318,7 +288,8 @@ Loadcell::IFailureEnforcer::IFailureEnforcer(Loadcell &lcell, float oldErrThresh
  * @param enable
  */
 Loadcell::FailureOnLoadAboveEnforcer::FailureOnLoadAboveEnforcer(Loadcell &lcell, bool enable, float grams)
-    : IFailureEnforcer(lcell, lcell.GetFailsOnLoadAbove()) {
+    : lcell(lcell)
+    , oldErrThreshold(lcell.GetFailsOnLoadAbove()) {
     if (enable) {
         lcell.SetFailsOnLoadAbove(grams);
     }

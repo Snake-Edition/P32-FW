@@ -34,7 +34,7 @@
  *
  */
 void PrusaGcodeSuite::M104_1() {
-    const bool is_stealth_mode = marlin_vars().stealth_mode.get();
+    const bool is_stealth_mode = config_store().stealth_mode.get();
 
     // We will be applying a thermal model in the future to better evaluate when the tool should start being heated.
     // For now, we start heating as soon as we see the gcode and ignore the time data.

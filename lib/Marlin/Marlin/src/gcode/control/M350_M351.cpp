@@ -22,7 +22,7 @@
 
 #include "../../inc/MarlinConfig.h"
 
-#if HAS_MICROSTEPS || HAS_DRIVER(TMC2130)
+#if HAS_DRIVER(TMC2130)
 
 #include "../gcode.h"
 #include "../../module/stepper.h"
@@ -60,29 +60,4 @@ void GcodeSuite::M350() {
 
 /** @}*/
 
-#endif // HAS_MICROSTEPS
-
-#if HAS_MICROSTEPS
-/**
- * M351: Toggle MS1 MS2 pins directly with axis codes X Y Z E B
- *       S# determines MS1, MS2 or MS3, X# sets the pin high/low.
- */
-void GcodeSuite::M351() {
-  if (parser.seenval('S')) switch (parser.value_byte()) {
-    case 1:
-      LOOP_XYZE(i) if (parser.seenval(axis_codes[i])) stepper.microstep_ms(i, parser.value_byte(), -1, -1);
-      if (parser.seenval('B')) stepper.microstep_ms(4, parser.value_byte(), -1, -1);
-      break;
-    case 2:
-      LOOP_XYZE(i) if (parser.seenval(axis_codes[i])) stepper.microstep_ms(i, -1, parser.value_byte(), -1);
-      if (parser.seenval('B')) stepper.microstep_ms(4, -1, parser.value_byte(), -1);
-      break;
-    case 3:
-      LOOP_XYZE(i) if (parser.seenval(axis_codes[i])) stepper.microstep_ms(i, -1, -1, parser.value_byte());
-      if (parser.seenval('B')) stepper.microstep_ms(4, -1, -1, parser.value_byte());
-      break;
-  }
-  stepper.microstep_readings();
-}
-
-#endif // HAS_MICROSTEPS
+#endif // HAS_DRIVER(TMC2130)

@@ -22,12 +22,12 @@
 
 #include <inc/MarlinConfig.h>
 
-#if ENABLED(CANCEL_OBJECTS)
+#include <src/gcode/gcode.h>
+#include <feature/cancel_object/cancel_object.hpp>
 
-    #include <src/gcode/gcode.h>
-    #include <feature/cancel_object.h>
+#include <marlin_vars.hpp>
 
-    #include <marlin_vars.hpp>
+using namespace buddy;
 
 /** \addtogroup G-Codes
  * @{
@@ -76,7 +76,7 @@ void GcodeSuite::M486() {
     }
 
     if (arg) {
-        if (static_cast<size_t>(cancelable.active_object) >= marlin_vars_t::CANCEL_OBJECTS_NAME_COUNT) {
+        if (static_cast<size_t>(cancel_object().current_object()) >= marlin_vars_t::CANCEL_OBJECTS_NAME_COUNT) {
             return; // out of bounds, nothing can be done
         }
         if (*arg == '\"') {
@@ -87,33 +87,30 @@ void GcodeSuite::M486() {
             if (arg[len - 1] == '\"') {
                 len--; // Remove " at the end
             }
-            marlin_vars().cancel_object_names[cancelable.active_object].set(arg, len);
+            marlin_vars().cancel_object_names[cancel_object().current_object()].set(arg, len);
         }
         return; // Do not parse the line if A or N are found
     }
 
     if (parser.seen('T')) {
-        cancelable.reset();
-        cancelable.object_count = parser.intval('T', 1);
+        cancel_object().set_state({ .object_count = parser.intval('T', 1) });
     }
 
     if (parser.seenval('S')) {
-        cancelable.set_active_object(parser.value_int());
+        cancel_object().set_current_object(parser.value_int());
     }
 
     if (parser.seen('C')) {
-        cancelable.cancel_active_object();
+        cancel_object().set_object_cancelled(cancel_object().current_object(), true);
     }
 
     if (parser.seenval('P')) {
-        cancelable.cancel_object(parser.value_int());
+        cancel_object().set_object_cancelled(parser.value_int(), true);
     }
 
     if (parser.seenval('U')) {
-        cancelable.uncancel_object(parser.value_int());
+        cancel_object().set_object_cancelled(parser.value_int(), false);
     }
 }
 
 /** @}*/
-
-#endif // CANCEL_OBJECTS

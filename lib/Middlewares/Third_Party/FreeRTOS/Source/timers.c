@@ -63,7 +63,7 @@
 /* The name assigned to the timer service task.  This can be overridden by
  * defining trmTIMER_SERVICE_TASK_NAME in FreeRTOSConfig.h. */
     #ifndef configTIMER_SERVICE_TASK_NAME
-        #define configTIMER_SERVICE_TASK_NAME    "Tmr Svc"
+        #define configTIMER_SERVICE_TASK_NAME    "TmrSvc" // Must be without space because of metrics
     #endif
 
 /* Bit definitions used in the ucStatus member of a timer structure. */

@@ -65,6 +65,7 @@ public:
         while (loop()) {
             idle(true);
         }
+        config_store().printer_network_setup_done.set(true); // Mark the network setup as done when fsm exits
     }
 
 private:

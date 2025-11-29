@@ -20,28 +20,9 @@
 #include <option/has_side_leds.h>
 #include <option/buddy_enable_connect.h>
 #include <option/has_belt_tuning.h>
-#include <trinamic.h>
+#include <option/has_auto_retract.h>
 #include <meta_utils.hpp>
-#include <str_utils.hpp>
 #include <gui/menu_item/menu_item_gcode_action.hpp>
-
-/// \returns tool name for tool menu item purposes
-inline constexpr const char *tool_name(uint8_t tool_index) {
-    switch (tool_index) {
-    case 0:
-        return N_("Tool 1");
-    case 1:
-        return N_("Tool 2");
-    case 2:
-        return N_("Tool 3");
-    case 3:
-        return N_("Tool 4");
-    case 4:
-        return N_("Tool 5");
-    default:
-        return "";
-    }
-}
 
 /// Checks if there is space in the gcode queue for inserting further commands.
 /// If there's not, \returns false and shows a message box
@@ -126,50 +107,6 @@ protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
 
-class MI_FACTORY_SOFT_RESET : public IWindowMenuItem {
-    static constexpr const char *const label = N_("Reset Settings & Calibrations");
-
-public:
-    MI_FACTORY_SOFT_RESET();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
-class MI_FACTORY_HARD_RESET : public IWindowMenuItem {
-    static constexpr const char *const label = N_("Hard Reset (USB with FW needed)");
-
-public:
-    MI_FACTORY_HARD_RESET();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
-#if PRINTER_IS_PRUSA_MK4()
-class MI_FACTORY_SHIPPING_PREP : public IWindowMenuItem {
-    static constexpr const char *const label = N_("Shipping Preparation");
-
-public:
-    MI_FACTORY_SHIPPING_PREP();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-#endif
-
-#ifdef BUDDY_ENABLE_DFU_ENTRY
-class MI_ENTER_DFU : public IWindowMenuItem {
-    static constexpr const char *const label = "Enter DFU";
-
-public:
-    MI_ENTER_DFU();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-#endif
-
 class MI_SAVE_DUMP : public IWindowMenuItem {
     static constexpr const char *const label = N_("Save Crash Dump");
 
@@ -185,37 +122,6 @@ class MI_XFLASH_RESET : public IWindowMenuItem {
 
 public:
     MI_XFLASH_RESET();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
-class MI_EE_SAVEXML : public IWindowMenuItem {
-    static constexpr const char *const label = "TODO EE Save XML"; // intentionally not translated, only for debugging
-
-public:
-    MI_EE_SAVEXML();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
-class MI_EE_CLEAR : public IWindowMenuItem {
-    static constexpr const char *const label = "EE Clear"; // intentionally not translated, only for debugging
-
-public:
-    MI_EE_CLEAR();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
-class MI_M600 : public IWindowMenuItem {
-    static constexpr const char *const label = N_("Change Filament");
-    bool enqueued = false; // Used to avoid multiple M600 enqueue
-public:
-    MI_M600();
-    void resetEnqueued() { enqueued = false; }
 
 protected:
     virtual void click(IWindowMenu &window_menu) override;
@@ -323,7 +229,6 @@ class MI_INFO_FW : public WI_INFO_t {
 
 public:
     MI_INFO_FW();
-    virtual void click(IWindowMenu &window_menu) override; // FW version is clickable when development tools are shown
 };
 
 class MI_INFO_BOOTLOADER : public WI_INFO_t {
@@ -361,284 +266,6 @@ public:
     MI_FS_AUTOLOAD();
     virtual void OnChange(size_t old_index) override;
 };
-
-#if PRINTER_IS_PRUSA_MINI()
-/* -===============================================(:>- */
-class MI_BRIGHTNESS : public WiSpin {
-    constexpr static const char *const label = N_("Brightness");
-
-public:
-    MI_BRIGHTNESS();
-    virtual void OnClick() override;
-};
-#endif
-
-class MI_DISPLAY_REINIT_TIMEOUT : public WiSpin {
-    constexpr static const char *const label = N_("Display Reinit Timeout");
-
-public:
-    MI_DISPLAY_REINIT_TIMEOUT();
-    virtual void OnClick() override;
-};
-
-class MI_SKEW_XY : public WiSpin {
-    constexpr static const char *const label = N_("Skew XY");
-
-public:
-    MI_SKEW_XY();
-};
-
-class MI_SKEW_XZ : public WiSpin {
-    constexpr static const char *const label = N_("Skew XZ");
-
-public:
-    MI_SKEW_XZ();
-};
-
-class MI_SKEW_YZ : public WiSpin {
-    constexpr static const char *const label = N_("Skew YZ");
-
-public:
-    MI_SKEW_YZ();
-};
-/* -===============================================(:>- */
-
-#if PRINTER_IS_PRUSA_MINI()
-class MI_X_AXIS_LEN : public WiSpin {
-    constexpr static const char *const label = N_("X-axis length");
-
-public:
-    MI_X_AXIS_LEN();
-    virtual void OnClick() override;
-};
-
-class MI_Y_AXIS_LEN : public WiSpin {
-    constexpr static const char *const label = N_("Y-axis length");
-
-public:
-    MI_Y_AXIS_LEN();
-    virtual void OnClick() override;
-};
-
-class MI_E_LOAD_LENGTH : public WiSpin {
-    constexpr static const char *const label = N_("E load length");
-
-public:
-    MI_E_LOAD_LENGTH();
-    virtual void OnClick() override;
-};
-#endif
-
-/* -===============================================(:>- */
-
-class MI_X_SENSITIVITY : public WiSpin {
-    constexpr static const char *const label = N_("X homing sensitivity");
-
-public:
-    MI_X_SENSITIVITY();
-    virtual void OnClick() override;
-};
-
-class MI_Y_SENSITIVITY : public WiSpin {
-    constexpr static const char *const label = N_("Y homing sensitivity");
-
-public:
-    MI_Y_SENSITIVITY();
-    virtual void OnClick() override;
-};
-
-class MI_X_SENSITIVITY_RESET : public IWindowMenuItem {
-    constexpr static const char *const label = N_("Reset X homing sensitivity");
-
-public:
-    MI_X_SENSITIVITY_RESET();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
-class MI_Y_SENSITIVITY_RESET : public IWindowMenuItem {
-    constexpr static const char *const label = N_("Reset Y homing sensitivity");
-
-public:
-    MI_Y_SENSITIVITY_RESET();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
-/* -===============================================(:>- */
-
-class MI_X_STEALTH : public WI_ICON_SWITCH_OFF_ON_t {
-    constexpr static const char *const label = N_("X Strong mode");
-
-public:
-    MI_X_STEALTH();
-
-protected:
-    virtual void OnChange(size_t old_index) override;
-};
-
-class MI_Y_STEALTH : public WI_ICON_SWITCH_OFF_ON_t {
-    constexpr static const char *const label = N_("Y Strong mode");
-
-public:
-    MI_Y_STEALTH();
-
-protected:
-    virtual void OnChange(size_t old_index) override;
-};
-
-class MI_Z_STEALTH : public WI_ICON_SWITCH_OFF_ON_t {
-    constexpr static const char *const label = N_("Z Strong mode");
-
-public:
-    MI_Z_STEALTH();
-
-protected:
-    virtual void OnChange(size_t old_index) override;
-};
-
-class MI_E_STEALTH : public WI_ICON_SWITCH_OFF_ON_t {
-    constexpr static const char *const label = N_("E Strong mode");
-
-public:
-    MI_E_STEALTH();
-
-protected:
-    virtual void OnChange(size_t old_index) override;
-};
-
-/* -===============================================(:>- */
-
-class MI_X_MAX_FEEDRATE : public WiSpin {
-    constexpr static const char *const label = N_("X Max Feedrate");
-
-public:
-    MI_X_MAX_FEEDRATE();
-    virtual void OnClick() override;
-};
-
-class MI_Y_MAX_FEEDRATE : public WiSpin {
-    constexpr static const char *const label = N_("Y Max Feedrate");
-
-public:
-    MI_Y_MAX_FEEDRATE();
-    virtual void OnClick() override;
-};
-
-/* -===============================================(:>- */
-
-class MI_X_HOME : public IWindowMenuItem {
-    constexpr static const char *const label = N_("Home X Axis");
-
-public:
-    MI_X_HOME();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
-class MI_Y_HOME : public IWindowMenuItem {
-    constexpr static const char *const label = N_("Home Y Axis");
-
-public:
-    MI_Y_HOME();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
-/* -===============================================(:>- */
-
-class MI_NOZZLE_CALIBRATION_TEMP : public WiSpin {
-    constexpr static const char *const label = N_("Nozzle calibration temperature");
-
-public:
-    MI_NOZZLE_CALIBRATION_TEMP();
-    void OnClick() override;
-};
-
-class MI_CALIBRATE_NOZZLE_PID : public IWindowMenuItem {
-    constexpr static const char *const label = N_("Calibrate nozzle temperature");
-
-public:
-    MI_CALIBRATE_NOZZLE_PID();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
-class MI_BED_CALIBRATION_TEMP : public WiSpin {
-    constexpr static const char *const label = N_("Bed calibration temperature");
-
-public:
-    MI_BED_CALIBRATION_TEMP();
-    void OnClick() override;
-};
-
-class MI_CALIBRATE_BED_PID : public IWindowMenuItem {
-    constexpr static const char *const label = N_("Calibrate bed temperature");
-
-public:
-    MI_CALIBRATE_BED_PID();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
-class MI_PID_NOZZLE_P : public WiSpin {
-    constexpr static const char *const label = N_("PID nozzle P");
-
-public:
-    MI_PID_NOZZLE_P();
-};
-
-class MI_PID_NOZZLE_I : public WiSpin {
-    constexpr static const char *const label = N_("PID nozzle I");
-
-public:
-    MI_PID_NOZZLE_I();
-};
-
-class MI_PID_NOZZLE_D : public WiSpin {
-    constexpr static const char *const label = N_("PID nozzle D");
-
-public:
-    MI_PID_NOZZLE_D();
-};
-
-class MI_PID_BED_P : public WiSpin {
-    constexpr static const char *const label = N_("PID bed P");
-
-public:
-    MI_PID_BED_P();
-};
-
-class MI_PID_BED_I : public WiSpin {
-    constexpr static const char *const label = N_("PID bed I");
-
-public:
-    MI_PID_BED_I();
-};
-
-class MI_PID_BED_D : public WiSpin {
-    constexpr static const char *const label = N_("PID bed D");
-
-public:
-    MI_PID_BED_D();
-};
-
-/* -===============================================(:>- */
-
-class MI_COLD_MODE : public WI_ICON_SWITCH_OFF_ON_t {
-    constexpr static const char *const label = N_("Cold Mode");
-
-public:
-    MI_COLD_MODE();
-    virtual void OnChange(size_t old_index) override;
-};
-/* -===============================================(:>- */
 
 class MI_INFO_BED_TEMP : public MenuItemAutoUpdatingLabel<float> {
 public:
@@ -823,17 +450,6 @@ public:
 protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
-
-class MI_CO_CANCEL_OBJECT : public IWindowMenuItem {
-    static constexpr const char *const label = N_("Cancel Object");
-
-public:
-    MI_CO_CANCEL_OBJECT();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
 class MI_FILAMENT_CHANGE_PREHEAT_ALL : public MenuItemSwitch {
 public:
     MI_FILAMENT_CHANGE_PREHEAT_ALL();
@@ -917,14 +533,6 @@ public:
     virtual void click(IWindowMenu &) override;
 };
 
-class MI_USB_MSC_ENABLE : public WI_ICON_SWITCH_OFF_ON_t {
-    constexpr static char const *label = "USB MSC";
-
-public:
-    MI_USB_MSC_ENABLE();
-    virtual void OnChange(size_t old_index) override;
-};
-
 #if HAS_LEDS()
 class MI_LEDS_ENABLE : public WI_ICON_SWITCH_OFF_ON_t {
     static constexpr const char *const label = N_("RGB Status Bar");
@@ -936,7 +544,7 @@ public:
 #endif
 
 #if HAS_SIDE_LEDS()
-class MI_SIDE_LEDS_ENABLE : public WiSpin {
+class MI_SIDE_LEDS_MAX_BRIGTHNESS : public WiSpin {
 
     static constexpr const char *const label =
     #if PRINTER_IS_PRUSA_COREONE()
@@ -946,11 +554,26 @@ class MI_SIDE_LEDS_ENABLE : public WiSpin {
     #endif
 
 public:
-    MI_SIDE_LEDS_ENABLE();
+    MI_SIDE_LEDS_MAX_BRIGTHNESS();
     virtual void OnClick() override;
 };
 
-class MI_SIDE_LEDS_DIMMING : public WI_ICON_SWITCH_OFF_ON_t {
+class MI_SIDE_LEDS_DIMMED_BRIGTHNESS : public WiSpin {
+
+    static constexpr const char *const label =
+    #if PRINTER_IS_PRUSA_COREONE()
+        N_("Chamber Lights Dimmed");
+    #else
+        N_("RGB Side Strip Dimmed");
+    #endif
+
+public:
+    MI_SIDE_LEDS_DIMMED_BRIGTHNESS();
+    virtual void OnClick() override;
+    virtual void Loop() override;
+};
+
+class MI_SIDE_LEDS_DIMMING_ENABLE : public MenuItemSwitch {
     static constexpr const char *const label =
     #if PRINTER_IS_PRUSA_COREONE()
         N_("Chamber Dimming");
@@ -959,7 +582,7 @@ class MI_SIDE_LEDS_DIMMING : public WI_ICON_SWITCH_OFF_ON_t {
     #endif
 
 public:
-    MI_SIDE_LEDS_DIMMING();
+    MI_SIDE_LEDS_DIMMING_ENABLE();
     virtual void OnChange(size_t old_index) override;
 };
 #endif
@@ -1012,6 +635,10 @@ protected:
 using MI_BELT_TUNING = WithConstructorArgs<MenuItemGcodeAction, N_("Belt Tuning"), "M960 W"_tstr>;
 #endif
 
+#if HAS_MANUAL_BELT_TUNING()
+using MI_MANUAL_BELT_TUNING = WithConstructorArgs<MenuItemGcodeAction, N_("Manual Belt Tuning"), "M961"_tstr>;
+#endif
+
 #if HAS_ILI9488_DISPLAY()
 class MI_DISPLAY_BAUDRATE : public MenuItemSwitch {
 public:
@@ -1033,3 +660,11 @@ public:
     MI_LOG_TO_TXT();
     void OnChange(size_t) final;
 };
+
+#if HAS_AUTO_RETRACT()
+class MI_PRE_NOZZLE_CLEANING_RETRACT : public WI_ICON_SWITCH_OFF_ON_t {
+public:
+    MI_PRE_NOZZLE_CLEANING_RETRACT();
+    void OnChange(size_t) final;
+};
+#endif

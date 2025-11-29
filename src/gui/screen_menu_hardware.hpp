@@ -15,19 +15,19 @@
 #include <option/has_sheet_profiles.h>
 #include <option/has_toolchanger.h>
 #include <option/has_side_fsensor.h>
-#include <option/has_modularbed.h>
+#include <option/has_modular_bed.h>
+#include <option/has_mmu2.h>
+#include <option/has_auto_retract.h>
+#include <option/has_chamber_vents.h>
 #include <common/extended_printer_type.hpp>
 #include "MItem_basic_selftest.hpp"
 #include "printers.h"
 
-#if HAS_LOADCELL()
-    #include "MItem_loadcell.hpp"
-#endif
 #if HAS_TOOLCHANGER()
     #include "screen_menu_tools.hpp"
 #endif
-#if HAS_MODULARBED()
-    #include "screen_menu_modularbed.hpp"
+#if HAS_MODULAR_BED()
+    #include "screen_menu_modular_bed.hpp"
 #endif
 #if HAS_MMU2()
     #include "MItem_mmu.hpp"
@@ -64,17 +64,30 @@ using ScreenMenuHardware__ = ScreenMenu<GuiDefaults::MenuFooter,
 // ================================
 // Bed related
 // ================================
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULAR_BED()
     MI_HEAT_ENTIRE_BED,
 #endif
 #if HAS_SHEET_PROFILES()
     MI_STEEL_SHEETS,
 #endif
 
-    // ================================
-    // Other
-    // ================================
+// ================================
+// MMU related
+// ================================
+#if HAS_MMU2()
+    MI_HW_MMU,
+#endif
+
+#if HAS_CHAMBER_VENTS()
+    MI_SWITCH_VENT_MECHANISM,
+#endif
+#if HAS_AUTO_RETRACT()
+    MI_PRE_NOZZLE_CLEANING_RETRACT,
+#endif
     MI_HARDWARE_G_CODE_CHECKS,
+#if HAS_PRECISE_HOMING_COREXY()
+    MI_AUTO_PRECISE_HOMING_CALIBRATION,
+#endif
 #if HAS_ILI9488_DISPLAY()
     MI_DISPLAY_BAUDRATE,
 #endif
@@ -84,14 +97,10 @@ using ScreenMenuHardware__ = ScreenMenu<GuiDefaults::MenuFooter,
     // ================================
     MI_PRINTER_SETUP,
     MI_EXPERIMENTAL_SETTINGS,
-    MI_XFLASH_RESET, MI_EEPROM
+    MI_XFLASH_RESET
 #ifdef HAS_TMC_WAVETABLE
     ,
     MI_WAVETABLE_XYZ
-#endif
-#if HAS_LOADCELL()
-    ,
-    MI_LOADCELL_SCALE
 #endif
 #if (BOARD_IS_XLBUDDY())
     ,

@@ -124,6 +124,11 @@ void WindowMenu::BindContainer(IWinMenuContainer &cont) {
     if (should_focus_item_on_init()) {
         move_focus_to_index(0);
     }
+
+    // Do initial loop to for items that do part of their inicialization inside it.
+    for (int i = 0; i < cont.GetRawCount(); i++) {
+        cont.GetItemByRawIndex(i)->Loop();
+    }
 }
 
 std::optional<int> WindowMenu::GetIndex(IWindowMenuItem &item) const {

@@ -8,6 +8,10 @@
 #include "bsod.h"
 #include "marlin_server.hpp"
 
+#if ENABLED(SENSORLESS_HOMING)
+    #include <feature/motordriver_util.h>
+#endif
+
 using buddy::puppies::Dwarf;
 using buddy::puppies::dwarfs;
 using namespace selftest;
@@ -191,6 +195,11 @@ LoopResult CSelftestPart_Dock::state_measure() {
     IPartHandler::SetFsmPhase(PhasesSelftest::Dock_measure);
 
     // Assumes user just positioned head to dock position by hand
+    // Reset current position to expected state - otherwise the current position may be negative and this would block G0 movements
+    current_position.x = static_cast<double>(PrusaToolChanger::DOCK_DEFAULT_FIRST_X_MM + (config.dock_id) * PrusaToolChanger::DOCK_OFFSET_X_MM);
+    current_position.y = static_cast<double>(PrusaToolChanger::DOCK_DEFAULT_Y_MM);
+    planner.synchronize();
+    sync_plan_position();
 
     // Remember initial stepper position
     position_before_measure = xy_long_t({ { {
@@ -198,18 +207,23 @@ LoopResult CSelftestPart_Dock::state_measure() {
         .y = stepper.position_from_startup(AxisEnum::B_AXIS),
     } } }); // GCC bug? (should be .a = ..., .b = ...) works with GCC 12.2.1
 
-    marlin_server::enqueue_gcode("G91"); // Relative positioning
+    // Relative positioning
+    marlin_server::enqueue_gcode("G91");
+
     // Detach from dock
     marlin_server::enqueue_gcode_printf(
         "G0 F%d X%f",
         PrusaToolChanger::FORCE_MOVE_MM_S * 60,
-        static_cast<double>(X_UNLOCK_DISTANCE_MM));
+        static_cast<double>(PrusaToolChanger::X_UNLOCK_DISTANCE_MM));
+
     // Back in front of the dock to not bump it when homing
     marlin_server::enqueue_gcode_printf(
         "G0 F%d Y%f",
         PrusaToolChanger::FORCE_MOVE_MM_S * 60,
-        static_cast<double>(PrusaToolChanger::SAFE_Y_WITH_TOOL - PrusaToolChanger::SAFE_Y_WITHOUT_TOOL));
-    marlin_server::enqueue_gcode("G90"); // Absolute positioning
+        static_cast<double>(PrusaToolChanger::SAFE_Y_WITH_TOOL - PrusaToolChanger::DOCK_DEFAULT_Y_MM));
+
+    // Absolute positioning
+    marlin_server::enqueue_gcode("G90");
 
     // Home
     marlin_server::enqueue_gcode("G28 XY R0");
@@ -278,46 +292,34 @@ LoopResult CSelftestPart_Dock::state_selftest_check_todock() {
 }
 
 LoopResult CSelftestPart_Dock::state_selftest_check_unlock() {
-    // Set motor current and stall sensitivity to parking and remember old value
-    auto x_current_ma = stepperX.rms_current();
-    auto x_stall_sensitivity = stepperX.stall_sensitivity();
-    auto y_current_ma = stepperY.rms_current();
-    auto y_stall_sensitivity = stepperY.stall_sensitivity();
-    stepperX.rms_current(PrusaToolChanger::PARKING_CURRENT_MA);
-    stepperX.stall_sensitivity(PrusaToolChanger::PARKING_STALL_SENSITIVITY);
-    stepperY.rms_current(PrusaToolChanger::PARKING_CURRENT_MA);
-    stepperY.stall_sensitivity(PrusaToolChanger::PARKING_STALL_SENSITIVITY);
+    { // Set motor current and stall sensitivity to parking and remember old value
+        PrusaToolChanger::StepperConfigGuard sc;
 
-    // Unlock the clamps
-    current_position.x = prusa_toolchanger.get_tool_info(dwarf, false).dock_x + PrusaToolChanger::PARK_X_OFFSET_2;
-    line_to_current_position(PrusaToolChanger::SLOW_MOVE_MM_S);
+        // Unlock the clamps
+        current_position.x = prusa_toolchanger.get_tool_info(dwarf, false).dock_x + PrusaToolChanger::PARK_X_OFFSET_2;
+        line_to_current_position(PrusaToolChanger::SLOW_MOVE_MM_S);
 
-    const auto original_acceleration = planner.settings.travel_acceleration;
-    {
-        auto s = planner.user_settings;
-        s.travel_acceleration = PrusaToolChanger::SLOW_ACCELERATION_MM_S2;
-        planner.apply_settings(s);
+        const auto original_acceleration = planner.settings.travel_acceleration;
+        {
+            auto s = planner.user_settings;
+            s.travel_acceleration = PrusaToolChanger::SLOW_ACCELERATION_MM_S2;
+            planner.apply_settings(s);
+        }
+
+        current_position.x = prusa_toolchanger.get_tool_info(dwarf, false).dock_x + PrusaToolChanger::PARK_X_OFFSET_3;
+        line_to_current_position(PrusaToolChanger::SLOW_MOVE_MM_S);
+
+        /// @note This synchronization shouldn't be delegated to state_wait_moves_done().
+        ///  User could abort and acceleration and current wouldn't be reverted.
+        planner.synchronize();
+
+        // Back to high acceleration
+        {
+            auto s = planner.user_settings;
+            s.travel_acceleration = original_acceleration;
+            planner.apply_settings(s);
+        }
     }
-
-    current_position.x = prusa_toolchanger.get_tool_info(dwarf, false).dock_x + PrusaToolChanger::PARK_X_OFFSET_3;
-    line_to_current_position(PrusaToolChanger::SLOW_MOVE_MM_S);
-
-    /// @note This synchronization shouldn't be delegated to state_wait_moves_done().
-    ///  User could abort and acceleration and current wouldn't be reverted.
-    planner.synchronize();
-
-    // Back to high acceleration
-    {
-        auto s = planner.user_settings;
-        s.travel_acceleration = original_acceleration;
-        planner.apply_settings(s);
-    }
-
-    // Reset motor current and stall sensitivity to old value
-    stepperX.rms_current(x_current_ma);
-    stepperX.stall_sensitivity(x_stall_sensitivity);
-    stepperY.rms_current(y_current_ma);
-    stepperY.stall_sensitivity(y_stall_sensitivity);
 
     // Return a bit to the exact dock position
     current_position.x = prusa_toolchanger.get_tool_info(dwarf, false).dock_x;

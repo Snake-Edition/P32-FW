@@ -8,7 +8,6 @@
 #include "color_scheme.hpp"
 #include "window_types.hpp"
 #include <optional>
-#include "option/development_items.h"
 #include <guiconfig/guiconfig.h>
 
 struct GuiDefaults {
@@ -27,7 +26,7 @@ struct GuiDefaults {
     // TODO bind this values
     static constexpr size_t ScreenWidth = 240;
     static constexpr size_t ScreenHeight = 320;
-    static constexpr size_t FooterHeight = FooterLines * FooterItemHeight + (FooterLines - 1) * FooterLinesSpace + FooterPadding.top + FooterPadding.bottom;
+    static constexpr uint8_t FooterHeight = FooterLines * FooterItemHeight + (FooterLines - 1) * FooterLinesSpace + FooterPadding.top + FooterPadding.bottom;
     static constexpr padding_ui8_t HeaderPadding { 4, 4, 4, 4 }; // number of edge pixels that will remain black in all cases
     static constexpr uint8_t HeaderTextExtraPaddingTop { 1 }; // extra padding to be added to the top, needed if font is weird
     static constexpr auto HeaderTextFont { Font::special };
@@ -58,7 +57,7 @@ struct GuiDefaults {
 #elif HAS_LARGE_DISPLAY()
     static constexpr size_t ScreenWidth = 480; // Some values are redundant on purpose - It's more convenient for future display's implementation
     static constexpr size_t ScreenHeight = 320;
-    static constexpr size_t FooterHeight = 23;
+    static constexpr uint8_t FooterHeight = 23;
     static constexpr padding_ui8_t HeaderPadding { 14, 12, 14, 4 }; // number of edge pixels that will remain black in all cases
     static constexpr uint8_t HeaderTextExtraPaddingTop { 1 }; // extra padding to be added to the top, needed if font is weird
     static constexpr auto HeaderTextFont { Font::special };
@@ -161,7 +160,6 @@ struct GuiDefaults {
     static constexpr bool MenuSwitchHasBrackets = true; // draw brackets around switch values in menus
     static constexpr bool MenuSpinHasUnits = true; // draw units behind spin
 #endif // USE_<display>
-    static constexpr bool ShowDevelopmentTools = static_cast<bool>(option::development_items); // Show menu items for development
 
     // New menu feature settings
 #if HAS_MINI_DISPLAY() || HAS_MOCK_DISPLAY()
@@ -193,6 +191,12 @@ struct GuiDefaults {
     // New msgbox
     static constexpr uint8_t DefaultCornerRadius = 8;
 #if HAS_MINI_DISPLAY() || HAS_MOCK_DISPLAY()
+    static const constexpr Rect16 RedscreenTitleRect = Rect16(10, 24, GuiDefaults::ScreenWidth - 26, 20);
+    static const constexpr Rect16 RedscreenDescriptionRect = Rect16(10, 50, GuiDefaults::ScreenWidth - 20, 220);
+    static const constexpr Rect16 WarningDlgDescriptionRect = Rect16(6, 112, 228, 320 - 52);
+    static const constexpr Rect16 MMUNoticeTitleRect = Rect16(0, 0, 0, 0); // Not used on MINI
+    static const constexpr Rect16 MMUNoticeTextRect = Rect16(0, 0, 0, 0); // Not used on MINI
+
     static constexpr Rect16 MsgBoxLayoutRect = { 30, 90, 180, 120 }; // Msgbox rect for drawing icon + text
     static constexpr Rect16 MessageTextRect = Rect16(GuiDefaults::MsgBoxLayoutRect.Left() + 48 + 15, GuiDefaults::MsgBoxLayoutRect.Top(), 117, 120); // 48px icon + 10px icon-text delimeter
 
@@ -200,7 +204,14 @@ struct GuiDefaults {
     static constexpr uint16_t RadioButtonCornerRadius = 6;
     static constexpr bool EnableDialogBigLayout = false;
     static constexpr uint16_t QRSize = 100;
+    static constexpr uint16_t WarningDlgPadding = 6;
 #elif HAS_LARGE_DISPLAY()
+    static const constexpr Rect16 RedscreenTitleRect = Rect16(30, 44, GuiDefaults::ScreenWidth - 60, 20);
+    static const constexpr Rect16 RedscreenDescriptionRect = Rect16(30, 85, 230, 170);
+    static const constexpr Rect16 WarningDlgDescriptionRect = Rect16(26, 182, 480 - 52, 282 - 26);
+    static const constexpr Rect16 MMUNoticeTitleRect = Rect16(86, 44, 374, 22);
+    static const constexpr Rect16 MMUNoticeTextRect = Rect16(86, 72, 244, 140);
+
     static constexpr Rect16 MsgBoxLayoutRect = { 70, 90, 363, ScreenHeight - 90 - ButtonHeight }; // Msgbox rect for drawing icon + text
     static constexpr Rect16 MessageTextRect = Rect16(MsgBoxLayoutRect.Left() + 48 + 15, MsgBoxLayoutRect.Top(), 300, MsgBoxLayoutRect.Height()); // 48px icon + 10px icon-text delimeter
 
@@ -208,8 +219,15 @@ struct GuiDefaults {
     static constexpr uint16_t RadioButtonCornerRadius = 8;
     static constexpr bool EnableDialogBigLayout = true;
     static constexpr uint16_t QRSize = 130;
+    static constexpr uint16_t WarningDlgPadding = 26;
 #endif
     static constexpr Rect16 MessageIconRect = Rect16(GuiDefaults::MsgBoxLayoutRect.Left(), GuiDefaults::MsgBoxLayoutRect.Top(), 48, 48);
+
+    static constexpr Rect16 WarningDlgTextRect = Rect16(
+        WarningDlgPadding,
+        WarningDlgPadding + QRSize + WarningDlgPadding,
+        RectScreen.Width() - 2 * WarningDlgPadding,
+        RectScreen.Height() - 2 * WarningDlgPadding - QRSize - ButtonHeight - FramePadding);
 
     static constexpr Rect16::Width_t InvalidPrinterIconMargin = 6;
     static constexpr Rect16::Height_t InvalidPrinterLineSpacing = 8;

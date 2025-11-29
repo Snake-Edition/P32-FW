@@ -207,17 +207,6 @@ typedef uint16_t raw_adc_t;
 typedef int16_t celsius_t;
 typedef float celsius_float_t;
 
-//
-// On AVR pointers are only 2 bytes so use 'const float &' for 'const float'
-//
-#ifdef __AVR__
-  typedef const float & const_float_t;
-#else
-  typedef const float const_float_t;
-#endif
-typedef const_float_t const_feedRate_t;
-typedef const_float_t const_celsius_float_t;
-
 // Conversion macros
 #define MMM_TO_MMS(MM_M) feedRate_t(static_cast<float>(MM_M) / 60.0f)
 #define MMS_TO_MMM(MM_S) (static_cast<float>(MM_S) * 60.0f)
@@ -525,8 +514,7 @@ struct XYZval {
   FI XYZval<float>  asNative()                   const { XYZval<float> o = asFloat(); toNative(o);  return o; }
 
   // In-place cast to types having fewer fields
-  FI operator       XYval<T>&()                        { return *(XYval<T>*)this; }
-  FI operator const XYval<T>&()                  const { return *(const XYval<T>*)this; }
+  FI operator XYval<T>()                         const { return XYval<T>{x, y}; }
 
   // Cast to a type with more fields by making a new object
   FI operator       XYZEval<T>()                 const { return NUM_AXIS_ARRAY(x, y, z, i, j, k, u, v, w); }

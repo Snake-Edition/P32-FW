@@ -1,7 +1,7 @@
 #include "screen_filaments_loaded.hpp"
 #include "screen_filament_detail.hpp"
 
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 #include <print_utils.hpp>
 #include <ScreenHandler.hpp>
 

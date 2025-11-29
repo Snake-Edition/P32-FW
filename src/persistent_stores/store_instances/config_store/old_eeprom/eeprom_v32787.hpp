@@ -7,10 +7,8 @@
 #include "eeprom_v12.hpp"
 #include "printers.h"
 #include "footer_eeprom.hpp"
-#include "led_animations/led_types.h"
 #include <option/development_items.h>
 #include "selftest_result.hpp"
-#include <gui/led_animations/animation_model.hpp>
 #include <module/prusa/dock_position.hpp>
 #include <module/prusa/tool_offset.hpp>
 
@@ -19,16 +17,31 @@ namespace config_store_ns::old_eeprom::v32787 {
 #pragma pack(push)
 #pragma pack(1)
 
-/**
- * @brief Unused & dropped
- *
- */
+// ========================
+// Unused and dropped types
+// ========================
 struct Color_model {
     uint8_t R;
     uint8_t G;
     uint8_t B;
     uint8_t next_index;
 };
+
+enum class AnimationTypes : uint8_t {
+    SolidColor,
+    Fading,
+};
+
+struct Animation_model {
+    uint8_t type;
+    uint8_t R;
+    uint8_t G;
+    uint8_t B;
+    uint16_t period;
+    uint8_t color_count;
+    uint8_t next_index;
+};
+// ========================
 
 /**
  * @brief body of eeprom v32787

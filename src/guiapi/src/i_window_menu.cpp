@@ -71,7 +71,11 @@ bool IWindowMenu::scroll_page(PageScrollDirection direction) {
     Sound_Play(eSOUND_TYPE::EncoderMove);
 
     set_scroll_offset(new_scroll_offset);
-    marlin_client::notify_server_about_encoder_move();
+    if (direction == PageScrollDirection::up) {
+        marlin_client::notify_server_about_encoder_move_up();
+    } else {
+        marlin_client::notify_server_about_encoder_move_down();
+    }
     return true;
 }
 

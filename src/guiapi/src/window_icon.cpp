@@ -152,7 +152,7 @@ void WindowMultiIconButton::unconditionalDraw() {
         pImg = &pRes->disabled;
     }
 
-    display::draw_img(point_ui16(Left(), Top()), *pImg, GetBackColor());
+    display::draw_img(point_ui16(Left(), Top()), *pImg, GetBackColor(), ropfn {});
 }
 
 void WindowMultiIconButton::windowEvent(window_t *sender, GUI_event_t event, void *param) {

@@ -1,11 +1,11 @@
 #pragma once
 
 #include <option/has_dwarf.h>
-#include <option/has_modularbed.h>
+#include <option/has_gearbox_alignment.h>
 #include <option/has_toolchanger.h>
 #include <option/has_loadcell.h>
 #include <option/has_selftest.h>
-#include <option/has_phase_stepping.h>
+#include <option/has_phase_stepping_calibration.h>
 #include <option/has_coldpull.h>
 #include <option/has_input_shaper_calibration.h>
 #include <option/has_belt_tuning.h>
@@ -15,6 +15,7 @@
 #include <option/has_chamber_api.h>
 #include <option/has_uneven_bed_prompt.h>
 #include <option/has_door_sensor_calibration.h>
+#include <option/has_manual_belt_tuning.h>
 
 #include <inc/MarlinConfigPre.h>
 
@@ -32,8 +33,8 @@ enum class ClientFSM : uint8_t {
     Preheat,
     #if HAS_SELFTEST()
     Selftest,
-    #endif
     FansSelftest,
+    #endif
     NetworkSetup,
     Printing, // not a dialog
     #if ENABLED(CRASH_RECOVERY)
@@ -45,8 +46,11 @@ enum class ClientFSM : uint8_t {
     #if HAS_COLDPULL()
     ColdPull,
     #endif
-    #if HAS_PHASE_STEPPING()
-    PhaseStepping,
+    #if HAS_MANUAL_BELT_TUNING()
+    ManualBeltTuning,
+    #endif
+    #if HAS_PHASE_STEPPING_CALIBRATION()
+    PhaseSteppingCalibration,
     #endif
     #if HAS_INPUT_SHAPER_CALIBRATION()
     InputShaperCalibration,
@@ -54,16 +58,23 @@ enum class ClientFSM : uint8_t {
     #if HAS_BELT_TUNING()
     BeltTuning,
     #endif
+    #if HAS_GEARBOX_ALIGNMENT()
+    GearboxAlignment,
+    #endif
     #if HAS_DOOR_SENSOR_CALIBRATION()
     DoorSensorCalibration,
     #endif
+    #if HAS_LOADCELL()
+    NozzleCleaningFailed,
+    #endif
+    SafetyTimer,
     Wait, ///< FSM that only blocks the screen with a "please wait" text
     _none, // cannot be created, must have same index as _count
     _count = _none
 };
 
 // We have only 5 bits for it in the serialization of data sent between server and client
-static_assert(ftrstd::to_underlying(ClientFSM::_count) < 32);
+static_assert(std::to_underlying(ClientFSM::_count) < 32);
 
 enum class LoadUnloadMode : uint8_t {
     Change,
@@ -96,9 +107,6 @@ enum class RetAndCool_t : uint8_t {
     last_ = Both
 };
 
-using message_cb_t = void (*)(char *);
 #else // !__cplusplus
 // C
-typedef void (*message_cb_t)(const char *);
-typedef void (*warning_cb_t)(uint32_t);
 #endif //__cplusplus

@@ -30,7 +30,7 @@ void MI_CRASH_DETECTION::Loop() {
     const bool phstep_enabled = config_store().get_phase_stepping_enabled();
     // If phase stepping is enabled, we can't enable crash detection and vice versa
     set_enabled(!phstep_enabled);
-    set_value(!phstep_enabled && crash_s.is_enabled(), false);
+    set_value(!phstep_enabled && crash_s.is_enabled());
     #endif
     return WI_ICON_SWITCH_OFF_ON_t::Loop();
 }
@@ -82,7 +82,7 @@ MI_CRASH_SENSITIVITY_XY::MI_CRASH_SENSITIVITY_XY()
     : MenuItemSwitch(_(label), crash_sensitivity_items, stdext::index_of(crash_sensitivity_item_values, crash_s.get_sensitivity().x)) {}
 
 void MI_CRASH_SENSITIVITY_XY::OnChange([[maybe_unused]] size_t old_index) {
-    const int32_t sensitivity = crash_sensitivity_item_values[index];
+    const int32_t sensitivity = crash_sensitivity_item_values[this->get_index()];
     crash_s.set_sensitivity({ .x = sensitivity, .y = sensitivity });
 }
     #else

@@ -207,7 +207,7 @@ void IRadioButton::draw_n_btns(size_t btn_count) {
             size_t length = std::min(max_btn_label_text, MAX_TEXT_BUFFER - 1);
             length = drawn.copyToRAM(buffer, length);
             buffer[length] = 0;
-            drawn = string_view_utf8::MakeRAM((const uint8_t *)buffer);
+            drawn = string_view_utf8::MakeRAM(buffer);
         }
         if (responseFromIndex(i) != Response::_none) {
             button_draw(layout.splits[i], GetBackColor(), GetParent() ? GetParent()->GetBackColor() : GetBackColor(), drawn,

@@ -109,8 +109,8 @@ void ProcessMeasuredElectricCurrent(ADCChannel channel, float current) {
     const uint32_t intExpectedCurrent = s_ExpectedCurrentFilter[idx].AddValue(static_cast<uint32_t>(PWMLogic::GetExpectedCurrent(idx) * EXPECTED_CURRENT_FILTER_MULTIPLIER));
     const uint16_t expectedCurrentRegValue = MODBUS_CURRENT_REGISTERS_SCALE * intExpectedCurrent / EXPECTED_CURRENT_FILTER_MULTIPLIER;
 
-    SetInputRegisterValue(ftrstd::to_underlying(SystemInputRegister::adc_current_1) + idx, static_cast<uint16_t>(adcCurrentRegValue));
-    SetInputRegisterValue(ftrstd::to_underlying(SystemInputRegister::expected_current_1) + idx, static_cast<uint16_t>(expectedCurrentRegValue));
+    SetInputRegisterValue(std::to_underlying(SystemInputRegister::adc_current_1) + idx, static_cast<uint16_t>(adcCurrentRegValue));
+    SetInputRegisterValue(std::to_underlying(SystemInputRegister::expected_current_1) + idx, static_cast<uint16_t>(expectedCurrentRegValue));
 
     if (current > OVERCURRENT_THRESHOLD_AMPS[idx]) {
         SetSystemError(SystemError::OverCurrent);

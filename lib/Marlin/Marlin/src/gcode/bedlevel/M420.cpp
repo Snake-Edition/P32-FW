@@ -29,10 +29,6 @@
 #include "../../module/planner.h"
 #include "../../module/probe.h"
 
-#if ENABLED(EEPROM_SETTINGS)
-  #include "../../module/configuration_store.h"
-#endif
-
 #if ENABLED(EXTENSIBLE_UI)
   #include "../../lcd/extensible_ui/ui_api.h"
 #endif
@@ -75,13 +71,6 @@ void GcodeSuite::M420() {
 
   #if ENABLED(MARLIN_DEV_MODE)
     if (parser.intval('S') == 2) {
-      #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-        const float x_min = probe_min_x(), x_max = probe_max_x(),
-                    y_min = probe_min_y(), y_max = probe_max_y();
-        bilinear_start.set(x_min, y_min);
-        bilinear_grid_spacing.set((x_max - x_min) / (GRID_MAX_POINTS_X - 1),
-                                  (y_max - y_min) / (GRID_MAX_POINTS_Y - 1));
-      #endif
       for (uint8_t x = 0; x < GRID_MAX_POINTS_X; x++)
         for (uint8_t y = 0; y < GRID_MAX_POINTS_Y; y++) {
           Z_VALUES(x, y) = 0.001 * random(-200, 200);
@@ -90,10 +79,10 @@ void GcodeSuite::M420() {
           #endif
         }
       SERIAL_ECHOPGM("Simulated " STRINGIFY(GRID_MAX_POINTS_X) "x" STRINGIFY(GRID_MAX_POINTS_Y) " mesh ");
-      SERIAL_ECHOPAIR(" (", x_min);
-      SERIAL_CHAR(','); SERIAL_ECHO(y_min);
-      SERIAL_ECHOPAIR(")-(", x_max);
-      SERIAL_CHAR(','); SERIAL_ECHO(y_max);
+      SERIAL_ECHOPAIR(" (", MESH_MIN_X);
+      SERIAL_CHAR(','); SERIAL_ECHO(MESH_MIN_Y);
+      SERIAL_ECHOPAIR(")-(", MESH_MAX_X);
+      SERIAL_CHAR(','); SERIAL_ECHO(MESH_MAX_Y);
       SERIAL_ECHOLNPGM(")");
     }
   #endif
@@ -111,30 +100,8 @@ void GcodeSuite::M420() {
 
       set_bed_leveling_enabled(false);
 
-      #if ENABLED(EEPROM_SETTINGS)
-        const int8_t storage_slot = parser.has_value() ? parser.value_int() : ubl.storage_slot;
-        const int16_t a = settings.calc_num_meshes();
-
-        if (!a) {
-          SERIAL_ECHOLNPGM("?EEPROM storage not available.");
-          return;
-        }
-
-        if (!WITHIN(storage_slot, 0, a - 1)) {
-          SERIAL_ECHOLNPGM("?Invalid storage slot.");
-          SERIAL_ECHOLNPAIR("?Use 0 to ", a - 1);
-          return;
-        }
-
-        settings.load_mesh(storage_slot);
-        ubl.storage_slot = storage_slot;
-
-      #else
-
-        SERIAL_ECHOLNPGM("?EEPROM storage not available.");
-        return;
-
-      #endif
+      SERIAL_ECHOLNPGM("?EEPROM storage not available.");
+      return;
     }
 
     // L or V display the map info
@@ -198,9 +165,6 @@ void GcodeSuite::M420() {
                   ExtUI::onMeshUpdate(x, y, Z_VALUES(x, y));
                 #endif
               }
-            #if ENABLED(ABL_BILINEAR_SUBDIVISION)
-              bed_level_virt_interpolate();
-            #endif
           }
 
         #endif
@@ -213,25 +177,6 @@ void GcodeSuite::M420() {
     }
 
   #endif // HAS_MESH
-
-  // V to print the matrix or mesh
-  if (seenV) {
-    #if ABL_PLANAR
-      planner.bed_level_matrix.debug(PSTR("Bed Level Correction Matrix:"));
-    #else
-      if (leveling_is_valid()) {
-        #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-          print_bilinear_leveling_grid();
-          #if ENABLED(ABL_BILINEAR_SUBDIVISION)
-            print_bilinear_leveling_grid_virt();
-          #endif
-        #elif ENABLED(MESH_BED_LEVELING)
-          SERIAL_ECHOLNPGM("Mesh Bed Level data:");
-          mbl.report_mesh();
-        #endif
-      }
-    #endif
-  }
 
   #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
     if (parser.seen('Z')) set_z_fade_height(parser.value_linear_units(), false);

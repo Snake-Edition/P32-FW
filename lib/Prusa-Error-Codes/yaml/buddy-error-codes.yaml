@@ -39,11 +39,19 @@ Errors:
     approved: true
 
   - code: "XX102"
-    printers: [iX, XL, COREONE]
-    title: "PRECISE HOMING REFINEMENT FAILED"
-    text: "Consider adjusting belt tension."
+    printers: [iX, COREONE]
+    title: "PRECISE HOMING FAILED"
+    text: "Failed to calibrate homing. Continuing can cause layer shifts after rehoming."
     id: "PRECISE_REFINEMENT_FAILED"
-    gui_layout: "red_screen"
+    gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX102"
+    printers: [XL]
+    title: "PRECISE HOMING FAILED"
+    text: "Failed to calibrate homing. Continuing can cause layer shifts after rehoming and toolchange issues."
+    id: "PRECISE_REFINEMENT_FAILED"
+    gui_layout: "warning_dialog"
     approved: true
 
   - code: "XX103"
@@ -96,7 +104,7 @@ Errors:
     approved: true
 
   - code: "XX109"
-    printers: [iX, COREONE]
+    printers: [iX, COREONE, MK4]
     title: "STEEL SHEEL NOT DETECTED"
     text: "Steel sheet was not detected. Please put the sheet on to prevent printer damage."
     action: [Retry, Skip]
@@ -208,6 +216,32 @@ Errors:
     action: [Continue]
     id: "MAINTENANCE_WARNING_CHANGES"
     type: WARNING
+    gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX118"
+    title: "HOMING CALIBRATION NEEDED"
+    printers: [XL, COREONE, iX]
+    text: "Homing calibration is needed to ensure repeatable homing."
+    id: "HOMING_CALIBRATION_NEEDED"
+    type: WARNING
+    gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX119"
+    title: "LOADING OBSTRUCTION"
+    printers: [XL, COREONE, iX]
+    text: "Filament was detected in the extruder filament sensor. Please remove it manually before proceeding."
+    id: "LOADING_OBSTRUCTION"
+    type: WARNING
+    gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX120"
+    printers: [iX, COREONE, XL]
+    title: "CALIBRATE HOMING FROM MENU"
+    text: "Please run homing calibration from the Calibrations menu. Continuing can result in homing shifts and toolcrashes."
+    id: "HOMING_CALIBRATION_FROM_MENU_NEEDED"
     gui_layout: "warning_dialog"
     approved: true
 
@@ -365,6 +399,14 @@ Errors:
     title: "CHAMBER MINTEMP ERROR"
     text: "Check the chamber thermistor wiring for possible damage."
     id: "CHAMBER_MINTEMP"
+    gui_layout: "red_screen"
+    approved: true
+
+  - code: "XX216"
+    printers: [iX]
+    title: "HEATBREAK COOLING TOO SLOW"
+    text: "Check the thermistor wiring, cooling duct or heatbreak fan wiring for potential damage."
+    id: "HEATBREAK_COOLING_TOO_SLOW"
     gui_layout: "red_screen"
     approved: true
 
@@ -694,6 +736,16 @@ Errors:
     gui_layout: "warning_dialog"
     approved: true
 
+  - code: "XX324"
+    printers: [MK4, COREONE, iX, XL, MK3.5]
+    title: "DISPLAY PROBLEM DETECTED"
+    text: "Display issues detected. Reducing the refresh rate will possibly solve the problem. Proceed?"
+    id: "DISPLAY_PROBLEM_DETECTED"
+    gui_layout: "warning_dialog"
+    approved: true
+
+# CONNECTIVITY   xx4xx   # Connectivity - Wi - Fi, LAN, Prusa Connect Cloud
+
   - code: "XX401"
     title: "CONNECT REGISTRATION FAILED"
     text: "Registration to Prusa Connect failed due to:"
@@ -982,6 +1034,20 @@ Errors:
     gui_layout: "red_screen"
     approved: true
 
+  - code: "XX537"
+    title: "SELFTEST NOT PASSED"
+    text: "The previous tests must be completed before this one."
+    id: "ACTION_SELFTEST_REQUIRED"
+    gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX538"
+    title: "INTERNAL ERROR"
+    text: "We are actively working on resolving these issues. Please send the crash dump, saved upon reset, to our support team."
+    id: "INTERNAL_ERROR"
+    gui_layout: "red_screen"
+    approved: true
+
   - code: "XX601"
     title: "UNKNOWN ERROR"
     text: "This error code is not found\nin our database.\nContact the support."
@@ -1085,14 +1151,14 @@ Errors:
     title: "Firmware Update Required"
     text: "Insert the bundled USB drive, restart the printer and click the knob once during the boot. This will install the MK4 firmware."
     id: "DIFFERENT_FW_REQUIRED"
-    approved: false
+    approved: true
 
   - code: "XX701"
     printers: [MK4]
     title: "Firmware Update Required"
     text: "Insert the bundled USB drive, restart the printer and click the knob once during the boot. This will install the correct firmware for your hardware."
     id: "DIFFERENT_FW_REQUIRED"
-    approved: false
+    approved: true
 
   - code: "XX701"
     printers: [MK3.5]
@@ -1407,7 +1473,7 @@ Errors:
     id: "ENCLOSURE_FILTER_EXPIRATION_WARNING"
     type: "CONNECT"
     gui_layout: "warning_dialog"
-    approved: false
+    approved: true
 
   - code: "XX832"
     printers: [XL]
@@ -1425,7 +1491,7 @@ Errors:
     id: "ENCLOSURE_FILTER_EXPIRATION"
     type: "CONNECT"
     gui_layout: "warning_dialog"
-    approved: false
+    approved: true
 
   - code: "XX833"
     printers: [iX, MK4, COREONE, MK3.5, MINI, XL]
@@ -1496,3 +1562,67 @@ Errors:
     type: "CONNECT"
     gui_layout: "warning_dialog"
     approved: true
+
+  - code: "XX841"
+    printers: [XL, COREONE, MK4]
+    title: "Cleaning the nozzle"
+    text: "Would you like to purge the filament?\n\nIt will then retract to prevent oozing. Be careful, the nozzle is hot!"
+    id: "NOZZLE_CLEANING_FAILED_RECOMMEND_PURGE"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX842"
+    printers: [XL, COREONE, MK4]
+    title: "Cleaning the nozzle"
+    text: "Waiting for nozzle temperature..."
+    id: "NOZZLE_CLEANING_FAILED_WAIT_TEMP"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX843"
+    printers: [XL, COREONE, MK4]
+    title: "Cleaning the nozzle"
+    text: "Purging the filament.\n\nPlease wait until the purge is complete."
+    id: "NOZZLE_CLEANING_FAILED_PURGE"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX844"
+    printers: [XL, COREONE, MK4]
+    title: "Cleaning the nozzle"
+    text: "The filament has been purged.\n\nThe nozzle will now retract the filament to prevent oozing."
+    id: "NOZZLE_CLEANING_FAILED_AUTORETRACT"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX845"
+    printers: [XL, COREONE, MK4]
+    title: "Cleaning the nozzle"
+    text: "Remove the purged filament and ensure the nozzle is clean and ready.\n\nBe careful, the nozzle is hot!"
+    id: "NOZZLE_CLEANING_FAILED_REMOVE_FILAMENT"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX846"
+    printers: [XL, COREONE, MK4, iX]
+    title: "Nozzle cleaning failed"
+    text: "The auto-retract feature is disabled, which might have caused the failure.\n\nDo you want to enable auto-retract?"
+    id: "NOZZLE_CLEANING_FAILED_AUTORETRACT_ENABLE_ASK"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
+    approved: true
+
+  - code: "XX847"
+    printers: [XL, COREONE, MK4, iX]
+    title: "Warning"
+    text: "Are you sure you want to abort the print?\n\nThe current print will be cancelled and you will need to start over."
+    id: "NOZZLE_CLEANING_FAILED_ABORT_ASK"
+    type: "CONNECT"
+    gui_layout: "warning_dialog"
+    approved: true
+

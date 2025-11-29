@@ -10,7 +10,8 @@
 #include "print_utils.hpp"
 #include "filename_type.hpp"
 #include "settings_ini.hpp"
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
+#include <sys/unistd.h>
 #include <wui_api.h>
 #include <version/version.hpp>
 
@@ -52,7 +53,8 @@
 #endif
 
 #include <crash_dump/crash_dump_handlers.hpp>
-#include "box_unfinished_selftest.hpp"
+#include <selftest_result_evaluation.hpp>
+#include <find_error.hpp>
 #include <transfers/transfer_file_check.hpp>
 #include <guiconfig/guiconfig.h>
 
@@ -141,7 +143,39 @@ const char *labels[] = {
 bool screen_home_data_t::usbWasAlreadyInserted = false;
 bool screen_home_data_t::need_check_wifi_credentials = true;
 
-static bool find_latest_gcode(char *fpath, int fpath_len);
+[[maybe_unused]] static bool find_latest_gcode(char *fpath, int fpath_len) {
+    auto sb = StringBuilder::from_ptr(fpath, fpath_len);
+    sb.append_string("/usb/");
+
+    F_DIR_RAII_Iterator dir(fpath);
+    if (dir.result == ResType::NOK) {
+        return false;
+    }
+
+    // prepare the item at the zeroth position according to sort policy
+    FileSort::Entry entry;
+
+    while (dir.FindNext()) {
+        const FileSort::EntryRef curr(*dir.fno, fpath);
+
+        if (curr.type != FileSort::EntryType::FILE) {
+            continue;
+        }
+
+        if (entry.is_valid() && !FileSort::less_by_time(curr, entry)) {
+            continue;
+        }
+
+        entry.CopyFrom(curr);
+    }
+
+    if (!entry.is_valid()) {
+        return false;
+    }
+
+    sb.append_string(entry.sfn);
+    return sb.is_ok();
+}
 
 static void FilamentBtn_cb(window_t &) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuFilament>);
@@ -160,7 +194,7 @@ screen_home_data_t::screen_home_data_t()
     , header(this)
     , footer(this)
 #if HAS_MINI_DISPLAY()
-    , logo(this, logoRect, &img::printer_logo)
+    , logo(this, logoRect, &img::prusa_mini_logo_153x40)
 #endif
     , w_buttons {
         { this, Rect16(), nullptr, [](window_t&) { Screens::Access()->Open(ScreenFactory::Screen<screen_filebrowser_data_t>); } },
@@ -193,9 +227,7 @@ screen_home_data_t::screen_home_data_t()
         sb.append_string("PRUSA ");
         sb.append_string(PrinterModelInfo::current().id_str);
         sb.append_string(" ");
-        char snake_ver[21];
-        version::snake_version(snake_ver, 21);
-        sb.append_string(snake_ver);
+        sb.append_string(version::project_version);
         sb.append_string(version::project_version_suffix_short);
 #if DEVELOPER_MODE()
         sb.append_string(" DEV");
@@ -203,7 +235,7 @@ screen_home_data_t::screen_home_data_t()
 #ifdef _DEBUG
         sb.append_string(" DBG");
 #endif
-        header.SetText(string_view_utf8::MakeCPUFLASH(header_text.data()));
+        header.SetText(string_view_utf8::MakeRAM(header_text.data()));
     }
 
     for (uint8_t row = 0; row < 2; row++) {
@@ -317,11 +349,15 @@ void screen_home_data_t::on_enter() {
     }
     first_event = false;
 
+#if HAS_SELFTEST()
     static bool first_time_check_st { true };
     if (first_time_check_st) {
         first_time_check_st = false;
-        warn_unfinished_selftest_msgbox();
+        if (!is_selftest_successfully_completed()) {
+            marlin_client::set_warning(WarningType::SelftestNotSuccessfullyCompleted);
+        }
     }
+#endif
 
 #if !DEVELOPER_MODE()
     handle_crash_dump();
@@ -384,14 +420,7 @@ Config::Status name_and_psk_status() {
 } // namespace
 
 void screen_home_data_t::handle_wifi_credentials() {
-    // first we find if there is an WIFI config
-    bool has_wifi_credentials = false;
-    {
-        unique_file_ptr fl;
-        // if other thread modifies files during this action, detection might fail
-        fl.reset(fopen(settings_ini::file_name, "r"));
-        has_wifi_credentials = fl.get() != nullptr;
-    }
+    const bool has_wifi_credentials = access(settings_ini::file_name, R_OK) == 0;
     if (has_wifi_credentials && (name_and_psk_status() == Config::Status::not_equal) && !option::developer_mode) {
         if (MsgBoxInfo(_("Wi-Fi credentials (SSID and password) discovered on the USB flash drive. Would you like to connect your printer to Wi-Fi now?"), Responses_YesNo, 1)
             == Response::Yes) {
@@ -492,40 +521,6 @@ void screen_home_data_t::windowEvent(window_t *sender, GUI_event_t event, void *
     // instead of replacing it, leaving NFC enabled.
     update_nfc_state();
 #endif
-}
-
-static bool find_latest_gcode(char *fpath, int fpath_len) {
-    auto sb = StringBuilder::from_ptr(fpath, fpath_len);
-    sb.append_string("/usb/");
-
-    F_DIR_RAII_Iterator dir(fpath);
-    if (dir.result == ResType::NOK) {
-        return false;
-    }
-
-    // prepare the item at the zeroth position according to sort policy
-    FileSort::Entry entry;
-
-    while (dir.FindNext()) {
-        const FileSort::EntryRef curr(*dir.fno, fpath);
-
-        if (curr.type != FileSort::EntryType::FILE) {
-            continue;
-        }
-
-        if (entry.is_valid() && !FileSort::less_by_time(curr, entry)) {
-            continue;
-        }
-
-        entry.CopyFrom(curr);
-    }
-
-    if (!entry.is_valid()) {
-        return false;
-    }
-
-    sb.append_string(entry.sfn);
-    return sb.is_ok();
 }
 
 void screen_home_data_t::printBtnEna() {

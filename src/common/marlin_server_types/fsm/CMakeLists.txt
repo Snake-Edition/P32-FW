@@ -1,0 +1,1 @@
+target_sources(marlin_server_types PUBLIC safety_timer_phases.cpp)

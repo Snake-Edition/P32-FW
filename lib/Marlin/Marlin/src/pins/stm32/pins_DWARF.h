@@ -40,10 +40,6 @@
 //
 // Limit Switches
 //
-#define X_MIN_PIN              MARLIN_PIN(X_DIAG)
-#define X_MAX_PIN              MARLIN_PIN(X_DIAG)
-#define Y_MIN_PIN              MARLIN_PIN(Y_DIAG)
-#define Y_MAX_PIN              MARLIN_PIN(Y_DIAG)
 #define Z_MIN_PIN              MARLIN_PIN(Z_DIAG)
 #define Z_MAX_PIN              MARLIN_PIN(Z_DIAG)
 
@@ -55,18 +51,6 @@
 // Steppers
 //
 
-#define X_STEP_PIN             MARLIN_PIN(X_STEP)
-#define X_DIR_PIN              MARLIN_PIN(X_DIR)
-#define X_ENABLE_PIN           MARLIN_PIN(X_ENA)
-
-#define Y_STEP_PIN             MARLIN_PIN(Y_STEP)
-#define Y_DIR_PIN              MARLIN_PIN(Y_DIR)
-#define Y_ENABLE_PIN           MARLIN_PIN(Y_ENA)
-
-#define Z_STEP_PIN             MARLIN_PIN(Z_STEP)
-#define Z_DIR_PIN              MARLIN_PIN(Z_DIR)
-#define Z_ENABLE_PIN           MARLIN_PIN(Z_ENA)
-
 #define E0_STEP_PIN            MARLIN_PIN(E0_STEP)
 #define E0_DIR_PIN             MARLIN_PIN(E0_DIR)
 #define E0_ENABLE_PIN          MARLIN_PIN(E0_ENA)
@@ -74,9 +58,6 @@
 #if !HAS_DRIVER(TMC2130)
   #error Unsupported driver
 #endif
-#define X_CS_PIN MARLIN_PIN(CS_X)
-#define Y_CS_PIN MARLIN_PIN(CS_Y)
-#define Z_CS_PIN MARLIN_PIN(CS_Z)
 #define E0_CS_PIN MARLIN_PIN(CS_E)
 
 
@@ -85,7 +66,6 @@
 //
 
 #define TEMP_0_PIN             MARLIN_PIN(TEMP_0)     // Analog Input
-//#define TEMP_BED_PIN           MARLIN_PIN(TEMP_BED)   // Analog Input
 
 #define TEMP_BOARD_PIN         MARLIN_PIN(TEMP_BOARD) // Analog Input
 #define TEMP_HEATBREAK_PIN     MARLIN_PIN(TEMP_HEATBREAK) // Analog Input
@@ -95,17 +75,11 @@
 //
 
 #define HEATER_0_PIN             MARLIN_PIN(HEAT0)
-//#define HEATER_BED_PIN         MARLIN_PIN(BED_HEAT)
 
 #define FAN_PIN                MARLIN_PIN(FAN)
 
 #define HEATER_HEATBREAK_PIN   MARLIN_PIN(FAN1)
 #define FAN1_PIN               MARLIN_PIN(FAN1)
-
-
-#define SDSS                   80  //it means "NC"
-#define SD_DETECT_PIN          80  //it means "NC"
-
 
 #if defined(MARLIN_PORT_HEATER_ENABLE) && defined(MARLIN_PIN_NR_HEATER_ENABLE)
   #define PS_ON_PIN              MARLIN_PIN(HEATER_ENABLE)

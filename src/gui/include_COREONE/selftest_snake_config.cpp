@@ -1,10 +1,14 @@
 #include "selftest_snake_config.hpp"
 #include <selftest_types.hpp>
-#include <screen_menu_selftest_snake_result_parsing.hpp>
+#include <selftest_result_evaluation.hpp>
 #include <config_store/store_instance.hpp>
 #include <option/has_switched_fan_test.h>
 
 #include <option/has_chamber_filtration_api.h>
+
+#if HAS_PRECISE_HOMING_COREXY()
+    #include <module/prusa/homing_corexy.hpp>
+#endif
 
 #include <option/has_chamber_api.h>
 #if HAS_CHAMBER_API()
@@ -56,15 +60,14 @@ TestResult get_test_result(Action action, [[maybe_unused]] Tool tool) {
         return evaluate_results(sr.yaxis);
     case Action::XCheck:
         return evaluate_results(sr.xaxis);
+#if HAS_PRECISE_HOMING_COREXY()
+    case Action::PreciseHoming:
+        return corexy_home_is_calibrated() ? TestResult::TestResult_Passed : TestResult::TestResult_Unknown;
+#endif
     case Action::Loadcell:
-        if (tool == Tool::_all_tools) {
-            return merge_hotends_evaluations(
-                [&](int8_t e) {
-                    return evaluate_results(sr.tools[e].loadcell);
-                });
-        } else {
-            return evaluate_results(sr.tools[ftrstd::to_underlying(tool)].loadcell);
-        }
+        return merge_hotends(tool, [&](const int8_t e) {
+            return evaluate_results(sr.tools[e].loadcell);
+        });
     case Action::ZCheck:
         return evaluate_results(sr.zaxis);
     case Action::Heaters:
@@ -72,18 +75,15 @@ TestResult get_test_result(Action action, [[maybe_unused]] Tool tool) {
             return evaluate_results(sr.tools[e].nozzle);
         }));
     case Action::Gears:
-        return evaluate_results(sr.gears);
+        return merge_hotends(tool, [&](const int8_t e) {
+            return evaluate_results(sr.tools[e].gears);
+        });
     case Action::DoorSensor:
         return evaluate_results(config_store().selftest_result_door_sensor.get());
     case Action::FilamentSensorCalibration:
-        if (tool == Tool::_all_tools) {
-            return merge_hotends_evaluations(
-                [&](int8_t e) {
-                    return evaluate_results(sr.tools[e].fsensor);
-                });
-        } else {
-            return evaluate_results(sr.tools[ftrstd::to_underlying(tool)].fsensor);
-        }
+        return merge_hotends(tool, [&](const int8_t e) {
+            return evaluate_results(sr.tools[e].fsensor);
+        });
     case Action::_count:
         break;
     }
@@ -97,7 +97,11 @@ ToolMask get_tool_mask([[maybe_unused]] Tool tool) {
 uint64_t get_test_mask(Action action) {
     switch (action) {
     case Action::Fans:
+    case Action::Gears:
     case Action::DoorSensor:
+#if HAS_PRECISE_HOMING_COREXY()
+    case Action::PreciseHoming:
+#endif
         bsod("This should be gcode");
     case Action::YCheck:
         return stmYAxis;
@@ -113,8 +117,6 @@ uint64_t get_test_mask(Action action) {
         return stmLoadcell;
     case Action::ZAlign:
         return stmZcalib;
-    case Action::Gears:
-        return stmGears;
     case Action::_count:
         break;
     }

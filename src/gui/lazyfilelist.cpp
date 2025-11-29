@@ -91,7 +91,7 @@ void LazyDirViewBase::ChangeDirectory(const char *p, SortPolicy sp, const char *
     // This will be adjusted in the following calculation
     windowStartingFrom = -1;
 
-    const auto less = sort_policy_less[ftrstd::to_underlying(sortPolicy)];
+    const auto less = sort_policy_less[std::to_underlying(sortPolicy)];
 
     const auto indices_begin = indices_data;
     const auto indices_end = indices_data + window_size;
@@ -165,7 +165,7 @@ bool LazyDirViewBase::MoveUp(int amount) {
 
     windowStartingFrom -= amount;
 
-    const auto less = sort_policy_less[ftrstd::to_underlying(sortPolicy)];
+    const auto less = sort_policy_less[std::to_underlying(sortPolicy)];
 
     const auto indices_end = indices_data + window_size;
     const auto full_insert_range_end = indices_data + amount;
@@ -262,7 +262,7 @@ bool LazyDirViewBase::MoveDown(int amount) {
 
     windowStartingFrom += amount;
 
-    const auto less = sort_policy_less[ftrstd::to_underlying(sortPolicy)];
+    const auto less = sort_policy_less[std::to_underlying(sortPolicy)];
 
     const auto indices_end = indices_data + window_size;
     const auto full_insert_range_end = indices_end;

@@ -11,7 +11,6 @@
 #include "img_resources.hpp"
 #include <option/has_sheet_profiles.h>
 #include "config_features.h"
-#include "gui_config_printer.hpp"
 #include <guiconfig/guiconfig.h>
 #include <menu_vars.h>
 #include <gui.hpp>
@@ -25,13 +24,16 @@
 
 WindowScale::WindowScale(window_t *parent, point_i16_t pt)
     : window_frame_t(parent, Rect16(pt, 10, 100))
-    , scaleNum0(parent, getNumRect(pt), z_offset_max, "% f")
-    , scaleNum1(parent, getNumRect(pt), (z_offset_max + z_offset_min) / 2, "% f")
-    , scaleNum2(parent, getNumRect(pt), z_offset_min, "% f") {
+    , scaleNum0(parent, getNumRect(pt), z_offset_max, "% d")
+    , scaleNum1(parent, getNumRect(pt), (z_offset_max + z_offset_min) / 2, "% d")
+    , scaleNum2(parent, getNumRect(pt), z_offset_min, "% d") {
 
     scaleNum0 -= Rect16::Top_t(8);
     scaleNum1 += Rect16::Top_t((Height() / 2) - 8);
     scaleNum2 += Rect16::Top_t(Height() - 8);
+    scaleNum0.PrintAsInt32();
+    scaleNum1.PrintAsInt32();
+    scaleNum2.PrintAsInt32();
 }
 
 Rect16 WindowScale::getNumRect(point_i16_t pt) const {
@@ -147,24 +149,12 @@ WindowLiveAdjustZ_withText::WindowLiveAdjustZ_withText(window_t *parent, point_i
     SetRect(GetRect().Union(text.GetRect()));
 }
 
-void WindowLiveAdjustZ_withText::Idle() {
-    number.Shadow();
-}
-
-void WindowLiveAdjustZ_withText::Activate() {
-    number.Unshadow();
-}
-
-bool WindowLiveAdjustZ_withText::IsActive() {
-    return number.IsShadowed();
-}
-
 void WindowLiveAdjustZ_withText::windowEvent(window_t *sender, GUI_event_t event, void *param) {
     switch (event) {
 
     case GUI_event_t::ENC_UP:
     case GUI_event_t::ENC_DN:
-        if (IsActive()) {
+        if (!active) {
             return; // discard event
         }
         break;

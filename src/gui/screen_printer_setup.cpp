@@ -2,7 +2,6 @@
 
 #include <ScreenHandler.hpp>
 #include <img_resources.hpp>
-#include <str_utils.hpp>
 #include <common/nozzle_diameter.hpp>
 #include <MItem_tools.hpp>
 
@@ -23,11 +22,13 @@ MI_DONE::MI_DONE()
 }
 
 void MI_DONE::click(IWindowMenu &) {
-    config_store().printer_setup_done.set(true);
+    config_store().printer_hw_config_done.set(true);
 
+#if HAS_SELFTEST()
     // If the screen was open as a part of RevisePrinterStatus selftest part, goes to the next part
     // Otherwise, this is ignored
     marlin_client::FSM_response(PhasesSelftest::RevisePrinterStatus_revise, Response::Done);
+#endif
 
     Screens::Access()->Close();
 }

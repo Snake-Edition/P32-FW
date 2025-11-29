@@ -37,7 +37,7 @@ MI_PL_ENABLED::MI_PL_ENABLED()
     : WI_ICON_SWITCH_OFF_ON_t(config_store().prusalink_enabled.get(), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {}
 
 void MI_PL_ENABLED::OnChange([[maybe_unused]] size_t old_index) {
-    config_store().prusalink_enabled.set(index);
+    config_store().prusalink_enabled.set(value());
     notify_reconfigure();
 }
 
@@ -48,7 +48,14 @@ MI_PL_PASSWORD_LABEL::MI_PL_PASSWORD_LABEL()
 // MI_PL_PASSWORD_VALUE
 // ----------------------------------------------------------------
 MI_PL_PASSWORD_VALUE::MI_PL_PASSWORD_VALUE()
-    : WiInfo(_(label)) {
+    : WiInfo {
+#if HAS_MINI_DISPLAY()
+    {},
+#else
+    _("Password"),
+#endif
+}
+{
     update_explicit();
 }
 

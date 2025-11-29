@@ -1,9 +1,9 @@
 #include "screen_qr_error.hpp"
+#include "display.hpp"
 #include "img_resources.hpp"
 #include "config.h"
 #include "ScreenHandler.hpp"
 #include "sound.hpp"
-#include "sys.h"
 #include "support_utils.h"
 
 #include <stdlib.h>
@@ -13,11 +13,13 @@
 #include <config_store/store_instance.hpp>
 #include <guiconfig/guiconfig.h>
 #include <option/has_leds.h>
+#if HAS_LEDS()
+    #include <leds/status_leds_handler.hpp>
+#endif
 
 using namespace crash_dump;
 
 static const constexpr Rect16 hand_rect = GuiDefaults::EnableDialogBigLayout ? Rect16(270, 95, 60, 82) : Rect16(20, 155, 64, 82);
-static const constexpr Rect16 descr_rect = GuiDefaults::EnableDialogBigLayout ? Rect16(30, 85, 230, 170) : Rect16(10, 50, GuiDefaults::ScreenWidth - 20, 220);
 static const constexpr Rect16 QR_rect = GuiDefaults::EnableDialogBigLayout ? Rect16(320, 85, 130, 130) : Rect16(90, 140, 130, 130);
 static const constexpr Rect16 link_rect = GuiDefaults::EnableDialogBigLayout ? Rect16(30, 277, 170, 20) : Rect16(0, 270, GuiDefaults::ScreenWidth, 13);
 static const constexpr Rect16 qr_code_rect = GuiDefaults::EnableDialogBigLayout ? Rect16(320, 257, 130, 20) : Rect16(100, 295, 64, 13);
@@ -31,19 +33,16 @@ static constexpr const char *const unknown_err_txt = N_("Unknown Error");
 ScreenErrorQR::ScreenErrorQR()
     : ScreenResetError(fw_version_rect)
     , header(this)
-    , err_title(this, title_rect, is_multiline::no)
-    , err_description(this, descr_rect, is_multiline::yes)
+    , err_title(this, GuiDefaults::RedscreenTitleRect, is_multiline::no)
+    , err_description(this, GuiDefaults::RedscreenDescriptionRect, is_multiline::yes)
     , hand_icon(this, hand_rect, &img::hand_qr_59x72)
     , qr(this, QR_rect, ErrCode::ERR_UNDEF)
     , help_txt(this, help_txt_rect, is_multiline::no)
     , help_link(this, link_rect, ErrCode::ERR_UNDEF)
     , qr_code_txt(this, qr_code_rect, is_multiline::no)
-#if HAS_LEDS()
-    , anim(Animator_LCD_leds().start_animations(Fading(leds::ColorRGBW(255, 0, 0), 500), 10))
-#endif
     , title_line(this, title_line_rect) {
 
-    img::enable_resource_file();
+    display::enable_resource_file();
     SetRedLayout();
     title_line.SetBackColor(COLOR_WHITE);
     help_link.set_font(Font::small);
@@ -81,7 +80,7 @@ ScreenErrorQR::ScreenErrorQR()
         if (config_store().devhash_in_qr.get()) {
             static char p_code[PRINTER_CODE_SIZE + 1];
             printerCode(p_code);
-            qr_code_txt.SetText(string_view_utf8::MakeRAM((const uint8_t *)p_code));
+            qr_code_txt.SetText(string_view_utf8::MakeRAM(p_code));
         } else {
             qr_code_txt.Hide();
         }
@@ -112,12 +111,8 @@ ScreenErrorQR::ScreenErrorQR()
         title_line.Hide();
         hide_qr();
     }
-}
 
-void ScreenErrorQR::windowEvent(window_t *sender, GUI_event_t event, void *param) {
-    if ((event == GUI_event_t::CLICK) || (event == GUI_event_t::BTN_DN)) {
-        sys_reset();
-        return;
-    }
-    ScreenResetError::windowEvent(sender, event, param);
+#if HAS_LEDS()
+    leds::StatusLedsHandler::instance().set_error();
+#endif
 }

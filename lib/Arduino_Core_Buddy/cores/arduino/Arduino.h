@@ -35,7 +35,6 @@
 extern "C" {
 #endif // __cplusplus
 extern void setup(void);
-extern void loop(void);
 
 void yield(void);
 #ifdef __cplusplus

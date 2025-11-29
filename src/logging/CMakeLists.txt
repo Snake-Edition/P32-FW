@@ -1,3 +1,6 @@
+add_library(log_interface INTERFACE)
+target_include_directories(log_interface INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 add_library(logging OBJECT log.cpp log_dest_rtt.cpp log_dest_shared.cpp log_platform.cpp)
 
 if(BOARD IN_LIST BUDDY_BOARDS)
@@ -24,6 +27,8 @@ target_link_libraries(
           Arduino::Core # config store 🤦
           SG14 # config store 🤦
           error_codes # config store 🤦
+          buddy_utils # config store 🤦
+  PUBLIC log_interface
   )
 
 target_include_directories(
@@ -36,5 +41,3 @@ target_include_directories(
           ${CMAKE_SOURCE_DIR}/src
           ${CMAKE_SOURCE_DIR}/src/gui # filename_defs.h 🤦
   )
-
-target_include_directories(logging PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

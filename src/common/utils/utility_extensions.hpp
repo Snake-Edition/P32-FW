@@ -7,27 +7,6 @@
 
 #include <utility>
 
-namespace ftrstd { // future std - simple to refactor out once our c++ standard increases
-
-// (since C++23)
-template <class Enum>
-constexpr std::underlying_type_t<Enum> to_underlying(Enum e) noexcept {
-    return static_cast<std::underlying_type_t<Enum>>(e);
-}
-
-// Stolen from cppreference.com
-template <class To, class From>
-std::enable_if_t<sizeof(From) == sizeof(To) && std::is_trivially_copyable_v<From> && std::is_trivially_copyable_v<To>, To>
-bit_cast(const From &src) noexcept {
-    static_assert(std::is_trivially_constructible_v<To>, "This implementation additionally requires destination type to be trivially constructible");
-
-    To dst;
-    memcpy(&dst, &src, sizeof(To));
-    return dst;
-}
-
-}; // namespace ftrstd
-
 /**
  * @brief If used in consteval functions, will cause a (rather cryptic) compile time error (call to non-constexpr function).
  *  Alternative to static_assert with dependant false

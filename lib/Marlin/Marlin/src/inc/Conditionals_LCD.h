@@ -26,60 +26,9 @@
  * Conditionals that need to be set before Configuration_adv.h or pins.h
  */
 
-#if ENABLED(CARTESIO_UI)
-
-  #define DOGLCD
-  #define IS_ULTIPANEL
-
-#elif ENABLED(ZONESTAR_LCD)
-
-  #define ADC_KEYPAD
-  #define IS_RRW_KEYPAD
-  #define REPRAPWORLD_KEYPAD_MOVE_STEP 10.0
-  #define ADC_KEY_NUM 8
-  #define IS_ULTIPANEL
-
-  // This helps to implement ADC_KEYPAD menus
-  #define REVERSE_MENU_DIRECTION
-  #define ENCODER_PULSES_PER_STEP 1
-  #define ENCODER_STEPS_PER_MENU_ITEM 1
-  #define ENCODER_FEEDRATE_DEADZONE 2
-
-#elif ENABLED(RADDS_DISPLAY)
-  #define IS_ULTIPANEL
-  #define ENCODER_PULSES_PER_STEP 2
-
-#elif EITHER(ANET_FULL_GRAPHICS_LCD, BQ_LCD_SMART_CONTROLLER)
+#if EITHER(ANET_FULL_GRAPHICS_LCD, BQ_LCD_SMART_CONTROLLER)
 
   #define IS_RRD_FG_SC
-
-#elif ANY(miniVIKI, VIKI2, ELB_FULL_GRAPHIC_CONTROLLER, AZSMZ_12864)
-
-  #define IS_ULTRA_LCD
-  #define DOGLCD
-  #define IS_ULTIPANEL
-
-  #if ENABLED(miniVIKI)
-    #define U8GLIB_ST7565_64128N
-  #elif ENABLED(VIKI2)
-    #define U8GLIB_ST7565_64128N
-  #elif ENABLED(ELB_FULL_GRAPHIC_CONTROLLER)
-    #define U8GLIB_LM6059_AF
-    #define SD_DETECT_INVERTED
-  #elif ENABLED(AZSMZ_12864)
-    #define U8GLIB_ST7565_64128N
-  #endif
-
-#elif ENABLED(OLED_PANEL_TINYBOY2)
-
-  #define IS_U8GLIB_SSD1306
-  #define IS_ULTIPANEL
-
-#elif ENABLED(REPRAPWORLD_GRAPHICAL_LCD)
-
-  #define DOGLCD
-  #define U8GLIB_ST7920
-  #define IS_ULTIPANEL
 
 #elif ENABLED(CR10_STOCKDISPLAY)
 
@@ -108,42 +57,6 @@
 
   #define MINIPANEL
 
-#elif ANY(FYSETC_MINI_12864_X_X, FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0, FYSETC_MINI_12864_2_1)
-
-  #define FYSETC_MINI_12864
-  #define DOGLCD
-  #define IS_ULTIPANEL
-  #define LED_COLORS_REDUCE_GREEN
-  #if HAS_POWER_SWITCH && EITHER(FYSETC_MINI_12864_2_0, FYSETC_MINI_12864_2_1)
-    #define LED_BACKLIGHT_TIMEOUT 10000
-  #endif
-
-  // Require LED backlighting enabled
-  #if EITHER(FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0)
-    #define RGB_LED
-  #elif ENABLED(FYSETC_MINI_12864_2_1)
-    #define LED_CONTROL_MENU
-    #define NEOPIXEL_LED
-    #undef NEOPIXEL_TYPE
-    #define NEOPIXEL_TYPE       NEO_RGB
-    #if NEOPIXEL_PIXELS < 3
-      #undef NEOPIXELS_PIXELS
-      #define NEOPIXEL_PIXELS     3
-    #endif
-    #ifndef NEOPIXEL_BRIGHTNESS
-      #define NEOPIXEL_BRIGHTNESS 127
-    #endif
-    //#define NEOPIXEL_STARTUP_TEST
-  #endif
-
-#elif ENABLED(ULTI_CONTROLLER)
-
-  #define IS_ULTIPANEL
-  #define U8GLIB_SSD1309
-  #define LCD_RESET_PIN LCD_PINS_D6 //  This controller need a reset pin
-  #define ENCODER_PULSES_PER_STEP 2
-  #define ENCODER_STEPS_PER_MENU_ITEM 2
-
 #elif ENABLED(MAKEBOARD_MINI_2_LINE_DISPLAY_1602)
 
   #define IS_RRD_SC
@@ -156,75 +69,13 @@
   #define REPRAP_DISCOUNT_FULL_GRAPHIC_SMART_CONTROLLER
 #endif
 
-#if EITHER(MAKRPANEL, MINIPANEL)
-  #define IS_ULTIPANEL
-  #define DOGLCD
-  #if ENABLED(MAKRPANEL)
-    #define U8GLIB_ST7565_64128N
-  #endif
-#endif
-
 #if ENABLED(IS_U8GLIB_SSD1306)
   #define U8GLIB_SSD1306
-#endif
-
-#if ENABLED(OVERLORD_OLED)
-  #define IS_ULTIPANEL
-  #define U8GLIB_SH1106
-  /**
-   * PCA9632 for buzzer and LEDs via i2c
-   * No auto-inc, red and green leds switched, buzzer
-   */
-  #define PCA9632
-  #define PCA9632_NO_AUTO_INC
-  #define PCA9632_GRN         0x00
-  #define PCA9632_RED         0x02
-  #define PCA9632_BUZZER
-  #define PCA9632_BUZZER_DATA { 0x09, 0x02 }
-
-  #define ENCODER_PULSES_PER_STEP     1 // Overlord uses buttons
-  #define ENCODER_STEPS_PER_MENU_ITEM 1
-#endif
-
-// 128x64 I2C OLED LCDs - SSD1306/SSD1309/SH1106
-#define HAS_SSD1306_OLED_I2C ANY(U8GLIB_SSD1306, U8GLIB_SSD1309, U8GLIB_SH1106)
-#if HAS_SSD1306_OLED_I2C
-  #define IS_ULTRA_LCD
-  #define DOGLCD
-#endif
-
-// ST7920-based graphical displays
-#if ANY(REPRAP_DISCOUNT_FULL_GRAPHIC_SMART_CONTROLLER, LCD_FOR_MELZI, SILVER_GATE_GLCD_CONTROLLER)
-  #define DOGLCD
-  #define U8GLIB_ST7920
-  #define IS_RRD_SC
 #endif
 
 // RepRapDiscount LCD or Graphical LCD with rotary click encoder
 #if ENABLED(IS_RRD_SC)
   #define REPRAP_DISCOUNT_SMART_CONTROLLER
-#endif
-
-/**
- * SPI Ultipanels
- */
-
-// Basic Ultipanel-like displays
-#if ANY(ULTIMAKERCONTROLLER, REPRAP_DISCOUNT_SMART_CONTROLLER, G3D_PANEL, RIGIDBOT_PANEL, PANEL_ONE, U8GLIB_SH1106)
-  #define IS_ULTIPANEL
-#endif
-
-// Einstart OLED has Cardinal nav via pins defined in pins_EINSTART-S.h
-#if ENABLED(U8GLIB_SH1106_EINSTART)
-  #define DOGLCD
-  #define IS_ULTIPANEL
-#endif
-
-// FSMC/SPI TFT Panels
-#if ENABLED(FSMC_GRAPHICAL_TFT)
-  #define DOGLCD
-  #define IS_ULTIPANEL
-  #define DELAYED_BACKLIGHT_INIT
 #endif
 
 /**
@@ -241,35 +92,6 @@
     #define LCD_HEIGHT 4
   #endif
 
-#elif ENABLED(LCD_I2C_PANELOLU2)
-
-  // PANELOLU2 LCD with status LEDs, separate encoder and click inputs
-
-  #define LCD_I2C_TYPE_MCP23017
-  #define LCD_I2C_ADDRESS 0x20 // I2C Address of the port expander
-  #define LCD_USE_I2C_BUZZER   // Enable buzzer on LCD (optional)
-  #define IS_ULTIPANEL
-
-#elif ENABLED(LCD_I2C_VIKI)
-
-  /**
-   * Panucatt VIKI LCD with status LEDs, integrated click & L/R/U/P buttons, separate encoder inputs
-   *
-   * This uses the LiquidTWI2 library v1.2.3 or later ( https://github.com/lincomatic/LiquidTWI2 )
-   * Make sure the LiquidTWI2 directory is placed in the Arduino or Sketchbook libraries subdirectory.
-   * Note: The pause/stop/resume LCD button pin should be connected to the Arduino
-   *       BTN_ENC pin (or set BTN_ENC to -1 if not used)
-   */
-  #define LCD_I2C_TYPE_MCP23017
-  #define LCD_I2C_ADDRESS 0x20 // I2C Address of the port expander
-  #define LCD_USE_I2C_BUZZER   // Enable buzzer on LCD (requires LiquidTWI2 v1.2.3 or later)
-  #define IS_ULTIPANEL
-
-  #define ENCODER_FEEDRATE_DEADZONE 4
-
-  #define STD_ENCODER_PULSES_PER_STEP 1
-  #define STD_ENCODER_STEPS_PER_MENU_ITEM 2
-
 #elif ENABLED(G3D_PANEL)
 
   #define STD_ENCODER_PULSES_PER_STEP 2
@@ -283,11 +105,7 @@
 #endif
 
 #ifndef STD_ENCODER_PULSES_PER_STEP
-  #if ENABLED(TOUCH_BUTTONS)
-    #define STD_ENCODER_PULSES_PER_STEP 1
-  #else
-    #define STD_ENCODER_PULSES_PER_STEP 5
-  #endif
+  #define STD_ENCODER_PULSES_PER_STEP 5
 #endif
 #ifndef STD_ENCODER_STEPS_PER_MENU_ITEM
   #define STD_ENCODER_STEPS_PER_MENU_ITEM 1
@@ -301,52 +119,6 @@
 #ifndef ENCODER_FEEDRATE_DEADZONE
   #define ENCODER_FEEDRATE_DEADZONE 6
 #endif
-
-// Shift register panels
-// ---------------------
-// 2 wire Non-latching LCD SR from:
-// https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/schematics#!shiftregister-connection
-#if ENABLED(FF_INTERFACEBOARD)
-  #define SR_LCD_3W_NL    // Non latching 3 wire shift register
-  #define IS_ULTIPANEL
-#elif ENABLED(SAV_3DLCD)
-  #define SR_LCD_2W_NL    // Non latching 2 wire shift register
-  #define IS_ULTIPANEL
-#endif
-
-#if ENABLED(IS_ULTIPANEL)
-  #define ULTIPANEL
-#endif
-#if ENABLED(ULTIPANEL)
-  #define IS_ULTRA_LCD
-  #ifndef NEWPANEL
-    #define NEWPANEL
-  #endif
-#endif
-
-#if ENABLED(IS_ULTRA_LCD)
-  #define ULTRA_LCD
-#endif
-
-#if ENABLED(IS_RRW_KEYPAD)
-  #define REPRAPWORLD_KEYPAD
-#endif
-
-// Keypad needs a move step
-#if ENABLED(REPRAPWORLD_KEYPAD)
-  #define NEWPANEL
-  #ifndef REPRAPWORLD_KEYPAD_MOVE_STEP
-    #define REPRAPWORLD_KEYPAD_MOVE_STEP 1.0
-  #endif
-#endif
-
-// Aliases for LCD features
-#define HAS_SPI_LCD          ENABLED(ULTRA_LCD)
-#define HAS_DISPLAY         (HAS_SPI_LCD || ENABLED(EXTENSIBLE_UI))
-#define HAS_GRAPHICAL_LCD    ENABLED(DOGLCD)
-#define HAS_CHARACTER_LCD   (HAS_SPI_LCD && !HAS_GRAPHICAL_LCD)
-#define HAS_LCD_MENU        (ENABLED(ULTIPANEL) && DISABLED(NO_LCD_MENUS))
-#define HAS_ADC_BUTTONS      ENABLED(ADC_KEYPAD)
 
 /**
  *  Multi-Material-Unit supported models
@@ -406,7 +178,6 @@
   #undef SINGLENOZZLE
   #undef SWITCHING_EXTRUDER
   #undef SWITCHING_NOZZLE
-  #undef MIXING_EXTRUDER
   #undef HOTEND_IDLE_TIMEOUT
   #undef DISABLE_E
 #endif
@@ -433,14 +204,6 @@
     #define HOTENDS       E_STEPPERS
   #endif
 
-#elif ENABLED(MIXING_EXTRUDER)      // Multiple feeds are mixed proportionally
-
-  #define E_STEPPERS      MIXING_STEPPERS
-  #define E_MANUAL        1
-  #if MIXING_STEPPERS == 2
-    #define HAS_DUAL_MIXING 1
-  #endif
-
 #elif ENABLED(SWITCHING_TOOLHEAD)   // Toolchanger
 
   #define E_STEPPERS      EXTRUDERS
@@ -465,7 +228,7 @@
   #define SINGLENOZZLE
 #endif
 
-#if EITHER(SINGLENOZZLE, MIXING_EXTRUDER)         // One hotend, one thermistor, no XY offset
+#if ENABLED(SINGLENOZZLE)           // One hotend, one thermistor, no XY offset
   #undef HOTENDS
   #define HOTENDS       1
   #undef HOTEND_OFFSET_X
@@ -890,7 +653,7 @@
  * Set flags for enabled probes
  */
 #define HAS_BED_PROBE (HAS_Z_SERVO_PROBE || ANY(FIX_MOUNTED_PROBE, TOUCH_MI_PROBE, Z_PROBE_ALLEN_KEY, Z_PROBE_SLED, SOLENOID_PROBE, SENSORLESS_PROBING, RACK_AND_PINION_PROBE))
-#define PROBE_SELECTED (HAS_BED_PROBE || EITHER(PROBE_MANUALLY, MESH_BED_LEVELING))
+#define PROBE_SELECTED (HAS_BED_PROBE || ENABLED(PROBE_MANUALLY))
 
 #if HAS_BED_PROBE
   #define HAS_CUSTOM_PROBE_PIN  DISABLED(Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN)
@@ -901,7 +664,7 @@
     #define Z_PROBE_LOW_POINT -5
   #endif
   #if ENABLED(Z_PROBE_ALLEN_KEY)
-    #define PROBE_TRIGGERED_WHEN_STOWED_TEST // Extra test for Allen Key Probe
+    #error
   #endif
   #ifdef MULTIPLE_PROBING
     #if EXTRA_PROBING
@@ -920,10 +683,8 @@
 #endif
 
 #define HAS_SOFTWARE_ENDSTOPS        EITHER(MIN_SOFTWARE_ENDSTOPS, MAX_SOFTWARE_ENDSTOPS)
-#define HAS_RESUME_CONTINUE          ANY(EXTENSIBLE_UI, NEWPANEL, EMERGENCY_PARSER)
-#define HAS_COLOR_LEDS               ANY(BLINKM, RGB_LED, RGBW_LED, PCA9632, PCA9533, NEOPIXEL_LED)
-#define HAS_LEDS_OFF_FLAG            (BOTH(PRINTER_EVENT_LEDS, SDSUPPORT) && HAS_RESUME_CONTINUE)
-#define HAS_PRINT_PROGRESS           EITHER(SDSUPPORT, LCD_SET_PROGRESS_MANUALLY)
+#define HAS_RESUME_CONTINUE          ANY(EXTENSIBLE_UI, EMERGENCY_PARSER)
+#define HAS_PRINT_PROGRESS           ENABLED(LCD_SET_PROGRESS_MANUALLY)
 #define HAS_PRINT_PROGRESS_PERMYRIAD (HAS_PRINT_PROGRESS && EITHER(PRINT_PROGRESS_SHOW_DECIMALS, SHOW_REMAINING_TIME))
 #define HAS_SERVICE_INTERVALS        (ENABLED(PRINTCOUNTER) && (SERVICE_INTERVAL_1 > 0 || SERVICE_INTERVAL_2 > 0 || SERVICE_INTERVAL_3 > 0))
 #define HAS_FILAMENT_SENSOR          ENABLED(FILAMENT_RUNOUT_SENSOR)
@@ -940,10 +701,7 @@
 #if ENABLED(MORGAN_SCARA)
   #define IS_SCARA 1
 #endif
-#if (ENABLED(DELTA) || IS_SCARA)
-  #define IS_KINEMATIC 1
-#endif
-#define IS_CARTESIAN !IS_KINEMATIC
+static_assert(!(ENABLED(DELTA) || ENABLED(IS_SCARA)), "Support dropped");
 
 #ifndef INVERT_X_DIR
   #define INVERT_X_DIR false
@@ -956,10 +714,6 @@
 #endif
 #ifndef INVERT_E_DIR
   #define INVERT_E_DIR false
-#endif
-
-#if ENABLED(SLIM_LCD_MENUS)
-  #define BOOT_MARLIN_LOGO_SMALL
 #endif
 
 #define IS_RE_ARM_BOARD MB(RAMPS_14_RE_ARM_EFB, RAMPS_14_RE_ARM_EEB, RAMPS_14_RE_ARM_EFF, RAMPS_14_RE_ARM_EEF, RAMPS_14_RE_ARM_SF)

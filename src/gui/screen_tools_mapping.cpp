@@ -14,6 +14,7 @@
 #include <tools_mapping.hpp>
 #include <print_utils.hpp>
 #include <filament_sensors_handler.hpp>
+#include <buddy/unreachable.hpp>
 
 namespace {
 
@@ -1098,15 +1099,30 @@ void ToolsMappingBody::handle_item_click() {
                 }
             }();
 
-            if (resp == Response::Back) { // do nothing, back to selection
+            switch (resp) {
+            case Response::Back:
                 return;
+
+            case Response::SpoolJoin: {
+                const uint8_t last_spool = joiner.get_last_spool_2_from_chain(real_right_mapped_to_last_left);
+// only relevant to XL; MMU printers without active filament sensor can't reach this.
+#if !HAS_MMU2()
+                if (!hasActiveFilamentSensor(last_spool)) {
+                    StringViewUtf8Parameters<2> params;
+                    tools_mapping_box(querying_user, _("Tool %d has both filament sensors disabled.\nUnable to set up spool join.").formatted(params, last_spool + 1), { Response::Back }, 0);
+                    cleanup_and_return_to_left();
+                    return;
+                }
+#endif
+                handle_right_steal();
+                const uint8_t real_right = right_phys_idx_to_real[current_idx];
+                // eventhough we are not adding "root" of the chain but instead the last spool of the chain, it should still work (even better)
+                joiner.add_join(last_spool, real_right);
+                break;
             }
 
-            handle_right_steal();
-
-            if (resp == Response::SpoolJoin) {
-                joiner.add_join(real_right_mapped_to_last_left, right_phys_idx_to_real[current_idx]);
-            } else if (resp == Response::Replace) {
+            case Response::Replace: {
+                handle_right_steal();
                 // can be replacing a part of chain to be on top, so remove whole chain and start from zero
                 // handle_right_steal() would have removed one link from a chain, even if it was this one
                 // need to make sure that the chain that was mapped to this left is completely removed before assigning to it
@@ -1115,21 +1131,30 @@ void ToolsMappingBody::handle_item_click() {
                     joiner.remove_join_chain_containing(leftover_chain_real_right);
                 }
                 mapper.set_mapping(left_gcode_idx_to_real[last_left_idx], right_phys_idx_to_real[current_idx]);
-            } else if (resp == Response::Remove) {
-                // done, just remove it
-            } else {
-                assert(false);
+                break;
+            }
+
+            case Response::Remove: {
+                handle_right_steal();
+                break;
+            }
+
+            default:
+                BUDDY_UNREACHABLE();
             }
         }
-
-        set_idle(right_phys_texts[right_phys_idx_to_real[current_idx]], nullptr);
-        set_idle(left_gcode_texts[left_gcode_idx_to_real[last_left_idx]], &left_gcode_colors[left_gcode_idx_to_real[last_left_idx]]);
-
-        update_shown_state();
-        go_left();
+        cleanup_and_return_to_left();
         break;
     }
     }
+}
+
+void ToolsMappingBody::cleanup_and_return_to_left() {
+    set_idle(right_phys_texts[right_phys_idx_to_real[current_idx]], nullptr);
+    set_idle(left_gcode_texts[left_gcode_idx_to_real[last_left_idx]], &left_gcode_colors[left_gcode_idx_to_real[last_left_idx]]);
+
+    update_shown_state();
+    go_left();
 }
 
 void ToolsMappingBody::windowEvent([[maybe_unused]] window_t *sender, GUI_event_t event, [[maybe_unused]] void *param) {
@@ -1147,7 +1172,7 @@ void ToolsMappingBody::windowEvent([[maybe_unused]] window_t *sender, GUI_event_
             break;
         }
 
-        auto response = ClientResponses::GetResponse(preview_phase, current_idx - cnt_current_items);
+        auto response = ClientResponses::get_available_response(preview_phase, current_idx - cnt_current_items);
 
         // Back in right state undoes going to right
         if (response == Response::Back && state == State::right) {

@@ -46,8 +46,8 @@ MEMORY
 {
   FLASH (rx)      : ORIGIN = 0x08020200, LENGTH = 1919K
   RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 192K
-  MEMORY_B1 (rx)  : ORIGIN = 0x60000000, LENGTH = 0K
   CCMRAM (rw)     : ORIGIN = 0x10000000, LENGTH = 64K
+  BACKUP_RAM (rw) : ORIGIN = 0x40024000, LENGTH = 4K
 }
 
 EXTERN (_scanf_float) /* Require proper _scanf_float rather than a stub */
@@ -55,6 +55,16 @@ EXTERN (_scanf_float) /* Require proper _scanf_float rather than a stub */
 /* Define output sections */
 SECTIONS
 {
+  /* Disable usage of some functions */
+  /DISCARD/ :
+  {
+    /* These functions dynamically allocate. Use their _r variant. */
+    *(.text.asctime)
+    *(.text.gmtime)
+    *(.text.localtime)
+    *(.text.ctime)
+  }
+
   /* The startup code goes first into FLASH */
   .isr_vector :
   {
@@ -62,6 +72,12 @@ SECTIONS
     KEEP(*(.isr_vector)) /* Startup code */
     . = ALIGN(4);
   } >FLASH
+
+  .backup_ram (NOLOAD):
+  {
+    . = ALIGN(4);
+    *(.backup_ram)
+  } >BACKUP_RAM
 
   /* The program code and other data goes into FLASH */
   .text :
@@ -134,7 +150,7 @@ SECTIONS
     PROVIDE_HIDDEN (__end_log_components = .);
 
     PROVIDE_HIDDEN (__start_metric_definitions = .);
-    KEEP(*(.data.metric_definitions))
+    KEEP(*(SORT(.data.metric_definitions.*)))
     PROVIDE_HIDDEN (__end_metric_definitions = .);
 
     *(.data)           /* .data sections */
@@ -192,16 +208,6 @@ SECTIONS
     . = . + _Min_Stack_Size;
     . = ALIGN(4);
   } >RAM
-
-  /* MEMORY_bank1 section, code must be located here explicitly            */
-  /* Example: extern int foo(void) __attribute__ ((section (".mb1text"))); */
-  .memory_b1_text :
-  {
-    *(.mb1text)        /* .mb1text sections (code) */
-    *(.mb1text*)       /* .mb1text* sections (code)  */
-    *(.mb1rodata)      /* read-only data (constants) */
-    *(.mb1rodata*)
-  } >MEMORY_B1
 
   /* Remove information from the standard libraries */
   /DISCARD/ :

@@ -14,8 +14,8 @@
 #include "client_response.hpp"
 #include "printers.h"
 #include "RAII.hpp"
-#include "box_unfinished_selftest.hpp"
 #include "window_msgbox_wrong_printer.hpp"
+#include <selftest_result_evaluation.hpp>
 #include <option/has_toolchanger.h>
 #include <option/has_mmu2.h>
 #include <device/board.h>
@@ -31,7 +31,7 @@ ScreenPrintPreview::ScreenPrintPreview()
     ClrMenuTimeoutClose();
 
     //  this MakeRAM is safe - gcode_file_name is set to vars->media_LFN, which is statically allocated in RAM
-    title_text.SetText(string_view_utf8::MakeRAM((const uint8_t *)gcode.GetGcodeFilename()));
+    title_text.SetText(string_view_utf8::MakeRAM(gcode.GetGcodeFilename()));
 
     CaptureNormalWindow(radio);
 }
@@ -75,7 +75,6 @@ void ScreenPrintPreview::Change(fsm::BaseData data) {
         break;
 
     case PhasesPrintPreview::main_dialog:
-        gcode_description.update(gcode);
         assert(gcode.is_loaded() && "GCodeInfo must be initialized before ScreenPrintPreview is created");
         show_main_dialog();
         break;
@@ -86,7 +85,7 @@ void ScreenPrintPreview::Change(fsm::BaseData data) {
 
     case PhasesPrintPreview::new_firmware_available: {
         const auto version = GCodeInfo::getInstance().get_valid_printer_settings().latest_fw_version;
-        pMsgbox = makeMsgBox(_(txt_new_fw_available), string_view_utf8::MakeRAM(reinterpret_cast<const uint8_t *>(version)));
+        pMsgbox = makeMsgBox(_(txt_new_fw_available), string_view_utf8::MakeRAM(version));
         break;
     }
 
@@ -136,11 +135,7 @@ void ScreenPrintPreview::hide_main_dialog() {
 }
 
 void ScreenPrintPreview::show_main_dialog() {
-    for (auto &line : gcode_description.description_lines) {
-        line.title.Show();
-        line.value.Show();
-    }
-
+    gcode_description.update(gcode);
     thumbnail.Show();
     radio.Show();
     title_text.Show();

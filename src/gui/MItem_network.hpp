@@ -1,6 +1,7 @@
 #pragma once
 
 #include <WindowMenuItems.hpp>
+#include <WindowItemFormatableLabel.hpp>
 #include <i18n.h>
 #include <wui_api.h>
 
@@ -44,6 +45,11 @@ public:
     MI_WIFI_STATUS_t();
 
     void Loop() override;
+};
+
+class MI_WIFI_SIGNAL_t : public MenuItemAutoUpdatingLabel<std::optional<int8_t>> {
+public:
+    MI_WIFI_SIGNAL_t();
 };
 
 class MI_WIFI_SSID final : public WiInfoString {

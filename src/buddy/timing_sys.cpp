@@ -7,15 +7,18 @@
 #include <wdt.hpp>
 #include <buddy/priorities_config.h>
 
+namespace {
 #define TICK_TIMER_CNT (h_tick_tim.Instance->CNT)
+TIM_HandleTypeDef h_tick_tim {};
 
 // Large numbers to avoid number of 0s errors
-constexpr const uint32_t thousand = 1000UL;
-constexpr const uint32_t million = thousand * thousand;
-constexpr const uint32_t billion = thousand * thousand * thousand;
+constexpr uint32_t thousand = 1000UL;
+constexpr uint32_t million = thousand * thousand;
+constexpr uint32_t billion = thousand * thousand * thousand;
 
-static volatile uint32_t tick_cnt_s;
-static TIM_HandleTypeDef h_tick_tim {};
+volatile uint32_t tick_cnt_s; ///< Seconds since boot
+volatile uint32_t last_ms; ///< Remember last given ms to optimize last_ticks_ms()
+} // namespace
 
 // rewrite weak function
 // no need to call HAL_IncTick(), binded variable is unused
@@ -39,9 +42,9 @@ extern "C" void SysTick_Handler(void) {
  * @brief Safely sample tick timer without the risk of race.
  * @param[out] sec seconds since boot
  * @param[out] subsec subseconds in TIM_BASE_CLK_MHZ, overflows every 1 second
- * @note Both subsec and sec need to be consistent, subsec will overlflow to 0 at the same time as sec increments.
+ * @note Both subsec and sec need to be consistent, subsec will overflow to 0 at the same time as sec increments.
  */
-static void sample_timer(uint32_t &sec, uint32_t &subsec) {
+sys_timestamp_t get_sys_timestamp() {
     volatile uint32_t sec_1st_read;
     volatile uint32_t lower_cnt;
     volatile uint32_t sec_2nd_read;
@@ -52,34 +55,26 @@ static void sample_timer(uint32_t &sec, uint32_t &subsec) {
         sec_2nd_read = tick_cnt_s;
     } while (sec_1st_read != sec_2nd_read); // Repeat if overflow of the timer has happened
 
-    sec = sec_1st_read;
-    subsec = lower_cnt;
+    return { .sec = sec_1st_read, .subsec = lower_cnt };
 }
 
 extern "C" int64_t get_timestamp_us() {
-    uint32_t sec, subsec;
-    sample_timer(sec, subsec);
-
-    return static_cast<int64_t>(sec) * static_cast<int64_t>(million) + (subsec / TIM_BASE_CLK_MHZ);
+    sys_timestamp_t ts = get_sys_timestamp();
+    return static_cast<int64_t>(ts.sec) * static_cast<int64_t>(million) + (ts.subsec / TIM_BASE_CLK_MHZ);
 }
 
 extern "C" timestamp_t get_timestamp() {
-    uint32_t sec, subsec;
-    sample_timer(sec, subsec);
-
-    return { sec, (subsec / TIM_BASE_CLK_MHZ) };
+    sys_timestamp_t ts = get_sys_timestamp();
+    return { ts.sec, (ts.subsec / TIM_BASE_CLK_MHZ) };
 }
 
 extern "C" uint32_t ticks_s() {
     return tick_cnt_s;
 }
 
-static uint32_t last_ms;
 extern "C" uint32_t ticks_ms() {
-    uint32_t sec, subsec;
-    sample_timer(sec, subsec);
-
-    last_ms = sec * thousand + subsec / (TIM_BASE_CLK_MHZ * thousand);
+    sys_timestamp_t ts = get_sys_timestamp();
+    last_ms = ts.sec * thousand + ts.subsec / (TIM_BASE_CLK_MHZ * thousand);
     return last_ms;
 }
 
@@ -88,10 +83,29 @@ extern "C" uint32_t last_ticks_ms() {
 }
 
 extern "C" uint32_t ticks_us() {
-    uint32_t sec, subsec;
-    sample_timer(sec, subsec);
+    sys_timestamp_t ts = get_sys_timestamp();
+    return ts.sec * million + ts.subsec / TIM_BASE_CLK_MHZ;
+}
 
-    return sec * million + subsec / TIM_BASE_CLK_MHZ;
+extern "C" uint32_t get_sys_timestamp_ns(const sys_timestamp_t *ts) {
+    // note that this is twice as fast as single multiply-divide in uint64_t,
+    // which is something we want when sampling in the ns range just below
+    uint32_t us = (ts->subsec / TIM_BASE_CLK_MHZ) * 1000;
+    uint32_t ns = (ts->subsec % TIM_BASE_CLK_MHZ) * 1000 / TIM_BASE_CLK_MHZ;
+    return us + ns;
+}
+
+extern "C" int32_t sys_timestamp_ns_diff(const sys_timestamp_t *a, const sys_timestamp_t *b) {
+    int32_t s = a->sec - b->sec;
+    if (s > 1) {
+        return 1e9;
+    } else if (s < -1) {
+        return -1e9;
+    }
+
+    int32_t ns_a = get_sys_timestamp_ns(a) + s * 1e9;
+    int32_t ns_b = get_sys_timestamp_ns(b);
+    return ns_a - ns_b;
 }
 
 extern "C" void TICK_TIMER_IRQHandler() {

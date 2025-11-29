@@ -4,9 +4,9 @@
 #include <option/has_mmu2.h>
 #include <option/has_loadcell.h>
 #include <option/has_toolchanger.h>
-#include <option/has_modularbed.h>
+#include <option/has_remote_bed.h>
 #include <option/has_chamber_api.h>
-#include <option/has_xbuddy_extension.h>
+#include <option/xbuddy_extension_variant_standard.h>
 
 #include <Configuration_adv.h>
 #include <fs_autoload_autolock.hpp>
@@ -26,13 +26,13 @@
 #if HAS_TOOLCHANGER()
     #include <screen_menu_tools.hpp>
 #endif
-#if HAS_MODULARBED()
-    #include <screen_menu_modularbed.hpp>
+#if HAS_REMOTE_BED()
+    #include "screen_menu_remote_bed.hpp"
 #endif
 #if HAS_CHAMBER_API()
     #include <gui/menu_item/specific/menu_items_chamber.hpp>
 #endif
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     #include <gui/menu_item/specific/menu_items_xbuddy_extension.hpp>
 #endif
 
@@ -76,8 +76,8 @@ struct ScreenMenuSensorInfo__<std::index_sequence<hotend...>> {
         MI_INFO_DWARF_BOARD_TEMPERATURE,
         MI_INFO_DWARF_MCU_TEMPERATURE,
     #endif
-    #if HAS_MODULARBED()
-        MI_INFO_MODULAR_BED_MCU_TEMPERATURE,
+    #if HAS_REMOTE_BED()
+        MI_INFO_REMOTE_BED_MCU_TEMPERATURE,
     #endif
 
     #if HAS_LOADCELL()
@@ -100,7 +100,7 @@ struct ScreenMenuSensorInfo__<std::index_sequence<hotend...>> {
 
         MI_INFO_PRINT_FAN,
         MI_INFO_HBR_FAN,
-    #if HAS_XBUDDY_EXTENSION()
+    #if XBUDDY_EXTENSION_VARIANT_STANDARD()
         MI_INFO_XBUDDY_EXTENSION_FAN1,
         MI_INFO_XBUDDY_EXTENSION_FAN2,
         MI_INFO_XBUDDY_EXTENSION_FAN3,

@@ -11,6 +11,7 @@
 
 #include <buddy/priorities_config.h>
 #include "metric_handlers.h"
+#include <printers.h>
 
 static_assert(sizeof(metric_t) == 12);
 
@@ -43,7 +44,6 @@ osMailQDef(metric_system_queue, metric_system_queue_size, metric_point_t);
 static osMailQId metric_system_queue;
 
 // internal variables
-static std::atomic<bool> metric_system_initialized = false;
 static std::atomic<uint16_t> dropped_points_count = 0;
 
 // logging component
@@ -53,14 +53,9 @@ LOG_COMPONENT_DEF(Metrics, logging::Severity::info);
 METRIC_DEF(metric_dropped_points, "points_dropped", METRIC_VALUE_INTEGER, 1000, METRIC_ENABLED);
 
 void metric_system_init() {
-    if (metric_system_initialized) {
-        return;
-    }
-
     // first create mail queue, then thread, Note that we pass nullptr as thread_id to osMailCreate, but its unused so its fine.
     metric_system_queue = osMailCreate(osMailQ(metric_system_queue), nullptr);
     metric_system_task = osThreadCreate(osThread(metric_system_task), NULL);
-    metric_system_initialized = true;
 }
 
 metric_t *metric_get_iterator_begin() {
@@ -76,7 +71,9 @@ static void metric_system_task_run(const void *) {
         osEvent event = osMailGet(metric_system_queue, osWaitForever);
         assert(event.status == osEventMail);
         metric_point_t *point = (metric_point_t *)event.value.p;
-        metric_handler(point);
+        if (are_metrics_enabled()) {
+            metric_handler(point);
+        }
         osMailFree(metric_system_queue, point);
         metric_record_integer(&metric_dropped_points, dropped_points_count.load(std::memory_order::relaxed));
     }
@@ -91,7 +88,12 @@ static bool check_min_interval(metric_t *metric, uint32_t timestamp) {
 }
 
 static metric_point_t *point_check_and_prepare(metric_t *metric, uint32_t timestamp, metric_value_type_t type) {
-    if (!metric_system_initialized) {
+    if (__get_IPSR()) {
+        // Don't do metrics from ISR, it takes a lot of stack
+        bsod("Metric from ISR");
+    }
+
+    if (!are_metrics_enabled() || !metric->enabled) {
         return NULL;
     }
 
@@ -103,10 +105,6 @@ static metric_point_t *point_check_and_prepare(metric_t *metric, uint32_t timest
         log_error(Metrics, "Attempt to record an invalid value type for metric %s", metric->name);
         metric_record_error(metric, "invalid type");
         return NULL;
-    }
-
-    if (!metric->enabled) {
-        return NULL; // don't try to enqueue if nobody is listening
     }
 
     metric_point_t *point = (metric_point_t *)osMailAlloc(metric_system_queue, 0);
@@ -235,5 +233,5 @@ void metric_record_error(metric_t *metric, const char *fmt, ...) {
 }
 
 bool metric_record_is_due(metric_t *metric) {
-    return check_min_interval(metric, ticks_us());
+    return metric->enabled && check_min_interval(metric, ticks_us());
 }

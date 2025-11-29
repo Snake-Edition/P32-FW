@@ -5,7 +5,6 @@
 #include "screen_help_fw_update.hpp"
 #include "ScreenHandler.hpp"
 #include "sound.hpp"
-#include <str_utils.hpp>
 #include <config_store/store_instance.hpp>
 #include <guiconfig/guiconfig.h>
 #include <img_resources.hpp>

@@ -27,13 +27,13 @@ void BinarySemaphore::release() {
     }
 }
 
-long BinarySemaphore::release_from_isr() {
-    long wakeup = 0;
-    if (xSemaphoreGiveFromISR(SemaphoreHandle_t(handle), &wakeup) != pdTRUE) {
+void BinarySemaphore::release_from_isr() {
+    BaseType_t higher_priority_task_woken = pdFALSE;
+    if (xSemaphoreGiveFromISR(SemaphoreHandle_t(handle), &higher_priority_task_woken) != pdTRUE) {
         // Since the semaphore was obtained correctly, this should never happen.
         std::abort();
     }
-    return wakeup;
+    portYIELD_FROM_ISR(higher_priority_task_woken);
 }
 
 void BinarySemaphore::release_blocking() {
@@ -51,6 +51,10 @@ void BinarySemaphore::acquire() {
         // Since we are waiting forever and have task suspension, this should never happen.
         std::abort();
     }
+}
+
+bool BinarySemaphore::try_acquire_for(uint32_t ms) {
+    return xSemaphoreTake(SemaphoreHandle_t(handle), ms * portTICK_PERIOD_MS) == pdTRUE;
 }
 
 } // namespace freertos

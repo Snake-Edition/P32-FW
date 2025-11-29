@@ -8,7 +8,6 @@
     #include "Marlin.h"
     #include <logging/log.hpp>
     #include "timing.h"
-    #include <option/is_knoblet.h>
     #include <puppies/Dwarf.hpp>
 
     #if ENABLED(CRASH_RECOVERY)
@@ -113,11 +112,6 @@ void PrusaToolChangerUtils::autodetect_active_tool() {
                     toolchanger_error("Multiple dwarfs are picked");
                 }
                 active = &dwarf;
-                if constexpr (option::is_knoblet) {
-                    // In knoblet build without cheese board, all dwarfs appear picked.
-                    // So we will act as if only first dwarf is picked, to avoid "Multiple dwarfs are picked" redscreen
-                    break;
-                }
             }
         }
     }
@@ -149,7 +143,7 @@ bool PrusaToolChangerUtils::update() {
                 if (old_tool->set_selected(false) == CommunicationStatus::ERROR) {
                     return false;
                 }
-                log_info(PrusaToolChanger, "Deactivated Dwarf %u", old_tool->get_dwarf_nr());
+                log_info(PrusaToolChanger, "Deactivated Dwarf #%u", old_tool->dwarf_index());
 
                 active_dwarf = nullptr; // No dwarf is selected right now
                 loadcell.Clear(); // No loadcell is available now, make sure that it is not stuck in active mode
@@ -158,7 +152,7 @@ bool PrusaToolChangerUtils::update() {
                 if (new_tool->set_selected(true) == CommunicationStatus::ERROR) {
                     return false;
                 }
-                log_info(PrusaToolChanger, "Activated Dwarf %u", new_tool->get_dwarf_nr());
+                log_info(PrusaToolChanger, "Activated Dwarf #%u", new_tool->dwarf_index());
 
                 active_dwarf = new_tool; // New tool is necessary for stepperE0.push()
                 stepperE0.push(); // Write current stepper settings
@@ -172,6 +166,7 @@ bool PrusaToolChangerUtils::update() {
 
     // Update physically picked tool
     autodetect_active_tool();
+    force_marlin_picked_tool(picked_dwarf);
     return true;
 }
 
@@ -206,7 +201,7 @@ void PrusaToolChangerUtils::force_marlin_picked_tool(Dwarf *dwarf) {
     if (dwarf == nullptr) {
         active_extruder = MARLIN_NO_TOOL_PICKED;
     } else {
-        active_extruder = dwarf->get_dwarf_nr() - 1;
+        active_extruder = dwarf->dwarf_index();
     }
 }
 
@@ -228,7 +223,7 @@ float PrusaToolChangerUtils::get_mbl_z_lift_height() const {
 uint8_t PrusaToolChangerUtils::detect_tool_nr() {
     Dwarf *dwarf = picked_dwarf.load();
     if (dwarf) {
-        return dwarf->get_dwarf_nr() - 1;
+        return dwarf->dwarf_index();
     } else {
         return MARLIN_NO_TOOL_PICKED;
     }
@@ -418,9 +413,8 @@ bool PrusaToolChangerUtils::load_tool_offsets_from_usb() {
 }
 
 const PrusaToolInfo &PrusaToolChangerUtils::get_tool_info(const Dwarf &dwarf, bool check_calibrated) const {
-    assert(dwarf.get_dwarf_nr() <= tool_info.size());
-    assert(dwarf.get_dwarf_nr() > 0);
-    const PrusaToolInfo &info = tool_info[dwarf.get_dwarf_nr() - 1];
+    assert(dwarf.dwarf_index() < tool_info.size());
+    const PrusaToolInfo &info = tool_info[dwarf.dwarf_index()];
 
     if (check_calibrated && (std::isnan(info.dock_x) || std::isnan(info.dock_y) || info.dock_x == 0 || info.dock_y == 0)) {
         toolchanger_error("Dock Position not calibrated");
@@ -441,10 +435,9 @@ bool PrusaToolChangerUtils::is_tool_info_valid(const Dwarf &dwarf, const PrusaTo
 }
 
 void PrusaToolChangerUtils::set_tool_info(const buddy::puppies::Dwarf &dwarf, const PrusaToolInfo &info) {
-    assert(dwarf.get_dwarf_nr() <= tool_info.size());
-    assert(dwarf.get_dwarf_nr() > 0);
+    assert(dwarf.dwarf_index() < tool_info.size());
 
-    tool_info[dwarf.get_dwarf_nr() - 1] = info;
+    tool_info[dwarf.dwarf_index()] = info;
 }
 
 void PrusaToolChangerUtils::toolchanger_error(const char *message) const {
@@ -455,7 +448,7 @@ void PrusaToolChangerUtils::expand_first_dock_position() {
     // Compute dock positions using first dock position
     const PrusaToolInfo first = get_tool_info(dwarfs[0]);
 
-    for (uint i = 1; i < tool_info.size(); ++i) {
+    for (unsigned int i = 1; i < tool_info.size(); ++i) {
         const PrusaToolInfo computed = {
             .dock_x = first.dock_x + i * DOCK_OFFSET_X_MM,
             .dock_y = first.dock_y
@@ -464,8 +457,26 @@ void PrusaToolChangerUtils::expand_first_dock_position() {
     }
 }
 
+PrusaToolChangerUtils::StepperConfigGuard::StepperConfigGuard() {
+    x_current_ma = stepperX.rms_current();
+    x_stall_sensitivity = stepperX.stall_sensitivity();
+    y_current_ma = stepperY.rms_current();
+    y_stall_sensitivity = stepperY.stall_sensitivity();
+    stepperX.rms_current(PARKING_CURRENT_MA);
+    stepperX.stall_sensitivity(PARKING_STALL_SENSITIVITY);
+    stepperY.rms_current(PARKING_CURRENT_MA);
+    stepperY.stall_sensitivity(PARKING_STALL_SENSITIVITY);
+}
+
+PrusaToolChangerUtils::StepperConfigGuard::~StepperConfigGuard() {
+    stepperX.rms_current(x_current_ma);
+    stepperX.stall_sensitivity(x_stall_sensitivity);
+    stepperY.rms_current(y_current_ma);
+    stepperY.stall_sensitivity(y_stall_sensitivity);
+}
+
 PrusaToolInfo PrusaToolChangerUtils::compute_synthetic_tool_info(const Dwarf &dwarf) const {
-    return PrusaToolInfo({ .dock_x = DOCK_DEFAULT_FIRST_X_MM + DOCK_OFFSET_X_MM * (dwarf.get_dwarf_nr() - 1),
+    return PrusaToolInfo({ .dock_x = DOCK_DEFAULT_FIRST_X_MM + DOCK_OFFSET_X_MM * (dwarf.dwarf_index()),
         .dock_y = DOCK_DEFAULT_Y_MM });
 }
 
@@ -514,13 +525,13 @@ void PrusaToolChangerUtils::ConfRestorer::restore_feedrate() {
 }
 
 // This function confuses the indexer, so it is last in the file
-bool PrusaToolChangerUtils::wait(std::function<bool()> function, uint32_t timeout_ms) {
+bool PrusaToolChangerUtils::wait(stdext::inplace_function<bool()> function, uint32_t timeout_ms) {
     uint32_t start_time = ticks_ms();
     bool result = false;
     while (!(result = function()) // Wait for this and remember its state for return
         && !planner.draining() // This triggers on powerpanic and quickstop
         && (ticks_ms() - start_time) < timeout_ms) { // Timeout
-        idle(true, true);
+        idle(true);
     }
     return result;
 }

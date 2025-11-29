@@ -14,7 +14,7 @@
 #include "../gcode.h"
 #include "../../module/planner.h"
 #include "../../Marlin.h"
-#include "../../module/stepper/trinamic.h"
+#include <feature/motordriver_util.h>
 #include "../../module/prusa/accelerometer.h"
 #include "../../module/prusa/fourier_series.h"
 #include "../../feature/input_shaper/input_shaper.hpp"
@@ -34,7 +34,6 @@
 
 static_assert(HAS_LOCAL_ACCELEROMETER() || HAS_REMOTE_ACCELEROMETER());
 
-// #define M958_OUTPUT_SAMPLES
 // #define M958_VERBOSE
 
 LOG_COMPONENT_REF(Marlin);
@@ -195,10 +194,8 @@ private:
 } // anonymous namespace
 
 static bool is_full() {
-    CRITICAL_SECTION_START;
-    bool retval = PreciseStepping::is_step_event_queue_full();
-    CRITICAL_SECTION_END;
-    return retval;
+    buddy::InterruptDisabler _;
+    return PreciseStepping::is_step_event_queue_full();
 }
 
 static void print_accelerometer_error(const char *error) {
@@ -210,7 +207,7 @@ static void enqueue_step(int step_us, bool dir, StepEventFlag_t axis_flags) {
     assert(step_us <= STEP_TIMER_MAX_TICKS_LIMIT);
     uint16_t next_queue_head = 0;
 
-    CRITICAL_SECTION_START;
+    buddy::InterruptDisabler _;
     step_event_u16_t *step_event = PreciseStepping::get_next_free_step_event(next_queue_head);
     step_event->time_ticks = step_us;
     step_event->flags = axis_flags;
@@ -218,7 +215,6 @@ static void enqueue_step(int step_us, bool dir, StepEventFlag_t axis_flags) {
         step_event->flags ^= STEP_EVENT_FLAG_DIR_MASK;
     }
     PreciseStepping::step_event_queue.head = next_queue_head;
-    CRITICAL_SECTION_END;
 }
 
 /**
@@ -268,7 +264,7 @@ static constexpr float expected_accelerometer_sample_period = 1.f / 1344.f;
 float get_accelerometer_sample_period(const SamplePeriodProgressHook &progress_hook, PrusaAccelerometer &accelerometer) {
     for (int i = 0; i < 96; ++i) {
         // Note: this is fast enough, it does not need to call progress_hook
-        idle(true, true);
+        idle(true);
         accelerometer.clear();
     }
     constexpr int request_samples_num = 20'000;
@@ -347,29 +343,27 @@ AxisEnum get_logical_axis(const uint16_t axis_flag) {
     const bool x_flag = axis_flag & STEP_EVENT_FLAG_STEP_X;
     const bool y_flag = axis_flag & STEP_EVENT_FLAG_STEP_Y;
     const bool z_flag = axis_flag & STEP_EVENT_FLAG_STEP_Z;
-#if IS_CARTESIAN
+
     if (z_flag) {
         return (!x_flag && !y_flag ? Z_AXIS : NO_AXIS_ENUM);
     }
 
-    #if IS_CORE
-        #if CORE_IS_XY
+#if IS_CORE
+    #if CORE_IS_XY
     if (x_flag == y_flag) {
         const bool x_dir = axis_flag & STEP_EVENT_FLAG_X_DIR;
         const bool y_dir = axis_flag & STEP_EVENT_FLAG_Y_DIR;
         return (x_dir == y_dir ? X_AXIS : Y_AXIS);
     }
-        #else
-            #error "Not implemented."
-        #endif
     #else
+        #error "Not implemented."
+    #endif
+#else
     if (x_flag != y_flag) {
         return (x_flag ? X_AXIS : Y_AXIS);
     }
-    #endif
-#else
-    #error "Not implemented."
 #endif
+
     return NO_AXIS_ENUM;
 }
 
@@ -392,6 +386,37 @@ static void advance_and_wrap_time_within_period(float &time, const float advance
     time += advance;
     if (time > period) {
         time -= period;
+    }
+}
+
+bool Vibrate::setup(const MicrostepRestorer &microstep_restorer) {
+    step_len = get_step_len(axis_flag, microstep_restorer.saved_mres());
+    if (isnan(step_len)) {
+        return false;
+    }
+    return true;
+}
+
+void Vibrate::step() {
+    // As we push steps directly, phase stepping needs to be off
+    phase_stepping::assert_disabled();
+
+    const float excitation_amplitude = HarmonicGenerator::amplitudeNotRounded(frequency, excitation_acceleration);
+
+    HarmonicGenerator generator(frequency, excitation_amplitude, step_len);
+
+    StepDir stepDir(generator);
+
+    uint32_t step_nr = 0;
+    const uint32_t steps_to_do = generator.getStepsPerPeriod() * 1;
+
+    while (step_nr < steps_to_do) {
+        const StepDir::RetVal step_dir = stepDir.get();
+        while (is_full()) {
+            idle(true);
+        }
+        enqueue_step(step_dir.step_us, step_dir.dir, axis_flag);
+        ++step_nr;
     }
 }
 
@@ -494,7 +519,6 @@ std::optional<VibrateMeasureResult> vibrate_measure(const VibrateMeasureParams &
     };
 
     uint32_t step_nr = 0;
-    GcodeSuite::reset_stepper_timeout();
     const uint32_t steps_to_do = generator.getStepsPerPeriod() * args.excitation_cycles;
     const uint32_t steps_to_do_max = steps_to_do * 2 + generator.getStepsPerPeriod() + STEP_EVENT_QUEUE_SIZE;
     bool do_once = true; // Do once after step buffer is refilled
@@ -554,7 +578,7 @@ std::optional<VibrateMeasureResult> vibrate_measure(const VibrateMeasureParams &
                     return std::nullopt;
                 }
 
-                idle(true, true);
+                idle(true);
             }
         }
 
@@ -572,16 +596,14 @@ std::optional<VibrateMeasureResult> vibrate_measure(const VibrateMeasureParams &
     if (do_delayed_measurement) {
         const auto has_steps = []() {
             // Cannot use freertos::CriticalSection here - steppers have higher priority than RTOS-aware interrupts
-            CRITICAL_SECTION_START;
-            const auto result = PreciseStepping::has_step_events_queued();
-            CRITICAL_SECTION_END;
-            return result;
+            buddy::InterruptDisabler _;
+            return PreciseStepping::has_step_events_queued();
         };
 
         // Wait till all the movement is executed
         while (has_steps()) {
             accelerometer.clear();
-            idle(true, true);
+            idle(true);
         }
 
         // Then wait for the specified time
@@ -589,7 +611,7 @@ std::optional<VibrateMeasureResult> vibrate_measure(const VibrateMeasureParams &
             const uint32_t end_time = millis() + excitation_period * args.wait_cycles * 1000.f;
             while (ticks_diff(millis(), end_time) > 0) {
                 accelerometer.clear();
-                idle(true, true);
+                idle(true);
             }
         }
 
@@ -615,7 +637,7 @@ std::optional<VibrateMeasureResult> vibrate_measure(const VibrateMeasureParams &
                     return std::nullopt;
                 }
 
-                idle(true, true);
+                idle(true);
                 break;
 
             case GetSampleResult::error:
@@ -807,13 +829,12 @@ float get_step_len(StepEventFlag_t axis_flag, const uint16_t orig_mres[]) {
         }
     }
 
-#if IS_CARTESIAN
     // return correct step length
     if ((motor_cnt == 1 && (motor_idx[0] == X_AXIS || motor_idx[0] == Y_AXIS))
         || (motor_cnt == 2 && motor_idx[0] == X_AXIS && motor_idx[1] == Y_AXIS)) {
         // X, Y, XY
-    #if IS_CORE
-        #if CORE_IS_XY
+#if IS_CORE
+    #if CORE_IS_XY
         switch (motor_cnt) {
         case 1:
             // diagonal
@@ -822,10 +843,10 @@ float get_step_len(StepEventFlag_t axis_flag, const uint16_t orig_mres[]) {
             // orthogonal
             return step_len;
         }
-        #else
-            #error "Not implemented."
-        #endif
     #else
+        #error "Not implemented."
+    #endif
+#else
         switch (motor_cnt) {
         case 1:
             // orthogonal
@@ -834,21 +855,18 @@ float get_step_len(StepEventFlag_t axis_flag, const uint16_t orig_mres[]) {
             // diagonal
             return sqrt(2.f) * step_len;
         }
-    #endif
+#endif
     } else if (motor_cnt == 1) {
         // single motor (not XY)
         return step_len;
     }
-#else
-    #error "Not implemented."
-#endif
 
     SERIAL_ECHOLN("error: unsupported configuration");
     return NAN;
 }
 
 static bool idle_progress_hook(const VibrateMeasureProgressHookParams &) {
-    idle(true, true);
+    idle(true);
     return true;
 };
 
@@ -1215,7 +1233,7 @@ static input_shaper::AxisConfig find_best_shaper(const FindBestShaperProgressHoo
 
 static input_shaper::AxisConfig find_best_shaper(const Spectrum &psd, const Action final_action, input_shaper::AxisConfig default_config) {
     const auto progress_hook = [](input_shaper::Type, float) {
-        idle(true, true);
+        idle(true);
         return true;
     };
     return find_best_shaper(progress_hook, psd, final_action, default_config);
@@ -1279,13 +1297,11 @@ MicrostepRestorer::MicrostepRestorer() {
 MicrostepRestorer::~MicrostepRestorer() {
     const auto has_steps = []() {
         // Cannot use freertos::CriticalSection here - steppers have higher priority than RTOS-aware interrupts
-        CRITICAL_SECTION_START;
-        const auto result = PreciseStepping::has_step_events_queued();
-        CRITICAL_SECTION_END;
-        return result;
+        buddy::InterruptDisabler _;
+        return PreciseStepping::has_step_events_queued();
     };
     while (has_steps()) {
-        idle(true, true);
+        idle(true);
     }
     LOOP_XYZ(i) {
         stepper_microsteps((AxisEnum)i, state[i]);
@@ -1327,7 +1343,11 @@ void GcodeSuite::M959() {
     SERIAL_ECHOLNPAIR("Running: ", parser.get_command());
 
     if (!parser.seen('D')) {
-        GcodeSuite::G28_no_parser(true, true, true, { .only_if_needed = true });
+        GcodeSuite::G28_no_parser(true, true, true,
+            {
+                .only_if_needed = true,
+                .precise = false, // We don't need precise position for this procedure
+            });
 
         current_position[X_AXIS] = X_BED_SIZE / 2;
         current_position[Y_AXIS] = Y_BED_SIZE / 2;

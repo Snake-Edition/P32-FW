@@ -20,6 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_core.h"
+#include <buddy/ccm_thread.hpp>
 
 
 /** @addtogroup USBH_LIB
@@ -140,7 +141,7 @@ USBH_StatusTypeDef  USBH_Init(USBH_HandleTypeDef *phost,
 
   /* Create USB Host Task */
 #if defined (USBH_PROCESS_STACK_SIZE)
-  osThreadDef(USBH_Thread, USBH_Process_OS, USBH_PROCESS_PRIO, 0U, USBH_PROCESS_STACK_SIZE);
+  osThreadCCMDef(USBH_Thread, USBH_Process_OS, USBH_PROCESS_PRIO, 0U, USBH_PROCESS_STACK_SIZE);
 #else
   osThreadDef(USBH_Thread, USBH_Process_OS, USBH_PROCESS_PRIO, 0U, 8U * configMINIMAL_STACK_SIZE);
 #endif /* defined (USBH_PROCESS_STACK_SIZE) */
@@ -454,7 +455,7 @@ USBH_StatusTypeDef USBH_ReEnumerate(USBH_HandleTypeDef *phost)
     (void)USBH_Stop(phost);
 
     // This was formerly inside USBH_Start's USBH_LL_DriverVBUS,
-    // got to put it out because it was called from Tmr Svc, which does not allow blocking
+    // got to put it out because it was called from TmrSvc, which does not allow blocking
     // BFW-5213
     (void)USBH_Delay(200);
 

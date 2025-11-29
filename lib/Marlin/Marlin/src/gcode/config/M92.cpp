@@ -87,7 +87,15 @@ void GcodeSuite::M92() {
     #if ENABLED(MAGIC_NUMBERS_GCODE)
       "HL"
     #endif
-  )) return report_M92(true, target_extruder);
+  )) {
+    return report_M92(true, target_extruder);
+  }
+
+  // We need to synchronize before we can change axis steps per unit
+  planner.synchronize();
+  if (planner.draining()) {
+    return;
+  }
 
   {
     auto s = planner.user_settings;

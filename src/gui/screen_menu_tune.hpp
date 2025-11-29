@@ -15,13 +15,13 @@
 #include <option/has_emergency_stop.h>
 #include <option/has_chamber_api.h>
 #include <option/has_loadcell.h>
-#include <option/has_phase_stepping_toggle.h>
 #include <option/has_toolchanger.h>
 #include <option/developer_mode.h>
 #include <option/has_mmu2.h>
-#include <option/has_xbuddy_extension.h>
+#include <option/xbuddy_extension_variant_standard.h>
 #include <option/has_chamber_filtration_api.h>
 #include <device/board.h>
+#include <gui/screen/screen_m600.hpp>
 
 #if XL_ENCLOSURE_SUPPORT()
     #include "MItem_enclosure.hpp"
@@ -29,8 +29,13 @@
 #if HAS_CHAMBER_API()
     #include <gui/menu_item/specific/menu_items_chamber.hpp>
 #endif
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     #include <gui/menu_item/specific/menu_items_xbuddy_extension.hpp>
+#endif
+
+#include <option/has_cancel_object.h>
+#if HAS_CANCEL_OBJECT()
+    #include <gui/screen/screen_cancel_objects.hpp>
 #endif
 
 /*****************************************************************************/
@@ -40,7 +45,7 @@ using ScreenMenuTune__ = ScreenMenu<EFooter::On, MI_RETURN,
     MI_LIVE_ADJUST_Z, // position without loadcell
 #endif
     MI_M600,
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
     MI_CO_CANCEL_OBJECT,
 #endif
     MI_SPEED,
@@ -53,7 +58,7 @@ using ScreenMenuTune__ = ScreenMenu<EFooter::On, MI_RETURN,
     MI_CHAMBER_TARGET_TEMP,
 #endif
     MI_PRINTFAN,
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     MI_XBUDDY_EXTENSION_COOLING_FANS,
     MI_XBUDDY_EXTENSION_COOLING_FANS_CONTROL_MAX,
     MI_XBE_FILTRATION_FAN,
@@ -88,9 +93,6 @@ using ScreenMenuTune__ = ScreenMenu<EFooter::On, MI_RETURN,
     MI_SOUND_VOLUME,
 #endif
     MI_INPUT_SHAPER,
-#if HAS_PHASE_STEPPING_TOGGLE()
-    MI_PHASE_STEPPING_TOGGLE,
-#endif
     MI_FAN_CHECK,
     MI_GCODE_VERIFY,
 #if HAS_EMERGENCY_STOP()
@@ -98,7 +100,8 @@ using ScreenMenuTune__ = ScreenMenu<EFooter::On, MI_RETURN,
 #endif
 #if HAS_MMU2()
     MI_MMU_CUTTER,
-#endif
+    MI_MMU_INVOKE_MAINTENANCE,
+#endif // HAS_MMU2()
 #if ENABLED(CRASH_RECOVERY)
     MI_CRASH_DETECTION,
     MI_CRASH_SENSITIVITY_XY,
@@ -111,8 +114,6 @@ using ScreenMenuTune__ = ScreenMenu<EFooter::On, MI_RETURN,
 #if ENABLED(POWER_PANIC)
     MI_TRIGGER_POWER_PANIC,
 #endif
-
-    MI_SNAKE_TUNE_SETTINGS,
 
 /* MI_FOOTER_SETTINGS,*/ // currently experimental, but we want it in future
 #if DEVELOPER_MODE()

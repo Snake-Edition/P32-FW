@@ -117,7 +117,7 @@ public:
         return std::tie(a.type, b.time, b.lfn) < std::tie(b.type, a.time, a.lfn);
     }
 
-    static inline constexpr LessFunc sort_policy_less[ftrstd::to_underlying(SortPolicy::_COUNT)] = {
+    static inline constexpr LessFunc sort_policy_less[std::to_underlying(SortPolicy::_COUNT)] = {
         &less_by_name,
         &less_by_time,
     };

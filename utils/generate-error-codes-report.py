@@ -20,13 +20,13 @@ def process_yaml_file(filename, result):
 
 def report_result(result):
     if result:
-        print('Some error codes are not approved, please fix them 🙏')
+        print('\ufeffSome error codes are not approved, please fix them 🙏')
         for ec, printers in result.items():
             printers_str = ', '.join(
                 sorted(printers)).lower() if printers else 'all'
             print(f'* `{ec}` ({printers_str})')
     else:
-        print('All error codes are approved 💪')
+        print('\ufeffAll error codes are approved 💪')
 
 
 def main():

@@ -81,15 +81,17 @@ typedef struct metric_s {
 } metric_t;
 
 #if __APPLE__
-    #define _METRIC_DEF_ATTRS __attribute__((used, section("__DATA,metric_definitions")))
+    #define _METRIC_DEF_ATTRS(name) __attribute__((used, section("__DATA,metric_definitions")))
 #elif !defined(__arm__)
-    #define _METRIC_DEF_ATTRS __attribute__((used, section("metric_definitions")))
+    #define _METRIC_DEF_ATTRS(name) __attribute__((used, section("metric_definitions")))
 #else
-    #define _METRIC_DEF_ATTRS __attribute__((used, section(".data.metric_definitions")))
+    // The section name needs to contain the metric name because of sorting (BFW-7830)
+    // Note: The asm() directive is only to ease up lookup of the metric variables through readelf, it is not necessary
+    #define _METRIC_DEF_ATTRS(name) asm("metric_" name) __attribute__((used, section(".data.metric_definitions." name)))
 #endif
 
 /// To be used for metric_t structure initialization.
-#define METRIC_DEF(var, name, type, min_interval_ms, enabled) static metric_t var _METRIC_DEF_ATTRS = { name, 0, min_interval_ms, type, enabled, 0 }
+#define METRIC_DEF(var, name, type, min_interval_ms, enabled) static metric_t var _METRIC_DEF_ATTRS(name) = { name, 0, min_interval_ms, type, enabled, 0 }
 
 /// Represents a single recorded value.
 ///

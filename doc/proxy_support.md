@@ -1,7 +1,40 @@
 # Proxy support for Connect
 
-Currently, the printer doesn't have an explicit support for accessing Connect
-through a proxy. However, there are some ways to work around that limitation.
+There are several alternatives to connect the printer to Connect from a
+corporate network.
+
+## Minimal proxy support
+
+The printer can talk to Connect trough a proxy. There are some limitations.
+
+* Connection between the printer and the proxy is not encrypted (however, the
+  connection _through_ the proxy ‒ to the upstream Connect server ‒ _is_
+  encrypted).
+* There's no support for proxy authentication.
+* The proxy is active only if `tls = true` in the printer configuration.
+
+To set up proxy, it is needed to be input through the ini file (see example in
+`doc/prusa_printer_settings.ini`). Steps needed:
+
+* Take the file, adjust to correspond your needs.
+* Place it onto a USB drive, put it to the printer.
+* Load it through `Settings -> Network -> Prusa Connect -> Load Settings`.
+* Proceed to usual printer registration (`Settings -> Network -> Prosa Connect
+  -> Add Printer to Connect`).
+
+The ini file would contain something like this:
+
+```ini
+[service::connect]
+hostname = buddy-a.connect.prusa3d.com
+port = 443
+tls = true
+# http proxy support.
+# Will do CONNECT for https
+# Max 30 chars.
+proxy_hostname = proxy.example.com
+proxy_port = 8080
+```
 
 ## Using a separate network without proxy
 
@@ -34,9 +67,9 @@ this service to go through the proxy.
   `https://connect.prusa3d.com/p/telemetry`.
 * Create a `prusa_printer_settings.ini` file with the content below.
 * Place it onto an USB flash drive, place it into the printer and load it
-  through `Settings -> Network -> Prusa Connect -> Load from file`.
+  through `Settings -> Network -> Prusa Connect -> Load Settings`.
 * Proceed to usual printer registration (`Settings -> Network -> Prusa Connect
-  -> Register`)
+  -> Add Printer to Connect`)
 
 ```ini
 [service::connect]

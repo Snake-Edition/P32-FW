@@ -36,8 +36,9 @@ void QueueBase::send(const void *payload) {
 
 bool QueueBase::send_from_isr(const void *payload) {
     BaseType_t higher_priority_task_woken = pdFALSE;
-    xQueueSendFromISR(queue_handle, payload, &higher_priority_task_woken);
-    return higher_priority_task_woken == pdTRUE;
+    BaseType_t result = xQueueSendFromISR(queue_handle, payload, &higher_priority_task_woken);
+    portYIELD_FROM_ISR(higher_priority_task_woken);
+    return result == pdPASS;
 }
 
 void QueueBase::receive(void *payload) {

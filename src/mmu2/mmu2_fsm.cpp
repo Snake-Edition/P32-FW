@@ -145,8 +145,8 @@ void Fsm::Loop() {
 
             log_debug(MMU2, "Report progress =%u", static_cast<unsigned>(r.rawProgressCode));
 
-            const auto data = ProgressSerializerLoadUnload(progressManager.GetLoadUnloadMode(), progressManager.GetProgressPercentage()).Serialize();
-            marlin_server::fsm_change(ProgressCodeToPhasesLoadUnload(progressManager.GetProgressCode()), data);
+            const FSMLoadUnloadData data { .mode = progressManager.GetLoadUnloadMode(), .progress = progressManager.GetProgressPercentage() };
+            marlin_server::fsm_change(ProgressCodeToPhasesLoadUnload(progressManager.GetProgressCode()), fsm::serialize_data(data));
 
         } else if constexpr (std::is_same_v<T, ErrorData>) {
             if (r.errorCode == ErrorCode::MMU_NOT_RESPONDING) {

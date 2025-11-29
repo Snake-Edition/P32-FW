@@ -21,7 +21,7 @@
  */
 
 #include "../gcode.h"
-#include <option/has_modularbed.h>
+#include <option/has_remote_bed.h>
 #include <option/has_dwarf.h>
 #include <option/has_mmu2.h>
 #include <option/has_toolchanger.h>
@@ -29,15 +29,16 @@
 #if HAS_TOOLCHANGER()
     #include "../../module/prusa/toolchanger.h"
 #endif
+#if HAS_CHAMBER_API()
+    #include "feature/chamber/chamber.hpp"
+#endif
 
-#if ENABLED(EXTENDED_CAPABILITIES_REPORT)
 static void cap_line(PGM_P const name, bool ena = false) {
     SERIAL_ECHOPGM("Cap:");
     serialprintPGM(name);
     SERIAL_CHAR(':');
     SERIAL_ECHOLN(int(ena ? 1 : 0));
 }
-#endif
 
 #include <version/version.hpp>
 
@@ -74,46 +75,35 @@ void GcodeSuite::M115() {
     SERIAL_ECHO(extruder_count);
 
     SERIAL_ECHOLNPGM(" UUID:" MACHINE_UUID);
-#if ENABLED(EXTENDED_CAPABILITIES_REPORT)
 
     // SERIAL_XON_XOFF
     cap_line(PSTR("SERIAL_XON_XOFF")
-    #if ENABLED(SERIAL_XON_XOFF)
+#if ENABLED(SERIAL_XON_XOFF)
                  ,
         true
-    #endif
+#endif
     );
 
     // BINARY_FILE_TRANSFER (M28 B1)
-    cap_line(PSTR("BINARY_FILE_TRANSFER")
-    #if ENABLED(BINARY_FILE_TRANSFER)
-                 ,
-        true
-    #endif
-    );
+    cap_line(PSTR("BINARY_FILE_TRANSFER"));
 
     // EEPROM (M500, M501)
-    cap_line(PSTR("EEPROM")
-    #if ENABLED(EEPROM_SETTINGS)
-                 ,
-        true
-    #endif
-    );
+    cap_line(PSTR("EEPROM"));
 
     // Volumetric Extrusion (M200)
     cap_line(PSTR("VOLUMETRIC")
-    #if DISABLED(NO_VOLUMETRICS)
+#if DISABLED(NO_VOLUMETRICS)
                  ,
         true
-    #endif
+#endif
     );
 
     // AUTOREPORT_TEMP (M155)
     cap_line(PSTR("AUTOREPORT_TEMP")
-    #if ENABLED(AUTO_REPORT_TEMPERATURES)
+#if ENABLED(AUTO_REPORT_TEMPERATURES)
                  ,
         true
-    #endif
+#endif
     );
 
     // PROGRESS (M530 S L, M531 <file>, M532 X L)
@@ -124,107 +114,103 @@ void GcodeSuite::M115() {
 
     // AUTOLEVEL (G29)
     cap_line(PSTR("AUTOLEVEL")
-    #if HAS_AUTOLEVEL
+#if HAS_AUTOLEVEL
                  ,
         true
-    #endif
+#endif
     );
 
     // Z_PROBE (G30)
     cap_line(PSTR("Z_PROBE")
-    #if HAS_BED_PROBE
+#if HAS_BED_PROBE
                  ,
         true
-    #endif
+#endif
     );
 
     // MESH_REPORT (M420 V)
     cap_line(PSTR("LEVELING_DATA")
-    #if HAS_LEVELING
+#if HAS_LEVELING
                  ,
         true
-    #endif
+#endif
     );
 
     // BUILD_PERCENT (M73)
     cap_line(PSTR("BUILD_PERCENT")
-    #if ENABLED(LCD_SET_PROGRESS_MANUALLY)
+#if ENABLED(LCD_SET_PROGRESS_MANUALLY)
                  ,
         true
-    #endif
+#endif
     );
 
     // SOFTWARE_POWER (M80, M81)
     cap_line(PSTR("SOFTWARE_POWER")
-    #if HAS_POWER_SWITCH
+#if HAS_POWER_SWITCH
                  ,
         true
-    #endif
+#endif
     );
 
     // CASE LIGHTS (M355)
     cap_line(PSTR("TOGGLE_LIGHTS")
-    #if HAS_CASE_LIGHT
+#if HAS_CASE_LIGHT
                  ,
         true
-    #endif
+#endif
     );
     cap_line(PSTR("CASE_LIGHT_BRIGHTNESS")
-    #if HAS_CASE_LIGHT
+#if HAS_CASE_LIGHT
                  ,
         PWM_PIN(CASE_LIGHT_PIN)
-    #endif
+#endif
     );
 
     // EMERGENCY_PARSER (M108, M112, M410, M876)
     cap_line(PSTR("EMERGENCY_PARSER")
-    #if ENABLED(EMERGENCY_PARSER)
+#if ENABLED(EMERGENCY_PARSER)
                  ,
         true
-    #endif
+#endif
     );
 
     // PROMPT SUPPORT (M876)
     cap_line(PSTR("PROMPT_SUPPORT")
-    #if ENABLED(HOST_PROMPT_SUPPORT)
+#if ENABLED(HOST_PROMPT_SUPPORT)
                  ,
         true
-    #endif
+#endif
     );
 
     // AUTOREPORT_SD_STATUS (M27 extension)
-    cap_line(PSTR("AUTOREPORT_SD_STATUS")
-    #if ENABLED(AUTO_REPORT_SD_STATUS)
-                 ,
-        true
-    #endif
-    );
+    cap_line(PSTR("AUTOREPORT_SD_STATUS"));
 
     // THERMAL_PROTECTION
     cap_line(PSTR("THERMAL_PROTECTION")
-    #if ((ENABLED(THERMAL_PROTECTION_HOTENDS) || HAS_DWARF()) && (ENABLED(THERMAL_PROTECTION_BED) || !HAS_HEATED_BED || HAS_MODULARBED()) && (ENABLED(THERMAL_PROTECTION_CHAMBER) || !HAS_HEATED_CHAMBER))
+#if ((ENABLED(THERMAL_PROTECTION_HOTENDS) || HAS_DWARF()) && (ENABLED(THERMAL_PROTECTION_BED) || !HAS_HEATED_BED || HAS_REMOTE_BED()) && (ENABLED(THERMAL_PROTECTION_CHAMBER) || !HAS_HEATED_CHAMBER))
                  ,
         true
-    #endif
+#endif
     );
 
     // MOTION_MODES (M80-M89)
     cap_line(PSTR("MOTION_MODES")
-    #if ENABLED(GCODE_MOTION_MODES)
+#if ENABLED(GCODE_MOTION_MODES)
                  ,
         true
-    #endif
+#endif
     );
 
     // CHAMBER_TEMPERATURE (M141, M191)
     cap_line(PSTR("CHAMBER_TEMPERATURE")
-    #if HAS_HEATED_CHAMBER
+#if HAS_HEATED_CHAMBER
                  ,
         true
-    #endif
+#elif HAS_CHAMBER_API()
+                 ,
+        buddy::chamber().capabilities().temperature_reporting
+#endif
     );
-
-#endif // EXTENDED_CAPABILITIES_REPORT
 }
 
 /** @}*/

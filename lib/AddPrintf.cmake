@@ -1,3 +1,5 @@
 add_library(printf printf/printf.c)
 target_include_directories(printf PUBLIC printf)
+# Can't compile with LTO, because linker can't keep __putc syscall even with __attribute((used))
+set_property(TARGET printf PROPERTY INTERPROCEDURAL_OPTIMIZATION OFF)
 add_library(printf::printf ALIAS printf)

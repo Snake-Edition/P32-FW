@@ -1,6 +1,6 @@
 #pragma once
 
-#include <functional>
+#include <inplace_function.hpp>
 
 class AsyncJobExecutor;
 
@@ -15,7 +15,7 @@ public:
     /// The \p f should be as fast as possible - only to store the results somewhere.
     /// The function is called with the synchronization mutex locked and only in the case that the task was not cancelled/discarded.
     /// \returns true if the function was executed
-    bool with_synchronized(const std::function<void()> &f);
+    bool with_synchronized(const stdext::inplace_function<void()> &f);
 
     /// \returns true if the job was discarded.
     /// This has only informational character and is intended to be used only as an option to early exit tasks that are no longer required.

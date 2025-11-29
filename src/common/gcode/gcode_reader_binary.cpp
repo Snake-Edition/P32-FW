@@ -427,7 +427,17 @@ constexpr PrusaPackGcodeReader::ImgType thumbnail_format_to_type(bgcode::core::E
     }
 }
 
-bool PrusaPackGcodeReader::stream_thumbnail_start(uint16_t expected_width, uint16_t expected_height, ImgType expected_type, bool allow_larger) {
+std::span<std::byte> PrusaPackGcodeReader::ThumbnailReader::read(std::span<std::byte> buffer) {
+    // thumbnail is read as-is, no decompression
+    size_t nread = 0;
+    if (size > 0) {
+        nread = fread(buffer.data(), 1, std::min(size, buffer.size()), file);
+        size -= nread;
+    }
+    return { buffer.data(), nread };
+}
+
+AbstractByteReader *PrusaPackGcodeReader::stream_thumbnail_start(uint16_t expected_width, uint16_t expected_height, ImgType expected_type, bool allow_larger) {
 
     const struct params {
         uint16_t expected_width;
@@ -477,15 +487,12 @@ bool PrusaPackGcodeReader::stream_thumbnail_start(uint16_t expected_width, uint1
     auto header = std::get_if<BlockHeader>(&res);
     if (header == nullptr) {
         stream_mode_ = StreamMode::none;
-        return false;
+        return nullptr;
     }
-
-    set_ptr_stream_getc(&PrusaPackGcodeReader::stream_getc_file);
-    stream.reset();
-    stream.current_block_header = *header;
-    stream.block_remaining_bytes_compressed = header->uncompressed_size; // thumbnail is read as-is, no decompression, so use uncompressed size
     stream_mode_ = StreamMode::thumbnail;
-    return true;
+    thumbnail_reader.file = file.get();
+    thumbnail_reader.size = header->uncompressed_size;
+    return &thumbnail_reader;
 }
 
 uint32_t PrusaPackGcodeReader::get_gcode_stream_size_estimate() {

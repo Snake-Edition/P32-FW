@@ -6,6 +6,8 @@
 #include <algorithm_extensions.hpp>
 #include <dialog_text_input.hpp>
 #include <ScreenHandler.hpp>
+#include <utils/string_builder.hpp>
+#include <screen/screen_preheat.hpp>
 
 #if HAS_CHAMBER_API()
     #include <feature/chamber/chamber.hpp>
@@ -21,11 +23,19 @@ MI_TOGGLE::MI_TOGGLE(Parameter param, const char *label)
 }
 void MI_TOGGLE::set_filament_type(FilamentType set) {
     filament_type = set;
-    set_value(filament_type.parameters().*param_, false);
+    // The XOR inverts the value if `invert_value == true`
+    set_value(filament_type.parameters().*param_ ^ invert_value);
     set_enabled(filament_type.is_customizable());
 }
 void MI_TOGGLE::OnChange(size_t) {
-    filament_type.modify_parameters([&](auto &p) { p.*param_ = value(); });
+    // The XOR inverts the value if `invert_value == true`
+    filament_type.modify_parameters([&](auto &p) { p.*param_ = (value() ^ invert_value); });
+}
+
+void MI_TOGGLE::set_invert_value(bool set) {
+    // Should only be called during initialization
+    assert(filament_type == FilamentType::none);
+    invert_value = set;
 }
 
 // * MI_FILAMENT_NAME
@@ -76,6 +86,11 @@ MI_FILAMENT_NOZZLE_PREHEAT_TEMPERATURE::MI_FILAMENT_NOZZLE_PREHEAT_TEMPERATURE()
 MI_FILAMENT_BED_TEMPERATURE::MI_FILAMENT_BED_TEMPERATURE()
     : MI_SPIN(&FilamentTypeParameters::heatbed_temperature, numeric_input_config::bed_temperature, HAS_MINI_DISPLAY() ? N_("Bed Temp") : N_("Bed Temperature")) {}
 
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+MI_FILAMENT_HEATBREAK_TEMPERATURE::MI_FILAMENT_HEATBREAK_TEMPERATURE()
+    : MI_SPIN(&FilamentTypeParameters::heatbreak_temperature, numeric_input_config::heatbreak_temperature, HAS_MINI_DISPLAY() ? N_("Heatbreak Temp") : N_("Heatbreak Temperature")) {}
+#endif
+
 #if HAS_CHAMBER_API()
 namespace {
 void setup_chamber_temp_item(IWindowMenuItem &item) {
@@ -114,9 +129,11 @@ MI_FILAMENT_REQUIRES_FILTRATION::MI_FILAMENT_REQUIRES_FILTRATION()
 MI_FILAMENT_IS_ABRASIVE::MI_FILAMENT_IS_ABRASIVE()
     : MI_TOGGLE(&FilamentTypeParameters::is_abrasive, N_("Is Abrasive")) {}
 
-// * MI_FILAMENT_IS_FLEXIBLE
-MI_FILAMENT_IS_FLEXIBLE::MI_FILAMENT_IS_FLEXIBLE()
-    : MI_TOGGLE(&FilamentTypeParameters::is_flexible, N_("Is Flexible")) {}
+// * MI_FILAMENT_AUTO_RETRACT
+MI_FILAMENT_AUTO_RETRACT::MI_FILAMENT_AUTO_RETRACT()
+    : MI_TOGGLE(&FilamentTypeParameters::do_not_auto_retract, N_("Auto Retract")) {
+    set_invert_value(true);
+}
 
 // * MI_FILAMENT_VISIBLE
 MI_FILAMENT_VISIBLE::MI_FILAMENT_VISIBLE()
@@ -125,7 +142,7 @@ MI_FILAMENT_VISIBLE::MI_FILAMENT_VISIBLE()
 
 void MI_FILAMENT_VISIBLE::set_filament_type(FilamentType set) {
     filament_type = set;
-    set_value(filament_type.is_visible(), false);
+    set_value(filament_type.is_visible());
     set_is_hidden(filament_type.is_visibility_customizable());
 }
 
@@ -133,28 +150,37 @@ void MI_FILAMENT_VISIBLE::OnChange(size_t) {
     filament_type.set_visible(value());
 }
 
-// * MI_PREHEAT_CONFIRM
-MI_PREHEAT_CONFIRM::MI_PREHEAT_CONFIRM()
+// * MI_CONFIRM
+MI_CONFIRM::MI_CONFIRM()
     : IWindowMenuItem(_("Confirm"), &img::ok_16x16) {}
 
-void MI_PREHEAT_CONFIRM::set_filament_type(FilamentType set) {
-    filament_type = set;
-}
-
-void MI_PREHEAT_CONFIRM::click(IWindowMenu &) {
-    marlin_client::FSM_response_variant(PhasesPreheat::UserTempSelection, FSMResponseVariant::make<FilamentType>(filament_type));
-    Screens::Access()->Close();
+void MI_CONFIRM::click(IWindowMenu &) {
+    callback();
 }
 
 // * ScreenFilamentDetail
-ScreenFilamentDetail::ScreenFilamentDetail(Params params)
-    : ScreenMenu(params.mode == Mode::preheat ? _("CUSTOM PARAMETERS") : _("FILAMENT DETAIL")) {
+ScreenFilamentDetail::ScreenFilamentDetail(FilamentType filament_type)
+    : ScreenFilamentDetail(filament_type, N_("FILAMENT DETAIL")) {}
 
+ScreenFilamentDetail::ScreenFilamentDetail(PreheatModeParams params)
+    : ScreenFilamentDetail(PendingAdHocFilamentType {}, N_("CUSTOM PARAMETERS")) {
+
+    auto &confirm_item = Item<MI_CONFIRM>();
+    confirm_item.set_is_hidden(false);
+    confirm_item.callback = [extruder = params.target_extruder] {
+        if (preheat_menu::WindowMenuPreheat::handle_filament_selection(PendingAdHocFilamentType {}, extruder)) {
+            Screens::Access()->Close();
+        }
+    };
+}
+
+ScreenFilamentDetail::ScreenFilamentDetail(FilamentType filament_type, const char *title)
+    : ScreenMenu(_(title)) {
     stdext::visit_tuple(container.menu_items, [&]<typename T>(T &item) {
-        if constexpr (!std::is_same_v<T, MI_RETURN>) {
-            item.set_filament_type(params.filament_type);
+        if constexpr (!std::is_same_v<T, MI_RETURN> && !std::is_same_v<T, MI_CONFIRM>) {
+            item.set_filament_type(filament_type);
         };
     });
 
-    Item<MI_PREHEAT_CONFIRM>().set_is_hidden(params.mode != Mode::preheat);
+    Item<MI_CONFIRM>().set_is_hidden();
 }

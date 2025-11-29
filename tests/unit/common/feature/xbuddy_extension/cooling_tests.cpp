@@ -78,14 +78,14 @@ TEST_CASE("Cooling PWM") {
         Temperature target_temperature = 20;
         step(true, 20, 20, pwm_auto); // set last_regulation_output to 0
 
-        REQUIRE(step(false, 0.5 + target_temperature + cooling.min_pwm.value / cooling.proportional_constant, target_temperature, pwm_auto) == cooling.spin_up_pwm);
+        REQUIRE(step(false, 0.5 + target_temperature + cooling.min_pwm.value / cooling.integration_constant, target_temperature, pwm_auto) == cooling.spin_up_pwm);
 
         target_temperature = 300.0; // reset the regulation output to 0
         step(true, 20, target_temperature, pwm_auto);
         target_temperature = 20;
         step(true, 20, target_temperature, pwm_auto); // set last_regulation_output to 0
 
-        REQUIRE(step(true, 0.5 + target_temperature + cooling.min_pwm.value / cooling.proportional_constant, target_temperature, pwm_auto) == cooling.min_pwm);
+        REQUIRE(step(true, 0.5 + target_temperature + cooling.min_pwm.value / cooling.integration_constant, target_temperature, pwm_auto) == cooling.min_pwm);
     }
 
     SECTION("Overheating cooling") {

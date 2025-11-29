@@ -29,6 +29,7 @@ TestReturn phaseToolOffsets([[maybe_unused]] const ToolMask tool_mask, IPartHand
             &CSelftestPart_ToolOffsets::state_wait_user,
             &CSelftestPart_ToolOffsets::state_wait_stable_temp,
             &CSelftestPart_ToolOffsets::state_calibrate,
+            &CSelftestPart_ToolOffsets::state_finish_calibration,
             &CSelftestPart_ToolOffsets::state_wait_moves_done,
             &CSelftestPart_ToolOffsets::state_final_park,
             &CSelftestPart_ToolOffsets::state_wait_moves_done,

@@ -7,7 +7,6 @@
 #pragma once
 #include <cstdint>
 #include <array>
-#include <functional>
 #include "i_selftest_part.hpp"
 #include "marlin_server.hpp"
 

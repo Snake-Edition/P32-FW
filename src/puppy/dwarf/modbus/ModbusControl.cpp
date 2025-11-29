@@ -2,13 +2,12 @@
 #include "ModbusRegisters.hpp"
 #include <cstring>
 #include <logging/log.hpp>
-#include <bitset>
+#include "Marlin.h"
 #include "Marlin/src/module/temperature.h"
 #include "Marlin/src/module/stepper/trinamic.h"
 #include "../loadcell.hpp"
 #include "Pin.hpp"
 #include "Cheese.hpp"
-#include "module_marlin.hpp"
 #include "tool_filament_sensor.hpp"
 #include "timing.h"
 #include "ModbusFIFOHandlers.hpp"
@@ -165,7 +164,7 @@ void ProcessModbusMessages() {
         }
 
         switch (msg->m_Address) {
-        case ftrstd::to_underlying(ModbusRegisters::SystemCoil::tmc_enable): {
+        case std::to_underlying(ModbusRegisters::SystemCoil::tmc_enable): {
             log_info(ModbusControl, "E stepper enable: %" PRIu32, msg->m_Value);
             if (msg->m_Value) {
                 enable_e_steppers();
@@ -174,15 +173,15 @@ void ProcessModbusMessages() {
             }
             break;
         }
-        case ftrstd::to_underlying(ModbusRegisters::SystemCoil::is_selected): {
+        case std::to_underlying(ModbusRegisters::SystemCoil::is_selected): {
             SetDwarfSelected(msg->m_Value);
             break;
         }
-        case ftrstd::to_underlying(ModbusRegisters::SystemCoil::loadcell_enable): {
+        case std::to_underlying(ModbusRegisters::SystemCoil::loadcell_enable): {
             loadcell::loadcell_set_enable(msg->m_Value);
             break;
         }
-        case ftrstd::to_underlying(ModbusRegisters::SystemCoil::accelerometer_enable): {
+        case std::to_underlying(ModbusRegisters::SystemCoil::accelerometer_enable): {
             if (msg->m_Value) {
                 dwarf::accelerometer::enable();
             } else {
@@ -190,42 +189,42 @@ void ProcessModbusMessages() {
             }
             break;
         }
-        case ftrstd::to_underlying(ModbusRegisters::SystemHoldingRegister::nozzle_target_temperature): {
+        case std::to_underlying(ModbusRegisters::SystemHoldingRegister::nozzle_target_temperature): {
             log_info(ModbusControl, "Set hotend temperature: %" PRIu32, msg->m_Value);
             thermalManager.setTargetHotend(msg->m_Value, 0);
             break;
         }
-        case ftrstd::to_underlying(ModbusRegisters::SystemHoldingRegister::heatbreak_requested_temperature): {
+        case std::to_underlying(ModbusRegisters::SystemHoldingRegister::heatbreak_requested_temperature): {
             log_info(ModbusControl, "Set Heatbreak requested temperature: %" PRIu32, msg->m_Value);
             thermalManager.setTargetHeatbreak(msg->m_Value, 0);
             break;
         }
-        case ftrstd::to_underlying(ModbusRegisters::SystemHoldingRegister::fan0_pwm): {
+        case std::to_underlying(ModbusRegisters::SystemHoldingRegister::fan0_pwm): {
             log_info(ModbusControl, "Set print fan PWM:: %" PRIu32, msg->m_Value);
             thermalManager.set_fan_speed(0, msg->m_Value);
             break;
         }
-        case ftrstd::to_underlying(ModbusRegisters::SystemHoldingRegister::fan1_pwm): {
+        case std::to_underlying(ModbusRegisters::SystemHoldingRegister::fan1_pwm): {
             if (msg->m_Value == std::numeric_limits<uint16_t>::max()) {
                 // switch back to auto control
-                if (Fans::heat_break(0).isSelftest()) {
+                if (Fans::heat_break(0).is_selftest()) {
                     log_info(ModbusControl, "Heatbreak fan: AUTO");
-                    Fans::heat_break(0).exitSelftestMode();
+                    Fans::heat_break(0).exit_selftest_mode();
                 }
             } else {
                 // direct PWM control mode (for selftest)
-                if (!Fans::heat_break(0).isSelftest()) {
+                if (!Fans::heat_break(0).is_selftest()) {
                     log_info(ModbusControl, "Heatbreak fan: SELFTEST");
-                    Fans::heat_break(0).enterSelftestMode();
+                    Fans::heat_break(0).enter_selftest_mode();
                 }
 
                 log_info(ModbusControl, "Set heatbreak fan PWM:: %" PRIu32, msg->m_Value);
-                Fans::heat_break(0).selftestSetPWM(msg->m_Value);
+                Fans::heat_break(0).selftest_set_pwm(msg->m_Value);
             }
 
             break;
         }
-        case ftrstd::to_underlying(ModbusRegisters::SystemHoldingRegister::led_pwm): {
+        case std::to_underlying(ModbusRegisters::SystemHoldingRegister::led_pwm): {
             LedPwm led_pwm = ModbusRegisters::GetRegValue(ModbusRegisters::SystemHoldingRegister::led_pwm);
             if (isDwarfSelected()) {
                 Cheese::set_led(led_pwm.selected);
@@ -236,16 +235,16 @@ void ProcessModbusMessages() {
         }
 
         ///@note React only to last register of the set. It needs to be written in block, last register applies new values.
-        case ftrstd::to_underlying(ModbusRegisters::SystemHoldingRegister::status_color_end): {
+        case std::to_underlying(ModbusRegisters::SystemHoldingRegister::status_color_end): {
             status_led = dwarf_shared::StatusLed({ ModbusRegisters::GetRegValue(ModbusRegisters::SystemHoldingRegister::status_color_start),
                 ModbusRegisters::GetRegValue(ModbusRegisters::SystemHoldingRegister::status_color_end) });
             break;
         }
 
         ///@note React only to last register of the set. It needs to be written in block, last register applies new values.
-        case ftrstd::to_underlying(ModbusRegisters::SystemHoldingRegister::pid_end): {
-            static_assert((ftrstd::to_underlying(ModbusRegisters::SystemHoldingRegister::pid_end)
-                              - ftrstd::to_underlying(ModbusRegisters::SystemHoldingRegister::pid_start) + 1)
+        case std::to_underlying(ModbusRegisters::SystemHoldingRegister::pid_end): {
+            static_assert((std::to_underlying(ModbusRegisters::SystemHoldingRegister::pid_end)
+                              - std::to_underlying(ModbusRegisters::SystemHoldingRegister::pid_start) + 1)
                     == (3 * sizeof(float) + 1) / 2,
                 "Needs this many registers");
 
@@ -256,7 +255,7 @@ void ProcessModbusMessages() {
              */
             auto get_reg = [](size_t i) -> uint16_t {
                 return ModbusRegisters::GetRegValue(static_cast<ModbusRegisters::SystemHoldingRegister>(
-                    ftrstd::to_underlying(ModbusRegisters::SystemHoldingRegister::pid_start) + i));
+                    std::to_underlying(ModbusRegisters::SystemHoldingRegister::pid_start) + i));
             };
 
             uint32_t temp_data; ///< Use to convert two registers into one float
@@ -335,15 +334,15 @@ void UpdateRegisters() {
     ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::mcu_temperature, std::clamp<int32_t>(mcu_temp_filter / 8, INT16_MIN, INT16_MAX));
     ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::heatbreak_temp, clamp_to_int16(Temperature::degHeatbreak(0)));
 
-    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan0_rpm, Fans::print(0).getActualRPM());
-    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan0_pwm, Fans::print(0).getPWM());
-    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan0_state, Fans::print(0).getState());
-    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan0_is_rpm_ok, Fans::print(0).getRPMIsOk());
+    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan0_rpm, Fans::print(0).get_actual_rpm());
+    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan0_pwm, Fans::print(0).get_pwm());
+    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan0_state, Fans::print(0).get_state());
+    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan0_is_rpm_ok, Fans::print(0).get_rpm_is_ok());
 
-    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan1_rpm, Fans::heat_break(0).getActualRPM());
-    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan1_pwm, Fans::heat_break(0).getPWM());
-    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan1_state, Fans::heat_break(0).getState());
-    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan1_is_rpm_ok, Fans::heat_break(0).getRPMIsOk());
+    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan1_rpm, Fans::heat_break(0).get_actual_rpm());
+    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan1_pwm, Fans::heat_break(0).get_pwm());
+    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan1_state, Fans::heat_break(0).get_state());
+    ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::fan1_is_rpm_ok, Fans::heat_break(0).get_rpm_is_ok());
 
     ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::is_picked_raw, Cheese::get_raw_picked());
     ModbusRegisters::SetRegValue(ModbusRegisters::SystemInputRegister::is_parked_raw, Cheese::get_raw_parked());
@@ -358,13 +357,13 @@ void UpdateRegisters() {
 
 void TriggerMarlinKillFault(dwarf_shared::errors::FaultStatusMask fault, const char *component, const char *message) {
     ModbusRegisters::PutStringIntoInputRegisters(
-        ftrstd::to_underlying(ModbusRegisters::SystemInputRegister::marlin_error_component_start),
-        ftrstd::to_underlying(ModbusRegisters::SystemInputRegister::marlin_error_component_end),
+        std::to_underlying(ModbusRegisters::SystemInputRegister::marlin_error_component_start),
+        std::to_underlying(ModbusRegisters::SystemInputRegister::marlin_error_component_end),
         component);
 
     ModbusRegisters::PutStringIntoInputRegisters(
-        ftrstd::to_underlying(ModbusRegisters::SystemInputRegister::marlin_error_message_start),
-        ftrstd::to_underlying(ModbusRegisters::SystemInputRegister::marlin_error_message_end),
+        std::to_underlying(ModbusRegisters::SystemInputRegister::marlin_error_message_start),
+        std::to_underlying(ModbusRegisters::SystemInputRegister::marlin_error_message_end),
         message);
 
     // this erases existing erros, but since this is fatal error, it doesn't matter

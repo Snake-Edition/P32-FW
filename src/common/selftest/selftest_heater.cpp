@@ -11,6 +11,7 @@
 #include "advanced_power.hpp"
 #include <printers.h>
 #include "config_store/store_instance.hpp"
+#include <feature/safety_timer/safety_timer.hpp>
 
 using namespace selftest;
 LOG_COMPONENT_REF(Selftest);
@@ -119,16 +120,16 @@ LoopResult CSelftestPart_Heater::stateSetup() {
 
 LoopResult CSelftestPart_Heater::stateTakeControlOverFans() {
     log_info(Selftest, "%s took control of fans", m_config.partname);
-    m_config.print_fan_fnc(m_config.tool_nr).enterSelftestMode();
-    m_config.heatbreak_fan_fnc(m_config.tool_nr).enterSelftestMode();
+    m_config.print_fan_fnc(m_config.tool_nr).enter_selftest_mode();
+    m_config.heatbreak_fan_fnc(m_config.tool_nr).enter_selftest_mode();
     return LoopResult::RunNext;
 }
 
 LoopResult CSelftestPart_Heater::stateFansActivate() {
     if (enable_cooldown) {
         log_info(Selftest, "%s set fans to maximum", m_config.partname);
-        m_config.print_fan_fnc(m_config.tool_nr).selftestSetPWM(255); // it will be restored by exitSelftestMode
-        m_config.heatbreak_fan_fnc(m_config.tool_nr).selftestSetPWM(255); // it will be restored by exitSelftestMode
+        m_config.print_fan_fnc(m_config.tool_nr).selftest_set_pwm(255); // it will be restored by exitSelftestMode
+        m_config.heatbreak_fan_fnc(m_config.tool_nr).selftest_set_pwm(255); // it will be restored by exitSelftestMode
     }
     return LoopResult::RunNext;
 }
@@ -160,8 +161,8 @@ LoopResult CSelftestPart_Heater::stateCooldown() {
 }
 
 LoopResult CSelftestPart_Heater::stateFansDeactivate() {
-    m_config.print_fan_fnc(m_config.tool_nr).exitSelftestMode();
-    m_config.heatbreak_fan_fnc(m_config.tool_nr).exitSelftestMode();
+    m_config.print_fan_fnc(m_config.tool_nr).exit_selftest_mode();
+    m_config.heatbreak_fan_fnc(m_config.tool_nr).exit_selftest_mode();
     log_info(Selftest, "%s returned control of fans", m_config.partname);
     return LoopResult::RunNext;
 }
@@ -250,11 +251,12 @@ LoopResult CSelftestPart_Heater::stateMeasure() {
 
     // Adapt test to HW differences
     int16_t hw_diff = 0;
+
+#if HAS_HOTEND_TYPE_SUPPORT()
     if (m_config.type == heater_type_t::Nozzle) {
-        // Bounds check, there might be invalid value in the config_store
-        const auto hotend_type = static_cast<size_t>(config_store().hotend_type.get(m_config.tool_nr));
-        hw_diff += m_config.hotend_type_temp_offsets[hotend_type < static_cast<size_t>(HotendType::_cnt) ? hotend_type : 0];
+        hw_diff += hotend_type_heater_selftest_offset(config_store().hotend_type.get(m_config.tool_nr));
     }
+#endif
 
     if (hw_diff) {
         log_info(Selftest, "%s heat range offseted by %d degrees Celsius due to HW differences", m_config.partname, hw_diff);

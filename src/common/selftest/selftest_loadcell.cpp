@@ -11,9 +11,8 @@
 #include "loadcell.hpp"
 #include <sound.hpp>
 #include <module/temperature.h>
-#include <module/planner.h>
-#include <module/stepper.h>
 #include <module/endstops.h>
+#include <feature/motordriver_util.h>
 #include <gcode/gcode.h>
 #include "i_selftest.hpp"
 #include "algorithm_scale.hpp"
@@ -27,6 +26,13 @@
 LOG_COMPONENT_REF(Selftest);
 using namespace selftest;
 
+static constexpr int32_t acceptable_noise_range_g = 60;
+
+auto set_extruder_temperature = [](int16_t temperature, uint8_t extruder) {
+    thermalManager.setTargetHotend(temperature, extruder);
+    marlin_server::set_temp_to_display(temperature, extruder);
+};
+
 CSelftestPart_Loadcell::CSelftestPart_Loadcell(IPartHandler &state_machine, const LoadcellConfig_t &config,
     SelftestLoadcell_t &result)
     : rStateMachine(state_machine)
@@ -39,13 +45,13 @@ CSelftestPart_Loadcell::CSelftestPart_Loadcell(IPartHandler &state_machine, cons
     , log(1000)
     , log_fast(100) // this is only during 1s (will generate 9-10 logs)
 {
-    thermalManager.setTargetHotend(0, rConfig.tool_nr);
+    set_extruder_temperature(0, rConfig.tool_nr);
     endstops.enable(true);
     log_info(Selftest, "%s Started", rConfig.partname);
 }
 
 CSelftestPart_Loadcell::~CSelftestPart_Loadcell() {
-    thermalManager.setTargetHotend(begin_target_temp, rConfig.tool_nr);
+    set_extruder_temperature(begin_target_temp, rConfig.tool_nr);
     endstops.enable(false);
 }
 
@@ -88,8 +94,7 @@ LoopResult CSelftestPart_Loadcell::stateMoveUpWaitFinish() {
 }
 
 LoopResult CSelftestPart_Loadcell::stateCooldownInit() {
-    thermalManager.setTargetHotend(0, rConfig.tool_nr); // Disable heating for tested hotend
-    marlin_server::set_temp_to_display(0, rConfig.tool_nr);
+    set_extruder_temperature(0, rConfig.tool_nr); // Disable heating for tested hotend
     const float temp = thermalManager.degHotend(rConfig.tool_nr);
     rResult.temperature = static_cast<int16_t>(temp);
     need_cooling = temp > rConfig.cool_temp; // Check if temperature is safe
@@ -106,10 +111,10 @@ LoopResult CSelftestPart_Loadcell::stateCooldownInit() {
         IPartHandler::SetFsmPhase(PhasesSelftest::Loadcell_cooldown);
         log_info(Selftest, "%s cooling needed, target: %d current: %f", rConfig.partname,
             static_cast<int>(rConfig.cool_temp), static_cast<double>(temp));
-        rConfig.print_fan_fnc(rConfig.tool_nr).enterSelftestMode();
-        rConfig.heatbreak_fan_fnc(rConfig.tool_nr).enterSelftestMode();
-        rConfig.print_fan_fnc(rConfig.tool_nr).selftestSetPWM(255); // it will be restored by exitSelftestMode
-        rConfig.heatbreak_fan_fnc(rConfig.tool_nr).selftestSetPWM(255); // it will be restored by exitSelftestMode
+        rConfig.print_fan_fnc(rConfig.tool_nr).enter_selftest_mode();
+        rConfig.heatbreak_fan_fnc(rConfig.tool_nr).enter_selftest_mode();
+        rConfig.print_fan_fnc(rConfig.tool_nr).selftest_set_pwm(255); // it will be restored by exitSelftestMode
+        rConfig.heatbreak_fan_fnc(rConfig.tool_nr).selftest_set_pwm(255); // it will be restored by exitSelftestMode
         log_info(Selftest, "%s fans set to maximum", rConfig.partname);
     }
     return LoopResult::RunNext;
@@ -124,7 +129,6 @@ LoopResult CSelftestPart_Loadcell::stateCooldown() {
     if (need_cooling && temp > rConfig.cool_temp) {
         LogInfoTimed(log, "%s cooling down, target: %d current: %f", rConfig.partname,
             static_cast<int>(rConfig.cool_temp), static_cast<double>(temp));
-        gcode.reset_stepper_timeout(); // Do not disable steppers while cooling
         return LoopResult::RunCurrent;
     }
 
@@ -134,8 +138,8 @@ LoopResult CSelftestPart_Loadcell::stateCooldown() {
 
 LoopResult CSelftestPart_Loadcell::stateCooldownDeinit() {
     if (need_cooling) { // if cooling was needed, return control of fans
-        rConfig.print_fan_fnc(rConfig.tool_nr).exitSelftestMode();
-        rConfig.heatbreak_fan_fnc(rConfig.tool_nr).exitSelftestMode();
+        rConfig.print_fan_fnc(rConfig.tool_nr).exit_selftest_mode();
+        rConfig.heatbreak_fan_fnc(rConfig.tool_nr).exit_selftest_mode();
         log_info(Selftest, "%s fans disabled", rConfig.partname);
     }
     return LoopResult::RunNext;
@@ -190,7 +194,8 @@ LoopResult CSelftestPart_Loadcell::stateConnectionCheck() {
 }
 
 LoopResult CSelftestPart_Loadcell::stateAskAbortInit() {
-    IPartHandler::SetFsmPhase(PhasesSelftest::Loadcell_user_tap_ask_abort);
+    const bool show_ignore = rResult.loadcell_noisy && !rResult.ignore_noisy;
+    IPartHandler::SetFsmPhase(show_ignore ? PhasesSelftest::Loadcell_user_tap_ask_ignore_abort : PhasesSelftest::Loadcell_user_tap_ask_abort);
     return LoopResult::RunNext;
 }
 
@@ -200,6 +205,10 @@ LoopResult CSelftestPart_Loadcell::stateAskAbort() {
     case Response::Abort: // Abort is automatic at state machine level, it should never get here
         log_error(Selftest, "%s user pressed abort, code should not reach this place", rConfig.partname);
         return LoopResult::Abort;
+    case Response::Ignore:
+        log_error(Selftest, "%s user selected to ignore loadcell noise", rConfig.partname);
+        rResult.ignore_noisy = true;
+        return LoopResult::RunNext;
     case Response::Continue:
         log_info(Selftest, "%s user pressed continue", rConfig.partname);
         return LoopResult::RunNext;
@@ -216,21 +225,27 @@ LoopResult CSelftestPart_Loadcell::stateTapCheckCountDownInit() {
     loadcell.WaitBarrier();
     loadcell.Tare(Loadcell::TareMode::Static);
 
+    loadcell_value_range = {};
     time_start_countdown = SelftestInstance().GetTime();
-    rResult.countdown = SelftestLoadcell_t::countdown_undef;
-    rResult.pressed_too_soon = true;
+    // Preserve the ignore noisy across retries.
+    const bool ignore_noisy = rResult.ignore_noisy;
+    rResult = { .ignore_noisy = ignore_noisy };
+
     IPartHandler::SetFsmPhase(PhasesSelftest::Loadcell_user_tap_countdown);
     return LoopResult::RunNext;
 }
 
 LoopResult CSelftestPart_Loadcell::stateTapCheckCountDown() {
-    int32_t load = -1 * loadcell.get_tared_z_load(); // Positive when pushing the nozzle up
+    const int32_t load = -1 * loadcell.get_tared_z_load(); // Positive when pushing the nozzle up
+    loadcell_value_range.min = std::min(loadcell_value_range.min, load);
+    loadcell_value_range.max = std::max(loadcell_value_range.max, load);
+
     // Show tared value at 1/10 of the range, threshold tap_min_load_ok is needed to pass the test
     rResult.progress = scale_percent_avoid_overflow(load, rConfig.tap_min_load_ok / -9, rConfig.tap_min_load_ok);
     if (std::abs(load) >= rConfig.countdown_load_error_value) {
         log_info(Selftest, "%s load during countdown %dg exceeded error value %dg", rConfig.partname,
             static_cast<int>(load), static_cast<int>(rConfig.countdown_load_error_value));
-        rResult.pressed_too_soon = true;
+        rResult.wrong_tap = true;
         return LoopResult::GoToMark0;
     }
     LogDebugTimed(log, "%s load during countdown %dg", rConfig.partname, static_cast<int>(load));
@@ -249,6 +264,12 @@ LoopResult CSelftestPart_Loadcell::stateTapCheckCountDown() {
 }
 
 LoopResult CSelftestPart_Loadcell::stateTapCheckInit() {
+    if (loadcell_value_range.max - loadcell_value_range.min > acceptable_noise_range_g && !rResult.ignore_noisy) {
+        log_info(Selftest, "%s range: %" PRIi32 "-%" PRIi32 " outside of %" PRIi32, rConfig.partname, loadcell_value_range.min, loadcell_value_range.max, acceptable_noise_range_g);
+        rResult.loadcell_noisy = true;
+        return LoopResult::GoToMark0;
+    }
+
     rResult.countdown = SelftestLoadcell_t::countdown_undef;
     time_start_tap = SelftestInstance().GetTime();
     IPartHandler::SetFsmPhase(PhasesSelftest::Loadcell_user_tap_check);
@@ -259,11 +280,12 @@ LoopResult CSelftestPart_Loadcell::stateTapCheckInit() {
 LoopResult CSelftestPart_Loadcell::stateTapCheck() {
     if ((SelftestInstance().GetTime() - time_start_tap) >= rConfig.tap_timeout_ms) {
         log_info(Selftest, "%s user did not tap", rConfig.partname);
+        rResult.wrong_tap = true;
         return LoopResult::GoToMark0; // timeout, retry entire touch sequence
     }
 
     int32_t load = -1 * loadcell.get_tared_z_load(); // Positive when pushing the nozzle up
-    bool pass = IsInClosedRange(load, rConfig.tap_min_load_ok, rConfig.tap_max_load_ok);
+    bool pass = (load >= rConfig.tap_min_load_ok) && (load <= rConfig.tap_max_load_ok);
     if (pass) {
         log_info(Selftest, "%s tap check, load %dg successful in range <%d, %d>",
             rConfig.partname, static_cast<int>(load), static_cast<int>(rConfig.tap_min_load_ok),
@@ -284,6 +306,6 @@ LoopResult CSelftestPart_Loadcell::stateTapOk() {
 
     log_info(Selftest, "%s finished", rConfig.partname);
     IPartHandler::SetFsmPhase(PhasesSelftest::Loadcell_user_tap_ok);
-    return LoopResult::RunNext;
     rResult.progress = 100;
+    return LoopResult::RunNext;
 }

@@ -4,8 +4,12 @@
 #include "marlin_client.hpp"
 #include "WindowMenuSpin.hpp"
 #include "window_msgbox.hpp"
-#include "ScreenSelftest.hpp"
 #include <filament_sensors_handler.hpp>
+#include <mmu2/fail_bucket.hpp>
+
+#if HAS_SELFTEST()
+    #include "ScreenSelftest.hpp"
+#endif
 
 #include "screen_menu_mmu_preload_to_mmu.hpp"
 #include "screen_menu_mmu_load_test_filament.hpp"
@@ -93,10 +97,7 @@ MI_MMU_ISSUE_GCODE::MI_MMU_ISSUE_GCODE(const char *lbl, const char *gcode, is_hi
 }
 
 void MI_MMU_ISSUE_GCODE::click(IWindowMenu & /*window_menu*/) {
-    marlin_client::event_clr(marlin_server::Event::CommandBegin);
     marlin_client::gcode(gcode);
-    //    while (!marlin_client::event_clr(Event::CommandBegin))
-    //        marlin_client::loop();
     // gui_dlg_wait(gui_marlin_G28_or_G29_in_progress); // @@TODO perform some blocking wait on the LCD until the MMU finishes its job
     // Meanwhile an MMU error screen may occur!
 }
@@ -120,8 +121,6 @@ MI_MMU_ISSUE_GCODE_SLOT::MI_MMU_ISSUE_GCODE_SLOT(uint8_t slot_i, const char *lab
 void MI_MMU_ISSUE_GCODE_SLOT::click(IWindowMenu &) {
     std::array<char, MAX_CMD_SIZE> gcode;
     snprintf(gcode.data(), gcode.size(), gcode_fmt_, slot_i_);
-
-    marlin_client::event_clr(marlin_server::Event::CommandBegin);
     gui_try_gcode_with_msg(gcode.data());
 }
 
@@ -132,7 +131,6 @@ MI_MMU_PRELOAD_ALL::MI_MMU_PRELOAD_ALL()
 }
 
 void MI_MMU_PRELOAD_ALL::click(IWindowMenu & /*window_menu*/) {
-    marlin_client::event_clr(marlin_server::Event::CommandBegin);
     for (uint8_t i = 0; i < 5; ++i) {
         char gcode[] = "M704 Px";
         gcode[sizeof(gcode) - 2] = i + '0';
@@ -147,7 +145,6 @@ MI_MMU_LOAD_TEST_ALL::MI_MMU_LOAD_TEST_ALL()
 }
 
 void MI_MMU_LOAD_TEST_ALL::click(IWindowMenu & /*window_menu*/) {
-    marlin_client::event_clr(marlin_server::Event::CommandBegin);
     for (uint8_t i = 0; i < 5; ++i) {
         char gcode[] = "M1704 Px";
         gcode[sizeof(gcode) - 2] = i + '0';
@@ -182,8 +179,8 @@ static bool flip_mmu_rework([[maybe_unused]] bool flip_mmu_at_the_end) {
 
     config_store().is_mmu_rework.set(set_mmu_rework);
 
-// The FS is not calibrated on MK3.5
-#if !PRINTER_IS_PRUSA_MK3_5()
+    // The FS is not calibrated on MK3.5
+#if HAS_SELFTEST() && !PRINTER_IS_PRUSA_MK3_5()
     const auto fsstate = GetExtruderFSensor(0)->get_state();
     GetExtruderFSensor(0)->SetInvalidateCalibrationFlag();
 
@@ -213,7 +210,7 @@ MI_MMU_ENABLE::MI_MMU_ENABLE()
 }
 
 void MI_MMU_ENABLE::OnChange(size_t old_index) {
-    if (!index) {
+    if (!value()) {
         // Disale MMU
         marlin_client::gcode("M709 S0");
 
@@ -230,7 +227,7 @@ void MI_MMU_ENABLE::OnChange(size_t old_index) {
         // logical_sensors.extruder is not synchronized, but in this case it it OK
         if (!is_fsensor_working_state(FSensors_instance().sensor_state(LogicalFilamentSensor::extruder))) {
             MsgBoxWarning(_("Can't enable MMU: calibrate and enable the printer's filament sensor first."), Responses_Ok);
-            SetIndex(old_index);
+            set_value(old_index > 0);
             return;
         }
 
@@ -239,7 +236,7 @@ void MI_MMU_ENABLE::OnChange(size_t old_index) {
 }
 
 void MI_MMU_ENABLE::Loop() {
-    set_value(config_store().mmu2_enabled.get(), 0);
+    set_value(config_store().mmu2_enabled.get());
 }
 
 /**********************************************************************************************/
@@ -276,30 +273,46 @@ MI_MMU_GENERAL_FAILS::MI_MMU_GENERAL_FAILS()
 MI_MMU_TOTAL_GENERAL_FAILS::MI_MMU_TOTAL_GENERAL_FAILS()
     : WI_INFO_t(config_store().mmu2_total_fails.get(), _(label), MMU2::mmu2.Enabled() ? is_hidden_t::no : is_hidden_t::yes) {}
 
-static constexpr const char *mmu_rework_items[] = {
+static constexpr std::array mmu_rework_items = std::to_array<const char *>({
     N_("Stock"),
     N_("MMU"),
-};
+});
+/**********************************************************************************************/
+
+// MMU INVOKE MAINTENANCE
+MI_MMU_INVOKE_MAINTENANCE::MI_MMU_INVOKE_MAINTENANCE()
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::dev) {}
+
+void MI_MMU_INVOKE_MAINTENANCE::click(IWindowMenu & /*window_menu*/) {
+    config_store().mmu_fail_bucket.set(MMU2::FailLeakyBucket::default_overflow_limit);
+}
 
 MI_MMU_NEXTRUDER_REWORK::MI_MMU_NEXTRUDER_REWORK()
-    : MenuItemSwitch(
-        _(HAS_LOADCELL() ? N_("Nextruder") : N_("Extruder")),
-        mmu_rework_items,
-        config_store().is_mmu_rework.get()) {}
+    : MenuItemSelectMenu(_(HAS_LOADCELL() ? N_("Nextruder") : N_("Extruder"))) {
+    set_current_item(config_store().is_mmu_rework.get());
+}
 
-void MI_MMU_NEXTRUDER_REWORK::OnChange([[maybe_unused]] size_t old_index) {
-    if (!flip_mmu_rework(index == 0)) {
-        SetIndex(old_index); // revert the index change of the toggle in case the user aborted the dialog
-        return;
+int MI_MMU_NEXTRUDER_REWORK::item_count() const {
+    return mmu_rework_items.size();
+}
+
+void MI_MMU_NEXTRUDER_REWORK::build_item_text(int index, const std::span<char> &buffer) const {
+    _(mmu_rework_items[index]).copyToRAM(buffer);
+}
+
+bool MI_MMU_NEXTRUDER_REWORK::on_item_selected([[maybe_unused]] int old_index, int new_index) {
+    if (!flip_mmu_rework(new_index == 0)) {
+        return false;
     }
 
     // Enabling MMU rework hides the FS_Autoload option from the menu - BFW-4290
     // However the request was that the autoload "stays active"
     // So we have to make sure that it's on when you activate the rework
-    if (index) {
-        marlin_client::set_fs_autoload(true);
+    if (new_index) {
         config_store().fs_autoload_enabled.set(true);
     }
+
+    return true;
 };
 
 /*****************************************************************************/

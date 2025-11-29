@@ -152,6 +152,9 @@ class Endstops {
       FORCE_INLINE static void validate_homing_move() { hit_on_purpose(); }
     #endif
 
+    // Trigger a software endstop
+    void trigger_endstop(EndstopEnum endstop);
+
     // Clear endstops (i.e., they were hit intentionally) to suppress the report
     FORCE_INLINE static void hit_on_purpose() { hit_state = 0; }
 
@@ -180,18 +183,6 @@ class Endstops {
       static bool monitor_flag;
       static void monitor();
       static void run_monitor();
-    #endif
-
-    #if ENABLED(SPI_ENDSTOPS)
-      typedef struct {
-        union {
-          bool any;
-          struct { bool x:1, y:1, z:1; };
-        };
-      } tmc_spi_homing_t;
-      static tmc_spi_homing_t tmc_spi_homing;
-      static void clear_endstop_state();
-      static bool tmc_spi_homing_check();
     #endif
 };
 

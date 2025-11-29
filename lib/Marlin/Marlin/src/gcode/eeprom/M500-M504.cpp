@@ -87,19 +87,3 @@ void GcodeSuite::M502() {
 #endif // !DISABLE_M503
 
 /** @}*/
-
-#if ENABLED(EEPROM_SETTINGS)
- /**
- *### M504: Validate EEPROM Contents <a href="https://reprap.org/wiki/G-code#M504:_Validate_EEPROM">M504: Validate EEPROM</a>
- *
- * Validate the contents of the EEPROM.
- *
- *#### Usage
- *
- *    M504
- */
-  void GcodeSuite::M504() {
-    if (settings.validate())
-      SERIAL_ECHO_MSG("EEPROM OK");
-  }
-#endif

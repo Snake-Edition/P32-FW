@@ -59,7 +59,6 @@ void GcodeSuite::G6() {
   if (parser.seen('S')) num_steps = parser.value_ushort();
 
   planner.buffer_page(page_idx, 0, num_steps);
-  reset_stepper_timeout();
 }
 
 #endif // DIRECT_STEPPING

@@ -105,6 +105,7 @@ target_include_directories(
           ${CMAKE_SOURCE_DIR}/src/common
           ${CMAKE_SOURCE_DIR}/src/common/http
           ${CMAKE_SOURCE_DIR}/src/common/gcode
+          ${CMAKE_SOURCE_DIR}/src/common/utils
           ${CMAKE_SOURCE_DIR}/src/persistent_stores
           ${CMAKE_SOURCE_DIR}/src
           ${CMAKE_SOURCE_DIR}/src/lang
@@ -135,6 +136,6 @@ add_custom_target(
 add_dependencies(nhttp_tests generate-http-automata-tests)
 # target_link_libraries(http_tests LwIP)
 
-target_link_libraries(nhttp_tests bgcode_core mbedTLS SG14 freertos_tests)
+target_link_libraries(nhttp_tests bgcode_core mbedTLS SG14 freertos_tests buddy_utils)
 
 add_catch_test(nhttp_tests)

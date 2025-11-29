@@ -22,15 +22,22 @@
 
 #pragma once
 
-#include "../inc/MarlinConfig.h"
-#include "../lcd/ultralcd.h"
+#include "../inc/MarlinConfigPre.h"
 
-#include <option/has_puppies.h>
+#if !HAS_TRINAMIC
+  #error "Do not include this file on printers without TMC drivers"
+#endif
 
-#if HAS_TRINAMIC
+#include <option/has_dwarf.h>
+#include <option/has_toolchanger.h>
 
+#include <core/serial.h>
 #include <TMCStepper.h>
-#include "../module/planner.h"
+
+#include <option/has_planner.h>
+#if HAS_PLANNER() && ENABLED(HYBRID_THRESHOLD)
+  #include "../module/planner.h"
+#endif
 
 #define TMC_X_LABEL 'X', '0'
 #define TMC_Y_LABEL 'Y', '0'
@@ -117,7 +124,7 @@ class TMCMarlinBase : public TMC, public TMCStorage {
     const char driver_id;
     const AxisEnum axis_id;
 
-    #if HAS_PUPPIES() && HAS_TOOLCHANGER()
+    #if HAS_DWARF() && HAS_TOOLCHANGER()
     TMCMarlinBase(char axis_letter, char driver_id, AxisEnum axis_id, const TMC2130Stepper::Connection connection, const float RS)
       : TMC(connection, RS)
       , axis_letter(axis_letter), driver_id(driver_id), axis_id(axis_id)
@@ -167,15 +174,12 @@ class TMCMarlinBase : public TMC, public TMCStorage {
       inline void refresh_stepping_mode() { this->en_pwm_mode(this->stored.stealthChop_enabled); }
       inline bool get_stealthChop_status() { return this->en_pwm_mode(); }
     #endif
-    #if ENABLED(HYBRID_THRESHOLD)
+    #if HAS_PLANNER() && ENABLED(HYBRID_THRESHOLD)
       uint32_t get_pwm_thrs() {
         return tmc_feedrate_to_period(axis_id, this->microsteps(), this->TPWMTHRS(), planner.settings.axis_steps_per_mm[axis_id]);
       }
       void set_pwm_thrs(const uint32_t thrs) {
         TMC::TPWMTHRS(tmc_feedrate_to_period(axis_id, this->microsteps(), thrs, planner.settings.axis_steps_per_mm[axis_id]));
-        #if HAS_LCD_MENU
-          this->stored.hybrid_thrs = thrs;
-        #endif
       }
     #endif
     #if USE_SENSORLESS
@@ -186,29 +190,11 @@ class TMCMarlinBase : public TMC, public TMCStorage {
       void stall_sensitivity(int16_t sgt_val) {
         sgt_val = (int16_t)constrain(sgt_val, sgt_min, sgt_max);
         TMC::sgt(sgt_val);
-        #if HAS_LCD_MENU
-          this->stored.homing_thrs = sgt_val;
-        #endif
       }
       void stall_max_period(uint32_t max_period){
         max_period = (uint32_t)constrain(max_period, 0, 1048575);
-        TMC2130Stepper::TCOOLTHRS(max_period);
+        TMC::TCOOLTHRS(max_period);
       }
-
-      #if ENABLED(SPI_ENDSTOPS)
-        bool test_stall_status();
-      #endif
-    #endif
-
-    #if HAS_LCD_MENU
-      inline void refresh_stepper_current() { rms_current(this->val_mA); }
-
-      #if ENABLED(HYBRID_THRESHOLD)
-        inline void refresh_hybrid_thrs() { set_pwm_thrs(this->stored.hybrid_thrs); }
-      #endif
-      #if USE_SENSORLESS
-        inline void refresh_homing_thrs() { stall_sensitivity(this->stored.homing_thrs); }
-      #endif
     #endif
 };
 
@@ -251,9 +237,6 @@ class TMCMarlin<TMC2209Stepper> : public TMCMarlinBase<TMC2209Stepper> {
       void stall_sensitivity(int16_t sgt_val) {
         sgt_val = (int16_t)constrain(sgt_val, sgt_min, sgt_max);
         TMC2209Stepper::SGTHRS(sgt_val);
-        #if HAS_LCD_MENU
-          this->stored.homing_thrs = sgt_val;
-        #endif
       }
     #endif
 
@@ -328,9 +311,6 @@ void initial_test_tmc_connection();
  */
 #if USE_SENSORLESS
 
-  // Track enabled status of stealthChop and only re-enable where applicable
-  struct sensorless_t { bool x, y, z, x2, y2, z2, z3; };
-
   #if ENABLED(IMPROVE_HOMING_RELIABILITY) && HOMING_SG_GUARD_DURATION > 0
     extern millis_t sg_guard_period;
     constexpr uint16_t default_sg_guard_duration = HOMING_SG_GUARD_DURATION;
@@ -345,25 +325,36 @@ void initial_test_tmc_connection();
   bool tmc_enable_stallguard(TMCMarlin<TMC2660Stepper>);
   void tmc_disable_stallguard(TMCMarlin<TMC2660Stepper>, const bool);
 
-  #if ENABLED(SPI_ENDSTOPS)
-    template<class TMC>
-    bool TMCMarlinBase<TMC>::test_stall_status() {
-      this->switchCSpin(LOW);
-
-      // read stallGuard flag from TMC library, will handle HW and SW SPI
-      TMC2130_n::DRV_STATUS_t drv_status{0};
-      drv_status.sr = this->DRV_STATUS();
-
-      this->switchCSpin(HIGH);
-
-      return drv_status.stallGuard;
-    }
-  #endif // SPI_ENDSTOPS
-
 #endif // USE_SENSORLESS
 
-#if TMC_HAS_SPI
-  void tmc_init_cs_pins();
+typedef struct {
+    const char *cmd_name;
+    uint8_t reg_adr;
+    bool write;
+    bool read;
+} tmc_reg_t;
+
+extern tmc_reg_t tmc_reg_map[]; //< Null terminated array of known registers
+
+void init_tmc();
+void tmc_get_sgt();
+void tmc_get_TPWMTHRS();
+void tmc_get_tstep();
+#if HAS_PLANNER()
+  uint16_t tmc_sg_result(uint8_t axis);
 #endif
 
-#endif // HAS_TRINAMIC
+#ifdef HAS_TMC_WAVETABLE
+  void tmc_enable_wavetable(bool X, bool Y, bool Z);
+  void tmc_disable_wavetable(bool X, bool Y, bool Z);
+#endif // HAS_TMC_WAVETABLE
+
+/**
+ * \brief Check stepper coils for open/short circuit
+ *
+ * This reports false errors when not moving or moving too fast.
+ *
+ * \param axis axis to check
+ * \return true if all coils are ok, false otherwise
+ */
+bool tmc_check_coils(uint8_t axis);

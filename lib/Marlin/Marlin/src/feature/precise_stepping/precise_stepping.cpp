@@ -31,6 +31,7 @@ move_segment_queue_t PreciseStepping::move_segment_queue;
 step_event_queue_t PreciseStepping::step_event_queue;
 
 uint16_t PreciseStepping::left_ticks_to_next_step_event = 0;
+uint32_t PreciseStepping::last_step_isr_delay = 0;
 
 step_generator_state_t PreciseStepping::step_generator_state;
 step_generators_pool_t PreciseStepping::step_generators_pool;
@@ -38,6 +39,7 @@ step_generators_pool_t PreciseStepping::step_generators_pool;
 uint8_t PreciseStepping::physical_axis_step_generator_types = CLASSIC_STEP_GENERATOR_X | CLASSIC_STEP_GENERATOR_Y | CLASSIC_STEP_GENERATOR_Z | CLASSIC_STEP_GENERATOR_E;
 double PreciseStepping::max_lookback_time = 0.;
 
+std::atomic<MoveFlag_t> PreciseStepping::current_move_flags = 0;
 uint16_t PreciseStepping::inverted_dirs = 0;
 double PreciseStepping::total_print_time = 0.;
 xyze_double_t PreciseStepping::total_start_pos = { 0., 0., 0., 0. };
@@ -45,18 +47,20 @@ xyze_long_t PreciseStepping::total_start_pos_msteps = { 0, 0, 0, 0 };
 PreciseSteppingFlag_t PreciseStepping::flags = 0;
 
 uint32_t PreciseStepping::waiting_before_delivering_start_time = 0;
-uint32_t PreciseStepping::last_step_isr_delay = 0;
 
+bool PreciseStepping::initialized_ = false;
 std::atomic<bool> PreciseStepping::stop_pending = false;
 std::atomic<bool> PreciseStepping::busy = false;
+std::atomic<bool> PreciseStepping::wakeup_requested = false;
 volatile uint8_t PreciseStepping::step_dl_miss = 0;
 volatile uint8_t PreciseStepping::step_ev_miss = 0;
+volatile uint32_t PreciseStepping::time_last_block_us;
 
 #if !BOARD_IS_DWARF()
 std::atomic<uint32_t> PreciseStepping::stall_count = 0;
 #endif
 
-FORCE_INLINE xyze_long_t get_oriented_msteps_from_block(const block_t &block) {
+STEPPING_INLINE xyze_long_t get_oriented_msteps_from_block(const block_t &block) {
     const xyze_long_t direction = {
         { { (block.direction_bits & _BV(X_AXIS)) ? -1 : 1,
             (block.direction_bits & _BV(Y_AXIS)) ? -1 : 1,
@@ -67,11 +71,11 @@ FORCE_INLINE xyze_long_t get_oriented_msteps_from_block(const block_t &block) {
     return block.msteps.asLong() * direction;
 }
 
-FORCE_INLINE double convert_oriented_msteps_to_distance(const int32_t msteps, const uint8_t axis) {
+STEPPING_INLINE double convert_oriented_msteps_to_distance(const int32_t msteps, const uint8_t axis) {
     return msteps * (double)Planner::mm_per_mstep[axis];
 }
 
-FORCE_INLINE xyze_double_t convert_oriented_msteps_to_distance(const xyze_long_t &msteps) {
+STEPPING_INLINE xyze_double_t convert_oriented_msteps_to_distance(const xyze_long_t &msteps) {
     const xyze_double_t distance_mm = {
         { { (double)msteps.x * (double)Planner::mm_per_mstep[X_AXIS],
             (double)msteps.y * (double)Planner::mm_per_mstep[Y_AXIS],
@@ -82,7 +86,7 @@ FORCE_INLINE xyze_double_t convert_oriented_msteps_to_distance(const xyze_long_t
     return distance_mm;
 }
 
-FORCE_INLINE MoveFlag_t get_active_axis_flags_from_block(const block_t &block) {
+STEPPING_INLINE MoveFlag_t get_active_axis_flags_from_block(const block_t &block) {
     MoveFlag_t flags = (block.msteps.x > 0 ? MOVE_FLAG_X_ACTIVE : 0)
         | (block.msteps.y > 0 ? MOVE_FLAG_Y_ACTIVE : 0)
         | (block.msteps.z > 0 ? MOVE_FLAG_Z_ACTIVE : 0)
@@ -90,7 +94,7 @@ FORCE_INLINE MoveFlag_t get_active_axis_flags_from_block(const block_t &block) {
     return flags;
 }
 
-FORCE_INLINE bool append_move_segment_to_queue(const double move_time, const double start_v, const double half_accel, const double print_time,
+STEPPING_INLINE bool append_move_segment_to_queue(const double move_time, const double start_v, const double half_accel, const double print_time,
     const xyze_double_t axes_r, const xyze_double_t start_pos, const MoveFlag_t flags) {
     assert(PreciseStepping::total_print_time > 0 && PreciseStepping::total_print_time < MAX_PRINT_TIME);
     uint8_t next_move_segment_queue_head;
@@ -109,7 +113,7 @@ FORCE_INLINE bool append_move_segment_to_queue(const double move_time, const dou
     return false;
 }
 
-FORCE_INLINE xyze_double_t calc_axes_r_from_block(const block_t &block) {
+STEPPING_INLINE xyze_double_t calc_axes_r_from_block(const block_t &block) {
     const double millimeters_inv = 1. / double(block.millimeters);
     xyze_double_t axes_r;
 
@@ -127,18 +131,18 @@ FORCE_INLINE xyze_double_t calc_axes_r_from_block(const block_t &block) {
     return axes_r;
 }
 
-FORCE_INLINE double calc_velocity_after_acceleration(const double start_v, const double accel, const double dist) {
+STEPPING_INLINE double calc_velocity_after_acceleration(const double start_v, const double accel, const double dist) {
     // Derived from S = v_0 * t + (a / 2) * t^2 by substitution t = (v - v_0) / a.
     return std::sqrt(2 * dist * accel + SQR(start_v));
 }
 
-FORCE_INLINE double calc_distance_required_to_reach_cruise_velocity(const double start_v, const double cruise_v, const double accel) {
+STEPPING_INLINE double calc_distance_required_to_reach_cruise_velocity(const double start_v, const double cruise_v, const double accel) {
     // Derived from S = v_0 * t + (a / 2) * t^2 by substitution t = (v - v_0) / a.
     return (SQR(cruise_v) - SQR(start_v)) / (2. * accel);
 }
 
 // Clamp distances close to zero or negative.
-FORCE_INLINE double calc_distance_required_to_reach_cruise_velocity_clamped(const double start_v, const double cruise_v, const double accel) {
+STEPPING_INLINE double calc_distance_required_to_reach_cruise_velocity_clamped(const double start_v, const double cruise_v, const double accel) {
     if (const double dist_out = calc_distance_required_to_reach_cruise_velocity(start_v, cruise_v, accel); dist_out < EPSILON_DISTANCE) {
         return 0.;
     } else {
@@ -147,7 +151,7 @@ FORCE_INLINE double calc_distance_required_to_reach_cruise_velocity_clamped(cons
 }
 
 // It assumes that there is no move segment with cruise velocity.
-FORCE_INLINE double calc_distance_in_which_we_start_decelerating(const double start_v, const double end_v, const double accel, const double dist) {
+STEPPING_INLINE double calc_distance_in_which_we_start_decelerating(const double start_v, const double end_v, const double accel, const double dist) {
     // First, we derived the maximum reachable velocity (v_c) from S = v_s * t_A + (a / 2) * t_A^2 + v_e * t_D + (a / 2) * t_D^2
     // by substituting t_A = (v_c - v_s) / a and t_D = (v_c - v_e) / a.
     // After the substitution, we get v_c = sqrt(2 * S * a + v_s^2 + v_s^2) / 2.
@@ -156,7 +160,7 @@ FORCE_INLINE double calc_distance_in_which_we_start_decelerating(const double st
 }
 
 // Clamp distances close to zero or negative to zero and distances close to "dist" to "dist".
-FORCE_INLINE double calc_distance_in_which_we_start_decelerating_clamped(const double start_v, const double end_v, const double accel, const double dist) {
+STEPPING_INLINE double calc_distance_in_which_we_start_decelerating_clamped(const double start_v, const double end_v, const double accel, const double dist) {
     if (const double dist_out = calc_distance_in_which_we_start_decelerating(start_v, end_v, accel, dist); dist_out <= EPSILON_DISTANCE) {
         return 0.;
     } else if (dist_out > dist - EPSILON_DISTANCE) {
@@ -295,7 +299,7 @@ static bool classic_state_step_dir(classic_step_generator_t &state) {
 }
 #endif
 
-FORCE_INLINE void classic_step_generator_update(classic_step_generator_t &step_generator) {
+STEPPING_INLINE void classic_step_generator_update(classic_step_generator_t &step_generator) {
     const uint8_t axis = step_generator.axis;
     const move_t &current_move = *step_generator.current_move;
 
@@ -348,7 +352,8 @@ step_event_info_t classic_step_generator_next_step_event(classic_step_generator_
     const float half_step_dist = Planner::mm_per_half_step[step_generator.axis];
     const float next_target = float(step_generator_state.current_distance[step_generator.axis] + (step_generator.step_dir ? 0 : -1)) * Planner::mm_per_step[step_generator.axis] + half_step_dist;
     const float next_distance = next_target - step_generator.start_pos;
-    const float step_time = calc_time_for_distance(step_generator, next_distance);
+    const float next_distance_clamped = step_generator.step_dir ? std::max(next_distance, 0.f) : std::min(next_distance, 0.f);
+    const float step_time = calc_time_for_distance(step_generator, next_distance_clamped);
 
     // When step_time is infinity, it means that next_distance will never be reached.
     // This happens when next_target exceeds end_position, and deceleration decelerates velocity to zero or negative value.
@@ -411,7 +416,7 @@ void classic_step_generator_init(const move_t &move, classic_step_generator_t &s
     classic_step_generator_update(step_generator);
 }
 
-FORCE_INLINE step_event_info_t step_generator_next_step_event(step_generator_state_t &step_generator_state, const uint8_t axis) {
+STEPPING_INLINE step_event_info_t step_generator_next_step_event(step_generator_state_t &step_generator_state, const uint8_t axis) {
     const step_event_info_t new_step_event = (*step_generator_state.next_step_func[axis])(static_cast<move_segment_step_generator_t &>(*step_generator_state.step_generator[axis]), step_generator_state);
     if (new_step_event.status == STEP_EVENT_INFO_STATUS_GENERATED_VALID) {
         // a new valid step has been produced: update the cached axis activity flags
@@ -504,14 +509,19 @@ void PreciseStepping::init() {
         | (!INVERT_E0_DIR ? STEP_EVENT_FLAG_E_DIR : 0);
 
     // Reset initial direction state
-    X_APPLY_DIR((Stepper::last_direction_bits ^ inverted_dirs) & STEP_EVENT_FLAG_X_DIR);
-    Y_APPLY_DIR((Stepper::last_direction_bits ^ inverted_dirs) & STEP_EVENT_FLAG_Y_DIR);
-    Z_APPLY_DIR((Stepper::last_direction_bits ^ inverted_dirs) & STEP_EVENT_FLAG_Z_DIR);
-    E_APPLY_DIR((Stepper::last_direction_bits ^ inverted_dirs) & STEP_EVENT_FLAG_E_DIR);
-    Stepper::count_direction.x = (Stepper::last_direction_bits & STEP_EVENT_FLAG_X_DIR) ? -1 : 1;
-    Stepper::count_direction.y = (Stepper::last_direction_bits & STEP_EVENT_FLAG_Y_DIR) ? -1 : 1;
-    Stepper::count_direction.z = (Stepper::last_direction_bits & STEP_EVENT_FLAG_Z_DIR) ? -1 : 1;
-    Stepper::count_direction.e = (Stepper::last_direction_bits & STEP_EVENT_FLAG_E_DIR) ? -1 : 1;
+    const StepEventFlag_t step_dir = ((Stepper::last_direction_bits << STEP_EVENT_FLAG_DIR_SHIFT) & STEP_EVENT_FLAG_DIR_MASK);
+    const StepEventFlag_t step_dir_inv = (step_dir ^ PreciseStepping::inverted_dirs);
+
+    X_APPLY_DIR(step_dir_inv & STEP_EVENT_FLAG_X_DIR);
+    Y_APPLY_DIR(step_dir_inv & STEP_EVENT_FLAG_Y_DIR);
+    Z_APPLY_DIR(step_dir_inv & STEP_EVENT_FLAG_Z_DIR);
+    E_APPLY_DIR(step_dir_inv & STEP_EVENT_FLAG_E_DIR);
+
+    Stepper::count_direction.x = (step_dir & STEP_EVENT_FLAG_X_DIR) ? -1 : 1;
+    Stepper::count_direction.y = (step_dir & STEP_EVENT_FLAG_Y_DIR) ? -1 : 1;
+    Stepper::count_direction.z = (step_dir & STEP_EVENT_FLAG_Z_DIR) ? -1 : 1;
+    Stepper::count_direction.e = (step_dir & STEP_EVENT_FLAG_E_DIR) ? -1 : 1;
+
 #if HAS_PHASE_STEPPING()
     for (std::size_t i = 0; i != phase_stepping::opts::SUPPORTED_AXIS_COUNT; ++i) {
         PreciseStepping::step_generators_pool.classic_step_generator[i].phase_step_state = &phase_stepping::axis_states[i];
@@ -534,8 +544,13 @@ void PreciseStepping::init() {
     PreciseStepping::reset_from_halt(false);
     PreciseStepping::update_maximum_lookback_time();
 
+    HAL_timer_start(STEP_TIMER_NUM, STEPPER_TIMER_RATE);
+    StepIsrDisabler::setGlobalTimerState(true);
+
     HAL_timer_start(MOVE_TIMER_NUM, MOVE_TIMER_FREQUENCY);
-    ENABLE_MOVE_INTERRUPT();
+    MoveIsrDisabler::setGlobalTimerState(true);
+
+    initialized_ = true;
 }
 
 void PreciseStepping::reset_from_halt(bool preserve_step_fraction) {
@@ -625,11 +640,18 @@ uint16_t PreciseStepping::process_one_step_event_from_queue() {
                 block_t *current_block = Planner::get_current_processed_block();
                 if (current_block->flag.sync_position) {
                     Stepper::_set_position(current_block->sync_step_position);
+                } else {
+                    time_last_block_us = ticks_us();
                 }
                 Planner::discard_current_block();
                 Stepper::count_position_last_block = Stepper::count_position;
             }
             discard_current_move_segment();
+
+            // refresh current move flags
+            if (const move_t *current_move = get_current_move_segment(); current_move) {
+                current_move_flags = current_move->flags;
+            }
         }
 
         discard_current_step_event();
@@ -697,44 +719,40 @@ uint16_t PreciseStepping::process_one_step_event_from_queue() {
     } else {
         // The step event queue drained or ended
         Stepper::axis_did_move = 0;
+
+        // Wake up the move ISR in emergency, we want more step events
+        // generated _right now_ (hopefully, we'll have time to refill before
+        // the next step would be due).
+        wake_up();
     }
 
     return ticks_to_next_isr;
 }
 
 static int32_t counter_signed_diff(uint16_t timestamp1, uint16_t timestamp2) {
-    int32_t diff = int32_t(timestamp1) - int32_t(timestamp2);
-    if (diff > 0xFFFF / 2 - 1) {
-        diff -= 0xFFFF;
-    } else if (diff < -0xFFFF / 2) {
-        diff += 0xFFFF;
-    }
-    return diff;
+    return static_cast<int16_t>(timestamp1 - timestamp2);
 }
 
 void PreciseStepping::step_isr() {
-#ifndef ISR_DEADLINE_TRACKING
-    constexpr uint16_t min_delay = 6; // fuse isr for steps below this threshold (us)
-#else
-    constexpr uint32_t min_delay = 11; // fuse isr for steps below this threshold (us)
-#endif
-    constexpr uint16_t min_reserve = 5; // minimum interval for isr re-entry (us)
-    constexpr uint16_t max_ticks = (UINT16_MAX / 4); // maximum isr interval for skip detection (us)
+    // minimum interval for isr re-entry (ticks: us)
+    constexpr uint16_t min_reserve = 5;
 
-#ifdef ISR_DEADLINE_TRACKING
-    // in addition to checking for forward misses, check for past ones
-    static uint32_t scheduled_ts = 0;
-    if (scheduled_ts && ticks_us() > scheduled_ts + min_reserve * 2) {
-        ++step_dl_miss;
-    }
-#endif
+    // maximum time advancement for each isr (ticks: us)
+    constexpr uint16_t max_time_increment = STEPPER_ISR_MAX_TICKS / 2;
+    static_assert(max_time_increment < STEPPER_ISR_MAX_TICKS);
+    static_assert(max_time_increment > min_reserve);
 
-    const uint32_t compare = __HAL_TIM_GET_COMPARE(&TimerHandle[STEP_TIMER_NUM].handle, TIM_CHANNEL_1);
+    // maximum number of steps ticked in a single iteration, for debugging purposes
+    uint8_t steps_merged = 0; // current call
+    static uint8_t max_steps_merged = 0; // overall
+
+    const auto timer_handle = &TimerHandle[STEP_TIMER_NUM].handle;
+    const uint32_t compare = __HAL_TIM_GET_COMPARE(timer_handle, TIM_CHANNEL_1);
 
     uint32_t next = 0;
     uint32_t time_increment = 0;
-    uint32_t timer_remaining_time = 0;
-    do {
+    uint32_t max_ticks = STEPPER_ISR_MAX_TICKS;
+    for (;;) {
         if (stop_pending)
             [[unlikely]] {
             next = compare + STEPPER_ISR_PERIOD_IN_TICKS;
@@ -742,34 +760,46 @@ void PreciseStepping::step_isr() {
             break;
         }
 
-        if (!left_ticks_to_next_step_event) {
+        // ensure we didn't advance too many ticks in previous iterations,
+        // which is a sign we aren't able to catch up and will eventually skip
+        assert(time_increment < max_time_increment);
+
+        // tick zero-interval steps together
+        while (!left_ticks_to_next_step_event) {
             left_ticks_to_next_step_event = process_one_step_event_from_queue();
         }
 
-        // limit the interval to avoid a counter overflow or runout
-        uint16_t ticks_to_next_step_event = left_ticks_to_next_step_event;
-        NOMORE(ticks_to_next_step_event, max_ticks);
-
-        // Compute the time remaining until the next step event.
-        left_ticks_to_next_step_event -= ticks_to_next_step_event;
-
-        // Compute the number of ticks for the next ISR.
-        time_increment += ticks_to_next_step_event;
-        if (ticks_to_next_step_event <= min_delay) {
-            continue;
+        // limit the interval of the next tick
+        uint32_t ticks_to_next_isr = left_ticks_to_next_step_event + time_increment;
+        if (ticks_to_next_isr <= max_ticks) {
+            // the next iteration will process the event
+            time_increment += left_ticks_to_next_step_event;
+            left_ticks_to_next_step_event = 0;
+        } else {
+            // the next iteration just advances the timer
+            left_ticks_to_next_step_event = ticks_to_next_isr - max_ticks;
+            time_increment += max_ticks;
+            ticks_to_next_isr = max_ticks;
         }
 
-        next = compare + time_increment;
+        // actually plan the next deadline and check if we have enough time reserve
+        next = compare + ticks_to_next_isr;
+        const uint32_t counter = __HAL_TIM_GET_COUNTER(timer_handle);
+        if (counter_signed_diff(next, counter) >= min_reserve) {
+            break;
+        }
 
-        const uint32_t counter = __HAL_TIM_GET_COUNTER(&TimerHandle[STEP_TIMER_NUM].handle);
+        // not enough reserve: iterate again to process the next event immediately
+        ++steps_merged;
 
-        // truncate timer_remaining_time to the effective 16bit res required by
-        // counter_signed_diff() to correctly check for overflow later. However, if that happens
-        // (timer_remaining_time is >= U16/2), it means we already blew past the new event. Instead
-        // of ticking it immediately, reschedule on a new isr. We check for the size of the overflow
-        // just below.
-        timer_remaining_time = (next - counter) & 0xFFFF;
-    } while (timer_remaining_time < min_reserve);
+        // adjust the deadline limit based on the real time elapsed to avoid rescheduling
+        max_ticks = STEPPER_ISR_MAX_TICKS + counter_signed_diff(counter, compare);
+    }
+
+    // keep some stats for debugging purposes
+    if (steps_merged > max_steps_merged) {
+        max_steps_merged = steps_merged;
+    }
 
     // What follows is a not-straightforward scheduling of the next step ISR
     // time event. If this ISR is interrupted by another routine, we might
@@ -779,34 +809,30 @@ void PreciseStepping::step_isr() {
     // The difference of values passed into counter_signed_diff always has to be smaller
     // or equal to (UINT16_MAX / 2). Otherwise, the value returned by counter_signed_diff()
     // will be incorrect.
-    const auto timer_handle_ptr = &TimerHandle[STEP_TIMER_NUM].handle;
     uint32_t adjusted_next = next - last_step_isr_delay;
-    __disable_irq();
-    int32_t tim_counter = __HAL_TIM_GET_COUNTER(timer_handle_ptr);
-    int32_t diff = counter_signed_diff(adjusted_next, tim_counter);
-    // We should miss the next deadline just by a couple of ticks. When the value of 'diff'
-    // is a big negative number, the difference between 'adjusted_next' and 'tim_counter'
-    // is bigger than (UINT16_MAX / 2), or something interrupts the stepper routine for a very long time.
-    assert(diff >= 0 || diff >= -max_ticks);
-    if (diff < min_reserve) {
-        adjusted_next = tim_counter + min_reserve;
+    int32_t diff;
+    {
+        buddy::InterruptDisabler _;
+        int32_t tim_counter = __HAL_TIM_GET_COUNTER(timer_handle);
+        diff = counter_signed_diff(adjusted_next, tim_counter);
+        // We should miss the next deadline just by a couple of ticks. When the value of 'diff'
+        // is a big negative number, the difference between 'adjusted_next' and 'tim_counter'
+        // is bigger than (UINT16_MAX / 2), or something interrupts the stepper routine for a very long time.
+        assert(diff >= -STEPPER_ISR_MAX_TICKS && diff <= STEPPER_ISR_MAX_TICKS);
+        if (diff < min_reserve) {
+            adjusted_next = tim_counter + min_reserve;
+        }
+        __HAL_TIM_SET_COMPARE(timer_handle, TIM_CHANNEL_1, adjusted_next);
     }
-    __HAL_TIM_SET_COMPARE(timer_handle_ptr, TIM_CHANNEL_1, adjusted_next);
-    __enable_irq();
 
-    if (diff < min_delay) {
+    if (diff < min_reserve) {
         last_step_isr_delay = -diff + min_reserve;
     } else {
         last_step_isr_delay = 0;
     }
-
-#ifdef ISR_DEADLINE_TRACKING
-    uint32_t scheduled_ticks = (((next & 0xFFFF) - __HAL_TIM_GET_COUNTER(&TimerHandle[STEP_TIMER_NUM].handle)) & 0xFFFF);
-    scheduled_ts = ticks_us() + scheduled_ticks;
-#endif
 }
 
-FORCE_INLINE move_t *append_beginning_empty_move() {
+STEPPING_INLINE move_t *append_beginning_empty_move() {
     assert(PreciseStepping::total_print_time == 0.);
     uint8_t next_move_segment_queue_head = 0;
     move_t *move = PreciseStepping::get_next_free_move_segment(next_move_segment_queue_head);
@@ -815,7 +841,11 @@ FORCE_INLINE move_t *append_beginning_empty_move() {
         move->start_v = 0.;
         move->half_accel = 0.;
         move->axes_r = { 0., 0., 0., 0. };
-        move->move_time = PreciseStepping::max_lookback_time + 0.001; // For now, the epsilon o 1ms is applied to ensure that even with big rounding errors, move_time will be much bigger than max_lookback_time.
+
+        // Ensure move_time to be much bigger than max_lookback_time
+        move->move_time = PreciseStepping::get_first_move_delay();
+        assert(move->move_time > PreciseStepping::max_lookback_time);
+
         move->start_pos = PreciseStepping::total_start_pos;
         move->print_time = 0.;
         move->reference_cnt = 0;
@@ -826,7 +856,7 @@ FORCE_INLINE move_t *append_beginning_empty_move() {
     return move;
 }
 
-FORCE_INLINE move_t *append_block_discarding_move() {
+STEPPING_INLINE move_t *append_block_discarding_move() {
     assert(PreciseStepping::total_print_time > 0 && PreciseStepping::total_print_time < MAX_PRINT_TIME);
     uint8_t next_move_segment_queue_head = 0;
     move_t *move = PreciseStepping::get_next_free_move_segment(next_move_segment_queue_head);
@@ -845,7 +875,7 @@ FORCE_INLINE move_t *append_block_discarding_move() {
     return move;
 }
 
-FORCE_INLINE move_t *append_ending_empty_move() {
+STEPPING_INLINE move_t *append_ending_empty_move() {
     assert(PreciseStepping::total_print_time > 0 && PreciseStepping::total_print_time < MAX_PRINT_TIME);
     uint8_t next_move_segment_queue_head = 0;
     move_t *move = PreciseStepping::get_next_free_move_segment(next_move_segment_queue_head);
@@ -865,7 +895,7 @@ FORCE_INLINE move_t *append_ending_empty_move() {
     return move;
 }
 
-FORCE_INLINE bool append_move_discarding_step_event(step_generator_state_t &step_state, StepEventFlag_t extra_step_flags = 0) {
+STEPPING_INLINE bool append_move_discarding_step_event(step_generator_state_t &step_state, StepEventFlag_t extra_step_flags = 0) {
     uint16_t next_step_event_queue_head = 0;
     if (step_event_u16_t *step_event = PreciseStepping::get_next_free_step_event(next_step_event_queue_head); step_event != nullptr) {
         step_event->time_ticks = 0;
@@ -884,12 +914,21 @@ bool PreciseStepping::is_waiting_before_delivering() {
         if (waiting_before_delivering_start_time == 0) {
             waiting_before_delivering_start_time = ticks_ms();
             return true;
-        } else if (Planner::nonbusy_movesplanned() >= 3 || (ticks_ms() - waiting_before_delivering_start_time) >= Planner::delay_before_delivering) {
+        } else if (
+            // block queue is full: no point in waiting
+            Planner::is_full()
+            // we have more than half of buffer full of optimized blocks ready
+            || (Planner::optimized_movesplanned() >= BLOCK_BUFFER_SIZE / 2)
+            // the timer expired
+            || (ticks_diff(ticks_ms(), waiting_before_delivering_start_time) >= int32_t(Planner::delay_before_delivering))) {
             Planner::delay_before_delivering = 0;
             waiting_before_delivering_start_time = 0;
         } else {
             return true;
         }
+    } else {
+        // clear any previous timer
+        waiting_before_delivering_start_time = 0;
     }
 
     if (const uint8_t waiting_for_discard = Planner::movesplanned_processed(); waiting_for_discard >= (BLOCK_BUFFER_SIZE / 2)) {
@@ -905,9 +944,33 @@ bool PreciseStepping::is_waiting_before_delivering() {
     return false;
 }
 
-void PreciseStepping::process_queue_of_blocks() {
+void PreciseStepping::wake_up() {
+    // In theory, both the MoveIsrDisabler and __HAL_TIM_SET_COUNTER should be
+    // cheap and handle the situation of being set multiple times in a row
+    // without the interrupt being invoked. But, for some weird reason, if we
+    // remove this wakeup_requested guard, it _doesn't_ work properly and we
+    // don't know why.
+    if (!wakeup_requested.exchange(true, std::memory_order_relaxed)) { // No wakeup scheduled yet
+        if (Planner::nonbusy_movesplanned()) {
+            MoveIsrDisabler move_guard;
+            __HAL_TIM_SET_COUNTER(&TimerHandle[MOVE_TIMER_NUM].handle, 0);
+        }
+    }
+}
+
+bool PreciseStepping::process_queue_of_blocks() {
+    if (Planner::is_recalculating()) {
+        // We do not want to observe the planner while it's recalculating
+        // because then we are not guaranteed to have the stopping segment
+        // available.
+        //
+        // We'll get called again once the planner finishes recalculation, it
+        // contains a wakeup.
+        return false;
+    }
+
     if (is_waiting_before_delivering()) {
-        return;
+        return false;
     }
 
     // When the ending move segment is on the bottom of the queue (then Planner::total_print_time
@@ -915,12 +978,14 @@ void PreciseStepping::process_queue_of_blocks() {
     if (PreciseStepping::total_print_time >= MAX_PRINT_TIME) {
         // ensure all motion has stopped
         if (has_blocks_queued() || phase_stepping::processing()) {
-            return;
+            return false;
         }
 
         // we can now reset to a halt
         reset_from_halt();
     }
+
+    bool processed = false;
 
     // fetch next block
     block_t *current_block;
@@ -944,8 +1009,10 @@ void PreciseStepping::process_queue_of_blocks() {
         assert(PreciseStepping::total_print_time != 0.);
 
         if (!append_block_discarding_move()) {
-            return;
+            return processed;
         }
+
+        processed = true;
 
         // To avoid accumulating E-axis into very big numbers that are causing numerical issues, we reset
         // the E-axis position with every SYNC block.
@@ -968,25 +1035,31 @@ void PreciseStepping::process_queue_of_blocks() {
 #if !BOARD_IS_DWARF()
             stall_count++;
 #endif
+            // We do not consider the ending empty move as a processed block
+            // for the "made some progress" purposes, so not setting processed
+            // = true.
         } else if (PreciseStepping::total_print_time == 0. && busy) {
             // motion reset has completed and there is no pending block to process, we're now free
             assert(!has_blocks_queued() && !phase_stepping::processing());
             busy = false;
         }
-        return;
+        return processed;
     }
 
     if (PreciseStepping::total_print_time == 0.) {
         // we're restarting from zero, prepend a beginning move
         if (!append_beginning_empty_move()) {
-            return;
+            return processed;
         }
         busy = true;
     }
 
     if (append_move_segments_to_queue(*current_block)) {
         Planner::discard_current_unprocessed_block();
+        processed = true;
     }
+
+    return processed;
 }
 
 void PreciseStepping::loop() {
@@ -1014,44 +1087,39 @@ void PreciseStepping::loop() {
 }
 
 void PreciseStepping::move_isr() {
-    if (stop_pending) {
-        return;
-    }
+    wakeup_requested.store(false, std::memory_order_relaxed);
 
-    StepGeneratorStatus status = process_one_move_segment_from_queue();
-    if (status == STEP_GENERATOR_STATUS_OK) {
-        // we produced enough steps in this iteration:
-        // stop immediately to avoid taking too much time
-        return;
-    } else if (status == STEP_GENERATOR_STATUS_FULL_STEP_EVENT_QUEUE) {
-        // full queue directly on the first iteration:
-        // spare some extra time to process a new block ahead of time
-        process_queue_of_blocks();
-        return;
-    }
+    bool produced_some_steps = false;
+    bool made_progress = true;
 
-    // we produced no steps and/or one of the generators reached the end of the move queue:
-    // at this point we need to keep trying advancing the block queue in order to allow
-    // generators to continue producing steps or we risk that a slew of short segments
-    // causes too few steps to be produced per iteration, eventually running it dry
-    assert(status == STEP_GENERATOR_STATUS_NO_STEP_EVENT_PRODUCED);
+    /*
+     * We want to process as much as possible to keep our output buffers full (step events, pending targets for phase stepping).
+     *
+     * We stop when:
+     * * stop_pending (requested by some quick_stop or such, we are throwing everything out anyway).
+     * * We no longer make any progress.
+     * * Reach safety upper limit of attempts (this shouldn't be reached in
+     *   practice, that's just for unexpected situations).
+     */
+    for (uint16_t i = 0; !stop_pending && made_progress && (i <= Planner::movesplanned()); ++i) {
+        made_progress = false;
+        if (has_unprocessed_move_segments_queued()) {
+            StepGeneratorStatus status = process_one_move_segment_from_queue();
 
-    // Until we break from this loop, no new blocks are appended into the block queue.
-    // To ensure that we are never stuck in the infinite loop (when some unexpected state happens),
-    // we will limit the number of iterations by the number of all blocks + 1.
-    // +1 is there to make one additional call when all blocks are processed because this additional
-    // call can append the ending empty move segment when all blocks were already processed.
-    for (uint16_t i = 0; i <= Planner::movesplanned(); ++i) {
-        process_queue_of_blocks();
-        if (!has_unprocessed_move_segments_queued()) {
-            // the queue didn't avance: we're stuck
-            break;
+            if (status != STEP_GENERATOR_STATUS_NO_STEP_EVENT_PRODUCED) {
+                made_progress = true;
+                produced_some_steps = true;
+            }
         }
 
-        status = process_one_move_segment_from_queue();
-        if (status != STEP_GENERATOR_STATUS_NO_STEP_EVENT_PRODUCED) {
-            // all generators are finally producing steps
-            break;
+        /*
+         * We try to consume a segment from the planner if:
+         * * We haven't created any step events because we've run out of input.
+         * * We have space and there are enough blocks in the buffer (one extra for the slowdown that can still change its speed; that's heuristic).
+         */
+        if ((!is_move_segment_queue_full() && planner.optimized_movesplanned() > 2) || !produced_some_steps) {
+            assert(planner.optimized_movesplanned() <= planner.nonbusy_movesplanned());
+            made_progress = process_queue_of_blocks() || made_progress;
         }
     }
 }
@@ -1067,7 +1135,7 @@ struct split_step_event_t {
     StepEventFlag_t last_step_event_flags = 0;
 };
 
-FORCE_INLINE split_step_event_t split_buffered_step(const step_generator_state_t &step_generator_state) {
+STEPPING_INLINE split_step_event_t split_buffered_step(const step_generator_state_t &step_generator_state) {
     split_step_event_t split_step_event = { 0, 0, 0, 0 };
     if (step_generator_state.buffered_step.flags) {
         if (step_generator_state.buffered_step.time_ticks <= STEP_TIMER_MAX_TICKS_LIMIT) {
@@ -1086,17 +1154,27 @@ FORCE_INLINE split_step_event_t split_buffered_step(const step_generator_state_t
     return split_step_event;
 }
 
-FORCE_INLINE void trigger_first_step_event_after_specified_ticks(const uint32_t ticks) {
+STEPPING_INLINE void trigger_first_step_event_after_specified_ticks(const uint32_t ticks) {
     assert(ticks <= STEP_TIMER_MAX_TICKS_LIMIT);
 
-    DISABLE_STEPPER_DRIVER_INTERRUPT();
-    const uint16_t counter = __HAL_TIM_GET_COUNTER(&TimerHandle[STEP_TIMER_NUM].handle);
-    const uint16_t deadline = counter + ticks;
-    __HAL_TIM_SET_COMPARE(&TimerHandle[STEP_TIMER_NUM].handle, TIM_CHANNEL_1, deadline);
-    ENABLE_STEPPER_DRIVER_INTERRUPT();
+    uint16_t isr_ticks = std::min<uint16_t>(ticks, STEPPER_ISR_MAX_TICKS);
+    uint16_t left_ticks = ticks - isr_ticks;
+
+    {
+        StepIsrDisabler step_guard;
+        const uint16_t deadline = PreciseStepping::step_generator_state.initial_counter + isr_ticks;
+        __HAL_TIM_SET_COMPARE(&TimerHandle[STEP_TIMER_NUM].handle, TIM_CHANNEL_1, deadline);
+        PreciseStepping::left_ticks_to_next_step_event = left_ticks;
+        PreciseStepping::last_step_isr_delay = 0;
+    }
+
+    // Ensure we didn't overshoot the first step event, which should be always far away enough into
+    // the future to account for scheduling overhead. This is normally ensured by the length of the
+    // initial empty move.
+    assert(ticks_diff(ticks_us(), PreciseStepping::step_generator_state.initial_time) < static_cast<int32_t>(ticks));
 }
 
-FORCE_INLINE void append_split_step_event(const split_step_event_t &split_step_event, step_event_u16_t *&next_step_event, uint16_t &next_step_event_queue_head) {
+STEPPING_INLINE void append_split_step_event(const split_step_event_t &split_step_event, step_event_u16_t *&next_step_event, uint16_t &next_step_event_queue_head) {
     assert(next_step_event != nullptr);
     assert(split_step_event.empty_step_event_cnt + 1 <= PreciseStepping::step_event_queue_free_slots());
 
@@ -1173,6 +1251,7 @@ static void check_step_time(const step_event_i32_t &step_event) {
 
 StepGeneratorStatus PreciseStepping::process_one_move_segment_from_queue() {
     uint16_t produced_step_events_cnt = 0;
+    bool move_done = false;
 
     if (const move_t *move = get_current_unprocessed_move_segment(); move != nullptr) {
         if (!step_generator_state.initialized) {
@@ -1197,7 +1276,7 @@ StepGeneratorStatus PreciseStepping::process_one_move_segment_from_queue() {
             }
 
             step_event_i32_t new_step_event;
-            bool done = generate_next_step_event(new_step_event, step_generator_state);
+            move_done = generate_next_step_event(new_step_event, step_generator_state);
 
             // accumulate into or flush the buffered step
             if (new_step_event.flags) {
@@ -1233,17 +1312,15 @@ StepGeneratorStatus PreciseStepping::process_one_move_segment_from_queue() {
                 }
             }
 
-            if (done) {
+            if (move_done) {
                 // the move is complete: if we just flushed a buffered step and produced new one in
                 // the same iteration then we need to check for a free slot again; do so just below
-                // by resetting produced_step_events_cnt (we don't need the counter anymore)
-                produced_step_events_cnt = 0;
                 break;
             }
         }
     }
 
-    if (!produced_step_events_cnt) {
+    if (!produced_step_events_cnt || move_done) {
         // no moves or end of steps, check if we're waiting on the ending move
         if (const move_t *unprocessed_move = get_current_unprocessed_move_segment();
             unprocessed_move != nullptr && is_ending_empty_move(*unprocessed_move)) {
@@ -1316,19 +1393,36 @@ void PreciseStepping::update_maximum_lookback_time() {
 #endif
 }
 
+double PreciseStepping::get_first_move_delay() {
+    // For now, the epsilon o 1ms is applied to ensure that even with big rounding errors,
+    // move_time will be much bigger than max_lookback_time.
+    double move_time = max_lookback_time + 0.001;
+
+    return move_time;
+}
+
 void PreciseStepping::step_generator_state_init(const move_t &move) {
     assert(is_beginning_empty_move(move));
     if (max_lookback_time > move.move_time) {
         bsod("Max lookback time exceeds the length of the beginning empty move segment.");
     }
 
+    current_move_flags = 0;
     step_generator_state.previous_step_time = 0.;
     step_generator_state.previous_step_time_ticks = 0;
     step_generator_state.buffered_step.flags = 0;
     step_generator_state.current_distance = stepper.count_position_from_startup;
     step_generator_state.current_distance.e = 0;
     step_generator_state.left_insert_start_of_move_segment = 0;
-    step_generator_state.initial_time = ticks_us();
+
+    // Setup the absolute initial time
+    int64_t initial_time;
+    {
+        buddy::InterruptDisabler _irq_guard;
+        initial_time = get_timestamp_us();
+        step_generator_state.initial_counter = __HAL_TIM_GET_COUNTER(&TimerHandle[STEP_TIMER_NUM].handle);
+    }
+    step_generator_state.initial_time = initial_time;
 
     // Reset step events and index
     for (step_index_t i = 0; i != step_generator_state.step_event_index.size(); ++i) {
@@ -1402,8 +1496,8 @@ void PreciseStepping::reset_queues() {
     }
 #endif
 
-    const bool was_enabled = stepper.suspend();
-    DISABLE_MOVE_INTERRUPT();
+    StepIsrDisabler step_guard;
+    MoveIsrDisabler move_guard;
 
     // reset internal state and queues
     step_event_queue_clear();
@@ -1416,14 +1510,11 @@ void PreciseStepping::reset_queues() {
     step_dl_miss = 0;
     step_ev_miss = 0;
     left_ticks_to_next_step_event = 0;
+    last_step_isr_delay = 0;
+    current_move_flags = 0;
     Stepper::axis_did_move = 0;
     stop_pending = false;
     busy = false;
-
-    ENABLE_MOVE_INTERRUPT();
-    if (was_enabled) {
-        stepper.wake_up();
-    }
 }
 
 void mark_ownership(move_t &move) {

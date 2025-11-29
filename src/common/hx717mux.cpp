@@ -2,6 +2,7 @@
 
 #include "filament_sensors_handler.hpp"
 #include "loadcell.hpp"
+#include <common/sys.hpp>
 
 // Ensure coherence between loadcell and lower-level types/values without creating a circular header
 // dependency between Loadcell and HX717Mux
@@ -52,7 +53,7 @@ void HX717Mux::handler() {
         // we already account for delayed reads above: we should never get an undefined value unless
         // the read itself took too long, meaning the interrupt took longer than ~1ms. If this
         // happens, the issue is *not* here but in higher-priority ISRs blocking too long!
-        if (!DBGMCU->CR || (TERN0(DEBUG_LEVELING_FEATURE, DEBUGGING(LEVELING)) || DEBUGGING(ERRORS))) {
+        if (!sys_debugger_attached() || (TERN0(DEBUG_LEVELING_FEATURE, DEBUGGING(LEVELING)) || DEBUGGING(ERRORS))) {
             // to simplify debugging, as hx717 doesn't stop triggerring [lost] interrupts, this is
             // only verified when:
             // - no debugger attached in debug builds

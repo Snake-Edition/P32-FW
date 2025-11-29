@@ -63,23 +63,6 @@ bool disable_modifiers_if(bool condition, bool do_z) {
     return leveling_was_active;
 }
 
-// FIXME this copies planner.cpp, remove once not needed
-void skew(float &cx, float &cy, const_float_t cz) {
-    skew_factor_t skew_factor = planner.get_skew_factor();
-    if (WITHIN(cx, X_MIN_POS + 1, X_MAX_POS) && WITHIN(cy, Y_MIN_POS + 1, Y_MAX_POS)) {
-        const float sx = cx - cy * skew_factor.xy - cz * (skew_factor.xz - (skew_factor.xy * skew_factor.yz)),
-                    sy = cy - cz * skew_factor.yz;
-        if (WITHIN(sx, X_MIN_POS, X_MAX_POS) && WITHIN(sy, Y_MIN_POS, Y_MAX_POS)) {
-            cx = sx;
-            cy = sy;
-        }
-    }
-}
-
-#if PRINTER_IS_PRUSA_MINI()
-static void skew(xyz_pos_t &raw) { skew(raw.x, raw.y, raw.z); }
-#endif
-
 void enable_modifiers_if(bool condition, bool restore_leveling) {
     if (!condition) {
         return;

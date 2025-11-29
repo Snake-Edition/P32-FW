@@ -13,8 +13,9 @@
     #include "bsod.h"
 #endif
 
-#if HAS_MODULARBED()
-    #include <puppies/modular_bed.hpp>
+#include <option/has_remote_bed.h>
+#if HAS_REMOTE_BED()
+    #include <common/feature/remote_bed/remote_bed.hpp>
 #endif
 
 using namespace buddy::hw;
@@ -100,8 +101,8 @@ bool AdvancedPower::MMUOvercurentFaultDetected() const {
 }
 #endif
 
-#if HAS_MODULARBED()
+#if HAS_REMOTE_BED()
 float AdvancedPower::get_bed_current() {
-    return buddy::puppies::modular_bed.get_heater_current();
+    return remote_bed::get_heater_current();
 }
 #endif

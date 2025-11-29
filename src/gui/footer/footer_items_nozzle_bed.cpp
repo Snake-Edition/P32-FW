@@ -10,11 +10,12 @@
 #include "footer_eeprom.hpp"
 #include <option/has_toolchanger.h>
 #include <config_store/store_instance.hpp>
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 #include <common/nozzle_diameter.hpp>
+#include <option/has_modular_bed.h>
 
-#if ENABLED(MODULAR_HEATBED)
-    #include <puppies/modular_bed.hpp>
+#if HAS_MODULAR_BED()
+    #include <module/modular_heatbed.h>
 #endif
 #if HAS_TOOLCHANGER()
     #include <puppies/Dwarf.hpp>
@@ -35,7 +36,7 @@ FooterItemNozzlePWM::FooterItemNozzlePWM(window_t *parent)
 
 FooterItemBed::FooterItemBed(window_t *parent)
     : FooterItemHeater(parent, &img::heatbed_16x16, static_makeView, static_readValue) {
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULAR_BED()
     icon.Hide();
 #endif
     updateValue();
@@ -57,10 +58,10 @@ footer::ItemDrawType FooterItemAllNozzles::GetDrawType() {
 void FooterItemBed::unconditionalDraw() {
     FooterItemHeater::unconditionalDraw();
 
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULAR_BED()
     for (int x = 0; x < X_HBL_COUNT; x++) {
         for (int y = 0; y < Y_HBL_COUNT; y++) {
-            uint16_t idx_mask = 1 << buddy::puppies::modular_bed.idx(x, y);
+            uint16_t idx_mask = 1 << advanced_modular_bed->idx(x, y);
             bool enabled = last_enabled_bedlet_mask & idx_mask;
             bool warm = last_warm_bedlet_mask & idx_mask;
 
@@ -89,7 +90,7 @@ void FooterItemBed::unconditionalDraw() {
 
 changed_t FooterItemBed::updateValue() {
     changed_t ret = FooterItemHeater::updateValue();
-#if ENABLED(MODULAR_HEATBED)
+#if HAS_MODULAR_BED()
     bool is_heating = marlin_vars().target_bed > 0;
 
     // if not heating, act as no heatbedlet is activated
@@ -102,8 +103,8 @@ changed_t FooterItemBed::updateValue() {
     uint16_t warm_bedlet_mask = 0;
     for (int y = 0; y < Y_HBL_COUNT; ++y) {
         for (int x = 0; x < X_HBL_COUNT; ++x) {
-            if (buddy::puppies::modular_bed.get_temp(x, y) > COLD) {
-                warm_bedlet_mask |= 1 << buddy::puppies::modular_bed.idx(x, y);
+            if (advanced_modular_bed->get_temp(x, y) > COLD) {
+                warm_bedlet_mask |= 1 << advanced_modular_bed->idx(x, y);
             }
         }
     }
@@ -141,7 +142,7 @@ void FooterItemAllNozzles::unconditionalDraw() {
 
         // Rectangle as high as temperature (can overwrite the white mark)
         const uint gray_column_max = (static_cast<uint>(COLD) * icon.Height() + (HEATER_XL_HOTEND_MAXTEMP / 2)) / HEATER_XL_HOTEND_MAXTEMP;
-        uint column_height = (static_cast<uint>(marlin_vars().hotend(nozzle).temp_nozzle) * icon.Height() + (HEATER_XL_HOTEND_MAXTEMP / 2)) / HEATER_XL_HOTEND_MAXTEMP;
+        uint column_height = (static_cast<uint>(round(marlin_vars().hotend(nozzle).temp_nozzle)) * icon.Height() + (HEATER_XL_HOTEND_MAXTEMP / 2)) / HEATER_XL_HOTEND_MAXTEMP;
         column_height = std::clamp<uint>(column_height, 0, icon.Height());
         uint gray_column_height = std::clamp<uint>(column_height, 0, gray_column_max);
 
@@ -173,9 +174,9 @@ changed_t FooterItemAllNozzles::updateValue() {
 int FooterItemNozzle::static_readValue() {
     static const uint cold = 45;
 
-    const uint current = marlin_vars().active_hotend().temp_nozzle;
-    const uint target = marlin_vars().active_hotend().target_nozzle;
-    const uint display = marlin_vars().active_hotend().display_nozzle;
+    const uint current = static_cast<uint>(round(marlin_vars().active_hotend().temp_nozzle));
+    const uint target = static_cast<uint>(round(marlin_vars().active_hotend().target_nozzle));
+    const uint display = static_cast<uint>(round(marlin_vars().active_hotend().display_nozzle));
 #if HAS_TOOLCHANGER()
     const bool no_tool = marlin_vars().active_extruder == PrusaToolChanger::MARLIN_NO_TOOL_PICKED;
 #else
@@ -203,8 +204,8 @@ int FooterItemNozzlePWM::static_readValue() {
 }
 
 int FooterItemBed::static_readValue() {
-    uint current = marlin_vars().temp_bed;
-    uint target = marlin_vars().target_bed;
+    uint current = static_cast<uint>(round(marlin_vars().temp_bed));
+    uint target = static_cast<uint>(round(marlin_vars().target_bed));
 
     HeatState state = getState(current, target, target, COLD); // display == target will disable green blinking preheat
     StateAndTemps temps(state, current, target, false);
@@ -214,7 +215,7 @@ int FooterItemBed::static_readValue() {
 int FooterItemAllNozzles::static_readValue() {
 #if HAS_TOOLCHANGER()
     /// Keep displayed value until switch_gui_time, so there is less flicker
-    static uint keep_value = static_cast<uint16_t>(marlin_vars().hotend(0).temp_nozzle);
+    static uint keep_value = static_cast<uint16_t>(round(marlin_vars().hotend(0).temp_nozzle));
 
     ///< gui::GetTick() of last change of nozzle_n
     static uint32_t switch_gui_time = gui::GetTick();
@@ -232,12 +233,12 @@ int FooterItemAllNozzles::static_readValue() {
         } while (buddy::puppies::dwarfs[nozzle_n].is_enabled() == false);
 
         // Update shown tool and temperature
-        keep_value = (nozzle_n << 16) | static_cast<uint16_t>(marlin_vars().hotend(nozzle_n).temp_nozzle);
+        keep_value = (nozzle_n << 16) | static_cast<uint16_t>(round(marlin_vars().hotend(nozzle_n).temp_nozzle));
     }
 
     return keep_value; // Return nozzle number in higher 16 bits and shown temperature in lower 16 bits
 #else /*HAS_TOOLCHANGER()*/
-    return static_cast<uint16_t>(marlin_vars().active_hotend().temp_nozzle); // Nozzle 0 temperature
+    return static_cast<uint16_t>(round(marlin_vars().active_hotend().temp_nozzle)); // Nozzle 0 temperature
 #endif /*HAS_TOOLCHANGER()*/
 }
 
@@ -302,5 +303,5 @@ string_view_utf8 FooterItemAllNozzles::static_makeView(int value) {
             buff[printed_chars] = ' ';
         }
     }
-    return string_view_utf8::MakeRAM((const uint8_t *)buff.data());
+    return string_view_utf8::MakeRAM(buff.data());
 }

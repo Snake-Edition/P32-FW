@@ -12,6 +12,10 @@
 #pragma GCC optimize("Os")
 
 namespace journal {
+
+/// Flags for annotating store items
+using ItemFlags = uint16_t;
+
 template <typename DataT>
 concept StoreItemDataC = std::equality_comparable<DataT> && std::default_initializable<DataT> && std::is_trivially_copyable_v<DataT>;
 
@@ -58,18 +62,23 @@ public:
         return data.data();
     }
 
-    void init(const std::span<uint8_t> &raw_data) {
-        if constexpr (!ram_only) {
-            if (raw_data.size() != sizeof(value_type)) {
-                std::terminate();
-            }
+    inline void init(const std::span<uint8_t> &)
+        requires(ram_only)
+    {
+    }
 
-            memcpy(&data, raw_data.data(), sizeof(value_type));
+    void init(const std::span<uint8_t> &raw_data)
+        requires(!ram_only)
+    {
+        if (raw_data.size() != sizeof(value_type)) {
+            std::terminate();
         }
+
+        memcpy(&data, raw_data.data(), sizeof(value_type));
     }
 
 protected:
-    constexpr inline JournalItemBase(const DataT &val)
+    consteval inline JournalItemBase(const DataT &val)
         : data(val) {}
 
     /// Sets the config to the provided value \p in
@@ -108,20 +117,22 @@ protected:
 };
 
 // hash_alloc_range is used by the gen_journal_hashes.py and is expected after journal::hash. The argument is added here to prevent clashes with ram_only
-template <StoreItemDataC DataT, auto DefaultVal, auto &(*backend)(), uint16_t HashedID, uint8_t hash_alloc_range, bool ram_only>
+template <StoreItemDataC DataT, auto DefaultVal, ItemFlags flags_, auto &(*backend)(), uint16_t HashedID, uint8_t hash_alloc_range, bool ram_only>
 struct JournalItem : public JournalItemBase<DataT, backend, ram_only> {
     static_assert(hash_alloc_range >= 1);
 
 public:
     static constexpr DataT default_val { DefaultVal };
     static constexpr uint16_t hashed_id { HashedID };
+    static constexpr ItemFlags flags { flags_ }; // All items have flag 1 (for easier filtering)
 
     using Base = JournalItemBase<DataT, backend, ram_only>;
 
 public:
-    constexpr JournalItem()
-        requires(sizeof(JournalItem) == sizeof(DataT)) // Current implementation of journal relies heavily on this
+    consteval JournalItem()
         : Base(default_val) {
+        // Current implementation of journal relies heavily on this
+        static_assert(sizeof(JournalItem) == sizeof(DataT));
     }
 
     /// Sets the config to the provided value \p in
@@ -173,17 +184,22 @@ public:
         Base::set(hashed_id, in_buff, max_length);
     }
 
-    inline void ram_dump() {
-        Base::ram_dump(hashed_id, default_val);
+    inline void ram_dump(ItemFlags exclude_flags) {
+        if (!(flags & exclude_flags)) {
+            Base::ram_dump(hashed_id, default_val);
+        }
     }
+};
+
+struct JournalItemArrayBase {
 };
 
 /// Array of journal items
 /// \p item_count determines the array size. It can be increased in time, possibly even decreased
 /// \p max_item_count determines the maximum item_count the item can ever have. This is only used for hash collision checking. It can never be decreased, but it can be increased (granted that it does not cause hash collisions)
 /// The journal_hashes_generator python script looks for the next argument after journal::hash for the hash range size - so \p max_item_count must be directly after \p hashed_id
-template <StoreItemDataC DataT, auto default_val, auto backend, uint16_t hashed_id, uint8_t max_item_count, uint8_t item_count>
-struct JournalItemArray {
+template <StoreItemDataC DataT, auto default_val, ItemFlags flags_, auto backend, uint16_t hashed_id, uint8_t max_item_count, uint8_t item_count>
+struct JournalItemArray : public JournalItemArrayBase {
 private:
     using DefaultVal = std::remove_cvref_t<decltype(default_val)>;
     using ItemArray = std::array<DataT, item_count>;
@@ -203,6 +219,7 @@ public:
 
     static constexpr uint16_t hashed_id_first { hashed_id };
     static constexpr uint16_t hashed_id_last { hashed_id + item_count - 1 };
+    static constexpr ItemFlags flags { flags_ }; // All items have flag 1 (for easier filtering)
 
     static constexpr DataT get_default_val(uint8_t index) {
         if constexpr (is_std_array_v<DefaultVal>) {
@@ -212,7 +229,7 @@ public:
         }
     }
 
-    constexpr JournalItemArray()
+    consteval JournalItemArray()
         requires(sizeof(JournalItemArray) == sizeof(ItemArray)) // Current implementation of journal relies heavily on this
     {
         if constexpr (is_std_array_v<DefaultVal>) {
@@ -221,6 +238,7 @@ public:
             data_array.fill(default_val);
         }
     }
+
     JournalItemArray(const JournalItemArray &other) = delete;
     JournalItemArray &operator=(const JournalItemArray &other) = delete;
 
@@ -322,7 +340,11 @@ public:
         memcpy(&(data_array[index]), raw_data.data(), sizeof(value_type));
     }
 
-    void ram_dump() {
+    void ram_dump(ItemFlags exclude_flags) {
+        if (flags & exclude_flags) {
+            return;
+        }
+
         for (uint8_t i = 0; i < item_count; i++) {
             if (data_array[i] != get_default_val(i)) {
                 do_save(i);
@@ -338,14 +360,6 @@ private:
         backend().save(hashed_id_first + index, { reinterpret_cast<const uint8_t *>(&(data_array[index])), sizeof(DataT) });
     }
 };
-
-template <typename>
-struct is_item_array : std::false_type {};
-template <typename DataT, auto default_val, auto backend, uint16_t hashed_id, uint8_t max_item_count, uint8_t item_count>
-struct is_item_array<JournalItemArray<DataT, default_val, backend, hashed_id, max_item_count, item_count>> : std::true_type {};
-
-template <typename T>
-inline constexpr bool is_item_array_v = is_item_array<T>::value;
 
 template <StoreItemDataC DataT, auto DefaultVal, journal::BackendC BackendT, uint16_t HashedID>
 struct DeprecatedStoreItem {

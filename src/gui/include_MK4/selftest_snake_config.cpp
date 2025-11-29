@@ -1,6 +1,6 @@
 #include "selftest_snake_config.hpp"
 #include <selftest_types.hpp>
-#include <screen_menu_selftest_snake_result_parsing.hpp>
+#include <selftest_result_evaluation.hpp>
 #include <option/has_toolchanger.h>
 #include <config_store/store_instance.hpp>
 #if HAS_TOOLCHANGER()
@@ -22,14 +22,9 @@ TestResult get_test_result(Action action, Tool tool) {
     case Action::XYCheck:
         return evaluate_results(sr.xaxis, sr.yaxis);
     case Action::Loadcell:
-        if (tool == Tool::_all_tools) {
-            return merge_hotends_evaluations(
-                [&](int8_t e) {
-                    return evaluate_results(sr.tools[e].loadcell);
-                });
-        } else {
-            return evaluate_results(sr.tools[ftrstd::to_underlying(tool)].loadcell);
-        }
+        return merge_hotends(tool, [&](const int8_t e) {
+            return evaluate_results(sr.tools[e].loadcell);
+        });
     case Action::ZCheck:
         return evaluate_results(sr.zaxis);
     case Action::Heaters:
@@ -37,16 +32,13 @@ TestResult get_test_result(Action action, Tool tool) {
             return evaluate_results(sr.tools[e].nozzle);
         }));
     case Action::FilamentSensorCalibration:
-        if (tool == Tool::_all_tools) {
-            return merge_hotends_evaluations(
-                [&](int8_t e) {
-                    return evaluate_results(sr.tools[e].fsensor);
-                });
-        } else {
-            return evaluate_results(sr.tools[ftrstd::to_underlying(tool)].fsensor);
-        }
+        return merge_hotends(tool, [&](const int8_t e) {
+            return evaluate_results(sr.tools[e].fsensor);
+        });
     case Action::Gears:
-        return evaluate_results(sr.gears);
+        return merge_hotends(tool, [&](const int8_t e) {
+            return evaluate_results(sr.tools[e].gears);
+        });
     case Action::_count:
         break;
     }
@@ -71,9 +63,8 @@ uint64_t get_test_mask(Action action) {
         return stmLoadcell;
     case Action::ZAlign:
         return stmZcalib;
-    case Action::Gears:
-        return stmGears;
     case Action::Fans:
+    case Action::Gears:
         bsod("get_test_mask");
     case Action::_count:
         break;

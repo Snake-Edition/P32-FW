@@ -17,8 +17,8 @@ struct AxisCalibrationConfig {
 
     float peak_speed_shift = 0.9f;
 
-    float min_magnitude = 0.002f;
-    float max_magnitude = 0.1f;
+    float min_magnitude = 0.008f;
+    float max_magnitude = 0.4f;
     float magnitude_quotient = 2.f;
 
     float analysis_window_size_seconds = 0.1f;
@@ -30,7 +30,7 @@ struct AxisCalibrationConfig {
 #if PRINTER_IS_PRUSA_MK4() || PRINTER_IS_PRUSA_COREONE()
 static inline constexpr const AxisCalibrationConfig xy_axis_calibration_config {
     .speed_range = { 0.2f, 4.f },
-    .enabled_harmonics = 0b1110,
+    .enabled_harmonics = 0b1010,
 };
 #elif PRINTER_IS_PRUSA_XL()
 static inline constexpr const AxisCalibrationConfig xy_axis_calibration_config {

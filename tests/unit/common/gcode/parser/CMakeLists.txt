@@ -1,3 +1,6 @@
+# Dependencies common for all tests
+link_libraries(SG14 buddy_utils)
+
 add_executable(
   gcode_basic_parser_tests
   ${CMAKE_SOURCE_DIR}/src/common/gcode/gcode_basic_parser.cpp
@@ -8,7 +11,7 @@ add_executable(
 target_include_directories(
   gcode_basic_parser_tests
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/stub ${CMAKE_SOURCE_DIR}/src/common/gcode
-         ${CMAKE_SOURCE_DIR}/lib/SG14 ${CMAKE_SOURCE_DIR}/src/common/ ${CMAKE_SOURCE_DIR}/src/lang
+         ${CMAKE_SOURCE_DIR}/src/common/ ${CMAKE_SOURCE_DIR}/src/lang
   )
 add_catch_test(gcode_basic_parser_tests)
 
@@ -21,9 +24,8 @@ add_executable(
   ${CMAKE_CURRENT_SOURCE_DIR}/gcode_parser_tests.cpp
   )
 target_include_directories(
-  gcode_parser_tests
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/stub ${CMAKE_SOURCE_DIR}/src/common/gcode
-         ${CMAKE_SOURCE_DIR}/lib/SG14 ${CMAKE_SOURCE_DIR}/src/common/ ${CMAKE_SOURCE_DIR}/src/lang
+  gcode_parser_tests PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/stub ${CMAKE_SOURCE_DIR}/src/common/gcode
+                            ${CMAKE_SOURCE_DIR}/src/common/ ${CMAKE_SOURCE_DIR}/src/lang
   )
 add_catch_test(gcode_parser_tests)
 
@@ -34,17 +36,14 @@ add_executable(
   ${CMAKE_SOURCE_DIR}/src/common/gcode/gcode_parser_helper.cpp
   ${CMAKE_SOURCE_DIR}/src/common/str_utils.cpp
   ${CMAKE_SOURCE_DIR}/src/common/filament.cpp
+  ${CMAKE_SOURCE_DIR}/src/common/filament_list.cpp
   ${CMAKE_SOURCE_DIR}/src/common/utils/color.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/gcode_parser_custom_types_tests.cpp
   )
 target_include_directories(
   gcode_parser_custom_types_tests
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/stub
-         ${CMAKE_SOURCE_DIR}/src/common/gcode
-         ${CMAKE_SOURCE_DIR}/lib/SG14
-         ${CMAKE_SOURCE_DIR}/src/common/
-         ${CMAKE_SOURCE_DIR}/src/lang
-         ${CMAKE_SOURCE_DIR}/include
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/stub ${CMAKE_SOURCE_DIR}/src/common/gcode
+         ${CMAKE_SOURCE_DIR}/src/common/ ${CMAKE_SOURCE_DIR}/src/lang ${CMAKE_SOURCE_DIR}/include
          ${OPTIONS_INCLUDE_DIR}
   )
 add_catch_test(gcode_parser_custom_types_tests)

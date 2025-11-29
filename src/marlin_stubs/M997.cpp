@@ -1,8 +1,8 @@
 #include "gcode/gcode.h"
 #include "gcode/queue.h"
 #include "PrusaGcodeSuite.hpp"
+#include <common/sys.hpp>
 #include <string.h>
-#include "sys.h"
 #include "data_exchange.hpp"
 
 static void update_main_board(bool update_older, const char *sfn) {
@@ -18,10 +18,10 @@ static void update_main_board(bool update_older, const char *sfn) {
 
     queue.ok_to_send();
     HAL_Delay(10);
-    NVIC_SystemReset();
+    sys_reset();
 }
 
-static void M997_no_parser(uint module_number, [[maybe_unused]] uint address, bool force_update_older, const char *sfn) {
+static void M997_no_parser(unsigned int module_number, [[maybe_unused]] unsigned int address, bool force_update_older, const char *sfn) {
     switch (module_number) {
     case 0:
         update_main_board(force_update_older, sfn);

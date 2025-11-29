@@ -10,7 +10,6 @@ namespace http {
 class Connection {
 public:
     Connection(uint8_t timeout_s);
-    virtual std::optional<Error> connection(const char *host, uint16_t port) = 0;
     virtual std::variant<size_t, Error> rx(uint8_t *buffer, size_t len, bool nonblock) = 0;
     virtual std::variant<size_t, Error> tx(const uint8_t *buffer, size_t len) = 0;
 

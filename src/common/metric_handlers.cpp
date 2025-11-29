@@ -86,6 +86,8 @@ static int textprotocol_append_point(char *buffer, int buffer_len, metric_point_
 // Note: This is not required to be in CCMRAM and can be moved to regular RAM if needed.
 static __attribute__((section(".ccmram"))) SyslogTransport syslog_transport;
 
+static std::atomic<bool> metrics_enabled_ = false;
+
 void metrics_reconfigure() {
     const auto host = config_store().metrics_host.get();
 
@@ -94,13 +96,19 @@ void metrics_reconfigure() {
         config_store().enable_metrics.set(false);
     }
 
-    if (config_store().enable_metrics.get()) {
+    const bool enable = config_store().enable_metrics.get();
+    if (enable) {
         const auto port = config_store().metrics_port.get();
         syslog_transport.reopen(host.data(), port);
 
     } else {
         syslog_transport.reopen(nullptr, 0);
     }
+    metrics_enabled_ = enable;
+}
+
+bool are_metrics_enabled() {
+    return metrics_enabled_.load();
 }
 
 static int syslog_message_init(char *buffer, int buffer_len, int64_t timestamp) {

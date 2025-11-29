@@ -1,8 +1,10 @@
-#include "st25dv64k.h"
-#include "st25dv64k_internal.h"
+#include <common/st25dv64k.h>
+
+#include <common/st25dv64k_internal.h>
 
 #include <option/has_nfc.h>
 #include <nfc.hpp>
+#include <freertos/mutex.hpp>
 
 #include "i2c.hpp"
 #include "cmsis_os.h"
@@ -13,43 +15,27 @@
 #include <algorithm>
 
 namespace {
-
-#define ST25DV64K_RTOS
-
 constexpr const uint8_t BLOCK_DELAY = 5; // block delay [ms]
 constexpr const uint8_t BLOCK_BYTES = 4; // bytes per block
 
 constexpr const uint32_t RETRIES = 3;
 
-#define DELAY HAL_Delay
-
-uint8_t st25dv64k_initialised = 0;
-
-#ifdef ST25DV64K_RTOS
-
-    #include "cmsis_os.h"
-
-osSemaphoreId st25dv64k_sema = 0; // semaphore handle
+freertos::Mutex &st25dv64k_mutex() {
+    // Has to be initialized lazily - global variables get initialized after the EEPROM is first used
+    static freertos::Mutex r;
+    return r;
+}
 
 inline void st25dv64k_lock() {
-    if (st25dv64k_sema == 0) {
-        osSemaphoreDef(st25dv64kSema);
-        st25dv64k_sema = osSemaphoreCreate(osSemaphore(st25dv64kSema), 1);
-    }
-    osSemaphoreWait(st25dv64k_sema, osWaitForever);
+    st25dv64k_mutex().lock();
 }
 
 inline void st25dv64k_unlock() {
-    osSemaphoreRelease(st25dv64k_sema);
+    st25dv64k_mutex().unlock();
 }
 
-    #define st25dv64k_delay osDelay
-
-#else
-    #define st25dv64k_lock()
-    #define st25dv64k_unlock()
-    #define st25dv64k_delay HAL_Delay
-#endif // ST25DV64K_RTOS
+// For some reason, things go wrong if you try to use osDelay
+#define st25dv64k_delay HAL_Delay
 
 } // namespace
 
@@ -82,7 +68,7 @@ void try_fix_if_needed(const i2c::Result &result) {
 }
 
 [[nodiscard]] i2c::Result eeprom_transmit(EepromCommandWrite cmd, uint8_t *pData, uint16_t size) {
-    return i2c::Transmit(I2C_HANDLE_FOR(eeprom), ftrstd::to_underlying(cmd), pData, size, HAL_MAX_DELAY);
+    return i2c::Transmit(I2C_HANDLE_FOR(eeprom), std::to_underlying(cmd), pData, size, HAL_MAX_DELAY);
 }
 
 [[nodiscard]] i2c::Result user_write_address_without_lock(EepromCommandWrite cmd, uint16_t address) {
@@ -91,7 +77,7 @@ void try_fix_if_needed(const i2c::Result &result) {
     _out[1] = address & 0xff;
 
     i2c::Result result = eeprom_transmit(cmd, _out, sizeof(address));
-    DELAY(BLOCK_DELAY);
+    st25dv64k_delay(BLOCK_DELAY);
 
     return result;
 }
@@ -117,7 +103,7 @@ void try_fix_if_needed(const i2c::Result &result) {
             return result;
         }
 
-        DELAY(BLOCK_DELAY);
+        st25dv64k_delay(BLOCK_DELAY);
 
         size -= block_size;
         address += block_size;
@@ -133,7 +119,7 @@ void try_fix_if_needed(const i2c::Result &result) {
 
     i2c::Result result = user_write_address_without_lock(eeprom_get_write_address(cmd), address);
     if (result == i2c::Result::ok) {
-        result = i2c::Receive(I2C_HANDLE_FOR(eeprom), ftrstd::to_underlying(eeprom_get_read_address(cmd)), static_cast<uint8_t *>(pdata), size, HAL_MAX_DELAY);
+        result = i2c::Receive(I2C_HANDLE_FOR(eeprom), std::to_underlying(eeprom_get_read_address(cmd)), static_cast<uint8_t *>(pdata), size, HAL_MAX_DELAY);
     }
 
     return result;
@@ -279,11 +265,6 @@ void st25dv64k_present_pwd(uint8_t *pwd) {
 }
 
 void st25dv64k_init() {
-    if (st25dv64k_initialised) {
-        return;
-    }
-    st25dv64k_initialised = 1;
-
     st25dv64k_present_pwd(0);
     st25dv64k_wr_cfg(REG_ENDA3, 0xFF);
     st25dv64k_present_pwd(0);

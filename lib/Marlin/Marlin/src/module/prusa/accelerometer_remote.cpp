@@ -95,7 +95,7 @@ void PrusaAccelerometer::clear() {
     m_sample_buffer.error.clear_overflow();
 }
 
-PrusaAccelerometer::GetSampleResult PrusaAccelerometer::get_sample(Acceleration &acceleration) {
+PrusaAccelerometer::GetSampleResult PrusaAccelerometer::get_sample(RawAcceleration &raw_acceleration) {
     std::lock_guard lock(s_buffer_mutex);
     if (get_error() != Error::none) {
         return GetSampleResult::error;
@@ -107,7 +107,7 @@ PrusaAccelerometer::GetSampleResult PrusaAccelerometer::get_sample(Acceleration 
     }
 
     AccelerometerUtils::SampleStatus sample_status;
-    acceleration = AccelerometerUtils::unpack_sample(sample_status, sample);
+    raw_acceleration = AccelerometerUtils::unpack_sample(sample_status, sample);
 
     if (sample_status.buffer_overflow) {
         m_sample_buffer.error.set(Error::overflow_dwarf);
@@ -122,14 +122,6 @@ PrusaAccelerometer::GetSampleResult PrusaAccelerometer::get_sample(Acceleration 
     return GetSampleResult::ok;
 }
 
-float PrusaAccelerometer::get_sampling_rate() const {
-    return m_sampling_rate;
-}
-
-PrusaAccelerometer::Error PrusaAccelerometer::get_error() const {
-    return m_sample_buffer.error.get();
-}
-
 void PrusaAccelerometer::put_sample(common::puppies::fifo::AccelerometerXyzSample sample) {
     std::lock_guard lock(s_buffer_mutex);
     if (s_sample_buffer) {
@@ -139,11 +131,19 @@ void PrusaAccelerometer::put_sample(common::puppies::fifo::AccelerometerXyzSampl
     }
 }
 
+PrusaAccelerometer::Error PrusaAccelerometer::get_error() const {
+    return m_sample_buffer.error.get();
+}
+
 void PrusaAccelerometer::set_possible_overflow() {
     std::lock_guard lock(s_buffer_mutex);
     if (s_sample_buffer) {
         s_sample_buffer->error.set(Error::overflow_possible);
     }
+}
+
+float PrusaAccelerometer::get_sampling_rate() const {
+    return m_sampling_rate;
 }
 
 void PrusaAccelerometer::set_rate(float rate) {

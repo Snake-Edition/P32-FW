@@ -58,9 +58,7 @@ void IFooterItem::windowEvent(window_t *sender, GUI_event_t event, void *param) 
 }
 
 Rect16::Width_t IFooterItem::TextWidth(const string_view_utf8 &text) {
-    uint16_t strlen_text = 0;
-    const size_ui16_t txt_size = font_meas_text(GuiDefaults::FooterFont, text, &strlen_text);
-    return txt_size.w;
+    return calculate_text_size(text, GuiDefaults::FooterFont, is_multiline::no).w;
 }
 
 IFooterIconText::IFooterIconText(window_t *parent, const img::Resource *icon, Rect16::W_t width)
@@ -70,9 +68,7 @@ IFooterIconText::IFooterIconText(window_t *parent, const img::Resource *icon, Re
 }
 
 Rect16::Width_t IFooterIconText::MeasureTextWidth(const string_view_utf8 &text) {
-    uint16_t strlen_text = 0;
-    const size_ui16_t txt_size = font_meas_text(GuiDefaults::FooterFont, text, &strlen_text);
-    return txt_size.w;
+    return calculate_text_size(text, GuiDefaults::FooterFont, is_multiline::no).w;
 }
 
 FooterIconText_IntVal::FooterIconText_IntVal(window_t *parent, const img::Resource *icon,

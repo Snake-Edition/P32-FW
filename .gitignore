@@ -1,5 +1,5 @@
 .vs
-/build*/
+/build*
 .cproject
 .project
 .settings
@@ -17,8 +17,9 @@ Makefile
 /doc/html/
 __pycache__
 .benchmarks
-/utils/debug/10_custom_config_overrides.cfg
 /doc/inline_umlgraph_cache_all.pu
 .venv
 *.egg-info/
 *.egg
+/heap_instrumentation.txt
+/src/**/*.mo

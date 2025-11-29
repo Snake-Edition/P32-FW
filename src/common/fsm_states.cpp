@@ -1,8 +1,9 @@
 #include <common/fsm_states.hpp>
 
-#include <option/has_phase_stepping.h>
+#include <option/has_phase_stepping_calibration.h>
 #include <option/has_input_shaper_calibration.h>
 #include <option/has_door_sensor_calibration.h>
+#include <option/has_manual_belt_tuning.h>
 #include <logging/log.hpp>
 
 LOG_COMPONENT_DEF(Fsm, logging::Severity::debug);
@@ -19,8 +20,13 @@ static constexpr uint32_t score(ClientFSM fsm_type) {
 
     case ClientFSM::Serial_printing:
     case ClientFSM::Printing:
+#if HAS_SELFTEST()
     case ClientFSM::Selftest:
     case ClientFSM::FansSelftest:
+#endif
+#if HAS_GEARBOX_ALIGNMENT()
+    case ClientFSM::GearboxAlignment:
+#endif
 #if HAS_DOOR_SENSOR_CALIBRATION()
     case ClientFSM::DoorSensorCalibration:
 #endif
@@ -36,9 +42,12 @@ static constexpr uint32_t score(ClientFSM fsm_type) {
 #if HAS_COLDPULL()
     case ClientFSM::ColdPull:
 #endif
+#if HAS_MANUAL_BELT_TUNING()
+    case ClientFSM::ManualBeltTuning:
+#endif
     case ClientFSM::NetworkSetup:
-#if HAS_PHASE_STEPPING()
-    case ClientFSM::PhaseStepping:
+#if HAS_PHASE_STEPPING_CALIBRATION()
+    case ClientFSM::PhaseSteppingCalibration:
 #endif
 #if HAS_INPUT_SHAPER_CALIBRATION()
     case ClientFSM::InputShaperCalibration:
@@ -46,10 +55,17 @@ static constexpr uint32_t score(ClientFSM fsm_type) {
 #if HAS_BELT_TUNING()
     case ClientFSM::BeltTuning:
 #endif
+#if HAS_LOADCELL()
+    case ClientFSM::NozzleCleaningFailed:
+#endif
         return 2;
 
-    case ClientFSM::Warning:
+    case ClientFSM::SafetyTimer:
+        // Show over everything except warnings
         return 3;
+
+    case ClientFSM::Warning:
+        return 4;
 
     case ClientFSM::_none:
         break;
@@ -80,7 +96,7 @@ std::optional<States::Top> States::get_top() const {
 
 void States::log() const {
 #if _DEBUG
-    log_debug(Fsm, "New generation %" PRIu32, generation);
+    log_debug(Fsm, "New generation %" PRIu32, state_id.to_uint32_t());
     for (size_t i = 0; i < states.size(); i++) {
         if (states[i].has_value()) {
             log_debug(Fsm, "%zu: %hhu", i, states[i]->GetPhase());

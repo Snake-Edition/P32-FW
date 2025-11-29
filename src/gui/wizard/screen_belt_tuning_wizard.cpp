@@ -98,7 +98,7 @@ public:
         , graph(this)
         , screen(*parent.screen) //
     {
-        static constexpr std::initializer_list layout {
+        static constexpr std::array layout {
             // Title
             StackLayoutItem { .height = 64 },
 
@@ -114,7 +114,8 @@ public:
             // Radio
             standard_stack_layout::for_radio,
         };
-        layout_vertical_stack(GetRect(), { &title, &progress_bar, &info, &graph, &radio }, layout);
+        std::array<window_t *, layout.size()> windows { &title, &progress_bar, &info, &graph, &radio };
+        layout_vertical_stack(parent.parent->GetRect(), windows, layout);
 
         // Reset the graph data, we will be sequentially filling it during the measuring
         screen.graph_data.fill(0);
@@ -161,7 +162,7 @@ class FrameResults : public FramePrompt {
 public:
     FrameResults(FrameParent parent, PhaseBeltTuning phase = PhaseBeltTuning::results)
         : FramePrompt(parent, phase, nullptr, nullptr)
-        , graph(this)
+        , graph(parent)
         , phase(phase)
         , screen(*parent.screen) //
     {
@@ -178,7 +179,9 @@ public:
             // Radio
             standard_stack_layout::for_radio,
         };
-        layout_vertical_stack(GetRect(), { &title, &info, &graph, &radio }, layout);
+
+        std::array<window_t *, layout.size()> windows { &title, &info, &graph, &radio };
+        layout_vertical_stack(parent.parent->GetRect(), windows, layout);
     }
 
     void update(const fsm::PhaseData &serialized_data) {
@@ -239,7 +242,6 @@ ScreenBeltTuningWizard::ScreenBeltTuningWizard()
     : ScreenFSM(N_("BELT TUNING"), GuiDefaults::RectScreenNoHeader) //
 {
     header.SetIcon(&img::wizard_16x16);
-    CaptureNormalWindow(inner_frame);
     create_frame();
 }
 

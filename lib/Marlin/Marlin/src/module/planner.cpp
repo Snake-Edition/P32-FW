@@ -72,15 +72,12 @@
 #include "../lcd/ultralcd.h"
 #include "../core/language.h"
 #include "../gcode/parser.h"
+#include "../feature/motordriver_util.h"
 
 #include "../Marlin.h"
 
 #if HAS_LEVELING
   #include "../feature/bedlevel/bedlevel.h"
-#endif
-
-#if ENABLED(FILAMENT_WIDTH_SENSOR)
-  #include "../feature/filwidth.h"
 #endif
 
 #if ENABLED(AUTO_POWER_CONTROL)
@@ -91,8 +88,9 @@
   #include "../feature/backlash.h"
 #endif
 
-#if ENABLED(CANCEL_OBJECTS)
-  #include "../feature/cancel_object.h"
+#include <option/has_cancel_object.h>
+#if HAS_CANCEL_OBJECT()
+  #include <feature/cancel_object/cancel_object.hpp>
 #endif
 
 #if ENABLED(CRASH_RECOVERY)
@@ -109,19 +107,29 @@
   #include <feature/emergency_stop/emergency_stop.hpp>
 #endif
 
+#include <option/has_ceiling_clearance.h>
+#if HAS_CEILING_CLEARANCE()
+  #include <feature/ceiling_clearance/ceiling_clearance.hpp>
+#endif
+
 #include <option/has_auto_retract.h>
 #if HAS_AUTO_RETRACT()
   #include <feature/auto_retract/auto_retract.hpp>
+  #include <feature/retract_tracker/retract_tracker.hpp>
 #endif
 
+#include <feature/safety_timer/safety_timer.hpp>
+#include <freertos/critical_section.hpp>
+
+#include <marlin_vars.hpp>
 #include "configuration_store.h"
 #include "bsod.h"
 
 constexpr const int32_t MIN_MSTEPS_PER_SEGMENT = MIN_STEPS_PER_SEGMENT * PLANNER_STEPS_MULTIPLIER;
 
-// Delay for delivery of first block to the stepper ISR, if the queue contains 2 or
-// fewer movements. The delay is measured in milliseconds, and must be less than 250ms
-#define BLOCK_DELAY_FOR_1ST_MOVE 100
+// Delay for delivery of first block to the stepper ISR to allow planner optimization.
+// The delay is measured in milliseconds.
+#define BLOCK_DELAY_FOR_1ST_MOVE 200
 
 Planner planner;
 
@@ -135,7 +143,8 @@ volatile uint8_t Planner::block_buffer_head,    // Index of the next block to be
                  Planner::block_buffer_nonbusy, // Index of the first non-busy block
                  Planner::block_buffer_planned, // Index of the optimally planned block
                  Planner::block_buffer_tail;    // Index of the busy block, if any
-uint8_t Planner::delay_before_delivering;       // This counter delays delivery of blocks when queue becomes empty to allow the opportunity of merging blocks
+uint32_t Planner::delay_before_delivering;      // Initial milliseconds of delay for planner optimization
+std::atomic<bool> Planner::recalculating = false;
 
 // A flag to drop queuing of blocks and abort any pending move
 bool Planner::draining_buffer;
@@ -151,7 +160,7 @@ const user_planner_settings_t &Planner::user_settings = user_settings_;
 
 bool Planner::stealth_mode_ = false;
 
-void Planner::apply_settings(const user_planner_settings_t &settings) {
+void Planner::apply_settings(const user_planner_settings_t &settings, const bool no_limits) {
   static constexpr planner_settings_t standard_limits = {
     .max_acceleration_mm_per_s2 = HWLIMIT_NORMAL_MAX_ACCELERATION,
     .max_feedrate_mm_s = HWLIMIT_NORMAL_MAX_FEEDRATE,
@@ -184,9 +193,11 @@ void Planner::apply_settings(const user_planner_settings_t &settings) {
     }
   };
 
-  apply_limit(&planner_settings_t::max_feedrate_mm_s);
-  apply_limit(&planner_settings_t::max_acceleration_mm_per_s2);
-  apply_limit(&planner_settings_t::max_jerk);
+  if (!no_limits) {
+    apply_limit(&planner_settings_t::max_feedrate_mm_s);
+    apply_limit(&planner_settings_t::max_acceleration_mm_per_s2);
+    apply_limit(&planner_settings_t::max_jerk);
+  }
 
   refresh_acceleration_rates();
 }
@@ -303,7 +314,7 @@ void Planner::init() {
  * is not and will not use the block while we modify it, so it is safe to
  * alter its values.
  */
-void Planner::calculate_trapezoid_for_block(block_t * const block, const_float_t entry_speed, const_float_t exit_speed) {
+void Planner::calculate_trapezoid_for_block(block_t * const block, const float entry_speed, const float exit_speed) {
   // Store new block parameters
   block->initial_speed = entry_speed;
   block->final_speed = exit_speed;
@@ -449,7 +460,7 @@ void Planner::calculate_trapezoid_for_block(block_t * const block, const_float_t
 
 // The kernel called by recalculate() when scanning the plan from last to first entry.
 void Planner::reverse_pass_kernel(block_t * const previous, block_t * const current, const block_t * const next
-  OPTARG(HINTS_SAFE_EXIT_SPEED, const_float_t safe_exit_speed_sqr)
+  OPTARG(HINTS_SAFE_EXIT_SPEED, const float safe_exit_speed_sqr)
 ) {
   // If entry speed is already at the maximum entry speed, and there was no change of speed
   // in the next block, there is no need to recheck. Block is cruising and there is no need to
@@ -496,7 +507,7 @@ void Planner::reverse_pass_kernel(block_t * const previous, block_t * const curr
  * recalculate() needs to go over the current plan twice.
  * Once in reverse and once forward. This implements the reverse pass.
  */
-void Planner::reverse_pass(TERN_(HINTS_SAFE_EXIT_SPEED, const_float_t safe_exit_speed_sqr)) {
+void Planner::reverse_pass(TERN_(HINTS_SAFE_EXIT_SPEED, const float safe_exit_speed_sqr)) {
   // Initialize block index to the last block in the planner buffer.
   uint8_t current_index = block_buffer_head,
           prev_index = prev_block_index(block_buffer_head);
@@ -591,8 +602,21 @@ void Planner::forward_pass_kernel(block_t * const previous, block_t * const curr
   // point in the buffer. When the plan is bracketed by either the beginning of the
   // buffer and a maximum entry speed or two maximum entry speeds, every block in between
   // cannot logically be further improved. Hence, we don't have to recompute them anymore.
-  if (current->entry_speed_sqr == current->max_entry_speed_sqr)
-    block_buffer_planned = prev_index;
+  if (current->entry_speed_sqr == current->max_entry_speed_sqr) {
+    // The planned block might be advanced automatically as it transitions to busy state.
+    // Since this can happen even without recomputation for an already-optimal plan, we
+    // need to ensure the block stays non-busy as we move the pointer.
+    if (previous->flag.recalculate) {
+      // the block was already locked, we can safely advance the pointer
+      block_buffer_planned = prev_index;
+    } else {
+      // ensure the ISR doesn't advance the pointer behind our's back
+      MoveIsrDisabler _;
+      if (!is_block_busy(previous)) {
+        block_buffer_planned = prev_index;
+      }
+    }
+  }
 }
 
 /**
@@ -640,7 +664,7 @@ void Planner::forward_pass() {
  * according to the entry_factor for each junction. Must be called by
  * recalculate() after updating the blocks.
  */
-void Planner::recalculate_trapezoids(TERN_(HINTS_SAFE_EXIT_SPEED, const_float_t safe_exit_speed_sqr)) {
+void Planner::recalculate_trapezoids(TERN_(HINTS_SAFE_EXIT_SPEED, const float safe_exit_speed_sqr)) {
   // The tail may be changed by the ISR so get a local copy.
   uint8_t block_index = block_buffer_nonbusy,
           head_block_index = block_buffer_head,
@@ -741,7 +765,10 @@ void Planner::recalculate_trapezoids(TERN_(HINTS_SAFE_EXIT_SPEED, const_float_t 
   }
 }
 
-void Planner::recalculate(TERN_(HINTS_SAFE_EXIT_SPEED, const_float_t safe_exit_speed_sqr)) {
+void Planner::recalculate(TERN_(HINTS_SAFE_EXIT_SPEED, const float safe_exit_speed_sqr)) {
+  // We need an operation that contains read for acquire to work properly
+  // (and the acquire-release pair works kind of like a lock, so other operations stay within)
+  recalculating.exchange(true, std::memory_order_acquire);
   // Initialize block index to the last block in the planner buffer.
   const uint8_t block_index = prev_block_index(block_buffer_head);
   // If there is just one block, no planning can be done. Avoid it!
@@ -750,6 +777,12 @@ void Planner::recalculate(TERN_(HINTS_SAFE_EXIT_SPEED, const_float_t safe_exit_s
     forward_pass();
   }
   recalculate_trapezoids(TERN_(HINTS_SAFE_EXIT_SPEED, safe_exit_speed_sqr));
+  recalculating.store(false, std::memory_order_release);
+
+  // Inform the move ISR that there is a new block added to the queue. If it
+  // wants one, now is a good time to pick it up when it's fresh instead of
+  // waiting up to 1ms for it to be its turn.
+  PreciseStepping::wake_up();
 }
 
 /**
@@ -807,16 +840,11 @@ void Planner::check_axes_activity() {
     xyze_bool_t axis_active = { false };
   #endif
 
-  #if FAN_COUNT > 0
-    uint8_t tail_fan_speed[FAN_COUNT];
-  #endif
-
   // In the current implementation of PreciseStepping, a sync position block can spend some time at the top of the block queue in contrast with the original Marlin.
   // So we have to ignore sync position blocks because they always have zero fan speeds.
   if (const block_t *block = get_first_move_block(); block != nullptr) {
     #if FAN_COUNT > 0
-      FANS_LOOP(i)
-        tail_fan_speed[i] = thermalManager.scaledFanSpeed(i, block->fan_speed[i]);
+      thermalManager.applyScaledFanSpeed(block->fan_speed);
     #endif
 
     #if ANY(DISABLE_X, DISABLE_Y, DISABLE_Z, DISABLE_E)
@@ -829,8 +857,7 @@ void Planner::check_axes_activity() {
   else {
 
     #if FAN_COUNT > 0
-      FANS_LOOP(i)
-        tail_fan_speed[i] = thermalManager.scaledFanSpeed(i);
+      thermalManager.applyScaledFanSpeed();
     #endif
   }
 
@@ -854,53 +881,6 @@ void Planner::check_axes_activity() {
     if (!axis_active.e) disable_e_steppers();
   #endif
 
-  //
-  // Update Fan speeds
-  //
-  #if FAN_COUNT > 0
-
-    #if FAN_KICKSTART_TIME > 0
-      static millis_t fan_kick_end[FAN_COUNT] = { 0 };
-      #define KICKSTART_FAN(f)                         \
-        if (tail_fan_speed[f]) {                       \
-          millis_t ms = millis();                      \
-          if (fan_kick_end[f] == 0) {                  \
-            fan_kick_end[f] = ms + FAN_KICKSTART_TIME; \
-            tail_fan_speed[f] = 255;                   \
-          } else if (PENDING(ms, fan_kick_end[f]))     \
-            tail_fan_speed[f] = 255;                   \
-        } else fan_kick_end[f] = 0
-    #else
-      #define KICKSTART_FAN(f) NOOP
-    #endif
-
-    #if FAN_MIN_PWM != 0 || FAN_MAX_PWM != 255
-      #define CALC_FAN_SPEED(f) (tail_fan_speed[f] ? map(tail_fan_speed[f], 1, 255, FAN_MIN_PWM, FAN_MAX_PWM) : 0)
-    #else
-      #define CALC_FAN_SPEED(f) tail_fan_speed[f]
-    #endif
-
-    #if ENABLED(FAN_SOFT_PWM)
-      #define _FAN_SET(F) thermalManager.soft_pwm_amount_fan[F] = CALC_FAN_SPEED(F);
-    #elif ENABLED(FAST_PWM_FAN)
-      #define _FAN_SET(F) set_pwm_duty(FAN##F##_PIN, CALC_FAN_SPEED(F));
-    #else
-      #define _FAN_SET(F) analogWrite(pin_t(FAN##F##_PIN), CALC_FAN_SPEED(F));
-    #endif
-    #define FAN_SET(F) do{ KICKSTART_FAN(F); _FAN_SET(F); }while(0)
-
-    #if HAS_FAN0
-      FAN_SET(0);
-    #endif
-    #if HAS_FAN1
-      FAN_SET(1);
-    #endif
-    #if HAS_FAN2
-      FAN_SET(2);
-    #endif
-
-  #endif // FAN_COUNT > 0
-
   #if ENABLED(AUTOTEMP)
     getHighESpeed();
   #endif
@@ -913,7 +893,7 @@ void Planner::check_axes_activity() {
    * This is the reciprocal of the circular cross-section area.
    * Return 1.0 with volumetric off or a diameter of 0.0.
    */
-  inline float calculate_volumetric_multiplier(const_float_t diameter) {
+  inline float calculate_volumetric_multiplier(const float diameter) {
     return (parser.volumetric_enabled && diameter) ? 1.0f / CIRCLE_AREA(diameter * 0.5f) : 1;
   }
 
@@ -929,25 +909,6 @@ void Planner::check_axes_activity() {
   }
 
 #endif // !NO_VOLUMETRICS
-
-#if ENABLED(FILAMENT_WIDTH_SENSOR)
-  /**
-   * Convert the ratio value given by the filament width sensor
-   * into a volumetric multiplier. Conversion differs when using
-   * linear extrusion vs volumetric extrusion.
-   */
-  void Planner::apply_filament_width_sensor(const int8_t encoded_ratio) {
-    // Reconstitute the nominal/measured ratio
-    const float nom_meas_ratio = 1 + 0.01f * encoded_ratio,
-                ratio_2 = sq(nom_meas_ratio);
-
-    volumetric_multiplier[FILAMENT_SENSOR_EXTRUDER_NUM] = parser.volumetric_enabled
-      ? ratio_2 / CIRCLE_AREA(filwidth.nominal_mm * 0.5f) // Volumetric uses a true volumetric multiplier
-      : ratio_2;                                          // Linear squares the ratio, which scales the volume
-
-    refresh_e_factor(FILAMENT_SENSOR_EXTRUDER_NUM);
-  }
-#endif
 
 #if HAS_LEVELING
 
@@ -975,16 +936,8 @@ void Planner::check_axes_activity() {
       #endif
 
       raw.z += (
-        #if ENABLED(MESH_BED_LEVELING)
-          mbl.get_z(raw
-            #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
-              , fade_scaling_factor
-            #endif
-          )
-        #elif ENABLED(AUTO_BED_LEVELING_UBL)
+        #if ENABLED(AUTO_BED_LEVELING_UBL)
           fade_scaling_factor ? fade_scaling_factor * ubl.get_z_correction(raw) : 0.0
-        #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
-          fade_scaling_factor ? fade_scaling_factor * bilinear_z_offset(raw) : 0.0
         #endif
       );
 
@@ -1004,16 +957,8 @@ void Planner::check_axes_activity() {
         #endif
 
         raw.z -= (
-          #if ENABLED(MESH_BED_LEVELING)
-            mbl.get_z(raw
-              #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
-                , fade_scaling_factor
-              #endif
-            )
-          #elif ENABLED(AUTO_BED_LEVELING_UBL)
+          #if ENABLED(AUTO_BED_LEVELING_UBL)
             fade_scaling_factor ? fade_scaling_factor * ubl.get_z_correction(raw) : 0.0
-          #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
-            fade_scaling_factor ? fade_scaling_factor * bilinear_z_offset(raw) : 0.0
           #endif
         );
 
@@ -1027,22 +972,6 @@ void Planner::check_axes_activity() {
 
 #endif // HAS_LEVELING
 
-#if ENABLED(FWRETRACT)
-  /**
-   * rz, e - Cartesian positions in mm
-   */
-  void Planner::apply_retract(float &rz, float &e) {
-    rz += fwretract.current_hop;
-    e -= fwretract.current_retract[active_extruder];
-  }
-
-  void Planner::unapply_retract(float &rz, float &e) {
-    rz -= fwretract.current_hop;
-    e += fwretract.current_retract[active_extruder];
-  }
-
-#endif
-
 void Planner::quick_stop() {
   // Immediately stop motion: all pending moves will be discarded later
   PreciseStepping::quick_stop();
@@ -1052,9 +981,19 @@ void Planner::quick_stop() {
 
   quick_stop_count ++;
 
-  // Restart the block delay for the first movement - As the queue was
-  // forced to empty, there's no risk the ISR will touch this.
-  delay_before_delivering = BLOCK_DELAY_FOR_1ST_MOVE;
+  // Reset the block delay for the first movement
+  delay_before_delivering = 0;
+}
+
+void Planner::quick_stop_and_resume() {
+  if(draining()) return;
+
+  quick_stop();
+  while (PreciseStepping::stopping()) {
+    PreciseStepping::loop();
+  }
+  clear_block_buffer();
+  resume_queuing();
 }
 
 void Planner::resume_queuing() {
@@ -1219,54 +1158,12 @@ bool Planner::busy() {
 void Planner::synchronize() {
   bool emptying_buffer_orig = emptying();
   emptying_buffer = true;
+  start_moving();
   while (busy()) idle(true);
   emptying_buffer = emptying_buffer_orig;
 #if HAS_PHASE_STEPPING()
   phase_stepping::check_state();
 #endif // HAS_PHASE_STEPPING()
-}
-
-/**
- * Planner::_buffer_msteps_raw
- *
- * Add a new linear movement to the buffer (in terms of steps) without implicit kinematic
- * translation, compensation or queuing restrictions.
- *
- *  target        - target position in mini-steps units
- *  fr_mm_s       - (target) speed of the move
- *  extruder      - target extruder
- *  millimeters   - the length of the movement, if known
- *
- * Returns true if movement was properly queued, false otherwise
- */
-bool Planner::_buffer_msteps_raw(const xyze_long_t &target, const xyze_pos_t &target_float
-  , feedRate_t fr_mm_s, const uint8_t extruder, const PlannerHints &hints
-) {
-
-  // Wait for the next available block
-  uint8_t next_buffer_head;
-  block_t * const block = get_next_free_block(next_buffer_head);
-  if (!block) return false;
-
-  // Mark the block as raw
-  PlannerHints block_hints = hints;
-  block_hints.raw_block = true;
-
-  // Fill the block with the specified movement
-  if (!_populate_block(block, target, target_float, fr_mm_s, extruder, block_hints)) {
-    // Movement was not queued, probably because it was too short.
-    //  Simply accept that as movement queued and done
-    return true;
-  }
-
-  // Move buffer head
-  block_buffer_head = next_buffer_head;
-
-  // Recalculate and optimize trapezoidal speed profiles
-  recalculate(TERN_(HINTS_SAFE_EXIT_SPEED, hints.safe_exit_speed_sqr));
-
-  // Movement successfully queued!
-  return true;
 }
 
 /**
@@ -1292,17 +1189,13 @@ bool Planner::_buffer_msteps(const xyze_long_t &target, const xyze_pos_t &target
   // Fill the block with the specified movement
   if (!_populate_block(block, target, target_float, fr_mm_s, extruder, hints)) {
     // Movement was not queued, probably because it was too short.
-    //  Simply accept that as movement queued and done
+    // Simply accept that as movement queued and done
     return true;
   }
 
-  // If this is the first added movement, reload the delay, otherwise, cancel it.
   if (block_buffer_head == block_buffer_tail) {
-    // If it was the first queued block, restart the 1st block delivery delay, to
+    // If it was the first queued block, set the 1st block delivery delay to
     // give the planner an opportunity to queue more movements and plan them
-    // As there are no queued movements, the Stepper ISR will not touch this
-    // variable, so there is no risk setting this here (but it MUST be done
-    // before the following line!!)
     delay_before_delivering = BLOCK_DELAY_FOR_1ST_MOVE;
   }
 
@@ -1400,6 +1293,9 @@ bool Planner::_populate_block(block_t * const block,
   block->flag.clear();
   block->busy = false;
 
+  // TODO: raw_block (no_discard) = hints.last_segment
+  // Don't discard last segment even if it's shorted than MIN_MSTEPS_PER_SEGMENT
+
   // Set direction bits
   block->direction_bits = dm;
 
@@ -1422,43 +1318,34 @@ bool Planner::_populate_block(block_t * const block,
 
   #if EXTRUDERS
     delta_mm.e = e_msteps_float * mm_per_mstep[E_AXIS_N(extruder)];
-  #endif
-
-  if (!hints.raw_block NUM_AXIS_GANG(
-      && block->msteps.a < MIN_MSTEPS_PER_SEGMENT, && block->msteps.b < MIN_MSTEPS_PER_SEGMENT, && block->msteps.c < MIN_MSTEPS_PER_SEGMENT,
-      && block->msteps.i < MIN_MSTEPS_PER_SEGMENT, && block->msteps.j < MIN_MSTEPS_PER_SEGMENT, && block->msteps.k < MIN_MSTEPS_PER_SEGMENT,
-      && block->msteps.u < MIN_MSTEPS_PER_SEGMENT, && block->msteps.v < MIN_MSTEPS_PER_SEGMENT, && block->msteps.w < MIN_MSTEPS_PER_SEGMENT
-    )
-  ) {
-    block->millimeters = TERN0(HAS_EXTRUDERS, ABS(delta_mm.e));
-  }
-  else {
-    if (hints.millimeters)
-      block->millimeters = hints.millimeters;
-    else
-      block->millimeters = SQRT(sq(delta_mm.x) + sq(delta_mm.y) + sq(delta_mm.z));
-
-    /**
-     * At this point at least one of the axes has more mini-steps than
-     * MIN_MSTEPS_PER_SEGMENT, ensuring the segment won't get dropped as
-     * zero-length. It's important to not apply corrections
-     * to blocks that would get dropped!
-     *
-     * A correction function is permitted to add steps to an axis, it
-     * should *never* remove steps!
-     */
-    #if ENABLED(BACKLASH_COMPENSATION)
-      if (!hints.raw_block) {
-        backlash.add_correction_msteps(da, db, dc, dm, block);
-      }
-    #endif
-  }
-
-  #if EXTRUDERS
     block->msteps.e = e_msteps;
   #endif
 
   block->mstep_event_count = _MAX(block->msteps.a, block->msteps.b, block->msteps.c, e_msteps);
+
+  // Always calculate the block length if we are going to keep it
+  if (block->mstep_event_count >= MIN_MSTEPS_PER_SEGMENT || block->flag.raw_block) {
+    if (block->msteps.a || block->msteps.b || block->msteps.c) {
+      block->millimeters = SQRT(sq(delta_mm.x) + sq(delta_mm.y) + sq(delta_mm.z));
+    } else {
+      block->millimeters = abs(delta_mm.e);
+    }
+  }
+
+    /**
+   * At this point at least one of the axes has more mini-steps than
+   * MIN_MSTEPS_PER_SEGMENT, ensuring the segment won't get dropped as
+   * zero-length. It's important to not apply corrections
+   * to blocks that would get dropped!
+   *
+   * A correction function is permitted to add steps to an axis, it
+   * should *never* remove steps!
+   */
+  #if ENABLED(BACKLASH_COMPENSATION)
+    if (!hints.no_discard) {
+      backlash.add_correction_msteps(da, db, dc, dm, block);
+    }
+  #endif
 
   if (!hints.raw_block) {
     // Bail if this is a regular short block
@@ -1513,6 +1400,14 @@ bool Planner::_populate_block(block_t * const block,
       if (block->msteps.z) enable_Z();
     #endif
   #endif
+
+  // Perform XYZ pre-move hooks
+  if (block->msteps.x || block->msteps.y) {
+    motor_prepare_move_xy();
+  }
+  if (block->msteps.z) {
+    motor_prepare_move_z();
+  }
 
   // Enable extruder(s)
   #if EXTRUDERS
@@ -1638,413 +1533,424 @@ bool Planner::_populate_block(block_t * const block,
         enable_E4();
         enable_E5();
       #endif
+
+      // Perform E pre-move hooks
+      motor_prepare_move_e();
     }
   #endif // EXTRUDERS
+
+
 
   if (e_msteps)
     NOLESS(fr_mm_s, settings.min_feedrate_mm_s);
   else
     NOLESS(fr_mm_s, settings.min_travel_feedrate_mm_s);
 
-  const float inverse_millimeters = 1.0f / block->millimeters;  // Inverse millimeters to remove multiple divides
+  if (!block->mstep_event_count) {
+    // reset block velocities to invalid values to avoid use
+    block->nominal_speed = 0;
+    block->entry_speed_sqr = 0;
+    block->max_entry_speed_sqr = 0;
+    block->millimeters = 0;
+    block->acceleration = 0;
+    block->initial_speed = 0;
+    block->final_speed = 0;
+  } else {
+    const float inverse_millimeters = 1.0f / block->millimeters;  // Inverse millimeters to remove multiple divides
 
-  // Calculate inverse time for this move. No divide by zero due to previous checks.
-  // Example: At 120mm/s a 60mm move takes 0.5s. So this will give 2.0.
-  float inverse_secs = fr_mm_s * inverse_millimeters;
+    // Calculate inverse time for this move. No divide by zero due to previous checks.
+    // Example: At 120mm/s a 60mm move takes 0.5s. So this will give 2.0.
+    float inverse_secs = fr_mm_s * inverse_millimeters;
 
-  // Get the number of non busy movements in queue (non busy means that they can be altered)
-  const uint8_t moves_queued = nonbusy_movesplanned();
+    // Get the number of non busy movements in queue (non busy means that they can be altered)
+    const uint8_t moves_queued = nonbusy_movesplanned();
 
-  // Slow down when the buffer starts to empty, rather than wait at the corner for a buffer refill
-  #if EITHER(SLOWDOWN, ULTRA_LCD) || defined(XY_FREQUENCY_LIMIT)
-    // Segment time in microseconds
-    uint32_t segment_time_us = LROUND(1000000.0f / inverse_secs);
-  #endif
-
-  #if ENABLED(SLOWDOWN)
-    #ifndef SLOWDOWN_DIVISOR
-      #define SLOWDOWN_DIVISOR 2
+    // Slow down when the buffer starts to empty, rather than wait at the corner for a buffer refill
+    #if ENABLED(SLOWDOWN) || defined(XY_FREQUENCY_LIMIT)
+      // Segment time in microseconds
+      uint32_t segment_time_us = LROUND(1000000.0f / inverse_secs);
     #endif
-    // Take into account also blocks that are just waiting to be discarded because even those blocks
-    // can't be modified, those blocks still aren't processed by PreciseStepping::process_one_step_event_from_queue().
-    const uint8_t total_blocks_queued = movesplanned();
 
-    // Do not slowdown when implicitly stopping and/or when the queue still contains at least one command
-    if (!emptying() && queue.length <= 3 && WITHIN(total_blocks_queued, 2, (BLOCK_BUFFER_SIZE) / (SLOWDOWN_DIVISOR) - 1)) {
-      const int32_t time_diff = settings.min_segment_time_us - segment_time_us;
-      if (time_diff > 0) {
-        // Buffer is draining so add extra time. The amount of time added increases if the buffer is still emptied more.
-        const uint32_t nst = segment_time_us + LROUND(2 * time_diff / total_blocks_queued);
-        inverse_secs = 1000000.0f / nst;
-        #if defined(XY_FREQUENCY_LIMIT) || HAS_SPI_LCD
-          segment_time_us = nst;
-        #endif
+    #if ENABLED(SLOWDOWN)
+      #ifndef SLOWDOWN_DIVISOR
+        #define SLOWDOWN_DIVISOR 2
+      #endif
+      // Take into account also blocks that are just waiting to be discarded because even those blocks
+      // can't be modified, those blocks still aren't processed by PreciseStepping::process_one_step_event_from_queue().
+      const uint8_t total_blocks_queued = movesplanned();
+
+      // Do not slowdown when implicitly stopping and/or when the queue still contains at least one command
+      if (!emptying() && queue.length <= 3 && WITHIN(total_blocks_queued, 2, (BLOCK_BUFFER_SIZE) / (SLOWDOWN_DIVISOR) - 1)) {
+        const int32_t time_diff = settings.min_segment_time_us - segment_time_us;
+        if (time_diff > 0) {
+          // Buffer is draining so add extra time. The amount of time added increases if the buffer is still emptied more.
+          const uint32_t nst = segment_time_us + LROUND(2 * time_diff / total_blocks_queued);
+          inverse_secs = 1000000.0f / nst;
+          #if defined(XY_FREQUENCY_LIMIT)
+            segment_time_us = nst;
+          #endif
+        }
       }
-    }
-  #endif
+    #endif
 
-  block->nominal_speed = block->millimeters * inverse_secs;           // (mm/sec) Always > 0
-#if ENABLED(S_CURVE_ACCELERATION)
-  block->nominal_rate = CEIL(block->mstep_event_count * inverse_secs); // (mini-step/sec) Always > 0
-#endif
+    block->nominal_speed = block->millimeters * inverse_secs;           // (mm/sec) Always > 0
+    #if ENABLED(S_CURVE_ACCELERATION)
+      block->nominal_rate = CEIL(block->mstep_event_count * inverse_secs); // (mini-step/sec) Always > 0
+    #endif
+    assert(block->nominal_speed > 0); // This assert just saved you 4 hours of digging through input shaper internals. You're welcome.
 
-  #if ENABLED(FILAMENT_WIDTH_SENSOR)
-    if (extruder == FILAMENT_SENSOR_EXTRUDER_NUM)   // Only for extruder with filament sensor
-      filwidth.advance_e(delta_mm.e);
-  #endif
+    // Calculate and limit speed in mm/sec for each axis
+    xyze_float_t current_speed;
+    float speed_factor = 1.0f; // factor <1 decreases speed
 
-  // Calculate and limit speed in mm/sec for each axis
-  xyze_float_t current_speed;
-  float speed_factor = 1.0f; // factor <1 decreases speed
+    #ifdef COREXY
+      const float speed_mm_x = std::abs(current_speed[X_AXIS] = delta_mm[X_AXIS] * inverse_secs);
+      const float speed_mm_y = std::abs(current_speed[Y_AXIS] = delta_mm[Y_AXIS] * inverse_secs);
+      const feedRate_t highest_strain = speed_mm_x + speed_mm_y;
 
-  #ifdef COREXY_CONVERT_LIMITS
-    const float speed_mm_x = std::abs(current_speed[X_AXIS] = delta_mm[X_AXIS] * inverse_secs);
-    const float speed_mm_y = std::abs(current_speed[Y_AXIS] = delta_mm[Y_AXIS] * inverse_secs);
-    const feedRate_t highest_strain = speed_mm_x + speed_mm_y;
+      const float max_feedrate_mm_s = settings.max_feedrate_mm_s[X_AXIS];
+      if(highest_strain > max_feedrate_mm_s) {
+        NOMORE(speed_factor, max_feedrate_mm_s / highest_strain);
+      }
+    #else
+      LOOP_XY(i) {
+        const float delta_mm_i = delta_mm[i];
+        const feedRate_t cs = ABS(current_speed[i] = delta_mm_i * inverse_secs);
+        if (cs > settings.max_feedrate_mm_s[i]) NOMORE(speed_factor, settings.max_feedrate_mm_s[i] / cs);
+      }
+    #endif
 
-    const float max_feedrate_mm_s = settings.max_feedrate_mm_s[X_AXIS];
-    if(highest_strain > max_feedrate_mm_s) {
-      NOMORE(speed_factor, max_feedrate_mm_s / highest_strain);
-    }
-  #else
-    LOOP_XY(i) {
+    LOOP_S_LE_N(i, Z_AXIS, E_AXIS) {
       const float delta_mm_i = delta_mm[i];
       const feedRate_t cs = ABS(current_speed[i] = delta_mm_i * inverse_secs);
       if (cs > settings.max_feedrate_mm_s[i]) NOMORE(speed_factor, settings.max_feedrate_mm_s[i] / cs);
+      #if ENABLED(DISTINCT_E_FACTORS)
+        if (i == E_AXIS) i += extruder;
+      #endif
     }
-  #endif
 
-  LOOP_S_LE_N(i, Z_AXIS, E_AXIS) {
-    const float delta_mm_i = delta_mm[i];
-    const feedRate_t cs = ABS(current_speed[i] = delta_mm_i * inverse_secs);
-    if (cs > settings.max_feedrate_mm_s[i]) NOMORE(speed_factor, settings.max_feedrate_mm_s[i] / cs);
-    #if ENABLED(DISTINCT_E_FACTORS)
-      if (i == E_AXIS) i += extruder;
+    // Max segment time in µs.
+    #ifdef XY_FREQUENCY_LIMIT
+      // Check and limit the xy direction change frequency
+      const unsigned char direction_change = block->direction_bits ^ old_direction_bits;
+      old_direction_bits = block->direction_bits;
+      segment_time_us = LROUND((float)segment_time_us / speed_factor);
+
+      uint32_t xs0 = axis_segment_time_us[0].x,
+               xs1 = axis_segment_time_us[1].x,
+               xs2 = axis_segment_time_us[2].x,
+               ys0 = axis_segment_time_us[0].y,
+               ys1 = axis_segment_time_us[1].y,
+               ys2 = axis_segment_time_us[2].y;
+
+      if (TEST(direction_change, X_AXIS)) {
+        xs2 = axis_segment_time_us[2].x = xs1;
+        xs1 = axis_segment_time_us[1].x = xs0;
+        xs0 = 0;
+      }
+      xs0 = axis_segment_time_us[0].x = xs0 + segment_time_us;
+
+      if (TEST(direction_change, Y_AXIS)) {
+        ys2 = axis_segment_time_us[2].y = axis_segment_time_us[1].y;
+        ys1 = axis_segment_time_us[1].y = axis_segment_time_us[0].y;
+        ys0 = 0;
+      }
+      ys0 = axis_segment_time_us[0].y = ys0 + segment_time_us;
+
+      const uint32_t max_x_segment_time = _MAX(xs0, xs1, xs2),
+                     max_y_segment_time = _MAX(ys0, ys1, ys2),
+                     min_xy_segment_time = _MIN(max_x_segment_time, max_y_segment_time);
+      if (min_xy_segment_time < MAX_FREQ_TIME_US) {
+        const float low_sf = speed_factor * min_xy_segment_time / (MAX_FREQ_TIME_US);
+        NOMORE(speed_factor, low_sf);
+      }
+    #endif // XY_FREQUENCY_LIMIT
+
+    // Correct the speed
+    if (speed_factor < 1.0f) {
+      current_speed *= speed_factor;
+    #if ENABLED(S_CURVE_ACCELERATION)
+      block->nominal_rate *= speed_factor;
     #endif
-  }
-
-  // Max segment time in µs.
-  #ifdef XY_FREQUENCY_LIMIT
-
-    // Check and limit the xy direction change frequency
-    const unsigned char direction_change = block->direction_bits ^ old_direction_bits;
-    old_direction_bits = block->direction_bits;
-    segment_time_us = LROUND((float)segment_time_us / speed_factor);
-
-    uint32_t xs0 = axis_segment_time_us[0].x,
-             xs1 = axis_segment_time_us[1].x,
-             xs2 = axis_segment_time_us[2].x,
-             ys0 = axis_segment_time_us[0].y,
-             ys1 = axis_segment_time_us[1].y,
-             ys2 = axis_segment_time_us[2].y;
-
-    if (TEST(direction_change, X_AXIS)) {
-      xs2 = axis_segment_time_us[2].x = xs1;
-      xs1 = axis_segment_time_us[1].x = xs0;
-      xs0 = 0;
+      block->nominal_speed *= speed_factor;
     }
-    xs0 = axis_segment_time_us[0].x = xs0 + segment_time_us;
 
-    if (TEST(direction_change, Y_AXIS)) {
-      ys2 = axis_segment_time_us[2].y = axis_segment_time_us[1].y;
-      ys1 = axis_segment_time_us[1].y = axis_segment_time_us[0].y;
-      ys0 = 0;
-    }
-    ys0 = axis_segment_time_us[0].y = ys0 + segment_time_us;
-
-    const uint32_t max_x_segment_time = _MAX(xs0, xs1, xs2),
-                   max_y_segment_time = _MAX(ys0, ys1, ys2),
-                   min_xy_segment_time = _MIN(max_x_segment_time, max_y_segment_time);
-    if (min_xy_segment_time < MAX_FREQ_TIME_US) {
-      const float low_sf = speed_factor * min_xy_segment_time / (MAX_FREQ_TIME_US);
-      NOMORE(speed_factor, low_sf);
-    }
-  #endif // XY_FREQUENCY_LIMIT
-
-  // Correct the speed
-  if (speed_factor < 1.0f) {
-    current_speed *= speed_factor;
-  #if ENABLED(S_CURVE_ACCELERATION)
-    block->nominal_rate *= speed_factor;
-  #endif
-    block->nominal_speed *= speed_factor;
-  }
-
-  // Compute and limit the acceleration rate for the trapezoid generator.
-  const float msteps_per_mm = block->mstep_event_count * inverse_millimeters;
-  uint32_t accel;
-  if (!block->msteps.a && !block->msteps.b && !block->msteps.c) {
-    // convert to: acceleration steps/sec^2
-    accel = CEIL(settings.retract_acceleration * msteps_per_mm);
-  }
-  else {
-    #define LIMIT_ACCEL_LONG(AXIS,INDX) do{ \
-      if (block->msteps[AXIS] && max_acceleration_msteps_per_s2[AXIS+INDX] < accel) { \
-        const uint32_t comp = max_acceleration_msteps_per_s2[AXIS+INDX] * block->mstep_event_count; \
-        if (accel * block->msteps[AXIS] > comp) accel = comp / block->msteps[AXIS]; \
-      } \
-    }while(0)
-
-    #define LIMIT_ACCEL_FLOAT(AXIS,INDX) do{ \
-      if (block->msteps[AXIS] && max_acceleration_msteps_per_s2[AXIS+INDX] < accel) { \
-        const float comp = (float)max_acceleration_msteps_per_s2[AXIS+INDX] * (float)block->mstep_event_count; \
-        if ((float)accel * (float)block->msteps[AXIS] > comp) accel = comp / (float)block->msteps[AXIS]; \
-      } \
-    }while(0)
-
-    // Start with print or travel acceleration
-    accel = CEIL((e_msteps ? settings.acceleration : settings.travel_acceleration) * msteps_per_mm);
-
-    #if ENABLED(DISTINCT_E_FACTORS)
-      #define ACCEL_IDX extruder
-    #else
-      #define ACCEL_IDX 0
-    #endif
-
-    // Limit acceleration per axis
-    if (block->mstep_event_count <= cutoff_long) {
-      LIMIT_ACCEL_LONG(A_AXIS, 0);
-      LIMIT_ACCEL_LONG(B_AXIS, 0);
-      LIMIT_ACCEL_LONG(C_AXIS, 0);
-      LIMIT_ACCEL_LONG(E_AXIS, ACCEL_IDX);
+    // Compute and limit the acceleration rate for the trapezoid generator.
+    const float msteps_per_mm = block->mstep_event_count * inverse_millimeters;
+    uint32_t accel;
+    if (!block->msteps.a && !block->msteps.b && !block->msteps.c) {
+      // convert to: acceleration steps/sec^2
+      accel = CEIL(settings.retract_acceleration * msteps_per_mm);
     }
     else {
-      LIMIT_ACCEL_FLOAT(A_AXIS, 0);
-      LIMIT_ACCEL_FLOAT(B_AXIS, 0);
-      LIMIT_ACCEL_FLOAT(C_AXIS, 0);
-      LIMIT_ACCEL_FLOAT(E_AXIS, ACCEL_IDX);
-    }
-  }
-#if ENABLED(S_CURVE_ACCELERATION)
-  block->acceleration_msteps_per_s2 = accel;
-#endif
-  block->acceleration = accel / msteps_per_mm;
-  float vmax_junction_sqr; // Initial limit on the segment entry velocity (mm/s)^2
+      #define LIMIT_ACCEL_LONG(AXIS,INDX) do{ \
+        if (block->msteps[AXIS] && max_acceleration_msteps_per_s2[AXIS+INDX] < accel) { \
+          const uint32_t comp = max_acceleration_msteps_per_s2[AXIS+INDX] * block->mstep_event_count; \
+          if (accel * block->msteps[AXIS] > comp) accel = comp / block->msteps[AXIS]; \
+        } \
+      }while(0)
 
-  #if DISABLED(CLASSIC_JERK)
-    /**
-     * Compute maximum allowable entry speed at junction by centripetal acceleration approximation.
-     * Let a circle be tangent to both previous and current path line segments, where the junction
-     * deviation is defined as the distance from the junction to the closest edge of the circle,
-     * colinear with the circle center. The circular segment joining the two paths represents the
-     * path of centripetal acceleration. Solve for max velocity based on max acceleration about the
-     * radius of the circle, defined indirectly by junction deviation. This may be also viewed as
-     * path width or max_jerk in the previous Grbl version. This approach does not actually deviate
-     * from path, but used as a robust way to compute cornering speeds, as it takes into account the
-     * nonlinearities of both the junction angle and junction velocity.
-     *
-     * NOTE: If the junction deviation value is finite, Grbl executes the motions in an exact path
-     * mode (G61). If the junction deviation value is zero, Grbl will execute the motion in an exact
-     * stop mode (G61.1) manner. In the future, if continuous mode (G64) is desired, the math here
-     * is exactly the same. Instead of motioning all the way to junction point, the machine will
-     * just follow the arc circle defined here. The Arduino doesn't have the CPU cycles to perform
-     * a continuous mode path, but ARM-based microcontrollers most certainly do.
-     *
-     * NOTE: The max junction speed is a fixed value, since machine acceleration limits cannot be
-     * changed dynamically during operation nor can the line move geometry. This must be kept in
-     * memory in the event of a feedrate override changing the nominal speeds of blocks, which can
-     * change the overall maximum entry speed conditions of all blocks.
-     *
-     * #######
-     * https://github.com/MarlinFirmware/Marlin/issues/10341#issuecomment-388191754
-     *
-     * hoffbaked: on May 10 2018 tuned and improved the GRBL algorithm for Marlin:
-          Okay! It seems to be working good. I somewhat arbitrarily cut it off at 1mm
-          on then on anything with less sides than an octagon. With this, and the
-          reverse pass actually recalculating things, a corner acceleration value
-          of 1000 junction deviation of .05 are pretty reasonable. If the cycles
-          can be spared, a better acos could be used. For all I know, it may be
-          already calculated in a different place. */
+      #define LIMIT_ACCEL_FLOAT(AXIS,INDX) do{ \
+        if (block->msteps[AXIS] && max_acceleration_msteps_per_s2[AXIS+INDX] < accel) { \
+          const float comp = (float)max_acceleration_msteps_per_s2[AXIS+INDX] * (float)block->mstep_event_count; \
+          if ((float)accel * (float)block->msteps[AXIS] > comp) accel = comp / (float)block->msteps[AXIS]; \
+        } \
+      }while(0)
 
-    // Unit vector of previous path line segment
-    static xyze_float_t prev_unit_vec;
-    xyze_float_t unit_vec = target_float - position_float;
+      // Start with print or travel acceleration
+      accel = CEIL((e_msteps ? settings.acceleration : settings.travel_acceleration) * msteps_per_mm);
 
-    /**
-     * On CoreXY the length of the vector [A,B] is SQRT(2) times the length of the head movement vector [X,Y].
-     * So taking Z and E into account, we cannot scale to a unit vector with "inverse_millimeters".
-     * => normalize the complete junction vector
-     * Also always normalize when float position is not available and there is E component.
-     */
-    if (ENABLED(IS_CORE))
-      normalize_junction_vector(unit_vec);
-    else
-      unit_vec *= inverse_millimeters;
-
-    // Skip first block or when previous_nominal_speed is used as a flag for homing and offset cycles.
-    if (moves_queued && !UNEAR_ZERO(previous_nominal_speed)) {
-      // Compute cosine of angle between previous and current path. (prev_unit_vec is negative)
-      // NOTE: Max junction velocity is computed without sin() or acos() by trig half angle identity.
-      float junction_cos_theta = (-prev_unit_vec.x * unit_vec.x) + (-prev_unit_vec.y * unit_vec.y)
-                               + (-prev_unit_vec.z * unit_vec.z) + (-prev_unit_vec.e * unit_vec.e);
-      #if ENABLED(JD_DEBUG_OUTPUT)
-        SERIAL_ECHO_F(junction_cos_theta, 7);
+      #if ENABLED(DISTINCT_E_FACTORS)
+        #define ACCEL_IDX extruder
+      #else
+        #define ACCEL_IDX 0
       #endif
 
-      // NOTE: Computed without any expensive trig, sin() or acos(), by trig half angle identity of cos(theta).
-      if (junction_cos_theta > 0.999999f) {
-        // For a 0 degree acute junction, just set minimum junction speed.
-        vmax_junction_sqr = sq(float(MINIMUM_PLANNER_SPEED));
+      // Limit acceleration per axis
+      if (block->mstep_event_count <= cutoff_long) {
+        LIMIT_ACCEL_LONG(A_AXIS, 0);
+        LIMIT_ACCEL_LONG(B_AXIS, 0);
+        LIMIT_ACCEL_LONG(C_AXIS, 0);
+        LIMIT_ACCEL_LONG(E_AXIS, ACCEL_IDX);
       }
       else {
-        NOLESS(junction_cos_theta, -0.999999f); // Check for numerical round-off to avoid divide by zero.
-
-        // Convert delta vector to unit vector
-        xyze_float_t junction_unit_vec = unit_vec - prev_unit_vec;
-        normalize_junction_vector(junction_unit_vec);
-
-        const float junction_acceleration = limit_value_by_axis_maximum(block->acceleration, junction_unit_vec),
-                    sin_theta_d2 = SQRT(0.5f * (1.0f - junction_cos_theta)); // Trig half angle identity. Always positive.
-
-        vmax_junction_sqr = (junction_acceleration * junction_deviation_mm * sin_theta_d2) / (1.0f - sin_theta_d2);
-        #if ENABLED(JD_SMALL_SEGMENT_HANDLING)
-          if (block->millimeters < 1) {
-
-            // Fast acos approximation, minus the error bar to be safe
-            const float junction_theta = (RADIANS(-40) * sq(junction_cos_theta) - RADIANS(50)) * junction_cos_theta + RADIANS(90) - 0.18f;
-
-            // If angle is greater than 135 degrees (octagon), find speed for approximate arc
-            if (junction_theta > RADIANS(135)) {
-              const float limit_sqr = block->millimeters / (RADIANS(180) - junction_theta) * junction_acceleration;
-              NOMORE(vmax_junction_sqr, limit_sqr);
-            }
-          }
-        #endif //JD_SMALL_SEGMENT_HANDLING
-
+        LIMIT_ACCEL_FLOAT(A_AXIS, 0);
+        LIMIT_ACCEL_FLOAT(B_AXIS, 0);
+        LIMIT_ACCEL_FLOAT(C_AXIS, 0);
+        LIMIT_ACCEL_FLOAT(E_AXIS, ACCEL_IDX);
       }
-
-      // Get the lowest speed
-      vmax_junction_sqr = _MIN(vmax_junction_sqr, sq(block->nominal_speed), sq(previous_nominal_speed));
     }
-    else // Init entry speed to zero. Assume it starts from rest. Planner will correct this later.
-      vmax_junction_sqr = 0;
-
-    prev_unit_vec = unit_vec;
-
-  #endif
-
-  #if HAS_CLASSIC_JERK
-
-    /**
-     * Adapted from Průša MKS firmware
-     * https://github.com/prusa3d/Prusa-Firmware
-     */
-    // Exit speed limited by a jerk to full halt of a previous last segment
-    static float previous_safe_speed;
-
-    // Start with a safe speed (from which the machine may halt to stop immediately).
-    float safe_speed = block->nominal_speed;
-
-    uint8_t limited = 0;
-    #if HAS_LINEAR_E_JERK
-      LOOP_XYZ(i)
-    #else
-      LOOP_XYZE(i)
+    #if ENABLED(S_CURVE_ACCELERATION)
+      block->acceleration_msteps_per_s2 = accel;
     #endif
-    {
-      const float jerk = ABS(current_speed[i]),   // cs : Starting from zero, change in speed for this axis
-                  maxj = settings.max_jerk[i];             // mj : The max jerk setting for this axis
-      if (jerk > maxj) {                          // cs > mj : New current speed too fast?
-        if (limited) {                            // limited already?
-          const float mjerk = block->nominal_speed * maxj; // ns*mj
-          if (jerk * safe_speed > mjerk) safe_speed = mjerk / jerk; // ns*mj/cs
-        }
-        else {
-          safe_speed *= maxj / jerk;              // Initial limit: ns*mj/cs
-          ++limited;                              // Initially limited
-        }
-      }
-    }
-
-    float vmax_junction;
-    if (moves_queued && !UNEAR_ZERO(previous_nominal_speed)) {
-      // Estimate a maximum velocity allowed at a joint of two successive segments.
-      // If this maximum velocity allowed is lower than the minimum of the entry / exit safe velocities,
-      // then the machine is not coasting anymore and the safe entry / exit velocities shall be used.
-
-      // Factor to multiply the previous / current nominal velocities to get componentwise limited velocities.
-      float v_factor = 1;
-      limited = 0;
-
-      // The junction velocity will be shared between successive segments. Limit the junction velocity to their minimum.
-      // Pick the smaller of the nominal speeds. Higher speed shall not be achieved at the junction during coasting.
-      vmax_junction = _MIN(block->nominal_speed, previous_nominal_speed);
-
-      // Now limit the jerk in all axes.
-      const float smaller_speed_factor = vmax_junction / previous_nominal_speed;
-      #if HAS_LINEAR_E_JERK
-        LOOP_XYZ(axis)
-      #else
-        LOOP_XYZE(axis)
-      #endif
-      {
-        // Limit an axis. We have to differentiate: coasting, reversal of an axis, full stop.
-        float v_exit = previous_speed[axis] * smaller_speed_factor,
-              v_entry = current_speed[axis];
-        if (limited) {
-          v_exit *= v_factor;
-          v_entry *= v_factor;
-        }
-
-        // Calculate jerk depending on whether the axis is coasting in the same direction or reversing.
-        const float jerk = (v_exit > v_entry)
-            ? //                                  coasting             axis reversal
-              ( (v_entry > 0 || v_exit < 0) ? (v_exit - v_entry) : _MAX(v_exit, -v_entry) )
-            : // v_exit <= v_entry                coasting             axis reversal
-              ( (v_entry < 0 || v_exit > 0) ? (v_entry - v_exit) : _MAX(-v_exit, v_entry) );
-
-        if (jerk > settings.max_jerk[axis]) {
-          v_factor *= settings.max_jerk[axis] / jerk;
-          ++limited;
-        }
-      }
-      if (limited) vmax_junction *= v_factor;
-      // Now the transition velocity is known, which maximizes the shared exit / entry velocity while
-      // respecting the jerk factors, it may be possible, that applying separate safe exit / entry velocities will achieve faster prints.
-      const float vmax_junction_threshold = vmax_junction * 0.99f;
-      if (previous_safe_speed > vmax_junction_threshold && safe_speed > vmax_junction_threshold)
-        vmax_junction = safe_speed;
-    }
-    else
-      vmax_junction = safe_speed;
-
-    previous_safe_speed = safe_speed;
+    block->acceleration = accel / msteps_per_mm;
+    float vmax_junction_sqr; // Initial limit on the segment entry velocity (mm/s)^2
 
     #if DISABLED(CLASSIC_JERK)
-      vmax_junction_sqr = _MIN(vmax_junction_sqr, sq(vmax_junction));
-    #else
-      vmax_junction_sqr = sq(vmax_junction);
+      /**
+       * Compute maximum allowable entry speed at junction by centripetal acceleration approximation.
+       * Let a circle be tangent to both previous and current path line segments, where the junction
+       * deviation is defined as the distance from the junction to the closest edge of the circle,
+       * colinear with the circle center. The circular segment joining the two paths represents the
+       * path of centripetal acceleration. Solve for max velocity based on max acceleration about the
+       * radius of the circle, defined indirectly by junction deviation. This may be also viewed as
+       * path width or max_jerk in the previous Grbl version. This approach does not actually deviate
+       * from path, but used as a robust way to compute cornering speeds, as it takes into account the
+       * nonlinearities of both the junction angle and junction velocity.
+       *
+       * NOTE: If the junction deviation value is finite, Grbl executes the motions in an exact path
+       * mode (G61). If the junction deviation value is zero, Grbl will execute the motion in an exact
+       * stop mode (G61.1) manner. In the future, if continuous mode (G64) is desired, the math here
+       * is exactly the same. Instead of motioning all the way to junction point, the machine will
+       * just follow the arc circle defined here. The Arduino doesn't have the CPU cycles to perform
+       * a continuous mode path, but ARM-based microcontrollers most certainly do.
+       *
+       * NOTE: The max junction speed is a fixed value, since machine acceleration limits cannot be
+       * changed dynamically during operation nor can the line move geometry. This must be kept in
+       * memory in the event of a feedrate override changing the nominal speeds of blocks, which can
+       * change the overall maximum entry speed conditions of all blocks.
+       *
+       * #######
+       * https://github.com/MarlinFirmware/Marlin/issues/10341#issuecomment-388191754
+       *
+       * hoffbaked: on May 10 2018 tuned and improved the GRBL algorithm for Marlin:
+            Okay! It seems to be working good. I somewhat arbitrarily cut it off at 1mm
+            on then on anything with less sides than an octagon. With this, and the
+            reverse pass actually recalculating things, a corner acceleration value
+            of 1000 junction deviation of .05 are pretty reasonable. If the cycles
+            can be spared, a better acos could be used. For all I know, it may be
+            already calculated in a different place. */
+
+      // Unit vector of previous path line segment
+      static xyze_float_t prev_unit_vec;
+      xyze_float_t unit_vec = target_float - position_float;
+
+      /**
+       * On CoreXY the length of the vector [A,B] is SQRT(2) times the length of the head movement vector [X,Y].
+       * So taking Z and E into account, we cannot scale to a unit vector with "inverse_millimeters".
+       * => normalize the complete junction vector
+       * Also always normalize when float position is not available and there is E component.
+       */
+      if (ENABLED(IS_CORE))
+        normalize_junction_vector(unit_vec);
+      else
+        unit_vec *= inverse_millimeters;
+
+      // Skip first block or when previous_nominal_speed is used as a flag for homing and offset cycles.
+      if (moves_queued && !UNEAR_ZERO(previous_nominal_speed)) {
+        // Compute cosine of angle between previous and current path. (prev_unit_vec is negative)
+        // NOTE: Max junction velocity is computed without sin() or acos() by trig half angle identity.
+        float junction_cos_theta = (-prev_unit_vec.x * unit_vec.x) + (-prev_unit_vec.y * unit_vec.y)
+                                 + (-prev_unit_vec.z * unit_vec.z) + (-prev_unit_vec.e * unit_vec.e);
+        #if ENABLED(JD_DEBUG_OUTPUT)
+          SERIAL_ECHO_F(junction_cos_theta, 7);
+        #endif
+
+        // NOTE: Computed without any expensive trig, sin() or acos(), by trig half angle identity of cos(theta).
+        if (junction_cos_theta > 0.999999f) {
+          // For a 0 degree acute junction, just set minimum junction speed.
+          vmax_junction_sqr = sq(float(MINIMUM_PLANNER_SPEED));
+        }
+        else {
+          NOLESS(junction_cos_theta, -0.999999f); // Check for numerical round-off to avoid divide by zero.
+
+          // Convert delta vector to unit vector
+          xyze_float_t junction_unit_vec = unit_vec - prev_unit_vec;
+          normalize_junction_vector(junction_unit_vec);
+
+          const float junction_acceleration = limit_value_by_axis_maximum(block->acceleration, junction_unit_vec),
+                      sin_theta_d2 = SQRT(0.5f * (1.0f - junction_cos_theta)); // Trig half angle identity. Always positive.
+
+          vmax_junction_sqr = (junction_acceleration * junction_deviation_mm * sin_theta_d2) / (1.0f - sin_theta_d2);
+          #if ENABLED(JD_SMALL_SEGMENT_HANDLING)
+            if (block->millimeters < 1) {
+
+              // Fast acos approximation, minus the error bar to be safe
+              const float junction_theta = (RADIANS(-40) * sq(junction_cos_theta) - RADIANS(50)) * junction_cos_theta + RADIANS(90) - 0.18f;
+
+              // If angle is greater than 135 degrees (octagon), find speed for approximate arc
+              if (junction_theta > RADIANS(135)) {
+                const float limit_sqr = block->millimeters / (RADIANS(180) - junction_theta) * junction_acceleration;
+                NOMORE(vmax_junction_sqr, limit_sqr);
+              }
+            }
+          #endif //JD_SMALL_SEGMENT_HANDLING
+
+        }
+
+        // Get the lowest speed
+        vmax_junction_sqr = _MIN(vmax_junction_sqr, sq(block->nominal_speed), sq(previous_nominal_speed));
+      }
+      else // Init entry speed to zero. Assume it starts from rest. Planner will correct this later.
+        vmax_junction_sqr = 0;
+
+      prev_unit_vec = unit_vec;
+
     #endif
 
-  #endif // Classic Jerk Limiting
+    #if HAS_CLASSIC_JERK
 
-  // Max entry speed of this block equals the max exit speed of the previous block.
-  #if ENABLED(JD_DEBUG_OUTPUT)
-    SERIAL_ECHO(" ");
-    SERIAL_ECHO(vmax_junction_sqr);
-    SERIAL_EOL();
-  #endif
-  block->max_entry_speed_sqr = vmax_junction_sqr;
+      /**
+       * Adapted from Průša MKS firmware
+       * https://github.com/prusa3d/Prusa-Firmware
+       */
+      // Exit speed limited by a jerk to full halt of a previous last segment
+      static float previous_safe_speed;
 
-  // Initialize block entry speed. Compute based on deceleration to user-defined MINIMUM_PLANNER_SPEED.
-  const float v_allowable_sqr = max_allowable_speed_sqr(-block->acceleration, sq(float(MINIMUM_PLANNER_SPEED)), block->millimeters);
+      // Start with a safe speed (from which the machine may halt to stop immediately).
+      float safe_speed = block->nominal_speed;
 
-  // Start with the minimum allowed speed
-  block->entry_speed_sqr = sq(float(MINIMUM_PLANNER_SPEED));
+      uint8_t limited = 0;
+      #if HAS_LINEAR_E_JERK
+        LOOP_XYZ(i)
+      #else
+        LOOP_XYZE(i)
+      #endif
+      {
+        const float jerk = ABS(current_speed[i]),   // cs : Starting from zero, change in speed for this axis
+                    maxj = settings.max_jerk[i];             // mj : The max jerk setting for this axis
+        if (jerk > maxj) {                          // cs > mj : New current speed too fast?
+          if (limited) {                            // limited already?
+            const float mjerk = block->nominal_speed * maxj; // ns*mj
+            if (jerk * safe_speed > mjerk) safe_speed = mjerk / jerk; // ns*mj/cs
+          }
+          else {
+            safe_speed *= maxj / jerk;              // Initial limit: ns*mj/cs
+            ++limited;                              // Initially limited
+          }
+        }
+      }
 
-  // Initialize planner efficiency flags
-  // Set flag if block will always reach maximum junction speed regardless of entry/exit speeds.
-  // If a block can de/ac-celerate from nominal speed to zero within the length of the block, then
-  // the current block and next block junction speeds are guaranteed to always be at their maximum
-  // junction speeds in deceleration and acceleration, respectively. This is due to how the current
-  // block nominal speed limits both the current and next maximum junction speeds. Hence, in both
-  // the reverse and forward planners, the corresponding block junction speed will always be at the
-  // the maximum junction speed and may always be ignored for any speed reduction checks.
-  block->flag.set_nominal(sq(block->nominal_speed) <= v_allowable_sqr);
+      float vmax_junction;
+      if (moves_queued && !UNEAR_ZERO(previous_nominal_speed)) {
+        // Estimate a maximum velocity allowed at a joint of two successive segments.
+        // If this maximum velocity allowed is lower than the minimum of the entry / exit safe velocities,
+        // then the machine is not coasting anymore and the safe entry / exit velocities shall be used.
 
-  // Update previous path unit_vector and nominal speed
-  previous_speed = current_speed;
-  previous_nominal_speed = block->nominal_speed;
+        // Factor to multiply the previous / current nominal velocities to get componentwise limited velocities.
+        float v_factor = 1;
+        limited = 0;
+
+        // The junction velocity will be shared between successive segments. Limit the junction velocity to their minimum.
+        // Pick the smaller of the nominal speeds. Higher speed shall not be achieved at the junction during coasting.
+        vmax_junction = _MIN(block->nominal_speed, previous_nominal_speed);
+
+        // Now limit the jerk in all axes.
+        const float smaller_speed_factor = vmax_junction / previous_nominal_speed;
+        #if HAS_LINEAR_E_JERK
+          LOOP_XYZ(axis)
+        #else
+          LOOP_XYZE(axis)
+        #endif
+        {
+          // Limit an axis. We have to differentiate: coasting, reversal of an axis, full stop.
+          float v_exit = previous_speed[axis] * smaller_speed_factor,
+                v_entry = current_speed[axis];
+          if (limited) {
+            v_exit *= v_factor;
+            v_entry *= v_factor;
+          }
+
+          // Calculate jerk depending on whether the axis is coasting in the same direction or reversing.
+          const float jerk = (v_exit > v_entry)
+              ? //                                  coasting             axis reversal
+                ( (v_entry > 0 || v_exit < 0) ? (v_exit - v_entry) : _MAX(v_exit, -v_entry) )
+              : // v_exit <= v_entry                coasting             axis reversal
+                ( (v_entry < 0 || v_exit > 0) ? (v_entry - v_exit) : _MAX(-v_exit, v_entry) );
+
+          if (jerk > settings.max_jerk[axis]) {
+            v_factor *= settings.max_jerk[axis] / jerk;
+            ++limited;
+          }
+        }
+        if (limited) vmax_junction *= v_factor;
+        // Now the transition velocity is known, which maximizes the shared exit / entry velocity while
+        // respecting the jerk factors, it may be possible, that applying separate safe exit / entry velocities will achieve faster prints.
+        const float vmax_junction_threshold = vmax_junction * 0.99f;
+        if (previous_safe_speed > vmax_junction_threshold && safe_speed > vmax_junction_threshold)
+          vmax_junction = safe_speed;
+      }
+      else
+        vmax_junction = safe_speed;
+
+      previous_safe_speed = safe_speed;
+
+      #if DISABLED(CLASSIC_JERK)
+        vmax_junction_sqr = _MIN(vmax_junction_sqr, sq(vmax_junction));
+      #else
+        vmax_junction_sqr = sq(vmax_junction);
+      #endif
+
+    #endif // Classic Jerk Limiting
+
+    // Max entry speed of this block equals the max exit speed of the previous block.
+    #if ENABLED(JD_DEBUG_OUTPUT)
+      SERIAL_ECHO(" ");
+      SERIAL_ECHO(vmax_junction_sqr);
+      SERIAL_EOL();
+    #endif
+    block->max_entry_speed_sqr = vmax_junction_sqr;
+
+    // Initialize block entry speed. Compute based on deceleration to user-defined MINIMUM_PLANNER_SPEED.
+    const float v_allowable_sqr = max_allowable_speed_sqr(-block->acceleration, sq(float(MINIMUM_PLANNER_SPEED)), block->millimeters);
+
+    // Start with the minimum allowed speed
+    block->entry_speed_sqr = sq(float(MINIMUM_PLANNER_SPEED));
+
+    // Initialize planner efficiency flags
+    // Set flag if block will always reach maximum junction speed regardless of entry/exit speeds.
+    // If a block can de/ac-celerate from nominal speed to zero within the length of the block, then
+    // the current block and next block junction speeds are guaranteed to always be at their maximum
+    // junction speeds in deceleration and acceleration, respectively. This is due to how the current
+    // block nominal speed limits both the current and next maximum junction speeds. Hence, in both
+    // the reverse and forward planners, the corresponding block junction speed will always be at the
+    // the maximum junction speed and may always be ignored for any speed reduction checks.
+    block->flag.set_nominal(sq(block->nominal_speed) <= v_allowable_sqr);
+
+    // Update previous path unit_vector and nominal speed
+    previous_speed = current_speed;
+    previous_nominal_speed = block->nominal_speed;
+  }
 
   #if ENABLED(CRASH_RECOVERY)
   {
@@ -2441,19 +2347,7 @@ void Planner::buffer_sync_block() {
   // Convert current mini-steps to absolute step count
   block->sync_step_position = position / PLANNER_STEPS_MULTIPLIER;
 
-  // If this is the first added movement, reload the delay, otherwise, cancel it.
-  if (block_buffer_head == block_buffer_tail) {
-    // If it was the first queued block, restart the 1st block delivery delay, to
-    // give the planner an opportunity to queue more movements and plan them
-    // As there are no queued movements, the Stepper ISR will not touch this
-    // variable, so there is no risk setting this here (but it MUST be done
-    // before the following line!!)
-    delay_before_delivering = BLOCK_DELAY_FOR_1ST_MOVE;
-  }
-
   block_buffer_head = next_buffer_head;
-
-  stepper.wake_up();
 } // buffer_sync_block()
 
 /**
@@ -2468,17 +2362,14 @@ void Planner::buffer_sync_block() {
  * @param hints         optional parameters to aid planner calculations
  */
 bool Planner::buffer_segment(const abce_pos_t &abce
-  , const_feedRate_t fr_mm_s
+  , const feedRate_t fr_mm_s
   , const uint8_t extruder/*=active_extruder*/
   , const PlannerHints &hints/*=PlannerHints()*/
 ) {
 
-  // If we are aborting, do not accept queuing of movements
-  if (draining_buffer || PreciseStepping::stopping()) return false;
-
-  if(hints.move.is_printing_move && abce.e > position_float.e) {
-    max_printed_z = std::max(max_printed_z, abce.z);
-  }
+#if defined(Z_CEILING_CLEARANCE) != HAS_CEILING_CLEARANCE()
+  #error Z_CEILING_CLEARANCE must be defined only if HAS_CEILING_CLEARANCE()
+#endif
 
   // The target position of the tool in absolute mini-steps
   // Calculate target position in absolute mini-steps
@@ -2488,6 +2379,22 @@ bool Planner::buffer_segment(const abce_pos_t &abce
     int32_t(LROUND(abce.c * settings.axis_msteps_per_mm[C_AXIS])),
     int32_t(LROUND(abce.e * settings.axis_msteps_per_mm[E_AXIS_N(extruder)]))
   };
+
+#if HAS_CEILING_CLEARANCE()
+  // BFW-7734 only check when a negative Z-move is planned - it's a workaround for ceiling check sometimes reporting false positives yet for unknown reasons
+  if(target.z < position.z){
+    // ! Important: call before checking for draining_buffer
+    // Note: I don't remember why I thought it was important and now I think it should probably be under the check
+    buddy::check_ceiling_clearance(abce);
+  }
+#endif
+
+  // If we are aborting, do not accept queuing of movements
+  if (draining_buffer || PreciseStepping::stopping()) return false;
+
+  // Make sure we are at the correct temperatures before doing any move whatsoever
+  // Also doing any printer movement resets the timer
+  buddy::safety_timer().reset_restore_blocking();
 
 #if HAS_EMERGENCY_STOP()
   // E-moves alone are always allowed
@@ -2501,14 +2408,27 @@ bool Planner::buffer_segment(const abce_pos_t &abce
 #endif
 
 #if HAS_AUTO_RETRACT()
-  if(target.e > position.e) {
+  if (target.e != position.e) {
+    buddy::retract_tracker().track_extruder_move(abce.e - position_float.e);
+  }
+
+  if (target.e > position.e) {
     buddy::auto_retract().maybe_deretract_to_nozzle();
     
-  } else if(hints.move.is_printing_move && buddy::auto_retract().is_retracted()) {
+  } else if (hints.move.is_printing_move && buddy::auto_retract().will_deretract()) {
     // Ignore retraction commands if we're retracted to prevent the filament getting out of the extruder
     // Only limit to printing moves - otherwise we screw up things like unload
     position.e = target.e;
     position_float.e = abce.e;
+    
+  } else if (target.e < position.e) {
+    // Invalidate auto_retract value if we retract E at least some amount (5 mm)
+    // maybe_retract_from_nozzle will overwrite the value at the end of it's sequence, other moves invalidate auto_retract value
+    // Before retract tracker's value is validated invalidate on any retract E move (10)
+    const auto hotend = marlin_vars().active_hotend_id();
+    if (buddy::retract_tracker().get_retracted_distance(hotend).value_or(10) > 5) {
+      buddy::auto_retract().set_retracted_distance(hotend, std::nullopt);
+    }
   }
 #endif
 
@@ -2552,9 +2472,9 @@ bool Planner::buffer_segment(const abce_pos_t &abce
   }
   #endif
 
-  /*if(hints.move.is_printing_move && abce.e > position_float.e) {
+  if(hints.move.is_printing_move && abce.e > position_float.e) {
     max_printed_z = std::max(max_printed_z, abce.z);
-  }*/
+  }
 
   // When changing extruders recalculate mini-steps corresponding to the E position
   #if ENABLED(DISTINCT_E_FACTORS)
@@ -2565,7 +2485,7 @@ bool Planner::buffer_segment(const abce_pos_t &abce
   #endif
 
   // DRYRUN prevents E moves from taking place
-  if (DEBUGGING(DRYRUN) || TERN0(CANCEL_OBJECTS, cancelable.skipping)) {
+  if (DEBUGGING(DRYRUN)) {
     position.e = target.e;
     position_float.e = abce.e;
   }
@@ -2597,7 +2517,6 @@ bool Planner::buffer_segment(const abce_pos_t &abce
 #endif
   )) return false;
 
-  stepper.wake_up();
   return true;
 } // buffer_segment()
 
@@ -2649,7 +2568,7 @@ bool Planner::buffer_raw_segment(const abce_pos_t &abce, const float acceleratio
         int32_t(LROUND(abce.e * settings.axis_msteps_per_mm[E_AXIS_N(extruder)])) } } };
 
     // DRYRUN prevents E moves from taking place
-    if (DEBUGGING(DRYRUN) || TERN0(CANCEL_OBJECTS, cancelable.skipping)) {
+    if (DEBUGGING(DRYRUN)) {
         position.e = target.e;
         position_float.e = abce.e;
     }
@@ -2670,7 +2589,7 @@ bool Planner::buffer_raw_segment(const abce_pos_t &abce, const float acceleratio
  *  extruder        - optional target extruder (otherwise active_extruder)
  *  hints           - optional parameters to aid planner calculations
  */
-bool Planner::buffer_line(const xyze_pos_t &cart, const_feedRate_t fr_mm_s
+bool Planner::buffer_line(const xyze_pos_t &cart, const feedRate_t fr_mm_s
   , const uint8_t extruder/*=active_extruder*/
   , const PlannerHints &hints/*=PlannerHints()*/
 ) {
@@ -2724,23 +2643,18 @@ void Planner::set_position_mm(const xyze_pos_t &xyze) {
 /**
  * Setters for planner position (also setting stepper position).
  */
-void Planner::set_e_position_mm(const_float_t e) {
+void Planner::set_e_position_mm(const float e) {
   const uint8_t axis_index = E_AXIS_N(active_extruder);
   #if ENABLED(DISTINCT_E_FACTORS)
     last_extruder = active_extruder;
   #endif
-  #if ENABLED(FWRETRACT)
-    float e_new = e - fwretract.current_retract[active_extruder];
-  #else
-    const float e_new = e;
-  #endif
-  position.e = LROUND(settings.axis_msteps_per_mm[axis_index] * e_new);
-  position_float.e = e_new;
+  position.e = LROUND(settings.axis_msteps_per_mm[axis_index] * e);
+  position_float.e = e;
 
   if (processing())
     buffer_sync_block();
   else
-    stepper.set_axis_position(E_AXIS, LROUND(settings.axis_steps_per_mm[axis_index] * e_new));
+    stepper.set_axis_position(E_AXIS, LROUND(settings.axis_steps_per_mm[axis_index] * e));
 }
 
 void Planner::reset_position() {
@@ -2794,6 +2708,7 @@ void Planner::refresh_acceleration_rates() {
 
 // Recalculate position, mm_per_step, mm_per_half_step and mm_per_mstep if settings.axis_steps_per_mm or settings.axis_msteps_per_mm changes!
 void Planner::refresh_positioning() {
+  assert(!planner.processing());
   LOOP_XYZE_N(i) {
     mm_per_step[i] = 1.f / settings.axis_steps_per_mm[i];
     mm_per_half_step[i] = mm_per_step[i] / 2.f;
@@ -2892,9 +2807,9 @@ void Planner::set_max_jerk(const AxisEnum axis, float targetValue) {
 
 #endif
 
-void Motion_Parameters::save_reset() {
+void Motion_Parameters::save_reset(const bool no_limits) {
   save();
-  reset();
+  reset(no_limits);
 }
 
 void Motion_Parameters::save() {
@@ -2945,7 +2860,7 @@ void Motion_Parameters::load() const {
   planner.apply_settings(s);
 }
 
-void Motion_Parameters::reset() {
-  MarlinSettings::reset_motion();
+void Motion_Parameters::reset(const bool no_limits) {
+  MarlinSettings::reset_motion(no_limits);
 }
 

@@ -13,9 +13,10 @@
     #include "lut.hpp"
     #include "axes.hpp"
 
-    #include <libs/circularqueue.h>
+    #include <utils/atomic_circular_queue.hpp>
     #include <core/types.h>
     #include <bsod.h>
+    #include <buddy/unreachable.hpp>
 
     #include <algorithm>
     #include <memory>
@@ -36,36 +37,9 @@ struct MoveTarget {
     float start_v = 0;
     uint32_t duration = 0; // Movement duration in us
     float target_pos = 0;
-    float end_time = 0; // Absolute movement end (s)
 
 private:
     float target_position() const;
-    float move_end_time(double end_time) const;
-};
-
-struct CalibrationSweep {
-    int harmonic; // Harmonic correction on which the sweep is performed
-
-    float setup_distance; // Distance in mm before the sweep
-    float sweep_distance; // Distance in mm to perform the sweep
-
-    int pha_start, pha_diff; // Phase start and end diff in fixed point
-    int mag_start, mag_diff; // Magnitude start and end diff in fixed point
-
-    static CalibrationSweep build_for_motor(AxisEnum axis, int harmonic,
-        float setup_revs, float sweep_revs,
-        float pha_start, float pha_end,
-        float mag_start, float mag_end) {
-        return {
-            harmonic,
-            rev_to_mm(axis, setup_revs),
-            rev_to_mm(axis, sweep_revs),
-            pha_to_fixed(pha_start),
-            pha_to_fixed(pha_end - pha_start),
-            mag_to_fixed(mag_start),
-            mag_to_fixed(mag_end - mag_start)
-        };
-    }
 };
 
 struct AxisState {
@@ -100,17 +74,106 @@ struct AxisState {
     // will dequeue items from pending_targets and set it as the current_target. When the position
     // is reached the cycle repeats, until no more targets are present and current_target is reset.
     std::optional<MoveTarget> current_target; // Current target to move
-    AtomicCircularQueue<MoveTarget, unsigned, 16> pending_targets; // 16 element queue of pre-processed elements
-    MoveTarget next_target; // Next planned target to move
+    AtomicCircularQueue<MoveTarget, unsigned, 32> pending_targets; // queue of pre-processed elements
+    /// Synchronization primitive to allow phase stepping to "steal" the next target.
+    ///
+    /// The scenario is, the next target is "owned" by the stepper interrupt,
+    /// where it is being prepared and then inserted into the pending_targets
+    /// queue. By that, it passes to the ownership of the phase stepping
+    /// interrupt. But under some circumstances, the phase stepping interrupt
+    /// needs to "steal" this move early, before passing it through the pending
+    /// targets.
+    ///
+    /// What we use for this to work:
+    ///
+    /// * There's the `state` companion variable. That one works somewhat as an
+    ///   atomic lock with the `updating` state - when the thing is being
+    ///   written, that one is locked (combination with acquire/release
+    ///   orderings).
+    /// * Whenever anyone wants to take it out, it is replaced (with acquire)
+    ///   with empty. That person atomically gains ownership and is allowed to
+    ///   read it.
+    /// * It can't be overwritten at that time, because:
+    ///   - Only the stepping interrupt writes. If that one acquired the
+    ///     ownership, it'll not write before it reads first.
+    ///   - The phase stepping interrupt has higher priority. That means that if
+    ///     that one acquries ownership, it will not get interrupted by the
+    ///     stepping interrupt before it finishes reading simply because the
+    ///     scheduling mechanism.
+    class StealableTarget {
+    private:
+        enum class State {
+            empty,
+            full,
+            updating,
+        };
+        MoveTarget value;
+        std::atomic<State> state = State::empty;
+        static_assert(decltype(state)::is_always_lock_free);
 
-    std::optional<CalibrationSweep> calibration_sweep; // Calibration sweep to perform
-    std::atomic<bool> calibration_sweep_active = false; // Calibration sweep active flag
+    public:
+        /// Overwrites the value.
+        ///
+        /// To be called from the stepping interrupt.
+        void set(const MoveTarget &v) {
+            // We don't really _need_ the old value, but unfortunately, acquire
+            // memory order needs to be on an operation that reads.
+            [[maybe_unused]] State old = state.exchange(State::updating, std::memory_order_acquire);
+            assert(old != State::updating);
+            value = v;
+            state.store(State::full, std::memory_order_release);
+        }
+        /// Have a look at the value without locking/acquiring.
+        ///
+        /// Used during initialization within the stepper interrupt, no need to
+        /// protect against anything / synchronize in any way - it only reads
+        /// and only the stepper interrupt writes (and it doesn't care if the
+        /// value was logically "consumed" or not).
+        const MoveTarget &peek() const {
+            return value;
+        }
+        /// Extract the value the "proper" way.
+        ///
+        /// To be called from the stepping interrupt.
+        std::optional<MoveTarget> take() {
+            State old = state.exchange(State::empty, std::memory_order_acquire);
+            switch (old) {
+            case State::empty:
+                return std::nullopt;
+            case State::full:
+                return value;
+            case State::updating:
+                BUDDY_UNREACHABLE();
+            }
+            BUDDY_UNREACHABLE();
+        }
+        /// Steal the value.
+        ///
+        /// This is to be called by the phase stepping interrupt.
+        ///
+        /// This can return nullopt either when the value is empty or when it
+        /// is being updated. The latter means a slight delay (likely until our
+        /// next iteration of the interrupt) and we are probably going to get a
+        /// proper move by then. So we _are_ moving forward and aren't stalled.
+        std::optional<MoveTarget> steal() {
+            State old = State::full;
+            if (state.compare_exchange_strong(old, State::empty, std::memory_order_acquire, std::memory_order_relaxed)) {
+                // Successfully replaced full with empty -> it's ours.
+                //
+                // We can copy it out, we are in higher-priority interrupt and
+                // it the owner won't touch it now.
+                return value;
+            } else {
+                // There was either empty (nothing to steal) or updating (not a
+                // consistent state -> we don't want garbage and we can wait,
+                // because we'll get something soon through the usual path).
+                return std::nullopt;
+            }
+        }
+    };
+    StealableTarget next_target; // Next planned target to move
 
-    // current_target_end_time is used to ensure pending_targets is replenished from the move ISR
-    // whenever the current_target completes, and we want to ensure the type is lock free
-    std::atomic<float> current_target_end_time; // Absolute end time (s) for the current target
-    static_assert(decltype(current_target_end_time)::is_always_lock_free);
-
+    double next_target_end_time; // Absolute end time (s) for the next planned target
     std::atomic<bool> is_moving = false;
     std::atomic<bool> is_cruising = false;
 
@@ -132,11 +195,6 @@ struct AxisState {
 void init();
 
 /**
- * Load and enable previous settings, if any.
- **/
-void load();
-
-/**
  * Set the axis phase origin for a single axis
  */
 void set_phase_origin(AxisEnum axis_num, float pos);
@@ -147,20 +205,6 @@ void set_phase_origin(AxisEnum axis_num, float pos);
  * already in desired state, it does nothing.
  **/
 void enable(AxisEnum axis_num, bool enable);
-
-/**
- * Enables phase stepping for axis. Reconfigures the motor driver. It is not
- * safe to invoke this procedure within interrupt context. No movement shall be
- * be in progress.
- **/
-void enable_phase_stepping(AxisEnum axis_num);
-
-/**
- * Disable phase stepping for axis. Reconfigures the motor driver. It is not
- * safe to invoke this procedure within interrupt context. No movement shall be
- * in progress.
- **/
-void disable_phase_stepping(AxisEnum axis_num);
 
 /**
  * Clear any current and all pending targets, stopping all motion on
@@ -255,6 +299,11 @@ int logical_ustep(AxisEnum axis);
 void synchronize();
 
 /**
+ * Return if some processing is still pending.
+ */
+bool processing();
+
+/**
  * Check phase stepping internal state
  * NOTE: To be called while idle!
  */
@@ -268,6 +317,11 @@ void check_state();
  * This array keeps axis state (and LUT tables) for each axis
  **/
 extern std::array<AxisState, opts::SUPPORTED_AXIS_COUNT> axis_states;
+
+/**
+ * Returns whether init() has been called
+ */
+bool is_initialized();
 
     /**
      * Ensure init() has been called
@@ -408,14 +462,14 @@ public:
     WithCorrectionDisabled(AxisEnum axis, int harmonic)
         : axis(axis)
         , harmonic(harmonic) {
-        original = axis_states[axis].forward_current.get_correction()[harmonic];
-        axis_states[axis].forward_current.modify_correction([&](auto &table) {
+        original = axis_states[axis].forward_current.get_correction_table()[harmonic];
+        axis_states[axis].forward_current.modify_correction_table([&](auto &table) {
             table[harmonic] = { 0, 0 };
         });
     }
 
     ~WithCorrectionDisabled() {
-        axis_states[axis].forward_current.modify_correction([&](auto &table) {
+        axis_states[axis].forward_current.modify_correction_table([&](auto &table) {
             table[harmonic] = original;
         });
     }
@@ -425,6 +479,16 @@ enum class CorrectionType {
     forward,
     backward,
 };
+
+/**
+ * Reset runtime current lookup tables for axis.
+ */
+void reset_compensation(AxisEnum axis);
+
+/**
+ * Load and enable previous settings, if any.
+ **/
+void load();
 
 constexpr const char *get_correction_file_path(AxisEnum axis, CorrectionType lut_type) {
     switch (axis) {
@@ -489,10 +553,11 @@ void load_from_persistent_storage(AxisEnum axis);
  */
 void remove_from_persistent_storage(AxisEnum axis, CorrectionType lut_type);
 
-/**
- * Return if some processing is still pending.
- */
-bool processing();
+/// Removes luts for the specific axis from the persistent media
+void remove_from_persistent_storage(AxisEnum axis);
+
+/// Removes all LUTS from the persistent media
+void remove_from_persistent_storage();
 
 } // namespace phase_stepping
 

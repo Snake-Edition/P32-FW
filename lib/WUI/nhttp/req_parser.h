@@ -129,7 +129,7 @@ public:
     bool want_write() const { return false; }
     bool want_read() const { return !done; }
 
-    void step(std::string_view input, bool terminated_by_client, uint8_t *output, size_t output_size, Step &out);
+    void step(const std::string_view &input, bool terminated_by_client, uint8_t *output, size_t output_size, Step &out);
 
     RequestParser(const Server &server);
 

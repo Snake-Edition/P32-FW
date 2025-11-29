@@ -5,7 +5,6 @@
 #include "planner.hpp"
 
 #include <segmented_json.h>
-#include <gcode_thumb_decoder.h>
 #include <gcode_reader_any.hpp>
 #include <unique_file_ptr.hpp>
 #include <unique_dir_ptr.hpp>
@@ -18,11 +17,12 @@ namespace connect_client {
 class PreviewRenderer final : public json::ChunkRenderer {
 private:
     IGcodeReader *gcode;
-    bool started = false;
+    AbstractByteReader *thumbnail_reader;
 
 public:
     PreviewRenderer(IGcodeReader *gcode)
-        : gcode(gcode) {}
+        : gcode(gcode)
+        , thumbnail_reader(nullptr) {}
     virtual std::tuple<json::JsonResult, size_t> render(uint8_t *buffer, size_t buffer_size) override;
 };
 

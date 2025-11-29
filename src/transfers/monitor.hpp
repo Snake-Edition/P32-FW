@@ -11,11 +11,12 @@
 #include <cstdint>
 #include <optional>
 #include <mutex>
+#include <utils/custom_uint31_t.hpp>
 
 namespace transfers {
 
 using TeamId = uint64_t;
-using TransferId = uint32_t;
+using TransferId = Custom_uint31_t;
 using Timestamp = uint32_t;
 
 /// The monitor of transfers.
@@ -225,7 +226,7 @@ private:
     // A bit of care needs to be employed when dealing with them, to avoid
     // races, etc.
     std::atomic<bool> transfer_active = false;
-    std::atomic<TransferId> current_id = 0;
+    std::atomic<TransferId> current_id = static_cast<TransferId>(0);
 
     // Transfer related
     bool used = false;

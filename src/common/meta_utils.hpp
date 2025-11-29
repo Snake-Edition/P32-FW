@@ -12,6 +12,6 @@ template <typename Parent, auto... args>
 class WithConstructorArgs final : public Parent {
 public:
     template <typename... Args2>
-    WithConstructorArgs(Args2... args2)
-        : Parent(args2..., args...) {}
+    WithConstructorArgs(Args2 &&...args2)
+        : Parent(std::forward<Args2>(args2)..., args...) {}
 };

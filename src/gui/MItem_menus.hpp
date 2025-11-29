@@ -11,6 +11,8 @@
 #include <option/developer_mode.h>
 #include <option/has_translations.h>
 #include <option/has_chamber_filtration_api.h>
+#include <option/has_mmu2.h>
+#include <option/has_leds_menu.h>
 #include <img_resources.hpp>
 #include <ScreenFactory.hpp>
 
@@ -64,9 +66,6 @@ using MI_SENSOR_INFO
 using MI_ODOMETER
     = MI_SCREEN<N_("Statistics"), class ScreenMenuOdometer>;
 
-using MI_SYS_INFO
-    = MI_SCREEN<N_("System Info"), class screen_sysinfo_data_t>;
-
 using MI_FAIL_STAT
     = MI_SCREEN<N_("Fail Stats"), class ScreenMenuFailStat>;
 
@@ -75,9 +74,6 @@ using MI_TEMPERATURE
 
 using MI_MOVE_AXIS
     = MI_SCREEN<N_("Move Axis"), class ScreenMenuMove, &img::move_16x16>;
-
-using MI_FW_UPDATE
-    = MI_SCREEN<N_("FW Update"), class ScreenMenuFwUpdate, nullptr, is_hidden_t::dev>;
 
 using MI_METRICS_SETTINGS
     = MI_SCREEN<N_("Metrics & Log"), class ScreenMenuMetricsSettings>;
@@ -97,9 +93,6 @@ using MI_PRUSA_CONNECT
 using MI_PRUSALINK
     = MI_SCREEN<N_("PrusaLink"), class ScreenMenuPrusaLink>;
 
-using MI_EEPROM
-    = MI_SCREEN<N_("EEPROM"), class ScreenMenuEeprom, nullptr, is_hidden_t::dev>;
-
 using MI_FOOTER_SETTINGS
     = MI_SCREEN<N_("Footer"), class ScreenMenuFooterSettings>;
 
@@ -107,65 +100,10 @@ using MI_FOOTER_SETTINGS_ADV
     = MI_SCREEN<N_("Advanced"), class ScreenMenuFooterSettingsAdv, nullptr, is_hidden_t::dev>;
 
 using MI_EXPERIMENTAL_SETTINGS
-    = MI_SCREEN<N_("Experimental Settings"), class ScreenMenuExperimentalSettings, nullptr, is_hidden_t::no>;
-
-/* -===============================================(:>- */
-
-class MI_SNAKE_SETTINGS : public IWindowMenuItem {
-    static constexpr const char *const label = N_("Snake Settings");
-
-public:
-    MI_SNAKE_SETTINGS();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
-class MI_PID_SETTINGS : public IWindowMenuItem {
-    static constexpr const char *const label = N_("PID Settings");
-
-public:
-    MI_PID_SETTINGS();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
-class MI_SNAKE_TUNE_SETTINGS : public IWindowMenuItem {
-    static constexpr const char *const label = N_("Snake Settings");
-
-public:
-    MI_SNAKE_TUNE_SETTINGS();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
-class MI_SNAKE : public IWindowMenuItem {
-    static constexpr const char *const label = "Snake";
-
-public:
-    MI_SNAKE();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
-class MI_MBL_VALUES : public IWindowMenuItem {
-    static constexpr const char *const label = "MBL values";
-
-public:
-    MI_MBL_VALUES();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
-
-/* -===============================================(:>- */
+    = MI_SCREEN<N_("Experimental Settings"), class ScreenMenuExperimentalSettings, nullptr, is_hidden_t::dev>;
 
 using MI_USER_INTERFACE
     = MI_SCREEN<N_("User Interface"), class ScreenMenuUserInterface>;
-
 using MI_LANG_AND_TIME
     = MI_SCREEN<N_("Language & Time"), class ScreenMenuLangAndTime>;
 
@@ -191,7 +129,7 @@ using MI_INFO
     = MI_SCREEN<N_("Info"), class ScreenMenuInfo>;
 
 using MI_OPEN_FACTORY_RESET
-    = MI_SCREEN<N_("Factory Reset"), class ScreenMenuFactoryReset>;
+    = MI_SCREEN<N_("Factory Reset"), class ScreenFactoryReset>;
 
 using MI_INPUT_SHAPER
     = MI_SCREEN<N_("Input Shaper"), class ScreenMenuInputShaper>;
@@ -218,10 +156,7 @@ using MI_LANGUAGE
 using MI_PHASE_STEPPING_SCREEN
     = MI_SCREEN<
         N_("Phase Stepping"),
-        class ScreenMenuPhaseStepping,
-        nullptr,
-        // CORE One support is experimental
-        PRINTER_IS_PRUSA_COREONE() ? is_hidden_t::dev : is_hidden_t::no>;
+        class ScreenMenuPhaseStepping>;
 #endif
 
 #if HAS_SHEET_PROFILES()
@@ -248,6 +183,11 @@ using MI_BED_LEVEL_CORRECTION
     = MI_SCREEN<N_("Bed Level Correction"), class ScreenMenuBedLevelCorrection>;
 #endif
 
+#if HAS_LEDS_MENU()
+using MI_LEDS_SETTINGS
+    = MI_SCREEN<N_("Lights Settings"), class ScreenMenuLeds>;
+#endif
+
 class MI_SERIAL_PRINTING_SCREEN_ENABLE : public WI_ICON_SWITCH_OFF_ON_t {
     static constexpr const char *const label = N_("Serial Printing Screen");
 
@@ -265,4 +205,13 @@ public:
 
 #if HAS_CHAMBER_FILTRATION_API()
 using MI_CHAMBER_FILTRATION = MI_SCREEN<N_("Chamber Filtration"), class ScreenChamberFiltration>;
+#endif
+
+#if HAS_MMU2()
+/// MMU HW settings submenu
+class MI_HW_MMU final : public IWindowMenuItem {
+public:
+    MI_HW_MMU();
+    void click(IWindowMenu &) override;
+};
 #endif

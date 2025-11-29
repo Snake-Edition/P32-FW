@@ -43,12 +43,6 @@ ScreenMenuVersionInfo::ScreenMenuVersionInfo()
     const int max_chars_per_line = 18;
     int project_version_full_len = strlen(version::project_version_full);
 
-    /* -===============================================(:>- */
-    char snake_version_[max_chars_per_line];
-    version::snake_version(snake_version_, max_chars_per_line);
-    project_version_full_len = strlen(snake_version_);
-    /* -===============================================(:>- */
-
     for (int i = 0; i < project_version_full_len; i += max_chars_per_line) {
         int line_length;
         if ((project_version_full_len - i) < max_chars_per_line) {
@@ -57,15 +51,9 @@ ScreenMenuVersionInfo::ScreenMenuVersionInfo()
             line_length = max_chars_per_line;
         }
         if (end > begin) {
-            begin += snprintf(begin, end - begin, "%.*s\n", line_length, snake_version_ + i);
+            begin += snprintf(begin, end - begin, "%.*s\n", line_length, version::project_version_full + i);
         }
     }
-
-#ifdef MINI_I3_MK33
-    begin += snprintf(begin, end - begin, "i3 MK3.3\n");
-#elif MINI_COREXY
-    begin += snprintf(begin, end - begin, "COREXY\n");
-#endif
 
     if (end > begin) {
         // c=20 r=4
@@ -79,6 +67,6 @@ ScreenMenuVersionInfo::ScreenMenuVersionInfo()
     }
 
     // this MakeRAM is safe - version_info_str is allocated in RAM for the lifetime of this
-    help.SetText(string_view_utf8::MakeRAM((const uint8_t *)version_info_str.data()));
+    help.SetText(string_view_utf8::MakeRAM(version_info_str.data()));
     EnableLongHoldScreenAction();
 }

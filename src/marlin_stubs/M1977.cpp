@@ -1,5 +1,6 @@
 #include <marlin_stubs/M1977.hpp>
 
+#include <mapi/parking.hpp>
 #include <buddy/unreachable.hpp>
 #include <client_response.hpp>
 #include <common/fsm_base_types.hpp>
@@ -8,6 +9,7 @@
 #include <Marlin/src/feature/phase_stepping/calibration_config.hpp>
 #include <Marlin/src/feature/phase_stepping/calibration.hpp>
 #include <Marlin/src/gcode/gcode.h>
+#include <option/developer_mode.h>
 #include <sys/fcntl.h>
 #include <sys/unistd.h>
 #include <version/version.hpp>
@@ -31,6 +33,7 @@ struct Context {
     CalibrationResult calibration_result_y;
     uint8_t reduction_x;
     uint8_t reduction_y;
+    phase_stepping::CalibrateAxisError error;
 };
 
 using marlin_server::wait_for_response;
@@ -44,6 +47,7 @@ private:
 public:
     CalibrationResult calibration_result;
     State state = State::error;
+    phase_stepping::CalibrateAxisError error;
 
     explicit CalibrateAxisHooks(PhasesPhaseStepping phase)
         : phase { phase } {
@@ -88,6 +92,8 @@ void calibration_helper(AxisEnum axis, CalibrateAxisHooks &hooks) {
     auto result = phase_stepping::calibrate_axis(axis, hooks);
     if (result.has_value()) {
         phase_stepping::save_to_persistent_storage_without_enabling(axis);
+    } else {
+        hooks.error = result.error();
     }
 }
 
@@ -117,6 +123,8 @@ static PhasesPhaseStepping intro_helper() {
     return PhasesPhaseStepping::home;
 #endif
 }
+
+#if DEVELOPER_MODE()
 
 __attribute__((format(printf, 2, 3))) static void fdprintf(int fd, const char *fmt, ...) {
     std::array<char, 64> buffer;
@@ -159,6 +167,8 @@ static void dump_calibration_result(const Context &context) {
     close(fd);
 }
 
+#endif
+
 std::optional<uint8_t> evaluate_calibration_result(const CalibrationResult &calibration_result) {
     for (const auto &res : calibration_result) {
         log_info(Marlin, "res %f %f", (double)res.backward, (double)res.forward);
@@ -166,7 +176,7 @@ std::optional<uint8_t> evaluate_calibration_result(const CalibrationResult &cali
 
     float reduction = 0.0f;
     for (const auto [forward, backward] : calibration_result) {
-        if (forward >= 1.f || backward >= 1.f) {
+        if (forward > 1.f || backward > 1.f) {
             return std::nullopt;
         }
 
@@ -178,7 +188,9 @@ std::optional<uint8_t> evaluate_calibration_result(const CalibrationResult &cali
 }
 
 PhasesPhaseStepping evaluate_result(Context &context) {
+#if DEVELOPER_MODE()
     dump_calibration_result(context);
+#endif
     const auto reduction_x = evaluate_calibration_result(context.calibration_result_x);
     const auto reduction_y = evaluate_calibration_result(context.calibration_result_y);
     if (reduction_x && reduction_y) {
@@ -189,21 +201,10 @@ PhasesPhaseStepping evaluate_result(Context &context) {
     return PhasesPhaseStepping::calib_nok;
 }
 
-void unlink_or_else(const char *path) {
-    if (unlink(path) != 0) {
-        if (errno == ENOENT) {
-            return; // file may not exist and that's ok
-        }
-        bsod("unlink");
-    }
-}
-
 void restore_axis_defaults(AxisEnum axis) {
-    phase_stepping::disable_phase_stepping(axis);
-    unlink_or_else(phase_stepping::get_correction_file_path(axis, phase_stepping::CorrectionType::backward));
-    unlink_or_else(phase_stepping::get_correction_file_path(axis, phase_stepping::CorrectionType::forward));
+    phase_stepping::EnsureDisabled _;
     phase_stepping::reset_compensation(axis);
-    phase_stepping::enable_phase_stepping(axis);
+    phase_stepping::remove_from_persistent_storage(axis);
 }
 
 namespace state {
@@ -249,12 +250,22 @@ namespace state {
 #endif
 
         if (axes_need_homing(X_AXIS | Y_AXIS)) {
-            GcodeSuite::G28_no_parser(true, true, false, { .only_if_needed = true, .z_raise = 3 }); // XY only
+            const G28Flags flags {
+                .only_if_needed = true,
+                .z_raise = 3,
+                .precise = false,
+            };
+            GcodeSuite::G28_no_parser(true, true, false, flags); // XY only
 #if HAS_TOOLCHANGER()
             tool_change(/*tool_index=*/0, tool_return_t::no_return, tool_change_lift_t::no_lift, /*z_down=*/false);
 #endif
         }
         Planner::synchronize();
+
+#if PRINTER_IS_PRUSA_iX()
+        mapi::move_out_of_nozzle_cleaner_area();
+#endif
+
 #if HAS_ATTACHABLE_ACCELEROMETER()
         return PhasesPhaseStepping::wait_for_extruder_temperature;
 #else
@@ -336,6 +347,7 @@ namespace state {
         calibration_helper(AxisEnum::X_AXIS, hooks);
         switch (hooks.state) {
         case State::error:
+            context.error = hooks.error;
             return PhasesPhaseStepping::calib_error;
         case State::finished:
             context.calibration_result_x = hooks.calibration_result;
@@ -351,6 +363,7 @@ namespace state {
         calibration_helper(AxisEnum::Y_AXIS, hooks);
         switch (hooks.state) {
         case State::error:
+            context.error = hooks.error;
             return PhasesPhaseStepping::calib_error;
         case State::finished:
             context.calibration_result_y = hooks.calibration_result;
@@ -385,8 +398,14 @@ namespace state {
         return fail_helper(PhasesPhaseStepping::calib_nok);
     }
 
-    PhasesPhaseStepping calib_error() {
-        marlin_server::fsm_change(PhasesPhaseStepping::calib_error);
+    PhasesPhaseStepping calib_error(Context &context) {
+        const fsm::PhaseData data {
+            static_cast<uint8_t>(context.error),
+            0,
+            0,
+            0,
+        };
+        marlin_server::fsm_change(PhasesPhaseStepping::calib_error, data);
         return fail_helper(PhasesPhaseStepping::calib_error);
     }
 
@@ -415,7 +434,7 @@ PhasesPhaseStepping get_next_phase(Context &context, const PhasesPhaseStepping p
     case PhasesPhaseStepping::calib_y:
         return state::calib_y(context);
     case PhasesPhaseStepping::calib_error:
-        return state::calib_error();
+        return state::calib_error(context);
     case PhasesPhaseStepping::calib_nok:
         return state::calib_nok();
     case PhasesPhaseStepping::calib_ok:

@@ -21,14 +21,11 @@
  */
 
 #include "../gcode.h"
-#include "../../Marlin.h" // for stepper_inactive_time, disable_e_steppers
+#include "../../Marlin.h" // for disable_e_steppers
 #include "../../lcd/ultralcd.h"
 #include "../../module/stepper.h"
 #include "gcode/parser.h"
-
-#if BOTH(AUTO_BED_LEVELING_UBL, ULTRA_LCD)
-  #include "../../feature/bedlevel/bedlevel.h"
-#endif
+#include <feature/stepper_timeout/stepper_timeout.hpp>
 
 /** \addtogroup G-Codes
  * @{
@@ -121,7 +118,7 @@ void GcodeSuite::M17() {
  */
 void GcodeSuite::M18_M84() {
   if (parser.seenval('S')) {
-    stepper_inactive_time = parser.value_millis_from_seconds();
+    buddy::stepper_timeout().set_interval_ms(parser.value_millis_from_seconds());
   }
   else {
     if (parser.seen("XYZE")) {
@@ -141,13 +138,6 @@ void GcodeSuite::M18_M84() {
     }
     else
       planner.finish_and_disable();
-
-    #if HAS_LCD_MENU && ENABLED(AUTO_BED_LEVELING_UBL)
-      if (ubl.lcd_map_control) {
-        ubl.lcd_map_control = false;
-        ui.defer_status_screen(false);
-      }
-    #endif
   }
 }
 

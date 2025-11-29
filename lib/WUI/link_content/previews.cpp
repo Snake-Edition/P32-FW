@@ -58,14 +58,15 @@ Selector::Accepted Previews::accept(const RequestParser &parser, handler::Step &
     memmove(fname, fname + extra_size - 1, FILE_PATH_BUFFER_LEN);
 
     if (parser.method == Method::Get) {
-        AnyGcodeFormatReader f(fname);
-        if (f.is_open()) {
-            out.next = GCodePreview(std::move(f), fname, parser.can_keep_alive(), parser.accepts_json, width, height, allow_larger, parser.if_none_match);
-            return Accepted::Accepted;
-        } else {
+        // Avoid copying over these guys on the stack, they are hundreds of bytes
+
+        auto &state = out.next.emplace<ConnectionState>();
+        auto &preview = state.emplace<GCodePreview>(fname, parser.can_keep_alive(), parser.accepts_json, width, height, allow_larger, parser.if_none_match);
+
+        if (!preview.gcode_reader().open(fname)) {
             out.next = StatusPage(Status::NotFound, parser);
-            return Accepted::Accepted;
         }
+        return Accepted::Accepted;
     } else {
         out.next = StatusPage(Status::MethodNotAllowed, parser);
         return Accepted::Accepted;

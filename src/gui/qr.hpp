@@ -4,7 +4,8 @@
 #include "Rect16.h"
 #include "window.hpp"
 #include <array>
-#include <common/str_utils.hpp>
+#include <utils/string_builder.hpp>
+#include <error_codes.hpp>
 
 /**
  * GUI widget for displaying QR codes with static string.
@@ -49,6 +50,7 @@ public:
 class QRErrorUrlWindow : public QRDynamicStringWindow<44> {
 public:
     QRErrorUrlWindow(window_t *parent, Rect16 rect, ErrCode ec);
+    QRErrorUrlWindow(window_t *parent, Rect16 rect);
 
     void set_error_code(ErrCode ec);
 };

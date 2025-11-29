@@ -115,12 +115,7 @@ struct tm *mbedtls_platform_gmtime_r( const mbedtls_time_t *tt,
         return( NULL );
 #endif /* MBEDTLS_THREADING_C */
 
-    lt = gmtime( tt );
-
-    if( lt != NULL )
-    {
-        memcpy( tm_buf, lt, sizeof( struct tm ) );
-    }
+    lt = gmtime_r( tt, tm_buf);
 
 #if defined(MBEDTLS_THREADING_C)
     if( mbedtls_mutex_unlock( &mbedtls_threading_gmtime_mutex ) != 0 )

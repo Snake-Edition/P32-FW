@@ -28,7 +28,6 @@ public:
     void run() {
         while (fsm_.loop()) {
             idle(true);
-            gcode.reset_stepper_timeout();
         }
     }
 
@@ -110,7 +109,7 @@ private:
                 }));
             }
 
-            idle(true, true);
+            idle(true);
             return true;
         });
 
@@ -194,7 +193,7 @@ private:
                     return false;
                 }
 
-                idle(true, true);
+                idle(true);
                 return true;
             });
         }

@@ -1,7 +1,7 @@
 #include "inject_queue.hpp"
 
 #include "gcode_loader.hpp"
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 
 InjectQueue inject_queue; // instance
 
@@ -38,7 +38,13 @@ std::expected<const char *, InjectQueue::GetGCodeError> InjectQueue::get_gcode()
 
     // The item is a literal -> just return the literal
     if (const auto *val = std::get_if<GCodeLiteral>(&item)) {
-        return val->gcode;
+        // gcode is not parametrized
+        if (std::isnan(val->parameter)) {
+            return val->gcode;
+        }
+        std::span<char> buf = loader.share_buffer();
+        snprintf(buf.data(), buf.size(), val->gcode, static_cast<double>(val->parameter));
+        return buf.data();
     }
 
     if (const auto button = std::get_if<GCodeMacroButton>(&item)) {

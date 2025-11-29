@@ -5,6 +5,7 @@
 #include "window_header.hpp"
 #include "window_frame.hpp"
 #include <common/fsm_base_types.hpp>
+#include <IDialogMarlin.hpp>
 
 namespace common_frames {
 // Blank screen is often needed to avoid short flicker of the lower screen when switching from (different FSM's) dialog to ScreenFSM
@@ -60,17 +61,19 @@ struct FrameDefinitionList {
     }
 };
 
-class ScreenFSM : public screen_t {
+template <typename Parent>
+class WindowFSM : public Parent {
     static constexpr size_t frame_static_storage_size = 1324;
 
 public:
     using FrameStorage = StaticStorage<frame_static_storage_size>;
 
-    ScreenFSM(const char *header_txt, Rect16 inner_frame_rect)
-        : screen_t()
-        , header { this, _(header_txt) }
+    template <typename... Args>
+    WindowFSM(Rect16 inner_frame_rect, Args &&...args)
+        : Parent(std::forward<Args>(args)...)
         , inner_frame { this, inner_frame_rect } {
-        ClrMenuTimeoutClose();
+        this->ClrMenuTimeoutClose();
+        this->CaptureNormalWindow(inner_frame);
     }
 
     void Change(fsm::BaseData new_fsm_base_data) {
@@ -83,6 +86,23 @@ public:
         }
         update_frame();
     }
+
+protected:
+    window_frame_t inner_frame;
+    FrameStorage frame_storage;
+    fsm::BaseData fsm_base_data;
+
+    virtual void create_frame() = 0;
+    virtual void destroy_frame() = 0;
+    virtual void update_frame() = 0;
+};
+
+class ScreenFSM : public WindowFSM<screen_t> {
+
+public:
+    ScreenFSM(const char *header_txt, Rect16 inner_frame_rect = GuiDefaults::RectScreenNoHeader)
+        : WindowFSM(inner_frame_rect)
+        , header { this, _(header_txt) } {}
 
     virtual void InitState(screen_init_variant var) override {
         if (auto fsm_base_data = var.GetFsmBaseData()) {
@@ -98,11 +118,13 @@ public:
 
 protected:
     window_header_t header;
-    window_frame_t inner_frame;
-    FrameStorage frame_storage;
-    fsm::BaseData fsm_base_data;
+};
 
-    virtual void create_frame() = 0;
-    virtual void destroy_frame() = 0;
-    virtual void update_frame() = 0;
+class DialogFSM : public WindowFSM<IDialogMarlin> {
+
+public:
+    DialogFSM(fsm::BaseData data)
+        : WindowFSM(GuiDefaults::RectScreenNoHeader, GuiDefaults::RectScreenNoHeader) {
+        fsm_base_data = data;
+    }
 };

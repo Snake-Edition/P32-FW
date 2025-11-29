@@ -25,7 +25,7 @@ public:
 class AsyncJob {
 
 public:
-    bool is_active() {
+    bool is_active() const {
         return false;
     }
 

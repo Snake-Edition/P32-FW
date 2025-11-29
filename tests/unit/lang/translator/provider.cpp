@@ -54,7 +54,7 @@ bool CheckAllTheStrings(const deque<string> &rawStringKeys, const deque<string> 
     //    { // problematic items:
     //        string sk("Cooldown");
     //        string_view_utf8 s = provider.GetText(sk.c_str());
-    //        string_view_utf8 s2 = string_view_utf8::MakeRAM((const uint8_t *)stringControlMapCS[sk].c_str());
+    //        string_view_utf8 s2 = string_view_utf8::MakeRAM(stringControlMapCS[sk].c_str());
     //        CHECK(CompareStringViews(s, s2));
     //    }
 
@@ -75,7 +75,7 @@ bool CheckAllTheStrings(const deque<string> &rawStringKeys, const deque<string> 
 
         // make the same interface over the translated string
         const char *value = v.second.c_str();
-        string_view_utf8 s2 = string_view_utf8::MakeRAM((const uint8_t *)value);
+        string_view_utf8 s2 = string_view_utf8::MakeRAM(value);
         UNSCOPED_INFO("key is " << v.first);
         UNSCOPED_INFO("fin is " << v.second);
         UNSCOPED_INFO("res is " << outString);
@@ -89,7 +89,7 @@ bool CheckAllTheStrings(const deque<string> &rawStringKeys, const deque<string> 
     { // check for a non-existing string
         static const char nex[] = "NoN_ExIsTiNg:string";
         string_view_utf8 s = provider.GetText(nex);
-        string_view_utf8 s2 = string_view_utf8::MakeRAM((const uint8_t *)nex);
+        string_view_utf8 s2 = string_view_utf8::MakeRAM(nex);
         CHECK(CompareStringViews(s, s2, nonAsciiChars, langCode));
     }
 

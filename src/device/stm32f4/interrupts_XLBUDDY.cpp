@@ -14,6 +14,12 @@ static_assert(BOARD_IS_XLBUDDY());
 // TODO Document ADC peripherals
 TRACED_ISR(DMA2_Stream4_IRQHandler, HAL_DMA_IRQHandler, hadc1.DMA_Handle);
 TRACED_ISR(DMA2_Stream0_IRQHandler, HAL_DMA_IRQHandler, hadc3.DMA_Handle);
+extern "C" void ADC_IRQHandler() {
+    traceISR_ENTER();
+    HAL_ADC_IRQHandler(&hadc1);
+    HAL_ADC_IRQHandler(&hadc3);
+    traceISR_EXIT();
+}
 
 // SPI for trinamic driver
 TRACED_ISR(SPI3_IRQHandler, HAL_SPI_IRQHandler, &SPI_HANDLE_FOR(tmc));
@@ -45,9 +51,11 @@ TRACED_ISR(DMA2_Stream1_IRQHandler, HAL_DMA_IRQHandler, hspi4.hdmatx);
 void uart_for_puppies_idle_isr() {
     uart_for_puppies.IdleISR();
 }
-TRACED_ISR(USART3_IRQHandler, HAL_UART_IRQHandler_with_idle, &uart_handle_for_puppies, uart_for_puppies_idle_isr);
-TRACED_ISR(DMA1_Stream1_IRQHandler, HAL_DMA_IRQHandler, uart_handle_for_puppies.hdmarx);
-TRACED_ISR(DMA1_Stream3_IRQHandler, HAL_DMA_IRQHandler, uart_handle_for_puppies.hdmatx);
+
+// These interrupts for puppy communication must not be tracked by Segger SysView, because they need higher priority than SysView lock
+BARE_ISR(USART3_IRQHandler, HAL_UART_IRQHandler_with_idle, &uart_handle_for_puppies, uart_for_puppies_idle_isr);
+BARE_ISR(DMA1_Stream1_IRQHandler, HAL_DMA_IRQHandler, uart_handle_for_puppies.hdmarx);
+BARE_ISR(DMA1_Stream3_IRQHandler, HAL_DMA_IRQHandler, uart_handle_for_puppies.hdmatx);
 
 #if BUDDY_ENABLE_WUI()
 

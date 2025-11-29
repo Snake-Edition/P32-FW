@@ -1,8 +1,6 @@
 #include "quick_tmc_spi.hpp"
 
-#include <trinamic.h>
-#include <TMCStepper.h>
-
+#include <feature/motordriver_util.h>
 #include <device/peripherals.h>
 #include <hwio_pindef.h>
 
@@ -35,7 +33,7 @@ static void setup_xdirect_buffer(int current_a, int current_b) {
 }
 
 bool phase_stepping::spi::initialize_transaction() {
-    return !tmc_serial_lock_requested_by_task() && tmc_serial_lock_acquire_isr();
+    return !motor_serial_lock_requested_by_task() && motor_serial_lock_acquire_isr();
 }
 
 void phase_stepping::spi::set_xdirect(int axis, const CoilCurrents &currents) {
@@ -64,12 +62,12 @@ void phase_stepping::spi::set_xdirect(int axis, const CoilCurrents &currents) {
 }
 
 void phase_stepping::spi::finish_transmission() {
-    if (!tmc_serial_lock_held_by_isr()) {
+    if (!motor_serial_lock_held_by_isr()) {
         return;
     }
 
     cs_pins[active_axis].write(Pin::State::high);
-    tmc_serial_lock_release_isr();
+    motor_serial_lock_release_isr();
 }
 
 bool phase_stepping::spi::busy() {

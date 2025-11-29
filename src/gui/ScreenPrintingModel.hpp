@@ -18,7 +18,7 @@ protected:
         _count,
         _last = _count - 1,
     };
-    static constexpr size_t socket_count = ftrstd::to_underlying(BtnSocket::_count);
+    static constexpr size_t socket_count = std::to_underlying(BtnSocket::_count);
 
     enum class BtnRes {
         Settings = 0,

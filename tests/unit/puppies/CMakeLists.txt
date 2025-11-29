@@ -13,7 +13,6 @@ add_catch_test(fifo_coder_tests)
 
 add_executable(
   time_sync ${CMAKE_CURRENT_SOURCE_DIR}/time_sync.cpp ${CMAKE_SOURCE_DIR}/src/puppies/time_sync.cpp
-            ${CMAKE_SOURCE_DIR}/src/common/filters/kalman.cpp
   )
 
 target_include_directories(
@@ -21,6 +20,6 @@ target_include_directories(
                    ${CMAKE_SOURCE_DIR}/src/common
   )
 
-target_link_libraries(time_sync SG14)
+target_link_libraries(time_sync SG14 buddy_utils)
 
 add_catch_test(time_sync)

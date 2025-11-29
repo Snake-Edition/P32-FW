@@ -6,7 +6,6 @@
 #include <gui/frame_calibration_common.hpp>
 #include <img_resources.hpp>
 #include <option/has_attachable_accelerometer.h>
-#include <str_utils.hpp>
 
 static ScreenInputShaperCalibration *instance = nullptr;
 

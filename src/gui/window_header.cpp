@@ -8,6 +8,7 @@
 #include "cpu_utils.hpp"
 #include "img_resources.hpp"
 #include "netdev.h"
+#include <espif.h>
 #include "transfers/monitor.hpp"
 #include <config_store/store_instance.hpp>
 #include <guiconfig/guiconfig.h>
@@ -49,22 +50,92 @@ void window_header_t::updateNetwork() {
     const auto active_interface = netdev_get_active_id();
     const auto interface_status = netdev_get_status(active_interface);
 
-    icon_network.SetRes((active_interface == NETDEV_ESP_ID) ? &img::wifi_16x16 : &img::lan_16x16);
+    const bool shadow = (interface_status != NETDEV_NETIF_UP);
+    const img::Resource *net_icon = nullptr;
+    if (active_interface == NETDEV_ESP_ID) {
+        const auto ticks_now = ticks_ms();
+        if (ticks_diff(ticks_now, last_wifi_strength_update_ms_) > 1000) {
+            last_wifi_strength_update_ms_ = ticks_now;
+
+            // Unknown signal -> show as "full signal" (to have some icon).
+            cached_wifi_strength_ = esp_signal_strength().value_or(0);
+        }
+
+        // In the shadow mode, we always do a "full" icon.
+        //
+        // The signal levels are based on random Internet discussions. We may
+        // want to tune them further.
+        if (shadow || cached_wifi_strength_ >= -70) {
+            net_icon = &img::wifi_16x16;
+        } else if (cached_wifi_strength_ >= -80) {
+            net_icon = &img::wifi_mid_16x16;
+        } else {
+            net_icon = &img::wifi_low_16x16;
+        }
+    } else {
+        net_icon = &img::lan_16x16;
+    }
+
+    icon_network.SetRes(net_icon);
 
     // Not connected at all -> hide icon
     icon_network.set_visible(interface_status != NETDEV_UNLINKED);
 
     // Not fully connected -> make the icon gray
-    icon_network.set_shadow(interface_status != NETDEV_NETIF_UP);
+    icon_network.set_shadow(shadow);
 
 #if !HAS_MINI_DISPLAY()
-    icon_metrics.set_shadow(interface_status != NETDEV_NETIF_UP);
+    icon_metrics.set_shadow(shadow);
 #endif
 
 #if BUDDY_ENABLE_CONNECT()
-    icon_connect.set_shadow(interface_status != NETDEV_NETIF_UP || get<0>(connect_client::last_status()) != connect_client::ConnectionStatus::Ok);
-#endif // BUDDY_ENABLE_CONNECT()
+    updateConnect(interface_status == NETDEV_NETIF_UP);
+#endif
 }
+
+#if BUDDY_ENABLE_CONNECT()
+void window_header_t::updateConnect(bool iface_up) {
+    /*
+     * Racionale behind the order and logic.
+     *
+     * The off state (not registered or turned off) and "permanent" errors have
+     * precedence over read/not ready indication. That's because the ready
+     * state has no application except for Connect.
+     *
+     * However, transient errors are combined with ready/not ready indication.
+     * Transient errors are likely going to get resolved on their own (eg.
+     * reconnection), so the fact a printer is ready and may start printing
+     * just after the reconnection is done is interesting info to the user. In
+     * a similar sense, the fact the printer drops connection for a short while
+     * is not uncommon and "hiding" the ready (and reappearing it) would
+     * confuse the user.
+     */
+    if (!connect_client::is_connect_registered()) {
+        // If not registered, we don't care about anything from the rest, just don't show.
+        icon_connect.set_visible(false);
+        return;
+    }
+
+    const auto status = connect_client::last_status();
+    const auto connection_status = get<0>(status);
+    const bool online = (connection_status == connect_client::ConnectionStatus::Ok);
+    bool shadow = !iface_up || !online;
+    if (!online && get<1>(status) == connect_client::OnlineError::Auth) {
+        // Auth errors are "permanent", this likely means the account was
+        // removed on the server. User interaction needed to resolve.
+        icon_connect.SetRes(&img::connect_orange_16x16);
+        // We "orangize" instead of shadow here.
+        shadow = false;
+    } else if (connect_client::MarlinPrinter::is_printer_ready()) {
+        icon_connect.SetRes(&img::set_ready_16x16);
+    } else {
+        icon_connect.SetRes(&img::connect_16x16);
+    }
+
+    icon_connect.set_shadow(shadow);
+    icon_connect.set_visible(true);
+}
+#endif
 
 void window_header_t::updateTransfer() {
     auto status = transfers::Monitor::instance.status();
@@ -90,7 +161,7 @@ void window_header_t::updateTransfer() {
     }
     if (transfer_progress && transfer_val_on && (transfer_progress != last_transfer_progress || transfer_has_issue != last_transfer_has_issue)) {
         snprintf(transfer_str, sizeof(transfer_str), "%d%%", transfer_progress.value());
-        transfer_val.SetText(string_view_utf8::MakeRAM((const uint8_t *)transfer_str));
+        transfer_val.SetText(string_view_utf8::MakeRAM(transfer_str));
         transfer_val.SetTextColor(transfer_has_issue ? COLOR_ORANGE : COLOR_WHITE);
         transfer_val.Invalidate();
     }
@@ -142,7 +213,7 @@ void window_header_t::update_bed_info() {
     }
 
     snprintf(bed_str, sizeof(bed_str), "%d\xC2\xB0\x43", static_cast<int>(marlin_vars().temp_bed.get()));
-    bed_text.SetText(string_view_utf8::MakeRAM((const uint8_t *)bed_str));
+    bed_text.SetText(string_view_utf8::MakeRAM(bed_str));
     bed_text.Invalidate();
 }
 
@@ -208,16 +279,11 @@ void window_header_t::updateIcons() {
     updateTime();
     update_bed_info();
 
-#if BUDDY_ENABLE_CONNECT()
-    icon_connect.SetRes(connect_client::MarlinPrinter::is_printer_ready() ? &img::set_ready_16x16 : &img::connect_16x16);
-    icon_connect.set_visible(connect_client::is_connect_registered());
-#endif // BUDDY_ENABLE_CONNECT()
-
 #if !HAS_MINI_DISPLAY()
     icon_metrics.set_visible(config_store().enable_metrics.get());
 #endif
 
-    icon_stealth.set_visible(marlin_vars().stealth_mode.get());
+    icon_stealth.set_visible(config_store().stealth_mode.get());
 
     updateAllRects();
 }
@@ -267,7 +333,7 @@ window_header_t::window_header_t(window_t *parent, const string_view_utf8 &txt)
     time_val.set_font(GuiDefaults::HeaderTextFont);
     time_val.SetAlignment(Align_t::RightCenter());
     time_tools::update_time();
-    time_val.SetText(string_view_utf8::MakeRAM((const uint8_t *)time_tools::get_time()));
+    time_val.SetText(string_view_utf8::MakeRAM(time_tools::get_time()));
 
     icon_metrics.SetAlignment(Align_t::LeftCenter());
 #endif /* !HAS_MINI_DISPLAY() */

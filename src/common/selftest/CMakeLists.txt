@@ -12,6 +12,7 @@ target_sources(
           selftest_heater.cpp
           selftest_heaters_interface.cpp
           selftest_part.cpp
+          selftest_result_evaluation.cpp
           selftest_revise_printer_setup.cpp
           selftest_tool_helper.cpp
   )
@@ -22,10 +23,6 @@ endif()
 
 if(HAS_LOADCELL)
   target_sources(firmware PRIVATE selftest_loadcell.cpp selftest_loadcell_interface.cpp)
-endif()
-
-if((PRINTER STREQUAL "MK4") OR (PRINTER STREQUAL "COREONE"))
-  target_sources(firmware PRIVATE selftest_gears.cpp)
 endif()
 
 if(PRINTER STREQUAL "MINI" OR PRINTER STREQUAL "MK3.5")

@@ -4,7 +4,8 @@
 #include <ScreenHandler.hpp>
 #include <scope_guard.hpp>
 #include <img_resources.hpp>
-#include "logging/log.hpp"
+#include <utils/string_builder.hpp>
+#include <logging/log.hpp>
 
 LOG_COMPONENT_REF(GUI);
 
@@ -215,12 +216,12 @@ DialogNumericInput::DialogNumericInput(const string_view_utf8 &prompt, double in
 
                 auto &wnd = ui.txt_prompt;
                 wnd.set_enabled(false);
-                wnd.set_font(Font::big);
                 wnd.set_is_multiline(true);
                 wnd.SetTextColor(COLOR_WHITE);
                 wnd.SetAlignment(Align_t::RightBottom());
                 wnd.SetText(prompt);
                 wnd.SetRect(Rect16::fromLTWH(x, y, result_w, h));
+                wnd.auto_select_font(Font::big);
                 RegisterSubWin(wnd);
 
                 y += h;
@@ -551,7 +552,7 @@ window_aligned_t *DialogNumericInput::UI::button_window(ButtonType bt) {
     case ButtonType::n7:
     case ButtonType::n8:
     case ButtonType::n9:
-        return &btn_number[ftrstd::to_underlying(bt) - ftrstd::to_underlying(ButtonType::n0)];
+        return &btn_number[std::to_underlying(bt) - std::to_underlying(ButtonType::n0)];
 
     case ButtonType::decimal_point:
         return &btn_decimal;

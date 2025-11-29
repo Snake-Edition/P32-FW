@@ -1,7 +1,7 @@
-#include <concepts>
 #include <algorithm>
 
 #include <option/has_mmu2.h>
+#include <option/has_gcode_compatibility.h>
 
 #include <common/printer_model.hpp>
 #include <common/printer_model_data.hpp>
@@ -100,26 +100,58 @@ const PrinterModelInfo *PrinterModelInfo::from_id_str(const std::string_view &id
     return nullptr;
 }
 
-PrinterGCodeCompatibilityReport PrinterModelInfo::gcode_compatibility_report(const PrinterModelInfo &gcode_target_printer) const {
+constexpr PrinterGCodeCompatibilityReport gcode_compatibility_report_constexpr(const PrinterModelInfo &fw_printer, const PrinterModelInfo &gcode_printer) {
     using CompatGroup = PrinterModelCompatibilityGroup;
 
     PrinterGCodeCompatibilityReport result;
-    auto gcode_compat_group = gcode_target_printer.compatibility_group;
 
-    // "Raise" MK3 gcode to MK4/3.5 gcode by enabling compatibility mode
-    if (gcode_compat_group == CompatGroup::mk3) {
-        gcode_compat_group = (this->compatibility_group == CompatGroup::mk3_5) ? CompatGroup::mk3_5 : CompatGroup::mk4;
+    if (gcode_printer.compatibility_group == fw_printer.compatibility_group) {
+        result.is_compatible = true;
+        return result;
+    }
+
+    // Recursively calls gcode_compatibility_report. is_compatible ends up being true if there is an upgrade path
+    const auto upgrade_from = [&](PrinterModel model) {
+        result = gcode_compatibility_report_constexpr(PrinterModelInfo::get_constexpr(model), gcode_printer);
+    };
+
+    switch (fw_printer.compatibility_group) {
+
+    case CompatGroup::mini:
+    case CompatGroup::xl:
+    case CompatGroup::ix:
+    case CompatGroup::mk3:
+        // No backwards compatibility
+        break;
+
+    case CompatGroup::mk3_5:
+    case CompatGroup::mk4:
+        upgrade_from(PrinterModel::mk3);
         result.mk3_compatibility_mode = true;
+        break;
+
+    case CompatGroup::mk4s:
+        upgrade_from(PrinterModel::mk4);
+        result.mk4_compatibility_mode = true;
+        break;
+
+    case CompatGroup::coreone:
+        upgrade_from(PrinterModel::mk4s);
+        result.chamber_compatibility_mode = true;
+        break;
     }
 
-    // "Raise" MK4 gcode to MK4S gcode by enabling fan compatibility mode
-    if (this->compatibility_group == CompatGroup::mk4s && gcode_compat_group == CompatGroup::mk4) {
-        gcode_compat_group = CompatGroup::mk4s;
-        result.mk4s_fan_compatibility_mode = true;
+    // Clear all compatibility modes if we're not compatible
+    if (!result.is_compatible) {
+        result = {};
     }
-
-    // Finally, determine if the gcode is compatible if we've reached the same compatibility group
-    result.is_compatible = (this->compatibility_group == gcode_compat_group);
 
     return result;
 }
+
+PrinterGCodeCompatibilityReport PrinterModelInfo::gcode_compatibility_report(const PrinterModelInfo &gcode_target_printer) const {
+    return gcode_compatibility_report_constexpr(*this, gcode_target_printer);
+}
+
+// HAS_GCODE_COMPATIBILITY() should coincide with the printer being able to run MK3 gcode
+static_assert(HAS_GCODE_COMPATIBILITY() == gcode_compatibility_report_constexpr(firmware_base_constexpr, PrinterModelInfo::get_constexpr(PrinterModel::mk3)).is_compatible);

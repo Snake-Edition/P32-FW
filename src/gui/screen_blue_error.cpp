@@ -2,10 +2,12 @@
 #include "screen_blue_error.hpp"
 #include <ScreenHandler.hpp>
 #include <sound.hpp>
-#include <sys.h>
 #include <support_utils.h>
 #include <version.h>
 #include <crash_dump/dump.hpp>
+#if HAS_LEDS()
+    #include <leds/status_leds_handler.hpp>
+#endif
 
 using namespace crash_dump;
 
@@ -16,13 +18,9 @@ static const constexpr Rect16 title_rect = GuiDefaults::EnableDialogBigLayout ? 
 ScreenBlueError::ScreenBlueError()
     : ScreenResetError(fw_version_rect)
     ///@note No translations on blue screens.
-    , header(this, header_rect, is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH(reinterpret_cast<const uint8_t *>("UNKNOWN ERROR")))
-    , title(this, title_rect, is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH(reinterpret_cast<const uint8_t *>("Unable to show details")))
-    , description(this, description_rect, is_multiline::yes)
-#if HAS_LEDS()
-    , anim(Animator_LCD_leds().start_animations(Fading(leds::ColorRGBW(0, 0, 255), 500), 10))
-#endif /*HAS_LEDS()*/
-{
+    , header(this, header_rect, is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH("UNKNOWN ERROR"))
+    , title(this, title_rect, is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH("Unable to show details"))
+    , description(this, description_rect, is_multiline::yes) {
     SetBlueLayout();
 
     // Simple text instead of header
@@ -34,4 +32,9 @@ ScreenBlueError::ScreenBlueError()
     }
 
     description.set_font(description_font);
+    description.set_check_overflow(false);
+
+#if HAS_LEDS()
+    leds::StatusLedsHandler::instance().set_error();
+#endif
 }

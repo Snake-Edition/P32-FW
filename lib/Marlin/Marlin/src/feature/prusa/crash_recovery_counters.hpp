@@ -17,7 +17,7 @@ public:
         power_panic,
         _cnt
     };
-    static constexpr size_t value_count = ftrstd::to_underlying(Counter::_cnt);
+    static constexpr size_t value_count = std::to_underlying(Counter::_cnt);
 
 public:
     using Value = uint16_t;
@@ -27,7 +27,7 @@ public:
     /// \returns the local \p counter value since the reset
     /// (reset happens on the beginning of the prints)
     inline Value get(Counter counter) const {
-        return data_[ftrstd::to_underlying(counter)];
+        return data_[std::to_underlying(counter)];
     }
 
     void increment(Counter counter);

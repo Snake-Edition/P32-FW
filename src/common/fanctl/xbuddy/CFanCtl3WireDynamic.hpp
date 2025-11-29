@@ -16,5 +16,5 @@ public:
         skip_tacho_t skip_tacho,
         uint8_t min_pwm_to_measure_rpm);
 
-    bool setPWM(uint16_t pwm) override;
+    bool set_pwm(uint16_t pwm) override;
 };

@@ -15,12 +15,28 @@
 #include <filament_sensors_handler.hpp>
 #include <filament_sensor_states.hpp>
 #include <state/printer_state.hpp>
+#include <common/sys.hpp>
 #include <common/unique_file_ptr.hpp>
+
+#include <option/has_cancel_object.h>
+#if HAS_CANCEL_OBJECT()
+    #include <feature/cancel_object/cancel_object.hpp>
+#endif
+
+#include <option/has_side_leds.h>
+#if HAS_SIDE_LEDS()
+    #include <leds/side_strip_handler.hpp>
+#endif
 
 #if XL_ENCLOSURE_SUPPORT()
     #include <xl_enclosure.hpp>
     #include <fanctl.hpp>
+
+    #include <option/has_chamber_filtration_api.h>
+static_assert(HAS_CHAMBER_FILTRATION_API());
+    #include <feature/chamber_filtration/chamber_filtration.hpp>
 #endif
+
 #if PRINTER_IS_PRUSA_COREONE()
     #include <feature/chamber/chamber.hpp>
     #include <feature/xbuddy_extension/xbuddy_extension.hpp>
@@ -42,11 +58,6 @@
 #if HAS_MMU2()
     #include <Marlin/src/feature/prusa/MMU2/mmu2_mk4.h>
     #include <mmu2/mmu2_fsm.hpp>
-#endif
-
-#include <option/has_side_leds.h>
-#if HAS_SIDE_LEDS()
-    #include <leds/side_strip_control.hpp>
 #endif
 
 using marlin_client::GcodeTryResult;
@@ -89,6 +100,13 @@ namespace {
             } else {
                 return 0;
             }
+        } else if (ini_string_match(section, INI_SECTION, name, "proxy_hostname")) {
+            if (len <= config_store_ns::connect_proxy_size) {
+                strlcpy(config->proxy_host, value, sizeof config->proxy_host);
+                config->loaded = true;
+            } else {
+                return 0;
+            }
         } else if (ini_string_match(section, INI_SECTION, name, "token")) {
             if (len <= config_store_ns::connect_token_size) {
                 strlcpy(config->token, value, sizeof config->token);
@@ -101,6 +119,15 @@ namespace {
             long tmp = strtol(value, &endptr, 10);
             if (*endptr == '\0' && tmp >= 0 && tmp <= 65535) {
                 config->port = (uint16_t)tmp;
+                config->loaded = true;
+            } else {
+                return 0;
+            }
+        } else if (ini_string_match(section, INI_SECTION, name, "proxy_port")) {
+            char *endptr;
+            long tmp = strtol(value, &endptr, 10);
+            if (*endptr == '\0' && tmp >= 0 && tmp <= 65535) {
+                config->proxy_port = (uint16_t)tmp;
                 config->loaded = true;
             } else {
                 return 0;
@@ -189,7 +216,7 @@ namespace {
 #if HAS_MMU2()
         params.progress_code = MMU2::Fsm::Instance().reporter.GetProgressCode();
         params.command_code = MMU2::Fsm::Instance().reporter.GetCommandInProgress();
-        const bool mmu_enabled = config_store().mmu2_enabled.get() && marlin_vars().mmu2_state == ftrstd::to_underlying(MMU2::xState::Active);
+        const bool mmu_enabled = config_store().mmu2_enabled.get() && marlin_vars().mmu2_state == std::to_underlying(MMU2::xState::Active);
         params.slot_mask = mmu_enabled ? 0b00011111 : 1;
         params.mmu_version = MMU2::mmu2.GetMMUFWVersion();
         // Note: 0 means no active tool, indexing from 1
@@ -262,21 +289,18 @@ Printer::Params MarlinPrinter::params() const {
     params.job_id = marlin_vars().job_id;
     params.version = PrinterModelInfo::current().version;
     get_slot_info(params);
-#if ENABLED(CANCEL_OBJECTS)
-    params.cancel_object_count = marlin_vars().cancel_object_count;
-    params.cancel_object_mask = marlin_vars().get_cancel_object_mask();
-#endif
+
 #if XL_ENCLOSURE_SUPPORT()
     params.enclosure_info = {
         .present = xl_enclosure.isActive(),
         .enabled = xl_enclosure.isEnabled(),
-        .printing_filtration = xl_enclosure.isPrintFiltrationEnabled(),
-        .post_print = xl_enclosure.isPostPrintFiltrationEnabled(),
+        .printing_filtration = config_store().chamber_print_filtration_enable.get(),
+        .post_print = config_store().chamber_post_print_filtration_enable.get(),
         // it is stored is minutes, but we want seconds, so that it is consistent with the rest
-        .post_print_filtration_time = static_cast<uint16_t>(config_store().xl_enclosure_post_print_duration.get() * 60),
+        .post_print_filtration_time = static_cast<uint16_t>(config_store().chamber_post_print_filtration_duration_min.get() * 60),
         .temp = static_cast<int>(xl_enclosure.getEnclosureTemperature().value_or(0)),
-        .fan_rpm = Fans::enclosure().getActualRPM(),
-        .time_in_use = std::min(config_store().xl_enclosure_filter_timer.get(), Enclosure::expiration_deadline_sec)
+        .fan_rpm = Fans::enclosure().get_actual_rpm(),
+        .time_in_use = config_store().chamber_filter_time_used_s.get()
     };
 #endif
 #if PRINTER_IS_PRUSA_COREONE()
@@ -288,7 +312,7 @@ Printer::Params MarlinPrinter::params() const {
             .fan_1_rpm = xbe.fan1rpm,
             .fan_2_rpm = xbe.fan2rpm,
             .fan_pwm_target = xbe.fan1_fan2_target_pwm.transform(buddy::XBuddyExtension::FanPWM::to_percent_static).value_or(connect_client::Printer::ChamberInfo::fan_pwm_target_unset),
-            .led_intensity = static_cast<int8_t>(static_cast<uint16_t>(leds::side_strip_control.max_brightness()) * 100 / 255),
+            .led_intensity = static_cast<int8_t>(static_cast<uint16_t>(leds::SideStripHandler::instance().get_max_brightness()) * 100 / 255),
         };
         params.addon_power = buddy::xbuddy_extension().usb_power();
     }
@@ -325,33 +349,19 @@ Printer::Config MarlinPrinter::load_config() {
 
 uint32_t MarlinPrinter::cancelable_fingerprint() const {
     uint32_t crc = 0;
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
     const auto &parameters = params();
-    auto calc_crc = [&](const char *s) {
-        crc = crc32_calc_ex(crc, reinterpret_cast<const uint8_t *>(*s), strlen(s));
-    };
-    for (size_t i = 0; i < marlin_vars_t::CANCEL_OBJECTS_NAME_COUNT; i++) {
-        marlin_vars().cancel_object_names[i].execute_with(calc_crc);
-    }
     crc = crc32_calc_ex(crc, reinterpret_cast<const uint8_t *>(&parameters.job_id), sizeof(parameters.job_id));
-    crc = crc32_calc_ex(crc, reinterpret_cast<const uint8_t *>(&parameters.cancel_object_count), sizeof(parameters.cancel_object_count));
-    crc = crc32_calc_ex(crc, reinterpret_cast<const uint8_t *>(&parameters.cancel_object_mask), sizeof(parameters.cancel_object_mask));
+
+    const auto revision = buddy::cancel_object().objects_revision();
+    crc = crc32_calc_ex(crc, reinterpret_cast<const uint8_t *>(&revision), sizeof(revision));
 #endif
     return crc;
 }
 
-#if ENABLED(CANCEL_OBJECTS)
-void MarlinPrinter::cancel_object(uint8_t id) {
-    marlin_client::cancel_object(id);
-}
-
-void MarlinPrinter::uncancel_object(uint8_t id) {
-    marlin_client::uncancel_object(id);
-}
-
-const char *MarlinPrinter::get_cancel_object_name(char *buffer, size_t size, size_t index) const {
-    marlin_vars().cancel_object_names[index].copy_to(buffer, size);
-    return buffer;
+#if HAS_CANCEL_OBJECT()
+void MarlinPrinter::set_object_cancelled(uint16_t id, bool set) {
+    marlin_client::set_object_cancelled(id, set);
 }
 #endif
 
@@ -388,6 +398,8 @@ bool MarlinPrinter::load_cfg_from_ini() {
         store.connect_port.set(config.port);
         store.connect_tls.set(config.tls);
         store.connect_custom_tls_cert.set(config.custom_cert);
+        store.connect_proxy_host.set(config.proxy_host);
+        store.connect_proxy_port.set(config.proxy_port);
         // Note: enabled is controlled in the GUI
     }
     return ok;
@@ -592,10 +604,10 @@ bool MarlinPrinter::set_printer_ready(bool ready) {
 }
 
 void MarlinPrinter::reset_printer() {
-    NVIC_SystemReset();
+    sys_reset();
 }
 
-const char *MarlinPrinter::dialog_action(uint32_t dialog_id, Response response) {
+const char *MarlinPrinter::dialog_action(printer_state::DialogId dialog_id, Response response) {
     const fsm::States fsm_states = marlin_vars().get_fsm_states();
     const std::optional<fsm::States::Top> top = fsm_states.get_top();
 
@@ -606,7 +618,7 @@ const char *MarlinPrinter::dialog_action(uint32_t dialog_id, Response response) 
         return "No buttons";
     }
 
-    if (fsm_states.generation != dialog_id) {
+    if (fsm_states.get_state_id() != dialog_id) {
         return "Invalid dialog id";
     }
 

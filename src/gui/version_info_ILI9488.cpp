@@ -1,6 +1,4 @@
-/**
- * @file version_info_ILI9488.cpp
- */
+/// \file
 
 #include "screen_menu_version_info.hpp"
 #include "config.h"
@@ -9,13 +7,13 @@
 #include "shared_config.h" //BOOTLOADER_VERSION_ADDRESS
 #include "../common/otp.hpp"
 #include "common/filament_sensors_handler.hpp"
+#include <utils/string_builder.hpp>
+
 #include <option/has_mmu2.h>
 
 #if HAS_MMU2()
     #include "Marlin/src/feature/prusa/MMU2/mmu2_mk4.h"
 #endif
-
-#include <str_utils.hpp>
 
 ScreenMenuVersionInfo::ScreenMenuVersionInfo()
     : ScreenMenuVersionInfo__(_(label)) {

@@ -13,12 +13,12 @@
 #include "gui_invalidate.hpp"
 #include "knob_event.hpp"
 #include "marlin_client.hpp"
-#include "sw_timer.hpp"
-#include <gui/screen_menu_selftest_snake.hpp>
+#include <utils/timing/rate_limiter.hpp>
 #include <logging/log.hpp>
 #include "display_hw_checks.hpp"
-#if XL_ENCLOSURE_SUPPORT()
-    #include "leds/side_strip.hpp"
+#include <option/has_leds.h>
+#if HAS_LEDS()
+    #include <leds/led_manager.hpp>
 #endif
 
 #include <option/has_touch.h>
@@ -32,6 +32,10 @@
 
 #if HAS_MINI_DISPLAY()
     #include "st7789v.hpp"
+#endif
+
+#if HAS_SELFTEST()
+    #include <gui/screen_menu_selftest_snake.hpp>
 #endif
 
 LOG_COMPONENT_REF(GUI);
@@ -52,9 +56,9 @@ static const constexpr uint32_t GUI_DELAY_MAX = 10;
 static const constexpr uint8_t GUI_DELAY_LOOP = 100;
 static const constexpr uint32_t GUI_DELAY_REDRAW = 40; // 40 ms => 25 fps
 
-static Sw_Timer<uint32_t> gui_roll_timer(txtroll_t::GetBaseTick());
-static Sw_Timer<uint32_t> gui_loop_timer(GUI_DELAY_LOOP);
-static Sw_Timer<uint32_t> gui_redraw_timer(GUI_DELAY_REDRAW);
+static RateLimiter<uint32_t> gui_roll_timer(txtroll_t::GetBaseTick());
+static RateLimiter<uint32_t> gui_loop_timer(GUI_DELAY_LOOP);
+static RateLimiter<uint32_t> gui_redraw_timer(GUI_DELAY_REDRAW);
 
 void gui_init(void) {
     display::init();
@@ -127,17 +131,17 @@ void gui_handle_touch() {
 void gui_redraw(void) {
     const uint32_t now = ticks_ms();
 
-    if (gui_loop_timer.RestartIfIsOver(now)) {
+    if (gui_loop_timer.check(now)) {
         Screens::Access()->ScreenEvent(nullptr, GUI_event_t::LOOP, 0);
     }
 
-    if (txtroll_t::HasInstance() && gui_roll_timer.RestartIfIsOver(now)) {
+    if (txtroll_t::HasInstance() && gui_roll_timer.check(now)) {
         Screens::Access()->ScreenEvent(nullptr, GUI_event_t::TEXT_ROLL, nullptr);
     }
 
     bool should_sleep = true;
     if (gui_invalid) {
-        if (gui_redraw_timer.RestartIfIsOver(now)) {
+        if (gui_redraw_timer.check(now)) {
             Screens::Access()->Draw();
             gui_invalid = false;
             should_sleep = false;
@@ -145,7 +149,7 @@ void gui_redraw(void) {
     }
 
     if (should_sleep) {
-        uint32_t sleep = std::clamp(gui_redraw_timer.Remains(now), GUI_DELAY_MIN, GUI_DELAY_MAX);
+        uint32_t sleep = std::clamp(gui_redraw_timer.remaining_cooldown(now), GUI_DELAY_MIN, GUI_DELAY_MAX);
         osDelay(sleep);
     }
 }
@@ -171,11 +175,11 @@ void gui_bare_loop() {
 void gui_loop(void) {
     ++guiloop_nesting;
     lcd::communication_check();
-#if XL_ENCLOSURE_SUPPORT()
-    // Update XL enclosure fan pwm, it is connected to the same PWM generator as the side LEDs
-    leds::side_strip.Update();
-#endif
     gui_handle_jogwheel();
+
+#if HAS_LEDS()
+    leds::LEDManager::instance().update();
+#endif
 
 #if HAS_TOUCH()
     gui_handle_touch();
@@ -197,8 +201,10 @@ void gui_loop(void) {
     gui_redraw();
     marlin_client::loop();
     GuiMediaEventsHandler::Tick();
+#if HAS_SELFTEST()
     if (marlin_client::event_clr(marlin_server::Event::RequestCalibrationsScreen)) {
         Screens::Access()->Open<ScreenMenuSTSCalibrations>();
     }
+#endif
     --guiloop_nesting;
 }

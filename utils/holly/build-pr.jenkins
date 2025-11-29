@@ -135,21 +135,26 @@ pipeline {
                 axes {
                     axis {
                         name 'configuration'
-                        // preset,build_type,bootloader(yesboot|noboot|emptyboot)
-                        values 'coreone,release,yesboot',
-                            'mini-en-cs,release,yesboot',
-                            'mini-en-de,release,yesboot',
-                            'mini-en-es,release,yesboot',
-                            'mini-en-fr,release,yesboot',
-                            'mini-en-it,release,yesboot',
-                            'mini-en-ja,release,yesboot',
-                            'mini-en-pl,release,yesboot',
-                            'mk3.5,release,yesboot',
-                            'mk4,release,yesboot',
-                            'mk4,release,noboot', // Needed for integration tests, please don't delete
-                            'xl,release,yesboot',
-                            'xl-burst,release,yesboot',
-                            'ix,release,yesboot'
+                        // pr_type(all|pr|main),preset,build_type,bootloader(yesboot|noboot|emptyboot)
+                        // pr_type==all: build on all branches and pull requests
+                        // pr_type==pr: build on pull requests only
+                        // pr_type==main: build in branches
+                        values 'all,coreone,release,yesboot',
+                            'all,mini-en-cs,release,yesboot', // Always build for testing
+                            'main,mini-en-de,release,yesboot',
+                            'main,mini-en-es,release,yesboot',
+                            'main,mini-en-fr,release,yesboot',
+                            'main,mini-en-it,release,yesboot',
+                            'main,mini-en-ja,release,yesboot',
+                            'main,mini-en-uk,release,yesboot',
+                            'all,mini-en-pl,release,yesboot', // Always build due to largest memory requirement
+                            'all,mk3.5,release,yesboot',
+                            'all,mk4,release,yesboot',
+                            'all,mk4,release,noboot', // Needed for integration tests, please don't delete
+                            'all,xl,release,yesboot',
+                            'main,xl-burst,release,yesboot',
+                            'main,xl-minimal,release,yesboot', // Test optional features on the most complex target
+                            'all,ix,release,yesboot'
                     }
                 }
                 stages {
@@ -158,11 +163,22 @@ pipeline {
                             script {
                                 def config_components = configuration.split(',')
                                 def config = [
-                                    preset: config_components[0],
-                                    build_type: config_components[1],
-                                    bootloader: config_components[2]]
-                                def version = get_version_info()
+                                    pr_type: config_components[0],
+                                    preset: config_components[1],
+                                    build_type: config_components[2],
+                                    bootloader: config_components[3]]
+                                def stash_name = config_components[1..-1].join(',')
+                                def pr_type = (env.CHANGE_ID ? 'pr' : 'main')
 
+                                // Skip based on branch type by returning early. This is a
+                                // workaround: using a when {} clause in stage() triggers the whole
+                                // parallel matrix to be skipped
+                                if ( (config.pr_type != 'all') && (config.pr_type != pr_type) ) {
+                                    echo "Build skipped"
+                                    return
+                                }
+
+                                def version = get_version_info()
                                 echo "Building ${config.preset} ${config.build_type} ${config.bootloader}"
 
                                 def dev_items
@@ -202,7 +218,7 @@ pipeline {
                                         """
                                     }
                                     // stash the build artifacts for use by the integration tests
-                                    stash(name: configuration, includes: "build/*boot/firmware*")
+                                    stash(name: stash_name, includes: "build/*boot/firmware*")
                                     // archive build products
                                     archiveArtifacts artifacts: 'build/products/*', fingerprint: true
                                     // cleanup
@@ -297,7 +313,7 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts artifacts: 'error-codes-report.txt, translations-report.txt'
+                            archiveArtifacts artifacts: 'error-codes-report.txt, translations-report.txt, Prusa-Firmware-Buddy.pot'
                         }
                     }
                 }

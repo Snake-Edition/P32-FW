@@ -5,10 +5,14 @@
 #include <cstdint>
 #include <variant>
 #include <expected>
-
-#include <str_utils.hpp>
+#include <array>
+#include <string_view>
+#include <optional>
 
 #include <option/has_chamber_api.h>
+#include <option/has_filament_heatbreak_param.h>
+
+class StringBuilder;
 
 // !!! DO NOT CHANGE - this is used in config store
 /// Maximum length of a filament name, including the terminating zero
@@ -47,6 +51,11 @@ public:
     /// Bed temperature for the filament, in degrees Celsius
     uint16_t heatbed_temperature = 60;
 
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+    /// Target heatbreak temperature for the filament
+    uint8_t heatbreak_temperature = DEFAULT_HEATBREAK_TEMPERATURE;
+#endif
+
 #if HAS_CHAMBER_API()
     /// Minimum temperature at which it's recommended to print this material
     std::optional<uint8_t> chamber_min_temperature = std::nullopt;
@@ -64,8 +73,8 @@ public:
     /// Whether the filament is abrasive and requires hardened (abrasive-resistant) nozzle
     bool is_abrasive = false;
 
-    /// Whether the filament is flexible - might require special care in some cases
-    bool is_flexible = false;
+    /// If set, the filament should not be auto-retracted (for example TPU could get tangled in the extruder gear)
+    bool do_not_auto_retract = false;
 
 public:
     constexpr bool operator==(const FilamentTypeParameters &) const = default;

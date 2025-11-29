@@ -11,6 +11,8 @@
  */
 
 #include "measure_axis.h"
+#include "../motordriver_util.h"
+
 #if ENABLED(AXIS_MEASURE)
 
     #include "crash_recovery.hpp"
@@ -19,16 +21,8 @@
 
     #define _CAN_HOME(A) \
         ((A##_MIN_PIN > -1 && A##_HOME_DIR < 0) || (A##_MAX_PIN > -1 && A##_HOME_DIR > 0))
-    #if X_SPI_SENSORLESS
-        #define CAN_HOME_X true
-    #else
-        #define CAN_HOME_X _CAN_HOME(X)
-    #endif
-    #if Y_SPI_SENSORLESS
-        #define CAN_HOME_Y true
-    #else
-        #define CAN_HOME_Y _CAN_HOME(Y)
-    #endif
+    #define CAN_HOME_X _CAN_HOME(X)
+    #define CAN_HOME_Y _CAN_HOME(Y)
 
 Measure_axis::Measure_axis(bool measure_x, bool measure_y, xy_bool_t invert_dir, feedRate_t fr_mm_s,
     float raise_z, bool no_modifiers, bool default_acceleration, bool default_current)
@@ -83,17 +77,17 @@ void Measure_axis::quick_home_start() {
 
         #if ENABLED(SENSORLESS_HOMING)
     stealth_states = {
-        tmc_enable_stallguard(stepperX),
-        tmc_enable_stallguard(stepperY),
+        enable_crash_detection(X_AXIS),
+        enable_crash_detection(Y_AXIS),
         false,
         false
             #if AXIS_HAS_STALLGUARD(X2)
-            || tmc_enable_stallguard(stepperX2)
+            || enable_crash_detection(X2_AXIS)
             #endif
             ,
         false
             #if AXIS_HAS_STALLGUARD(Y2)
-            || tmc_enable_stallguard(stepperY2)
+            || enable_crash_detection(Y2_AXIS)
             #endif
     };
 
@@ -156,76 +150,29 @@ void Measure_axis::sensorless_disable(AxisEnum axis) {
 }
 
 void Measure_axis::home_back(AxisEnum axis) {
+    // FIXME: duplicit code
     #if ENABLED(MOVE_BACK_BEFORE_HOMING)
-
-    // TODO: don't reset positions
-    current_position.pos[axis] = 0;
-    sync_plan_position();
     const int axis_home_dir = (
         #if ENABLED(DUAL_X_CARRIAGE)
         axis == X_AXIS ? x_home_dir(active_extruder) :
         #endif
             invert_dir[axis] ? (-home_dir(axis))
                              : home_dir(axis));
-
-    abce_pos_t target;
-    planner.get_axis_position_mm(target);
-    target[axis] = 0;
-    planner.set_machine_position_mm(target);
     float dist = (axis_home_dir > 0) ? -MOVE_BACK_BEFORE_HOMING_DISTANCE : MOVE_BACK_BEFORE_HOMING_DISTANCE;
-    target[axis] = dist;
-
-        #if IS_KINEMATIC && DISABLED(CLASSIC_JERK)
-    const xyze_float_t delta_mm_cart { 0 };
-        #endif
-
-    // Set delta/cartesian axes directly
-    planner.buffer_segment(target
-        #if IS_KINEMATIC && DISABLED(CLASSIC_JERK)
-        ,
-        delta_mm_cart
-        #endif
-        ,
-        fr[axis], active_extruder);
+    do_homing_move_axis_rel(axis, dist, fr[axis]);
     #endif
 }
 
 void Measure_axis::home_start(AxisEnum axis, bool invert) {
-    /// FIXME: duplicit code
+    // FIXME: duplicit code
     const int axis_home_dir = (
     #if ENABLED(DUAL_X_CARRIAGE)
         axis == X_AXIS ? x_home_dir(active_extruder) :
     #endif
             invert_dir[axis] ^ invert ? (-home_dir(axis))
                                       : home_dir(axis));
-    float distance = 1.5f * max_length(axis) * axis_home_dir;
-
-    #if IS_SCARA
-    // Tell the planner the axis is at 0
-    current_position[axis] = 0;
-    sync_plan_position();
-    current_position[axis] = distance;
-    line_to_current_position(fr[axis]);
-    #else
-    abce_pos_t target = { planner.get_axis_position_mm(A_AXIS), planner.get_axis_position_mm(B_AXIS), planner.get_axis_position_mm(C_AXIS), planner.get_axis_position_mm(E_AXIS) };
-    target[axis] = 0;
-    planner.set_machine_position_mm(target);
-    target[axis] = distance;
-
-        #if IS_KINEMATIC && DISABLED(CLASSIC_JERK)
-    const xyze_float_t delta_mm_cart { 0 };
-        #endif
-
-    // Set delta/cartesian axes directly
-    planner.buffer_segment(target
-        #if IS_KINEMATIC && DISABLED(CLASSIC_JERK)
-        ,
-        delta_mm_cart
-        #endif
-        ,
-        fr[axis], active_extruder);
-
-    #endif
+    float dist = 1.5f * max_length(axis) * axis_home_dir;
+    do_homing_move_axis_rel(axis, dist, fr[axis]);
 }
 
 void Measure_axis::home_finish(AxisEnum axis) {
@@ -252,7 +199,7 @@ void Measure_axis::state_start() {
     case RAISE_Z: {
         // TODO: raise Z with Z stallguard
         destination = current_position;
-        if (TEST(axis_homed, Z_AXIS)) {
+        if (axes_home_level.is_homed(Z_AXIS, AxisHomeLevel::imprecise)) {
             destination.z = std::max(raise_z, destination.z); //< lift at least to raise_z
         } else {
             destination.z += raise_z; //< lift by raise_z because we don't know where the Z is

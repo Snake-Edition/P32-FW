@@ -101,15 +101,12 @@ public:
     xyze_pos_t start_current_position; /// absolute logical starting XYZE position of the gcode instruction
     xyze_pos_t crash_current_position; /// absolute logical XYZE position of the crash location
     abce_pos_t crash_position; /// absolute physical ABCE position of the crash location
-    #if ENABLED(LIN_ADVANCE)
-    float advance_mm = 0; /// accumulated linear advance mm
-    #endif
 
     Crash_s_Counters counters;
     using Counter = Crash_s_Counters::Counter;
 
     uint16_t segments_finished;
-    uint8_t crash_axis_known_position; /// axis state before crashing
+    AxesHomeLevel crash_axes_home_level; /// axis state before crashing
     bool leveling_active; /// state of MBL before crashing
     RecoverFlags recover_flags; /// instruction replay flags before crashing
     feedRate_t fr_mm_s; /// Replay feedrate
@@ -298,7 +295,7 @@ public:
         orig_state = crash_s.is_active();
         if (orig_state) {
             // Crash state shouldn't be changed while moving.
-            assert(!planner.processing());
+            assert(!planner.processing() || planner.draining());
             crash_s.deactivate();
         }
     }
@@ -318,11 +315,16 @@ public:
     [[nodiscard]] bool get_orig_state() const { return orig_state; }
 };
 
-#else
+#else // ENABLED(CRASH_RECOVERY)
 
 /// Stubs for printers without CRASH_RECOVERY support
 static constexpr struct {
     static constexpr bool did_trigger() { return false; }
 } crash_s;
 
-#endif // ENABLED(CRASH_RECOVERY)
+struct Crash_Temporary_Deactivate {
+    Crash_Temporary_Deactivate() {} // avoids unused warning
+    static constexpr bool get_orig_state() { return false; }
+};
+
+#endif

@@ -33,8 +33,14 @@ target_sources(
           temperature.cpp
   )
 target_link_libraries(
-  firmware PRIVATE printf::printf STM32H5::HAL STM32H5_HAL_Config freertos XBuddyExtensionShared
-                   mmu_protocol
+  firmware
+  PRIVATE printf::printf
+          STM32H5::HAL
+          STM32H5_HAL_Config
+          freertos
+          XBuddyExtensionShared
+          mmu_protocol
+          buddy_utils
   )
 
 # TODO For now, we need to also explicitly depend on `FreeRTOS::FreeRTOS` because we are using
@@ -43,3 +49,19 @@ target_link_libraries(firmware PRIVATE FreeRTOS::FreeRTOS)
 
 add_library(FreeRTOS_Config INTERFACE)
 target_include_directories(FreeRTOS_Config INTERFACE config)
+
+set(EXTENSION_STANDARD 1)
+set(EXTENSION_IX 2)
+
+if(${PRINTER} STREQUAL "iX")
+  set(EXTENSION_VARIANT ${EXTENSION_IX})
+elseif(${PRINTER} STREQUAL "COREONE")
+  set(EXTENSION_VARIANT ${EXTENSION_STANDARD})
+else()
+  message(FATAL_ERROR "Building xBuddyExtension for an incompatible printer")
+endif()
+
+target_compile_definitions(
+  firmware PRIVATE EXTENSION_STANDARD=${EXTENSION_STANDARD} EXTENSION_IX=${EXTENSION_IX}
+                   EXTENSION_VARIANT=${EXTENSION_VARIANT}
+  )

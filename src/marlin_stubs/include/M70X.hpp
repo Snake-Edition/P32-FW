@@ -79,6 +79,11 @@ struct M1700Args {
     /// Whether to set target chamber temperature
     bool preheat_chamber;
 #endif
+
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+    /// Whether to set target heatbreak temperature
+    bool set_heatbreak;
+#endif
 };
 
 /// Standalone preheat

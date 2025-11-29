@@ -29,16 +29,15 @@ else()
   message(FATAL_ERROR "Unknown HW platform of mcu \"${MCU}\"")
 endif()
 
-if(BOARD STREQUAL "XBUDDY_EXTENSION")
-  set(HAS_CMSIS_RTOS OFF)
-else()
-  set(HAS_CMSIS_RTOS ON)
-endif()
+# Can't compile with LTO, there are several problems especially when comiling with MPU
+set_property(TARGET FreeRTOS PROPERTY INTERPROCEDURAL_OPTIMIZATION OFF)
 
-if(HAS_CMSIS_RTOS)
-  target_sources(FreeRTOS PRIVATE Source/CMSIS_RTOS/cmsis_os.c)
-  target_include_directories(FreeRTOS PUBLIC Source/CMSIS_RTOS)
-endif()
+add_library(cmsis_rtos Source/CMSIS_RTOS/cmsis_os.c)
+target_include_directories(cmsis_rtos PUBLIC Source/CMSIS_RTOS)
+target_link_libraries(cmsis_rtos PRIVATE FreeRTOS)
+
+
+add_library(FreeRTOS::CMSIS ALIAS cmsis_rtos)
 
 target_link_libraries(FreeRTOS PUBLIC FreeRTOS_Config)
 

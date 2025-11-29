@@ -1,6 +1,6 @@
 #include <selftest_fans.hpp>
-#include <option/has_xbuddy_extension.h>
-#if HAS_XBUDDY_EXTENSION()
+#include <option/xbuddy_extension_variant_standard.h>
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     #include <feature/xbuddy_extension/xbuddy_extension.hpp>
     #include <feature/xbuddy_extension/xbuddy_extension_fan_results.hpp>
     #include <puppies/xbuddy_extension.hpp> // For FAN_CNT
@@ -42,31 +42,31 @@ TestResult FanHandler::test_result() const {
     return is_failed() ? TestResult_Failed : TestResult_Passed;
 }
 
-CommonFanHandler::CommonFanHandler(const FanType type, uint8_t tool_nr, FanRPMRange fan_range, CFanCtlCommon *fan_control)
-    : FanHandler(type, fan_range, tool_nr)
+CommonFanHandler::CommonFanHandler(const FanType type, uint8_t tool_nr, FanRPMRange fan_range, CFanCtlCommon *fan_control, FanRPMRange low_fan_range)
+    : FanHandler(type, fan_range, tool_nr, low_fan_range)
     , fan(fan_control) {
-    fan->enterSelftestMode();
+    fan->enter_selftest_mode();
 }
 
 CommonFanHandler::~CommonFanHandler() {
-    fan->exitSelftestMode();
+    fan->exit_selftest_mode();
 }
 
 void CommonFanHandler::set_pwm(uint8_t pwm) {
-    fan->selftestSetPWM(pwm);
+    fan->selftest_set_pwm(pwm);
 }
 
 void CommonFanHandler::record_sample() {
     sample_count++;
-    sample_sum += fan->getActualRPM();
+    sample_sum += fan->get_actual_rpm();
 }
 
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
 
 static_assert(puppies::XBuddyExtension::FAN_CNT == XBEFanTestResults::fan_count, "Adjust the fan result structure in EEPROM (xbuddy_expansion_fan_result.hpp)");
 
 XBEFanHandler::XBEFanHandler(const FanType type, uint8_t desc_num, FanRPMRange fan_range)
-    : FanHandler(type, fan_range, desc_num) {
+    : FanHandler(type, fan_range, desc_num, benevolent_fan_range) {
     original_pwm = xbuddy_extension().fan_target_pwm(static_cast<XBuddyExtension::Fan>(desc_num));
 }
 

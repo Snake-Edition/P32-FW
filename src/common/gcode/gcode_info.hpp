@@ -33,6 +33,7 @@ inline constexpr const char *printer = "printer_model";
 inline constexpr const char *m862 = "M862";
 inline constexpr const char *m115 = "M115";
 inline constexpr const char *m555 = "M555";
+inline constexpr const char *m486 = "M486";
 inline constexpr const char *m140_set_bed_temp = "M140";
 inline constexpr const char *m190_wait_bed_temp = "M190";
 inline constexpr const char *m104_set_hotend_temp = "M104";
@@ -98,18 +99,16 @@ public:
         Feature nozzle_not_hardened { config_store().hw_check_nozzle.get() }; // M862.1 disagree. Can be handled by tools mapping screen
         Feature nozzle_not_high_flow { config_store().hw_check_nozzle.get() }; // M862.1 disagree. Can be handled by tools mapping screen
         Feature wrong_printer_model { config_store().hw_check_model.get() }; // M862.2 or M862.3 or printer_model (from comments) disagree
-        Feature wrong_gcode_level { config_store().hw_check_gcode.get() }; // M862.5 disagree
+        Feature wrong_gcode_level { config_store().hw_check_gcode_level.get() }; // M862.5 disagree
         Feature wrong_firmware { config_store().hw_check_firmware.get() }; // M862.4 Px.yy.z disagrees
 #if HAS_MMU2()
         Feature nozzle_flow_mismatch { config_store().hw_check_nozzle.get() }; // Nozzle flow rate doesn't match flow rate in G-code and printing with MMU enabled
 #endif
-#if ENABLED(GCODE_COMPATIBILITY_MK3)
-        Feature gcode_compatibility_mode { config_store().hw_check_compatibility.get() };
-#endif
-#if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-        Feature fan_compatibility_mode { config_store().hw_check_fan_compatibility.get() };
+#if HAS_GCODE_COMPATIBILITY()
+        Feature gcode_compatibility_mode { config_store().hw_check_gcode_compatibility.get() };
 #endif
         Feature outdated_firmware { config_store().hw_check_firmware.get() }; // M115 Ux.yy.z disagrees (TODO: Separate EEVAR?)
+        Feature sliced_without_input_shaper { config_store().hw_check_input_shaper.get() }; // G-code sliced with a profile that has input shaper
         bool unsupported_features { false };
         char unsupported_features_text[37] { "" };
         void add_unsupported_feature(const char *feature, size_t length);
@@ -144,6 +143,7 @@ private:
 #if EXTRUDERS > 1
     std::optional<float> filament_wipe_tower_g = { std::nullopt }; ///< Grams of filament used for wipe tower
 #endif
+    bool sliced_with_input_shaper_ = false; ///< True if gcode was sliced with input shaper
     bool has_preview_thumbnail_; ///< True if gcode has preview thumbnail
     bool has_progress_thumbnail_; ///< True if gcode has progress thumbnail
     bool filament_described; ///< Filament info was found in gcode's comments
@@ -200,6 +200,9 @@ public:
         assert(extruder < std::size(per_extruder_info));
         return per_extruder_info[extruder];
     }
+
+    /// Calls \param callback for each extruder that is used for the print
+    void for_each_used_extruder(const stdext::inplace_function<void(uint8_t logical_ix, uint8_t physical_ix, const ExtruderInfo &info)> &callback);
 
     /** Get static instance of the singleton
      */

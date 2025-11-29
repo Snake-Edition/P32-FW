@@ -10,6 +10,7 @@
 #include <numeric_input_config.hpp>
 
 #include <option/has_chamber_api.h>
+#include <option/has_filament_heatbreak_param.h>
 
 namespace screen_filament_detail {
 
@@ -54,12 +55,17 @@ public:
     void set_filament_type(FilamentType set);
     void OnChange(size_t) override;
 
+protected:
+    /// If true, the displayed toggle value will be inverse of the actual parameter value
+    void set_invert_value(bool set);
+
 private:
     Parameter param_;
     FilamentType filament_type;
+    bool invert_value = false;
 };
 
-class MI_FILAMENT_NAME final : public WI_INFO_t {
+class MI_FILAMENT_NAME final : public WiInfo<32> {
 public:
     MI_FILAMENT_NAME();
     void set_filament_type(FilamentType set);
@@ -83,6 +89,13 @@ class MI_FILAMENT_BED_TEMPERATURE final : public MI_SPIN<decltype(FilamentTypePa
 public:
     MI_FILAMENT_BED_TEMPERATURE();
 };
+
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+class MI_FILAMENT_HEATBREAK_TEMPERATURE final : public MI_SPIN<decltype(FilamentTypeParameters::heatbreak_temperature)> {
+public:
+    MI_FILAMENT_HEATBREAK_TEMPERATURE();
+};
+#endif
 
 #if HAS_CHAMBER_API()
 class MI_FILAMENT_MIN_CHAMBER_TEMPERATURE final : public MI_SPIN<decltype(FilamentTypeParameters::chamber_min_temperature)> {
@@ -117,9 +130,9 @@ public:
     MI_FILAMENT_IS_ABRASIVE();
 };
 
-class MI_FILAMENT_IS_FLEXIBLE final : public MI_TOGGLE {
+class MI_FILAMENT_AUTO_RETRACT final : public MI_TOGGLE {
 public:
-    MI_FILAMENT_IS_FLEXIBLE();
+    MI_FILAMENT_AUTO_RETRACT();
 };
 
 class MI_FILAMENT_VISIBLE final : public WI_ICON_SWITCH_OFF_ON_t {
@@ -132,14 +145,11 @@ protected:
     FilamentType filament_type;
 };
 
-class MI_PREHEAT_CONFIRM final : public IWindowMenuItem {
+class MI_CONFIRM final : public IWindowMenuItem {
 public:
-    MI_PREHEAT_CONFIRM();
-    void set_filament_type(FilamentType set);
+    MI_CONFIRM();
     void click(IWindowMenu &) override;
-
-protected:
-    FilamentType filament_type;
+    stdext::inplace_function<void()> callback;
 };
 
 using ScreenFilamentDetail_ = ScreenMenu<EFooter::Off,
@@ -149,41 +159,40 @@ using ScreenFilamentDetail_ = ScreenMenu<EFooter::Off,
     MI_FILAMENT_NOZZLE_TEMPERATURE,
     MI_FILAMENT_NOZZLE_PREHEAT_TEMPERATURE,
     MI_FILAMENT_BED_TEMPERATURE,
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+    MI_FILAMENT_HEATBREAK_TEMPERATURE,
+#endif
 #if HAS_CHAMBER_API()
     MI_FILAMENT_TARGET_CHAMBER_TEMPERATURE,
     MI_FILAMENT_MIN_CHAMBER_TEMPERATURE,
     MI_FILAMENT_MAX_CHAMBER_TEMPERATURE,
 #endif
     MI_FILAMENT_IS_ABRASIVE,
-    MI_FILAMENT_IS_FLEXIBLE,
+    MI_FILAMENT_AUTO_RETRACT,
 #if HAS_CHAMBER_API()
     MI_FILAMENT_REQUIRES_FILTRATION,
 #endif
-    MI_PREHEAT_CONFIRM //
+    MI_CONFIRM //
     >;
 
 /// Management of a specified filament type
 class ScreenFilamentDetail final : public ScreenFilamentDetail_ {
 public:
-    enum class Mode : uint8_t {
-        /// Standard filament detail screen, as accessed from menu
-        standard,
-
-        /// When the detail screen is opened from within the preheat menu.
-        /// Adds a "Confirm" button that sends the filament as a response to the preheat FSM
-        preheat,
-    };
-
-    struct Params {
-        FilamentType filament_type;
-        Mode mode = Mode::standard;
+    /// When the detail screen is opened from within the preheat menu.
+    /// Adds a "Confirm" button that sends the filament as a response to the preheat FSM
+    struct PreheatModeParams {
+        uint8_t target_extruder = 0;
     };
 
 public:
-    ScreenFilamentDetail(Params params);
+    ScreenFilamentDetail(FilamentType filament_type);
 
-    ScreenFilamentDetail(FilamentType filament_type)
-        : ScreenFilamentDetail(Params { .filament_type = filament_type }) {}
+    /// Shows the screen in the PendingAdHocFilament mode for preheat
+    /// The added "Confirm" button sends the response to the Preheat FSM
+    ScreenFilamentDetail(PreheatModeParams preheat_mode);
+
+private:
+    ScreenFilamentDetail(FilamentType filament_type, const char *title);
 };
 
 }; // namespace screen_filament_detail

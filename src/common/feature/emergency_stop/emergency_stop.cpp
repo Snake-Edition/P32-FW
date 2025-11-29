@@ -3,6 +3,7 @@
 #include <config_store/store_c_api.h>
 #include <common/power_panic.hpp>
 #include <module/stepper.h>
+#include <module/endstops.h>
 #include <marlin_server.hpp>
 #include <Configuration.h>
 
@@ -50,12 +51,7 @@ void EmergencyStop::invoke_emergency() {
     const bool in_quickstoppable_state = marlin_server::printer_idle() || marlin_server::aborting_or_aborted() || marlin_server::finishing_or_finished();
     if (in_quickstoppable_state || !marlin_server::all_axes_homed()) {
         log_info(EmergencyStop, "Quickstop");
-        planner.quick_stop();
-        while (PreciseStepping::stopping()) {
-            PreciseStepping::loop();
-        }
-        planner.clear_block_buffer();
-        planner.resume_queuing();
+        planner.quick_stop_and_resume();
         // We've lost the homing by the quick-stop
         //
         // In case we are in print, we are here because we are still homing /
@@ -66,14 +62,22 @@ void EmergencyStop::invoke_emergency() {
             set_all_unhomed();
         }
 
-    } else if (!power_panic::ac_fault_triggered) {
+    } else if (endstops.is_z_probe_enabled()) {
+        // We can safely do this, because this is what Planner::endstop_triggered(Z_AXIS) does internally
+        // Except we don't trigger the endstop, so the probing will be reported as failed
+        PreciseStepping::quick_stop();
+    }
+#if ENABLED(POWER_PANIC)
+    else if (!power_panic::ac_fault_triggered) {
         log_info(EmergencyStop, "PP");
         // Do a "synthetic" power panic. Should stop _right now_ and reboot, then we'll deal with the consequences.
         // Do not beep - BFW-6472
         power_panic::should_beep = false;
         buddy::hw::acFault.triggerIT();
 
-    } else {
+    }
+#endif
+    else {
         log_info(EmergencyStop, "Out of options");
     }
 }
@@ -94,6 +98,25 @@ void EmergencyStop::maybe_block() {
     // If a power panic happened (either caused by us or by a real one), we do
     // _not_ want to block it.
     if (power_panic::ac_fault_triggered) {
+        return;
+    }
+
+    if (endstops.is_z_probe_enabled()) {
+        // Prevent getting stuck on planner.synchronize() - quick_stop makes the planner busy again
+        // So issue it only if there are any moves to be interrupted
+        if (planner.busy()) {
+            // Don't wait for the probing to finish, interrupt it immediately
+            // We can safely do this, because this is what Planner::endstop_triggered(Z_AXIS) does internally
+            // Except we don't trigger the endstop, so the probing will be reported as failed
+            PreciseStepping::quick_stop();
+        }
+
+        // Don't do anything else, let the quick_stop apply and get us out of the probing code
+        // We cannot safely block here, because:
+        // * We cannot park the nozzle - it would not play well with the quick_stop mechanism the endstops are using
+        //   (and that would be enabled during the whole parking business)
+        // * If whe block without parking, we might block at the moment when the nozzle is touching the plate. We don't want a hole in our plate.
+        // So it's better to interrupt the Z probe move and park right after we get outside of the probing code.
         return;
     }
 
@@ -155,7 +178,7 @@ void EmergencyStop::maybe_block() {
     // If the power panic started the draining, we shall quit from inside of
     // the planner as fast as possible.
     while (in_emergency() && !planner.draining() && !PreciseStepping::stopping() && !power_panic::ac_fault_triggered) {
-        idle(true, true);
+        idle(true);
     }
 
     // Trigger the scope guards: unpark, clear the warning

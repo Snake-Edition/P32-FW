@@ -41,6 +41,7 @@ const Register ProtocolLogic::regs8Addrs[ProtocolLogic::regs8Count] PROGMEM = {
 const Register ProtocolLogic::regs16Addrs[ProtocolLogic::regs16Count] PROGMEM = {
     Register::MMU_Errors, // MMU errors - aka statistics
     Register::Get_Pulley_Position, // Pulley position [mm]
+    Register::Bowden_Length, // @@TODO ideally read this only once at start
 };
 
 const Register ProtocolLogic::initRegs8Addrs[ProtocolLogic::initRegs8Count] PROGMEM = {
@@ -250,7 +251,6 @@ StepStatus ProtocolLogic::ExpectingMessage() {
 
 StepStatus ProtocolLogic::ExpectingMessage2(const buddy::puppies::XBuddyExtension::MMUModbusRequest &mmr,
     const buddy::puppies::XBuddyExtension::MMUQueryRegisters &mqr, ResponseMsg &rsp, const RequestMsg &rq, uint8_t *rawMsg, uint8_t &rawMsgLen) {
-    using namespace ftrstd;
     using namespace buddy::puppies;
 
     // Based on the request compose the response message.
@@ -370,7 +370,7 @@ void ProtocolLogic::SendCommand() {
 #if HAS_MMU2_OVER_UART()
     SendMsg(rq);
 #else
-    ext->post_command_mmu(ftrstd::to_underlying(rq.code), rq.value);
+    ext->post_command_mmu(std::to_underlying(rq.code), rq.value);
     LogRequestMsgModbus(rq);
     RecordUARTActivity();
 #endif

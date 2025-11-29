@@ -7,8 +7,8 @@
 #include <option/has_local_accelerometer.h>
 #include <option/has_remote_accelerometer.h>
 #include "Marlin/src/core/types.h"
-#include "Marlin/src/module/stepper/trinamic.h"
 #include "Marlin/src/module/prusa/accelerometer.h"
+#include "Marlin/src/feature/precise_stepping/common.hpp"
 #include "Marlin/src/feature/input_shaper/input_shaper_config.hpp"
 #include <inplace_function.hpp>
 #include <freertos/critical_section.hpp>
@@ -128,3 +128,30 @@ std::optional<VibrateMeasureResult> vibrate_measure(const VibrateMeasureParams &
 using FindBestShaperProgressHook = stdext::inplace_function<bool(input_shaper::Type checked_type, float progress)>;
 
 input_shaper::AxisConfig find_best_shaper(const FindBestShaperProgressHook &progress_hook, const Spectrum &psd, input_shaper::AxisConfig default_config);
+
+/// Something that just vibrates.
+///
+/// Unlike the vibrate_measure, this just vibrates. And it doesn't need an accelerometer.
+///
+/// Fill the structure with requested data, call `setup`. After that, each call
+/// to step queues one period of the vibration. The parameters can be changed
+/// between calls to step.
+struct Vibrate {
+    float frequency;
+
+    /// How much we're exciting the vibrations, in m/s^2.
+    float excitation_acceleration = NAN;
+
+    /// Configured automatically in setup()
+    float step_len = NAN;
+
+    StepEventFlag_t axis_flag = 0;
+
+    /// One-time setup.
+    bool setup(const MicrostepRestorer &microstep_restorer);
+
+    /// Queues one period of the vibration.
+    ///
+    /// Parameters can be changed in between.
+    void step();
+};

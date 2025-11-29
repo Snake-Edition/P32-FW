@@ -196,9 +196,9 @@ public:
 
 Response msg_box(MsgBoxType type, const string_view_utf8 &txt, const PhaseResponses &resp = Responses_Ok, MsgBoxDefaultButton default_button = MsgBoxDefaultButton::b0);
 
-Response MsgBox(const string_view_utf8 &txt, const PhaseResponses &resp = Responses_NONE, size_t def_btn = 0);
-Response MsgBoxError(const string_view_utf8 &txt, const PhaseResponses &resp = Responses_NONE, size_t def_btn = 0);
-Response MsgBoxQuestion(const string_view_utf8 &txt, const PhaseResponses &resp = Responses_NONE, size_t def_btn = 0);
-Response MsgBoxWarning(const string_view_utf8 &txt, const PhaseResponses &resp = Responses_NONE, size_t def_btn = 0);
-Response MsgBoxInfo(const string_view_utf8 &txt, const PhaseResponses &resp = Responses_NONE, size_t def_btn = 0);
-Response MsgBoxPepaCentered(const string_view_utf8 &txt, const PhaseResponses &resp = Responses_NONE, size_t def_btn = 0);
+Response MsgBox(const string_view_utf8 &txt, const PhaseResponses &resp, size_t def_btn = 0);
+Response MsgBoxError(const string_view_utf8 &txt, const PhaseResponses &resp, size_t def_btn = 0);
+Response MsgBoxQuestion(const string_view_utf8 &txt, const PhaseResponses &resp, size_t def_btn = 0);
+Response MsgBoxWarning(const string_view_utf8 &txt, const PhaseResponses &resp, size_t def_btn = 0);
+Response MsgBoxInfo(const string_view_utf8 &txt, const PhaseResponses &resp, size_t def_btn = 0);
+Response MsgBoxPepaCentered(const string_view_utf8 &txt, const PhaseResponses &resp, size_t def_btn = 0);

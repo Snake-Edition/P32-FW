@@ -12,11 +12,7 @@ enum class Event : uint8_t {
     MediaInserted, // onMediaInserted();
     MediaError, // onMediaError();
     MediaRemoved, // onMediaRemoved();
-    StatusChanged, // onStatusChanged(const char * const msg)
     // Marlin events - other
-    CommandBegin, //
-    CommandEnd, //
-    Message, //
     RequestCalibrationsScreen, //
     Acknowledge, // onAcknowledge - lowest priority
     NotAcknowledge, // onNotAcknowledge - lowest priority
@@ -27,11 +23,11 @@ enum class Event : uint8_t {
 
 using EventMask = uint64_t;
 
-static_assert(sizeof(EventMask) * 8 > ftrstd::to_underlying(Event::_last));
+static_assert(sizeof(EventMask) * 8 > std::to_underlying(Event::_last));
 
 // event masks
 constexpr EventMask make_mask(Event id) {
-    return static_cast<EventMask>(1) << ftrstd::to_underlying(id);
+    return static_cast<EventMask>(1) << std::to_underlying(id);
 }
 
 inline constexpr EventMask EVENT_MSK_ALL = std::numeric_limits<EventMask>::max();

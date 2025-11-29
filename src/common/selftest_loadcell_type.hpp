@@ -12,58 +12,46 @@
 #include <limits>
 
 struct SelftestLoadcell_t {
-    static constexpr uint8_t countdown_undef = 0x7f; // 7 bits for countdown
-    uint8_t progress;
-    uint8_t countdown;
-    int16_t temperature;
-    bool pressed_too_soon;
-    bool failed; // workaround just to pass it to main selftest
+    static constexpr uint8_t countdown_undef = 0b11111;
 
-    constexpr SelftestLoadcell_t(uint8_t prog = 0)
-        : progress(prog)
-        , countdown(countdown_undef)
-        , temperature(std::numeric_limits<int16_t>::min())
-        , pressed_too_soon(false)
-        , failed(false) {}
+    uint8_t progress : 7 = 0;
+    bool ignore_noisy : 1 = false;
+    uint8_t countdown : 5 = countdown_undef;
+    bool loadcell_noisy : 1 = false;
+    bool wrong_tap : 1 = false;
+    bool failed : 1 = false; // workaround just to pass it to main selftest
+    int16_t temperature = std::numeric_limits<int16_t>::min();
 
-    constexpr SelftestLoadcell_t(fsm::PhaseData new_data)
-        : SelftestLoadcell_t() {
-        Deserialize(new_data);
+    static SelftestLoadcell_t from_phaseData(fsm::PhaseData new_data) {
+        SelftestLoadcell_t r;
+        r.Deserialize(new_data);
+        return r;
     }
 
     constexpr fsm::PhaseData Serialize() const {
         fsm::PhaseData ret;
-        ret[0] = progress;
-        ret[1] = countdown & 0x7f; // 7 bits for countdown
-        ret[1] |= pressed_too_soon ? 0x80 : 0x00; // 8th bit for pressed_too_soon
-        ret[2] = temperature & 0xff;
-        ret[3] = temperature >> 8;
+        memcpy(ret.data(), this, sizeof(SelftestLoadcell_t));
         return ret;
     }
 
     constexpr void Deserialize(fsm::PhaseData new_data) {
-        progress = new_data[0];
-        countdown = new_data[1] & 0x7f; // 7 bits for countdown
-        pressed_too_soon = (new_data[1] & 0x80) == 0x80; // 8th bit for pressed_too_soon
-        temperature = new_data[2] | (new_data[3] << 8);
+        memcpy(this, new_data.data(), sizeof(SelftestLoadcell_t));
     }
 
-    constexpr bool operator==(const SelftestLoadcell_t &other) const {
-        return ((progress == other.progress) && (countdown == other.countdown) && (pressed_too_soon == other.pressed_too_soon) && (temperature == other.temperature));
-    }
-
-    constexpr bool operator!=(const SelftestLoadcell_t &other) const {
-        return !((*this) == other);
-    }
+    constexpr bool operator==(const SelftestLoadcell_t &other) const = default;
+    constexpr bool operator!=(const SelftestLoadcell_t &other) const = default;
 
     void Pass() {
         progress = 100;
         countdown = countdown_undef;
-        pressed_too_soon = false;
+        wrong_tap = false;
+        loadcell_noisy = false;
     }
     void Fail() {
         progress = 100;
         failed = true;
-    } // don't touch countdown and pressed_too_soon
+    } // don't touch countdown and wrong_tap
     void Abort() {} // currently not needed
 };
+
+static_assert(sizeof(SelftestLoadcell_t) <= std::tuple_size<fsm::PhaseData>());

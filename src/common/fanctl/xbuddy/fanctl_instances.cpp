@@ -46,16 +46,15 @@ void Fans::tick() {
     CFanCtl3Wire &heatbreak_fan = static_cast<CFanCtl3Wire &>(Fans::heat_break(0));
     CFanCtl3Wire &print_fan = static_cast<CFanCtl3Wire &>(Fans::print(0));
 
-    if (heatbreak_fan.getSkipTacho() != skip_tacho_t::yes && heatbreak_fan.getRPMMeasured()) {
+    if (heatbreak_fan.getSkipTacho() != skip_tacho_t::yes && heatbreak_fan.get_rpm_measured()) {
         buddy::hw::tachoSelectPrintFan.write(buddy::hw::Pin::State::high);
         print_fan.setSkipTacho(skip_tacho_t::no);
         heatbreak_fan.setSkipTacho(skip_tacho_t::yes);
-    } else if (print_fan.getSkipTacho() != skip_tacho_t::yes && print_fan.getRPMMeasured()) {
+    } else if (print_fan.getSkipTacho() != skip_tacho_t::yes && print_fan.get_rpm_measured()) {
         buddy::hw::tachoSelectPrintFan.write(buddy::hw::Pin::State::low);
         heatbreak_fan.setSkipTacho(skip_tacho_t::no);
         print_fan.setSkipTacho(skip_tacho_t::yes);
     }
     Fans::print(0).tick();
     Fans::heat_break(0).tick();
-    record_fanctl_metrics();
 }

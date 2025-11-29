@@ -6,13 +6,14 @@
 #include "../../Marlin/src/module/endstops.h"
 #include "../../Marlin/src/module/motion.h"
 #include "../../Marlin/src/module/prusa/homing_utils.hpp"
-#include "trinamic.h"
+#include "../../Marlin/src/feature/motordriver_util.h"
 #include "selftest_log.hpp"
 #include "i_selftest.hpp"
 #include "algorithm_scale.hpp"
 #include "printers.h"
 #include "homing_reporter.hpp"
 #include "config_store/store_instance.hpp"
+#include <utils/string_builder.hpp>
 
 #include <limits>
 #include <option/has_loadcell.h>
@@ -44,7 +45,6 @@ void CSelftestPart_Axis::phaseMove(int8_t dir) {
     log_info(Selftest, "%s %s @%d mm/s", ((dir * config.movement_dir) > 0) ? "fwd" : "rew", config.partname, int(feedrate));
     planner.synchronize();
     endstops.validate_homing_move();
-    sg_sampling_enable();
 
     set_current_from_steppers();
     sync_plan_position();
@@ -84,18 +84,14 @@ LoopResult CSelftestPart_Axis::wait(int8_t dir) {
     if (planner.processing()) {
         return LoopResult::RunCurrent;
     }
-    sg_sampling_disable();
 
     set_current_from_steppers();
     sync_plan_position();
     report_current_position();
 
-#if HAS_HOTEND_OFFSET
-    // Tool offset was just trashed, moreover this home was not precise
-    // Force home on next toolchange
-    CBI(axis_known_position, X_AXIS);
-    CBI(axis_known_position, Y_AXIS);
-#endif
+    // Tool offset was just trashed, moreover this home was not intended to be precise
+    axes_home_level[X_AXIS] = AxisHomeLevel::not_homed;
+    axes_home_level[Y_AXIS] = AxisHomeLevel::not_homed;
 
     int32_t endPos_usteps = stepper.position((AxisEnum)config.axis);
     int32_t length_usteps = dir * (endPos_usteps - m_StartPos_usteps);
@@ -132,40 +128,6 @@ uint32_t CSelftestPart_Axis::estimate_move(float len_mm, float fr_mms) {
     return move_time;
 }
 
-void CSelftestPart_Axis::sg_sample_cb(uint8_t axis, uint16_t sg) {
-    if (m_pSGAxis && (m_pSGAxis->config.axis == axis)) {
-        m_pSGAxis->sg_sample(sg);
-    }
-}
-
-void CSelftestPart_Axis::sg_sample(uint16_t sg) {
-    [[maybe_unused]] int32_t pos = stepper.position((AxisEnum)config.axis);
-    LogDebugTimed(log, "%s time %" PRIu32 "ms pos: %" PRId32 " sg: %" PRIu16,
-        config.partname, static_cast<uint32_t>(SelftestInstance().GetTime() - time_progress_start), pos, sg);
-    m_SGCount++;
-    m_SGSum += sg;
-}
-
-void CSelftestPart_Axis::sg_sampling_enable() {
-    m_SGOrig_mask = tmc_get_sg_mask();
-    tmc_set_sg_mask(1 << config.axis);
-    tmc_set_sg_axis(config.axis);
-    m_pSGOrig_cb = (void *)tmc_get_sg_sample_cb();
-    tmc_set_sg_sample_cb(sg_sample_cb);
-    m_pSGAxis = this;
-    m_SGCount = 0;
-    m_SGSum = 0;
-}
-
-void CSelftestPart_Axis::sg_sampling_disable() {
-    tmc_set_sg_mask(m_SGOrig_mask);
-    tmc_set_sg_axis(0);
-    tmc_set_sg_sample_cb((tmc_sg_sample_cb_t *)m_pSGOrig_cb);
-    m_pSGAxis = nullptr;
-}
-
-CSelftestPart_Axis *CSelftestPart_Axis::m_pSGAxis = nullptr;
-
 LoopResult CSelftestPart_Axis::stateActivateHomingReporter() {
     HomingReporter::enable();
     return LoopResult::RunNext;
@@ -176,14 +138,14 @@ LoopResult CSelftestPart_Axis::stateHomeXY() {
     set_axis_is_not_at_home(AxisEnum(config.axis));
 
     // Trigger home on axis
-    ArrayStringBuilder<10> sb;
+    ArrayStringBuilder<12> sb;
 #if PRINTER_IS_PRUSA_MK4()
     // MK4 needs to be able to calibrate homing here, i.e.
     // not have "D"o not calibrate parameter set
     // (yes, those double negatives are fun).
     sb.append_printf("G28 %c P", iaxis_codes[config.axis]);
 #else
-    sb.append_printf("G28 %c D P", iaxis_codes[config.axis]);
+    sb.append_printf("G28 %c I D P", iaxis_codes[config.axis]);
 #endif
     queue.enqueue_one_now(sb.str());
 
@@ -218,21 +180,16 @@ LoopResult CSelftestPart_Axis::stateEvaluateHomingXY() {
 }
 
 LoopResult CSelftestPart_Axis::stateHomeZ() {
-    // we have Z safe homing enabled, so Z might need to home all axis
-    if (!TEST(axis_known_position, X_AXIS) || !TEST(axis_known_position, Y_AXIS)) {
-        log_info(Selftest, "%s home all axis", config.partname);
-        queue.enqueue_one_now("G28 D P");
-    } else {
-        log_info(Selftest, "%s home single axis", config.partname);
-        queue.enqueue_one_now("G28 Z P");
-    }
-
 #if HAS_TOOLCHANGER()
-    // Z axis check needs to be done with a tool
+    // The next Z axis check needs to be done with a tool. This will re-home XY on-demand
     if (prusa_toolchanger.is_toolchanger_enabled() && (prusa_toolchanger.has_tool() == false)) {
         queue.enqueue_one_now("T0 S1");
     }
-#endif /*HAS_TOOLCHANGER()*/
+#endif
+
+    // We have Z safe homing enabled, so trash Z position and re-home without calibrations
+    axes_home_level[Z_AXIS] = AxisHomeLevel::not_homed;
+    queue.enqueue_one_now("G28 I O D P");
 
     return LoopResult::RunNext;
 }
@@ -242,10 +199,6 @@ LoopResult CSelftestPart_Axis::stateWaitHome() {
         return LoopResult::RunCurrent;
     }
     endstops.enable(true);
-    return LoopResult::RunNext;
-}
-
-LoopResult CSelftestPart_Axis::stateEnableZProbe() {
     endstops.enable_z_probe();
     return LoopResult::RunNext;
 }
@@ -278,6 +231,11 @@ LoopResult CSelftestPart_Axis::stateMoveFinishCycle() {
     if ((++m_Step) < config.steps) {
         return LoopResult::GoToMark2;
     }
+
+    // Disable the endstops now (BFW-7792)
+    endstops.enable(false);
+    endstops.enable_z_probe(false);
+
     return LoopResult::RunNext;
 }
 
@@ -328,11 +286,11 @@ void CSelftestPart_Axis::check_coils() {
 #endif
 
     if (check_ab) {
-        if (tmc_check_coils(A_AXIS) && tmc_check_coils(B_AXIS)) {
+        if (motor_check_coils(A_AXIS) && motor_check_coils(B_AXIS)) {
             coils_ok = true;
         }
     } else {
-        if (tmc_check_coils(config.axis)) {
+        if (motor_check_coils(config.axis)) {
             coils_ok = true;
         }
     }

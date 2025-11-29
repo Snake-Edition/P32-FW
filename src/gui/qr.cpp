@@ -3,7 +3,6 @@
 #include "window_qr.hpp"
 #include <common/error_code_mangle.hpp>
 #include <common/support_utils.h>
-#include <common/str_utils.hpp>
 #include <version/version.hpp>
 
 QRStaticStringWindow::QRStaticStringWindow(window_t *parent, Rect16 rect, Align_t align, const char *data)
@@ -21,8 +20,12 @@ void QRStaticStringWindow::unconditionalDraw() {
 }
 
 QRErrorUrlWindow::QRErrorUrlWindow(window_t *parent, Rect16 rect, ErrCode ec)
-    : QRDynamicStringWindow { parent, rect, Align_t::Center() } {
+    : QRErrorUrlWindow(parent, rect) {
     set_error_code(ec);
+}
+
+QRErrorUrlWindow::QRErrorUrlWindow(window_t *parent, Rect16 rect)
+    : QRDynamicStringWindow { parent, rect, Align_t::Center() } {
 }
 
 void QRErrorUrlWindow::set_error_code(ErrCode ec) {
@@ -32,13 +35,13 @@ void QRErrorUrlWindow::set_error_code(ErrCode ec) {
         {
             char printer_code[10] = {};
             printerCode(printer_code);
-            builder.append_string("/");
+            builder.append_string("?ref_data=");
             builder.append_string(printer_code);
         }
         {
             char version[10] = {};
             version::fill_project_version_no_dots(version, sizeof(version));
-            builder.append_string("/");
+            builder.append_string("-");
             builder.append_string(version);
         }
     }

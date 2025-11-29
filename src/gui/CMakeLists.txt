@@ -12,7 +12,6 @@ endif()
 target_sources(
   firmware
   PRIVATE auto_layout.cpp
-          box_unfinished_selftest.cpp
           file_sort.cpp
           fonts.cpp
           frame_calibration_common.cpp
@@ -22,12 +21,11 @@ target_sources(
           gui_media_events.cpp
           gui_time.cpp
           guimain.cpp
-          img_resources.cpp
-          img_resources.cpp
           IScreenPrinting.cpp
           lazyfilelist.cpp
           logger.cpp
           menu_vars.cpp
+          MItem_basic_selftest.cpp
           MItem_crash.cpp
           MItem_experimental_tools.cpp
           MItem_filament.cpp
@@ -44,24 +42,17 @@ target_sources(
           qr.cpp
           screen_blue_error.cpp
           screen_bsod.cpp
-          screen_change_filter.cpp
-          screen_dialog_does_not_exist.cpp
           screen_filebrowser.cpp
           screen_hardfault.cpp
           screen_help_fw_update.cpp
           screen_home.cpp
-          screen_mbl_values.cpp
           screen_menu.cpp
-          screen_menu_cancel_object.cpp
           screen_menu_control.cpp
-          screen_menu_eeprom.cpp
           screen_menu_enclosure.cpp
           screen_menu_error_test.cpp
-          screen_menu_factory_reset.cpp
           screen_menu_fail_stat.cpp
           screen_menu_filament.cpp
           screen_menu_footer_settings.cpp
-          screen_menu_fw_update.cpp
           screen_menu_hardware.cpp
           screen_menu_hardware_tune.cpp
           screen_menu_info.cpp
@@ -76,7 +67,6 @@ target_sources(
           screen_menu_odometer.cpp
           screen_menu_sensor_info.cpp
           screen_menu_settings.cpp
-          screen_menu_snake_settings.cpp
           screen_menu_statistics.cpp
           screen_menu_system.cpp
           screen_menu_temperature.cpp
@@ -92,10 +82,8 @@ target_sources(
           screen_prusa_link.cpp
           screen_qr_error.cpp
           screen_reset_error.cpp
-          screen_snake.cpp
           screen_splash.cpp
           screen_stack_overflow.cpp
-          screen_sysinf.cpp
           screen_watchdog.cpp
           ScreenFactory.cpp
           ScreenHandler.cpp
@@ -108,6 +96,7 @@ target_sources(
           window_msgbox_wrong_printer.cpp
           window_print_progress.cpp
           window_thumbnail.cpp
+          window_wizard_icon.cpp
   )
 
 if(HAS_CRASH_DETECTION)
@@ -133,8 +122,12 @@ if(HAS_TOOLCHANGER)
     )
 endif()
 
-if(HAS_MODULARBED)
-  target_sources(firmware PRIVATE screen_menu_modularbed.cpp)
+if(HAS_MODULAR_BED)
+  target_sources(firmware PRIVATE screen_menu_modular_bed.cpp)
+endif()
+
+if(HAS_REMOTE_BED)
+  target_sources(firmware PRIVATE screen_menu_remote_bed.cpp)
 endif()
 
 if(DEBUG)
@@ -146,8 +139,7 @@ endif()
 if(HAS_SELFTEST)
   add_subdirectory(wizard)
   target_sources(
-    firmware PRIVATE MItem_basic_selftest.cpp screen_menu_selftest_snake.cpp ScreenSelftest.cpp
-                     selftest_frame.cpp
+    firmware PRIVATE screen_menu_selftest_snake.cpp ScreenSelftest.cpp selftest_frame.cpp
     )
 endif()
 
@@ -196,8 +188,8 @@ if(BOARD STREQUAL "XBUDDY" OR BOARD STREQUAL "XLBUDDY")
   target_sources(firmware PRIVATE menu_item_xlcd.cpp)
 endif()
 
-if(BOARD STREQUAL "XLBUDDY")
-  target_sources(firmware PRIVATE MItem_enclosure.cpp)
+if(XL_ENCLOSURE_SUPPORT)
+  target_sources(firmware PRIVATE MItem_enclosure.cpp screen_change_filter.cpp)
 endif()
 
 if(HAS_LOVE_BOARD)
@@ -212,8 +204,8 @@ if(HAS_COLDPULL)
   target_sources(firmware PRIVATE screen_cold_pull.cpp)
 endif()
 
-if(HAS_PHASE_STEPPING)
-  target_sources(firmware PRIVATE screen_phase_stepping.cpp)
+if(HAS_PHASE_STEPPING_CALIBRATION)
+  target_sources(firmware PRIVATE screen_phase_stepping_calibration.cpp)
 endif()
 
 if(CONNECT)
@@ -229,10 +221,6 @@ add_subdirectory(footer)
 add_subdirectory(screen)
 add_subdirectory(menu_item)
 add_subdirectory(standard_frame)
-
-if(HAS_LEDS)
-  add_subdirectory(led_animations)
-endif()
 
 if(HAS_BED_LEVEL_CORRECTION)
   target_sources(firmware PRIVATE screen_menu_bed_level_correction.cpp)

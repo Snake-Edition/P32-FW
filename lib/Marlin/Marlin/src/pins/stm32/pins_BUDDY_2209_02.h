@@ -116,7 +116,6 @@
 //
 
 #define TEMP_0_PIN             MARLIN_PIN(TEMP_0)     // Analog Input
-#define TEMP_BED_PIN           MARLIN_PIN(TEMP_BED)   // Analog Input
 
 #define TEMP_BOARD_PIN         MARLIN_PIN(THERM2) // Analog Input
 #define TEMP_HEATBREAK_PIN     MARLIN_PIN(TEMP_HEATBREAK) // Analog Input todo: why it is defined for all printers?
@@ -132,7 +131,6 @@
 //
 
 #define HEATER_0_PIN           MARLIN_PIN(HEAT0)
-#define HEATER_BED_PIN         MARLIN_PIN(BED_HEAT)
 
 #define FAN_PIN                MARLIN_PIN(FAN)
 #if BOARD_IS_XBUDDY()
@@ -149,12 +147,6 @@
 #else
   #error "macro BOARD_TYPE is not defined"
 #endif
-
-
-
-#define SDSS                   80  //it means "NC"
-#define SD_DETECT_PIN          80  //it means "NC"
-
 
 #if defined(MARLIN_PORT_HEATER_ENABLE) && defined(MARLIN_PIN_NR_HEATER_ENABLE)
   #define PS_ON_PIN              MARLIN_PIN(HEATER_ENABLE)

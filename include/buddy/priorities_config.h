@@ -7,6 +7,7 @@
 extern "C" {
 #endif
 #include "FreeRTOSConfig.h" // for configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY
+#include "SEGGER_RTT_Conf.h" // for SEGGER_RTT_MAX_INTERRUPT_PRIORITY
 #include "cmsis_os.h" // for osPriorityXXX
 #ifdef __cplusplus
 }
@@ -16,7 +17,6 @@ extern "C" {
 /************************************************
  * Interrupt priorities:
  *************************************************/
-static_assert(configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY == 5);
     #define ISR_PRIORITY_TICK_TIMER 0
     #define ISR_PRIORITY_WWDG       0
     #if !BOARD_IS_XBUDDY()
@@ -28,14 +28,19 @@ static_assert(configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY == 5);
     #if BOARD_IS_XBUDDY()
         #define ISR_PRIORITY_ENDSTOP ISR_PRIORITY_HX717_HARD // Shared EXTI line: avoid STEP jitter
     #endif
-    #define ISR_PRIORITY_TEMP_TIMER    4
-    #define ISR_PRIORITY_POWER_PANIC   5
-    #define ISR_PRIORITY_PUPPIES_USART 5
-    #define ISR_PRIORITY_HX717_SOFT    5
-    #define ISR_PRIORITY_ACCELEROMETER 5 // Accelerometer has to be able to preempt the move timer
-    #define ISR_PRIORITY_MOVE_TIMER    6
-    #define ISR_PRIORITY_DEFAULT       7 // default ISR priority, used by ISRs that don't need specific ISR priority
+    #define ISR_PRIORITY_TEMP_TIMER 4
+// priority level defined by configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY - interrupts with lower priority below may use FreeRTOS calls
+    #define ISR_PRIORITY_PUPPIES_USART 5 // needs to have priority higher than SEGGER_RTT_MAX_INTERRUPT_PRIORITY - which allows interruption of RTT lock
+// priority level defined by SEGGER_RTT_MAX_INTERRUPT_PRIORITY - interrupts with lower priority may use RTT and SysView logging
+    #define ISR_PRIORITY_POWER_PANIC   6
+    #define ISR_PRIORITY_HX717_SOFT    6
+    #define ISR_PRIORITY_ACCELEROMETER 6 // Accelerometer has to be able to preempt the move timer
+    #define ISR_PRIORITY_MOVE_TIMER    7
+    #define ISR_PRIORITY_DEFAULT       8 // default ISR priority, used by ISRs that don't need specific ISR priority
     #define ISR_PRIORITY_PENDSV        15
+
+static_assert(configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY == 5);
+static_assert(ISR_PRIORITY_PUPPIES_USART < SEGGER_RTT_MAX_INTERRUPT_PRIORITY);
 static_assert(configLIBRARY_LOWEST_INTERRUPT_PRIORITY == 15);
 
     /************************************************

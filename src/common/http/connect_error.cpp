@@ -28,6 +28,8 @@ const char *to_str(Error error) {
         return "Websocket";
     case Error::InternalError:
         return "Internal error";
+    case Error::Proxy:
+        return "Proxy error";
     }
 
     // To avoid the "reaches end" warning

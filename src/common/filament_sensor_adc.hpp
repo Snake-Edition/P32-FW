@@ -8,17 +8,13 @@
 #pragma once
 
 #include "filament_sensor.hpp"
-#include <app_metrics.h>
+#include <utils/timing/rate_limiter.hpp>
 
 struct metric_s;
 
 class FSensorADC final : public IFSensor {
 
-public:
-    static constexpr float fs_selftest_span_multipler { 1.2 }; // when doing selftest, fs with filament and without has to be different by this value times configured span to pass selftest
-
 protected:
-    int32_t fs_value_span { 0 }; ///< minimal difference of raw values between the two states of the filament sensor
     int32_t fs_ref_ins_value { 0 }; ///< value of filament insert in extruder
     int32_t fs_ref_nins_value { 0 }; ///< value of filament not inserted in extruder
 
@@ -68,10 +64,11 @@ public:
 
     void invalidate_calibration();
 
-    void record_raw(int32_t val);
-
 private:
     // Limit metrics recording for each tool
-    buddy::metrics::RunApproxEvery limit_record = 49;
-    buddy::metrics::RunApproxEvery limit_record_raw = 60;
+    RateLimiter<uint32_t> limit_record;
+
+    uint32_t value_span = 0;
+
+    static constexpr float fs_selftest_span_multipler { 1.2 };
 };

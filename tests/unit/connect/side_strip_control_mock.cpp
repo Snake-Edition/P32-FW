@@ -1,15 +1,19 @@
-#include <leds/side_strip_control.hpp>
+#include <leds/side_strip_handler.hpp>
 
 namespace leds {
 
-SideStripControl side_strip_control;
+SideStripHandler::SideStripHandler() {}
 
-uint8_t side_max_brightness = 0;
-
-void SideStripControl::ActivityPing() {
+SideStripHandler &SideStripHandler::instance() {
+    static SideStripHandler instance;
+    return instance;
 }
 
-void SideStripControl::set_max_brightness(uint8_t set) {
+void SideStripHandler::activity_ping() {
+}
+
+uint8_t side_max_brightness = 0;
+void SideStripHandler::set_max_brightness(uint8_t set) {
     side_max_brightness = set;
 }
 

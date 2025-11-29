@@ -38,7 +38,8 @@
 #include "motion.h"
 #include "temperature.h"
 #include "endstops.h"
-#include "planner.h"
+#include <module/planner.h>
+#include <feature/pressure_advance/pressure_advance_config.hpp>
 
 #include "../gcode/gcode.h"
 #include "../lcd/ultralcd.h"
@@ -76,8 +77,7 @@ xyz_pos_t probe_offset; // Initialized by settings.load()
 #endif
 
 #if ENABLED(SENSORLESS_PROBING)
-  #include "stepper.h"
-  #include "../feature/tmc_util.h"
+  #include "../feature/motordriver_util.h"
 #endif
 
 #if QUIET_PROBING
@@ -92,6 +92,18 @@ xyz_pos_t probe_offset; // Initialized by settings.load()
 #include "../core/debug_out.h"
 
 #include "metric.h"
+
+#include <feature/print_status_message/print_status_message_guard.hpp>
+
+#include <option/has_auto_retract.h>
+#include <mapi/motion.hpp>
+#include <gcode/temperature/M104_M109.hpp>
+#include <config_store/store_instance.hpp>
+#include <marlin_vars.hpp>
+
+#if HAS_AUTO_RETRACT()
+  #include <feature/auto_retract/auto_retract.hpp>
+#endif
 
 #if ENABLED(Z_PROBE_SLED)
 
@@ -241,9 +253,6 @@ xyz_pos_t probe_offset; // Initialized by settings.load()
 
 #if QUIET_PROBING
   void probing_pause(const bool p) {
-    #if ENABLED(PROBING_HEATERS_OFF)
-      thermalManager.pause(p);
-    #endif
     #if ENABLED(PROBING_FANS_OFF)
       thermalManager.set_fans_paused(p);
     #endif
@@ -282,42 +291,6 @@ inline void do_probe_raise(const float z_raise) {
 }
 
 FORCE_INLINE void probe_specific_action(const bool deploy) {
-  #if ENABLED(PAUSE_BEFORE_DEPLOY_STOW)
-    do {
-      #if ENABLED(PAUSE_PROBE_DEPLOY_WHEN_TRIGGERED)
-        if (deploy == (READ(Z_MIN_PROBE_PIN) == Z_MIN_PROBE_ENDSTOP_INVERTING)) break;
-      #endif
-
-      BUZZ(100, 659);
-      BUZZ(100, 698);
-
-      PGM_P const ds_str = deploy ? GET_TEXT(MSG_MANUAL_DEPLOY) : GET_TEXT(MSG_MANUAL_STOW);
-      ui.return_to_status();       // To display the new status message
-      ui.set_status_P(ds_str, 99);
-      serialprintPGM(ds_str);
-      SERIAL_EOL();
-
-      KEEPALIVE_STATE(PAUSED_FOR_USER);
-      wait_for_user = true;
-      #if ENABLED(HOST_PROMPT_SUPPORT)
-        host_prompt_do(PROMPT_USER_CONTINUE, PSTR("Stow Probe"), PSTR("Continue"));
-      #endif
-      #if ENABLED(EXTENSIBLE_UI)
-        ExtUI::onUserConfirmRequired_P(PSTR("Stow Probe"));
-      #endif
-      while (wait_for_user) idle(true);
-      ui.reset_status();
-
-    } while(
-      #if ENABLED(PAUSE_PROBE_DEPLOY_WHEN_TRIGGERED)
-        true
-      #else
-        false
-      #endif
-    );
-
-  #endif // PAUSE_BEFORE_DEPLOY_STOW
-
   #if ENABLED(NOZZLE_LOAD_CELL)
     if (deploy) {
       // Disable E axis for probing to reduce noise on sensor
@@ -352,11 +325,6 @@ FORCE_INLINE void probe_specific_action(const bool deploy) {
   #elif ENABLED(RACK_AND_PINION_PROBE)
 
     do_blocking_move_to_x(deploy ? Z_PROBE_DEPLOY_X : Z_PROBE_RETRACT_X);
-
-  #elif DISABLED(PAUSE_BEFORE_DEPLOY_STOW)
-
-    UNUSED(deploy);
-
   #endif
 }
 
@@ -372,8 +340,7 @@ bool set_probe_deployed(const bool deploy) {
 
   // Make room for probe to deploy (or stow)
   // Fix-mounted probe should only raise for deploy
-  // unless PAUSE_BEFORE_DEPLOY_STOW is enabled
-  #if ENABLED(FIX_MOUNTED_PROBE) && DISABLED(PAUSE_BEFORE_DEPLOY_STOW)
+  #if ENABLED(FIX_MOUNTED_PROBE)
     const bool deploy_stow_condition = deploy;
   #else
     constexpr bool deploy_stow_condition = true;
@@ -407,39 +374,7 @@ bool set_probe_deployed(const bool deploy) {
   #endif
 
   const xy_pos_t old_xy = current_position;
-
-  #if ENABLED(PROBE_TRIGGERED_WHEN_STOWED_TEST)
-    #if HAS_CUSTOM_PROBE_PIN
-      #define PROBE_STOWED() (READ(Z_MIN_PROBE_PIN) != Z_MIN_PROBE_ENDSTOP_INVERTING)
-    #else
-      #define PROBE_STOWED() (READ(Z_MIN_PIN) != Z_MIN_ENDSTOP_INVERTING)
-    #endif
-  #endif
-
-  #ifdef PROBE_STOWED
-
-    // Only deploy/stow if needed
-    if (PROBE_STOWED() == deploy) {
-      if (!deploy) endstops.enable_z_probe(false); // Switch off triggered when stowed probes early
-                                                   // otherwise an Allen-Key probe can't be stowed.
-      probe_specific_action(deploy);
-    }
-
-    if (PROBE_STOWED() == deploy) {                // Unchanged after deploy/stow action?
-      if (IsRunning()) {
-        SERIAL_ERROR_MSG("Z-Probe failed");
-        LCD_ALERTMESSAGEPGM_P(PSTR("Err: ZPROBE"));
-      }
-      stop();
-      return true;
-    }
-
-  #else
-
-    probe_specific_action(deploy);
-
-  #endif
-
+  probe_specific_action(deploy);
   do_blocking_move_to(old_xy);
   #if DISABLED(NOZZLE_LOAD_CELL)
     endstops.enable_z_probe(deploy);
@@ -470,22 +405,8 @@ bool set_probe_deployed(const bool deploy) {
  * @return true to indicate an error
  */
 
-#if HAS_HEATED_BED && ENABLED(WAIT_FOR_BED_HEATER)
-  const char msg_wait_for_bed_heating[25] PROGMEM = "Wait for bed heating...\n";
-#endif
-
 static bool do_probe_move(const float z, const feedRate_t fr_mm_s) {
   if (DEBUGGING(LEVELING)) DEBUG_POS(">>> do_probe_move", current_position);
-
-  #if HAS_HEATED_BED && ENABLED(WAIT_FOR_BED_HEATER)
-    // Wait for bed to heat back up between probing points
-    if (thermalManager.isHeatingBed()) {
-      serialprintPGM(msg_wait_for_bed_heating);
-      LCD_MESSAGEPGM(MSG_BED_HEATING);
-      thermalManager.wait_for_bed();
-      ui.reset_status();
-    }
-  #endif
 
   #if ENABLED(BLTOUCH) && DISABLED(BLTOUCH_HS_MODE)
     if (bltouch.deploy()) return true; // DEPLOY in LOW SPEED MODE on every probe action
@@ -495,10 +416,10 @@ static bool do_probe_move(const float z, const feedRate_t fr_mm_s) {
   #if ENABLED(SENSORLESS_PROBING)
     sensorless_t stealth_states { false };
     #if ENABLED(DELTA)
-      stealth_states.x = tmc_enable_stallguard(stepperX);
-      stealth_states.y = tmc_enable_stallguard(stepperY);
+      stealth_states.x = enable_crash_detection(X_AXIS);
+      stealth_states.y = enable_crash_detection(Y_AXIS);
     #endif
-    stealth_states.z = tmc_enable_stallguard(stepperZ);
+    stealth_states.z = enable_crash_detection(Z_AXIS);
     endstops.enable(true);
   #endif
 
@@ -511,7 +432,11 @@ static bool do_probe_move(const float z, const feedRate_t fr_mm_s) {
   #endif
 
   // Move down until the probe is triggered
-  do_blocking_move_to_z(z, fr_mm_s);
+  auto target = planner.get_machine_position_mm();
+  target.z = z;
+  planner.buffer_segment(target, fr_mm_s);
+  planner.synchronize();
+  // Note: current_position is updated lower in this function
 
   #if ENABLED(NOZZLE_LOAD_CELL)
     endstops.enable_z_probe(false);
@@ -541,10 +466,10 @@ static bool do_probe_move(const float z, const feedRate_t fr_mm_s) {
     endstops.not_homing();
     #if NEITHER(ENDSTOPS_ALWAYS_ON_DEFAULT, CRASH_RECOVERY)
       #if ENABLED(DELTA)
-        tmc_disable_stallguard(stepperX, stealth_states.x);
-        tmc_disable_stallguard(stepperY, stealth_states.y);
+        disable_crash_detection(X_AXIS, stealth_states.x);
+        disable_crash_detection(Y_AXIS, stealth_states.y);
       #endif
-      tmc_disable_stallguard(stepperZ, stealth_states.z);
+      disable_crash_detection(Z_AXIS, stealth_states.z);
     #endif
   #endif
 
@@ -593,10 +518,12 @@ static xy_pos_t offset_for_probe_try(int try_idx) {
 #endif
 
 #if ENABLED(NOZZLE_LOAD_CELL)
-  static float loadcell_retare_for_analysis() {
+  static float loadcell_retare_for_analysis(millis_t tare_delay) {
+    safe_delay(tare_delay);
     loadcell.WaitBarrier(); // Sync samples before tare
-    loadcell.analysis.Reset(); // Reset window to include the tare samples
-    return loadcell.Tare();
+    float tare = loadcell.Tare();
+    loadcell.analysis.Reset(); // Reset window to remove tare offset jump
+    return tare;
   }
 #endif
 
@@ -623,9 +550,12 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
   if (endstop_triggered)
     *endstop_triggered = true;
 
+  // We expect PA delays to be already avoided here
+  assert(pressure_advance::PressureAdvanceDisabler::is_active());
+
   #if ENABLED(NOZZLE_LOAD_CELL)
     auto H = loadcell.CreateLoadAboveErrEnforcer();
-    auto reference_tare = loadcell_retare_for_analysis(); ///< Use this value as reference for following tares
+    auto reference_tare = loadcell_retare_for_analysis(Z_FIRST_PROBE_DELAY); ///< Use this value as reference for following tares
     const auto max_tare_offset = std::abs(loadcell.GetThreshold()); ///< Maximal valid offset from reference_tare
   #endif
 
@@ -664,10 +594,7 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
     if (current_position.z > z) {
       // Probe down fast. If the probe never triggered, raise for probe clearance
       if (!do_probe_move(z, MMM_TO_MMS(Z_PROBE_SPEED_FAST))) {
-        do_blocking_move_to_z(current_position.z + Z_CLEARANCE_BETWEEN_PROBES, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
-        #if ENABLED(NOZZLE_LOAD_CELL)
-          reference_tare = loadcell_retare_for_analysis();
-        #endif
+        do_blocking_move_to_z(current_position.z + Z_CLEARANCE_BETWEEN_PROBES, MMM_TO_MMS(Z_PROBE_SPEED_FAST), Segmented::yes);
       }
     }
   #endif
@@ -694,21 +621,19 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
         auto center_offset = offset_for_probe_try(probe_idx++);
         do_blocking_move_to_xy(center_pos + center_offset, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
 
-        if (p) {
-          // sync and re-tare the loadcell
-          auto offset = loadcell_retare_for_analysis() - reference_tare;
+        // re-tare the loadcell
+        auto offset = loadcell_retare_for_analysis(Z_FIRST_PROBE_DELAY) - reference_tare;
+
+        SERIAL_ECHO_START();
+        SERIAL_ECHOLNPAIR_F("Re-tared with offset ", offset);
+
+        // If tare value is suspicious, lift very high and try tare again
+        if (std::abs(offset) > max_tare_offset) {
+          do_blocking_move_to_z(current_position.z + Z_AFTER_PROBING, MMM_TO_MMS(Z_PROBE_SPEED_FAST), Segmented::yes);
+          reference_tare = loadcell_retare_for_analysis(Z_FIRST_PROBE_DELAY);
 
           SERIAL_ECHO_START();
-          SERIAL_ECHOLNPAIR_F("Re-tared with offset ", offset);
-
-          // If tare value is suspicious, lift very high and try tare again
-          if (std::abs(offset) > max_tare_offset) {
-            do_blocking_move_to_z(current_position.z + Z_AFTER_PROBING, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
-            reference_tare = loadcell_retare_for_analysis();
-
-            SERIAL_ECHO_START();
-            SERIAL_ECHOLNPAIR_F("Lifted and took new reference tare ", reference_tare);
-          }
+          SERIAL_ECHOLNPAIR_F("Lifted and took new reference tare ", reference_tare);
         }
 
         SERIAL_ECHO_START();
@@ -716,6 +641,10 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
 
         METRIC_DEF(probe_start, "probe_start", METRIC_VALUE_EVENT, 0, METRIC_ENABLED);
         metric_record_event(&probe_start);
+
+        // Sync enough samples before moving downwards to ensure the pre-compression line can be fit
+        // when the Z move is very short
+        loadcell.WaitBarrier(ticks_us() + loadcell.analysis.analysisLookback * 1e6);
       #endif
 
       // Probe downward slowly to find the bed
@@ -736,10 +665,24 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
       }
 
       #if ENABLED(NOZZLE_LOAD_CELL)
-        // Return slowly back
+        // The analysis profile *expects* a delay after touchdown. Compensate for the
+        // synchronization and first move delay to wait precisely the amount requested.
+        uint32_t move_fwd_end = PreciseStepping::get_time_of_last_block_us();
+        uint32_t elapsed_us = ticks_diff(ticks_us(), move_fwd_end);
+        uint32_t start_delay_us = PreciseStepping::get_first_move_delay_us();
+        uint32_t precomp_ms = (elapsed_us + start_delay_us) / 1000;
+        assert(precomp_ms <= Loadcell::TOUCHDOWN_DELAY_MS); // we handle underflow, but catch it on debug
+        millis_t delay_ms = std::min<uint32_t>(Loadcell::TOUCHDOWN_DELAY_MS - precomp_ms, Loadcell::TOUCHDOWN_DELAY_MS);
+        safe_delay(delay_ms);
+
+        // Return slowly back. Ensure this move is not optimized even when small
         float move_back = 0.09f;
-        do_blocking_move_to_z(current_position.z + move_back, MMM_TO_MMS(Z_PROBE_SPEED_BACK_MOVE));
-        uint32_t move_back_end = micros();
+        current_position.z += move_back;
+        planner.buffer_line(current_position, MMM_TO_MMS(Z_PROBE_SPEED_BACK_MOVE), active_extruder, { .raw_block = true });
+        planner.synchronize();
+        if (planner.draining())
+          return NAN;
+        uint32_t move_back_end = PreciseStepping::get_time_of_last_block_us();
       #endif
 
       #if ENABLED(MEASURE_BACKLASH_WHEN_PROBING)
@@ -791,8 +734,9 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
 
       #if TOTAL_PROBING > 2
         // Small Z raise after all but the last probe
-        if (p < TOTAL_PROBING - 1)
+        if (p < TOTAL_PROBING - 1) {
           do_blocking_move_to_z(current_position.z + Z_CLEARANCE_MULTI_PROBE, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+        }
       #endif
     }
 
@@ -846,14 +790,64 @@ float run_z_probe(float expected_trigger_z, bool single_only, bool *endstop_trig
 
 #if ENABLED(NOZZLE_LOAD_CELL) && ENABLED(PROBE_CLEANUP_SUPPORT)
 
+#if HAS_AUTO_RETRACT()
+void prepare_for_nozzle_cleaning() {
+  // Do not retract on unknown retracted_distance
+  const auto retracted_distance = buddy::auto_retract().retracted_distance().value_or(10);
+  const bool do_not_autoretract = config_store().get_filament_type(active_extruder).parameters().do_not_auto_retract;
+
+  // Do not auto retract filaments marked do_not_auto_retract, they might get tangled in the extruder (BFW-6953)
+  // Skip if retracted distance is known and filament is out of the nozzle
+  if (!do_not_autoretract && retracted_distance < 5.0f) {
+
+    // Save target temperature to put back at the end
+    const auto previous_target_temp = static_cast<float>(thermalManager.degTargetHotend(active_extruder));
+
+    // Ensure safe temperature
+    const M109Flags flags_pre = {
+      // Filament target temperature can be altered through PrusaSlicer
+      // We don't have access to this information here, so we use filament presets
+      // Filament had to be loaded with the preset's temperature anyway, so we should be able to retract with it
+      // TODO: Could be passed to G29 as a parameter
+      .target_temp = static_cast<float>(config_store().get_filament_type(active_extruder).parameters().nozzle_temperature),
+    };
+    M109_no_parser(active_extruder, flags_pre);
+
+    {
+      PrintStatusMessageGuard pmg_retract;
+      pmg_retract.update<PrintStatusMessage::auto_retracting>({});
+
+      // Retract to standard distance 
+      const auto hotend = marlin_vars().active_hotend_id();
+      const auto standard_distance = buddy::AutoRetract::minimum_auto_retract_distance;
+      const auto retract_compensation_distance = (-1) * (standard_distance - retracted_distance);
+      assert(retract_compensation_distance < 0);
+      buddy::auto_retract().set_retracted_distance(hotend, std::nullopt);
+      mapi::extruder_move(retract_compensation_distance, FILAMENT_CHANGE_FAST_LOAD_FEEDRATE);
+      planner.synchronize();
+      buddy::auto_retract().set_retracted_distance(hotend, standard_distance);
+    }
+
+    const M109Flags flags_post = {
+      .target_temp = previous_target_temp,
+      .wait_heat_or_cool = true,
+    };
+    M109_no_parser(active_extruder, flags_post);
+  }
+}
+#endif
+
 /**
  * @brief Probe within a given rectangle in order to cleanup loadcell-based probe.
  */
-void cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max) {
+bool cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max) {
   float radius = 1.0f;
   bool probe_deployed = false;
   const int required_clean_cnt = 3;
   int consecutive_clean_cnt = 0;
+
+  // Disable PA to reduce filter delay during probe analysis
+  pressure_advance::PressureAdvanceDisabler pa_disabler;
 
   // Enable loadcell high precision across the entire sequence to prime the noise filters
   auto loadcellPrecisionEnabler = Loadcell::HighPrecisionEnabler(loadcell);
@@ -866,13 +860,22 @@ void cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max) {
     planner.apply_settings(s);
   }
 
+  #if HAS_AUTO_RETRACT()
+  if (config_store().pre_nozzle_cleaning_retraction_enable.get()) {
+    // If retracted distance is known, we should retract to avoid nozzle cleaning fail often occurring with the filament in the nozzle
+    prepare_for_nozzle_cleaning();
+  }
+  #endif // HAS_AUTO_RETRACT()
+  
+  PrintStatusMessageGuard pmg;
+  pmg.update<PrintStatusMessage::nozzle_cleaning>({});
+
   bool should_continue = true;
   for (float y = rect_min.y + radius; (y + radius) <= rect_max.y && should_continue; y += 2 * radius) {
     for (float x = rect_max.x - radius; (x - radius) >= rect_min.x && should_continue; x -= 2 * radius) {
       // move above the probe point
       xyz_pos_t pos = { x, y, static_cast<float>(PROBE_CLEANUP_CLEARANCE - TERN0(HAS_HOTEND_OFFSET, hotend_currently_applied_offset.z))};
       do_blocking_move_to(pos);
-        LCD_MESSAGEPGM_P("Nozzle cleaning");
 
       if(probe_deployed == false) {
         // first attempt: deploy probe
@@ -881,9 +884,6 @@ void cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max) {
           should_continue = false;
           break;
         }
-
-        // dampen the system after the move
-        safe_delay(Z_FIRST_PROBE_DELAY);
       }
       probe_deployed = true;
 
@@ -917,9 +917,8 @@ void cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max) {
   if (probe_deployed) {
     STOW_PROBE();
   }
-  if (consecutive_clean_cnt < required_clean_cnt) {
-    LCD_MESSAGEPGM_P(MSG_ERR_NOZZLE_CLEANING_FAILED);
-  }
+  
+  return consecutive_clean_cnt >= required_clean_cnt;
 }
 #endif
 
@@ -952,7 +951,7 @@ float probe_here(float expected_trigger_z)
  *   - Raise to the BETWEEN height
  * - Return the probed Z position
  */
-float probe_at_point(const float &rx, const float &ry, const ProbePtRaise raise_after/*=PROBE_PT_NONE*/, const uint8_t verbose_level/*=0*/, const bool probe_relative/*=true*/) {
+float probe_at_point(const xy_pos_t &pos, const ProbePtRaise raise_after/*=PROBE_PT_NONE*/, const uint8_t verbose_level/*=0*/, const bool probe_relative/*=true*/) {
   if (DEBUGGING(LEVELING)) {
     DEBUG_ECHOLNPAIR(
       ">>> probe_at_point(", LOGICAL_X_POSITION(rx), ", ", LOGICAL_Y_POSITION(ry),
@@ -964,7 +963,7 @@ float probe_at_point(const float &rx, const float &ry, const ProbePtRaise raise_
   }
 
   // TODO: Adapt for SCARA, where the offset rotates
-  xyz_pos_t npos = { rx, ry };
+  xyz_pos_t npos = pos;
   if (probe_relative) {
     if (!position_is_reachable_by_probe(npos)) {
       #if ENABLED(HALT_ON_PROBING_ERROR)
@@ -1000,6 +999,9 @@ float probe_at_point(const float &rx, const float &ry, const ProbePtRaise raise_
   // Move the probe to the starting XYZ
   do_blocking_move_to(npos, MMM_TO_MMS(XY_PROBE_SPEED));
 
+  // Disable PA to reduce filter delay during probe analysis
+  pressure_advance::PressureAdvanceDisabler pa_disabler;
+
   #if ENABLED(NOZZLE_LOAD_CELL)
     // HighPrecision needs to be enabled with some time margin to prime the filters.
     // If it hasn't been already we're being called in single-probe mode, enable it temporarily.
@@ -1031,14 +1033,14 @@ float probe_at_point(const float &rx, const float &ry, const ProbePtRaise raise_
   }
 
   if (verbose_level > 2) {
-    SERIAL_ECHOPAIR_F("Bed X: ", LOGICAL_X_POSITION(rx), 3);
-    SERIAL_ECHOPAIR_F(" Y: ", LOGICAL_Y_POSITION(ry), 3);
+    SERIAL_ECHOPAIR_F("Bed X: ", LOGICAL_X_POSITION(pos.x), 3);
+    SERIAL_ECHOPAIR_F(" Y: ", LOGICAL_Y_POSITION(pos.y), 3);
     SERIAL_ECHOLNPAIR_F(" Z: ", measured_z, 3);
   }
 
   {
-      int logical_x = LOGICAL_X_POSITION(rx);
-      int logical_y = LOGICAL_Y_POSITION(ry);
+      int logical_x = LOGICAL_X_POSITION(pos.x);
+      int logical_y = LOGICAL_Y_POSITION(pos.y);
       metric_record_custom(&metric_probe_z, " x=%i,y=%i,v=%.3f", logical_x, logical_y, (double)measured_z);
   }
 

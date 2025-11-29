@@ -1,9 +1,3 @@
-/**
- * @file neopixel.hpp
- * @author Radek Vana
- * @date 2021-05-27
- */
-
 #pragma once
 #include <stdint.h>
 #include <bitset>
@@ -113,15 +107,15 @@ inline constexpr uint32_t RESET_2M5Hz = uint32_t(51.f * 2.5f);
  * @tparam COUNT count of LEDs
  */
 template <size_t COUNT>
-class Leds_base {
+class LedsBase {
 public:
-    constexpr Leds_base()
+    constexpr LedsBase()
         : leds_to_rewrite(COUNT) {
         leds.fill(0);
     }
     using color_array = std::array<uint32_t, COUNT>;
 
-    void Set(uint32_t color, size_t index) {
+    void set(uint32_t color, size_t index) {
         if (index >= COUNT) {
             return;
         }
@@ -134,25 +128,30 @@ public:
         leds_to_rewrite = std::max(index + size_t(1), leds_to_rewrite);
     }
 
-    void Set(const uint32_t *colors, size_t count) {
+    void set(const uint32_t *colors, size_t count) {
         count = std::min(count, size_t(COUNT - 1));
         for (size_t led = 0; led <= count; ++led) {
-            Set(colors[led], led);
+            set(colors[led], led);
         }
     }
 
-    void Set(const color_array &colors) {
-        Set(colors.begin(), colors.size());
+    void set(const color_array &colors) {
+        set(colors.begin(), colors.size());
     }
 
-    void ForceRefresh(size_t cnt) {
+    void set_all(uint32_t color) {
+        for (size_t i = 0; i < COUNT; ++i) {
+            set(color, i);
+        }
+    }
+
+    void force_refresh(size_t cnt) {
         leds_to_rewrite = cnt;
     }
 
 protected:
     color_array leds;
     size_t leds_to_rewrite;
-    bool force_refresh;
 };
 
 /**
@@ -165,11 +164,11 @@ protected:
  * @tparam T0L   lenght of low  bus status of converted logical "0" bit value
  */
 template <size_t COUNT, size_t T1H, size_t T1L, size_t T0H, size_t T0L>
-class LedsSPI_base : public Leds_base<COUNT> {
+class LedsSPIBase : public LedsBase<COUNT> {
 public:
     using color_array = std::array<uint32_t, COUNT>;
 
-    constexpr LedsSPI_base() = default;
+    constexpr LedsSPIBase() = default;
 
 protected:
     static constexpr uint32_t max_pulse_len = T1H + T1L > T0H + T0L ? T1H + T1L : T0H + T0L; // std::max( T1H + T1L,  T0H + T0L); - not constexpr
@@ -177,20 +176,20 @@ protected:
     static constexpr uint32_t bitfield_size = COUNT * max_size; // theoretical maximum size in bits
     std::bitset<bitfield_size> led_bitset;
 
-    void setHi(size_t &rBitfieldPos) {
-        rBitfieldPos += T1L; // no need to set false
-
+    void set_high(size_t &bitfield_pos) {
         for (size_t i = 0; i < T1H; ++i) {
-            led_bitset[rBitfieldPos++] = true;
+            led_bitset[bitfield_pos++] = true;
         }
+
+        bitfield_pos += T1L; // no need to set false
     }
 
-    void setLo(size_t &rBitfieldPos) {
-        rBitfieldPos += T0L; // no need to set false
-
+    void set_low(size_t &bitfield_pos) {
         for (size_t i = 0; i < T0H; ++i) {
-            led_bitset[rBitfieldPos++] = true;
+            led_bitset[bitfield_pos++] = true;
         }
+
+        bitfield_pos += T0L; // no need to set false
     }
 
     /**
@@ -199,20 +198,14 @@ protected:
      *
      * @return size_t number of bits to be send
      */
-    size_t setBitset();
+    size_t set_bitset();
 };
 
 template <size_t COUNT, size_t T1H, size_t T1L, size_t T0H, size_t T0L>
-size_t LedsSPI_base<COUNT, T1H, T1L, T0H, T0L>::setBitset() {
+size_t LedsSPIBase<COUNT, T1H, T1L, T0H, T0L>::set_bitset() {
     if (this->leds_to_rewrite == 0) {
         return 0; // nothing to set
     }
-
-    // Optimization via leds_to_rewrite does not work correctly
-    // thanks to LedsSPI_MSB inverting the indexing and breaking the daisy-chaining.
-    // As a quick fix, we always update everything
-    // BFW-5067 - Someone please fix this :(
-    this->leds_to_rewrite = COUNT;
 
     led_bitset.reset(); // clear bit array
 
@@ -220,8 +213,8 @@ size_t LedsSPI_base<COUNT, T1H, T1L, T0H, T0L>::setBitset() {
 
     for (size_t i = 0; i < this->leds_to_rewrite; ++i) {
         std::bitset<24> bits_of_color = this->leds[i];
-        for (size_t bit = 0; bit < 24; ++bit) {
-            bits_of_color[bit] ? setHi(bitfield_position) : setLo(bitfield_position); // bitfield_position passed by reference
+        for (int8_t bit = 23; bit >= 0; --bit) {
+            bits_of_color[bit] ? set_high(bitfield_position) : set_low(bitfield_position); // bitfield_position passed by reference
         }
     }
 
@@ -230,52 +223,7 @@ size_t LedsSPI_base<COUNT, T1H, T1L, T0H, T0L>::setBitset() {
 }
 
 /**
- * @brief child of LedsSPI_base handling LSB data conversion
- *
- * @tparam COUNT count of leds
- * @tparam T1H   lenght of high bus status of converted logical "1" bit value
- * @tparam T1L   lenght of low  bus status of converted logical "1" bit value
- * @tparam T0H   lenght of high bus status of converted logical "0" bit value
- * @tparam T0L   lenght of low  bus status of converted logical "0" bit value
- * @tparam RESET_PULSE number of pulses needed to be in low state to write signals on LEDs
- */
-// This class is not used at all and should probably be thrown out of the codee -> BFW-5067
-template <size_t COUNT, size_t T1H, size_t T1L, size_t T0H, size_t T0L, size_t RESET_PULSE>
-class LedsSPI_LSB : public LedsSPI_base<COUNT, T1H, T1L, T0H, T0L> {
-protected:
-    uint8_t send_buff[(LedsSPI_base<COUNT, T1H, T1L, T0H, T0L>::bitfield_size + RESET_PULSE + 7) / 8];
-
-    /**
-     * @brief ready data to send
-     *        call exactly once before sending data to LEDs via SPI
-     *
-     * @return size_t number of bytes to be send
-     */
-    size_t bitfieldToSendBuff() {
-        size_t bit_count = this->setBitset();
-        size_t bit_read_index = 0; // from bitset
-
-        // write reset pulse
-        for (size_t i = 0; i < (RESET_PULSE + 7) / 8; ++i) {
-            send_buff[i] = 0;
-        }
-
-        // clear last byte
-        send_buff[((bit_count + RESET_PULSE + 7) / 8) - 1] = 0;
-
-        for (; bit_read_index < bit_count; ++bit_read_index) {
-            size_t bit_write_index = bit_read_index + RESET_PULSE;
-            uint8_t &r_target_byte = send_buff[bit_write_index / 8];
-            uint8_t target_bit = 1 << (bit_write_index % 8);
-            r_target_byte = this->led_bitset[bit_read_index] ? r_target_byte | target_bit : r_target_byte & (~target_bit);
-        }
-
-        return (bit_count + RESET_PULSE + 7) / 8;
-    };
-};
-
-/**
- * @brief child of LedsSPI_base handling MSB data conversion
+ * @brief child of LedsSPIBase handling MSB data conversion
  *
  * @tparam COUNT count of leds
  * @tparam T1H   lenght of high bus status of converted logical "1" bit value
@@ -285,9 +233,9 @@ protected:
  * @tparam RESET_PULSE number of pulses needed to be in low state to write signals on LEDs
  */
 template <size_t COUNT, size_t T1H, size_t T1L, size_t T0H, size_t T0L, size_t RESET_PULSE>
-class LedsSPI_MSB : public LedsSPI_base<COUNT, T1H, T1L, T0H, T0L> {
+class LedsSPIMSB : public LedsSPIBase<COUNT, T1H, T1L, T0H, T0L> {
 protected:
-    uint8_t send_buff[(LedsSPI_base<COUNT, T1H, T1L, T0H, T0L>::bitfield_size + RESET_PULSE + 7) / 8];
+    uint8_t send_buff[(LedsSPIBase<COUNT, T1H, T1L, T0H, T0L>::bitfield_size + RESET_PULSE + 7) / 8];
 
     /**
      * @brief ready data to send
@@ -295,8 +243,8 @@ protected:
      *
      * @return size_t number of bytes to be send
      */
-    size_t bitfieldToSendBuff() {
-        const size_t bit_count = this->setBitset();
+    size_t bitfield_to_send_buf() {
+        const size_t bit_count = this->set_bitset();
         if (!bit_count) {
             return 0;
         }
@@ -306,17 +254,10 @@ protected:
             send_buff[i] = 0;
         }
 
-        size_t bit_read_index = bit_count - 1;
-        size_t bit_write_index = 0;
-
-        // This function reverses completely everything,
-        // which screws up neopixel driver indexing (doesn't correspond with the daisy-chain order)
-        // BFW-5067
-
-        for (; bit_write_index < bit_count; ++bit_write_index, --bit_read_index) {
-            uint8_t &r_target_byte = send_buff[bit_write_index / 8];
-            uint8_t target_bit = 1 << (7 - (bit_write_index % 8));
-            r_target_byte = this->led_bitset[bit_read_index] ? r_target_byte | target_bit : r_target_byte & (~target_bit);
+        for (size_t bit_index = 0; bit_index < bit_count; ++bit_index) {
+            const uint8_t target_bit = 1 << (7 - (bit_index % 8));
+            uint8_t &r_target_byte = send_buff[bit_index / 8];
+            r_target_byte = this->led_bitset[bit_index] ? r_target_byte | target_bit : r_target_byte & (~target_bit);
         }
 
         return (bit_count + RESET_PULSE + 7) / 8;
@@ -330,7 +271,7 @@ protected:
 using draw_fn_t = void (*)(uint8_t *, uint16_t);
 
 /**
- * @brief fully functional child of LedsSPI_MSB able to set physical LEDs via pointer
+ * @brief fully functional child of LedsSPIMSB able to set physical LEDs via pointer
  *        to function hadling SPI DMA
  * @tparam COUNT count of leds
  * @tparam DRAW_FN pointer to draw function
@@ -341,25 +282,25 @@ using draw_fn_t = void (*)(uint8_t *, uint16_t);
  * @tparam RESET_PULSE number of pulses needed to be in low state to write signals on LEDs
  */
 template <size_t COUNT, draw_fn_t DRAW_FN, size_t T1H, size_t T1L, size_t T0H, size_t T0L, size_t RESET_PULSE>
-class LedsSPI : public LedsSPI_MSB<COUNT, T1H, T1L, T0H, T0L, RESET_PULSE> {
+class LedsSPI : public LedsSPIMSB<COUNT, T1H, T1L, T0H, T0L, RESET_PULSE> {
 public:
-    void Tick() {
+    void update() {
         if (!this->leds_to_rewrite) {
             return;
         }
 
-        size_t bytes = this->bitfieldToSendBuff();
+        size_t bytes = this->bitfield_to_send_buf();
         DRAW_FN(this->send_buff, bytes);
     };
 };
 
 template <size_t COUNT, draw_fn_t DRAW_FN>
-using SPI_21MHz = LedsSPI<COUNT, DRAW_FN, T1H_21MHz, T1L_21MHz, T0H_21MHz, T0L_21MHz, RESET_21MHz>;
+using LedsSPI21MHz = LedsSPI<COUNT, DRAW_FN, T1H_21MHz, T1L_21MHz, T0H_21MHz, T0L_21MHz, RESET_21MHz>;
 
 template <size_t COUNT, draw_fn_t DRAW_FN>
-using SPI_10M5Hz = LedsSPI<COUNT, DRAW_FN, T1H_10M5Hz, T1L_10M5Hz, T0H_10M5Hz, T0L_10M5Hz, RESET_10M5Hz>;
+using LedsSPI10M5Hz = LedsSPI<COUNT, DRAW_FN, T1H_10M5Hz, T1L_10M5Hz, T0H_10M5Hz, T0L_10M5Hz, RESET_10M5Hz>;
 
 template <size_t COUNT, draw_fn_t DRAW_FN>
-using SPI_2M5Hz = LedsSPI<COUNT, DRAW_FN, T1H_2M5Hz, T1L_2M5Hz, T0H_2M5Hz, T0L_2M5Hz, RESET_2M5Hz>;
+using LedsSPI2M5Hz = LedsSPI<COUNT, DRAW_FN, T1H_2M5Hz, T1L_2M5Hz, T0H_2M5Hz, T0L_2M5Hz, RESET_2M5Hz>;
 
 }; // namespace neopixel

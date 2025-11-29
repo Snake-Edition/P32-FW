@@ -3,27 +3,28 @@
 #include <device/peripherals.h>
 #include <device/hal.h>
 #include "Marlin.h"
-#include "accelerometer.hpp"
 #include "modbus/ModbusTask.hpp"
 #include <PuppyConfig.hpp>
 #include "wiring_analog.h"
 #include "wiring_digital.h"
-#include "Marlin/src/module/temperature.h"
 #include <logging/log.hpp>
 #include "gpio.h"
-#include "timing.h"
 #include "modbus/ModbusInit.hpp" //for modbus::modbus_control
 #include "loadcell.hpp"
 #include "led.h"
 #include "adc.hpp"
 #include "safe_state.h"
 #include "Cheese.hpp"
-#include "hwio.h"
-#include "trigger_crash_dump.h"
 #include "fanctl.hpp"
 #include "task_startup.h"
 #include <hal/HAL_MultiWatchdog.hpp>
 #include <advanced_power.hpp>
+#include <bsod.h>
+
+#include <option/has_planner.h>
+#if HAS_PLANNER()
+    #include <module/planner.h>
+#endif
 
 LOG_COMPONENT_REF(Marlin);
 
@@ -131,8 +132,9 @@ void stop_marlin() {
     // stop marlin loop
     marlin_kill = true;
 
-    DISABLE_STEPPER_DRIVER_INTERRUPT();
-    DISABLE_MOVE_INTERRUPT();
+#if HAS_PLANNER()
+    planner.quick_stop();
+#endif
     DISABLE_TEMPERATURE_INTERRUPT();
     dwarf_init_done = false;
     hwio_safe_state();
@@ -141,10 +143,10 @@ void stop_marlin() {
 void analogWrite(uint32_t ulPin, uint32_t ulValue) {
     switch (ulPin) {
     case MARLIN_PIN(FAN): // print fan
-        Fans::print(0).setPWM(ulValue);
+        Fans::print(0).set_pwm(ulValue);
         return;
     case MARLIN_PIN(FAN1): // heatbreak
-        Fans::heat_break(0).setPWM(ulValue);
+        Fans::heat_break(0).set_pwm(ulValue);
         return;
     default:
         bsod("Write undefined pin");
@@ -179,20 +181,18 @@ int digitalRead(uint32_t marlinPin) {
     return gpio_get(marlinPin);
 }
 
-#if DISABLED(OVERRIDE_KILL_METHOD)
-    #error Dwarf needs OVERRIDE_KILL_METHOD kill method enabled
-#endif
-
 void kill(PGM_P const lcd_error /*=nullptr*/, PGM_P const lcd_component /*=nullptr*/, [[maybe_unused]] const bool steppers_off /*=false*/) {
     log_error(Marlin, "Printer killed: %s: %s", lcd_component, lcd_error);
     dwarf::ModbusControl::TriggerMarlinKillFault(dwarf_shared::errors::FaultStatusMask::MARLIN_KILLED, lcd_component, lcd_error);
     stop_marlin();
+    // keep running for modbus
 }
 
 #include "SPI.h"
 
 #define TMC_WRITE 0x80;
 
+#define writeCSN_H  HAL_GPIO_WritePin(STEPPER_CSN_GPIO_Port, STEPPER_CSN_Pin, GPIO_PIN_SET)
 #define writeSCK_L  HAL_GPIO_WritePin(STEPPER_SCK_GPIO_Port, STEPPER_SCK_Pin, GPIO_PIN_RESET)
 #define writeSCK_H  HAL_GPIO_WritePin(STEPPER_SCK_GPIO_Port, STEPPER_SCK_Pin, GPIO_PIN_SET)
 #define writeMOSI_L HAL_GPIO_WritePin(STEPPER_MOSI_GPIO_Port, STEPPER_MOSI_Pin, GPIO_PIN_RESET)
@@ -224,7 +224,9 @@ SPIClass::SPIClass() {
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_Init(STEPPER_SCK_GPIO_Port, &GPIO_InitStruct);
+    writeCSN_H;
+    writeSCK_H;
 }
 void SPIClass::begin([[maybe_unused]] uint8_t _pin) {}
 void SPIClass::end(void) {}
@@ -318,35 +320,6 @@ HardwareSerial::operator bool() {
 HardwareSerial SerialUART3(nullptr);
 HardwareSerial Serial3(nullptr);
 
-#include "Marlin/src/feature/safety_timer.h"
-
-void safety_timer_set_interval([[maybe_unused]] millis_t ms) {
-}
-
-bool safety_timer_is_expired() {
-    return false;
-}
-
-void safety_timer_reset() {
-}
-
-SafetyTimer &SafetyTimer::Instance() {
-    static SafetyTimer ret;
-    return ret;
-}
-
-SafetyTimer::SafetyTimer()
-    : pBoundPause(nullptr)
-    , interval(default_interval)
-    , last_reset(0)
-    , knob_moves(0)
-    , knob_clicks(0) {
-}
-
-SafetyTimer::expired_t SafetyTimer::Loop() {
-    return SafetyTimer::expired_t::no;
-}
-
 #include "metric.h"
 
 void metric_record_custom_at_time(metric_t *, uint32_t, const char *, ...) {}
@@ -356,10 +329,6 @@ void metric_record_integer_at_time(metric_t *, uint32_t, int) {}
 // Marlin's HAL
 
 unsigned HAL_RCC_CSR = 0;
-
-#include "Marlin/src/gcode/gcode.h"
-
-millis_t GcodeSuite::previous_move_ms = 0;
 
 #include "Marlin/src/gcode/queue.h"
 
@@ -372,7 +341,6 @@ uint8_t GCodeQueue::length = 0;
 
 void ExtUI::onStartup() {}
 void ExtUI::onIdle() {}
-void ExtUI::onStatusChanged([[maybe_unused]] const char *const msg) {}
 void ExtUI::onFactoryReset() {}
 
 #include "Marlin/src/feature/pause.h"

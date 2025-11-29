@@ -5,6 +5,7 @@
 #include "selftest_tool_helper.hpp"
 #include "Marlin/src/module/temperature.h"
 #include "fanctl.hpp"
+#include <marlin_stubs/G425.hpp>
 
 using namespace selftest;
 LOG_COMPONENT_REF(Selftest);
@@ -24,7 +25,7 @@ void set_nozzle_temps(int16_t temp) {
 bool all_nozzles_at_target() {
     for (uint8_t tool_nr = 0; tool_nr < HOTENDS; tool_nr++) {
         if (is_tool_selftest_enabled(tool_nr, ToolMask::AllTools)) { // check temperature on all tools, its not possible to calibrate just one tool
-            if (thermalManager.still_heating(tool_nr)) {
+            if (!thermalManager.is_hotend_temperature_reached(tool_nr)) {
                 return false;
             }
         }
@@ -75,16 +76,16 @@ private:
 
     static void start_cooling(uint8_t tool_nr) {
         tool_cooling_down[tool_nr] = true;
-        Fans::print(tool_nr).enterSelftestMode();
-        Fans::heat_break(tool_nr).enterSelftestMode();
-        Fans::print(tool_nr).selftestSetPWM(255);
-        Fans::heat_break(tool_nr).selftestSetPWM(255);
+        Fans::print(tool_nr).enter_selftest_mode();
+        Fans::heat_break(tool_nr).enter_selftest_mode();
+        Fans::print(tool_nr).selftest_set_pwm(255);
+        Fans::heat_break(tool_nr).selftest_set_pwm(255);
     }
 
     static void stop_cooling(uint8_t tool_nr) {
         tool_cooling_down[tool_nr] = false;
-        Fans::print(tool_nr).exitSelftestMode();
-        Fans::heat_break(tool_nr).exitSelftestMode();
+        Fans::print(tool_nr).exit_selftest_mode();
+        Fans::heat_break(tool_nr).exit_selftest_mode();
     }
 };
 
@@ -205,8 +206,20 @@ LoopResult CSelftestPart_ToolOffsets::state_wait_stable_temp() {
 
 LoopResult CSelftestPart_ToolOffsets::state_calibrate() {
     IPartHandler::SetFsmPhase(PhasesSelftest::ToolOffsets_wait_calibrate);
-    marlin_server::enqueue_gcode("G425");
+    return LoopResult::RunNext;
+}
+
+/**
+ * This state exists just because full_calibration() is a blocking call and we need to update FSM state
+ * to let the user know that calibration is in progress.
+ * The issue is that the fsm takes update after returning from a state function, so we cannot do it in one state.
+ */
+LoopResult CSelftestPart_ToolOffsets::state_finish_calibration() {
+    bool calibration_success = full_calibration();
     marlin_server::enqueue_gcode_printf("M18 S%d", DEFAULT_STEPPER_DEACTIVE_TIME);
+    if (!calibration_success) {
+        return LoopResult::Fail;
+    }
     return LoopResult::RunNext;
 }
 

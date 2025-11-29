@@ -6,9 +6,10 @@
 
 #include <cstring>
 #include "store_item.hpp"
-#include <tuple>
 #include <algorithm>
 #include <ranges>
+#include <type_traits>
+
 #include "utils/utility_extensions.hpp"
 #include "backend.hpp"
 #include <persistent_stores/journal/gen_journal_hashes.hpp>
@@ -25,11 +26,11 @@ struct CurrentStoreConfig {
     static inline BackendT &get_backend() { return backend(); };
     using Backend = BackendT;
 
-    template <StoreItemDataC DataT, auto default_val, typename BackendT::Id id, uint8_t hash_alloc_range = 1, bool ram_only = false>
-    using StoreItem = JournalItem<DataT, default_val, backend, id, hash_alloc_range, ram_only>;
+    template <StoreItemDataC DataT, auto default_val, ItemFlags flags, typename BackendT::Id id, uint8_t hash_alloc_range = 1, bool ram_only = false>
+    using StoreItem = JournalItem<DataT, default_val, flags, backend, id, hash_alloc_range, ram_only>;
 
-    template <StoreItemDataC DataT, auto default_val, typename BackendT::Id id, uint8_t max_item_count, uint8_t item_count>
-    using StoreItemArray = JournalItemArray<DataT, default_val, backend, id, max_item_count, item_count>;
+    template <StoreItemDataC DataT, auto default_val, ItemFlags flags, typename BackendT::Id id, uint8_t max_item_count, uint8_t item_count>
+    using StoreItemArray = JournalItemArray<DataT, default_val, flags, backend, id, max_item_count, item_count>;
 };
 
 template <BackendC BackendT>
@@ -65,12 +66,6 @@ bool consteval has_unique_items() {
 template <class Config, class DeprecatedItems, const std::span<const journal::Backend::MigrationFunction> &MigrationFunctions>
 class Store : public Config {
 
-    void dump_items() {
-        visit_all_struct_fields(static_cast<Config &>(*this), [](auto &item) {
-            item.ram_dump();
-        });
-    }
-
 public:
     /**
      * @brief Loads data from a byte array with a hashed_id.
@@ -81,7 +76,7 @@ public:
      */
     void load_item(uint16_t id, std::span<uint8_t> data) {
         visit_all_struct_fields(static_cast<Config &>(*this), [&]<typename Item>(Item &item) {
-            if constexpr (is_item_array_v<Item>) {
+            if constexpr (std::is_base_of_v<JournalItemArrayBase, Item>) {
                 if (Item::hashed_id_first <= id && id <= Item::hashed_id_last) {
                     item.init(id - Item::hashed_id_first, data);
                 }
@@ -91,6 +86,13 @@ public:
                 }
             }
         });
+    }
+
+    void dump_items(ItemFlags exclude_flags = {}) {
+        static constexpr auto callback = [](auto &item, auto exclude_flags) {
+            item.ram_dump(exclude_flags);
+        };
+        visit_all_struct_fields(static_cast<Config &>(*this), callback, exclude_flags);
     }
 
     void save_all() {
@@ -106,7 +108,9 @@ public:
         });
     }
 
-    Store() = default;
+    consteval Store()
+        : Config {} {}
+
     Store(const Store &other) = delete;
     Store(Store &&other) = delete;
     Store &operator=(const Store &other) = delete;
@@ -115,7 +119,7 @@ public:
 
 template <class Config, class DeprecatedItems, const std::span<const journal::Backend::MigrationFunction> &MigrationFunctions>
 inline Store<Config, DeprecatedItems, MigrationFunctions> &store() {
-    static Store<Config, DeprecatedItems, MigrationFunctions> str {};
+    static constinit Store<Config, DeprecatedItems, MigrationFunctions> str {};
     return str;
 }
 } // namespace journal

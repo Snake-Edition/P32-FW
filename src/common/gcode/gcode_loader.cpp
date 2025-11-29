@@ -4,6 +4,7 @@
 
 #include <logging/log.hpp>
 #include <gcode_reader_any.hpp>
+#include <utils/string_builder.hpp>
 
 LOG_COMPONENT_REF(MarlinServer);
 
@@ -115,4 +116,8 @@ std::expected<char *, GCodeLoader::BufferState> GCodeLoader::get_result() {
 
 void GCodeLoader::reset() {
     state = BufferState::idle;
+}
+
+std::span<char> GCodeLoader::share_buffer() {
+    return std::span<char>(gcode_buffer);
 }

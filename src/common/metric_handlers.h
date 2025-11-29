@@ -8,6 +8,8 @@ extern "C" {
 /// Set up the metrics handlers based on config store
 void metrics_reconfigure();
 
+bool are_metrics_enabled();
+
 extern void metric_handler(metric_point_t *point);
 
 #ifdef __cplusplus

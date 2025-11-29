@@ -11,7 +11,8 @@ TEMP_DIR=`mktemp --directory`
 
 # generate new .pot file
 "${CURRENT_DIR}/generate_pot.sh"
-POT_FILE="${ROOT_DIR}/src/lang/po/Prusa-Firmware-Buddy.pot"
+POT_FILE_BASE="Prusa-Firmware-Buddy.pot"
+POT_FILE="${ROOT_DIR}/src/lang/po/${POT_FILE_BASE}"
 
 REPORT_FILE="${TEMP_DIR}/report"
 
@@ -33,6 +34,9 @@ done
 echo 'untranslated strings begin'
 sort ${REPORT_FILE} | uniq |grep -v '^msgid ""$'
 echo 'untranslated strings end'
+
+# store file for CI
+cp "${POT_FILE}" "${POT_FILE_BASE}"
 
 # cleanup
 rm -r "${TEMP_DIR}"

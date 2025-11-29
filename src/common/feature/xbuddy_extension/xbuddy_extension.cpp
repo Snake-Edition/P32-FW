@@ -3,15 +3,24 @@
 #include <utility>
 
 #include <common/temperature.hpp>
-#include <common/app_metrics.h>
 #include <puppies/xbuddy_extension.hpp>
 #include <feature/chamber/chamber.hpp>
 #include <feature/chamber_filtration/chamber_filtration.hpp>
 #include <feature/xbuddy_extension/cooling.hpp>
-#include <leds/side_strip.hpp>
 #include <marlin_server.hpp>
+#include <leds/side_strip_handler.hpp>
 #include <buddy/unreachable.hpp>
 #include <CFanCtl3Wire.hpp> // for FANCTL_START_TIMEOUT
+#include <utils/timing/rate_limiter.hpp>
+
+namespace {
+
+// PWM used for the white led in strobe mode. We want more "dark" time than "light" time for clearer stroboscopic effect.
+//
+// This is a bit below 15%.
+constexpr uint8_t strobe_pwm = 35;
+
+} // namespace
 
 namespace buddy {
 
@@ -27,6 +36,7 @@ XBuddyExtension::Status XBuddyExtension::status() const {
     return Status::ready;
 }
 
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
 void XBuddyExtension::step() {
     // Obtain these values before locking the mutex.
     // Chamber API is accessing XBuddyExtension in some methods as well, so we might cause a deadlock otherwise.
@@ -34,9 +44,10 @@ void XBuddyExtension::step() {
     const auto target_temp = chamber().target_temperature();
     const auto filtration_backend = chamber_filtration().backend();
     const auto filtration_pwm = chamber_filtration().output_pwm();
-    const auto chamber_leds_pwm = leds::side_strip.GetColor(0).w;
 
     std::lock_guard _lg(mutex_);
+
+    const auto chamber_leds_pwm = strobe_freq_.has_value() ? strobe_pwm : leds::SideStripHandler::instance().color().w;
 
     if (status() != Status::ready) {
         return;
@@ -44,6 +55,7 @@ void XBuddyExtension::step() {
 
     puppies::xbuddy_extension.set_rgbw_led({ bed_leds_color_.r, bed_leds_color_.g, bed_leds_color_.b, bed_leds_color_.w });
     puppies::xbuddy_extension.set_white_led(chamber_leds_pwm);
+    puppies::xbuddy_extension.set_white_strobe_frequency(strobe_freq_);
     puppies::xbuddy_extension.set_usb_power(config_store().xbe_usb_power.get());
 
     const auto rpm0 = puppies::xbuddy_extension.get_fan_rpm(0);
@@ -135,8 +147,8 @@ void XBuddyExtension::step() {
       // them to wrong value, keep them at what they are now).
 
     METRIC_DEF(xbe_fan, "xbe_fan", METRIC_VALUE_CUSTOM, 0, METRIC_DISABLED);
-    static auto fan_should_record = metrics::RunApproxEvery(1000);
-    if (fan_should_record()) {
+    static auto fan_should_record = RateLimiter<uint32_t>(1000);
+    if (fan_should_record.check(ticks_ms())) {
         for (int fan = 0; fan < 3; ++fan) {
             const FanPWM pwm = FanPWM { puppies::xbuddy_extension.get_requested_fan_pwm(fan) };
             const FanRPM rpm = puppies::xbuddy_extension.get_fan_rpm(fan).value_or(0);
@@ -157,9 +169,9 @@ bool XBuddyExtension::is_fan_ok(const Fan fan) const {
     if (actual_pwm.value == 0) {
         // Fan is not supposed to spin - all is well
 
-    } else if (fan_rpm(fan).value_or(0) > 0) {
+    } else if (auto rpm = fan_rpm(fan); !rpm.has_value() || rpm.value() > 0) {
         // Fan is spinning - all is well
-        // Or we don't know the RPM, at which point we will not report the problem until we are sure
+        // Or we don't know the RPM, at which point, it's an error in modBus read communication and we can't assume anything about the fan_rpm
 
     } else if (ticks_diff(ticks_ms(), fan_start_timestamp[fan]) >= FANCTL_START_TIMEOUT) {
         // Fan should be spinning for some time now, but it isn't -> report a problem
@@ -270,12 +282,15 @@ void XBuddyExtension::set_bed_leds_color(leds::ColorRGBW set) {
     bed_leds_color_ = set;
 }
 
-std::optional<Temperature> XBuddyExtension::chamber_temperature() {
-    return puppies::xbuddy_extension.get_chamber_temp();
+void XBuddyExtension::set_strobe(std::optional<uint16_t> freq) {
+    assert(freq != 0);
+
+    std::lock_guard _lg(mutex_);
+    strobe_freq_ = freq;
 }
 
-std::optional<XBuddyExtension::FilamentSensorState> XBuddyExtension::filament_sensor() {
-    return puppies::xbuddy_extension.get_filament_sensor_state().transform([](auto val) { return static_cast<FilamentSensorState>(val); });
+std::optional<Temperature> XBuddyExtension::chamber_temperature() {
+    return puppies::xbuddy_extension.get_chamber_temp();
 }
 
 void XBuddyExtension::set_usb_power(bool enabled) {
@@ -284,6 +299,11 @@ void XBuddyExtension::set_usb_power(bool enabled) {
 
 bool XBuddyExtension::usb_power() const {
     return config_store().xbe_usb_power.get();
+}
+#endif
+
+std::optional<XBuddyExtension::FilamentSensorState> XBuddyExtension::filament_sensor() {
+    return puppies::xbuddy_extension.get_filament_sensor_state().transform([](auto val) { return static_cast<FilamentSensorState>(val); });
 }
 
 } // namespace buddy

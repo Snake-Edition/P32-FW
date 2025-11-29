@@ -6,7 +6,7 @@
 #include <Marlin/src/gcode/parser.h>
 #include <Marlin/src/module/motion.h>
 #include <config_store/store_instance.hpp>
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 
 #ifdef PRINT_CHECKING_Q_CMDS
 

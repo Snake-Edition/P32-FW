@@ -1,6 +1,5 @@
 #include "MItem_basic_selftest.hpp"
 #include "gui.hpp"
-#include "sys.h"
 #include "ScreenHandler.hpp"
 #include "printer_selftest.hpp"
 #include <buddy/main.h>
@@ -26,25 +25,26 @@ MI_RESTORE_CALIBRATION_FROM_USB::MI_RESTORE_CALIBRATION_FROM_USB()
 void MI_RESTORE_CALIBRATION_FROM_USB::click([[maybe_unused]] IWindowMenu &window_menu) {
     bool success = true;
 
-    SelftestResult res = config_store().selftest_result.get();
-
     // load dock positions
     success &= prusa_toolchanger.load_tool_info_from_usb();
     prusa_toolchanger.save_tool_info();
-    for (int i = 0; i < std::min<int>(config_store_ns::max_tool_count, buddy::puppies::DWARF_MAX_COUNT); i++) {
-        res.tools[i].dockoffset = prusa_toolchanger.is_tool_info_valid(buddy::puppies::dwarfs[i]) ? TestResult_Passed : TestResult_Failed;
-    }
 
     // load tool offsets
     success &= prusa_toolchanger.load_tool_offsets_from_usb();
     prusa_toolchanger.save_tool_offsets();
+
+    #if HAS_SELFTEST()
+    SelftestResult res = config_store().selftest_result.get();
+    for (int i = 0; i < std::min<int>(config_store_ns::max_tool_count, buddy::puppies::DWARF_MAX_COUNT); i++) {
+        res.tools[i].dockoffset = prusa_toolchanger.is_tool_info_valid(buddy::puppies::dwarfs[i]) ? TestResult_Passed : TestResult_Failed;
+    }
     for (int i = 0; i < std::min<int>(config_store_ns::max_tool_count, buddy::puppies::DWARF_MAX_COUNT); i++) {
         auto tool_offset = config_store().get_tool_offset(i);
         bool looks_fine = tool_offset.x != 0 && tool_offset.y != 0 && tool_offset.z != 0;
         res.tools[i].tooloffset = looks_fine ? TestResult_Passed : TestResult_Failed;
     }
-
     res = config_store().selftest_result.get();
+    #endif
 
     // load filament sensor calibrations
     success &= restore_fs_calibration();
@@ -81,12 +81,11 @@ bool MI_RESTORE_CALIBRATION_FROM_USB::restore_fs_calibration() {
         }
 
         int32_t ref_nins_value = atoi(buffer.data());
-        uint32_t span_value = side ? config_store_ns::defaults::side_fs_value_span : config_store_ns::defaults::extruder_fs_value_span;
         int32_t ref_ins_value = side ? config_store_ns::defaults::side_fs_ref_ins_value : config_store_ns::defaults::extruder_fs_ref_ins_value;
         ;
         char *second = strnstr(buffer.data(), " ", pos) + 1;
         if (second) {
-            span_value = atoll(second);
+            // second parameter used to be for the "fs span", we're not using that anymore
             char *third = strnstr(second, " ", pos - (second - buffer.data())) + 1;
             if (third) {
                 ref_ins_value = atoi(third);
@@ -95,11 +94,9 @@ bool MI_RESTORE_CALIBRATION_FROM_USB::restore_fs_calibration() {
 
         if (side) {
             config_store().set_side_fs_ref_nins_value(e, ref_nins_value);
-            config_store().set_side_fs_value_span(e, span_value);
             config_store().set_side_fs_ref_ins_value(e, ref_ins_value);
         } else {
             config_store().set_extruder_fs_ref_nins_value(e, ref_nins_value);
-            config_store().set_extruder_fs_value_span(e, span_value);
             config_store().set_extruder_fs_ref_ins_value(e, ref_ins_value);
         }
     }
@@ -141,10 +138,9 @@ bool MI_BACKUP_CALIBRATION_TO_USB::backup_fs_calibration() {
         bool side = i >= EXTRUDERS;
 
         int32_t ref_nins_value = side ? config_store().get_side_fs_ref_nins_value(e) : config_store().get_extruder_fs_ref_nins_value(e);
-        uint32_t span_value = side ? config_store().get_side_fs_value_span(e) : config_store().get_extruder_fs_value_span(e);
         int32_t ref_ins_value = side ? config_store().get_side_fs_ref_ins_value(e) : config_store().get_extruder_fs_ref_ins_value(e);
 
-        int n = snprintf(buffer.data(), buffer.size(), "%" PRIi32 " %" PRIu32 " %" PRIi32 "\n", ref_nins_value, span_value, ref_ins_value);
+        int n = snprintf(buffer.data(), buffer.size(), "%" PRIi32 " 0 %" PRIi32 "\n", ref_nins_value, ref_ins_value);
         fwrite(buffer.data(), sizeof(char), std::min<int>(n, buffer.size() - 1), file);
     }
 

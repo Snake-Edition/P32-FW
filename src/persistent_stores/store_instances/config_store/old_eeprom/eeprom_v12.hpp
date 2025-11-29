@@ -141,7 +141,7 @@ inline Record decode_from_v11(uint32_t encoded) {
 
     for (size_t i = 0; i < count; ++i) {
         uint32_t decoded = encoded & mask;
-        if (decoded >= ftrstd::to_underlying(FooterItems::_count)) {
+        if (decoded >= std::to_underlying(FooterItems::_count)) {
             return default_items; // data corrupted, return default setting
         }
 

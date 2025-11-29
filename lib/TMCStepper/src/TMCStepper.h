@@ -12,7 +12,7 @@
 
 #include <Stream.h>
 
-#include <option/has_puppies.h>
+#include <option/has_dwarf.h>
 #include <option/has_toolchanger.h>
 
 #if (__cplusplus == 201703L) && defined(__has_include)
@@ -53,6 +53,7 @@
 
 #define TMCSTEPPER_VERSION 0x000501 // v0.5.1
 
+extern "C" void tmc_serial_lock_init();
 extern "C" bool tmc_serial_lock_acquire();
 extern "C" void tmc_serial_lock_release();
 extern "C" void tmc_communication_error();
@@ -171,7 +172,7 @@ class TMCStepper {
 
 class TMC2130Stepper : public TMCStepper {
 	public:
-	#if HAS_PUPPIES() && HAS_TOOLCHANGER()
+	#if HAS_DWARF() && HAS_TOOLCHANGER()
 		enum class Connection { Direct, Remote };
 		TMC2130Stepper(Connection connection, float RS = default_RS);
 	#endif
@@ -390,7 +391,7 @@ class TMC2130Stepper : public TMCStepper {
 		static uint32_t spi_speed; // Default 2MHz
 		const uint16_t _pinCS;
 		SW_SPIClass * TMC_SW_SPI = NULL;
-	#if HAS_PUPPIES() && HAS_TOOLCHANGER()
+	#if HAS_DWARF() && HAS_TOOLCHANGER()
 		Connection connection = Connection::Direct;
 	#endif
 		static constexpr float default_RS = 0.11;

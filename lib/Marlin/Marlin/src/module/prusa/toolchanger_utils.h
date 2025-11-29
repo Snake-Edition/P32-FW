@@ -6,6 +6,8 @@
     #include <puppies/Dwarf.hpp>
     #include <module/tool_change.h>
 
+    #include <inplace_function.hpp>
+
 struct PrusaToolInfo {
     float dock_x;
     float dock_y;
@@ -39,6 +41,7 @@ public:
     static constexpr auto PICK_X_OFFSET_1 = -11.8f; ///< Offset from dock_x when tool is being locked [mm]
     static constexpr auto PICK_X_OFFSET_2 = -12.8f; ///< Offset from dock_x when tool is fully locked [mm]
     static constexpr auto PICK_X_OFFSET_3 = -9.9f; ///< Offset from dock_x when tool can be pulled from the dock area [mm]
+    static constexpr auto X_UNLOCK_DISTANCE_MM = PICK_X_OFFSET_3; ///< Unlock move length while dock calibrating [mm]
 
     /// Feedrate for moves around dock
     static float limit_stealth_feedrate(float feedrate);
@@ -140,6 +143,27 @@ public:
 
     void expand_first_dock_position(); // TODO: Is this still needed/wanted ?
 
+    class StepperConfigGuard final {
+        uint32_t x_stall_sensitivity; ///< Sensitivity to restore [driver specific]
+        uint32_t x_current_ma; ///< Current to restore [mA]
+        uint32_t y_stall_sensitivity; ///< Sensitivity to restore [driver specific]
+        uint32_t y_current_ma; ///< Current to restore [mA]
+    public:
+        /**
+         * @brief Configure stepper current and stall sensitivity for toolchange.
+         * Use constants defined above.
+         * Configure only X and Y (A and B) steppers.
+         * Use constants defined above, on top of PrusaToolChangerUtils.
+         * Remember previous values and restore them in destructor.
+         */
+        StepperConfigGuard();
+        StepperConfigGuard(const StepperConfigGuard &) = delete; ///< No copy constructor
+        StepperConfigGuard &operator=(const StepperConfigGuard &) = delete; ///< No copy assignment
+        StepperConfigGuard(StepperConfigGuard &&) = delete; ///< No move constructor
+        StepperConfigGuard &operator=(StepperConfigGuard &&) = delete; ///< No move assignment
+        ~StepperConfigGuard(); ///< Restore stepper current and stall sensitivity
+    };
+
 protected:
     std::atomic<bool> force_toolchange_gcode = false; ///< after reset force toolchange to init marlin tool variables
     std::atomic<bool> request_toolchange = false; ///< when true, toolchange was requested and will be executed in puppytask
@@ -151,8 +175,8 @@ protected:
      * It is used to clean up something on a return from a function.
      */
     struct ResetOnReturn {
-        std::function<void(bool)> set_state;
-        [[nodiscard]] ResetOnReturn(std::function<void(bool)> set_state)
+        stdext::inplace_function<void(bool)> set_state;
+        [[nodiscard]] ResetOnReturn(stdext::inplace_function<void(bool)> set_state)
             : set_state(set_state) { set_state(true); }
         ~ResetOnReturn() { set_state(false); }
     };
@@ -183,7 +207,7 @@ protected:
      * @param timeout_ms maximal time to wait [ms]
      * @return true on success, false if timeout was reached
      */
-    [[nodiscard]] bool wait(std::function<bool()> function, uint32_t timeout_ms);
+    [[nodiscard]] bool wait(stdext::inplace_function<bool()> function, uint32_t timeout_ms);
 
     /**
      * @brief Force a selected tool to marlin.

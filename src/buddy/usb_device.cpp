@@ -11,7 +11,7 @@
 #include <tasks.hpp>
 #include <timing.h>
 #include <atomic>
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 
 LOG_COMPONENT_DEF(USBDevice, logging::Severity::info);
 

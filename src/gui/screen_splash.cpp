@@ -15,8 +15,8 @@
 #include <pseudo_screen_callback.hpp>
 #include "bsod.h"
 #include <guiconfig/guiconfig.h>
-#include <st25dv64k.h>
-#include <sys.h>
+#include <feature/factory_reset/factory_reset.hpp>
+#include <window_msgbox_happy_printing.hpp>
 
 #include <option/bootloader.h>
 #include <option/developer_mode.h>
@@ -63,12 +63,6 @@
 
 screen_splash_data_t::screen_splash_data_t()
     : screen_t()
-#if HAS_MINI_DISPLAY()
-    , img_printer("/internal/res/printer_logo.qoi") // dimensions are printer dependent
-    , img_marlin("/internal/res/marlin_logo_79x61.qoi")
-    , icon_logo_printer(this, &img_printer, point_i16_t(0, 84), window_icon_t::Center::x, GuiDefaults::ScreenWidth)
-    , icon_logo_marlin(this, &img_marlin, point_i16_t(80, 225))
-#endif
     , text_progress(this, Rect16(0, SPLASHSCREEN_VERSION_Y, GuiDefaults::ScreenWidth, 18), is_multiline::no)
     , progress(this, Rect16(SPLASHSCREEN_PROGRESSBAR_X, SPLASHSCREEN_PROGRESSBAR_Y, SPLASHSCREEN_PROGRESSBAR_W, SPLASHSCREEN_PROGRESSBAR_H), COLOR_ORANGE, COLOR_GRAY, 6)
     , version_displayed(false) {
@@ -79,16 +73,24 @@ screen_splash_data_t::screen_splash_data_t()
     text_progress.SetTextColor(COLOR_GRAY);
 
     snprintf(text_progress_buffer, sizeof(text_progress_buffer), "Firmware %s", version::project_version_full);
-    text_progress.SetText(string_view_utf8::MakeRAM((uint8_t *)text_progress_buffer));
+    text_progress.SetText(string_view_utf8::MakeRAM(text_progress_buffer));
     progress.SetProgressPercent(0);
 
-#if !HAS_SELFTEST()
-    // Nothing
+#if ENABLED(POWER_PANIC)
+    // don't present any screen or wizard if there is a powerpanic pending
+    if (power_panic::state_stored()) {
+        return;
+    }
+#endif
 
-#elif DEVELOPER_MODE()
-    const bool run_wizard = false;
+#if DEVELOPER_MODE()
+    // don't present any screen or wizard
+    return;
+#endif
 
-#elif !PRINTER_IS_PRUSA_iX()
+    Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<PseudoScreenCallback, MsgBoxHappyPrinting>);
+
+#if HAS_SELFTEST() && !PRINTER_IS_PRUSA_iX()
     const bool run_wizard =
         []() {
             SelftestResult sr = config_store().selftest_result.get();
@@ -125,7 +127,7 @@ screen_splash_data_t::screen_splash_data_t()
 
             return true;
         }();
-#else
+#elif HAS_SELFTEST()
     const bool run_wizard = false;
 #endif
 
@@ -167,6 +169,26 @@ screen_splash_data_t::screen_splash_data_t()
         // Calls network_initial_setup_wizard
         marlin_client::gcode("M1703 A");
     };
+#if HAS_SELFTEST()
+    if (run_wizard) {
+        Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<ScreenMenuSTSWizard>);
+    }
+#endif
+    bool network_setup_needed = !config_store().printer_network_setup_done.get();
+    bool hw_config_needed = !config_store().printer_hw_config_done.get();
+    if (network_setup_needed) {
+        Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<PseudoScreenCallback, network_callback>);
+    }
+    if (hw_config_needed) {
+        Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<ScreenPrinterSetup>);
+    }
+    if (network_setup_needed || hw_config_needed
+#if HAS_SELFTEST()
+        || run_wizard
+#endif
+    ) {
+        Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<PseudoScreenCallback, pepa_callback>);
+    }
 
     // Check for FW type change
     {
@@ -181,57 +203,30 @@ screen_splash_data_t::screen_splash_data_t()
             constexpr auto callback = +[] {
                 StringViewUtf8Parameters<16> params;
                 MsgBoxError(
-                    _("Printer type changed from %s to %s.\nFactory reset has to be performed.")
+                    _("Printer type changed from %s to %s.\nFactory reset will be performed.\nSome configuration (network, filament profiles, ...) will be preserved.")
                         .formatted(params, PrinterModelInfo::get(config_store().last_boot_base_printer_model.get()).id_str, PrinterModelInfo::firmware_base().id_str),
                     { Response::Continue });
 
-                auto msg = MsgBoxBase(GuiDefaults::DialogFrameRect, Responses_NONE, 0, nullptr, _("Erasing everything,\nit will take some time..."));
-                msg.Draw(); // Non-blocking info
-
-                static constexpr uint32_t empty = 0xffffffff;
-                for (uint16_t address = 0; address <= (8096 - 4); address += 4) {
-                    st25dv64k_user_write_bytes(address, &empty, sizeof(empty));
-                }
-
-                MsgBoxInfo(_("Reset complete. The system will now restart."), Responses_Ok);
-                sys_reset();
+                FactoryReset::perform(false, FactoryReset::item_bitset({ FactoryReset::Item::network, FactoryReset::Item::stats, FactoryReset::Item::user_interface, FactoryReset::Item::user_profiles }));
             };
-            Screens::Access()->PushBeforeCurrent(screen_node(ScreenFactory::Screen<PseudoScreenCallback, callback>));
-            return;
+            Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<PseudoScreenCallback, callback>);
         }
     }
 
-    const screen_node screens[] {
-#if HAS_TRANSLATIONS()
-        { !LangEEPROM::getInstance().IsValid() ? ScreenFactory::Screen<ScreenMenuLanguages, ScreenMenuLanguages::Context::initial_language_selection> : nullptr },
-#endif
 #if HAS_TOUCH()
-            { touchscreen.is_enabled() && !touchscreen.is_hw_ok() ? ScreenFactory::Screen<PseudoScreenCallback, touch_error_callback> : nullptr },
+    if (touchscreen.is_enabled() && !touchscreen.is_hw_ok()) {
+        Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<PseudoScreenCallback, touch_error_callback>);
+    }
 #endif // HAS_TOUCH
-
-            { !config_store().printer_setup_done.get() ? ScreenFactory::Screen<PseudoScreenCallback, pepa_callback> : nullptr },
-            { !config_store().printer_setup_done.get() ? ScreenFactory::Screen<ScreenPrinterSetup> : nullptr },
-            { !config_store().printer_setup_done.get() ? ScreenFactory::Screen<PseudoScreenCallback, network_callback> : nullptr },
-
-#if HAS_SELFTEST()
-        {
-            run_wizard ? ScreenFactory::Screen<ScreenMenuSTSWizard> : nullptr
-        }
-#endif
-    };
-
-#if ENABLED(POWER_PANIC)
-    // present none of the screens above if there is a powerpanic pending
-    if (!power_panic::state_stored()) {
-#endif
-        Screens::Access()->PushBeforeCurrent(screens, screens + std::size(screens));
-#if ENABLED(POWER_PANIC)
+#if HAS_TRANSLATIONS()
+    if (!LangEEPROM::getInstance().IsValid()) {
+        Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<ScreenMenuLanguages, ScreenMenuLanguages::Context::initial_language_selection>);
     }
 #endif
 }
 
 screen_splash_data_t::~screen_splash_data_t() {
-    img::enable_resource_file(); // now it is safe to use resources from xFlash
+    display::enable_resource_file(); // now it is safe to use resources from xFlash
 }
 
 void screen_splash_data_t::draw() {
@@ -240,12 +235,11 @@ void screen_splash_data_t::draw() {
     text_progress.Invalidate();
     screen_t::draw(); // We want to draw over bootloader's screen without flickering/redrawing
 #ifdef _DEBUG
-    static const char dbg[] = "DEBUG";
     #if HAS_MINI_DISPLAY()
-    display::draw_text(Rect16(180, 91, 60, 13), string_view_utf8::MakeCPUFLASH((const uint8_t *)dbg), resource_font(Font::small), COLOR_BLACK, COLOR_RED);
+    display::draw_text(Rect16(180, 91, 60, 16), string_view_utf8::MakeCPUFLASH("DEBUG"), Font::small, COLOR_BLACK, COLOR_RED);
     #endif
     #if HAS_LARGE_DISPLAY()
-    display::draw_text(Rect16(340, 130, 60, 13), string_view_utf8::MakeCPUFLASH((const uint8_t *)dbg), resource_font(Font::small), COLOR_BLACK, COLOR_RED);
+    display::draw_text(Rect16(340, 130, 60, 16), string_view_utf8::MakeCPUFLASH("DEBUG"), Font::small, COLOR_BLACK, COLOR_RED);
     #endif
 #endif //_DEBUG
 }
@@ -282,13 +276,13 @@ void screen_splash_data_t::windowEvent([[maybe_unused]] window_t *sender, GUI_ev
         // If such a process description is not available (e.g: fw_gui_splash_progress()) - draw FW version (only once to avoid flickering)
         if (un.pGUIStartupProgress->bootstrap_description.has_value()) {
             strlcpy(text_progress_buffer, un.pGUIStartupProgress->bootstrap_description.value(), sizeof(text_progress_buffer));
-            text_progress.SetText(string_view_utf8::MakeRAM((uint8_t *)text_progress_buffer));
+            text_progress.SetText(string_view_utf8::MakeRAM(text_progress_buffer));
             text_progress.Invalidate();
             version_displayed = false;
         } else {
             if (!version_displayed) {
                 snprintf(text_progress_buffer, sizeof(text_progress_buffer), "Firmware %s", version::project_version_full);
-                text_progress.SetText(string_view_utf8::MakeRAM((uint8_t *)text_progress_buffer));
+                text_progress.SetText(string_view_utf8::MakeRAM(text_progress_buffer));
                 text_progress.Invalidate();
                 version_displayed = true;
             }

@@ -6,44 +6,44 @@
 
 namespace screen_toolhead_settings {
 
-class MI_FS_SPAN : public MI_TOOLHEAD_SPECIFIC_SPIN<MI_FS_SPAN> {
+class MI_FS_REF_NINS : public MI_TOOLHEAD_SPECIFIC_SPIN {
 public:
-    MI_FS_SPAN(Toolhead toolhead = default_toolhead);
-    static float read_value_impl(ToolheadIndex ix);
-    static void store_value_impl(ToolheadIndex ix, float set);
+    MI_FS_REF_NINS(Toolhead toolhead = default_toolhead);
+    float read_value_impl(ToolheadIndex ix) final;
+    void store_value_impl(ToolheadIndex ix, float set) final;
 };
 
-class MI_FS_REF : public MI_TOOLHEAD_SPECIFIC_SPIN<MI_FS_REF> {
+class MI_FS_REF_INS : public MI_TOOLHEAD_SPECIFIC_SPIN {
 public:
-    MI_FS_REF(Toolhead toolhead = default_toolhead);
-    static float read_value_impl(ToolheadIndex ix);
-    static void store_value_impl(ToolheadIndex ix, float set);
+    MI_FS_REF_INS(Toolhead toolhead = default_toolhead);
+    float read_value_impl(ToolheadIndex ix) final;
+    void store_value_impl(ToolheadIndex ix, float set) final;
 };
 
 #if HAS_ADC_SIDE_FSENSOR()
-class MI_SIDE_FS_SPAN : public MI_TOOLHEAD_SPECIFIC_SPIN<MI_SIDE_FS_SPAN> {
+class MI_SIDE_FS_REF_NINS : public MI_TOOLHEAD_SPECIFIC_SPIN {
 public:
-    MI_SIDE_FS_SPAN(Toolhead toolhead = default_toolhead);
-    static float read_value_impl(ToolheadIndex ix);
-    static void store_value_impl(ToolheadIndex ix, float set);
+    MI_SIDE_FS_REF_NINS(Toolhead toolhead = default_toolhead);
+    float read_value_impl(ToolheadIndex ix) final;
+    void store_value_impl(ToolheadIndex ix, float set) final;
 };
 
-class MI_SIDE_FS_REF : public MI_TOOLHEAD_SPECIFIC_SPIN<MI_SIDE_FS_REF> {
+class MI_SIDE_FS_REF_INS : public MI_TOOLHEAD_SPECIFIC_SPIN {
 public:
-    MI_SIDE_FS_REF(Toolhead toolhead = default_toolhead);
-    static float read_value_impl(ToolheadIndex ix);
-    static void store_value_impl(ToolheadIndex ix, float set);
+    MI_SIDE_FS_REF_INS(Toolhead toolhead = default_toolhead);
+    float read_value_impl(ToolheadIndex ix) final;
+    void store_value_impl(ToolheadIndex ix, float set) final;
 };
 #endif
 
 using ScreenToolheadDetailFS_ = ScreenMenu<EFooter::Off,
     MI_RETURN,
-    MI_FS_SPAN,
-    MI_FS_REF
+    MI_FS_REF_NINS,
+    MI_FS_REF_INS
 #if HAS_ADC_SIDE_FSENSOR()
     ,
-    MI_SIDE_FS_SPAN,
-    MI_SIDE_FS_REF
+    MI_SIDE_FS_REF_NINS,
+    MI_SIDE_FS_REF_INS
 #endif
     >;
 

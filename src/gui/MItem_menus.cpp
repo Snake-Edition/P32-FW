@@ -1,23 +1,17 @@
 #include "MItem_menus.hpp"
 #include "ScreenHandler.hpp"
-#include "str_utils.hpp"
 #include <option/buddy_enable_connect.h>
-#include "screen_sysinf.hpp"
 #include "screen_qr_error.hpp"
 #include "screen_messages.hpp"
 #include "translator.hpp"
-#include "screen_mbl_values.hpp"
-
 #include "screen_menu_temperature.hpp"
 #include "screen_menu_move.hpp"
 #include "screen_menu_sensor_info.hpp"
 #include "screen_menu_odometer.hpp"
 #include "screen_menu_version_info.hpp"
 #include "screen_menu_metrics.hpp"
-#include "screen_menu_fw_update.hpp"
 #include "screen_menu_network_status.hpp"
 #include "screen_menu_network_settings.hpp"
-#include "screen_menu_eeprom.hpp"
 #include "screen_menu_footer_settings.hpp"
 #include "screen_prusa_link.hpp"
 #include "screen_menu_connect.hpp"
@@ -28,13 +22,10 @@
 #include "screen_menu_lang_and_time.hpp"
 #include "screen_menu_hardware.hpp"
 #include "screen_menu_hardware_tune.hpp"
-#include "screen_menu_snake_settings.hpp"
 #include "screen_menu_system.hpp"
 #include "screen_menu_statistics.hpp"
-#include "screen_menu_factory_reset.hpp"
 #include "screen_menu_error_test.hpp"
 #include "screen_menu_input_shaper.hpp"
-#include "screen_snake.hpp"
 #include <screen_menu_languages.hpp>
 #include <screen_menu_info.hpp>
 #include <screen_menu_control.hpp>
@@ -48,6 +39,7 @@
 #include <screen/filament/screen_filaments_reorder.hpp>
 #include <screen/filament/screen_filaments_visibility.hpp>
 #include <screen/toolhead/screen_toolhead_settings.hpp>
+#include <gui/screen/screen_factory_reset.hpp>
 
 #if PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_MINI()
     #include <screen_menu_bed_level_correction.hpp>
@@ -67,6 +59,14 @@
 
 #if HAS_CHAMBER_FILTRATION_API()
     #include <gui/screen/screen_chamber_filtration.hpp>
+#endif
+
+#if HAS_MMU2()
+    #include <gui/screen/screen_hw_mmu.hpp>
+#endif
+
+#if HAS_LEDS_MENU()
+    #include <screen/screen_menu_leds.hpp>
 #endif
 
 #include <config_store/store_instance.hpp>
@@ -94,18 +94,15 @@ template struct MI_SCREEN_CTOR<ScreenFilamentsVisibility>;
 template struct MI_SCREEN_CTOR<ScreenMenuVersionInfo>;
 template struct MI_SCREEN_CTOR<ScreenMenuSensorInfo>;
 template struct MI_SCREEN_CTOR<ScreenMenuOdometer>;
-template struct MI_SCREEN_CTOR<screen_sysinfo_data_t>;
 template struct MI_SCREEN_CTOR<ScreenMenuFailStat>;
 template struct MI_SCREEN_CTOR<ScreenMenuTemperature>;
 template struct MI_SCREEN_CTOR<ScreenMenuMove>;
-template struct MI_SCREEN_CTOR<ScreenMenuFwUpdate>;
 template struct MI_SCREEN_CTOR<ScreenMenuMetricsSettings>;
 template struct MI_SCREEN_CTOR<ScreenMenuEthernetSettings>;
 template struct MI_SCREEN_CTOR<ScreenMenuWifiSettings>;
 template struct MI_SCREEN_CTOR<screen_messages_data_t>;
 template struct MI_SCREEN_CTOR<ScreenMenuConnect>;
 template struct MI_SCREEN_CTOR<ScreenMenuPrusaLink>;
-template struct MI_SCREEN_CTOR<ScreenMenuEeprom>;
 template struct MI_SCREEN_CTOR<ScreenMenuFooterSettings>;
 template struct MI_SCREEN_CTOR<ScreenMenuFooterSettingsAdv>;
 template struct MI_SCREEN_CTOR<ScreenMenuExperimentalSettings>;
@@ -118,7 +115,7 @@ template struct MI_SCREEN_CTOR<ScreenMenuHardwareTune>;
 template struct MI_SCREEN_CTOR<ScreenMenuSystem>;
 template struct MI_SCREEN_CTOR<ScreenMenuStatistics>;
 template struct MI_SCREEN_CTOR<ScreenMenuInfo>;
-template struct MI_SCREEN_CTOR<ScreenMenuFactoryReset>;
+template struct MI_SCREEN_CTOR<ScreenFactoryReset>;
 template struct MI_SCREEN_CTOR<ScreenMenuInputShaper>;
 template struct MI_SCREEN_CTOR<ScreenPrinterSetup>;
 
@@ -146,50 +143,12 @@ template struct MI_SCREEN_CTOR<ScreenMenuFilamentSensors>;
 template struct MI_SCREEN_CTOR<ScreenMenuSTSCalibrations>;
 #endif
 
-/**********************************************************************************************/
-MI_SNAKE_SETTINGS::MI_SNAKE_SETTINGS()
-    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
-}
-
-void MI_SNAKE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
-    Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuSnakeSettings>);
-}
-
-/**********************************************************************************************/
-MI_PID_SETTINGS::MI_PID_SETTINGS()
-    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
-}
-
-void MI_PID_SETTINGS::click(IWindowMenu & /*window_menu*/) {
-    Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuPIDSettings>);
-}
-
-/**********************************************************************************************/
-MI_SNAKE_TUNE_SETTINGS::MI_SNAKE_TUNE_SETTINGS()
-    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
-}
-
-void MI_SNAKE_TUNE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
-    Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuSnakeTuneSettings>);
-}
-
-MI_SNAKE::MI_SNAKE()
-    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
-}
-
-void MI_SNAKE::click(IWindowMenu & /*window_menu*/) {
-    Screens::Access()->Open(ScreenFactory::Screen<screen_snake_data_t>);
-}
-MI_MBL_VALUES::MI_MBL_VALUES()
-    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
-}
-
-void MI_MBL_VALUES::click(IWindowMenu & /*window_menu*/) {
-    Screens::Access()->Open(ScreenFactory::Screen<screen_mbl_values_t>);
-}
-
 #if PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_MINI()
 template struct MI_SCREEN_CTOR<ScreenMenuBedLevelCorrection>;
+#endif
+
+#if HAS_LEDS_MENU()
+template struct MI_SCREEN_CTOR<ScreenMenuLeds>;
 #endif
 
 /**********************************************************************************************/
@@ -197,7 +156,6 @@ template struct MI_SCREEN_CTOR<ScreenMenuBedLevelCorrection>;
 MI_SERIAL_PRINTING_SCREEN_ENABLE::MI_SERIAL_PRINTING_SCREEN_ENABLE()
     : WI_ICON_SWITCH_OFF_ON_t(config_store().serial_print_screen_enabled.get(), _(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
-
 void MI_SERIAL_PRINTING_SCREEN_ENABLE::OnChange(size_t old_index) {
     config_store().serial_print_screen_enabled.set(!old_index);
 }
@@ -228,4 +186,18 @@ void MI_TOOLHEAD_SETTINGS::click(IWindowMenu &) {
 
 #if HAS_CHAMBER_FILTRATION_API()
 template struct MI_SCREEN_CTOR<ScreenChamberFiltration>;
+#endif
+
+#if HAS_MMU2()
+    #include <feature/prusa/MMU2/mmu2_mk4.h>
+
+MI_HW_MMU::MI_HW_MMU()
+    : IWindowMenuItem(_("MMU")) {
+    set_is_hidden(!MMU2::mmu2.Enabled());
+}
+
+void MI_HW_MMU::click(IWindowMenu &) {
+    Screens::Access()->Open<ScreenMenuHwMmu>();
+}
+
 #endif

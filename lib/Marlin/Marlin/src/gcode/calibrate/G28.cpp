@@ -45,14 +45,14 @@
 #endif
 
 #if ENABLED(SENSORLESS_HOMING)
-  #include "../../feature/tmc_util.h"
+  #include "../../feature/motordriver_util.h"
 #endif
 
 #if ENABLED(CRASH_RECOVERY)
   #include "../../feature/prusa/crash_recovery.hpp"
 #endif
 
-#if ENABLED(PRECISE_HOMING_COREXY)
+#if HAS_PRECISE_HOMING_COREXY()
   #include "../../module/prusa/homing_corexy.hpp"
 #endif
 
@@ -87,8 +87,10 @@
 #define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
 #include "../../core/debug_out.h"
 
-#include "../../../../../../src/common/trinamic.h" // for disabling Wave Table during homing
+#include <feature/tmc_util.h> // for disabling Wave Table during homing
+
 #include <feature/phase_stepping/phase_stepping.hpp> // for disabling phase stepping during homing
+#include <feature/pressure_advance/pressure_advance_config.hpp> // for disabling PA during homing
 
 #include <option/has_nozzle_cleaner.h>
 
@@ -98,14 +100,26 @@
 
 #include <scope_guard.hpp>
 #include <marlin_server.hpp>
+#include <feature/print_status_message/print_status_message_guard.hpp>
+#include <config_store/store_instance.hpp>
+#include <buddy/unreachable.hpp>
+
+#include <option/has_ceiling_clearance.h>
+#if HAS_CEILING_CLEARANCE()
+  #include <feature/ceiling_clearance/ceiling_clearance.hpp>
+#endif
+
+#if HAS_PRECISE_HOMING_COREXY()
+bool corexy_refine_during_G28(float fr_mm_s, const G28Flags &flags);
+#endif
 
 #if ENABLED(QUICK_HOME)
 
   static void quick_home_xy() {
 
     // Pretend the current position is 0,0
-    CBI(axis_known_position, X_AXIS);
-    CBI(axis_known_position, Y_AXIS);
+    axes_home_level[X_AXIS] = AxisHomeLevel::not_homed;
+    axes_home_level[Y_AXIS] = AxisHomeLevel::not_homed;
     current_position.set(0.0, 0.0);
     sync_plan_position();
 
@@ -127,12 +141,12 @@
 
       sensorless_t stealth_states {
         NUM_AXIS_LIST(
-          TERN0(X_SENSORLESS, tmc_enable_stallguard(stepperX)),
-          TERN0(Y_SENSORLESS, tmc_enable_stallguard(stepperY)),
+          TERN0(X_SENSORLESS, enable_crash_detection(X_AXIS)),
+          TERN0(Y_SENSORLESS, enable_crash_detection(Y_AXIS)),
           false, false, false, false
         )
-        , TERN0(X2_SENSORLESS, tmc_enable_stallguard(stepperX2))
-        , TERN0(Y2_SENSORLESS, tmc_enable_stallguard(stepperY2))
+        , TERN0(X2_SENSORLESS, enable_crash_detection(X2_AXIS))
+        , TERN0(Y2_SENSORLESS, enable_crash_detection(Y2_AXIS))
       };
 
       #if ENABLED(CRASH_RECOVERY)
@@ -154,10 +168,10 @@
       #if ANY(ENDSTOPS_ALWAYS_ON_DEFAULT, CRASH_RECOVERY)
         UNUSED(stealth_states);
       #else
-        TERN_(X_SENSORLESS, tmc_disable_stallguard(stepperX, stealth_states.x));
-        TERN_(X2_SENSORLESS, tmc_disable_stallguard(stepperX2, stealth_states.x2));
-        TERN_(Y_SENSORLESS, tmc_disable_stallguard(stepperY, stealth_states.y));
-        TERN_(Y2_SENSORLESS, tmc_disable_stallguard(stepperY2, stealth_states.y2));
+        TERN_(X_SENSORLESS, disable_crash_detection(X_AXIS, stealth_states.x));
+        TERN_(X2_SENSORLESS, disable_crash_detection(X2_AXIS, stealth_states.x2));
+        TERN_(Y_SENSORLESS, disable_crash_detection(Y_AXIS, stealth_states.y));
+        TERN_(Y2_SENSORLESS, disable_crash_detection(Y2_AXIS, stealth_states.y2));
       #endif
     #endif
   }
@@ -186,25 +200,24 @@
       constexpr xy_float_t okay_homing_xy = safe_homing_xy;
     #endif
 
-    destination.set(okay_homing_xy, current_position.z);
+    xyze_pos_t dest_pos;
+    dest_pos.set(okay_homing_xy, current_position.z);
 
-    TERN_(HOMING_Z_WITH_PROBE, destination -= probe_offset);
-    TERN_(HAS_HOTEND_OFFSET, destination -= hotend_currently_applied_offset);
+    TERN_(HOMING_Z_WITH_PROBE, dest_pos -= probe_offset);
+    TERN_(HAS_HOTEND_OFFSET, dest_pos -= hotend_currently_applied_offset);
 
-    if (position_is_reachable(destination)) {
+    if (position_is_reachable(dest_pos)) {
 
-      if (DEBUGGING(LEVELING)) DEBUG_POS("home_z_safely", destination);
-
-      TERN_(SENSORLESS_HOMING, safe_delay(500)); // Short delay needed to settle
+      if (DEBUGGING(LEVELING)) DEBUG_POS("home_z_safely", dest_pos);
 
 #if ENABLED(PRUSA_TOOLCHANGER)
-      do_blocking_move_to_xy(destination, PrusaToolChanger::limit_stealth_feedrate(XY_PROBE_FEEDRATE_MM_S));
+      do_blocking_move_to_xy(dest_pos, PrusaToolChanger::limit_stealth_feedrate(XY_PROBE_FEEDRATE_MM_S));
 #elif HAS_NOZZLE_CLEANER()
     // with nozzle cleaner (iX), move in Y first to avoid going over the cleaner
-    do_blocking_move_to_xy(current_position.x, destination.y);
-    do_blocking_move_to_xy(destination.x, destination.y);
+    do_blocking_move_to_xy(current_position.x, dest_pos.y);
+    do_blocking_move_to_xy(dest_pos.x, dest_pos.y);
 #else
-      do_blocking_move_to_xy(destination);
+      do_blocking_move_to_xy(dest_pos);
 #endif
 
       if (!homeaxis(Z_AXIS)) {
@@ -227,7 +240,7 @@
      * @retval true print sheet detected
      * @retval false print sheet not detected or move was interrupted
      */
-    static bool detect_print_sheet(const_float_t z_homing_height) {
+    static bool detect_print_sheet(const float z_homing_height) {
       DEBUG_SECTION(log_G28, "detect_print_sheet", DEBUGGING(LEVELING));
 
       // Disallow detection if if X or Y or Z homing is needed
@@ -259,8 +272,6 @@
 
         if (DEBUGGING(LEVELING)) DEBUG_POS("detect_print_sheet", destination);
 
-        TERN_(SENSORLESS_HOMING, safe_delay(500)); // Short delay needed to settle
-
         do_blocking_move_to(destination);
         bool endstop_triggered;
         run_z_probe(0 - (Z_PROBE_LOW_POINT) + DETECT_PRINT_SHEET_Z_POINT, true, &endstop_triggered);
@@ -279,10 +290,13 @@
 
 #endif // Z_SAFE_HOMING
 
+#if HAS_TRINAMIC && defined(HAS_TMC_WAVETABLE)
 static void reenable_wavetable(AxisEnum axis)
 {
     tmc_enable_wavetable(axis == X_AXIS, axis == Y_AXIS, false);
 }
+#endif
+
 
 /** \addtogroup G-Codes
  * @{
@@ -291,7 +305,7 @@ static void reenable_wavetable(AxisEnum axis)
 /**
  *###G28: Home all axes according to settings <a href="https://reprap.org/wiki/G-code#G28:_Move_to_Origin_.28Home.29">G28: Move to Origin (Home)</a>
  *
- *If `PRECISE_HOMING` is enabled, there are specific amount
+ *If `HAS_PRECISE_HOMING()` is enabled, there are specific amount
  *of tries to home an X/Y axis. If it fails it runs re-calibration
  *
  *Home to all axes with no parameters.
@@ -330,22 +344,23 @@ void GcodeSuite::G28() {
   flags.only_if_needed = parser.boolval('O');
   flags.z_raise = parser.seenval('R') ? parser.value_linear_units() : Z_HOMING_HEIGHT;
   flags.no_change = parser.seen('N');
-  #if DISABLED(PRUSA_TOOLCHANGER)
-    flags.can_calibrate = !parser.seen('D');
-  #endif
+  flags.can_calibrate = !parser.seen('D');
   flags.force_calibrate = parser.seen('C');
   #if ENABLED(MARLIN_DEV_MODE)
-    flags.simulate = parser.seen('S')
+    flags.simulate = parser.seen('S');
   #endif
   #if ENABLED(DETECT_PRINT_SHEET)
     flags.check_sheet = !parser.boolval('P');
   #endif
-  #if ENABLED(PRECISE_HOMING_COREXY)
-    flags.precise = !parser.seen('I'); // imprecise: do not perform precise refinement
-  #endif
+  flags.precise = !parser.seen('I'); // do not perform precise refinement
+
+  // No axes were specified -> interpret as home all
+  if(!X && !Y && !Z) {
+    X = Y = Z = true;
+  }
 
   #if ENABLED(CRASH_RECOVERY)
-    bool all_axes = (!X && !Y && !Z) || (X && Y && Z);
+    const bool all_axes = (X && Y && Z);
     if (all_axes) {
       // Skip all recovery when homing all axes
       crash_s.set_gcode_replay_flags(Crash_s::RECOVER_NONE);
@@ -360,7 +375,103 @@ void GcodeSuite::G28() {
 /** @}*/
 
 bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
+  struct AxisHomingRequirement {
+    // !!! Keep before initial_level, someone might be not using a designated initializer and expect .expand({AxisHomeLevel::something}) to work.
+    AxisHomeLevel required_level = AxisHomeLevel::not_homed;
+
+    /// Whether the homing is optional or enforced
+    bool force = false;
+
+    /// Initial home level of the axis at homing start
+    AxisHomeLevel initial_level = AxisHomeLevel::not_homed;
+
+    void expand(const AxisHomingRequirement &other, bool condition = true) {
+      if(condition) {
+        required_level = std::max(required_level, other.required_level);
+        force |= other.force;
+      }
+    }
+  };
+  std::array<AxisHomingRequirement, 3> requirements;
+
+  /// \returns whether there should be any homing done for the specified axis during the G28
+  const auto should_home_at_all = [&](AxisEnum axis) {
+    const auto &r = requirements[axis];
+    return r.force || (r.initial_level < r.required_level);
+  };
+
+  /// \returns whether the axis should be homed to (or above) the specified level during the G28
+  /// In some cases, the G28 might only require precise refinement and not base homing,
+  // at which point should_home_to_level(imprecise) would be false and should_home_to_level(full) would be true
+  const auto should_home_to_level = [&](AxisEnum axis, AxisHomeLevel to_level = AxisHomeLevel::full) {
+    const auto &r = requirements[axis];
+    return (to_level <= r.required_level) && (r.force || r.initial_level < to_level);
+  };
+
+  // Setup basic requirements
+  {
+    const AxisHomingRequirement req {
+      .required_level = (flags.precise ? AxisHomeLevel::full : AxisHomeLevel::imprecise),
+      .force = !flags.only_if_needed,
+    };
+
+    for(uint8_t i = 0; i < axes_home_level.size(); i++) {
+      requirements[i].initial_level = axes_home_level[i];
+    }
+
+    requirements[X_AXIS].expand(req, X);
+    requirements[Y_AXIS].expand(req, Y);
+    requirements[Z_AXIS].expand(req, Z);
+  }
+
+  // On Z_SAFE_HOMING, if we need to home Z, we need to have X and Y homed as well
+  if(ENABLED(Z_SAFE_HOMING) && should_home_at_all(Z_AXIS)) {
+    static constexpr AxisHomingRequirement req {
+      .required_level = AxisHomeLevel::imprecise,
+    };
+    requirements[X_AXIS].expand(req);
+    requirements[Y_AXIS].expand(req);
+  }
+
+  // On CODEPENDENT_XY_HOMING, we need to home both axes
+  if constexpr(ENABLED(CODEPENDENT_XY_HOMING)) {
+    requirements[X_AXIS].expand(requirements[Y_AXIS]);
+    requirements[Y_AXIS] = requirements[X_AXIS];
+  }
+
+  // Precise COREXY homing is XY codependent, even if the imprecise homing isn't
+  if(HAS_PRECISE_HOMING_COREXY() && (should_home_to_level(X_AXIS, AxisHomeLevel::full) || should_home_to_level(Y_AXIS, AxisHomeLevel::full))) {
+    requirements[X_AXIS].expand(requirements[Y_AXIS]);
+    requirements[Y_AXIS] = requirements[X_AXIS];
+  }
+
+  // Home (O)nly if position is unknown with respect to the required axes
+  if (!should_home_at_all(X_AXIS) && !should_home_at_all(Y_AXIS) && !should_home_at_all(Z_AXIS)) {
+    if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("> homing not needed, skip");
+    return true;
+  }
+
+
+  #if ENABLED(MARLIN_DEV_MODE)
+    if (flags.simulate) {
+      planner.synchronize();
+      if (planner.draining())
+        return false;
+      LOOP_NUM_AXES(a) set_axis_is_at_home((AxisEnum)a);
+      sync_plan_position();
+      SERIAL_ECHOLNPGM("Simulated Homing");
+      report_current_position();
+      return true;
+    }
+  #endif
+
+  PrintStatusMessageGuard statusGuard;
+  statusGuard.update<PrintStatusMessage::homing>({});
   HomingReporter reporter;
+
+  #if HAS_CEILING_CLEARANCE()
+  buddy::CeilingClearanceCheckDisabler ccd;
+  #endif
 
   DEBUG_SECTION(log_G28, "G28", DEBUGGING(LEVELING));
   if (DEBUGGING(LEVELING)) log_machine_info();
@@ -374,32 +485,6 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
     planner.laser_inline.status.isPowered = false;
   #endif
 
-  #if ENABLED(MARLIN_DEV_MODE)
-    if (S) {
-      LOOP_NUM_AXES(a) set_axis_is_at_home((AxisEnum)a);
-      sync_plan_position();
-      SERIAL_ECHOLNPGM("Simulated Homing");
-      report_current_position();
-      return;
-    }
-  #endif
-
-  // Home (O)nly if position is unknown with respect to the required axes
-  uint8_t required_axis_bits = 0;
-  if(X) SBI(required_axis_bits, X_AXIS);
-  if(Y) SBI(required_axis_bits, Y_AXIS);
-  if(Z) SBI(required_axis_bits, Z_AXIS);
-  if(!X && !Y && !Z) {
-    // None specified -> need all
-    SBI(required_axis_bits, X_AXIS);
-    SBI(required_axis_bits, Y_AXIS);
-    SBI(required_axis_bits, Z_AXIS);
-  }
-  if (!axes_should_home(required_axis_bits) && flags.only_if_needed) {
-    if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("> homing not needed, skip");
-    return true;
-  }
-
   #if ENABLED(FULL_REPORT_TO_HOST_FEATURE)
     const M_StateEnum old_grblstate = M_State_grbl;
     set_and_report_grblstate(M_HOMING);
@@ -409,6 +494,11 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   //TERN_(EXTENSIBLE_UI, ExtUI::onHomingStart());
 
   planner.synchronize();          // Wait for planner moves to finish!
+
+  // If we are homing Z, assume that max_printed_z is zero (the Z homing couldn't be safe otherwise)
+  if(Z && Z_HOME_DIR < 0) {
+    planner.max_printed_z = 0;
+  }
 
   /**
    * @brief Set to true when homing fails.
@@ -432,9 +522,6 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
   // Reset to the XY plane
   TERN_(CNC_WORKSPACE_PLANES, workspace_plane = PLANE_XY);
-
-  // Count this command as movement / activity
-  reset_stepper_timeout();
 
   #define HAS_CURRENT_HOME(N) (defined(N##_CURRENT_HOME) && N##_CURRENT_HOME != N##_CURRENT)
   #if HAS_CURRENT_HOME(X) || HAS_CURRENT_HOME(X2) || HAS_CURRENT_HOME(Y) || HAS_CURRENT_HOME(Y2) || HAS_CURRENT_HOME(I) || HAS_CURRENT_HOME(J) || HAS_CURRENT_HOME(K) || HAS_CURRENT_HOME(U) || HAS_CURRENT_HOME(V) || HAS_CURRENT_HOME(W)
@@ -521,8 +608,6 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   #endif
 
   #if ENABLED(XY_HOMING_STEALTCHCHOP)
-    bool stealthChop_x = stepperX.stored.stealthChop_enabled;
-    bool stealthChop_y = stepperY.stored.stealthChop_enabled;
     // Enable stealtchop on X and Y before homing
     stepperX.stored.stealthChop_enabled = true;
     stepperX.refresh_stepping_mode();
@@ -538,7 +623,7 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
     };
     if (!flags.no_change) {
       // Reset default feedrate and acceleration limits during homing
-      Motion_Parameters::reset();
+      Motion_Parameters::reset(true);
 
       auto s = planner.user_settings;
       s.max_acceleration_mm_per_s2[X_AXIS] = XY_HOMING_ACCELERATION;
@@ -547,7 +632,9 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
       #if HAS_CLASSIC_JERK
         s.max_jerk.set(XY_HOMING_JERK, XY_HOMING_JERK);
       #endif
-      planner.apply_settings(s);
+
+      // use feedrates as given! These shouldn't be alterated by any other policy!
+      planner.apply_settings(s, true);
     }
   #endif
 
@@ -564,8 +651,9 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
   TERN_(HAS_DUPLICATION_MODE, set_duplication_enabled(false));
 
-  // Disable phase stepping just before homing XY. This will synchronize only if needed
+  // Disable phase stepping/PA just before homing XY. This will synchronize only if needed
   phase_stepping::EnsureSuitableForHoming phstep_disabler;
+  pressure_advance::PressureAdvanceDisabler pa_disabler;
 
   // Homing feedrate
   float fr_mm_s = flags.no_change ? feedrate_mm_s : 0.0f;
@@ -576,45 +664,12 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
   endstops.enable(true); // Enable endstops for next homing move
 
-  #define _UNSAFE(A) (homeZ && TERN0(Z_SAFE_HOMING, axes_should_home(_BV(A##_AXIS))))
-
-  const bool homeZ = TERN0(HAS_Z_AXIS, Z),
-              NUM_AXIS_LIST(              // Other axes should be homed before Z safe-homing
-                needX = _UNSAFE(X), needY = _UNSAFE(Y), needZ = false, // UNUSED
-                needI = _UNSAFE(I), needJ = _UNSAFE(J), needK = _UNSAFE(K),
-                needU = _UNSAFE(U), needV = _UNSAFE(V), needW = _UNSAFE(W)
-              ),
-              NUM_AXIS_LIST(              // Home each axis if needed or flagged
-                homeX = needX || X,
-                homeY = needY || Y,
-                homeZZ = homeZ,
-                homeI = needI || parser.seen_test(AXIS4_NAME), homeJ = needJ || parser.seen_test(AXIS5_NAME),
-                homeK = needK || parser.seen_test(AXIS6_NAME), homeU = needU || parser.seen_test(AXIS7_NAME),
-                homeV = needV || parser.seen_test(AXIS8_NAME), homeW = needW || parser.seen_test(AXIS9_NAME)
-              ),
-              home_all = NUM_AXIS_GANG(   // Home-all if all or none are flagged
-                  homeX == homeX, && homeY == homeX, && homeZ == homeX,
-                && homeI == homeX, && homeJ == homeX, && homeK == homeX,
-                && homeU == homeX, && homeV == homeX, && homeW == homeX
-              ),
-              NUM_AXIS_LIST(
-                doX = home_all || homeX, doY = home_all || homeY, doZ = home_all || homeZ,
-                doI = home_all || homeI, doJ = home_all || homeJ, doK = home_all || homeK,
-                doU = home_all || homeU, doV = home_all || homeV, doW = home_all || homeW
-              );
-
-  #if HAS_Z_AXIS
-    UNUSED(needZ); UNUSED(homeZZ);
-  #else
-    constexpr bool doZ = false;
-  #endif
-
   TERN_(HOME_Z_FIRST, if (!failed && doZ) failed = !homeaxis(Z_AXIS));
 
   const bool seenR = !isnan(flags.z_raise);
   const float z_homing_height = seenR ? flags.z_raise : Z_HOMING_HEIGHT;
 
-  if (!failed && z_homing_height && (seenR || NUM_AXIS_GANG(doX, || doY, || TERN0(Z_SAFE_HOMING, doZ), || doI, || doJ, || doK, || doU, || doV, || doW))) {
+  if (!failed && z_homing_height && (seenR || should_home_at_all(X_AXIS) || should_home_at_all(Y_AXIS) || TERN0(Z_SAFE_HOMING, should_home_at_all(Z_AXIS)))) {
     // Raise Z before homing any other axes and z is not already high enough (never lower z)
     if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Raise Z (before homing) by ", z_homing_height);
     const auto trigger_states = do_z_clearance(z_homing_height);
@@ -622,26 +677,28 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
     // If we have the Z homed and trigger an endstop, that means that we have homed wrong.
     // Letting this continue could lead to collision with the print or with the bedsheet, so rather raise a redscreen.
     // BFW-5334
-    if((trigger_states & (1 << EndstopEnum::Z_MAX)) && !doZ && !axes_need_homing(_BV(Z_AXIS))) {
+    if((trigger_states & (1 << EndstopEnum::Z_MAX)) && !should_home_at_all(Z_AXIS) && axes_home_level.is_homed(Z_AXIS, AxisHomeLevel::imprecise)) {
       raise_redscreen(ErrCode::ERR_UNDEF, "Unexpected Z MAX endstop trigger", "G28");
     }
     TERN_(BLTOUCH, bltouch.init());
   }
 
   // Diagonal move first if both are homing
-  TERN_(QUICK_HOME, if (!failed && doX && doY) quick_home_xy());
+  #if ENABLED(QUICK_HOME)
+    if (!failed && should_home_to_level(X_AXIS, AxisHomeLevel::imprecise) && should_home_to_level(Y_AXIS, AxisHomeLevel::imprecise))
+      quick_home_xy();
+  #endif
 
+#if HAS_TRINAMIC && defined(HAS_TMC_WAVETABLE)
   // Only allow wavetable change if homing performs a backoff. This backoff is made in the way that it ends on stepper zero-position, so that re-enabling wavetable is safe.
   bool wavetable_off_X = false, wavetable_off_Y = false;
-  #ifdef HAS_TMC_WAVETABLE
-    #if ENABLED(PRECISE_HOMING_COREXY)
-      #error "wavetable switching currently not compatible with PRECISE_HOMING_COREXY"
-    #endif
-    #ifdef HOMING_BACKOFF_POST_MM
-      constexpr xyz_float_t homing_backoff = HOMING_BACKOFF_POST_MM;
-      wavetable_off_X = (homing_backoff[X] > 0.0f) && doX;
-      wavetable_off_Y = (homing_backoff[Y] > 0.0f) && doY;
-    #endif
+  #if HAS_PRECISE_HOMING_COREXY()
+    #error "wavetable switching currently not compatible with HAS_PRECISE_HOMING_COREXY()"
+  #endif
+  #ifdef HOMING_BACKOFF_POST_MM
+    constexpr xyz_float_t homing_backoff = HOMING_BACKOFF_POST_MM;
+    wavetable_off_X = (homing_backoff[X] > 0.0f) && should_home_at_all(X_AXIS);
+    wavetable_off_Y = (homing_backoff[Y] > 0.0f) && should_home_at_all(Y_AXIS);
   #endif
   void (*reenable_wt_X)(AxisEnum) = wavetable_off_X ? reenable_wavetable : NULL;
   void (*reenable_wt_Y)(AxisEnum) = wavetable_off_Y ? reenable_wavetable : NULL;
@@ -653,9 +710,13 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   if (!failed) {
     tmc_disable_wavetable(wavetable_off_X, wavetable_off_Y, false);
   }
+#else
+  void (*reenable_wt_X)(AxisEnum) = NULL;
+  void (*reenable_wt_Y)(AxisEnum) = NULL;
+#endif
 
   #if ENABLED(PRUSA_TOOLCHANGER)
-  if (!failed && doX && doY) {
+  if (!failed && should_home_at_all(X_AXIS) && should_home_at_all(Y_AXIS)) {
     // Bump right edge to align toolchanger locking plates
     if (!prusa_toolchanger.align_locks()) {
       ui.status_printf_P(0, "Toolchanger lock alignment failed");
@@ -671,86 +732,44 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   #endif /*ENABLED(PRUSA_TOOLCHANGER)*/
 
   // Home Y (before X)
-  if (ENABLED(HOME_Y_BEFORE_X) && !failed && (doY || TERN0(CODEPENDENT_XY_HOMING, doX))) {
+  if (ENABLED(HOME_Y_BEFORE_X) && !failed && should_home_to_level(Y_AXIS, AxisHomeLevel::imprecise)) {
     failed = !homeaxis(Y_AXIS, fr_mm_s, false, reenable_wt_Y, flags.can_calibrate);
   }
 
   // Home X
-  if (!failed && (doX || (doY && ENABLED(CODEPENDENT_XY_HOMING) && DISABLED(HOME_Y_BEFORE_X)))) {
+  if (!failed && should_home_to_level(X_AXIS, AxisHomeLevel::imprecise)) {
+#ifdef HOMING_PREEMPTIVE_MOVE_Y
+    do_blocking_move_to_y(HOMING_PREEMPTIVE_MOVE_Y);
+#endif
     failed = !homeaxis(X_AXIS, fr_mm_s, false, reenable_wt_X, flags.can_calibrate);
   }
 
   // Home Y (after X)
-  if (DISABLED(HOME_Y_BEFORE_X) && !failed && doY) {
+  if (DISABLED(HOME_Y_BEFORE_X) && !failed && should_home_to_level(Y_AXIS, AxisHomeLevel::imprecise)) {
     failed = !homeaxis(Y_AXIS, fr_mm_s, false, reenable_wt_Y, flags.can_calibrate);
   }
 
-  #if ENABLED(PRECISE_HOMING_COREXY)
+  #if HAS_PRECISE_HOMING_COREXY()
     // absolute refinement requires both axes to be already probed
-    if (!failed && ( doX || ENABLED(CODEPENDENT_XY_HOMING)) && doY && flags.precise) {
-      // Do not handle feedrate defaults again within precise homing: do it here
-      const float xy_mm_s = fr_mm_s ? fr_mm_s : homing_feedrate(A_AXIS);
+    if (!failed && (should_home_to_level(X_AXIS, AxisHomeLevel::full) || should_home_to_level(Y_AXIS, AxisHomeLevel::full))) {
+      #if DISABLED(PRUSA_TOOLCHANGER)
+        // skip refinement without data if we're not allowed to calibrate
+        const bool do_refine = (corexy_home_is_calibrated() || flags.can_calibrate || flags.force_calibrate);
+      #else
+        // TODO[BFW-6527]: this is a temporary workaround until home calibration is enforced
+        const bool do_refine = true;
+      #endif
 
-      for (size_t retry = 0; !planner.draining(); ++retry) {
-        #if HAS_TRINAMIC && defined(XY_HOMING_MEASURE_SENS_MIN)
-        // re/calibrate optimal measurement sensitivity first
-        if (flags.force_calibrate || !corexy_sens_is_calibrated()
-          || (retry && (retry % PRECISE_HOMING_SENS_TRY_RECAL) == 0)) {
-          if (!corexy_sens_calibrate(xy_mm_s)) {
-            failed = true;
-            break;
-          }
-          if (!corexy_rehome_xy(xy_mm_s)) {
-            failed = true;
-            break;
-          }
-        }
-        #endif
+      if(do_refine) {
+        failed |= !corexy_refine_during_G28(fr_mm_s, flags);
 
-        CoreXYCalibrationMode mode =
-          ( flags.force_calibrate ? CoreXYCalibrationMode::force
-            : flags.can_calibrate ? CoreXYCalibrationMode::on_demand
-            : CoreXYCalibrationMode::disallow );
-
-        if (mode == CoreXYCalibrationMode::on_demand && corexy_home_is_unstable()) {
-          // automatically recalibrate when allowed and unstable
-          mode = CoreXYCalibrationMode::force;
-        }
-
-        failed = !corexy_home_refine(xy_mm_s, mode);
-        if (!failed && (!corexy_home_is_unstable() || !corexy_home_is_calibrated())) {
-          // successfully homed
-          break;
-        }
-        if (retry >= PRECISE_HOMING_COREXY_RETRIES) {
-          // allow homing to continue after enough retries even if the home is unstable
-          break;
-        }
-
-        // instead of blindly retrying internally on the same location, move the gantry
-        if (!corexy_rehome_xy(xy_mm_s)) {
-          failed = true;
-          break;
-        }
-      }
-      if (failed && !planner.draining()) {
-        homing_failed([]() { fatal_error(ErrCode::ERR_MECHANICAL_PRECISE_REFINEMENT_FAILED); });
       }
     }
   #endif
 
-  // Restore XY stealthChop / spreadCycle mode
-  #if ENABLED(XY_HOMING_STEALTCHCHOP)
-    // Enable stealtchop on X and Y before homing
-    stepperX.stored.stealthChop_enabled = stealthChop_x;
-    stepperX.refresh_stepping_mode();
-    stepperY.stored.stealthChop_enabled = stealthChop_y;
-    stepperY.refresh_stepping_mode();
-  #endif /*ENABLED(XY_HOMING_STEALTCHCHOP)*/
-
   // Home Z last if homing towards the bed
   #if HAS_Z_AXIS && DISABLED(HOME_Z_FIRST)
-    if (!failed && doZ) {
+    if (!failed && should_home_at_all(Z_AXIS)) {
       #if EITHER(Z_MULTI_ENDSTOPS, Z_STEPPER_AUTO_ALIGN)
         stepper.set_all_z_lock(false);
         stepper.set_separate_multi_axis(false);
@@ -765,66 +784,69 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
       if (!failed) {
       #if ENABLED(Z_SAFE_HOMING)
-        if (TERN1(POWER_LOSS_RECOVERY, !parser.seen_test('H'))) {
-          failed = !home_z_safely();
+        failed = !home_z_safely();
 
-          #if ENABLED(DETECT_PRINT_SHEET)
-          if (!failed && flags.check_sheet) {
-            failed = [&] {
-              // Do multiple attempts of detect print sheet
-              // The point is that we want to prevent false failures caused by a dirty nozzle (cold filament left hanging out)
-              // BFW-5028
-              uint8_t attempt = 0;
-              while(true) {
-                // If detect_print_sheet, return success (failed -> false)
-                if(detect_print_sheet(z_homing_height)) {
-                  return false;
-                }
+        #if ENABLED(DETECT_PRINT_SHEET)
+        if (!failed && flags.check_sheet) {
+          PrintStatusMessageGuard status_guard;
+          status_guard.update<PrintStatusMessage::detecting_steel_sheet>({});
 
-                bool ignore_fail = false;
-
-                // Ran out of attempts -> report detect fail
-                if(++attempt == 3) {
-                  // Report missing bed sheet
-                  static constexpr auto warning_type = WarningType::SteelSheetNotDetected;
-                  marlin_server::set_warning(warning_type);
-
-                  // Move the bed to the bottom to give space for the user to insert the sheet
-                  // Do this asynchronously so that we can process the response while moving
-                  current_position.z = DETECT_PRINT_SHEET_Z_AFTER_FAILURE;
-                  line_to_current_position(homing_feedrate(Z_AXIS));
-
-                  // Continue after the user puts the print sheet on
-                  const Response response = marlin_server::wait_for_response(warning_type_phase(warning_type));
-
-                  marlin_server::clear_warning(warning_type);
-
-                  // Wait for the movement to finish
-                  planner.synchronize();
-                  ignore_fail = (response == Response::Ignore);
-                  attempt = 0;
-                }
-
-                // Raise the Z again to prevent crashing into the sheet
-                do_z_clearance(z_homing_height);
-
-                // Return to the XY homing position over the printbed and try rehoming z
-                if(!home_z_safely()) {
-                  // Fail straight away if z homing fails, only repeat if detect_print_sheet fails
-                  return true;
-                }
-
-                if(ignore_fail) {
-                  return false;
-                }
+          failed = [&] {
+            // Do multiple attempts of detect print sheet
+            // The point is that we want to prevent false failures caused by a dirty nozzle (cold filament left hanging out)
+            // BFW-5028
+            uint8_t attempt = 0;
+            while(true) {
+              // If detect_print_sheet, return success (failed -> false)
+              if(detect_print_sheet(z_homing_height)) {
+                return false;
               }
-            }();
-          }
-          #endif
 
-        } else {
-          failed = !homeaxis(Z_AXIS);
+              // Fail straight away if draining
+              if(planner.draining()) {
+                return true;
+              }
+
+              bool ignore_fail = false;
+
+              // Ran out of attempts -> report detect fail
+              if(++attempt == 3) {
+                // Report missing bed sheet
+                static constexpr auto warning_type = WarningType::SteelSheetNotDetected;
+                marlin_server::set_warning(warning_type);
+
+                // Move the bed to the bottom to give space for the user to insert the sheet
+                // Do this asynchronously so that we can process the response while moving
+                current_position.z = DETECT_PRINT_SHEET_Z_AFTER_FAILURE;
+                line_to_current_position(homing_feedrate(Z_AXIS));
+
+                // Continue after the user puts the print sheet on
+                const Response response = marlin_server::wait_for_response(warning_type_phase(warning_type));
+
+                marlin_server::clear_warning(warning_type);
+
+                // Wait for the movement to finish
+                planner.synchronize();
+                ignore_fail = (response == Response::Ignore);
+                attempt = 0;
+              }
+
+              // Raise the Z again to prevent crashing into the sheet
+              do_z_clearance(z_homing_height);
+
+              // Return to the XY homing position over the printbed and try rehoming z
+              if(!home_z_safely()) {
+                // Fail straight away if z homing fails, only repeat if detect_print_sheet fails
+                return true;
+              }
+
+              if(ignore_fail) {
+                return false;
+              }
+            }
+          }();
         }
+        #endif
       #else
         failed = !homeaxis(Z_AXIS);
       #endif
@@ -856,9 +878,6 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
   phstep_disabler.release();
 
   if (!failed) {
-    // Clear endstop state for polled stallGuard endstops
-    TERN_(SPI_ENDSTOPS, endstops.clear_endstop_state());
-
     // Move to a height where we can use the full xy-area
     TERN_(DELTA_HOME_TO_SAFE_ZONE, do_blocking_move_to_z(delta_clip_start_height));
   }
@@ -914,10 +933,195 @@ bool GcodeSuite::G28_no_parser(bool X, bool Y, bool Z, const G28Flags& flags) {
 
   report_current_position();
 
-  if (ENABLED(NANODLP_Z_SYNC) && (doZ || ENABLED(NANODLP_ALL_AXIS)))
+  if (ENABLED(NANODLP_Z_SYNC) && (should_home_at_all(Z_AXIS) || ENABLED(NANODLP_ALL_AXIS)))
     SERIAL_ECHOLNPGM(STR_Z_MOVE_COMP);
 
   TERN_(FULL_REPORT_TO_HOST_FEATURE, set_and_report_grblstate(old_grblstate));
 
   return !failed;
 }
+
+#if HAS_PRECISE_HOMING_COREXY()
+enum class RefineResult {
+  success,
+  hard_fail, ///< Failed hard, cannot recover
+  refine_fail, ///< Failed to refine, but could potentially continue unrefined
+  calibrate_from_menu, ///< Needs calibration but cannot do it en-situ. The user needs to abort/ignroe and do it from the calibrations menu.
+};
+
+RefineResult corexy_calibrate_homing_during_G28(float xy_mm_s, const G28Flags &flags) {
+  // We cannot calibrate -> this are bad, abort
+  if (!flags.can_calibrate) {
+    return RefineResult::calibrate_from_menu;
+  }
+
+  Tristate calibration_approved = flags.force_calibrate ? Tristate::yes : config_store().auto_recalibrate_precise_homing.get();
+
+  // Prompt the user that we would like to do the calibration (if the calibration was not triggered from gcode)
+  if(calibration_approved == Tristate::other) {
+    switch(marlin_server::prompt_warning(WarningType::HomingCalibrationNeeded, 60'000)) {
+
+    case Response::Calibrate:
+    case Response::_none: // In case of timeout
+    default: // To stop the compiler from complaining
+      calibration_approved = Tristate::yes;
+      break;
+
+    case Response::Skip:
+      calibration_approved = Tristate::no;
+      break;
+
+    case Response::Always:
+      calibration_approved = Tristate::yes;
+      config_store().auto_recalibrate_precise_homing.set(Tristate::yes);
+      break;
+
+    case Response::Never:
+      calibration_approved = Tristate::no;
+      config_store().auto_recalibrate_precise_homing.set(Tristate::no);
+      break;
+
+    }
+  }
+
+  // Regardless of whether the calibration will run or not, reset homing instability history
+  // In both cases, we want a clean slate so that the user is not bothered with "please recalibrate" right away
+  config_store().precise_homing_instability_history.set(0);
+
+  if(!calibration_approved) {
+    // User decided to not do the calibration at his own risk -> consider the point refined
+    return RefineResult::success;
+  }
+
+  PrintStatusMessageGuard status_guard;
+  status_guard.update<PrintStatusMessage::recalibrating_home>({});
+
+  /// Wait holder should be part of the homing procedure
+  marlin_server::fsm_change(PhaseWait::homing_calibration);
+
+#if HAS_TRINAMIC && defined(XY_HOMING_MEASURE_SENS_MIN)
+  // Try calibrating motor sensitivity before calibration
+  if (!corexy_sens_calibrate(xy_mm_s)) {
+    return RefineResult::hard_fail;
+  }
+
+  // After calibrating sensitivity, we need to rehome
+  if (!corexy_rehome_xy(xy_mm_s)) {
+    return RefineResult::hard_fail;
+  }
+#endif
+
+  if (!corexy_home_refine(xy_mm_s, CoreXYCalibrationMode::force)) {
+    return RefineResult::refine_fail;
+  }
+
+  return RefineResult::success;
+}
+
+RefineResult corexy_refine_during_G28_once(float fr_mm_s, const G28Flags &flags) {
+  // Do a quick move to the home position. Refinement can now be done separately to the imprecise homing and the head can be anywhere
+  // The position taken from corexy_rehome_and_phase
+  do_blocking_move_to_xy(
+    (base_home_pos(X_AXIS) - XY_HOMING_ORIGIN_OFFSET * X_HOME_DIR),
+    (base_home_pos(Y_AXIS) - XY_HOMING_ORIGIN_OFFSET * Y_HOME_DIR)
+  );
+
+  // Do not handle feedrate defaults again within precise homing: do it here
+  fr_mm_s = fr_mm_s ?: homing_feedrate(A_AXIS);
+
+  if (flags.force_calibrate || !corexy_home_is_calibrated()) {
+    // Calibration is required, do not even attempt to naively refine
+    return corexy_calibrate_homing_during_G28(fr_mm_s, flags);
+  }
+
+  // Retry the refinement a few times
+  for (uint8_t retry = 0; retry < PRECISE_HOMING_COREXY_RETRIES; retry++) {
+    if (planner.draining()) {
+      return RefineResult::hard_fail;
+    }
+
+    if (corexy_home_refine(fr_mm_s, CoreXYCalibrationMode::disallow)) {
+      // Successfully refined the home
+
+      // Record whether the refinement found a stable home
+      config_store().precise_homing_instability_history.transform([is_unstable = corexy_home_is_unstable()] (auto val) {
+        return (val << 1) | is_unstable;
+      });
+
+      // If at least history_threshold out of last history_window refinements were unstable, trigger calibration
+      static constexpr auto history_threshold = 6;
+      static constexpr auto history_window = 10;
+
+      // Check that we have the requested history window actually stored
+      using History = decltype(config_store_ns::CurrentStore::precise_homing_instability_history)::value_type;
+      static_assert(history_window <= sizeof(History) * 8);
+      static constexpr History history_mask = ((1 << history_window) - 1);
+
+      const auto recent_instability_count = std::popcount(static_cast<History>(config_store().precise_homing_instability_history.get() & history_mask));
+      if(flags.can_calibrate && recent_instability_count >= history_threshold) {
+        break; // Break out of the loop -> offer calibration
+      }
+
+      return RefineResult::success;
+    }
+
+    // instead of blindly retrying internally on the same location, move the gantry
+    if (!corexy_rehome_xy(fr_mm_s)) {
+      return RefineResult::hard_fail;
+    }
+  }
+
+  // If we've exhausted retries, force calibration
+  return corexy_calibrate_homing_during_G28(fr_mm_s, flags);
+}
+
+bool corexy_refine_during_G28(float fr_mm_s, const G28Flags &flags) {
+  RefineResult result;
+  while (true) {
+    result = corexy_refine_during_G28_once(fr_mm_s, flags);
+    switch(result) {
+
+      case RefineResult::success:
+        // Mark the axes as precisely homed
+        axes_home_level[X_AXIS] = AxisHomeLevel::full;
+        axes_home_level[Y_AXIS] = AxisHomeLevel::full;
+        return true;
+
+      case RefineResult::hard_fail:
+        return false;
+
+      case RefineResult::refine_fail:
+      case RefineResult::calibrate_from_menu:
+        break;
+    }
+
+    if(planner.draining()) {
+      // We're quick stopping, do not repeat
+      return false;
+    }
+
+    const auto warning_type = (result == RefineResult::calibrate_from_menu) ? WarningType::HomingCalibrationFromMenuNeeded : WarningType::HomingRefinementFailed;
+    const auto prompt_result = marlin_server::prompt_warning(warning_type);
+    switch(prompt_result) {
+
+    case Response::Retry:
+      continue;
+
+    case Response::Abort:
+      marlin_server::quick_stop();
+      marlin_server::print_abort();
+      return false;
+
+    case Response::Ignore:
+      // The user decided to ignore the problem at his own risk, consider the homing calibrated for now
+      axes_home_level[X_AXIS] = AxisHomeLevel::full;
+      axes_home_level[Y_AXIS] = AxisHomeLevel::full;   
+      return true;
+
+    default:
+      BUDDY_UNREACHABLE();
+
+    }
+  }
+}
+#endif

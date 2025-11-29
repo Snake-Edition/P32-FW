@@ -1,5 +1,6 @@
 #include "crash_dump_handlers.hpp"
-#include <w25x.h>
+
+#include <common/w25x.hpp>
 #include <cstring>
 #include <device/board.h>
 #include <logging/log.hpp>

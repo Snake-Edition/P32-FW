@@ -9,6 +9,7 @@
 #include <guiconfig/GuiDefaults.hpp>
 #include <guiconfig/wizard_config.hpp>
 #include "img_resources.hpp"
+#include <str_utils.hpp>
 
 /**
  * @brief Construct a new Self Test View Text:: Self Test View Text object
@@ -34,15 +35,9 @@ static constexpr size_t text_pos_after_icon = WizardDefaults::col_after_icon - W
 static constexpr Font font = GuiDefaults::DefaultFont;
 
 Rect16::Height_t SelfTestViewText::CalculateHeight(const string_view_utf8 &txt, is_multiline multiln, Rect16::Width_t width) {
-    if (multiln == is_multiline::no) {
-        return ::height(font);
-    }
-
-    std::optional<size_ui16_t> sz_in_chars = characters_meas_text(txt, width / ::width(font));
-    if (sz_in_chars) {
-        return ::height(font) * sz_in_chars->h;
-    }
-    return 0;
+    StringReaderUtf8 reader(txt);
+    const auto layout = RectTextLayout(reader, width / ::width(font), 255, multiln);
+    return layout.get_height_in_chars() * ::height(font);
 }
 
 void SelfTestViewText::render(Rect16 rc) const {

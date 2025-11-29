@@ -44,10 +44,9 @@
 #include <stdint.h>
 #include "MarlinPin.h"
 #include "../../lib/Marlin/Marlin/src/HAL/HAL_STM32_F4_F7/endstop_ISR.h"
-#include "device/peripherals.h"
 #include <type_traits>
 #include "buddy/priorities_config.h"
-#include <option/has_modularbed.h>
+#include <option/has_local_bed.h>
 #include <option/has_loadcell_hx717.h>
 #include <option/has_phase_stepping.h>
 #include <option/has_i2c_expander.h>
@@ -85,6 +84,7 @@ void hw_init_spi_side_leds();
 #else // Not special board with separate pin definition file.
 
     #if PRINTER_IS_PRUSA_iX()
+        #include <device/peripherals.h>
 inline constexpr SPI_HandleTypeDef *hw_get_spi_side_strip() {
     return &SPI_HANDLE_FOR(led);
 }
@@ -227,10 +227,7 @@ inline constexpr SPI_HandleTypeDef *hw_get_spi_side_strip() {
         #error "Unknown board."
     #endif //(BOARD_TYPE == XBUDDY_BOARD)
 
-    #if HAS_MODULARBED()
-        #define MARLIN_PORT_BED_HEAT   MARLIN_PORT_DUMMY
-        #define MARLIN_PIN_NR_BED_HEAT MARLIN_PIN_NR_DUMMY
-    #else
+    #if HAS_LOCAL_BED()
         #define MARLIN_PORT_BED_HEAT   MARLIN_PORT_B
         #define MARLIN_PIN_NR_BED_HEAT MARLIN_PIN_NR_0
     #endif
@@ -255,10 +252,7 @@ inline constexpr SPI_HandleTypeDef *hw_get_spi_side_strip() {
         #define MARLIN_PIN_NR_TEMP_AMBIENT MARLIN_PIN_NR_5 // ADC
     #endif
 
-    #if HAS_MODULARBED()
-        #define MARLIN_PORT_TEMP_BED   MARLIN_PORT_DUMMY
-        #define MARLIN_PIN_NR_TEMP_BED MARLIN_PIN_NR_DUMMY
-    #else
+    #if HAS_LOCAL_BED()
         #define MARLIN_PORT_TEMP_BED   MARLIN_PORT_A
         #define MARLIN_PIN_NR_TEMP_BED MARLIN_PIN_NR_4 // ADC
     #endif

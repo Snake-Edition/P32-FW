@@ -13,27 +13,27 @@ public:
         reset_fan();
     }
 
-    virtual void enterSelftestMode() override;
+    virtual void enter_selftest_mode() override;
 
-    virtual void exitSelftestMode() override;
+    virtual void exit_selftest_mode() override;
 
     void reset_fan();
 
-    virtual bool setPWM(uint16_t pwm) override;
+    virtual bool set_pwm(uint16_t pwm) override;
 
-    virtual bool selftestSetPWM(uint8_t pwm) override;
+    virtual bool selftest_set_pwm(uint8_t pwm) override;
 
-    virtual uint8_t getPWM() const override;
+    virtual uint8_t get_pwm() const override;
 
-    virtual uint16_t getActualRPM() const override;
+    virtual uint16_t get_actual_rpm() const override;
 
-    virtual bool getRPMIsOk() const override;
+    virtual bool get_rpm_is_ok() const override;
 
-    virtual FanState getState() const override;
+    virtual FanState get_state() const override;
 
     // Not used
-    virtual uint16_t getMinPWM() const override { return 0; }
-    virtual bool getRPMMeasured() const override { return false; }
+    virtual uint16_t get_min_pwm() const override { return 0; }
+    virtual bool get_rpm_measured() const override { return false; }
     virtual void tick() override {}
 
 private:

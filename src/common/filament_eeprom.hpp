@@ -2,6 +2,9 @@
 
 #include "filament.hpp"
 
+#include <option/has_chamber_api.h>
+#include <option/has_filament_heatbreak_param.h>
+
 // For historic reasons, the FilamentTypeParameters is split across multiple structures in the EEPROM
 
 // !!! DO NOT CHANGE - this is used in config store
@@ -16,9 +19,9 @@ public:
 
     bool requires_filtration : 1 = false;
     bool is_abrasive : 1 = false;
-    bool is_flexible : 1 = false;
+    bool do_not_auto_retract : 1 = false;
 
-    // Keeping the remaining bits of the bitfield unused, but zero initizliazed, for future proofing
+    // Keeping the remaining bits of the bitfield unused, but zero initialized, for future proofing
     uint8_t _unused : 5 = 0;
 
 public:
@@ -26,6 +29,7 @@ public:
     constexpr bool operator!=(const FilamentTypeParameters_EEPROM1 &) const = default;
 };
 
+#if HAS_CHAMBER_API()
 // !!! DO NOT CHANGE - this is used in config store
 struct __attribute__((packed)) FilamentTypeParameters_EEPROM2 {
 
@@ -47,3 +51,17 @@ public:
     constexpr bool operator==(const FilamentTypeParameters_EEPROM2 &) const = default;
     constexpr bool operator!=(const FilamentTypeParameters_EEPROM2 &) const = default;
 };
+#endif
+
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+// !!! DO NOT CHANGE - this is used in config store
+struct __attribute__((packed)) FilamentTypeParameters_EEPROM3 {
+
+public:
+    uint8_t heatbreak_temperature = 35;
+
+public:
+    constexpr bool operator==(const FilamentTypeParameters_EEPROM3 &) const = default;
+    constexpr bool operator!=(const FilamentTypeParameters_EEPROM3 &) const = default;
+};
+#endif

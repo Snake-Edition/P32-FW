@@ -4,8 +4,6 @@
 
 // clang-format off
 #if (!ENABLED(FILAMENT_LOAD_UNLOAD_GCODES)) || \
-    HAS_LCD_MENU || \
-    ENABLED(MIXING_EXTRUDER) || \
     ENABLED(NO_MOTION_BEFORE_HOMING)
     #error unsupported
 #endif
@@ -36,14 +34,14 @@ static FSMResponseVariant preheatTempUnKnown(PreheatData preheat_data, bool brea
         if (const auto ret = marlin_server::get_response_variant_from_phase(PhasesPreheat::UserTempSelection)) {
             return ret;
         }
-        if (preheat_data.mode == PreheatMode::Autoload && FSensors_instance().sensor_state(LogicalFilamentSensor::autoload) == FilamentSensorState::NoFilament) {
+        if (preheat_data.mode == PreheatMode::Autoload && FSensors_instance().sensor_state(LogicalFilamentSensor::primary_runout) == FilamentSensorState::NoFilament) {
             return FSMResponseVariant::make(Response::Abort);
         }
         if (break_on_autoload && FSensors_instance().IsAutoloadInProgress()) {
             return FSMResponseVariant();
         }
 
-        idle(true, true);
+        idle(true);
     }
 }
 
@@ -112,6 +110,10 @@ void filament_gcodes::preheat_to(FilamentType filament, uint8_t target_extruder,
     if (preheat_arg.set_chamber_temperature) {
         buddy::chamber().set_target_temperature(fil_cnf.chamber_target_temperature);
     }
+#endif
+
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+    thermalManager.setTargetHeatbreak(fil_cnf.heatbreak_temperature, target_extruder);
 #endif
 }
 
@@ -189,11 +191,17 @@ void filament_gcodes::M1700_no_parser(const M1700Args &args) {
     }
 #endif
 
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+    if (args.set_heatbreak) {
+        thermalManager.setTargetHeatbreak(fil_cnf.heatbreak_temperature, args.target_extruder);
+    }
+#endif
+
     // cooldown pressed
     if (filament == FilamentType::none) {
         thermalManager.set_fan_speed(0, 0);
 
-    } else if ((axis_homed & _BV(Z_AXIS)) != _BV(Z_AXIS)) {
+    } else if (!axes_home_level.is_homed(Z_AXIS, AxisHomeLevel::imprecise)) {
         unhomed_z_lift(10);
     }
 

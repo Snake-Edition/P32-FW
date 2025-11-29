@@ -8,6 +8,7 @@
 #include <unique_file_ptr.hpp>
 #include <common/heap.h>
 #include <common/conserve_cpu.hpp>
+#include <common/http/proxy.hpp>
 
 #include <lwip/mem.h>
 
@@ -90,7 +91,7 @@ tls::~tls() {
     mbedtls_ssl_config_free(&ssl_config);
 }
 
-std::optional<Error> tls::connection(const char *host, uint16_t port) {
+std::optional<Error> tls::connection(const char *connection_host, uint16_t connection_port, const char *destination_host, uint16_t destination_port) {
 
     log_debug(connect, "Starting SSL handshake");
     int status;
@@ -181,7 +182,7 @@ std::optional<Error> tls::connection(const char *host, uint16_t port) {
     static const int tls_cipher_suites[2] = { MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, 0 };
     mbedtls_ssl_conf_ciphersuites(&ssl_config, tls_cipher_suites);
 
-    mbedtls_ssl_set_hostname(&ssl_context, host);
+    mbedtls_ssl_set_hostname(&ssl_context, destination_host);
 
     if ((status = mbedtls_ssl_setup(&ssl_context, &ssl_config)) != 0) {
         return Error::InternalError;
@@ -189,13 +190,18 @@ std::optional<Error> tls::connection(const char *host, uint16_t port) {
 
     mbedtls_ssl_set_bio(&ssl_context, &net_context, mbedtls_net_send, mbedtls_net_recv, NULL);
 
-    constexpr size_t str_len = 6;
-    char port_as_str[str_len] = {};
-    snprintf(port_as_str, str_len, "%hu", port);
-
-    if ((status = mbedtls_net_connect(&net_context, host, port_as_str, MBEDTLS_NET_PROTO_TCP)) != 0) {
+    if ((status = mbedtls_plain_connect(&net_context, connection_host, connection_port)) != 0) {
         log_info(connect, "ssl handshake failed with: %d", status);
         return Error::Connect;
+    }
+
+    // Really a pointer compare, not strcmp.
+    if (destination_host != connection_host || destination_port != connection_port) {
+        // We are using a proxy to do the connection. Ask it to tunnel it through before initiating the encryption.
+        const auto err = http::proxy_connect(net_context.plain_conn, destination_host, destination_port);
+        if (err.has_value()) {
+            return err.value();
+        }
     }
 
     while ((status = mbedtls_ssl_handshake(&ssl_context)) != 0) {

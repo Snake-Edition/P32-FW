@@ -11,7 +11,7 @@ namespace buddy {
 enum class ChamberFiltrationBackend : uint8_t {
     none = 0,
 #if XL_ENCLOSURE_SUPPORT()
-// TODO xl_enclosure = 1,
+    xl_enclosure = 1,
 #endif
 #if HAS_XBUDDY_EXTENSION()
     /// XBE Filtration fan is doing both cooling and filtration

@@ -2,7 +2,7 @@
 
 MenuItemSwitch::MenuItemSwitch(const string_view_utf8 &label, const std::span<const char *const> &items, size_t initial_index)
     : IWindowMenuItem(label)
-    , index(initial_index)
+    , index_(initial_index)
     , items_(items) //
 {
     touch_extension_only_ = true;
@@ -11,25 +11,25 @@ MenuItemSwitch::MenuItemSwitch(const string_view_utf8 &label, const std::span<co
 }
 
 invalidate_t MenuItemSwitch::change(int /*dif*/) {
-    if ((++index) >= item_count()) {
-        index = 0;
+    if ((++index_) >= item_count()) {
+        index_ = 0;
     }
     return invalidate_t::yes;
 }
 
 void MenuItemSwitch::click(IWindowMenu & /*window_menu*/) {
-    const size_t old_index = index;
+    const size_t old_index = index_;
     Change(0);
     OnChange(old_index);
     changeExtentionWidth();
 }
 
 void MenuItemSwitch::set_index(size_t idx) {
-    if (idx == index || idx >= item_count()) {
+    if (idx == index_ || idx >= item_count()) {
         return;
     }
 
-    index = idx;
+    index_ = idx;
     changeExtentionWidth();
     InValidateExtension();
 }
@@ -63,13 +63,11 @@ void MenuItemSwitch::printExtension(Rect16 extension_rect, Color color_text, Col
 
     // draw brackets
     if (has_brackets) {
-        static const uint8_t bf[] = "[";
-        static const uint8_t be[] = "]";
-        render_text_align(getLeftBracketRect(extension_rect), string_view_utf8::MakeCPUFLASH(bf), BracketFont,
+        render_text_align(getLeftBracketRect(extension_rect), string_view_utf8::MakeCPUFLASH("["), BracketFont,
             color_back, IsFocused() ? COLOR_DARK_GRAY : COLOR_SILVER, GuiDefaults::MenuPaddingSpecial, Align_t::Center(), false);
 
         // draw bracket end  TODO: Change font
-        render_text_align(getRightBracketRect(extension_rect), string_view_utf8::MakeCPUFLASH(be), BracketFont,
+        render_text_align(getRightBracketRect(extension_rect), string_view_utf8::MakeCPUFLASH("]"), BracketFont,
             color_back, IsFocused() ? COLOR_DARK_GRAY : COLOR_SILVER, GuiDefaults::MenuPaddingSpecial, Align_t::Center(), false);
     }
 }
@@ -89,6 +87,6 @@ void MenuItemSwitch::changeExtentionWidth() {
 }
 
 string_view_utf8 MenuItemSwitch::current_item_text() const {
-    const char *str = items_[index];
+    const char *str = items_[index_];
     return translate_items_ ? _(str) : string_view_utf8::MakeRAM(str);
 }

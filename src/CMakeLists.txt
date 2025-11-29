@@ -1,3 +1,6 @@
+# Modules are nice, so we can include them everywhere
+add_subdirectory(module)
+
 if(BOARD IN_LIST BUDDY_BOARDS)
   target_include_directories(firmware PRIVATE .)
 
@@ -16,6 +19,10 @@ if(BOARD IN_LIST BUDDY_BOARDS)
   add_subdirectory(freertos)
   add_subdirectory(persistent_stores)
   add_subdirectory(version)
+
+  if(HEAP_INSTRUMENTATION_ENABLED)
+    add_subdirectory(heap_instrumentation)
+  endif()
 
   if(CONNECT OR WUI)
     add_subdirectory(transfers)
@@ -109,4 +116,6 @@ elseif(BOARD STREQUAL "XL_DEV_KIT_XLB")
     add_subdirectory(puppies)
   endif()
   add_subdirectory(marlin_stubs)
+else()
+  message(FATAL_ERROR "Unknown board: ${BOARD}")
 endif()

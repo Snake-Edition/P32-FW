@@ -107,17 +107,6 @@
   #define analogInputToDigitalPin(p) (p)
 #endif
 
-#define CRITICAL_SECTION_START  const uint32_t primask = __get_PRIMASK(); __disable_irq()
-#define CRITICAL_SECTION_END    __set_PRIMASK(primask)
-#define ISRS_ENABLED() (!__get_PRIMASK())
-#define ENABLE_ISRS()  __enable_irq()
-#define DISABLE_ISRS() __disable_irq()
-#define cli() __disable_irq()
-#define sei() __enable_irq()
-
-// On AVR this is in math.h?
-#define square(x) ((x)*(x))
-
 #ifndef strncpy_P
   #define strncpy_P(dest, src, num) strncpy((dest), (src), (num))
 #endif
@@ -190,19 +179,6 @@ static inline int freeMemory() {
 #pragma GCC diagnostic pop
 
 //
-// EEPROM
-//
-
-/**
- * TODO: Write all this EEPROM stuff. Can emulate EEPROM in flash as last resort.
- * Wire library should work for i2c EEPROMs.
- */
-void eeprom_write_byte(uint8_t *pos, unsigned char value);
-uint8_t eeprom_read_byte(uint8_t *pos);
-void eeprom_read_block (void *__dst, const void *__src, size_t __n);
-void eeprom_update_block (const void *__src, void *__dst, size_t __n);
-
-//
 // ADC
 //
 
@@ -220,8 +196,3 @@ uint16_t HAL_adc_get_result();
 #define GET_PIN_MAP_PIN(index) index
 #define GET_PIN_MAP_INDEX(pin) pin
 #define PARSED_PIN_INDEX(code, dval) parser.intval(code, dval)
-
-#ifdef STM32F4
-  #define JTAG_DISABLE() afio_cfg_debug_ports(AFIO_DEBUG_SW_ONLY)
-  #define JTAGSWD_DISABLE() afio_cfg_debug_ports(AFIO_DEBUG_NONE)
-#endif

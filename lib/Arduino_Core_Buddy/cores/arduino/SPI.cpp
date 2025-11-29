@@ -71,8 +71,9 @@ byte SPIClass::transfer(uint8_t _data, SPITransferMode _mode) {
 
 uint16_t SPIClass::transfer16(uint16_t _data, SPITransferMode _mode) {
     _data = ((_data << 8) & 0xff00) | ((_data >> 8) & 0x00ff);
-    uint16_t read;
-    dmaTransfer((uint8_t *)&_data, (uint8_t *)&read, sizeof(_data));
+    uint16_t read = 0;
+    [[maybe_unused]] auto ret = dmaTransfer((uint8_t *)&_data, (uint8_t *)&read, sizeof(_data));
+    assert(ret == SPI_OK);
     read = ((read << 8) & 0xff00) | ((read >> 8) & 0x00ff);
     return read;
 }

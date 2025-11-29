@@ -27,6 +27,20 @@ endif()
 
 include(ProjectOptions.cmake)
 
+# link time optimizations to disable LTO run cmake with -DDISABLE_LTO
+if(NOT DEFINED DISABLE_LTO
+   AND NOT DEVELOPER_MODE
+   AND NOT BOARD STREQUAL DWARF
+   AND CMAKE_CROSSCOMPILING # This will not force LTO for unittests and png2font, because those are
+                            # build natively
+   )
+  set(COMPILE_WITH_LTO ON)
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+else()
+  set(COMPILE_WITH_LTO OFF)
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+endif()
+
 # Check GCC Version
 get_recommended_gcc_version(RECOMMENDED_TOOLCHAIN_VERSION)
 if(CMAKE_CROSSCOMPILING AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL
@@ -54,6 +68,9 @@ add_compile_options(-Wall -Wsign-compare)
 # make all paths stored inside firmware relative
 add_compile_options(-ffile-prefix-map=${CMAKE_SOURCE_DIR}=.)
 
+# make the builds reproducible
+add_compile_options(-frandom-seed=BuddyFW)
+
 add_compile_options(
   $<$<COMPILE_LANGUAGE:CXX>:-Wno-register> $<$<COMPILE_LANGUAGE:CXX>:-Wno-volatile>
   $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
@@ -61,8 +78,8 @@ add_compile_options(
 
 # append custom C/C++ flags
 if(CUSTOM_COMPILE_OPTIONS)
-  string(REPLACE " " ";" CUSTOM_COMPILE_OPTIONS "${CUSTOM_COMPILE_OPTIONS}")
-  add_compile_options(${CUSTOM_COMPILE_OPTIONS})
+  string(REPLACE " " ";" EXTRA_COMPILE_OPTIONS "${CUSTOM_COMPILE_OPTIONS}")
+  add_compile_options(${EXTRA_COMPILE_OPTIONS})
 endif()
 
 # find bootloader.bin location
@@ -119,7 +136,7 @@ endif()
 
 target_include_directories(BuddyHeaders INTERFACE include)
 
-target_link_libraries(BuddyHeaders INTERFACE FreeRTOS::FreeRTOS)
+target_link_libraries(BuddyHeaders INTERFACE FreeRTOS::FreeRTOS FreeRTOS::CMSIS)
 
 # Define printer type and version
 set(PRINTER_VERSION "1") # default version
@@ -164,14 +181,7 @@ target_compile_definitions(
   )
 
 target_compile_definitions(
-  BuddyHeaders
-  INTERFACE PRINTER_CODE=${PRINTER_CODE}
-            BOARD=BOARD_${BOARD}
-            BOARD_VERSION_MAJOR=${BOARD_VERSION_MAJOR}
-            BOARD_VERSION_MINOR=${BOARD_VERSION_MINOR}
-            BOARD_VERSION_PATCH=${BOARD_VERSION_PATCH}
-            MARLIN_DISABLE_INFINITE_LOOP
-            PROCESS_CUSTOM_GCODE
+  BuddyHeaders INTERFACE PRINTER_CODE=${PRINTER_CODE} BOARD=BOARD_${BOARD} PROCESS_CUSTOM_GCODE
   )
 target_link_libraries(BuddyHeaders INTERFACE printers)
 
@@ -207,7 +217,7 @@ target_link_libraries(Segger_Config INTERFACE BuddyHeaders)
 #
 
 add_library(LwIP_Config INTERFACE)
-target_link_libraries(LwIP_Config INTERFACE BuddyHeaders logging)
+target_link_libraries(LwIP_Config INTERFACE BuddyHeaders log_interface)
 
 #
 # Configure FatFs
@@ -341,7 +351,9 @@ if(BOARD IN_LIST BUDDY_BOARDS AND HAS_PUPPIES_BOOTLOADER)
       dwarf
       SOURCE_DIR "${DWARF_SOURCE_DIR}"
       BINARY_DIR "${DWARF_BINARY_DIR}"
-      CMAKE_ARGS --preset xl-dwarf_${CMAKE_BUILD_TYPE_lower}_boot -B "${DWARF_BINARY_DIR}"
+      CMAKE_ARGS
+        --preset xl-dwarf_${CMAKE_BUILD_TYPE_lower}_boot -B "${DWARF_BINARY_DIR}"
+        $<$<BOOL:${CUSTOM_COMPILE_OPTIONS}>:-DCUSTOM_COMPILE_OPTIONS=${CUSTOM_COMPILE_OPTIONS}>
       INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step"
       BUILD_BYPRODUCTS "${DWARF_BINARY_PATH}" "${DWARF_BINARY_DIR}/firmware"
       STEP_TARGETS build
@@ -351,7 +363,7 @@ if(BOARD IN_LIST BUDDY_BOARDS AND HAS_PUPPIES_BOOTLOADER)
       )
   endif()
 
-  if(NOT MODULARBED_BINARY_PATH AND HAS_MODULARBED)
+  if(NOT MODULARBED_BINARY_PATH AND HAS_PUPPY_MODULARBED)
     get_filename_component(
       MODULARBED_BINARY_DIR "${MODULARBED_BINARY_DIR}" REALPATH BASE_DIR "${CMAKE_SOURCE_DIR}"
       )
@@ -362,8 +374,10 @@ if(BOARD IN_LIST BUDDY_BOARDS AND HAS_PUPPIES_BOOTLOADER)
       modularbed
       SOURCE_DIR "${MODULARBED_SOURCE_DIR}"
       BINARY_DIR "${MODULARBED_BINARY_DIR}"
-      CMAKE_ARGS --preset ${PRINTER_lower}-modularbed_${CMAKE_BUILD_TYPE_lower}_boot -B
-                 "${MODULARBED_BINARY_DIR}"
+      CMAKE_ARGS
+        --preset ${PRINTER_lower}-modularbed_${CMAKE_BUILD_TYPE_lower}_boot -B
+        "${MODULARBED_BINARY_DIR}"
+        $<$<BOOL:${CUSTOM_COMPILE_OPTIONS}>:-DCUSTOM_COMPILE_OPTIONS=${CUSTOM_COMPILE_OPTIONS}>
       INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step"
       BUILD_BYPRODUCTS "${MODULARBED_BINARY_PATH}" "${MODULARBED_BINARY_DIR}/firmware"
       STEP_TARGETS build
@@ -386,8 +400,10 @@ if(BOARD IN_LIST BUDDY_BOARDS AND HAS_PUPPIES_BOOTLOADER)
       xbuddy_extension
       SOURCE_DIR "${XBUDDY_EXTENSION_SOURCE_DIR}"
       BINARY_DIR "${XBUDDY_EXTENSION_BINARY_DIR}"
-      CMAKE_ARGS --preset ${PRINTER_lower}-xbuddy-extension_${CMAKE_BUILD_TYPE_lower}_boot -B
-                 "${XBUDDY_EXTENSION_BINARY_DIR}"
+      CMAKE_ARGS
+        --preset ${PRINTER_lower}-xbuddy-extension_${CMAKE_BUILD_TYPE_lower}_boot -B
+        "${XBUDDY_EXTENSION_BINARY_DIR}"
+        $<$<BOOL:${CUSTOM_COMPILE_OPTIONS}>:-DCUSTOM_COMPILE_OPTIONS=${CUSTOM_COMPILE_OPTIONS}>
       INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step"
       BUILD_BYPRODUCTS "${XBUDDY_EXTENSION_BINARY_PATH}" "${XBUDDY_EXTENSION_BINARY_DIR}/firmware"
       STEP_TARGETS build
@@ -473,11 +489,6 @@ objcopy(firmware "binary" ".bin")
 
 # generate linker map file
 target_link_options(firmware PUBLIC -Wl,-Map=firmware.map,--print-memory-usage)
-
-# link time optimizations
-if(NOT DEVELOPER_MODE)
-  set_target_properties(firmware PROPERTIES INTERPROCEDURAL_OPTIMIZATION True)
-endif()
 
 # inform about the firmware's size in terminal
 report_size(firmware)

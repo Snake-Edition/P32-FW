@@ -328,7 +328,7 @@ public:
 
     using BeginResult = std::variant<Transfer, NoTransferSlot, AlreadyExists, Storage>;
     /// Begin a new transfer.
-    static BeginResult begin(const char *destination_path, const Download::Request &request);
+    static BeginResult begin(const char *destination_path, Download::Request request);
 
     using RecoverResult = std::variant<Transfer, NoTransferSlot, Storage>;
     /// Given a destination path, restore the transfer (based on the <dest_path>/download file).

@@ -3,11 +3,11 @@
 #include "mmu2_marlin.h"
 
 #include "mapi/motion.hpp"
+#include "mapi/parking.hpp"
 
 #include "../../inc/MarlinConfig.h"
 #include "../../gcode/gcode.h"
 #include "../../libs/buzzer.h"
-#include "../../libs/nozzle.h"
 #include "../../module/temperature.h"
 #include "../../module/planner.h"
 #include "../../module/stepper/indirection.h"
@@ -123,8 +123,7 @@ void motion_do_blocking_move_to_z(float z, float feedRate_mm_s) {
 }
 
 void nozzle_park() {
-    static constexpr xyz_pos_t park_point = { { XYZ_NOZZLE_PARK_POINT_M600 } };
-    nozzle.park(2, park_point);
+    mapi::park(mapi::ZAction::relative_move, mapi::ParkingPosition::from_xyz_pos({ { XYZ_NOZZLE_PARK_POINT_M600 } }));
 }
 
 bool marlin_printingIsActive() {
@@ -135,12 +134,16 @@ void marlin_manage_heater() {
     thermalManager.manage_heater();
 }
 
-void marlin_manage_inactivity(bool ignore_stepper_queue) {
-    manage_inactivity(ignore_stepper_queue);
+void marlin_manage_inactivity([[maybe_unused]] bool ignore_stepper_queue) {
+    // ignore_stepper_queue was removed from Marlin::manage_inactivity
+    // Keeping it in the MMU code to not break the compatibility with MK3
+    manage_inactivity();
 }
 
-void marlin_idle(bool waiting, bool ignore_stepper_queue) {
-    idle(waiting, ignore_stepper_queue);
+void marlin_idle(bool waiting, [[maybe_unused]] bool ignore_stepper_queue) {
+    // ignore_stepper_queue was removed from Marlin::manage_inactivity
+    // Keeping it in the MMU code to not break the compatibility with MK3
+    idle(waiting);
 }
 
 void marlin_refresh_print_state_in_ram() {
@@ -160,7 +163,16 @@ void marlin_finalize_unload() {
     static_assert(HOTENDS == 1);
 
     // The filament is completely out of the nozzle - so not auto-retracted
-    buddy::auto_retract().mark_as_retracted(0, false);
+    buddy::auto_retract().set_retracted_distance(0, std::nullopt);
+#endif
+}
+
+bool marlin_is_retracted() {
+#if HAS_AUTO_RETRACT()
+    static_assert(HOTENDS == 1);
+    return buddy::auto_retract().is_safely_retracted_for_unload();
+#else
+    return false;
 #endif
 }
 
@@ -172,8 +184,10 @@ int16_t thermal_degHotend() {
     return thermalManager.degHotend(active_extruder);
 }
 
-void thermal_setExtrudeMintemp(int16_t t) {
+int16_t thermal_setExtrudeMintemp(int16_t t) {
+    int16_t rv = thermalManager.extrude_min_temp;
     thermalManager.extrude_min_temp = t;
+    return rv;
 }
 
 void thermal_setTargetHotend(int16_t t) {
@@ -185,7 +199,7 @@ void safe_delay_keep_alive(uint16_t t) {
     //    manage_inactivity(true);
     //    ui.update();
     // shouldn't we call idle() instead? At least the MMU communication can be run even during waiting for temperature
-    idle(true, true);
+    idle(true);
 }
 
 void Enable_E0() {

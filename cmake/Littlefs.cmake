@@ -51,7 +51,7 @@ function(lfs_image_add_file image_name file target)
     COMMAND "${Python3_EXECUTABLE}" "${mklittlefs}" "--block-size" "${block_size}" "--block-count"
             "${block_count}" "add-file" "${image_location}" "${file}" "${target}"
     DEPENDS "${file}"
-    APPEND VERBATIM
+    APPEND
     )
 endfunction()
 

@@ -1,20 +1,25 @@
 target_include_directories(firmware PRIVATE . include)
 
+target_link_libraries(firmware PRIVATE buddy_utils)
+
 if(BOARD IN_LIST BUDDY_BOARDS)
   target_sources(
     firmware
     PRIVATE adc.cpp
             app_metrics.cpp
             appmain.cpp
+            awdg.cpp
             base64_stream_decoder.cpp
             bbf.cpp
             conserve_cpu.cpp
             crc32.cpp
             crc32_zlib.cpp
             data_exchange.cpp
-            enum_array.cpp
             error_code_mangle.cpp
             ExtInterruptHandler.cpp
+            filament.cpp
+            filament_list.cpp
+            filament_to_load.cpp
             filename_type.cpp
             filepath_operation.cpp
             footer_def.cpp
@@ -73,7 +78,6 @@ if(BOARD IN_LIST BUDDY_BOARDS)
             sys_time.cpp
             tasks.cpp
             tools_mapping.cpp
-            trinamic.cpp
             w25x.cpp
             w25x_communication.cpp
             wdt.cpp
@@ -139,14 +143,19 @@ elseif(BOARD STREQUAL "XL_DEV_KIT_XLB")
             st25dv64k.cpp # todo: remove
             tasks.cpp
             tools_mapping.cpp
-            trinamic.cpp
             wdt.cpp
     )
 endif()
 
-if(NOT BOARD STREQUAL "DWARF" AND NOT BOARD STREQUAL "MODULARBED")
-  if(HAS_POWER_PANIC)
-    target_sources(firmware PRIVATE power_panic.cpp)
+if(HAS_POWER_PANIC)
+  target_sources(firmware PRIVATE power_panic.cpp)
+
+  if(${POWER_PANIC_STORAGE_IS_FLASH})
+    target_sources(firmware PRIVATE power_panic_storage_flash.cpp)
+  elseif(${POWER_PANIC_STORAGE_IS_BKPSRAM})
+    target_sources(firmware PRIVATE power_panic_storage_bkpsram.cpp)
+  else()
+    message(FATAL_ERROR "POWER_PANIC_STORAGE storage is unknown")
   endif()
 endif()
 
@@ -179,7 +188,9 @@ endif()
 
 if(BOARD_IS_MASTER_BOARD)
   if(PRINTER STREQUAL "iX")
-    target_sources(firmware PRIVATE filament_sensor_ix_side.cpp filament_sensors_handler_iX.cpp)
+    target_sources(
+      firmware PRIVATE filament_sensor_ix_side.cpp filament_sensors_handler_default.cpp
+      )
   elseif(PRINTER STREQUAL "XL")
     target_sources(
       firmware PRIVATE filament_sensors_handler_XL.cpp filament_sensors_handler_XL_remap.cpp
@@ -193,10 +204,7 @@ endif()
 
 if(GUI)
   # TODO: Some of it should be moved under GUI
-  target_sources(
-    firmware PRIVATE bsod_gui.cpp filament.cpp filament_gui.cpp filament_list.cpp
-                     filament_to_load.cpp
-    )
+  target_sources(firmware PRIVATE bsod_gui.cpp filament_gui.cpp)
 endif()
 
 if(BOARD IN_LIST BUDDY_BOARDS)
@@ -213,7 +221,10 @@ if(HAS_NFC)
   target_sources(firmware PRIVATE nfc.cpp)
 endif()
 
-add_subdirectory(filters)
+if(HAS_HOTEND_TYPE_SUPPORT)
+  target_sources(firmware PRIVATE hotend_type.cpp)
+endif()
+
 add_subdirectory(fanctl)
 add_subdirectory(mapi)
 add_subdirectory(marlin_server_types)
@@ -226,10 +237,6 @@ endif()
 if(BOARD_IS_MASTER_BOARD)
   add_subdirectory(gcode)
   add_subdirectory(feature)
-endif()
-
-if(HAS_PRECISE_HOMING)
-  target_sources(firmware PRIVATE PersistentStorage.cpp)
 endif()
 
 add_subdirectory(utils)

@@ -22,14 +22,6 @@ import stat
 from argparse import ArgumentParser
 from pathlib import Path
 from urllib.parse import urlparse
-try:
-    import requests
-except ModuleNotFoundError:
-    print(
-        f'Python executable ({sys.executable}) is missing the "requests" package.',
-        file=sys.stderr,
-        flush=True)
-    raise
 
 assert sys.version_info >= (3, 8), 'Python 3.8+ is required.'
 is_windows = platform.system() == 'Windows'
@@ -79,28 +71,28 @@ dependencies = {
         }
     },
     'bootloader-mini': {
-        'version': '2.4.1',
-        'url': 'https://prusa-buddy-firmware-dependencies.s3.eu-central-1.amazonaws.com/bootloader-mini-2.4.1-F548BE04-E73E-48B1-ABA4-F1BE7FDB2420.zip',
+        'version': '2.5.0',
+        'url': 'https://prusa-buddy-firmware-dependencies.s3.eu-central-1.amazonaws.com/bootloader-mini-2.5.0-A05C6B62-D801-4D14-9CB2-E1856AE491B4.zip',
     },
     'bootloader-mk4': {
-        'version': '2.4.1',
-        'url': 'https://prusa-buddy-firmware-dependencies.s3.eu-central-1.amazonaws.com/bootloader-mk4-2.4.1-0F09D30D-43CD-4B93-BBD5-932C1405A069.zip',
+        'version': '2.5.0',
+        'url': 'https://prusa-buddy-firmware-dependencies.s3.eu-central-1.amazonaws.com/bootloader-mk4-2.5.0-F25989EA-595A-4CE4-BF6F-4E5A6E30EDF2.zip',
     },
     'bootloader-coreone': {
-        'version': '2.4.1',
-        'url': 'https://prusa-buddy-firmware-dependencies.s3.eu-central-1.amazonaws.com/bootloader-mk4-2.4.1-0F09D30D-43CD-4B93-BBD5-932C1405A069.zip',
+        'version': '2.5.0',
+        'url': 'https://prusa-buddy-firmware-dependencies.s3.eu-central-1.amazonaws.com/bootloader-mk4-2.5.0-F25989EA-595A-4CE4-BF6F-4E5A6E30EDF2.zip',
     },
     'bootloader-mk3.5': {
-        'version': '2.4.1',
-        'url': 'https://prusa-buddy-firmware-dependencies.s3.eu-central-1.amazonaws.com/bootloader-mk4-2.4.1-0F09D30D-43CD-4B93-BBD5-932C1405A069.zip',
+        'version': '2.5.0',
+        'url': 'https://prusa-buddy-firmware-dependencies.s3.eu-central-1.amazonaws.com/bootloader-mk4-2.5.0-F25989EA-595A-4CE4-BF6F-4E5A6E30EDF2.zip',
     },
     'bootloader-xl': {
-        'version': '2.4.1',
-        'url': 'https://prusa-buddy-firmware-dependencies.s3.eu-central-1.amazonaws.com/bootloader-xl-2.4.1-21D38F7F-B1E9-4C30-BD46-B8006B1BB79E.zip',
+        'version': '2.5.0',
+        'url': 'https://prusa-buddy-firmware-dependencies.s3.eu-central-1.amazonaws.com/bootloader-xl-2.5.0-855E7B4F-C06F-4785-9578-B392136108D3.zip',
     },
     'bootloader-ix': {
-        'version': '2.4.1',
-        'url': 'https://prusa-buddy-firmware-dependencies.s3.eu-central-1.amazonaws.com/bootloader-ix-2.4.1-9923AA1D-0047-4299-B2C8-E42A67E7AA97.zip',
+        'version': '2.5.0',
+        'url': 'https://prusa-buddy-firmware-dependencies.s3.eu-central-1.amazonaws.com/bootloader-ix-2.5.0-D485B618-3E74-4CAB-8666-880819DE4C4D.zip',
     },
     'firmware-mmu': {
         'version': '3.0.3',
@@ -153,6 +145,7 @@ def find_single_subdir(path: Path):
 
 def download_url(url: str, filename: Path):
     """Download file from url and write it to given filename"""
+    import requests
     with requests.get(url, stream=True) as response:
         response.raise_for_status()
         with open(filename, 'wb') as file:
@@ -250,6 +243,7 @@ def install_dependency(dependency):
         os.mkdir(installation_directory)
         for file in files:
             basename = file.split('/')[-1]
+            print('Downloading ' + file)
             download_url(url=file, filename=installation_directory / basename)
     else:
         raise ('dependency is missing payload')
@@ -259,12 +253,13 @@ def install_dependency(dependency):
 
 def install_openocd_config_template():
     debug_dir = project_root_dir / 'utils' / 'debug'
-    custom_config_path = debug_dir / '10_custom_config_overrides.cfg'
+    os.makedirs(debug_dir, exist_ok=True)
+    custom_config_path = debug_dir / 'device_setup_overrides.cfg'
     if not custom_config_path.exists():
         print(
             f'Installing openocd user-config override to {custom_config_path}')
         custom_config_path.write_text(
-            "# This file is meant for custom configuration overrides.\n# See 10_custom_config_defaults.cfg for info and copy one proc section here.\n"
+            "# This file is meant for custom configuration overrides.\n# See 10_device_setup.cfg for info and copy one proc section here.\n"
         )
 
 

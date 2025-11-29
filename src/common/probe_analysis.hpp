@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <algorithm>
 #include <tuple>
-#include <functional>
+#include <optional>
 #include <numeric>
 #include <limits>
 #include <cassert>
@@ -54,8 +54,6 @@ public:
 
     /// Entry of the moving window used for analysis.
     struct Record {
-        uint32_t timestamp;
-
         /// Extruder's Z coordinate [mm]
         float z;
 
@@ -114,9 +112,11 @@ public:
     struct Features {
         Sample analysisStart;
         Line fallLine;
+        Sample fallStart;
         Sample fallEnd;
         Line haltLine;
         Sample riseStart;
+        Sample riseEnd;
         Line riseLine;
         Sample analysisEnd;
 
@@ -188,7 +188,7 @@ public:
 
 public:
     /// Append current Z coordinate and load to the window for later analysis
-    void StoreSample(float currentZ, float currentLoad);
+    void StoreSample(uint32_t time_us, float currentZ, float currentLoad);
 
     /// Run the analysis and return its result
     Result Analyse();
@@ -204,14 +204,38 @@ public:
     /// How many samples to ignore at the beginning/end of a sample sequence (related to some features)
     const int skipBorderSamples;
 
-    /// Time interval in seconds specifying the subset of samples before haltStart that should be used for the analysis.
-    static constexpr float analysisLookback = 0.150;
+    /// Initial sampling frequency, will be changed by SetSamplingIntervalMs() from a real data
+    static constexpr float initialFrequency = 320.0f;
 
-    /// Time interval in seconds specifying the subset of samples after haltEnd that should be used for the analysis.
-    static constexpr float analysisLookahead = 0.300;
+    /// Time interval in seconds specifying the samples ignored when calculating the intersection
+    /// between before and compression line features.
+    static constexpr float analysisCompressionGap = 0.010f;
+
+    /// Time interval in seconds specifying the samples ignored when calculating the intersection
+    /// between decompression and after-decompression line features.
+    static constexpr float analysisDecompressionGap = 0.030f;
+
+    /// Expected time interval in seconds specifying the time required for the nozzle lift off the
+    /// bed starting from the trigger endpoint
+    static constexpr float analysisExpectedRaiseTime = 0.100f;
+
+    /// Time interval in seconds specifying the length of samples used for the before and after
+    /// compression lines.
+    static constexpr float analysisBaselineTime = 0.300f;
+
+    /// Time interval in seconds specifying the subset of samples before haltStart that should be used for the analysis.
+    static constexpr float analysisLookback = analysisBaselineTime + analysisCompressionGap;
+
+    /// Time interval in seconds specifying the subset of samples after haltEnd that should be used
+    /// for the analysis. Lookahead should have enough samples to match the lenght of the
+    /// pre-compression line after accounting for raise time, plus some margin.
+    static constexpr float analysisLookahead = analysisBaselineTime + analysisDecompressionGap + analysisExpectedRaiseTime;
 
     /// Currently recorded samples (moving window).
     CircleBufferBaseT<Record> &window;
+
+    /// Last sample's timestamp to be used for metrics
+    uint32_t lastSampleTimestamp;
 
 public:
     /// Return time of the given sample
@@ -264,18 +288,19 @@ public:
 
     /// Calculate error when the load of given sample range would be represented by two specific lines
     ///
-    /// Those lines are the result of linear regression over [start, split) and [split, end].
+    /// Those lines are the result of linear regression over [start, split) and [split + gapSamples, end].
     /// Please note, that the `split` sample is included in the second line/regression and excluded from the first.
     ///
     /// Returns (NaN, Line::Invalid, Line::Invalid) on error.
-    std::tuple<float, Line, Line> CalculateErrorWhenLoadRepresentedAsLines(SamplesRange samples, Sample split);
+    std::tuple<float, Line, Line> CalculateErrorWhenLoadRepresentedAsLines(SamplesRange samples, Sample split, size_t gapSamples);
 
-    /// Find the best two-line representation of load for given sample range
+    /// Find the best two-line representation of load for given sample range, ignoring the
+    /// intersection point (gapSamples).
     ///
     /// Returns the split sample as accepted by CalculateErrorWhenLoadRepresentedAsLines
     /// and the two lines.
     /// Returns (window.end(), Line::Invalid, Line::Invalid) on error.
-    std::tuple<Sample, Line, Line> FindBestTwoLinesApproximation(SamplesRange samples);
+    std::tuple<Sample, Line, Line> FindBestTwoLinesApproximation(SamplesRange samples, size_t gapSamples);
 
     /// Compensate for the fact that loadcell data are delayed in respect to Z axis coordinates.
     bool CompensateForSystemDelay();
@@ -344,10 +369,13 @@ protected:
 
 protected:
     /// Time interval in seconds between consecutive samples.
-    float samplingInterval = 1.0f / 320.0f;
+    float samplingInterval = 1.0f / initialFrequency;
 
     /// True if Analyse() is being process (and no samples should be processed)
     std::atomic<bool> analysisInProgress = false;
+
+    /// Log features into metrics
+    void log_features_metrics(const Features &features, std::optional<float> detected_z) const;
 };
 
 /**

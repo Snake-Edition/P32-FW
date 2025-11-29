@@ -19,7 +19,6 @@ target_sources(
           selftest_view_item.cpp
           selftest_view_item_separator.cpp
           selftest_view_item_text.cpp
-          window_wizard_icon.cpp
   )
 
 if(NOT (${PRINTER} STREQUAL "MINI"))
@@ -27,10 +26,6 @@ if(NOT (${PRINTER} STREQUAL "MINI"))
     firmware PRIVATE selftest_frame_fsensor.cpp selftest_frame_loadcell.cpp
                      selftest_result_fsensor.cpp selftest_result_loadcell.cpp
     )
-endif()
-
-if((PRINTER STREQUAL "MK4") OR (PRINTER STREQUAL "COREONE"))
-  target_sources(firmware PRIVATE selftest_frame_gears_calib.cpp)
 endif()
 
 if(${PRINTER} STREQUAL "XL")

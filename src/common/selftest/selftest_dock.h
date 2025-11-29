@@ -47,8 +47,6 @@ public:
 
 private:
     static constexpr auto NUM_PARK_PICK_CYCLES = 3;
-    static constexpr auto EXTRA_SCREWDRIVER_SPACE_MM = 150;
-    static constexpr auto X_UNLOCK_DISTANCE_MM = -10;
 
     IPartHandler &state_machine;
     const DockConfig_t &config;

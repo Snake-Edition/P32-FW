@@ -21,6 +21,9 @@
  */
 #pragma once
 
+#include <option/has_local_bed.h>
+#include <option/has_remote_bed.h>
+
 /**
  * Conditionals_post.h
  * Defines that depend on configuration but are not editable.
@@ -43,7 +46,7 @@
   #define NOT_A_PIN 0 // For PINS_DEBUGGING
 #endif
 
-#if (ENABLED(CLASSIC_JERK) || IS_KINEMATIC)
+#if (ENABLED(CLASSIC_JERK))
   #define HAS_CLASSIC_JERK 1
 #endif
 #define HAS_CLASSIC_E_JERK HAS_CLASSIC_JERK
@@ -56,16 +59,11 @@
 #define Z_MAX_LENGTH (Z_MAX_POS - (Z_MIN_POS))
 
 // Defined only if the sanity-check is bypassed
-// #ifndef X_BED_SIZE
-//   #define X_BED_SIZE X_MAX_LENGTH
-// #endif
-// #ifndef Y_BED_SIZE
-//   #define Y_BED_SIZE Y_MAX_LENGTH
-// #endif
-
-// Require 0,0 bed center for Delta and SCARA
-#if IS_KINEMATIC
-  #define BED_CENTER_AT_0_0
+#ifndef X_BED_SIZE
+  #define X_BED_SIZE X_MAX_LENGTH
+#endif
+#ifndef Y_BED_SIZE
+  #define Y_BED_SIZE Y_MAX_LENGTH
 #endif
 
 // Define center values for future use
@@ -127,13 +125,6 @@
   #else
     #define CORESIGN(n) (n)
   #endif
-#endif
-
-/**
- * No adjustable bed on non-cartesians
- */
-#if IS_KINEMATIC
-  #undef LEVEL_BED_CORNERS
 #endif
 
 /**
@@ -237,13 +228,6 @@
 #endif
 
 /**
- * Provide a MAX_AUTORETRACT for older configs
- */
-#if ENABLED(FWRETRACT) && !defined(MAX_AUTORETRACT)
-  #define MAX_AUTORETRACT 99
-#endif
-
-/**
  * LCD Contrast for Graphical Displays
  */
 #if ENABLED(CARTESIO_UI)
@@ -266,8 +250,6 @@
 #elif ENABLED(MKS_MINI_12864)
   #define _LCD_CONTRAST_MIN  120
   #define _LCD_CONTRAST_INIT 195
-#elif ANY(FYSETC_MINI_12864_X_X, FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0, FYSETC_MINI_12864_2_1)
-  #define _LCD_CONTRAST_INIT 220
 #elif ENABLED(ULTI_CONTROLLER)
   #define _LCD_CONTRAST_INIT 127
   #define _LCD_CONTRAST_MAX  254
@@ -299,13 +281,6 @@
   #ifndef DEFAULT_LCD_CONTRAST
     #define DEFAULT_LCD_CONTRAST LCD_CONTRAST_INIT
   #endif
-#endif
-
-/**
- * Override here because this is set in Configuration_adv.h
- */
-#if HAS_LCD_MENU && DISABLED(ELB_FULL_GRAPHIC_CONTROLLER)
-  #undef SD_DETECT_INVERTED
 #endif
 
 /**
@@ -347,210 +322,83 @@
 
 #define ANY_TEMP_SENSOR_IS(n) (TEMP_SENSOR_0 == (n) || TEMP_SENSOR_1 == (n) || TEMP_SENSOR_2 == (n) || TEMP_SENSOR_3 == (n) || TEMP_SENSOR_4 == (n) || TEMP_SENSOR_5 == (n) || TEMP_SENSOR_BED == (n) || TEMP_SENSOR_CHAMBER == (n))
 
-#define HAS_USER_THERMISTORS ANY_TEMP_SENSOR_IS(1000)
-
-#if TEMP_SENSOR_0 == -4
-  #define HEATER_0_USES_AD8495
-#elif TEMP_SENSOR_0 == -3
-  #define HEATER_0_USES_MAX6675
-  #define MAX6675_IS_MAX31855
-  #define HEATER_0_MAX6675_TMIN -270
-  #define HEATER_0_MAX6675_TMAX 1800
-#elif TEMP_SENSOR_0 == -2
-  #define HEATER_0_USES_MAX6675
-  #define HEATER_0_MAX6675_TMIN 0
-  #define HEATER_0_MAX6675_TMAX 1024
-#elif TEMP_SENSOR_0 == -1
-  #define HEATER_0_USES_AD595
-#elif TEMP_SENSOR_0 > 0
+#if TEMP_SENSOR_0 > 0
   #define THERMISTOR_HEATER_0 TEMP_SENSOR_0
   #define HEATER_0_USES_THERMISTOR
-  #if TEMP_SENSOR_0 == 1000
-    #define HEATER_0_USER_THERMISTOR
-  #endif
 #else
   #undef HEATER_0_MINTEMP
   #undef HEATER_0_MAXTEMP
 #endif
 
-#if TEMP_SENSOR_1 == -4
-  #define HEATER_1_USES_AD8495
-#elif TEMP_SENSOR_1 == -3
-  #if TEMP_SENSOR_0 == -2
-    #error "If MAX31855 Thermocouple (-3) is used for TEMP_SENSOR_1 then TEMP_SENSOR_0 must match."
-  #endif
-  #define HEATER_1_USES_MAX6675
-  #define HEATER_1_MAX6675_TMIN -270
-  #define HEATER_1_MAX6675_TMAX 1800
-#elif TEMP_SENSOR_1 == -2
-  #if TEMP_SENSOR_0 == -3
-    #error "If MAX31855 Thermocouple (-3) is used for TEMP_SENSOR_0 then TEMP_SENSOR_1 must match."
-  #endif
-  #define HEATER_1_USES_MAX6675
-  #define HEATER_1_MAX6675_TMIN 0
-  #define HEATER_1_MAX6675_TMAX 1024
-#elif TEMP_SENSOR_1 == -1
-  #define HEATER_1_USES_AD595
-#elif TEMP_SENSOR_1 > 0
+#if TEMP_SENSOR_1 > 0
   #define THERMISTOR_HEATER_1 TEMP_SENSOR_1
   #define HEATER_1_USES_THERMISTOR
-  #if TEMP_SENSOR_1 == 1000
-    #define HEATER_1_USER_THERMISTOR
-  #endif
 #else
   #undef HEATER_1_MINTEMP
   #undef HEATER_1_MAXTEMP
 #endif
 
-#if TEMP_SENSOR_2 == -4
-  #define HEATER_2_USES_AD8495
-#elif TEMP_SENSOR_2 == -3
-  #error "MAX31855 Thermocouples (-3) not supported for TEMP_SENSOR_2."
-#elif TEMP_SENSOR_2 == -2
-  #error "MAX6675 Thermocouples (-2) not supported for TEMP_SENSOR_2."
-#elif TEMP_SENSOR_2 == -1
-  #define HEATER_2_USES_AD595
-#elif TEMP_SENSOR_2 > 0
+#if TEMP_SENSOR_2 > 0
   #define THERMISTOR_HEATER_2 TEMP_SENSOR_2
   #define HEATER_2_USES_THERMISTOR
-  #if TEMP_SENSOR_2 == 1000
-    #define HEATER_2_USER_THERMISTOR
-  #endif
 #else
   #undef HEATER_2_MINTEMP
   #undef HEATER_2_MAXTEMP
 #endif
 
-#if TEMP_SENSOR_3 == -4
-  #define HEATER_3_USES_AD8495
-#elif TEMP_SENSOR_3 == -3
-  #error "MAX31855 Thermocouples (-3) not supported for TEMP_SENSOR_3."
-#elif TEMP_SENSOR_3 == -2
-  #error "MAX6675 Thermocouples (-2) not supported for TEMP_SENSOR_3."
-#elif TEMP_SENSOR_3 == -1
-  #define HEATER_3_USES_AD595
-#elif TEMP_SENSOR_3 > 0
+#if TEMP_SENSOR_3 > 0
   #define THERMISTOR_HEATER_3 TEMP_SENSOR_3
   #define HEATER_3_USES_THERMISTOR
-  #if TEMP_SENSOR_3 == 1000
-    #define HEATER_3_USER_THERMISTOR
-  #endif
 #else
   #undef HEATER_3_MINTEMP
   #undef HEATER_3_MAXTEMP
 #endif
 
-#if TEMP_SENSOR_4 == -4
-  #define HEATER_4_USES_AD8495
-#elif TEMP_SENSOR_4 == -3
-  #error "MAX31855 Thermocouples (-3) not supported for TEMP_SENSOR_4."
-#elif TEMP_SENSOR_4 == -2
-  #error "MAX6675 Thermocouples (-2) not supported for TEMP_SENSOR_4."
-#elif TEMP_SENSOR_4 == -1
-  #define HEATER_4_USES_AD595
-#elif TEMP_SENSOR_4 > 0
+#if TEMP_SENSOR_4 > 0
   #define THERMISTOR_HEATER_4 TEMP_SENSOR_4
   #define HEATER_4_USES_THERMISTOR
-  #if TEMP_SENSOR_4 == 1000
-    #define HEATER_4_USER_THERMISTOR
-  #endif
 #else
   #undef HEATER_4_MINTEMP
   #undef HEATER_4_MAXTEMP
 #endif
 
-#if TEMP_SENSOR_5 == -4
-  #define HEATER_5_USES_AD8495
-#elif TEMP_SENSOR_5 == -3
-  #error "MAX31855 Thermocouples (-3) not supported for TEMP_SENSOR_5."
-#elif TEMP_SENSOR_5 == -2
-  #error "MAX6675 Thermocouples (-2) not supported for TEMP_SENSOR_5."
-#elif TEMP_SENSOR_5 == -1
-  #define HEATER_5_USES_AD595
-#elif TEMP_SENSOR_5 > 0
+#if TEMP_SENSOR_5 > 0
   #define THERMISTOR_HEATER_5 TEMP_SENSOR_5
   #define HEATER_5_USES_THERMISTOR
-  #if TEMP_SENSOR_5 == 1000
-    #define HEATER_5_USER_THERMISTOR
-  #endif
 #else
   #undef HEATER_5_MINTEMP
   #undef HEATER_5_MAXTEMP
 #endif
 
-#if TEMP_SENSOR_BED == -4
-  #define HEATER_BED_USES_AD8495
-#elif TEMP_SENSOR_BED == -3
-  #error "MAX31855 Thermocouples (-3) not supported for TEMP_SENSOR_BED."
-#elif TEMP_SENSOR_BED == -2
-  #error "MAX6675 Thermocouples (-2) not supported for TEMP_SENSOR_BED."
-#elif TEMP_SENSOR_BED == -1
-  #define HEATER_BED_USES_AD595
-#elif TEMP_SENSOR_BED > 0
+#if TEMP_SENSOR_BED > 0
   #define THERMISTORBED TEMP_SENSOR_BED
   #define HEATER_BED_USES_THERMISTOR
-  #if TEMP_SENSOR_BED == 1000
-    #define HEATER_BED_USER_THERMISTOR
-  #endif
 #else
   #undef BED_MINTEMP
   #undef BED_MAXTEMP
 #endif
 
-#if TEMP_SENSOR_CHAMBER == -4
-  #define HEATER_CHAMBER_USES_AD8495
-#elif TEMP_SENSOR_CHAMBER == -3
-  #error "MAX31855 Thermocouples (-3) not supported for TEMP_SENSOR_CHAMBER."
-#elif TEMP_SENSOR_CHAMBER == -2
-  #error "MAX6675 Thermocouples (-2) not supported for TEMP_SENSOR_CHAMBER."
-#elif TEMP_SENSOR_CHAMBER == -1
-  #define HEATER_CHAMBER_USES_AD595
-#elif TEMP_SENSOR_CHAMBER > 0
+#if TEMP_SENSOR_CHAMBER > 0
   #define THERMISTORCHAMBER TEMP_SENSOR_CHAMBER
   #define HEATER_CHAMBER_USES_THERMISTOR
-  #if TEMP_SENSOR_CHAMBER == 1000
-    #define HEATER_CHAMBER_USER_THERMISTOR
-  #endif
 #else
   #undef CHAMBER_MINTEMP
   #undef CHAMBER_MAXTEMP
 #endif
 
 
-#if TEMP_SENSOR_HEATBREAK == -4
-  #error "AD8495 Thermocouples (-4) not supported for TEMP_SENSOR_HEATBREAK."
-#elif TEMP_SENSOR_HEATBREAK == -3
-  #error "MAX31855 Thermocouples (-3) not supported for TEMP_SENSOR_HEATBREAK."
-#elif TEMP_SENSOR_HEATBREAK == -2
-  #error "MAX6675 Thermocouples (-2) not supported for TEMP_SENSOR_HEATBREAK."
-#elif TEMP_SENSOR_HEATBREAK == -1
-  #error "AD595 Thermocouples (-1) not supported for TEMP_SENSOR_HEATBREAK."
-#elif TEMP_SENSOR_HEATBREAK > 0
+#if TEMP_SENSOR_HEATBREAK > 0
   #define THERMISTORHEATBREAK TEMP_SENSOR_HEATBREAK
   #define HEATBREAK_USES_THERMISTOR
-  #if TEMP_SENSOR_HEATBREAK == 1000
-    #define HEATBREAK_USER_THERMISTOR
-  #endif
 #else
   #undef HEATBREAK_MINTEMP
   #undef HEATBREAK_MAXTEMP
 #endif
 
 
-#if TEMP_SENSOR_BOARD == -4
-  #error "AD8495 Thermocouples (-4) not supported for TEMP_SENSOR_BOARD."
-#elif TEMP_SENSOR_BOARD == -3
-  #error "MAX31855 Thermocouples (-3) not supported for TEMP_SENSOR_BOARD."
-#elif TEMP_SENSOR_BOARD == -2
-  #error "MAX6675 Thermocouples (-2) not supported for TEMP_SENSOR_BOARD."
-#elif TEMP_SENSOR_BOARD == -1
-  #error "AD595 Thermocouples (-1) not supported for TEMP_SENSOR_BOARD."
-#elif TEMP_SENSOR_BOARD > 0
+#if TEMP_SENSOR_BOARD > 0
   #define THERMISTORBOARD TEMP_SENSOR_BOARD
   #define BOARD_USES_THERMISTOR
-  #if TEMP_SENSOR_BOARD == 1000
-    #define BOARD_USER_THERMISTOR
-  #endif
 #else
   #undef BOARD_MINTEMP
   #undef BOARD_MINTEMP
@@ -924,73 +772,60 @@
 #define HAS_X_ENABLE      (PIN_EXISTS(X_ENABLE) || (ENABLED(SOFTWARE_DRIVER_ENABLE) && AXIS_IS_TMC(X)))
 #define HAS_X_DIR         (PIN_EXISTS(X_DIR))
 #define HAS_X_STEP        (PIN_EXISTS(X_STEP))
-#define HAS_X_MICROSTEPS  (PIN_EXISTS(X_MS1))
 
 #define HAS_X2_ENABLE     (PIN_EXISTS(X2_ENABLE) || (ENABLED(SOFTWARE_DRIVER_ENABLE) && AXIS_IS_TMC(X2)))
 #define HAS_X2_DIR        (PIN_EXISTS(X2_DIR))
 #define HAS_X2_STEP       (PIN_EXISTS(X2_STEP))
-#define HAS_X2_MICROSTEPS (PIN_EXISTS(X2_MS1))
 
 #define HAS_Y_ENABLE      (PIN_EXISTS(Y_ENABLE) || (ENABLED(SOFTWARE_DRIVER_ENABLE) && AXIS_IS_TMC(Y)))
 #define HAS_Y_DIR         (PIN_EXISTS(Y_DIR))
 #define HAS_Y_STEP        (PIN_EXISTS(Y_STEP))
-#define HAS_Y_MICROSTEPS  (PIN_EXISTS(Y_MS1))
 
 #define HAS_Y2_ENABLE     (PIN_EXISTS(Y2_ENABLE) || (ENABLED(SOFTWARE_DRIVER_ENABLE) && AXIS_IS_TMC(Y2)))
 #define HAS_Y2_DIR        (PIN_EXISTS(Y2_DIR))
 #define HAS_Y2_STEP       (PIN_EXISTS(Y2_STEP))
-#define HAS_Y2_MICROSTEPS (PIN_EXISTS(Y2_MS1))
 
 #define HAS_Z_ENABLE      (PIN_EXISTS(Z_ENABLE) || (ENABLED(SOFTWARE_DRIVER_ENABLE) && AXIS_IS_TMC(Z)))
 #define HAS_Z_DIR         (PIN_EXISTS(Z_DIR))
 #define HAS_Z_STEP        (PIN_EXISTS(Z_STEP))
-#define HAS_Z_MICROSTEPS  (PIN_EXISTS(Z_MS1))
 
 #define HAS_Z2_ENABLE     (PIN_EXISTS(Z2_ENABLE) || (ENABLED(SOFTWARE_DRIVER_ENABLE) && AXIS_IS_TMC(Z2)))
 #define HAS_Z2_DIR        (PIN_EXISTS(Z2_DIR))
 #define HAS_Z2_STEP       (PIN_EXISTS(Z2_STEP))
-#define HAS_Z2_MICROSTEPS (PIN_EXISTS(Z2_MS1))
 
 #define HAS_Z3_ENABLE     (PIN_EXISTS(Z3_ENABLE) || (ENABLED(SOFTWARE_DRIVER_ENABLE) && AXIS_IS_TMC(Z3)))
 #define HAS_Z3_DIR        (PIN_EXISTS(Z3_DIR))
 #define HAS_Z3_STEP       (PIN_EXISTS(Z3_STEP))
-#define HAS_Z3_MICROSTEPS (PIN_EXISTS(Z3_MS1))
 
 // Extruder steppers and solenoids
 #define HAS_E0_ENABLE     (PIN_EXISTS(E0_ENABLE) || (ENABLED(SOFTWARE_DRIVER_ENABLE) && AXIS_IS_TMC(E0)))
 #define HAS_E0_DIR        (PIN_EXISTS(E0_DIR))
 #define HAS_E0_STEP       (PIN_EXISTS(E0_STEP))
-#define HAS_E0_MICROSTEPS (PIN_EXISTS(E0_MS1))
 #define HAS_SOLENOID_0    (PIN_EXISTS(SOL0))
 
 #define HAS_E1_ENABLE     (PIN_EXISTS(E1_ENABLE) || (ENABLED(SOFTWARE_DRIVER_ENABLE) && AXIS_IS_TMC(E1)))
 #define HAS_E1_DIR        (PIN_EXISTS(E1_DIR))
 #define HAS_E1_STEP       (PIN_EXISTS(E1_STEP))
-#define HAS_E1_MICROSTEPS (PIN_EXISTS(E1_MS1))
 #define HAS_SOLENOID_1    (PIN_EXISTS(SOL1))
 
 #define HAS_E2_ENABLE     (PIN_EXISTS(E2_ENABLE) || (ENABLED(SOFTWARE_DRIVER_ENABLE) && AXIS_IS_TMC(E2)))
 #define HAS_E2_DIR        (PIN_EXISTS(E2_DIR))
 #define HAS_E2_STEP       (PIN_EXISTS(E2_STEP))
-#define HAS_E2_MICROSTEPS (PIN_EXISTS(E2_MS1))
 #define HAS_SOLENOID_2    (PIN_EXISTS(SOL2))
 
 #define HAS_E3_ENABLE     (PIN_EXISTS(E3_ENABLE) || (ENABLED(SOFTWARE_DRIVER_ENABLE) && AXIS_IS_TMC(E3)))
 #define HAS_E3_DIR        (PIN_EXISTS(E3_DIR))
 #define HAS_E3_STEP       (PIN_EXISTS(E3_STEP))
-#define HAS_E3_MICROSTEPS (PIN_EXISTS(E3_MS1))
 #define HAS_SOLENOID_3    (PIN_EXISTS(SOL3))
 
 #define HAS_E4_ENABLE     (PIN_EXISTS(E4_ENABLE) || (ENABLED(SOFTWARE_DRIVER_ENABLE) && AXIS_IS_TMC(E4)))
 #define HAS_E4_DIR        (PIN_EXISTS(E4_DIR))
 #define HAS_E4_STEP       (PIN_EXISTS(E4_STEP))
-#define HAS_E4_MICROSTEPS (PIN_EXISTS(E4_MS1))
 #define HAS_SOLENOID_4    (PIN_EXISTS(SOL4))
 
 #define HAS_E5_ENABLE     (PIN_EXISTS(E5_ENABLE) || (ENABLED(SOFTWARE_DRIVER_ENABLE) && AXIS_IS_TMC(E5)))
 #define HAS_E5_DIR        (PIN_EXISTS(E5_DIR))
 #define HAS_E5_STEP       (PIN_EXISTS(E5_STEP))
-#define HAS_E5_MICROSTEPS (PIN_EXISTS(E5_MS1))
 #define HAS_SOLENOID_5    (PIN_EXISTS(SOL5))
 
 // Trinamic Stepper Drivers
@@ -1021,11 +856,6 @@
   #if (AXIS_HAS_STALLGUARD(Z3) && defined(Z3_STALL_SENSITIVITY))
     #define Z3_SENSORLESS 1
   #endif
-  #if ENABLED(SPI_ENDSTOPS)
-    #define X_SPI_SENSORLESS X_SENSORLESS
-    #define Y_SPI_SENSORLESS Y_SENSORLESS
-    #define Z_SPI_SENSORLESS Z_SENSORLESS
-  #endif
 #endif
 
 #define HAS_E_STEPPER_ENABLE (HAS_E_DRIVER(TMC2660) \
@@ -1053,32 +883,23 @@
 #define HAS_CALIBRATION_PIN (PIN_EXISTS(CALIBRATION))
 
 // ADC Temp Sensors (Thermistor or Thermocouple with amplifier ADC interface)
-#define HAS_ADC_TEST(P) (PIN_EXISTS(TEMP_##P) && TEMP_SENSOR_##P != 0 && DISABLED(HEATER_##P##_USES_MAX6675))
+#define HAS_ADC_TEST(P) (PIN_EXISTS(TEMP_##P) && TEMP_SENSOR_##P != 0)
 #define HAS_TEMP_ADC_0 HAS_ADC_TEST(0)
 #define HAS_TEMP_ADC_1 HAS_ADC_TEST(1)
 #define HAS_TEMP_ADC_2 HAS_ADC_TEST(2)
 #define HAS_TEMP_ADC_3 HAS_ADC_TEST(3)
 #define HAS_TEMP_ADC_4 HAS_ADC_TEST(4)
 #define HAS_TEMP_ADC_5 HAS_ADC_TEST(5)
-#define HAS_TEMP_ADC_BED HAS_ADC_TEST(BED)
 #define HAS_TEMP_ADC_CHAMBER HAS_ADC_TEST(CHAMBER)
 #define HAS_TEMP_ADC_HEATBREAK HAS_ADC_TEST(HEATBREAK)
 #define HAS_TEMP_ADC_BOARD HAS_ADC_TEST(BOARD)
 
-#define HAS_TEMP_HOTEND (HAS_TEMP_ADC_0 || ENABLED(HEATER_0_USES_MAX6675))
-#define HAS_TEMP_BED HAS_TEMP_ADC_BED
+#define HAS_TEMP_HOTEND HAS_TEMP_ADC_0
 #define HAS_TEMP_CHAMBER HAS_TEMP_ADC_CHAMBER
 #define HAS_TEMP_HEATBREAK HAS_TEMP_ADC_HEATBREAK
 #define HAS_TEMP_BOARD HAS_TEMP_ADC_BOARD
 #define HAS_HEATED_CHAMBER (HAS_TEMP_CHAMBER && PIN_EXISTS(HEATER_CHAMBER))
 #define HAS_TEMP_HEATBREAK_CONTROL (HAS_TEMP_HEATBREAK && PIN_EXISTS(HEATER_HEATBREAK))  // For future use to control heatbreak temperature
-
-#if ENABLED(JOYSTICK)
-  #define HAS_JOY_ADC_X  PIN_EXISTS(JOY_X)
-  #define HAS_JOY_ADC_Y  PIN_EXISTS(JOY_Y)
-  #define HAS_JOY_ADC_Z  PIN_EXISTS(JOY_Z)
-  #define HAS_JOY_ADC_EN PIN_EXISTS(JOY_EN)
-#endif
 
 // Heaters
 #define HAS_HEATER_0 (PIN_EXISTS(HEATER_0))
@@ -1087,11 +908,10 @@
 #define HAS_HEATER_3 (PIN_EXISTS(HEATER_3))
 #define HAS_HEATER_4 (PIN_EXISTS(HEATER_4))
 #define HAS_HEATER_5 (PIN_EXISTS(HEATER_5))
-#define HAS_HEATER_BED (PIN_EXISTS(HEATER_BED))
 #define HAS_HEATER_HEATBREAK (PIN_EXISTS(HEATER_HEATBREAK))
 
 // Shorthand for common combinations
-#define HAS_HEATED_BED (HAS_TEMP_BED && HAS_HEATER_BED)
+#define HAS_HEATED_BED (HAS_LOCAL_BED() || HAS_REMOTE_BED())
 #define BED_OR_CHAMBER (HAS_HEATED_BED || HAS_TEMP_CHAMBER)
 #define HAS_TEMP_SENSOR (HAS_TEMP_HOTEND || BED_OR_CHAMBER)
 
@@ -1137,9 +957,8 @@
 
 // Other fans
 #define HAS_FAN0 (PIN_EXISTS(FAN))
-#define HAS_FAN1 (PIN_EXISTS(FAN1) && CONTROLLER_FAN_PIN != FAN1_PIN && E0_AUTO_FAN_PIN != FAN1_PIN && E1_AUTO_FAN_PIN != FAN1_PIN && E2_AUTO_FAN_PIN != FAN1_PIN && E3_AUTO_FAN_PIN != FAN1_PIN && E4_AUTO_FAN_PIN != FAN1_PIN && E5_AUTO_FAN_PIN != FAN1_PIN)
-#define HAS_FAN2 (PIN_EXISTS(FAN2) && CONTROLLER_FAN_PIN != FAN2_PIN && E0_AUTO_FAN_PIN != FAN2_PIN && E1_AUTO_FAN_PIN != FAN2_PIN && E2_AUTO_FAN_PIN != FAN2_PIN && E3_AUTO_FAN_PIN != FAN2_PIN && E4_AUTO_FAN_PIN != FAN2_PIN && E5_AUTO_FAN_PIN != FAN2_PIN)
-#define HAS_CONTROLLER_FAN (PIN_EXISTS(CONTROLLER_FAN))
+#define HAS_FAN1 (PIN_EXISTS(FAN1) && E0_AUTO_FAN_PIN != FAN1_PIN && E1_AUTO_FAN_PIN != FAN1_PIN && E2_AUTO_FAN_PIN != FAN1_PIN && E3_AUTO_FAN_PIN != FAN1_PIN && E4_AUTO_FAN_PIN != FAN1_PIN && E5_AUTO_FAN_PIN != FAN1_PIN)
+#define HAS_FAN2 (PIN_EXISTS(FAN2) && E0_AUTO_FAN_PIN != FAN2_PIN && E1_AUTO_FAN_PIN != FAN2_PIN && E2_AUTO_FAN_PIN != FAN2_PIN && E3_AUTO_FAN_PIN != FAN2_PIN && E4_AUTO_FAN_PIN != FAN2_PIN && E5_AUTO_FAN_PIN != FAN2_PIN)
 
 // Servos
 #define HAS_SERVO_0 (PIN_EXISTS(SERVO0) && NUM_SERVOS > 0)
@@ -1158,81 +977,23 @@
   #undef EDITABLE_SERVO_ANGLES
 #endif
 
-// Sensors
-#define HAS_FILAMENT_WIDTH_SENSOR (PIN_EXISTS(FILWIDTH))
-
 // User Interface
 #define HAS_HOME        (PIN_EXISTS(HOME))
 #define HAS_KILL        (PIN_EXISTS(KILL))
 #define HAS_SUICIDE     (PIN_EXISTS(SUICIDE))
 #define HAS_PHOTOGRAPH  (PIN_EXISTS(PHOTOGRAPH))
-#define HAS_BUZZER      (PIN_EXISTS(BEEPER) || EITHER(LCD_USE_I2C_BUZZER, PCA9632_BUZZER))
-#define USE_BEEPER      (HAS_BUZZER && DISABLED(LCD_USE_I2C_BUZZER, PCA9632_BUZZER))
+#define HAS_BUZZER      (PIN_EXISTS(BEEPER) || ENABLED(LCD_USE_I2C_BUZZER))
+#define USE_BEEPER      (HAS_BUZZER && DISABLED(LCD_USE_I2C_BUZZER))
 #define HAS_CASE_LIGHT  (PIN_EXISTS(CASE_LIGHT) && ENABLED(CASE_LIGHT_ENABLE))
 
 // Digital control
 #define HAS_STEPPER_RESET     (PIN_EXISTS(STEPPER_RESET))
-#define HAS_DIGIPOTSS         (PIN_EXISTS(DIGIPOTSS))
-#define HAS_MOTOR_CURRENT_PWM ANY_PIN(MOTOR_CURRENT_PWM_X, MOTOR_CURRENT_PWM_Y, MOTOR_CURRENT_PWM_XY, MOTOR_CURRENT_PWM_Z, MOTOR_CURRENT_PWM_E)
-
-#define HAS_MICROSTEPS (HAS_X_MICROSTEPS || HAS_X2_MICROSTEPS || HAS_Y_MICROSTEPS || HAS_Y2_MICROSTEPS || HAS_Z_MICROSTEPS || HAS_Z2_MICROSTEPS || HAS_Z3_MICROSTEPS || HAS_E0_MICROSTEPS || HAS_E1_MICROSTEPS || HAS_E2_MICROSTEPS || HAS_E3_MICROSTEPS || HAS_E4_MICROSTEPS || HAS_E5_MICROSTEPS)
-
-#if HAS_MICROSTEPS
-
-  // MS1 MS2 MS3 Stepper Driver Microstepping mode table
-  #ifndef MICROSTEP1
-    #define MICROSTEP1 LOW,LOW,LOW
-  #endif
-  #if ENABLED(HEROIC_STEPPER_DRIVERS)
-    #ifndef MICROSTEP128
-      #define MICROSTEP128 LOW,HIGH,LOW
-    #endif
-  #else
-    #ifndef MICROSTEP2
-      #define MICROSTEP2 HIGH,LOW,LOW
-    #endif
-    #ifndef MICROSTEP4
-      #define MICROSTEP4 LOW,HIGH,LOW
-    #endif
-  #endif
-  #ifndef MICROSTEP8
-    #define MICROSTEP8 HIGH,HIGH,LOW
-  #endif
-  #ifdef __SAM3X8E__
-    #if MB(ALLIGATOR)
-      #ifndef MICROSTEP16
-        #define MICROSTEP16 LOW,LOW,LOW
-      #endif
-      #ifndef MICROSTEP32
-        #define MICROSTEP32 HIGH,HIGH,LOW
-      #endif
-    #else
-      #ifndef MICROSTEP16
-        #define MICROSTEP16 HIGH,HIGH,LOW
-      #endif
-    #endif
-  #else
-    #ifndef MICROSTEP16
-      #define MICROSTEP16 HIGH,HIGH,LOW
-    #endif
-  #endif
-
-  #define HAS_MICROSTEP1 defined(MICROSTEP1)
-  #define HAS_MICROSTEP2 defined(MICROSTEP2)
-  #define HAS_MICROSTEP4 defined(MICROSTEP4)
-  #define HAS_MICROSTEP8 defined(MICROSTEP8)
-  #define HAS_MICROSTEP16 defined(MICROSTEP16)
-  #define HAS_MICROSTEP32 defined(MICROSTEP32)
-  #define HAS_MICROSTEP64 defined(MICROSTEP64)
-  #define HAS_MICROSTEP128 defined(MICROSTEP128)
-
-#endif // HAS_MICROSTEPS
 
 #if !HAS_TEMP_SENSOR
   #undef AUTO_REPORT_TEMPERATURES
 #endif
 
-#define HAS_AUTO_REPORTING EITHER(AUTO_REPORT_TEMPERATURES, AUTO_REPORT_SD_STATUS)
+#define HAS_AUTO_REPORTING ENABLED(AUTO_REPORT_TEMPERATURES)
 
 /**
  * This setting is also used by M109 when trying to calculate
@@ -1301,22 +1062,6 @@
 #endif
 
 /**
- * Heated bed requires settings
- */
-#if HAS_HEATED_BED
-  #ifndef MIN_BED_POWER
-    #define MIN_BED_POWER 0
-  #endif
-  #ifndef MAX_BED_POWER
-    #define MAX_BED_POWER 255
-  #endif
-  #ifndef HEATER_BED_INVERTING
-    #define HEATER_BED_INVERTING false
-  #endif
-  #define WRITE_HEATER_BED(v) WRITE(HEATER_BED_PIN, (v) ^ HEATER_BED_INVERTING)
-#endif
-
-/**
  * Heated chamber requires settings
  */
 #if HAS_HEATED_CHAMBER
@@ -1370,30 +1115,6 @@
  * Part Cooling fan multipliexer
  */
 #define HAS_FANMUX PIN_EXISTS(FANMUX0)
-
-/**
- * MIN/MAX fan PWM scaling
- */
-#ifndef FAN_MIN_PWM
-  #define FAN_MIN_PWM 0
-#endif
-#ifndef FAN_MAX_PWM
-  #define FAN_MAX_PWM 255
-#endif
-#if FAN_MIN_PWM < 0 || FAN_MIN_PWM > 255
-  #error "FAN_MIN_PWM must be a value from 0 to 255."
-#elif FAN_MAX_PWM < 0 || FAN_MAX_PWM > 255
-  #error "FAN_MAX_PWM must be a value from 0 to 255."
-#elif FAN_MIN_PWM > FAN_MAX_PWM
-  #error "FAN_MIN_PWM must be less than or equal to FAN_MAX_PWM."
-#endif
-
-/**
- * FAST PWM FAN Settings
- */
-#if ENABLED(FAST_PWM_FAN) && !defined(FAST_PWM_FAN_FREQUENCY)
-  #define FAST_PWM_FAN_FREQUENCY ((F_CPU) / (2 * 255 * 1)) // Fan frequency default
-#endif
 
 /**
  * MIN/MAX case light PWM scaling
@@ -1474,18 +1195,14 @@
  * Set granular options based on the specific type of leveling
  */
 #define UBL_SEGMENTED   (ENABLED(AUTO_BED_LEVELING_UBL) && ANY(SEGMENT_LEVELED_MOVES, DELTA))
-#define ABL_PLANAR      EITHER(AUTO_BED_LEVELING_LINEAR, AUTO_BED_LEVELING_3POINT)
-#define ABL_GRID        EITHER(AUTO_BED_LEVELING_LINEAR, AUTO_BED_LEVELING_BILINEAR)
-#define HAS_ABL_NOT_UBL (ABL_PLANAR || ABL_GRID)
-#define HAS_ABL_OR_UBL  (HAS_ABL_NOT_UBL || ENABLED(AUTO_BED_LEVELING_UBL))
-#if (HAS_ABL_OR_UBL || ENABLED(MESH_BED_LEVELING))
+#if ENABLED(AUTO_BED_LEVELING_UBL)
   #define HAS_LEVELING 1
 #endif
-#define HAS_AUTOLEVEL   (HAS_ABL_OR_UBL && DISABLED(PROBE_MANUALLY))
-#define HAS_MESH        ANY(AUTO_BED_LEVELING_BILINEAR, AUTO_BED_LEVELING_UBL, MESH_BED_LEVELING)
+#define HAS_AUTOLEVEL   (ENABLED(AUTO_BED_LEVELING_UBL) && DISABLED(PROBE_MANUALLY))
+#define HAS_MESH        ENABLED(AUTO_BED_LEVELING_UBL)
 #define PLANNER_LEVELING      (HAS_LEVELING && DISABLED(AUTO_BED_LEVELING_UBL))
-#define HAS_PROBING_PROCEDURE (HAS_ABL_OR_UBL || ENABLED(Z_MIN_PROBE_REPEATABILITY_TEST))
-#if (ENABLED(FWRETRACT) || HAS_LEVELING || ENABLED(SKEW_CORRECTION))
+#define HAS_PROBING_PROCEDURE (ENABLED(AUTO_BED_LEVELING_UBL) || ENABLED(Z_MIN_PROBE_REPEATABILITY_TEST))
+#if (HAS_LEVELING || ENABLED(SKEW_CORRECTION))
 #define HAS_POSITION_MODIFIERS 1
 #endif
 
@@ -1502,8 +1219,8 @@
   #undef NO_FAN_SLOWING_IN_PID_TUNING
 #endif
 
-#define QUIET_PROBING (HAS_BED_PROBE && (EITHER(PROBING_HEATERS_OFF, PROBING_FANS_OFF) || DELAY_BEFORE_PROBING > 0))
-#define HEATER_IDLE_HANDLER ANY(ADVANCED_PAUSE_FEATURE, PROBING_HEATERS_OFF, WATCH_HOTENDS)
+#define QUIET_PROBING (HAS_BED_PROBE && (ENABLED(PROBING_FANS_OFF) || DELAY_BEFORE_PROBING > 0))
+#define HEATER_IDLE_HANDLER ANY(ADVANCED_PAUSE_FEATURE, WATCH_HOTENDS)
 
 #if ENABLED(ADVANCED_PAUSE_FEATURE) && !defined(FILAMENT_CHANGE_SLOW_LOAD_LENGTH)
   #define FILAMENT_CHANGE_SLOW_LOAD_LENGTH 0
@@ -1511,16 +1228,6 @@
 
 #if EXTRUDERS > 1 && !defined(TOOLCHANGE_FIL_EXTRA_PRIME)
   #define TOOLCHANGE_FIL_EXTRA_PRIME 0
-#endif
-
-/**
- * Only constrain Z on DELTA / SCARA machines
- */
-#if IS_KINEMATIC
-  #undef MIN_SOFTWARE_ENDSTOP_X
-  #undef MIN_SOFTWARE_ENDSTOP_Y
-  #undef MAX_SOFTWARE_ENDSTOP_X
-  #undef MAX_SOFTWARE_ENDSTOP_Y
 #endif
 
 /**
@@ -1599,17 +1306,9 @@
  * Default mesh area is an area with an inset margin on the print area.
  */
 #if HAS_LEVELING
-  #if IS_KINEMATIC
-    // Probing points may be verified at compile time within the radius
-    // using static_assert(HYPOT2(X2-X1,Y2-Y1)<=sq(DELTA_PRINTABLE_RADIUS),"bad probe point!")
-    // so that may be added to SanityCheck.h in the future.
-    #define _MESH_MIN_X (X_MIN_BED + MESH_INSET)
-    #define _MESH_MIN_Y (Y_MIN_BED + MESH_INSET)
-    #define _MESH_MAX_X (X_MAX_BED - (MESH_INSET))
-    #define _MESH_MAX_Y (Y_MAX_BED - (MESH_INSET))
-  #else
+  #if 1
     // Boundaries for Cartesian probing based on set limits
-    #if EITHER(MESH_BED_LEVELING, AUTO_BED_LEVELING_UBL)
+    #if ENABLED(AUTO_BED_LEVELING_UBL)
       #define _MESH_MIN_X (_MAX(X_MIN_BED + MESH_INSET, X_MIN_POS))  // UBL is careful not to probe off the bed.  It does not
       #define _MESH_MIN_Y (_MAX(Y_MIN_BED + MESH_INSET, Y_MIN_POS))  // need NOZZLE_TO_PROBE_OFFSET in the mesh dimensions
       #define _MESH_MAX_X (_MIN(X_MAX_BED - (MESH_INSET), X_MAX_POS))
@@ -1636,39 +1335,7 @@
     #define MESH_MAX_Y _MESH_MAX_Y
   #endif
 
-#endif // MESH_BED_LEVELING || AUTO_BED_LEVELING_UBL
-
-#if ALL(PROBE_PT_1_X, PROBE_PT_2_X, PROBE_PT_3_X, PROBE_PT_1_Y, PROBE_PT_2_Y, PROBE_PT_3_Y)
-  #define HAS_FIXED_3POINT;
-#endif
-
-#if EITHER(AUTO_BED_LEVELING_UBL, AUTO_BED_LEVELING_3POINT) && IS_KINEMATIC
-    #define HAS_FIXED_3POINT
-    #define SIN0    0.0
-    #define SIN120  0.866025
-    #define SIN240 -0.866025
-    #define COS0    1.0
-    #define COS120 -0.5
-    #define COS240 -0.5
-    #ifndef PROBE_PT_1_X
-      #define PROBE_PT_1_X (X_CENTER + (_PROBE_RADIUS) * COS0)
-    #endif
-    #ifndef PROBE_PT_1_Y
-      #define PROBE_PT_1_Y (Y_CENTER + (_PROBE_RADIUS) * SIN0)
-    #endif
-    #ifndef PROBE_PT_2_X
-      #define PROBE_PT_2_X (X_CENTER + (_PROBE_RADIUS) * COS120)
-    #endif
-    #ifndef PROBE_PT_2_Y
-      #define PROBE_PT_2_Y (Y_CENTER + (_PROBE_RADIUS) * SIN120)
-    #endif
-    #ifndef PROBE_PT_3_X
-      #define PROBE_PT_3_X (X_CENTER + (_PROBE_RADIUS) * COS240)
-    #endif
-    #ifndef PROBE_PT_3_Y
-      #define PROBE_PT_3_Y (Y_CENTER + (_PROBE_RADIUS) * SIN240)
-    #endif
-#endif
+#endif // AUTO_BED_LEVELING_UBL
 
 /**
  * Buzzer/Speaker
@@ -1686,18 +1353,6 @@
   #endif
   #ifndef LCD_FEEDBACK_FREQUENCY_DURATION_MS
     #define LCD_FEEDBACK_FREQUENCY_DURATION_MS 2
-  #endif
-#endif
-
-/**
- * Make sure DOGLCD_SCK and DOGLCD_MOSI are defined.
- */
-#if HAS_GRAPHICAL_LCD
-  #ifndef DOGLCD_SCK
-    #define DOGLCD_SCK  SCK_PIN
-  #endif
-  #ifndef DOGLCD_MOSI
-    #define DOGLCD_MOSI MOSI_PIN
   #endif
 #endif
 
@@ -1734,7 +1389,7 @@
 // Updated G92 behavior shifts the workspace
 #define HAS_POSITION_SHIFT DISABLED(NO_WORKSPACE_OFFSETS)
 // The home offset also shifts the coordinate space
-#define HAS_HOME_OFFSET (DISABLED(NO_WORKSPACE_OFFSETS) && IS_CARTESIAN)
+#define HAS_HOME_OFFSET (DISABLED(NO_WORKSPACE_OFFSETS))
 // The SCARA home offset applies only on G28
 #define HAS_SCARA_OFFSET (DISABLED(NO_WORKSPACE_OFFSETS) && IS_SCARA)
 // Cumulative offset to workspace to save some calculation
@@ -1748,7 +1403,7 @@
 #endif
 
 // Add commands that need sub-codes to this list
-#define USE_GCODE_SUBCODES ANY(G38_PROBE_TARGET, CNC_COORDINATE_SYSTEMS, POWER_LOSS_RECOVERY, PRINT_CHECKING_Q_CMDS)
+#define USE_GCODE_SUBCODES ANY(G38_PROBE_TARGET, CNC_COORDINATE_SYSTEMS, PRINT_CHECKING_Q_CMDS)
 
 // Parking Extruder
 #if ENABLED(PARKING_EXTRUDER)
@@ -1767,31 +1422,8 @@
   #define MAX_VFAT_ENTRIES (2)
 #endif
 
-// Set defaults for unspecified LED user colors
-#if ENABLED(LED_CONTROL_MENU)
-  #ifndef LED_USER_PRESET_RED
-    #define LED_USER_PRESET_RED       255
-  #endif
-  #ifndef LED_USER_PRESET_GREEN
-    #define LED_USER_PRESET_GREEN     255
-  #endif
-  #ifndef LED_USER_PRESET_BLUE
-    #define LED_USER_PRESET_BLUE      255
-  #endif
-  #ifndef LED_USER_PRESET_WHITE
-    #define LED_USER_PRESET_WHITE     0
-  #endif
-  #ifndef LED_USER_PRESET_BRIGHTNESS
-    #ifdef NEOPIXEL_BRIGHTNESS
-      #define LED_USER_PRESET_BRIGHTNESS NEOPIXEL_BRIGHTNESS
-    #else
-      #define LED_USER_PRESET_BRIGHTNESS 255
-    #endif
-  #endif
-#endif
-
 // Nozzle park for Delta
-#if BOTH(NOZZLE_PARK_FEATURE, DELTA)
+#if ENABLED(DELTA)
   #undef NOZZLE_PARK_Z_FEEDRATE
   #define NOZZLE_PARK_Z_FEEDRATE NOZZLE_PARK_XY_FEEDRATE
 #endif
@@ -1839,43 +1471,6 @@
   #define Z_STEPPER_COUNT 2
 #else
   #define Z_STEPPER_COUNT 1
-#endif
-
-#if HAS_SPI_LCD
-  // Get LCD character width/height, which may be overridden by pins, configs, etc.
-  #ifndef LCD_WIDTH
-    #if HAS_GRAPHICAL_LCD
-      #define LCD_WIDTH 21
-    #elif ENABLED(ULTIPANEL)
-      #define LCD_WIDTH 20
-    #else
-      #define LCD_WIDTH 16
-    #endif
-  #endif
-  #ifndef LCD_HEIGHT
-    #if HAS_GRAPHICAL_LCD
-      #define LCD_HEIGHT 5
-    #elif ENABLED(ULTIPANEL)
-      #define LCD_HEIGHT 4
-    #else
-      #define LCD_HEIGHT 2
-    #endif
-  #endif
-#endif
-
-#if ENABLED(SDSUPPORT)
-  #if SD_CONNECTION_IS(ONBOARD) && DISABLED(NO_SD_HOST_DRIVE)
-    //
-    // The external SD card is not used. Hardware SPI is used to access the card.
-    // When sharing the SD card with a PC we want the menu options to
-    // mount/unmount the card and refresh it. So we disable card detect.
-    //
-    #undef SD_DETECT_PIN
-    #define SHARED_SD_CARD
-  #endif
-  #if DISABLED(SHARED_SD_CARD)
-    #define INIT_SDCARD_ON_BOOT
-  #endif
 #endif
 
 #if !NUM_SERIAL

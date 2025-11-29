@@ -12,9 +12,6 @@ public:
         : Connection(5) {}
     std::string sent;
     std::string received;
-    virtual std::optional<http::Error> connection(const char *, uint16_t) override {
-        return std::nullopt;
-    }
     virtual std::variant<size_t, http::Error> rx(uint8_t *buffer, size_t len, bool /*nonblock: we never block here*/) override {
         size_t amnt = std::min(len, received.size());
         memcpy(buffer, received.data(), amnt);

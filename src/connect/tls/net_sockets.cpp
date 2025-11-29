@@ -61,14 +61,10 @@ void mbedtls_net_init(mbedtls_net_context *) {
 }
 
 /*
- * Initiate a TCP connection with host:port and the given protocol
+ * Initiate a TCP connection with host:port
  */
-int mbedtls_net_connect(mbedtls_net_context *ctx, const char *host, const char *port, int /* proto */) {
-    // We assume the string is correct number.
-    //
-    // Why would anyone pass port as a string anyway? :-(
-    uint16_t port_int = atoi(port);
-    auto error = ctx->plain_conn.connection(host, port_int);
+int mbedtls_plain_connect(mbedtls_net_context *ctx, const char *host, uint16_t port) {
+    auto error = ctx->plain_conn.connection(host, port);
     if (error.has_value()) {
         switch (*error) {
         case Error::Dns:

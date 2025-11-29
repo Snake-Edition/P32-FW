@@ -2,10 +2,10 @@
 
 #include "display_math_helper.h"
 #include "Rect16.h"
+#include <common/abstract_byte_reader.hpp>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <algorithm>
 
 enum {
     ST7789V_COLS = 240,
@@ -15,16 +15,6 @@ enum {
 };
 
 inline uint16_t color_to_565(Color clr) {
-
-    /* -===============================================(:>- */
-    // dim the screen
-    const float dim = std::clamp(uint8_t(config_store().brightness.get()), uint8_t(30), uint8_t(150)) / 100.f;
-    const uint8_t b = std::min(0xff, int(dim * (clr.raw & 0xff)));
-    const uint8_t g = std::min(0xff, int(dim * ((clr.raw & 0xff00) >> 8)));
-    const uint8_t r = std::min(0xff, int(dim * ((clr.raw & 0xff0000) >> 16)));
-    clr.raw = b | (g << 8) | (r << 16);
-    /* -===============================================(:>- */
-
     static constexpr uint8_t r_shift = (8 - 5);
     static constexpr uint8_t g_shift = (8 - 6) + r_shift;
     static constexpr uint8_t b_shift = (8 - 5) + g_shift;
@@ -38,15 +28,13 @@ extern void st7789v_wr(uint8_t *pdata, uint16_t size);
 extern void st7789v_fill_rect_colorFormat565(uint16_t rect_x, uint16_t rect_y, uint16_t rect_w, uint16_t rect_h, uint16_t clr565);
 
 /**
- * @brief Draw QOI image from file.
- * @param pf pointer to file, it has to be open and pointing to the qoi header
- * @param point_x x coordinate of the top left corner of the image
- * @param point_y y coordinate of the top left corner of the image
+ * @brief Draw QOI.
+ * @param pt coordinate of the top left corner of the image
+ * @param reader A reader for reading QOI bytestream
  * @param back_color background color, (back_color >> 16) & 0xff is blue, (back_color >> 8) & 0xff is green, back_color & 0xff is red
  * @param rop raster operations as defined in display_math_helper.h and qoi_decoder.h
- * @param subrect subrectangle of the image to draw
  */
-void st7789v_draw_qoi_ex(FILE *pf, uint16_t point_x, uint16_t point_y, Color back_color, uint8_t rop, Rect16 subrect);
+void st7789v_draw_qoi_ex(point_ui16_t pt, AbstractByteReader &reader, Color back_color, uint8_t rop);
 
 inline void st7789v_set_backlight([[maybe_unused]] uint8_t bck) {}
 

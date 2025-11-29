@@ -3,7 +3,6 @@
 #if HAS_GUI()
     #include <guiconfig/GuiDefaults.hpp>
 #endif
-#include "gcode_thumb_decoder.h"
 #include <cstring>
 #include <option/developer_mode.h>
 #include <Marlin/src/module/motion.h>
@@ -93,6 +92,7 @@ void GCodeInfo::load(IGcodeReader &reader) {
     // scan info G-codes and comments
     valid_printer_settings = ValidPrinterSettings(); // reset to valid state
     per_extruder_info = {}; // Reset extruder info
+    sliced_with_input_shaper_ = false; // Reset input shaper flag
 #if EXTRUDERS > 1
     filament_wipe_tower_g = std::nullopt;
 #endif
@@ -130,6 +130,10 @@ void GCodeInfo::load(IGcodeReader &reader) {
 
             parse_gcode(buffer.line, gcode_counter);
         }
+        // If we didnt find any M862.6 "Input Shaper" command, we assume that the gcode was not sliced with input shaper.
+        if (!sliced_with_input_shaper_) {
+            valid_printer_settings.sliced_without_input_shaper.fail();
+        }
     }
 
     is_loaded_ = true;
@@ -152,24 +156,14 @@ void GCodeInfo::reset_info() {
     has_progress_thumbnail_ = false;
     filament_described = false;
     valid_printer_settings = ValidPrinterSettings();
+    sliced_with_input_shaper_ = false;
     per_extruder_info.fill({});
     printing_time[0] = 0;
     error_str_ = {};
 }
 
 void GCodeInfo::EvaluateToolsValid() {
-    EXTRUDER_LOOP() { // e == gcode_tool
-        // do not check this nozzle if not used in print
-        if (!per_extruder_info[e].used()) {
-            continue;
-        }
-
-        auto physical_tool = tools_mapping::to_physical_tool(e);
-        if (physical_tool == tools_mapping::no_tool) {
-            // used but nothing prints this, so teeechnically it's ok from the POV of tool/nozzle
-            continue;
-        }
-
+    for_each_used_extruder([this]([[maybe_unused]] uint8_t logical_ix, [[maybe_unused]] uint8_t physical_tool, const GCodeInfo::ExtruderInfo &extruder_info) {
 #if HAS_TOOLCHANGER()
         // tool is used in gcode, but not enabled in printer
         if (!prusa_toolchanger.is_tool_enabled(physical_tool)) {
@@ -181,7 +175,9 @@ void GCodeInfo::EvaluateToolsValid() {
         // Make sure that MMU gcode is sliced with the correct nozzle.
         // Slicing with a non-HF nozzle while HF nozzle is installed results in unsufficient purging.
         // Slicing for a HF nozzle without having it leads to extruder skipping.
-        if (per_extruder_info[e].requires_high_flow_nozzle.has_value() && (config_store().nozzle_is_high_flow.get()[e] != *per_extruder_info[e].requires_high_flow_nozzle)
+        // Note: Always checking first bit in the config store, since nozzle_is_high_flow is set per toolhead and MMU always uses first one.
+        if (extruder_info.requires_high_flow_nozzle.has_value()
+            && (config_store().nozzle_is_high_flow.get()[0] != extruder_info.requires_high_flow_nozzle)
             && !is_singletool_gcode()
             && MMU2::mmu2.Enabled()) {
             valid_printer_settings.nozzle_flow_mismatch.fail();
@@ -190,8 +186,6 @@ void GCodeInfo::EvaluateToolsValid() {
 
         auto do_nozzle_check = [&](uint8_t hotend) {
             assert(hotend < HOTENDS);
-
-            const auto &extruder_info = per_extruder_info[hotend];
 
             if (auto dia = extruder_info.nozzle_diameter; dia && std::abs(*dia - config_store().get_nozzle_diameter(hotend)) > 0.001f) {
                 valid_printer_settings.wrong_nozzle_diameter.fail();
@@ -212,7 +206,7 @@ void GCodeInfo::EvaluateToolsValid() {
                 do_nozzle_check(physical); // here should be map to hotend from this extruder but the #if ENABLED(SINGLENOZZLE) should be enough for now
             });
 #endif
-    }
+    });
 }
 
 void GCodeInfo::ValidPrinterSettings::add_unsupported_feature(const char *feature, size_t length) {
@@ -231,33 +225,29 @@ void GCodeInfo::ValidPrinterSettings::add_unsupported_feature(const char *featur
 
 bool GCodeInfo::ValidPrinterSettings::is_valid(bool is_tools_mapping_possible) const {
     return wrong_printer_model.is_valid() && wrong_gcode_level.is_valid() && wrong_firmware.is_valid()
-#if ENABLED(GCODE_COMPATIBILITY_MK3)
+#if HAS_GCODE_COMPATIBILITY()
         && gcode_compatibility_mode.is_valid()
-#endif
-#if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-        && fan_compatibility_mode.is_valid()
 #endif
 #if HAS_MMU2()
         && nozzle_flow_mismatch.is_valid()
 #endif
         && !unsupported_features
         && (is_tools_mapping_possible // if is_possible -> always true -> handled by tools_mapping screen
-            || (wrong_tools.is_valid() && wrong_nozzle_diameter.is_valid() && nozzle_not_hardened.is_valid() && nozzle_not_high_flow.is_valid()));
+            || (wrong_tools.is_valid() && wrong_nozzle_diameter.is_valid() && nozzle_not_hardened.is_valid() && nozzle_not_high_flow.is_valid()))
+        && sliced_without_input_shaper.is_valid();
 }
 
 bool GCodeInfo::ValidPrinterSettings::is_fatal(bool is_tools_mapping_possible) const {
     return wrong_printer_model.is_fatal() || wrong_gcode_level.is_fatal() || wrong_firmware.is_fatal()
-#if ENABLED(GCODE_COMPATIBILITY_MK3)
+#if HAS_GCODE_COMPATIBILITY()
         || gcode_compatibility_mode.is_fatal()
-#endif
-#if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-        || fan_compatibility_mode.is_fatal()
 #endif
 #if HAS_MMU2()
         || nozzle_flow_mismatch.is_fatal()
 #endif
         || (!is_tools_mapping_possible // if is_possible -> always false -> handled by tools_mapping screen
-            && (wrong_tools.is_fatal() || wrong_nozzle_diameter.is_fatal() || nozzle_not_hardened.is_fatal() || nozzle_not_high_flow.is_fatal()));
+            && (wrong_tools.is_fatal() || wrong_nozzle_diameter.is_fatal() || nozzle_not_hardened.is_fatal() || nozzle_not_high_flow.is_fatal()))
+        || sliced_without_input_shaper.is_fatal();
 }
 
 bool GCodeInfo::is_up_to_date(const char *new_version_string) {
@@ -369,19 +359,13 @@ void GCodeInfo::parse_m862(GcodeBuffer::String cmd) {
         // If there isn't full compatibility of the gcode, report wrong printer model
         if (compatibility != PrinterGCodeCompatibilityReport { .is_compatible = true }) {
             valid_printer_settings.wrong_printer_model.fail();
-        }
 
-#if ENABLED(GCODE_COMPATIBILITY_MK3)
-        if (compatibility.mk3_compatibility_mode) {
-            valid_printer_settings.gcode_compatibility_mode.fail();
-        }
+#if HAS_GCODE_COMPATIBILITY()
+            if (compatibility.is_compatible) {
+                valid_printer_settings.gcode_compatibility_mode.fail();
+            }
 #endif
-
-#if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-        if (compatibility.mk4s_fan_compatibility_mode) {
-            valid_printer_settings.fan_compatibility_mode.fail();
         }
-#endif
     };
 
     // Parse parameters
@@ -450,6 +434,9 @@ void GCodeInfo::parse_m862(GcodeBuffer::String cmd) {
                     break;
                 }
 #endif
+                if (compare(feature, "Input Shaper")) {
+                    sliced_with_input_shaper_ = true;
+                }
 
                 if (!find(feature)) {
                     valid_printer_settings.add_unsupported_feature(feature.begin, feature.end - feature.begin);
@@ -545,6 +532,15 @@ void GCodeInfo::parse_gcode(GcodeBuffer::String cmd, uint32_t &gcode_counter) {
                 }
             }
         }
+    }
+
+    else if (cmd.skip_gcode(gcode_info::m486)) {
+        // Do not count M486 towards search_first_x_gcodes limit
+        // M486 is emiited multiple times for each object in the gcode
+        // Meaning that if the gcode has enough objects, we would drain the limit
+        // without ever getting to the checks
+        // BFW-7269
+        gcode_counter--;
     }
 
     else if (cmd.skip_gcode(gcode_info::m555)) {
@@ -660,4 +656,20 @@ bool GCodeInfo::is_singletool_gcode() const {
     }
 
     return true;
+}
+
+void GCodeInfo::for_each_used_extruder(const stdext::inplace_function<void(uint8_t logical_ix, uint8_t physical_ix, const ExtruderInfo &info)> &callback) {
+    EXTRUDER_LOOP() {
+        const auto &info = get_extruder_info(e);
+        if (!info.used()) {
+            continue;
+        }
+
+        const uint8_t tool_index = tools_mapping::to_physical_tool(e);
+        if (tool_index == tools_mapping::no_tool) {
+            continue;
+        }
+
+        callback(e, tool_index, info);
+    }
 }

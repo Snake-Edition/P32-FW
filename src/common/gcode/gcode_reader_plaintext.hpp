@@ -14,7 +14,7 @@ public:
 
     virtual bool stream_metadata_start() override;
     virtual Result_t stream_gcode_start(uint32_t offset = 0) override;
-    virtual bool stream_thumbnail_start(uint16_t expected_width, uint16_t expected_height, ImgType expected_type, bool allow_larger = false) override;
+    virtual AbstractByteReader *stream_thumbnail_start(uint16_t expected_width, uint16_t expected_height, ImgType expected_type, bool allow_larger = false) override;
     virtual Result_t stream_get_line(GcodeBuffer &buffer, Continuations) override;
     virtual uint32_t get_gcode_stream_size_estimate() override;
     virtual uint32_t get_gcode_stream_size() override;
@@ -36,14 +36,11 @@ private:
     static constexpr const size_t search_last_x_bytes = 50000;
 
     uint32_t gcodes_in_metadata = 0;
-    uint32_t thumbnail_size = 0;
-    Base64StreamDecoder base64_decoder;
     uint32_t file_size = 0;
     // when scanning for metadata, this will be set to position of first gcode, so subsequent calls to stream_gcode_start will start directly from gcodes
     uint32_t first_gcode_pos;
 
     Result_t stream_getc_impl(char &out);
-    Result_t stream_getc_thumbnail_impl(char &out);
 
     /**
      * @brief Check if the line is thumbnail begin.
@@ -56,9 +53,13 @@ private:
      */
     bool IsBeginThumbnail(GcodeBuffer &buffer, uint16_t expected_width, uint16_t expected_height, ImgType expected_type, bool allow_larger, unsigned long &num_bytes) const;
 
-    void set_ptr_stream_getc(IGcodeReader::Result_t (PlainGcodeReader::*ptr_stream_getc)(char &out)) {
-        // this converts PlainGcodeReader::some_getc_function to IGcodeReader::some_function,
-        // note that this conversion is only possible if PlainGcodeReader is subclass of IGcodeReader, and class doesn't have multiple parents
-        this->ptr_stream_getc = static_cast<stream_getc_type>(ptr_stream_getc);
-    }
+    struct ThumbnailReader final : public AbstractByteReader {
+        PlainGcodeReader *gcode_reader = nullptr;
+        uint32_t thumbnail_size = 0;
+        Base64StreamDecoder base64_decoder;
+
+        std::span<std::byte> read(std::span<std::byte> buffer) final;
+        Result_t getc(char &out);
+    };
+    ThumbnailReader thumbnail_reader;
 };

@@ -44,11 +44,11 @@ inline void init_step_generator_input_shaping(
     bsod("Phase stepping enabled when printer doesn't support it");
 }
 
-inline bool processing() {
+static constexpr inline bool processing() {
     return false;
 }
 
-inline bool is_enabled(AxisEnum) {
+static constexpr inline bool is_enabled(AxisEnum) {
     return false;
 }
 

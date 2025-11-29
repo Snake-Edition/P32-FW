@@ -1,6 +1,13 @@
 #pragma once
 
 #include "client_response.hpp"
+#include <guiconfig/guiconfig.h>
+#include <option/has_chamber_vents.h>
+#include <option/has_remote_bed.h>
+#include <option/has_chamber_filtration_api.h>
+#include <option/xbuddy_extension_variant_standard.h>
+#include <option/has_selftest.h>
+#include <option/has_precise_homing_corexy.h>
 
 enum class WarningType : uint32_t {
 #if HAS_EMERGENCY_STOP()
@@ -24,6 +31,10 @@ enum class WarningType : uint32_t {
 #endif
     USBFlashDiskError,
     USBDriveUnsupportedFileSystem,
+#if HAS_SELFTEST()
+    SelftestNotSuccessfullyCompleted,
+    ActionSelftestRequired,
+#endif
 #if ENABLED(POWER_PANIC)
     HeatbedColdAfterPP,
 #endif
@@ -35,18 +46,15 @@ enum class WarningType : uint32_t {
 #if HAS_DWARF()
     DwarfMCUMaxTemp,
 #endif
-#if HAS_MODULARBED()
-    ModBedMCUMaxTemp,
+#if HAS_REMOTE_BED()
+    BedMCUMaxTemp,
 #endif
-#if HAS_BED_PROBE
     ProbingFailed,
-#endif
-#if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-    NozzleCleaningFailed,
-#endif
-#if XL_ENCLOSURE_SUPPORT()
+#if XL_ENCLOSURE_SUPPORT() || HAS_CHAMBER_FILTRATION_API()
     EnclosureFilterExpirWarning,
     EnclosureFilterExpiration,
+#endif
+#if XL_ENCLOSURE_SUPPORT()
     EnclosureFanError,
 #endif
 #if ENABLED(DETECT_PRINT_SHEET)
@@ -59,7 +67,7 @@ enum class WarningType : uint32_t {
 #if HAS_CHAMBER_API()
     FailedToReachChamberTemperature,
 #endif
-#if PRINTER_IS_PRUSA_COREONE()
+#if HAS_CHAMBER_VENTS()
     OpenChamberVents,
     CloseChamberVents,
 #endif
@@ -70,14 +78,27 @@ enum class WarningType : uint32_t {
     ChamberOverheatingTemperature,
     ChamberCriticalTemperature,
 #endif
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     ChamberCoolingFanError,
 #endif
-#if HAS_XBUDDY_EXTENSION() || XL_ENCLOSURE_SUPPORT()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD() || XL_ENCLOSURE_SUPPORT()
     ChamberFiltrationFanError,
 #endif
+#if HAS_CEILING_CLEARANCE()
+    CeilingClearanceViolation,
+#endif
+#if HAS_PRECISE_HOMING_COREXY()
+    HomingCalibrationNeeded,
+    HomingRefinementFailed,
+    HomingCalibrationFromMenuNeeded,
+#endif
     AccelerometerCommunicationFailed,
-    _last = AccelerometerCommunicationFailed,
+#if HAS_ILI9488_DISPLAY()
+    DisplayProblemDetected,
+#endif
+    _cnt,
 };
 
 PhasesWarning warning_type_phase(WarningType warning);
+
+uint32_t warning_lifespan_sec(WarningType type);

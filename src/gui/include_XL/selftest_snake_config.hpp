@@ -1,7 +1,8 @@
 #pragma once
 #include "i18n.h"
 #include <utility_extensions.hpp>
-#include <printer_selftest.hpp>
+#include <common/selftest/include_XL/printer_selftest.hpp>
+#include <option/has_precise_homing_corexy.h>
 
 namespace SelftestSnake {
 enum class Tool {
@@ -17,13 +18,13 @@ enum class Tool {
 };
 
 constexpr Tool operator-(Tool tool, int i) {
-    assert(ftrstd::to_underlying(tool) - i >= ftrstd::to_underlying(Tool::_first));
-    return static_cast<Tool>(ftrstd::to_underlying(tool) - i);
+    assert(std::to_underlying(tool) - i >= std::to_underlying(Tool::_first));
+    return static_cast<Tool>(std::to_underlying(tool) - i);
 }
 
 constexpr Tool operator+(Tool tool, int i) {
-    assert(ftrstd::to_underlying(tool) + i <= ftrstd::to_underlying(Tool::_last));
-    return static_cast<Tool>(ftrstd::to_underlying(tool) + i);
+    assert(std::to_underlying(tool) + i <= std::to_underlying(Tool::_last));
+    return static_cast<Tool>(std::to_underlying(tool) + i);
 }
 
 // Order matters, snake and will be run in the same order, as well as menu items (with indices) will be
@@ -31,12 +32,16 @@ enum class Action {
     Fans,
     YCheck,
     XCheck,
+#if HAS_PRECISE_HOMING_COREXY()
+    PreciseHoming,
+#endif
     ZAlign, // also known as z_calib
     DockCalibration,
     Loadcell,
     ZCheck,
     Heaters,
     NozzleHeaters,
+    Gears,
     FilamentSensorCalibration,
     ToolOffsetsCalibration,
     BedHeaters,
@@ -47,13 +52,14 @@ enum class Action {
 };
 
 template <Action action>
-concept SubmenuActionC = action == Action::DockCalibration || action == Action::Loadcell || action == Action::FilamentSensorCalibration;
+concept SubmenuActionC = action == Action::DockCalibration || action == Action::Loadcell || action == Action::FilamentSensorCalibration || action == Action::Gears;
 
 constexpr bool has_submenu(Action action) {
     switch (action) {
     case Action::DockCalibration:
     case Action::Loadcell:
     case Action::FilamentSensorCalibration:
+    case Action::Gears:
         return true;
     default:
         return false;
@@ -94,6 +100,12 @@ consteval auto get_submenu_label(Tool tool, Action action) -> const char * {
         { Tool::Tool3, Action::FilamentSensorCalibration, N_("Tool 3 Filament Sensor Calibration") },
         { Tool::Tool4, Action::FilamentSensorCalibration, N_("Tool 4 Filament Sensor Calibration") },
         { Tool::Tool5, Action::FilamentSensorCalibration, N_("Tool 5 Filament Sensor Calibration") },
+        { Tool::Tool1, Action::Gears, N_("Tool 1 Gearbox alignment") },
+        { Tool::Tool2, Action::Gears, N_("Tool 2 Gearbox alignment") },
+        { Tool::Tool3, Action::Gears, N_("Tool 3 Gearbox alignment") },
+        { Tool::Tool4, Action::Gears, N_("Tool 4 Gearbox alignment") },
+        { Tool::Tool5, Action::Gears, N_("Tool 5 Gearbox alignment") },
+
     };
 
     if (auto it = std::ranges::find_if(tooltexts, [&](const auto &elem) {
@@ -115,18 +127,22 @@ struct MenuItemText {
 // could have been done with an array of texts directly, but there would be an order dependancy
 inline constexpr MenuItemText blank_item_texts[] {
     { Action::Fans, N_("%d Fan Test") },
-    { Action::ZAlign, N_("%d Z Alignment Calibration") },
-    { Action::YCheck, N_("%d Y Axis Test") },
-    { Action::XCheck, N_("%d X Axis Test") },
-    { Action::DockCalibration, N_("%d Dock Position Calibration") },
-    { Action::Loadcell, N_("%d Loadcell Test") },
-    { Action::ToolOffsetsCalibration, N_("%d Tool Offset Calibration") },
-    { Action::ZCheck, N_("%d Z Axis Test") },
-    { Action::Heaters, N_("%d Heater Test") },
-    { Action::FilamentSensorCalibration, N_("%d Filament Sensor Calibration") },
-    { Action::BedHeaters, N_("%d Bed Heater Test") },
-    { Action::NozzleHeaters, N_("%d Nozzle Heaters Test") },
-    { Action::PhaseSteppingCalibration, N_("%d Phase Stepping Calibration") },
+        { Action::ZAlign, N_("%d Z Alignment Calibration") },
+        { Action::YCheck, N_("%d Y Axis Test") },
+        { Action::XCheck, N_("%d X Axis Test") },
+#if HAS_PRECISE_HOMING_COREXY()
+        { Action::PreciseHoming, N_("%d Homing Calibration") },
+#endif
+        { Action::DockCalibration, N_("%d Dock Position Calibration") },
+        { Action::Loadcell, N_("%d Loadcell Test") },
+        { Action::ToolOffsetsCalibration, N_("%d Tool Offset Calibration") },
+        { Action::ZCheck, N_("%d Z Axis Test") },
+        { Action::Heaters, N_("%d Heater Test") },
+        { Action::FilamentSensorCalibration, N_("%d Filament Sensor Calibration") },
+        { Action::BedHeaters, N_("%d Bed Heater Test") },
+        { Action::NozzleHeaters, N_("%d Nozzle Heaters Test") },
+        { Action::PhaseSteppingCalibration, N_("%d Phase Stepping Calibration") },
+        { Action::Gears, N_("%d Gearbox Alignment") },
 };
 
 TestResult get_test_result(Action action, Tool tool);

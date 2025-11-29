@@ -87,7 +87,6 @@ public:
 
   /**
    * Enqueue one or many commands to run from program memory.
-   * Aborts the current queue, if any.
    * Note: process_injected_command() will process them.
    */
   static void inject_P(ConstexprString pgcode);
@@ -151,10 +150,6 @@ private:
 
   static void get_serial_commands();
 
-  #if ENABLED(SDSUPPORT)
-    static void get_sdcard_commands();
-  #endif
-
   static void _commit_command(bool say_ok
     #if NUM_SERIAL > 1
       , int16_t p=-1
@@ -175,7 +170,7 @@ public:
    * Enqueue with Serial Echo (optionally without)
    * Return true on success
    */
-  static bool enqueue_one(const char* cmd, bool echo=true);
+   [[nodiscard]] static bool enqueue_one(const char* cmd, bool echo=true);
 
 private:
   static void gcode_line_error(PGM_P const err, const int8_t port);

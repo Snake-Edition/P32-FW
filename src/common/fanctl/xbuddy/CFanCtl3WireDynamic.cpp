@@ -25,7 +25,7 @@ CFanCtl3WireDynamic::CFanCtl3WireDynamic(
     setPhaseShiftMode(CFanCtlPWM::PhaseShiftMode::none);
 }
 
-bool CFanCtl3WireDynamic::setPWM(uint16_t pwm) {
+bool CFanCtl3WireDynamic::set_pwm(uint16_t pwm) {
     if (selftest_mode) {
         return false;
     }

@@ -2,7 +2,7 @@
 
 #include <marlin_server.hpp>
 #include <optional>
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 
 template <typename Phase_, typename FSMClass_>
 struct FSMHandlerMetadata {

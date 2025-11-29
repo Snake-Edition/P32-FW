@@ -56,8 +56,8 @@ uint32_t Printer::Params::telemetry_fingerprint(bool include_xy_axes) const {
                 .add(int(slots[i].temp_nozzle))
 #if PRINTER_IS_PRUSA_iX()
                 .add(int(slots[i].temp_heatbreak))
-                .add(slots[i].extruder_fs_state ? ftrstd::to_underlying(*slots[i].extruder_fs_state) : -1)
-                .add(slots[i].remote_fs_state ? ftrstd::to_underlying(*slots[i].remote_fs_state) : -1)
+                .add(slots[i].extruder_fs_state ? std::to_underlying(*slots[i].extruder_fs_state) : -1)
+                .add(slots[i].remote_fs_state ? std::to_underlying(*slots[i].remote_fs_state) : -1)
 #endif
                 // The RPM values are in thousands and fluctuating a bit, we don't want
                 // that to trigger the send too often, only when it actually really
@@ -167,7 +167,10 @@ uint32_t Printer::info_fingerprint() const {
 uint32_t Printer::Params::state_fingerprint() const {
     Crc crc;
 
-    const uint32_t dialog_id = state.dialog.has_value() ? state.dialog->dialog_id : 0xFFFFFFFF;
+    // internal variable used to calculate fingerprint and may exceed 31bits reserved for DialogId's
+    // value 0xFFFFFFFF reserved for missing Id
+    const uint32_t dialog_id = state.dialog.has_value() ? state.dialog->dialog_id.to_uint32_t() : 0xFFFFFFFF;
+
     return crc
         .add(state.device_state)
         .add(dialog_id)

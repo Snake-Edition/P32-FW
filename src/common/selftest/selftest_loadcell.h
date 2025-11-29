@@ -6,9 +6,12 @@
  */
 #pragma once
 
-#include <inttypes.h>
+#include <utility>
+#include <cinttypes>
+#include <limits>
+#include <optional>
+
 #include "i_selftest_part.hpp"
-#include "algorithm_range.hpp"
 #include "selftest_loadcell_config.hpp"
 #include "selftest_log.hpp"
 
@@ -29,6 +32,12 @@ class CSelftestPart_Loadcell {
     LogTimer log;
     LogTimer log_fast;
     std::optional<Loadcell::HighPrecisionEnabler> loadcell_high_precision_enabler;
+
+    /// Range of loadcell values read during the countdown phase when the loadcell should be calm
+    struct {
+        int32_t min = std::numeric_limits<int32_t>::max();
+        int32_t max = std::numeric_limits<int32_t>::min();
+    } loadcell_value_range;
 
 public:
     CSelftestPart_Loadcell(IPartHandler &state_machine, const LoadcellConfig_t &config,

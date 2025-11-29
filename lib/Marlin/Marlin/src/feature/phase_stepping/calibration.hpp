@@ -1,9 +1,14 @@
 #pragma once
 
+#include <option/has_phase_stepping_calibration.h>
+#if !HAS_PHASE_STEPPING_CALIBRATION()
+    #error "calibration disabled by configuration"
+#endif
+
 #include "common.hpp"
 
 #include <cassert>
-#include <functional>
+#include <inplace_function.hpp>
 #include <tuple>
 #include <optional>
 #include <vector>
@@ -48,20 +53,27 @@ struct SweepParams {
     }
 };
 
+/// Prevent implicit conversions from int16_t to float
+struct AccelerometerSample {
+    int16_t value;
+};
+
+using YieldSample = stdext::inplace_function<void(AccelerometerSample)>;
+
 /**
  * Assuming phase stepping is enabled, make a movement during which a parameter
  * sweep is performed. Yield a projection of captured sample to the active axis.
  * Returns accelerometer sampling frequency, or 0 on error.
  */
 SamplesAnnotation capture_param_sweep_samples(AxisEnum axis, float speed, float revs,
-    int harmonic, const SweepParams &params, const std::function<void(float)> &yield_sample);
+    int harmonic, const SweepParams &params, const YieldSample &yield_sample);
 
 /**
  * Make an accelerated movement and capture samples. Return accelerometer
  * sampling frequency, or 0 on error.
  */
 SamplesAnnotation capture_speed_sweep_samples(AxisEnum axis, float start_speed, float end_speed,
-    float revs, const std::function<void(float)> &yield_sample);
+    float revs, const YieldSample &yield_sample);
 
 /**
  * Calibration routine notifies about the progress made via this class. Subclass
@@ -104,18 +116,24 @@ public:
     virtual ContinueOrAbort on_idle() = 0;
 };
 
+enum class CalibrateAxisError : uint8_t {
+    aborted,
+    speed_sweep_movement_failed,
+    param_sweep_movement_failed,
+    no_peaks_found,
+    cannot_find_peaks_in_phase_sweep,
+    magnitude_out_of_bounds,
+};
+
+const char *to_string(CalibrateAxisError);
+
 /**
  * Assuming the printer is homed, calibrate given axis. The progress is reported
  * via hooks. The routine is blocking.
  *
  * Returns an array with forward and backward calibration
  */
-std::expected<std::array<MotorPhaseCorrection, 2>, const char *>
+std::expected<std::array<MotorPhaseCorrection, 2>, CalibrateAxisError>
 calibrate_axis(AxisEnum axis, CalibrateAxisHooks &hooks);
-
-/**
- * Reset runtime current lookup tables for axis.
- */
-void reset_compensation(AxisEnum axis);
 
 } // namespace phase_stepping

@@ -34,8 +34,8 @@
     #include <feature/chamber_filtration/chamber_filtration.hpp>
 #endif
 
-#include <option/has_xbuddy_extension.h>
-#if HAS_XBUDDY_EXTENSION()
+#include <option/xbuddy_extension_variant_standard.h>
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     #include <feature/xbuddy_extension/xbuddy_extension.hpp>
     #include <puppies/xbuddy_extension.hpp> // For FAN_CNT
 #endif
@@ -99,7 +99,7 @@ public:
     }
 
     void update_progress() {
-        float new_progress;
+        float new_progress = 0;
         // Manual check pauses the progress, so we cannot calculate just (now - start)
         switch (phase) {
 #if PRINTER_IS_PRUSA_MK3_5() && HAS_SWITCHED_FAN_TEST()
@@ -153,7 +153,7 @@ public:
         }
 #endif
         change_phase(PhasesFansSelftest::test_40_percent);
-        set_benevolent_fan_range(); // Test only if fan is spinning
+        set_low_speed_fan_range();
         set_up_measurement(0);
         wait(wait_rpm_0_percent_delay);
         set_up_measurement(pwm_40_percent);
@@ -292,7 +292,7 @@ private:
             break;
     #endif /* XL_ENCLOSURE_SUPPORT() */
 
-    #if HAS_XBUDDY_EXTENSION()
+    #if XBUDDY_EXTENSION_VARIANT_STANDARD()
         case Chamber::Backend::xbuddy_extension:
             config_store().xbe_fan_test_results.set({});
             break;
@@ -304,9 +304,9 @@ private:
 #endif /* HAS_CHAMBER_API() */
     }
 
-    void set_benevolent_fan_range() {
+    void set_low_speed_fan_range() {
         for (auto *fan : fans) {
-            fan->set_range(benevolent_fan_range);
+            fan->set_low_range();
         }
     }
 
@@ -330,7 +330,7 @@ private:
                 config_store().xl_enclosure_fan_selftest_result.set(fan->test_result());
                 break;
 #endif
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
             case FanType::xbe_chamber: {
                 assert(fan->get_desc_num() < puppies::XBuddyExtension::FAN_CNT);
                 auto res = config_store().xbe_fan_test_results.get();
@@ -384,7 +384,7 @@ void M1978() {
 
     auto print_fans = [&]<size_t... ix>(std::index_sequence<ix...>) {
         return std::array {
-            CommonFanHandler(FanType::print, ix, print_fan_range, &Fans::print(ix))...
+            CommonFanHandler(FanType::print, ix, print_fan_range, &Fans::print(ix), print_low_fan_range)...
         };
     }(std::make_index_sequence<HOTENDS>());
 
@@ -413,7 +413,7 @@ void M1978() {
 #if XL_ENCLOSURE_SUPPORT()
     CommonFanHandler xl_enclosure_fan(FanType::xl_enclosure, 0, benevolent_fan_range, &Fans::enclosure());
 #endif
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     std::array xbe_fans {
         XBEFanHandler(FanType::xbe_chamber, 0, chamber_fan_range),
         XBEFanHandler(FanType::xbe_chamber, 1, chamber_fan_range),
@@ -432,7 +432,7 @@ void M1978() {
     }
     #endif /* XL_ENCLOSURE_SUPPORT() */
 
-    #if HAS_XBUDDY_EXTENSION()
+    #if XBUDDY_EXTENSION_VARIANT_STANDARD()
         static_assert(HAS_CHAMBER_FILTRATION_API());
     case Chamber::Backend::xbuddy_extension:
         if (xbuddy_extension().using_filtration_fan_instead_of_cooling_fans()) {

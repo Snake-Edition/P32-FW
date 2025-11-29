@@ -71,5 +71,5 @@ public:
 };
 
 constexpr std::underlying_type_t<SelftestHeaters_t::TestedParts> to_one_hot(SelftestHeaters_t::TestedParts p) {
-    return 1 << ftrstd::to_underlying(p);
+    return 1 << std::to_underlying(p);
 }

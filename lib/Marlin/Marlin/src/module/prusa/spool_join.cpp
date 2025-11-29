@@ -14,9 +14,10 @@
 #include "module/planner.h" // for get_axis_position_mm
 #include "marlin_vars.hpp"
 #include "module/tool_change.h"
-#include "lcd/extensible_ui/ui_api.h" // for ExtUI::onStatusChanged to send notification about spool join
 #include <config_store/store_instance.hpp>
 #include "mmu2_toolchanger_common.hpp"
+#include <feature/print_status_message/print_status_message_mgr.hpp>
+#include <feature/print_status_message/print_status_message_guard.hpp>
 
 SpoolJoin spool_join;
 
@@ -44,16 +45,10 @@ bool SpoolJoin::add_join(uint8_t spool_1, uint8_t spool_2) {
     if (num_joins >= joins.size() || !is_tool_enabled(spool_1) || !is_tool_enabled(spool_2) || spool_1 == spool_2) {
         return false;
     }
-
     // join will be added at the end of existing joins, so when for example
     // 0 will join with 1, and we want to join0 with 2,  actual join created will be 1 -> 2,
     // because we first want to join 0 -> 1, and then 1 -> 2
-    for (size_t i = 0; i < num_joins; ++i) {
-        if (joins[i].spool_1 == spool_1) {
-            spool_1 = joins[i].spool_2;
-            i = -1; // reset the search as we don't have order guaranteed
-        }
-    }
+    spool_1 = get_last_spool_2_from_chain_unlocked(spool_1);
 
     // Prevent adding loops
     if (get_first_spool_1_from_chain_unlocked(spool_2) == get_first_spool_1_from_chain_unlocked(spool_1)) {
@@ -168,6 +163,21 @@ bool SpoolJoin::remove_join_chain_containing_unlocked(uint8_t spool) {
     }
 }
 
+uint8_t SpoolJoin::get_last_spool_2_from_chain(uint8_t spool_1) const {
+    std::unique_lock lock(mutex);
+    return get_last_spool_2_from_chain_unlocked(spool_1);
+}
+
+uint8_t SpoolJoin::get_last_spool_2_from_chain_unlocked(uint8_t spool_1) const {
+    for (size_t i = 0; i < num_joins; ++i) {
+        if (joins[i].spool_1 == spool_1) {
+            spool_1 = joins[i].spool_2;
+            i = -1; // reset the loop and search again
+        }
+    }
+    return spool_1;
+}
+
 uint8_t SpoolJoin::get_first_spool_1_from_chain(uint8_t spool_2) const {
     std::unique_lock lock(mutex);
     return get_first_spool_1_from_chain_unlocked(spool_2);
@@ -207,8 +217,8 @@ bool SpoolJoin::do_join(uint8_t current_tool) {
 
     uint8_t new_tool = join_settings.value();
     log_info(Marlin, "Spool join from %d to %d (z=%f)", current_tool, new_tool, planner.get_axis_position_mm(AxisEnum::Z_AXIS));
-
-    ExtUI::onStatusChanged("Joining spool");
+    PrintStatusMessageGuard statusGuard;
+    statusGuard.update<PrintStatusMessage::joining_spool>({});
 
     planner.synchronize();
 
@@ -254,9 +264,7 @@ bool SpoolJoin::do_join(uint8_t current_tool) {
 #else
     tool_change(new_tool, tool_return_t::purge_and_to_destination /* For MMU unused */);
 #endif
-
-    ExtUI::onStatusChanged("Spool joined");
-
+    print_status_message().show_temporary<PrintStatusMessage::spool_joined>({});
     return true;
 }
 

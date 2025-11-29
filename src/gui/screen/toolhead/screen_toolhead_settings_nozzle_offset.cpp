@@ -1,7 +1,5 @@
 #include "screen_toolhead_settings_nozzle_offset.hpp"
 
-#include <str_utils.hpp>
-
 using namespace screen_toolhead_settings;
 
 static constexpr std::array<NumericInputConfig, 3> offset_configs {

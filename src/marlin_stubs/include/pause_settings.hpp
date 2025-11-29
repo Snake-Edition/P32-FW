@@ -7,6 +7,7 @@
 #include <optional>
 #include "../../../lib/Marlin/Marlin/src/core/macros.h"
 #include "../../../lib/Marlin/Marlin/src/core/types.h"
+#include <mapi/parking.hpp>
 
 class Pause; // forward declaration, so Settings does not think Pause is member of pause namespace
 
@@ -31,7 +32,7 @@ public:
     void SetPurgeLength(const std::optional<float> &len);
     void SetRetractLength(const std::optional<float> &len);
     void SetParkZFeedrate(const std::optional<float> &feedrate); ///< Set feedrate for park z move [mm/s].
-    void SetParkPoint(const xyz_pos_t &park_point);
+    void SetParkPoint(const mapi::ParkingPosition &park_point);
     void SetResumePoint(const xyze_pos_t &resume_point);
     void SetMmuFilamentToLoad(uint8_t index);
 
@@ -56,8 +57,6 @@ private:
 
     uint8_t mmu_filament_to_load = 0;
     uint8_t target_extruder;
-    bool can_stop : 1; // true by default, only runout cannot stop, set by Pause
-    bool do_stop : 1; // part of settings just o be resetted
 
     // Preloaded from the config_store to prevent querying it each loop
     bool extruder_mmu_rework : 1 = PRINTER_IS_PRUSA_iX();

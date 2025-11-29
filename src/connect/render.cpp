@@ -1,6 +1,5 @@
 #include "render.hpp"
 #include "printer_type.hpp"
-#include "str_utils.hpp"
 
 #include <client_response.hpp>
 #include <segmented_json_macros.h>
@@ -13,8 +12,15 @@
 #include <filament.hpp>
 #include <filament_list.hpp>
 #include <filament_sensor_states.hpp>
-#if XL_ENCLOSURE_SUPPORT()
-    #include <xl_enclosure.hpp>
+
+#include <option/has_cancel_object.h>
+#if HAS_CANCEL_OBJECT()
+    #include <feature/cancel_object/cancel_object.hpp>
+#endif
+
+#include <option/has_chamber_filtration_api.h>
+#if HAS_CHAMBER_FILTRATION_API()
+    #include <feature/chamber_filtration/chamber_filtration.hpp>
 #endif
 
 #include <cassert>
@@ -101,6 +107,7 @@ namespace {
             if (request.details.has_value()) {
                 JSON_FIELD_STR("hash", request.details->hash) JSON_COMMA;
                 JSON_FIELD_INT("team_id", request.details->team_id) JSON_COMMA;
+                JSON_FIELD_INT("transfer_id", request.details->transfer_id.to_uint32_t()) JSON_COMMA;
             }
             // Relates both to size of the FS block.
             JSON_FIELD_INT("chunk", 4096) JSON_COMMA;
@@ -138,7 +145,7 @@ namespace {
                 //
                 // And yes, we need the guard on each one, because we can
                 // resume at each and every of these fields.
-                JSON_FIELD_INT_G(transfer_status.has_value(), "transfer_id", transfer_status->id) JSON_COMMA;
+                JSON_FIELD_INT_G(transfer_status.has_value(), "transfer_id", transfer_status->id.to_uint32_t()) JSON_COMMA;
                 JSON_FIELD_INT_G(transfer_status.has_value(), "transfer_transferred", transfer_status->download_progress.get_valid_size()) JSON_COMMA;
                 JSON_FIELD_INT_G(transfer_status.has_value(), "transfer_time_remaining", transfer_status->time_remaining_estimate()) JSON_COMMA;
                 JSON_FIELD_FFIXED_G(transfer_status.has_value(), "transfer_progress", transfer_status->progress_estimate() * 100.0, 1) JSON_COMMA;
@@ -252,7 +259,7 @@ namespace {
             }
 
             if (params.state.dialog.has_value()) {
-                JSON_FIELD_INT_G(params.state.dialog.has_value(), "dialog_id", params.state.dialog->dialog_id) JSON_COMMA;
+                JSON_FIELD_INT_G(params.state.dialog.has_value(), "dialog_id", params.state.dialog->dialog_id.to_uint32_t()) JSON_COMMA;
             }
             // State is sent always, first because it seems important, but
             // also, we want something that doesn't have the final comma on
@@ -267,9 +274,6 @@ namespace {
         const auto params = state.printer.params();
         const auto &info = state.printer.printer_info();
         const bool has_extra = (event.type != EventType::Accepted) && (event.type != EventType::Rejected);
-#if ENABLED(CANCEL_OBJECTS)
-        char cancel_object_name[Printer::CANCEL_OBJECT_NAME_LEN];
-#endif
         std::optional<Printer::FinishedJobResult> job_state;
 
         const char *reject_with = nullptr;
@@ -407,7 +411,7 @@ namespace {
                             JSON_FIELD_BOOL("printing_filtration", params.enclosure_info.printing_filtration) JSON_COMMA;
                             JSON_FIELD_BOOL("post_print", params.enclosure_info.post_print) JSON_COMMA;
                             JSON_FIELD_INT("post_print_filtration_time", params.enclosure_info.post_print_filtration_time) JSON_COMMA;
-                            JSON_FIELD_INT("filter_lifetime", Enclosure::expiration_deadline_sec) JSON_COMMA;
+                            JSON_FIELD_INT("filter_lifetime", buddy::chamber_filtration().filter_lifetime_s()) JSON_COMMA;
                             JSON_FIELD_ARR("filtration_filaments");
                             for (state.iter = 0, state.need_comma = false; state.iter <all_filament_types.size(); state.iter++) {
                                 if(!all_filament_types[state.iter].parameters().requires_filtration) {
@@ -416,7 +420,7 @@ namespace {
                                 if (state.need_comma) {
                                     JSON_COMMA;
                                 }
-                                JSON_CUSTOM("\"%s\"",  all_filament_types[state.iter].parameters().name);
+                                JSON_CUSTOM("\"%s\"",  all_filament_types[state.iter].parameters().name.data());
                                 state.need_comma = true;
                             }
                             JSON_ARR_END;
@@ -546,7 +550,7 @@ namespace {
                     if (params.has_usb) {
                         JSON_FIELD_INT("free_space", params.usb_space_free) JSON_COMMA;
                     }
-                    if (event.incident == transfers::ChangedPath::Incident::Created || event.incident == transfers::ChangedPath::Incident::CreatedEarly) {
+                    if (event.incident == transfers::ChangedPath::Incident::Created) {
                         JSON_FIELD_STR("new_path", event.path->path()) JSON_COMMA;
                     } else if (event.incident == transfers::ChangedPath::Incident::Deleted) {
                         JSON_FIELD_STR("old_path", event.path->path()) JSON_COMMA;
@@ -566,29 +570,24 @@ namespace {
                     JSON_OBJ_END;
                 JSON_OBJ_END JSON_COMMA;
             } else if (event.type == EventType::CancelableChanged) {
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
                 JSON_FIELD_OBJ("data");
                     JSON_FIELD_ARR("objects");
                         state.iter = 0;
-                        while (state.iter <  params.cancel_object_count) {
-                            //Note: It can theoretically happen, that print finishes and new starts as we are sending this (tho really unlikely)
-                            //, but in that case we would just send some inconsistent names, probably empty srings and
-                            //right after we would generate next event with the correct ones, so it is OK.
-                            JSON_OBJ_START;
-                                //Note: The name has to be copied inside this call, so that it cannot be skipped, if this does not fit the first time.
-                                //
-                                // Also we store only CANCEL_OBJECT_NAME_COUNT names, but can cancel up to the number of bits in the cancel_object_mask
-                                // objects, for the rest we still want to say, if they are canceled or not.
-                                if (state.iter < Printer::CANCEL_OBJECT_NAME_COUNT) {
 
-                                    JSON_FIELD_STR("name", state.printer.get_cancel_object_name(cancel_object_name, sizeof(cancel_object_name), state.iter)) JSON_COMMA;
-                                }
-                                JSON_FIELD_BOOL("canceled", TEST64(params.cancel_object_mask, state.iter)) JSON_COMMA;
-                                JSON_FIELD_INT("id", state.iter);
-                            JSON_OBJ_END;
-                            if (state.iter != params.cancel_object_count - 1) {
+                        // Note: Because we're reading out object_count and is_object_cancelled directly,
+                        // we can end up with inconsistent data being rendered.
+                        // But that is fine, if that happens, cancel_object.revision changes and new render will be issued later, so we will eventually end up being consistent
+
+                        while (static_cast<buddy::CancelObject::ObjectID>(state.iter) < buddy::cancel_object().object_count()) {
+                            if (state.iter != 0) {
                                 JSON_COMMA;
                             }
+                            JSON_OBJ_START;
+                                // is_object_cancelled will work even if i is outside of bounds, so having object_count inconsistent is fine
+                                JSON_FIELD_BOOL("canceled", buddy::cancel_object().is_object_cancelled(state.iter)) JSON_COMMA;
+                                JSON_FIELD_INT("id", state.iter);
+                            JSON_OBJ_END;
                             state.iter++;
                         }
                     JSON_ARR_END;
@@ -670,14 +669,14 @@ namespace {
             }
 
             if (params.state.dialog.has_value()) {
-                JSON_FIELD_INT_G(params.state.dialog.has_value(), "dialog_id", params.state.dialog->dialog_id) JSON_COMMA;
+                JSON_FIELD_INT_G(params.state.dialog.has_value(), "dialog_id", params.state.dialog->dialog_id.to_uint32_t()) JSON_COMMA;
             }
             JSON_FIELD_STR("state", to_str(params.state.device_state)) JSON_COMMA;
             if (event.command_id.has_value()) {
                 JSON_FIELD_INT("command_id", *event.command_id) JSON_COMMA;
             }
             if (state.transfer_id.has_value()) {
-                JSON_FIELD_INT("transfer_id", *state.transfer_id) JSON_COMMA;
+                JSON_FIELD_INT("transfer_id", (*state.transfer_id).to_uint32_t()) JSON_COMMA;
             }
             JSON_FIELD_STR("event", to_str(event.type));
         JSON_OBJ_END;
@@ -791,10 +790,10 @@ tuple<JsonResult, size_t> PreviewRenderer::render(uint8_t *buffer, size_t buffer
     }
 
     size_t written = 0;
-
-    if (!started) {
+    if (!thumbnail_reader) {
         // get any thumbnail bigger than 17x17
-        if (!gcode->stream_thumbnail_start(17, 17, IGcodeReader::ImgType::PNG, true)) {
+        thumbnail_reader = gcode->stream_thumbnail_start(17, 17, IGcodeReader::ImgType::PNG, true);
+        if (!thumbnail_reader) {
             // no thumbnail found in gcode, just dont send anything
             return make_tuple(JsonResult::Complete, 0);
         }
@@ -802,26 +801,17 @@ tuple<JsonResult, size_t> PreviewRenderer::render(uint8_t *buffer, size_t buffer
         memcpy(buffer, intro, intro_len);
         written += intro_len;
         buffer += intro_len;
-        started = true;
     }
 
     bool write_end = false;
     while ((buffer_size - written) >= (encoded_chunk_size + 1)) { // if there is space for another chunk (and ending \0)
         // read chunk of decoded data
         uint8_t dec_chunk[decoded_chunk_size] = { 0 };
-        size_t decoded_len = 0;
-        while (decoded_len < decoded_chunk_size) {
-            if (gcode->stream_getc(reinterpret_cast<char &>(dec_chunk[decoded_len])) != IGcodeReader::Result_t::RESULT_OK) {
-                // probably end of data, or error. Either way stop reading and send whatever was read till now.
-                // if error happens while sending thumbnail, there is not much that can be done to signal that anyway.
-                write_end = true;
-                break;
-            }
-            ++decoded_len;
-        }
-        // encode data, if there is something to encode
-        if (decoded_len == 0) {
-            // nothing to encode, end
+        size_t decoded_len = thumbnail_reader->read({ dec_chunk, decoded_chunk_size }).size();
+        if (decoded_len != decoded_chunk_size) {
+            // probably end of data, or error. Either way stop reading and send whatever was read till now.
+            // if error happens while sending thumbnail, there is not much that can be done to signal that anyway.
+            write_end = true;
             break;
         }
         [[maybe_unused]] size_t encoded_len;
@@ -1028,18 +1018,25 @@ JsonResult DirRenderer::renderState(size_t resume_point, json::JsonOutput &outpu
         }
 
         state.childsize = nullopt;
-        // Will skip all the .bbf and other files still being transfered
-        // (that's actually what we want, they are not usable until renamed).
-        if (state.ent->d_type == DT_DIR && filename_is_printable(state.ent->d_name)) {
+        if (state.ent->d_type == DT_DIR && filename_is_transferrable(state.ent->d_name)) {
+            // Suspicion: This might actualy be a partial file. Check and decide what to do about it.
+            const bool is_printable = filename_is_printable(state.ent->d_name);
             MutablePath path(state.base_path);
             path.push(state.ent->d_name);
-            // This also checks validity of the file
-            if (auto st_opt = transfers::Transfer::get_transfer_partial_file_stat(path); st_opt.has_value()) {
+            auto st_opt = transfers::Transfer::get_transfer_partial_file_stat(path);
+            if (st_opt.has_value() && is_printable) {
+                // A print file ‒ report it even while we are downloading, it can be printed right away.
                 state.ent->d_type = DT_REG;
                 state.childsize = st_opt->st_size;
                 state.read_only = true;
-            } else {
+            } else if (st_opt.has_value()) {
+                // This is a bbf that's being transfered. Hide it completely until it is complete.
                 continue;
+            } else {
+                // It is a directory with a stupid name, but not a running
+                // transfer. Act as if it is just a directory.
+                state.read_only = false;
+                state.childsize = child_size(state.base_path, state.ent->d_name);
             }
         } else {
             state.read_only = false;

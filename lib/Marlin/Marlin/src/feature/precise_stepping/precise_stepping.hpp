@@ -7,6 +7,8 @@
  */
 #pragma once
 #include "common.hpp"
+#include <interrupt_disabler.hpp>
+#include <timing.h>
 #include <atomic>
 
 #ifdef COREXY
@@ -30,6 +32,9 @@ constexpr const int32_t STEP_TIMER_MAX_TICKS_LIMIT = int32_t(std::numeric_limits
 
 // Precomputed period of calling PreciseStepping::isr() when there is no queued step event (1ms).
 constexpr const uint16_t STEPPER_ISR_PERIOD_IN_TICKS = (STEPPER_TIMER_RATE / 1000);
+
+// Maximum isr interval for skip detection
+constexpr const uint16_t STEPPER_ISR_MAX_TICKS = UINT16_MAX / 4;
 
 // Precomputed conversion rate from seconds to timer ticks.
 constexpr const double STEPPER_TICKS_PER_SEC = double(STEPPER_TIMER_RATE);
@@ -68,6 +73,46 @@ static_assert(MoveFlag::MOVE_FLAG_Y_ACTIVE == (MoveFlag)PreciseSteppingFlag::PRE
 static_assert(MoveFlag::MOVE_FLAG_Z_ACTIVE == (MoveFlag)PreciseSteppingFlag::PRECISE_STEPPING_FLAG_Z_USED);
 static_assert(MoveFlag::MOVE_FLAG_E_ACTIVE == (MoveFlag)PreciseSteppingFlag::PRECISE_STEPPING_FLAG_E_USED);
 
+// Helper class to disable timers from multiple threads or interrupts
+template <uint8_t TIMER_NUM>
+class [[nodiscard]] TimerDisabler {
+    static inline bool global_timer_state = false;
+    static inline uint8_t nesting_count = 0;
+
+public:
+    static void setGlobalTimerState(bool enabled) {
+        buddy::InterruptDisabler _;
+        global_timer_state = enabled;
+        if (nesting_count == 0) {
+            if (enabled) {
+                HAL_timer_enable_interrupt(TIMER_NUM);
+            } else {
+                HAL_timer_disable_interrupt(TIMER_NUM);
+            }
+        }
+    }
+
+    TimerDisabler() {
+        buddy::InterruptDisabler _;
+        if (nesting_count++ == 0 && global_timer_state) {
+            HAL_timer_disable_interrupt(TIMER_NUM);
+        }
+    }
+
+    ~TimerDisabler() {
+        buddy::InterruptDisabler _;
+        if (--nesting_count == 0 && global_timer_state) {
+            HAL_timer_enable_interrupt(TIMER_NUM);
+        }
+    }
+
+    TimerDisabler(const TimerDisabler &) = delete;
+    TimerDisabler &operator=(const TimerDisabler &) = delete;
+};
+
+using MoveIsrDisabler = TimerDisabler<MOVE_TIMER_NUM>;
+using StepIsrDisabler = TimerDisabler<STEP_TIMER_NUM>;
+
 class PreciseStepping {
 
 public:
@@ -83,6 +128,13 @@ public:
     // Total number of ticks until the next step event will be processed.
     // Or number of ticks to next call of stepper ISR when step event queue is empty.
     static uint16_t left_ticks_to_next_step_event;
+
+    // Accumulated delay in the last ISR call
+    static uint32_t last_step_isr_delay;
+
+    // Active (step-synchronized) current move flags
+    static std::atomic<MoveFlag_t> current_move_flags;
+    static_assert(decltype(current_move_flags)::is_always_lock_free);
 
     // Indicate which direction bits are inverted.
     static uint16_t inverted_dirs;
@@ -112,7 +164,11 @@ public:
 
     PreciseStepping() = default;
 
+    // Initialize
     static void init();
+
+    // Return PreciseStepping initialization state
+    static bool initialized() { return initialized_; }
 
     // Reset the motion/stepper generator state from halt
     static void reset_from_halt(bool preserve_step_fraction = true);
@@ -127,7 +183,12 @@ public:
     static void loop();
 
     // Process one planner block into move segments
-    static void process_queue_of_blocks();
+    //
+    // Returns true if any block was processed.
+    static bool process_queue_of_blocks();
+
+    /// Trigger immediate processing of the move queue
+    static void wake_up();
 
     // Process the move segment queue
     static void process_queue_of_move_segments();
@@ -305,12 +366,28 @@ public:
 
     static void update_maximum_lookback_time();
 
+    static double get_first_move_delay();
+    static uint32_t get_first_move_delay_us() {
+        return get_first_move_delay() * 1e6;
+    }
+
     // This function must be called after the whole actual move segment is processed or the artificially
     // created move segment is processed, as in the input shaper case.
     static void move_segment_processed_handler();
 
+    // Return the timestamp (us) of the last block discarding time
+    static uint32_t get_time_of_last_block_us() {
+        return time_last_block_us;
+    }
+
     // Reset the step/move queue
-    static void quick_stop() { stop_pending = true; }
+    static void quick_stop() {
+        bool old = stop_pending.exchange(true);
+        if (!old) {
+            // only update on first trigger
+            time_last_block_us = ticks_us();
+        }
+    }
 
     // Return true if the motion is being stopped
     static bool stopping() { return stop_pending; }
@@ -323,17 +400,70 @@ public:
 
     static volatile uint8_t step_dl_miss; // stepper deadline misses
     static volatile uint8_t step_ev_miss; // stepper event misses
+    static volatile uint32_t time_last_block_us; // time of last block discarding event
+
+    // Return true whether the specified (logical) axis is moving
+    FORCE_INLINE static bool is_axis_moving(const AxisEnum logical_axis) {
+        assert(logical_axis < PS_AXIS_COUNT);
+        return (current_move_flags & (MOVE_FLAG_X_ACTIVE << (MoveFlag_t)logical_axis));
+    }
+
+    // Return true whether the specified physical axis is moving given a logical one
+    FORCE_INLINE static bool is_physical_axis_moving(const AxisEnum logical_axis) {
+        assert(logical_axis < PS_AXIS_COUNT);
+        bool moving = false;
+#ifdef COREXY
+        if ((logical_axis == A_AXIS || logical_axis == B_AXIS)) {
+            moving = (current_move_flags & (MOVE_FLAG_X_ACTIVE | MOVE_FLAG_Y_ACTIVE));
+        } else {
+#endif
+            moving = (current_move_flags & (MOVE_FLAG_X_ACTIVE << (MoveFlag_t)logical_axis));
+#ifdef COREXY
+        }
+#endif
+        return moving;
+    }
+
+    // Return true whether the specified (logical) axis is moving at cruising speed
+    FORCE_INLINE static bool is_axis_cruising(const AxisEnum logical_axis) {
+        assert(logical_axis < PS_AXIS_COUNT);
+        MoveFlag_t active_mask = (MOVE_FLAG_X_ACTIVE << (MoveFlag_t)logical_axis);
+        MoveFlag_t move_flags = current_move_flags; // take a snapshot to perform both checks
+        return (move_flags & active_mask) && (move_flags & MOVE_FLAG_CRUISE_PHASE);
+    }
+
+    // Return true whether the physical axis/es are moving at cruising speed given a logical one
+    // NOTE: this does not imply that all required physical axes are actually moving. If required,
+    //       each axis needs to be checked independently to check whether it's used after kinematic
+    //       translation via Stepper::axis_is_moving()
+    FORCE_INLINE static bool is_physical_axis_cruising(const AxisEnum logical_axis) {
+        assert(logical_axis < PS_AXIS_COUNT);
+        MoveFlag_t active_mask;
+#ifdef COREXY
+        if ((logical_axis == A_AXIS || logical_axis == B_AXIS)) {
+            active_mask = (MOVE_FLAG_X_ACTIVE | MOVE_FLAG_Y_ACTIVE);
+        } else {
+#endif
+            active_mask = (MOVE_FLAG_X_ACTIVE << (MoveFlag_t)logical_axis);
+#ifdef COREXY
+        }
+#endif
+        MoveFlag_t move_flags = current_move_flags; // take a snapshot to perform both checks
+        return (move_flags & active_mask) && (move_flags & MOVE_FLAG_CRUISE_PHASE);
+    }
 
 private:
     static uint32_t waiting_before_delivering_start_time;
-    static uint32_t last_step_isr_delay;
 
     static void step_generator_state_init(const move_t &move);
 
+    static bool initialized_;
     static std::atomic<bool> busy;
     static std::atomic<bool> stop_pending;
     static void reset_queues();
     static bool is_waiting_before_delivering();
+    // Wake up already requested, don't request more until it actually wakes up.
+    static std::atomic<bool> wakeup_requested;
 };
 
 void classic_step_generator_init(const move_t &move, classic_step_generator_t &step_generator, step_generator_state_t &step_generator_state);

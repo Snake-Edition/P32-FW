@@ -65,8 +65,9 @@ uint32_t ask_to_remap() {
         // Store mapping
         set_mapping(new_mapping);
 
-        // Reset selftest state and fsensor calibration for remapped sensors
         uint32_t remapped = 0; ///< Mask of remapped tools
+#if HAS_SELFTEST()
+        // Reset selftest state and fsensor calibration for remapped sensors
         SelftestResult eeres = config_store().selftest_result.get();
         for (uint8_t e = 0; e < std::size(current_mapping); ++e) {
             if (current_mapping[e] != new_mapping[e]) {
@@ -78,6 +79,13 @@ uint32_t ask_to_remap() {
             }
         }
         config_store().selftest_result.set(eeres);
+#else
+        for (uint8_t e = 0; e < std::size(current_mapping); ++e) {
+            if (current_mapping[e] != new_mapping[e]) {
+                remapped |= 1 << e;
+            }
+        }
+#endif
 
         return remapped;
     }

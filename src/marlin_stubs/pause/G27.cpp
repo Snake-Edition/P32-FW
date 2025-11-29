@@ -22,15 +22,11 @@
 
 #include "config_features.h"
 
-#if ENABLED(NOZZLE_PARK_FEATURE)
-    #include "G27.hpp"
-
-    #include <Marlin/src/gcode/gcode.h>
-    #include <Marlin/src/libs/nozzle.h>
-    #include <Marlin/src/module/motion.h>
-    #include <common/gcode/gcode_parser.hpp>
-    #include <common/filament_sensors_handler.hpp>
-    #include <common/mapi/parking.hpp>
+#include <Marlin/src/gcode/gcode.h>
+#include <Marlin/src/module/motion.h>
+#include <common/gcode/gcode_parser.hpp>
+#include <common/filament_sensors_handler.hpp>
+#include <common/mapi/parking.hpp>
 
 /** \addtogroup G-Codes
  * @{
@@ -63,41 +59,39 @@ void GcodeSuite::G27() {
         return;
     }
 
-    G27Params params;
-    parser.store_option('P', params.z_action, mapi::ZAction::_cnt);
-    parser.store_option('W', params.where_to_park, mapi::ParkPosition::_cnt);
+    mapi::ZAction z_action { mapi::ZAction::move_to_at_least };
+    parser.store_option('P', z_action, static_cast<uint32_t>(mapi::ZAction::_last) + 1);
 
-    parser.store_option('X', params.park_position.x);
-    parser.store_option('Y', params.park_position.y);
-    parser.store_option('Z', params.park_position.z);
+    mapi::ParkingPosition parking_position;
+    if (auto where_to_park = parser.option<mapi::ParkPosition>('W', mapi::ParkPosition::_cnt)) {
+        parking_position = mapi::park_positions[*where_to_park];
+    } else {
+        auto parse_axis = [&parser](char letter, mapi::ParkingPosition::Variant &axis) {
+            if (auto res = parser.option<float>(letter)) {
+                axis = *res;
+            }
+        };
 
-    G27_no_parser(params);
-}
+        parse_axis('X', parking_position.x);
+        parse_axis('Y', parking_position.y);
+        parse_axis('Z', parking_position.z);
 
-void G27_no_parser(const G27Params &params) {
-    xyz_pos_t park_position { mapi::park_positions[params.where_to_park] };
-    xyz_bool_t do_axis = { { { true, true, true } } };
-
-    // If any park position was given, move only specified axes
-    if (!(isnan(params.park_position.x) && isnan(params.park_position.y) && isnan(params.park_position.z))) {
-        for (uint8_t i = 0; i < 3; i++) {
-            do_axis.pos[i] = !isnan(params.park_position.pos[i]);
-            park_position.pos[i] = do_axis.pos[i] ? params.park_position.pos[i] : current_position.pos[i];
+        // If no axis has been specified (comparing against a position with all axes unchanged)
+        if (parking_position == mapi::ParkingPosition {}) {
+            parking_position = mapi::park_positions[mapi::ParkPosition::park];
         }
     }
 
     // If not homed and only Z clearance is requested, od just that, otherwise home and then park.
     if (axes_need_homing(X_AXIS | Y_AXIS | Z_AXIS)) {
-        if (do_axis == xyz_bool_t { { { false, false, true } } } && params.z_action == mapi::ZAction::move_to_at_least) {
+        if (parking_position.x == mapi::ParkingPosition::unchanged && parking_position.y == mapi::ParkingPosition::unchanged && parking_position.z != mapi::ParkingPosition::unchanged && z_action == mapi::ZAction::move_to_at_least) {
             // Only Z axis is given in P=0 mode, do Z clearance
-            do_z_clearance(park_position.z);
+            do_z_clearance(std::get<float>(parking_position.z));
             return;
         }
     }
 
-    mapi::park_move_with_conditional_home(park_position, params.z_action);
+    mapi::home_if_needed_and_park(z_action, parking_position);
 }
 
 /** @}*/
-
-#endif // NOZZLE_PARK_FEATURE

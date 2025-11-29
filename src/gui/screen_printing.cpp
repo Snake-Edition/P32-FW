@@ -19,11 +19,17 @@
 #include <option/has_loadcell.h>
 #include <option/has_mmu2.h>
 #include <option/has_toolchanger.h>
+#include <buddy/unreachable.hpp>
+#include <utils/string_builder.hpp>
+
 #if HAS_MMU2()
     #include <feature/prusa/MMU2/mmu2_mk4.h>
     #include <window_msgbox.hpp>
     #include <mmu2/maintenance.hpp>
 #endif
+
+#include <feature/print_status_message/print_status_message_mgr.hpp>
+#include <feature/print_status_message/print_status_message_formatter_buddy.hpp>
 
 #include "Marlin/src/module/motion.h"
 
@@ -39,9 +45,6 @@
 
 using namespace marlin_server;
 
-void screen_printing_data_t::invalidate_print_state() {
-    state__readonly__use_change_print_state = printing_state_t::COUNT;
-}
 printing_state_t screen_printing_data_t::GetState() const {
     return state__readonly__use_change_print_state;
 }
@@ -55,7 +58,7 @@ static bool is_waiting_for_connect_set_ready() {
 }
 
 void screen_printing_data_t::tuneAction() {
-    if (buttons[ftrstd::to_underlying(BtnSocket::Left)].IsShadowed()) {
+    if (buttons[std::to_underlying(BtnSocket::Left)].IsShadowed()) {
         return;
     }
     switch (GetState()) {
@@ -77,7 +80,7 @@ void screen_printing_data_t::tuneAction() {
 }
 
 void screen_printing_data_t::pauseAction() {
-    if (buttons[ftrstd::to_underlying(BtnSocket::Middle)].IsShadowed()) {
+    if (buttons[std::to_underlying(BtnSocket::Middle)].IsShadowed()) {
         return;
     }
     switch (GetState()) {
@@ -104,7 +107,7 @@ void screen_printing_data_t::pauseAction() {
 }
 
 void screen_printing_data_t::stopAction() {
-    if (buttons[ftrstd::to_underlying(BtnSocket::Right)].IsShadowed()) {
+    if (buttons[std::to_underlying(BtnSocket::Right)].IsShadowed()) {
         return;
     }
     switch (GetState()) {
@@ -167,7 +170,7 @@ screen_printing_data_t::screen_printing_data_t()
 #if (HAS_LARGE_DISPLAY())
     , print_progress(this)
     , arrow_left(this, arrow_left_rect, arrow_left_res)
-    , rotating_circles(this, rotating_circles_rect, ftrstd::to_underlying(CurrentlyShowing::_count))
+    , rotating_circles(this, rotating_circles_rect, std::to_underlying(CurrentlyShowing::_count))
 #endif
 #if HAS_MINI_DISPLAY()
     , w_filename(this, Rect16(10, 33, 220, 29))
@@ -187,7 +190,7 @@ screen_printing_data_t::screen_printing_data_t()
     , message_timer(0)
     , stop_pressed(false)
     , waiting_for_abort(false)
-    , state__readonly__use_change_print_state(printing_state_t::COUNT)
+    , state__readonly__use_change_print_state(printing_state_t::INITIAL)
 #if HAS_MINI_DISPLAY()
     , time_end_format(PT_t::init)
     , message_popup(this, Rect16::Merge(std::array<Rect16, 4>({ w_time_label.GetRect(), w_time_value.GetRect(), w_etime_label.GetRect(), w_etime_value.GetRect() })), is_multiline::yes)
@@ -267,111 +270,157 @@ screen_printing_data_t::screen_printing_data_t()
 
 void screen_printing_data_t::windowEvent(window_t *sender, GUI_event_t event, void *param) {
     /// check stop clicked when MBL is running
-    printing_state_t p_state = GetState();
-    if (
-        stop_pressed
-        && waiting_for_abort
-        && marlin_client::get_command() != Cmd::G29
-        && (p_state == printing_state_t::ABORTING || p_state == printing_state_t::PAUSED)) {
-        marlin_client::print_abort();
-        waiting_for_abort = false;
-        return;
+    const printing_state_t p_state = GetState();
+
+    switch (event) {
+
+    case GUI_event_t::LOOP: {
+        if (
+            stop_pressed
+            && waiting_for_abort
+            && marlin_vars().gcode_command.get() != Cmd::G29
+            && (p_state == printing_state_t::ABORTING || p_state == printing_state_t::PAUSED)) {
+            marlin_client::print_abort();
+            waiting_for_abort = false;
+            break;
+        }
+
+        change_print_state();
+
+        /// -- Print time update loop
+        updateTimes();
+
+        /// -- close screen when print is done / stopped and USB media is removed
+        if (!marlin_vars().media_inserted && (p_state == printing_state_t::PRINTED || p_state == printing_state_t::STOPPED)) {
+            marlin_client::print_exit();
+            break;
+        }
+
+#if HAS_LARGE_DISPLAY()
+        if (p_state == printing_state_t::PRINTING) {
+            const auto &vars = marlin_vars();
+            const bool midprint = vars.logical_curr_pos[MARLIN_VAR_INDEX_Z] >= 1.0f;
+            const bool extruder_moved = (vars.logical_curr_pos[MARLIN_VAR_INDEX_E] - last_e_axis_position) > 0
+                && vars.logical_curr_pos[MARLIN_VAR_INDEX_E] > 0
+                && last_e_axis_position > 0; // Ignore negative movements and reset of E position (e.g. retraction)
+            if (print_progress.isPaused() && midprint && extruder_moved) {
+                print_progress.Resume();
+            } else if (print_progress.isPaused()) {
+                last_e_axis_position = vars.logical_curr_pos[MARLIN_VAR_INDEX_E];
+            }
+
+        } else if (p_state == printing_state_t::PRINTED && !shown_end_result) {
+            start_showing_end_result();
+        }
+#endif
+
+        // Update status message
+        {
+            const auto new_msg = print_status_message().current_message();
+            if (new_msg.message != current_message) {
+                decltype(message_text) new_text;
+                StringBuilder sb(new_text);
+                PrintStatusMessageFormatterBuddy::format(sb, new_msg.message);
+                if (strcmp(message_text.data(), new_text.data())) {
+                    strlcpy(message_text.data(), new_text.data(), message_text.size());
+                    message_popup.SetText(string_view_utf8::MakeRAM(message_text.data()));
+                    message_popup.Invalidate();
+                }
+
+                current_message = new_msg.message;
+                message_popup.set_visible(bool(new_msg));
+            }
+        }
+
+        const bool stoppedOrPrinted = (p_state == printing_state_t::STOPPED) || (p_state == printing_state_t::PRINTED);
+        set_remaining_time_visible(!message_popup.IsVisible() && !stoppedOrPrinted);
+#if HAS_MINI_DISPLAY()
+        // Hide time information when popup is visible [BFW-6677]
+        set_print_time_visible(!message_popup.IsVisible() && !stoppedOrPrinted);
+#elif HAS_LARGE_DISPLAY()
+        rotating_circles.set_visible(!stoppedOrPrinted);
+        [&] {
+            switch (p_state) {
+            case printing_state_t::PRINTED:
+                print_progress.Pause();
+                return;
+            case printing_state_t::STOPPED:
+                print_progress.StoppedMode();
+                return;
+            case printing_state_t::PRINTING:
+            case printing_state_t::PAUSED:
+            case printing_state_t::PAUSING:
+            case printing_state_t::RESUMING:
+            case printing_state_t::REHEATING:
+            case printing_state_t::ABORTING:
+            case printing_state_t::SKIPPABLE_OPERATION:
+            case printing_state_t::INITIAL:
+                print_progress.PrintingMode();
+                return;
+            }
+            BUDDY_UNREACHABLE();
+        }();
+#endif
+        break;
     }
 
-    change_print_state();
-
-    /// -- Print time update loop
-    updateTimes();
-
-    /// -- close screen when print is done / stopped and USB media is removed
-    if (!marlin_vars().media_inserted && (p_state == printing_state_t::PRINTED || p_state == printing_state_t::STOPPED)) {
-        marlin_client::print_exit();
-        return;
-    }
-
-    /// -- check when media is or isn't inserted
-    if (event == GUI_event_t::MEDIA) {
+    case GUI_event_t::MEDIA: {
         /// -- check for enable/disable resume button
         set_pause_icon_and_label();
+
+        break;
     }
-    if (event == GUI_event_t::HELD_RELEASED) {
+
+    case GUI_event_t::HELD_RELEASED:
         if (marlin_vars().logical_curr_pos[2 /* Z Axis */] <= 1.0f && p_state == printing_state_t::PRINTING) {
             open_live_adjust_z_screen();
         } else if (p_state == printing_state_t::PRINTED || p_state == printing_state_t::STOPPED) {
             open_move_z_screen();
         }
-        return;
-    }
+        break;
+
 #if HAS_LARGE_DISPLAY()
-    if (event == GUI_event_t::LOOP && p_state == printing_state_t::PRINTING) {
-        const auto &vars = marlin_vars();
-        const bool midprint = vars.logical_curr_pos[MARLIN_VAR_INDEX_Z] >= 1.0f;
-        const bool extruder_moved = (vars.logical_curr_pos[MARLIN_VAR_INDEX_E] - last_e_axis_position) > 0
-            && vars.logical_curr_pos[MARLIN_VAR_INDEX_E] > 0
-            && last_e_axis_position > 0; // Ignore negative movements and reset of E position (e.g. retraction)
-        if (print_progress.isPaused() && midprint && extruder_moved) {
-            print_progress.Resume();
-        } else if (print_progress.isPaused()) {
-            last_e_axis_position = vars.logical_curr_pos[MARLIN_VAR_INDEX_E];
+    case GUI_event_t::ENC_DN:
+        if (shown_end_result
+            && ((buttons[0].IsEnabled() && buttons[0].IsFocused()) || (!buttons[0].IsEnabled() && buttons[1].IsFocused()))) {
+            start_showing_end_result();
+            break;
         }
-    }
+        break;
 #endif
 
-    if (event == GUI_event_t::LOOP) {
-        if (message_popup.IsVisible() && ticks_diff(ticks_ms(), message_popup_close_time) > 0) {
-            message_popup.Hide();
-        }
-    }
-
-    if (p_state == printing_state_t::PRINTED || p_state == printing_state_t::STOPPED) {
-#if HAS_LARGE_DISPLAY()
-        if (p_state == printing_state_t::PRINTED) {
-            print_progress.Pause();
-        } else {
-            print_progress.StoppedMode();
-        }
-#endif
-        hide_time_information();
-    } else {
-#if HAS_LARGE_DISPLAY()
-        print_progress.PrintingMode();
-#endif
-        show_time_information();
-    }
-
-#if HAS_LARGE_DISPLAY()
-    if (shown_end_result && event == GUI_event_t::ENC_DN
-        && ((buttons[0].IsEnabled() && buttons[0].IsFocused()) || (!buttons[0].IsEnabled() && buttons[1].IsFocused()))) {
-        start_showing_end_result();
-        return;
-    }
-
-    if (p_state == printing_state_t::PRINTED && !shown_end_result) {
-        start_showing_end_result();
-        return;
-    }
-
-    // Touch swipe left/right toggles showing end result
-    if (event == GUI_event_t::TOUCH_SWIPE_LEFT || event == GUI_event_t::TOUCH_SWIPE_RIGHT) {
+#if HAS_TOUCH()
+    case GUI_event_t::TOUCH_SWIPE_LEFT:
+    case GUI_event_t::TOUCH_SWIPE_RIGHT:
+        // Touch swipe left/right toggles showing end result
         if (showing_end_result) {
             stop_showing_end_result();
         } else {
             start_showing_end_result();
         }
-        return;
+        break;
+
+    case GUI_event_t::TOUCH_CLICK:
+        // Clicking on the left arrow also shows end result
+        if (!showing_end_result && arrow_left_touch_rect.Contain(event_conversion_union { .pvoid = param }.point)) {
+            start_showing_end_result();
+        }
+        break;
+#endif
+
+#if HAS_LARGE_DISPLAY()
+    case GUI_event_t::CHILD_CHANGED:
+        if (showing_end_result) {
+            stop_showing_end_result();
+        }
+        break;
+#endif
+
+    default:
+        break;
     }
 
-    // Clicking on the left arrow also shows end result
-    if (!showing_end_result && event == GUI_event_t::TOUCH_CLICK && arrow_left_touch_rect.Contain(event_conversion_union { .pvoid = param }.point)) {
-        start_showing_end_result();
-        return;
-    }
-
-    if (showing_end_result && (event == GUI_event_t::CHILD_CHANGED)) {
-        stop_showing_end_result();
-        return;
-    }
-
+#if HAS_LARGE_DISPLAY()
     if (!showing_end_result) {
         ScreenPrintingModel::windowEvent(sender, event, param);
     }
@@ -395,7 +444,7 @@ void screen_printing_data_t::start_showing_end_result() {
     arrow_left.Hide();
     w_progress_txt.Hide();
 
-    hide_time_information(); // OK because currently we never show remaining time at the end
+    set_remaining_time_visible(false); // OK because currently we never show remaining time at the end
 
     // show end result
 
@@ -431,24 +480,56 @@ void screen_printing_data_t::hide_end_result_fields() {
 }
 #endif
 
-void screen_printing_data_t::show_time_information() {
-    w_etime_label.Show();
-    w_etime_value.Show();
-
-#if HAS_LARGE_DISPLAY()
-    rotating_circles.Show();
-#endif
+void screen_printing_data_t::set_remaining_time_visible(bool visible) {
+    w_etime_label.set_visible(visible);
+    w_etime_value.set_visible(visible);
     updateTimes(); // make sure the data is valid
 }
 
-void screen_printing_data_t::hide_time_information() {
-    w_etime_label.Hide();
-    w_etime_value.Hide();
+#if HAS_MINI_DISPLAY()
+void screen_printing_data_t::set_print_time_visible(bool visible) {
+    w_time_label.set_visible(visible);
+    w_time_value.set_visible(visible);
+    updateTimes(); // make sure the data is valid
+}
+#endif
 
 #if HAS_LARGE_DISPLAY()
-    rotating_circles.Hide();
-#endif
+bool screen_printing_data_t::update_validities() {
+    auto time_to_end = marlin_vars().time_to_end.get();
+    auto time_to_change = marlin_vars().time_to_pause.get();
+
+    bool changed = false;
+
+    auto update_validity = [&](CurrentlyShowing item, bool new_validity) {
+        if (currently_showing_valid[item].first != new_validity) {
+            currently_showing_valid[item].first = new_validity;
+            changed = true;
+        }
+    };
+
+    bool new_end_time_valid = (time_to_end != marlin_server::TIME_TO_END_INVALID) && (time_to_end <= 60 * 60 * 24 * 365);
+    bool new_remaining_time_valid = new_end_time_valid;
+    bool new_time_to_change_valid = (time_to_change != marlin_server::TIME_TO_END_INVALID);
+
+    update_validity(CurrentlyShowing::end_time, new_end_time_valid);
+    update_validity(CurrentlyShowing::remaining_time, new_remaining_time_valid);
+    update_validity(CurrentlyShowing::time_to_change, new_time_to_change_valid);
+
+    return changed;
 }
+
+size_t screen_printing_data_t::reindex_rotating_circles() {
+    size_t cnt = 0;
+    for (size_t i = 0; i < std::to_underlying(CurrentlyShowing::_count); ++i) {
+        if (currently_showing_valid[i].first) {
+            currently_showing_valid[i].second = cnt++;
+        }
+    }
+    return cnt;
+}
+
+#endif
 
 void screen_printing_data_t::updateTimes() {
 #if HAS_MINI_DISPLAY()
@@ -474,37 +555,44 @@ void screen_printing_data_t::updateTimes() {
         return;
     }
 
-    // Message popup is rendered over the times -> do not invalidate, do not compute
-    if (message_popup.IsVisible()) {
-        return;
-    }
-
     if (auto now = ticks_s(); now - last_update_time_s > rotation_time_s) {
         // do rotation
 
-        currently_showing = static_cast<CurrentlyShowing>(
-            (ftrstd::to_underlying(currently_showing) + 1) % ftrstd::to_underlying(CurrentlyShowing::_count));
+        // Some validity changed, update the indexing of fields
+        if (update_validities()) {
+            valid_count = reindex_rotating_circles();
+            rotating_circles.set_max_circles(valid_count);
+        }
 
-        rotating_circles.set_index(ftrstd::to_underlying(currently_showing));
+        if (valid_count == 0) { // Should never happen since we never invalidate print time, just to make sure
+            this->Hide();
+            return;
+        } else if (!this->IsVisible()) {
+            this->Show();
+        }
+
+        // find next valid item
+        auto curr = this->currently_showing;
+        do {
+            curr = static_cast<CurrentlyShowing>(
+                (std::to_underlying(curr) + 1) % std::to_underlying(CurrentlyShowing::_count));
+        } while (!currently_showing_valid[curr].first);
+
+        this->currently_showing = curr;
+
+        rotating_circles.set_index(currently_showing_valid[curr].second);
 
         last_update_time_s = now;
     }
 
-    bool value_available = true;
     auto time_to_end = marlin_vars().time_to_end.get();
     auto time_to_change = marlin_vars().time_to_pause.get();
-
-    if ((currently_showing == CurrentlyShowing::end_time
-            || currently_showing == CurrentlyShowing::remaining_time)
-        && (time_to_end == marlin_server::TIME_TO_END_INVALID || time_to_end > 60 * 60 * 24 * 365)) {
-        value_available = false;
-    }
 
     switch (currently_showing) {
 
     case CurrentlyShowing::end_time:
         w_etime_label.SetText(_(PrintTime::EN_STR_TIMESTAMP));
-        value_available &= PrintTime::print_end_time(time_to_end, w_etime_value_buffer);
+        PrintTime::print_end_time(time_to_end, w_etime_value_buffer);
         break;
 
     case CurrentlyShowing::remaining_time:
@@ -519,11 +607,7 @@ void screen_printing_data_t::updateTimes() {
 
     case CurrentlyShowing::time_to_change:
         w_etime_label.SetText(_("Next change in"));
-        if (time_to_change == marlin_server::TIME_TO_END_INVALID) {
-            value_available = false;
-        } else {
-            PrintTime::print_formatted_duration(time_to_change, w_etime_value_buffer);
-        }
+        PrintTime::print_formatted_duration(time_to_change, w_etime_value_buffer);
         break;
     case CurrentlyShowing::_count:
         assert(false); // invalid value, should never happen
@@ -536,13 +620,8 @@ void screen_printing_data_t::updateTimes() {
         strlcat(w_etime_value_buffer.data(), "?", w_etime_value_buffer.size());
     }
 
-    if (value_available) {
-        w_etime_value.SetText(string_view_utf8::MakeRAM(w_etime_value_buffer.data()));
-        w_etime_value.SetTextColor(GuiDefaults::COLOR_VALUE_VALID);
-    } else {
-        w_etime_value.SetText(_("N/A"));
-        w_etime_value.SetTextColor(GuiDefaults::COLOR_VALUE_INVALID);
-    }
+    w_etime_value.SetText(string_view_utf8::MakeRAM(w_etime_value_buffer.data()));
+    w_etime_value.SetTextColor(GuiDefaults::COLOR_VALUE_VALID);
 
     w_etime_value.Invalidate(); // just to make sure
 
@@ -557,13 +636,9 @@ void screen_printing_data_t::screen_printing_reprint() {
 }
 
 void screen_printing_data_t::set_pause_icon_and_label() {
-    // todo it is static, because menu tune is not dialog
-    // switch (state__readonly__use_change_print_state)
     switch (GetState()) {
-    case printing_state_t::COUNT:
     case printing_state_t::INITIAL:
     case printing_state_t::PRINTING:
-    case printing_state_t::MBL_FAILED:
         EnableButton(BtnSocket::Middle);
         SetButtonIconAndLabel(BtnSocket::Middle, BtnRes::Pause, LabelRes::Pause);
         break;
@@ -587,7 +662,6 @@ void screen_printing_data_t::set_pause_icon_and_label() {
         SetButtonIconAndLabel(BtnSocket::Middle, BtnRes::Resume, LabelRes::Resuming);
         break;
     case printing_state_t::REHEATING:
-    case printing_state_t::REHEATING_DONE:
         DisableButton(BtnSocket::Middle);
         SetButtonIconAndLabel(BtnSocket::Middle, BtnRes::Resume, LabelRes::Reheating);
         break;
@@ -605,7 +679,6 @@ void screen_printing_data_t::set_pause_icon_and_label() {
     case printing_state_t::PAUSING:
         header.SetText(_("PAUSING ..."));
         break;
-    case printing_state_t::MBL_FAILED:
     case printing_state_t::PAUSED:
         header.SetText(_("PAUSED"));
         break;
@@ -677,93 +750,90 @@ void screen_printing_data_t::set_stop_icon_and_label() {
 }
 
 void screen_printing_data_t::change_print_state() {
-    printing_state_t st = printing_state_t::COUNT;
-
-    switch (marlin_vars().print_state) {
-    case State::Idle:
-    case State::WaitGui:
-    case State::PrintPreviewInit:
-    case State::PrintPreviewImage:
-    case State::PrintPreviewConfirmed:
-    case State::PrintPreviewQuestions:
+    printing_state_t st = [&] {
+        switch (marlin_vars().print_state) {
+        case State::Idle:
+        case State::WaitGui:
+        case State::PrintPreviewInit:
+        case State::PrintPreviewImage:
+        case State::PrintPreviewConfirmed:
+        case State::PrintPreviewQuestions:
 #if HAS_TOOLCHANGER() || HAS_MMU2()
-    case State::PrintPreviewToolsMapping:
+        case State::PrintPreviewToolsMapping:
 #endif
-    case State::PrintInit:
-        st = printing_state_t::INITIAL;
-        break;
-    case State::Printing:
-        st = printing_state_t::PRINTING;
-        break;
-    case State::PowerPanic_AwaitingResume:
-    case State::Paused:
-        // stop_pressed = false;
-        st = printing_state_t::PAUSED;
-        break;
-    case State::Pausing_Begin:
-    case State::Pausing_Failed_Code:
-    case State::Pausing_WaitIdle:
-    case State::Pausing_ParkHead:
-        st = printing_state_t::PAUSING;
+        case State::PrintInit:
+            return printing_state_t::INITIAL;
+        case State::Printing:
+            return printing_state_t::PRINTING;
+        case State::PowerPanic_AwaitingResume:
+        case State::MediaErrorRecovery_BufferData:
+        case State::Paused:
+            // stop_pressed = false;
+            return printing_state_t::PAUSED;
+        case State::Pausing_Begin:
+        case State::Pausing_Failed_Code:
+        case State::Pausing_WaitIdle:
+        case State::Pausing_ParkHead:
 // When print is paused, progress screen needs to reinit it's thumbnail file handler
 // because USB removal error crashes file handler access. Progress screen should not be enabled during pause -> reinit on EVERY pause
 #if HAS_LARGE_DISPLAY()
-        print_progress.Pause();
+            print_progress.Pause();
 #endif
-        break;
-    case State::Resuming_Reheating:
-        stop_pressed = false;
-        st = printing_state_t::REHEATING;
-        break;
-    case State::Resuming_Begin:
-    case State::Resuming_UnparkHead_XY:
-    case State::Resuming_UnparkHead_ZE:
-    case State::CrashRecovery_Begin:
-    case State::CrashRecovery_Retracting:
-    case State::CrashRecovery_Lifting:
-    case State::CrashRecovery_ToolchangePowerPanic:
-    case State::CrashRecovery_XY_Measure:
+            return printing_state_t::PAUSING;
+        case State::Resuming_Reheating:
+            stop_pressed = false;
+            return printing_state_t::REHEATING;
+        case State::Resuming_BufferData:
+        case State::Resuming_Begin:
+        case State::Resuming_UnparkHead_XY:
+        case State::Resuming_UnparkHead_ZE:
+        case State::CrashRecovery_Begin:
+        case State::CrashRecovery_Retracting:
+        case State::CrashRecovery_Lifting:
+        case State::CrashRecovery_ToolchangePowerPanic:
+        case State::CrashRecovery_XY_Measure:
 #if HAS_TOOLCHANGER()
-    case State::CrashRecovery_Tool_Pickup:
+        case State::CrashRecovery_Tool_Pickup:
 #endif
-    case State::CrashRecovery_XY_HOME:
-    case State::CrashRecovery_HOMEFAIL:
-    case State::CrashRecovery_Axis_NOK:
-    case State::CrashRecovery_Repeated_Crash:
-    case State::PowerPanic_Resume:
-        stop_pressed = false;
-        st = printing_state_t::RESUMING;
+        case State::CrashRecovery_XY_HOME:
+        case State::CrashRecovery_HOMEFAIL:
+        case State::CrashRecovery_Axis_NOK:
+        case State::CrashRecovery_Repeated_Crash:
+        case State::PowerPanic_Resume:
+            stop_pressed = false;
 #if HAS_LARGE_DISPLAY()
-        print_progress.Resume();
+            print_progress.Resume();
 #endif
-        break;
-    case State::Aborting_Begin:
-    case State::Aborting_WaitIdle:
-    case State::Aborting_UnloadFilament:
-    case State::Aborting_ParkHead:
-    case State::Aborting_Preview:
-        stop_pressed = false;
-        st = printing_state_t::ABORTING;
-        break;
-    case State::Finishing_WaitIdle:
-    case State::Finishing_UnloadFilament:
-    case State::Finishing_ParkHead:
-        st = printing_state_t::PRINTING;
-        break;
-    case State::Aborted:
-        stop_pressed = false;
-        st = printing_state_t::STOPPED;
-        break;
-    case State::Finished:
-    case State::Exit:
-        st = printing_state_t::PRINTED;
-        break;
-    case State::PowerPanic_acFault:
-    case State::SerialPrintInit:
-        // this state is never reached
-        __builtin_unreachable();
-        return;
-    }
+            return printing_state_t::RESUMING;
+        case State::Aborting_Begin:
+        case State::Aborting_WaitIdle:
+        case State::Aborting_UnloadFilament:
+        case State::Aborting_ParkHead:
+        case State::Aborting_Preview:
+            stop_pressed = false;
+            return printing_state_t::ABORTING;
+        case State::Finishing_WaitIdle:
+        case State::Finishing_UnloadFilament:
+        case State::Finishing_ParkHead:
+            return printing_state_t::PRINTING;
+        case State::Aborted:
+            stop_pressed = false;
+            return printing_state_t::STOPPED;
+        case State::Finished:
+        case State::Exit:
+            return printing_state_t::PRINTED;
+        case State::PowerPanic_acFault:
+        case State::SerialPrintInit:
+            // It is questionable in this case if it is really printing at this
+            // point. But at least in case of power panic, it _can_ happen. It
+            // won't show on the screen, but we don't want to BSOD.
+            //
+            // In that case, the display is turned off, but the GUI thread
+            // still runs (even though it doesn't show anywhere).
+            return printing_state_t::PRINTING;
+        }
+        BUDDY_UNREACHABLE();
+    }();
     if (stop_pressed) {
         st = printing_state_t::ABORTING;
     }
@@ -779,15 +849,4 @@ void screen_printing_data_t::change_print_state() {
     if (st == printing_state_t::PRINTED || st == printing_state_t::STOPPED || st == printing_state_t::PAUSED) {
         Odometer_s::instance().force_to_eeprom();
     }
-}
-
-void screen_printing_data_t::on_message(const char *msg) {
-    if (strcmp(msg, message_buffer.data()) != 0) {
-        strlcpy(message_buffer.data(), msg, message_buffer.size());
-        message_popup.SetText(string_view_utf8::MakeRAM(message_buffer.data()));
-        message_popup.Invalidate();
-    }
-
-    message_popup.set_visible(true);
-    message_popup_close_time = ticks_ms() + POPUP_MSG_DUR_MS;
 }

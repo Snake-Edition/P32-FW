@@ -21,8 +21,6 @@ enum class LogicalFilamentSensor : uint8_t {
     /// The second runout filament sensor - the one closer to the extruder
     /// XL,MK4+MMU: extruder sensor | OTHER: none
     secondary_runout,
-    /// Filament sensor that is used to detect autoload
-    autoload,
 };
 
 static constexpr size_t logical_filament_sensor_count = 5;
@@ -31,10 +29,10 @@ struct LogicalFilamentSensors {
     std::array<std::atomic<IFSensor *>, logical_filament_sensor_count> array = { nullptr };
 
     inline auto &operator[](LogicalFilamentSensor fs) {
-        return array.at(ftrstd::to_underlying(fs));
+        return array.at(std::to_underlying(fs));
     }
     inline IFSensor *operator[](LogicalFilamentSensor fs) const {
-        return array.at(ftrstd::to_underlying(fs));
+        return array.at(std::to_underlying(fs));
     }
 };
 
@@ -45,9 +43,9 @@ struct LogicalFilamentSensorStates {
     std::array<State, logical_filament_sensor_count> array = { init_val };
 
     inline auto &operator[](LogicalFilamentSensor fs) {
-        return array.at(ftrstd::to_underlying(fs));
+        return array.at(std::to_underlying(fs));
     }
     inline const auto &operator[](LogicalFilamentSensor fs) const {
-        return array.at(ftrstd::to_underlying(fs));
+        return array.at(std::to_underlying(fs));
     }
 };

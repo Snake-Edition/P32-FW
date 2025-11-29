@@ -14,11 +14,19 @@
 #if XL_ENCLOSURE_SUPPORT()
     #include <xl_enclosure.hpp>
 #endif
-#if PRINTER_IS_PRUSA_COREONE() || defined(UNITTESTS)
+
+#include <option/xbuddy_extension_variant_standard.h>
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     #include <feature/chamber/chamber.hpp>
     #include <feature/xbuddy_extension/xbuddy_extension.hpp>
     #include <feature/xbuddy_extension/cooling.hpp>
 #endif
+
+#include <option/has_chamber_filtration_api.h>
+#if HAS_CHAMBER_FILTRATION_API()
+    #include <feature/chamber_filtration/chamber_filtration.hpp>
+#endif
+
 #include <alloca.h>
 #include <algorithm>
 #include <cassert>
@@ -31,7 +39,7 @@
 
 #include <option/has_side_leds.h>
 #if HAS_SIDE_LEDS() || defined(UNITTESTS)
-    #include <leds/side_strip_control.hpp>
+    #include <leds/side_strip_handler.hpp>
 #endif
 
 using http::HeaderOut;
@@ -76,15 +84,13 @@ namespace {
     //
     // All timestamps and durations are in milliseconds.
 
-    // First retry after 100 ms.
-    const constexpr Duration COOLDOWN_BASE = 100;
-    // Don't do retries less often than once a minute.
-    const constexpr Duration COOLDOWN_MAX = 1000 * 60;
     // Don't send telemetry more often than this even if things change.
     const constexpr Duration TELEMETRY_INTERVAL_MIN = 750;
 #if WEBSOCKET()
-    // Max of 2 minutes of telemetry silence.
-    const constexpr Duration TELEMETRY_INTERVAL_LONG = 2 * 60 * 1000;
+    // ~~~Max of 2 minutes of telemetry silence.~~~
+    //
+    // Switching to 4 seconds for expreminent too.
+    const constexpr Duration TELEMETRY_INTERVAL_LONG = 1000 * 4;
 #else
     // Telemetry every 4 seconds. We may want to have something more clever later on.
     const constexpr Duration TELEMETRY_INTERVAL_LONG = 1000 * 4;
@@ -203,7 +209,7 @@ namespace {
 
         auto request = Download::Request(download.hash, download.team_id, download.orig_size);
 
-        return Transfer::begin(dpath, request);
+        return Transfer::begin(dpath, std::move(request));
     }
 
     Transfer::BeginResult init_transfer(const Printer::Config &config, const StartEncryptedDownload &download) {
@@ -227,7 +233,7 @@ namespace {
 
         auto request = Download::Request(host, port, path, std::move(encryption));
 
-        return Transfer::begin(dpath, request);
+        return Transfer::begin(dpath, std::move(request));
     }
 
     bool command_is_error_whitelisted(const Command &command) {
@@ -323,9 +329,13 @@ void Planner::reset() {
     cancellable_objects.mark_clean();
     last_telemetry = nullopt;
     telemetry_changes.mark_dirty();
-    cooldown = nullopt;
+    cooldown.reset();
     perform_cooldown = false;
     failed_attempts = 0;
+    // Better be careful about ignoring a retransmit after this. We may be
+    // getting it because the server didn't get our answer (the service we've
+    // connected crashed, or it got lost, etc).
+    last_command_id = nullopt;
 }
 
 void Planner::reset_telemetry() {
@@ -406,11 +416,22 @@ Action Planner::next_action(SharedBuffer &buffer, http::Connection *wake_on_read
 
     if (perform_cooldown) {
         perform_cooldown = false;
-        assert(cooldown.has_value());
-        return sleep(*cooldown, nullptr, true);
+        assert(cooldown.get().has_value());
+        return sleep(*cooldown.get(), nullptr, true);
     }
 
     if (planned_event.has_value()) {
+        // Update local hashes for the events that depend on them, so we don't generate them again unnecessarily.
+        switch (planned_event->type) {
+        case EventType::Info:
+            info_changes.set_hash(printer.info_fingerprint());
+            break;
+        case EventType::StateChanged:
+            state_info.set_hash(printer.params().state_fingerprint());
+            break;
+        default:
+            break;
+        }
         // We don't take it out yet. Only after it's successfuly sent.
         return *planned_event;
     }
@@ -571,16 +592,18 @@ void Planner::action_done(ActionResult result) {
                 EventType::Info,
             };
             last_success = nullopt;
+            // Similar reasons as within Planner::reset()
+            last_command_id = nullopt;
         }
 
         // Failed to talk to the server. Retry after a while (with a back-off), but otherwise keep stuff the same.
-        cooldown = min(COOLDOWN_MAX, cooldown.value_or(COOLDOWN_BASE / 2) * 2);
+        cooldown.fail();
         perform_cooldown = true;
     };
 
     auto reset_backoff = [&]() {
         perform_cooldown = false;
-        cooldown = nullopt;
+        cooldown.reset();
     };
 
     auto cleanups = [&]() {
@@ -636,6 +659,9 @@ void Planner::action_done(ActionResult result) {
             // the data), so avoid some kind of infinite loop/blocked state.
             if (planned_event.has_value() && planned_event->type != EventType::Info) {
                 cleanups();
+                // We have *failed* to deliver the answer to that, so don't
+                // assume the command is handled.
+                last_command_id = nullopt;
             }
             failed_attempts = 0;
         }
@@ -664,11 +690,7 @@ void Planner::command(const Command &command, const ProcessingOtherCommand &) {
 void Planner::command(const Command &command, const Gcode &gcode) {
     background_command = BackgroundCommand {
         command.id,
-        BackgroundGcode {
-            gcode.gcode,
-            gcode.size,
-            0,
-        },
+        BackgroundGcodeContent(gcode.gcode, gcode.size),
     };
     planned_event = Event { EventType::Accepted, command.id };
 }
@@ -747,7 +769,7 @@ void Planner::command(const Command &command, const SendTransferInfo &) {
 }
 
 void Planner::command(const Command &command, const SetPrinterReady &) {
-    auto result = printer.set_ready(true) ? EventType::Finished : EventType::Rejected;
+    auto result = printer.set_ready(true) ? EventType::StateChanged : EventType::Rejected;
     const char *reason = (result == EventType::Rejected) ? "Can't set ready now" : nullptr;
     planned_event = Event { result, command.id, nullopt, nullopt, nullopt, reason };
 }
@@ -798,6 +820,28 @@ void Planner::handle_transfer_result(const Command &command, Transfer::BeginResu
         }
     },
         result);
+}
+
+void Planner::handle_cancel_object_command(const Command &command, uint16_t object_id, bool set_cancelled) {
+#if HAS_CANCEL_OBJECT()
+    printer.set_object_cancelled(object_id, set_cancelled);
+    // Reset the hash to the current (modified) cancel mask.
+    // We don't need to do .renew on the printer, the printer.set_object_cancelled is synchronous (at least for now)
+    cancellable_objects.set_hash(printer.cancelable_fingerprint());
+    // We confirm the command by sending the current cancellable state
+    // (even if it didn't change by this modification - like if it was already canceled, etc)
+    planned_event = Event {
+        EventType::CancelableChanged,
+        command.id,
+    };
+
+#else
+    planned_event = Event {
+        EventType::Rejected,
+        command.id,
+    };
+    planned_event->reason = "Not supported on this printer type";
+#endif
 }
 
 void Planner::command(const Command &command, const StartInlineDownload &download) {
@@ -943,15 +987,15 @@ void Planner::command(const Command &command, const SetValue &params) {
     case connect_client::PropertyName::HostName:
         err = set_hostname(reinterpret_cast<const char *>(get<SharedBorrow>(params.value)->data()));
         break;
-#if XL_ENCLOSURE_SUPPORT()
+#if XL_ENCLOSURE_SUPPORT() && HAS_CHAMBER_FILTRATION_API()
     case connect_client::PropertyName::EnclosureEnabled:
         xl_enclosure.setEnabled(get<bool>(params.value));
         break;
     case connect_client::PropertyName::EnclosurePrintingFiltration:
-        xl_enclosure.setPrintFiltration(get<bool>(params.value));
+        config_store().chamber_print_filtration_enable.set(get<bool>(params.value));
         break;
     case connect_client::PropertyName::EnclosurePostPrint:
-        xl_enclosure.setPostPrintFiltration(get<bool>(params.value));
+        config_store().chamber_post_print_filtration_enable.set(get<bool>(params.value));
         break;
     case connect_client::PropertyName::EnclosurePostPrintFiltrationTime: {
         // we recieve it in seconds, but this function expects minutes
@@ -959,8 +1003,8 @@ void Planner::command(const Command &command, const SetValue &params) {
         uint32_t minutes = raw_value / 60;
         if (raw_value % 60 != 0) {
             err = "Value should be whole minutes";
-        } else if (minutes >= 1 && minutes <= 10) {
-            xl_enclosure.setPostPrintFiltrationDuration(minutes);
+        } else if (minutes >= 1 && minutes <= buddy::ChamberFiltration::max_post_print_filtration_time_min) {
+            config_store().chamber_post_print_filtration_duration_min.set(minutes);
         } else {
             err = "Value out of range";
         }
@@ -982,7 +1026,7 @@ void Planner::command(const Command &command, const SetValue &params) {
             slot.nozzle_diameter = get<float>(params.value);
         });
         break;
-#if PRINTER_IS_PRUSA_COREONE() || defined(UNITTESTS)
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     case connect_client::PropertyName::ChamberTargetTemp: {
         auto target_temp = get<uint32_t>(params.value);
         buddy::chamber().set_target_temperature(target_temp == connect_client::Printer::ChamberInfo::target_temp_unset ? nullopt : std::make_optional(target_temp));
@@ -999,8 +1043,8 @@ void Planner::command(const Command &command, const SetValue &params) {
 #endif
 #if HAS_SIDE_LEDS() || defined(UNITTESTS)
     case connect_client::PropertyName::ChamberLedIntensity:
-        leds::side_strip_control.set_max_brightness(static_cast<uint16_t>(get<int8_t>(params.value)) * 255 / 100);
-        leds::side_strip_control.ActivityPing();
+        leds::SideStripHandler::instance().set_max_brightness(static_cast<uint8_t>(get<int8_t>(params.value)) * 255 / 100);
+        leds::SideStripHandler::instance().activity_ping();
         break;
 #endif
     }
@@ -1011,49 +1055,13 @@ void Planner::command(const Command &command, const SetValue &params) {
     }
 }
 
-#if ENABLED(CANCEL_OBJECTS)
 void Planner::command(const Command &command, const CancelObject &params) {
-    printer.cancel_object(params.id);
-    // Reset the hash to the current (modified) cancel mask.
-    // We don't need to do .renew on the printer, the marlin vars are propagated "instantly"
-    cancellable_objects.set_hash(printer.cancelable_fingerprint());
-    // We confirm the command by sending the current cancellable state
-    // (even if it didn't change by this modification - like if it was already canceled, etc)
-    planned_event = Event {
-        EventType::CancelableChanged,
-        command.id,
-    };
+    handle_cancel_object_command(command, params.id, true);
 }
 
 void Planner::command(const Command &command, const UncancelObject &params) {
-    printer.uncancel_object(params.id);
-    // Reset the hash to the current (modified) cancel mask.
-    // We don't need to do .renew on the printer, the marlin vars are propagated "instantly"
-    cancellable_objects.set_hash(printer.cancelable_fingerprint());
-    // We confirm the command by sending the current cancellable state
-    // (even if it didn't change by this modification - like if it was already canceled, etc)
-    planned_event = Event {
-        EventType::CancelableChanged,
-        command.id,
-    };
+    handle_cancel_object_command(command, params.id, false);
 }
-#else
-void Planner::command(const Command &command, const CancelObject &) {
-    planned_event = Event {
-        EventType::Rejected,
-        command.id,
-    };
-    planned_event->reason = "Not supported on this printer type";
-}
-
-void Planner::command(const Command &command, const UncancelObject &) {
-    planned_event = Event {
-        EventType::Rejected,
-        command.id,
-    };
-    planned_event->reason = "Not supported on this printer type";
-}
-#endif
 
 // FIXME: Handle the case when we are resent a command we are already
 // processing for a while. In that case, we want to re-Accept it. Nevertheless,
@@ -1083,6 +1091,17 @@ void Planner::command(Command command) {
         };
         return;
     }
+
+    if (last_command_id == command.id) {
+        planned_event = Event {
+            EventType::Rejected,
+            command.id,
+        };
+        planned_event->reason = "Won't execute the same command multiple times";
+        return;
+    }
+
+    last_command_id = command.id;
 
     visit([&](const auto &arg) {
         this->command(command, arg);

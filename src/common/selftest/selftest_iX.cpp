@@ -123,11 +123,6 @@ static constexpr HeaterConfig_t Config_HeaterNozzle[] = {
         .heater_full_load_max_W = 50,
         .pwm_100percent_equivalent_value = 127,
         .min_pwm_to_measure = 26,
-        .hotend_type_temp_offsets = EnumArray<HotendType, int8_t, HotendType::_cnt> {
-            { HotendType::stock, 0 },
-            { HotendType::stock_with_sock, -20 },
-            { HotendType::e3d_revo, -127 }, // Not supported on this printer
-        },
     }
 };
 
@@ -364,9 +359,7 @@ void CSelftest::phaseDidSelftestPass() {
 
     // dont run wizard again
     if (SelftestResult_Passed_All(m_result)) {
-        auto &store = config_store();
-        auto transaction = store.get_backend().transaction_guard();
-        store.run_selftest.set(false);
+        config_store().run_selftest.set(false);
     }
 }
 
@@ -376,11 +369,7 @@ bool CSelftest::phaseWaitUser(PhasesSelftest phase) {
         Abort();
     }
     if (response == Response::Ignore) {
-        {
-            auto &store = config_store();
-            auto transaction = store.get_backend().transaction_guard();
-            store.run_selftest.set(false);
-        }
+        config_store().run_selftest.set(false);
         Abort();
     }
     return response == Response::_none;
@@ -472,6 +461,7 @@ void CSelftest::next() {
 
     // current state cannot be run
     // call recursively: it is fine, this function is tiny and there will be few iterations
+    marlin_server::set_warning(WarningType::ActionSelftestRequired);
     next();
 }
 

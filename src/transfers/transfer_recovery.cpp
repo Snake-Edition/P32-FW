@@ -59,7 +59,7 @@ struct SerializedTransfer {
     uint64_t team_id = 0;
     uint32_t orig_size = 0;
 
-    uint32_t transfer_id;
+    TransferId transfer_id;
 
     // encryption info
     std::optional<Download::EncryptionInfo> encryption_info;
@@ -332,18 +332,25 @@ std::optional<Download::Request> Transfer::RestoredTransfer::get_download_reques
         return this->get_data_ptr(offset, size);
     };
 
+    // option just to allow initializing in if-else.
+    //
+    // The ? : operator got auto-formatted to unreadable mess :-(. Expecting
+    // the compiler to optimize the optional out in practice.
+    std::optional<Download::Request> req;
     if (transfer.is_inline) {
-        return Download::Request(
+        req = Download::Request(
             transfer.url_path_or_hash.deserialize(get_data_ptr),
             transfer.team_id,
             transfer.orig_size);
     } else {
-        return Download::Request(
+        req = Download::Request(
             transfer.host.deserialize(get_data_ptr),
             transfer.port,
             transfer.url_path_or_hash.deserialize(get_data_ptr),
             transfer.encryption_info.has_value() ? std::make_unique<Download::EncryptionInfo>(*transfer.encryption_info) : nullptr);
     }
+    req->set_transfer_id(transfer.transfer_id);
+    return *req;
 }
 
 Transfer::RecoverySearchResult Transfer::search_transfer_for_recovery(Path &path) {

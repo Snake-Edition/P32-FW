@@ -2,6 +2,7 @@
 #include "printer_common.hpp"
 #include <config_store/store_instance.hpp>
 #include <common/random.h>
+#include <common/sys.hpp>
 
 using printer_state::DeviceState;
 using printer_state::Dialog;
@@ -114,22 +115,15 @@ uint32_t ErrorPrinter::cancelable_fingerprint() const {
     return 0;
 }
 
-#if ENABLED(CANCEL_OBJECTS)
-void ErrorPrinter::cancel_object(uint8_t) {}
-void ErrorPrinter::uncancel_object(uint8_t) {}
-
-const char *ErrorPrinter::get_cancel_object_name(char *buffer, [[maybe_unused]] size_t size, size_t) const {
-    assert(size > 0);
-    *buffer = '\0';
-    return buffer;
-}
+#if HAS_CANCEL_OBJECT()
+void ErrorPrinter::set_object_cancelled(uint16_t, bool) {}
 #endif
 
 Printer::Config ErrorPrinter::load_config() {
     return load_eeprom_config();
 }
 
-const char *ErrorPrinter::dialog_action(uint32_t, Response) {
+const char *ErrorPrinter::dialog_action(printer_state::DialogId, Response) {
     return "Click not allowed.";
 }
 
@@ -138,7 +132,7 @@ std::optional<ErrorPrinter::FinishedJobResult> ErrorPrinter::get_prior_job_resul
 }
 
 void ErrorPrinter::reset_printer() {
-    NVIC_SystemReset();
+    sys_reset();
 }
 
 void ErrorPrinter::set_slot_info(size_t, const SlotInfo &) {

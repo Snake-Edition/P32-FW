@@ -45,7 +45,7 @@ public:
         uint16_t stringIndex = hash_table.find((const uint8_t *)key);
         if (stringIndex == 0xffff) {
             // if the translated string was not found, return the source string (assuming it is somewhere in memory, i.e. CPUFLASH or RAM)
-            return string_view_utf8::MakeCPUFLASH((const uint8_t *)key);
+            return string_view_utf8::MakeCPUFLASH(key);
         }
         const uint8_t *utf8raw = StringTableAt(stringIndex);
         return string_view_utf8::MakeCPUFLASH(utf8raw);

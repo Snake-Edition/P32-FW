@@ -97,6 +97,7 @@ public:
         struct Inline {
             const char *hash;
             uint64_t team_id;
+            TransferId transfer_id;
             uint32_t orig_size;
         };
 
@@ -113,6 +114,7 @@ public:
             : data(Inline {
                 hash,
                 team_id,
+                0, // Will be filled in later.
                 orig_size,
             }) {}
 
@@ -123,6 +125,8 @@ public:
                 return get<Inline>(data).orig_size;
             }
         }
+
+        void set_transfer_id(TransferId id);
     };
 
 private:
@@ -134,6 +138,7 @@ private:
     struct Inline {
         uint64_t team_id;
         uint32_t file_id;
+        TransferId transfer_id;
         uint32_t start;
         // One past end
         uint32_t end;
@@ -175,6 +180,8 @@ public:
     PartialFile::Ptr get_partial_file() const;
 
     struct InlineRequestDetails {
+        // The transfer it belongs to.
+        TransferId transfer_id;
         uint64_t team_id;
         // The InlineRequest is just taken and rendered. It's fine to point
         // into the Download, as that can be removed only in connect's Sleep,

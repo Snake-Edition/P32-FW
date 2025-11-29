@@ -27,8 +27,8 @@
  *
  *#### Example
  *
- *    M300 P440 P2000 V1   ; Play 440Hz sound for 2000 ms / 2 seconds with 100% volume
- *    M300 P440 P2000 V0.5 ; Play 440Hz sound for 2000 ms / 2 seconds with 50% volume
+ *    M300 S440 P2000 V1   ; Play 440Hz sound for 2000 ms / 2 seconds with 100% volume
+ *    M300 S440 P2000 V0.5 ; Play 440Hz sound for 2000 ms / 2 seconds with 50% volume
  */
 void PrusaGcodeSuite::M300() {
     uint16_t const frequency = parser.ushortval('S', 100);

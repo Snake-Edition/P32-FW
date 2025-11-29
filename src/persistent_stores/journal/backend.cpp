@@ -1,9 +1,18 @@
 #include "backend.hpp"
-#include "timing.h"
-#include "assert.h"
-#include <memory>
-#include <utility>
-#include <ranges>
+#include <cassert>
+#include <crc32.h>
+#include <algorithm>
+#include <bsod.h>
+
+#ifndef UNITTESTS
+    #include <metric.h>
+
+/// Emitted for each item write (outside of migrations), value is the hash ID of the written item
+METRIC_DEF(metric_store_id, "store_id", METRIC_VALUE_INTEGER, 0, METRIC_ENABLED);
+
+/// Emitted for ecah migration, value is the number of bytes written due to the migration
+METRIC_DEF(metric_store_migration, "store_migration", METRIC_VALUE_INTEGER, 0, METRIC_ENABLED);
+#endif
 
 namespace journal {
 std::unique_lock<freertos::Mutex> Backend::lock() {
@@ -442,26 +451,46 @@ Backend::Address Backend::get_next_bank_start_address() const {
     }
 }
 void Backend::migrate_bank() {
+#ifndef UNITTESTS
+    const auto start_bytes_written = storage.bytes_written();
+#endif
+
     current_bank_id++;
+    bank_migration_count_.fetch_add(1, std::memory_order_relaxed);
     init_bank(get_next_bank(), current_bank_id);
 
     {
         auto guard = bank_migration_guard();
         dump_callback();
     }
+
+#ifndef UNITTESTS
+    metric_record_integer(&metric_store_migration, storage.bytes_written() - start_bytes_written);
+#endif
 }
 void Backend::transaction_start() {
+    auto lock_guard = lock();
     if (transaction.has_value()) {
-        bsod("Starting transaction while transaction is running");
+        if (transaction->type == Transaction::Type::transaction) {
+            transaction->ref_count++;
+        } else {
+            bsod("Starting transaction while other-type transaction is running");
+        }
+    } else {
+        transaction.emplace(Transaction::Type::transaction, *this);
     }
-    transaction.emplace(Transaction::Type::transaction, *this);
 }
 
 void Backend::transaction_end() {
-    if (!transaction.has_value()) {
-        bsod("Transaction is not in progress");
+    auto lock_guard = lock();
+    if (!transaction.has_value() || transaction->type != Transaction::Type::transaction) {
+        bsod("This transaction is not in progress");
     }
-    transaction.reset();
+    assert(transaction->ref_count > 0);
+    transaction->ref_count--;
+    if (transaction->ref_count == 0) {
+        transaction.reset();
+    }
 }
 
 auto Backend::transaction_guard() -> TransactionGuard {
@@ -476,7 +505,10 @@ void Backend::version_migration_start() {
 }
 
 void Backend::version_migration_end() {
-    transaction_end();
+    if (!transaction.has_value()) {
+        bsod("Transaction is not in progress");
+    }
+    transaction.reset();
 }
 
 auto Backend::version_migration_guard() -> VersionMigratingTransactionGuard {
@@ -510,6 +542,15 @@ uint16_t Backend::write_item(Address address, Backend::ItemHeader header, const 
     storage.write_bytes(data_address, data);
     written += data.size();
     storage.write_bytes(address, { reinterpret_cast<const uint8_t *>(&header), ITEM_HEADER_SIZE });
+
+    if (!bank_migration.has_value() && header.id != LAST_ITEM_ID) {
+#ifndef UNITTESTS
+        metric_record_integer(&metric_store_id, header.id);
+#endif
+
+        item_write_count_.fetch_add(1, std::memory_order_relaxed);
+    }
+
     return written + ITEM_HEADER_SIZE;
 }
 
@@ -551,7 +592,19 @@ void Backend::bank_migration_end() {
         bsod("Migration is not started");
     }
     if (transaction.has_value()) {
-        transaction->reinitialize();
+        // Reinitialize the transaction.
+        //
+        // Doing so "from the outside", because it is questionable if an object
+        // can replace _itself_ (it probably can, but that raised a lot of
+        // questions).
+        Backend &_backend = transaction->backend;
+        const Transaction::Type _type = transaction->type;
+        const uint16_t _ref_count = transaction->ref_count;
+        // Launder probably isn't strictly necessary either, but better safe than sorry.
+        Transaction *t = std::launder(&*transaction);
+        // using placement new, because we want to get default values without calling destructor
+        new (t) Backend::Transaction(_type, _backend);
+        t->ref_count = _ref_count;
     }
     bank_migration.reset();
 }
@@ -562,7 +615,8 @@ auto Backend::bank_migration_guard() -> BankMigrationGuard {
 
 Backend::Transaction::Transaction(Transaction::Type type, Backend &backend)
     : backend(backend)
-    , type(type) {
+    , type(type)
+    , last_item_address(type == Type::version_migration ? backend.current_next_address : backend.current_address) {
 }
 
 Backend::Transaction::~Transaction() {
@@ -616,12 +670,5 @@ void Backend::Transaction::store_item(Backend::Id id, const std::span<const uint
     last_item_address = current_address;
 
     current_address += backend.write_item(current_address, header, data, std::nullopt);
-}
-
-void Backend::Transaction::reinitialize() {
-    Backend &_backend = backend;
-    Type _type = type;
-    // using placement new, because we want to get default values without calling destructor
-    new (this) Backend::Transaction(_type, _backend);
 }
 } // namespace journal

@@ -10,8 +10,6 @@ DUMP_SIZE_SIZE = 4
 FW_TYPE_CONSTANT = 12321
 
 FW_DESCRIPTOR_SECTION_SIZE = 128
-MAX_FW_SIZE_WITH_BL = 120 * 1024
-MAX_FW_SIZE_WITHOUT_BL = 128 * 1024
 
 
 def main():
@@ -23,14 +21,7 @@ def main():
 
     with open(args.input_file, 'rb') as f:
         data = f.read()
-        has_bootloader = len(data) <= MAX_FW_SIZE_WITH_BL
-        if has_bootloader:
-            descriptor_start = MAX_FW_SIZE_WITH_BL - FW_DESCRIPTOR_SECTION_SIZE
-        else:
-            descriptor_start = MAX_FW_SIZE_WITHOUT_BL - FW_DESCRIPTOR_SECTION_SIZE
-
-        assert (len(data) >= descriptor_start
-                )  # binary needs to have the fw_descriptor section
+        descriptor_start = len(data) - FW_DESCRIPTOR_SECTION_SIZE
         data = data[:descriptor_start]
 
         m = hashlib.sha256()

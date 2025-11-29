@@ -5,9 +5,9 @@
 #include <array>
 #include <span>
 #include <selftest_fans_config.hpp>
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 #include <option/xl_enclosure_support.h>
-#include <option/has_xbuddy_extension.h>
+#include <option/xbuddy_extension_variant_standard.h>
 #include <pwm_utils.hpp>
 
 namespace fan_selftest {
@@ -18,7 +18,7 @@ enum class FanType {
 #if XL_ENCLOSURE_SUPPORT()
     xl_enclosure,
 #endif
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     xbe_chamber,
 #endif
     _count,
@@ -30,7 +30,7 @@ static constexpr EnumArray<FanType, const char *, FanType::_count> fan_type_name
 #if XL_ENCLOSURE_SUPPORT()
         { FanType::xl_enclosure, N_("XL Enclosure") },
 #endif
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
         { FanType::xbe_chamber, N_("Chamber") },
 #endif
 };
@@ -45,9 +45,10 @@ static constexpr EnumArray<FanType, const char *, FanType::_count> fan_type_name
  */
 class FanHandler {
 public:
-    FanHandler(const FanType type, const FanRPMRange range, const uint8_t desc_num)
+    FanHandler(const FanType type, const FanRPMRange range, const uint8_t desc_num, FanRPMRange low_range)
         : fan_type(type)
         , fan_range(range)
+        , low_fan_range(low_range)
         , desc_num(desc_num) {}
 
     virtual void set_pwm(const uint8_t pwm) = 0;
@@ -68,11 +69,13 @@ public:
     FanType get_type() const { return fan_type; }
     FanRPMRange get_range() const { return fan_range; }
     void set_range(const FanRPMRange new_range) { fan_range = new_range; }
+    void set_low_range() { fan_range = low_fan_range; }
     uint8_t get_desc_num() const { return desc_num; }
 
 protected:
     const FanType fan_type;
-    FanRPMRange fan_range;
+    FanRPMRange fan_range; ///< range of acceptable RPM values for test at 100% PWM
+    FanRPMRange low_fan_range; ///< range of acceptable RPM values for test at 40% PWM
     const uint8_t desc_num; ///< Description number (Tool number or Chamber fan number)
     bool failed { false };
     uint16_t sample_count { 0 };
@@ -82,7 +85,7 @@ protected:
 
 class CommonFanHandler : public FanHandler {
 public:
-    CommonFanHandler(const FanType type, const uint8_t tool_nr, const FanRPMRange fan_range, CFanCtlCommon *fan_control);
+    CommonFanHandler(const FanType type, const uint8_t tool_nr, const FanRPMRange fan_range, CFanCtlCommon *fan_control, const FanRPMRange low_fan_range = benevolent_fan_range);
     ~CommonFanHandler();
 
     virtual void set_pwm(const uint8_t pwm) override;
@@ -92,7 +95,7 @@ private:
     CFanCtlCommon *fan;
 };
 
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
 class XBEFanHandler : public FanHandler {
 public:
     XBEFanHandler(const FanType type, const uint8_t desc_nr, const FanRPMRange fan_range);

@@ -8,7 +8,7 @@ namespace MMU2 {
 RawCommandInProgress Reporter::GetCommandInProgress() const {
     const auto r = PeekReport();
     if (!r) {
-        return ftrstd::to_underlying(CommandInProgress::NoCommand);
+        return std::to_underlying(CommandInProgress::NoCommand);
     }
 
     return std::visit([](auto &&r) -> RawCommandInProgress {
@@ -19,7 +19,7 @@ RawCommandInProgress Reporter::GetCommandInProgress() const {
 RawProgressCode Reporter::GetProgressCode() const {
     const auto r = PeekReport();
     if (!r || !std::holds_alternative<ProgressData>(*r)) {
-        return ftrstd::to_underlying(ProgressCode::OK);
+        return std::to_underlying(ProgressCode::OK);
     }
 
     return std::get<ProgressData>(*r).rawProgressCode;

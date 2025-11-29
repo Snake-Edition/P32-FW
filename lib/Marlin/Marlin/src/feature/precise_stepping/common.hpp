@@ -146,6 +146,7 @@ struct step_event_u16_t {
     StepEventFlag_t flags;
 };
 
+#if HAS_PLANNER()
 // Circular queue for move segments.
 // head == tail              : the queue is empty
 // head != tail              : moves segments are in the queue
@@ -166,6 +167,7 @@ typedef struct step_event_queue_t {
     volatile uint16_t tail = 0;
     volatile uint16_t head = 0;
 } step_event_queue_t;
+#endif
 
 enum StepGeneratorType : uint8_t {
     CLASSIC_STEP_GENERATOR_X = 0,
@@ -253,6 +255,7 @@ struct step_generator_state_t {
     uint64_t previous_step_time_ticks;
 
     uint64_t initial_time; // initialization timestamp (us)
+    uint16_t initial_counter; // step timer counter during initialization
     StepEventFlag_t current_flags; // current active/direction flags for all axes
     step_event_i32_t buffered_step; // accumulator for multi-axis step fusion
 

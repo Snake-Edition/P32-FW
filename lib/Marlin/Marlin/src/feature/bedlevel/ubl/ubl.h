@@ -38,12 +38,8 @@ enum MeshPointType : char { INVALID, REAL, SET_IN_BITMAP };
 
 struct mesh_index_pair;
 
-float mesh_x_dist();
-float mesh_y_dist();
-
-#define MESH_X_DIST mesh_x_dist()
-#define MESH_Y_DIST mesh_y_dist()
-
+#define MESH_X_DIST (float(MESH_MAX_X - (MESH_MIN_X)) / float(GRID_MAX_POINTS_X - 1))
+#define MESH_Y_DIST (float(MESH_MAX_Y - (MESH_MIN_Y)) / float(GRID_MAX_POINTS_Y - 1))
 
 class unified_bed_leveling {
   private:
@@ -66,18 +62,13 @@ class unified_bed_leveling {
       static int  g29_grid_size;
     #endif
 
-    #if ENABLED(NEWPANEL)
-      static void move_z_with_encoder(const float &multiplier);
-      static float measure_point_with_encoder();
-      static float measure_business_card_thickness(float in_height);
-      static void manually_probe_remaining_mesh(const xy_pos_t&, const float&, const float&, const bool) __O0;
-      static void fine_tune_mesh(const xy_pos_t &pos, const bool do_ubl_mesh_map) __O0;
-    #endif
     static int count_points_to_probe();
     static bool g29_parameter_parsing() __O0;
     static void shift_mesh_height();
-    static void probe_entire_mesh(const xy_pos_t &near, const bool do_ubl_mesh_map, const bool stow_probe, const bool do_furthest) __O0;
-    static void probe_major_points(const xy_pos_t area_a, const xy_pos_t area_b, const bool do_ubl_mesh_map, const bool stow_probe);
+    /**
+      * @param extendMesh Whether this probe extends the existing mesh or not -> determines the message to be displayed.
+      */
+    static void probe_major_points(const xy_pos_t area_a, const xy_pos_t area_b, const bool do_ubl_mesh_map, const bool stow_probe, const bool extend_mesh);
     static void tilt_mesh_based_on_3pts(const float &z1, const float &z2, const float &z3);
     static void tilt_mesh_based_on_probed_grid(const bool do_ubl_mesh_map);
     static bool smart_fill_one(const uint8_t x, const uint8_t y, const int8_t xdir, const int8_t ydir);
@@ -119,14 +110,17 @@ class unified_bed_leveling {
 
     static bed_mesh_t z_values;
 
-    #if HAS_LCD_MENU
-      static bool lcd_map_control;
-    #endif
-
     static volatile int encoder_diff; // Volatile because it's changed at interrupt time.
 
     /// Tracked on probe_major_points. You have to reset it yourself before the procedure
-    static std::optional<std::pair<float, float>> g29_min_max_measured_z;
+    struct MeasuredZ {
+      float min;
+      float max;
+    };
+    static std::optional<MeasuredZ> g29_min_max_measured_z;
+
+    bool g29_probing_failed = false;
+    bool g29_nozzle_cleaning_failed = false;
 
     unified_bed_leveling();
 
@@ -211,14 +205,8 @@ class unified_bed_leveling {
           DEBUG_ECHOLNPAIR(" out of bounds in z_correction_for_x_on_horizontal_mesh_line(rx0=", rx0, ",x1_i=", x1_i, ",yi=", yi, ")");
         }
 
-        // The requested location is off the mesh. Return UBL_Z_RAISE_WHEN_OFF_MESH or NAN.
-        return (
-          #ifdef UBL_Z_RAISE_WHEN_OFF_MESH
-            UBL_Z_RAISE_WHEN_OFF_MESH
-          #else
-            NAN
-          #endif
-        );
+        // The requested location is off the mesh.
+        return NAN;
       }
 
       const float xratio = (rx0 - mesh_index_to_xpos(x1_i)) * RECIPROCAL(MESH_X_DIST),
@@ -241,14 +229,8 @@ class unified_bed_leveling {
           DEBUG_ECHOLNPAIR(" out of bounds in z_correction_for_y_on_vertical_mesh_line(ry0=", ry0, ", xi=", xi, ", y1_i=", y1_i, ")");
         }
 
-        // The requested location is off the mesh. Return UBL_Z_RAISE_WHEN_OFF_MESH or NAN.
-        return (
-          #ifdef UBL_Z_RAISE_WHEN_OFF_MESH
-            UBL_Z_RAISE_WHEN_OFF_MESH
-          #else
-            NAN
-          #endif
-        );
+        // The requested location is off the mesh.
+        return NAN;
       }
 
       const float yratio = (ry0 - mesh_index_to_ypos(y1_i)) * RECIPROCAL(MESH_Y_DIST),
@@ -272,15 +254,6 @@ class unified_bed_leveling {
       float iry0 = constrain(ry0, MESH_MIN_Y, MESH_MAX_Y);
 
       const int8_t cx = cell_index_x(irx0), cy = cell_index_y(iry0); // return values are clamped
-
-      /**
-       * Check if the requested location is off the mesh.  If so, and
-       * UBL_Z_RAISE_WHEN_OFF_MESH is specified, that value is returned.
-       */
-      #ifdef UBL_Z_RAISE_WHEN_OFF_MESH
-        if (!WITHIN(rx0, MESH_MIN_X, MESH_MAX_X) || !WITHIN(ry0, MESH_MIN_Y, MESH_MAX_Y))
-          return UBL_Z_RAISE_WHEN_OFF_MESH;
-      #endif
 
       const float z1 = calc_z0(irx0,
                                mesh_index_to_xpos(cx), z_values[cx][cy],
@@ -325,12 +298,6 @@ class unified_bed_leveling {
     static inline float mesh_index_to_ypos(const uint8_t i) {
       return MESH_MIN_Y + i * (MESH_Y_DIST);
     }
-
-    #if UBL_SEGMENTED
-      static bool line_to_destination_segmented(const feedRate_t &scaled_fr_mm_s);
-    #else
-      static void line_to_destination_cartesian(const feedRate_t &scaled_fr_mm_s, const uint8_t e);
-    #endif
 
     static inline bool mesh_is_valid() {
       for (uint8_t x = 0; x < GRID_MAX_POINTS_X; x++)

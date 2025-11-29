@@ -5,6 +5,7 @@
 #include "sleep.hpp"
 
 #include <common/shared_buffer.hpp>
+#include <common/utils/exponential_backoff.hpp>
 #include <transfers/monitor.hpp>
 #include <transfers/download.hpp>
 #include <transfers/changed_path.hpp>
@@ -128,11 +129,21 @@ private:
     SendTelemetry::Mode last_telemetry_mode = SendTelemetry::Mode::Reduced;
     /// Last time we've successfully talked to the server.
     std::optional<Timestamp> last_success;
+
+    /// Last command we've received and handled.
+    ///
+    /// Used for deduplication.
+    std::optional<CommandId> last_command_id;
+
+    // First retry after 100 ms.
+    static const constexpr Duration COOLDOWN_BASE = 100;
+    // Don't do retries less often than once a minute.
+    static const constexpr Duration COOLDOWN_MAX = 1000 * 60;
     /// When doing comm retries, this is the cooldown time between them.
     ///
     /// In case we are in a unsuccessfull row, this is keeping the current
     /// value, which gets incremented each time (up to a limit).
-    std::optional<Duration> cooldown;
+    buddy::ExponentialBackoff<Duration, COOLDOWN_BASE, COOLDOWN_MAX> cooldown;
     /// The next action shall be a cooldown.
     ///
     /// Note that this might be set to false and still have the above cooldown
@@ -183,6 +194,7 @@ private:
     void command(const Command &, const UncancelObject &);
 
     void handle_transfer_result(const Command &command, transfers::Transfer::BeginResult result);
+    void handle_cancel_object_command(const Command &command, uint16_t object_id, bool set_cancelled);
 
     // Tracking if we should resend the INFO message due to some changes.
     Tracked info_changes;

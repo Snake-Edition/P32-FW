@@ -41,7 +41,7 @@
 
 #include "../inc/MarlinConfig.h"
 
-#if ABL_PLANAR || ENABLED(AUTO_BED_LEVELING_UBL)
+#if ENABLED(AUTO_BED_LEVELING_UBL)
 
 #include "vector_3.h"
 
@@ -151,4 +151,4 @@ void matrix_3x3::debug(PGM_P const title) {
   }
 }
 
-#endif // HAS_ABL_OR_UBL
+#endif

@@ -2,11 +2,9 @@
 #include "filament_sensor_adc_eval.hpp"
 #include <fstream>
 #include <string>
-#include <chrono>
 #include <regex>
-#include <string_view>
 #include <optional>
-#include "filters/median_filter.hpp"
+#include <filters/median_filter.hpp>
 
 using TimeStamp = std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>;
 using DataPoint = std::pair<TimeStamp, uint32_t>;
@@ -69,39 +67,45 @@ bool LoadCSV(const char *fpath, DataPointsDeq &dataPoints) {
     return true;
 }
 
-FilamentSensorState FilterAndEvaluate(int32_t fs_raw_value, int32_t fs_ref_nins_value, int32_t fs_ref_ins_value, int32_t fs_value_span) {
+FilamentSensorState FilterAndEvaluate(int32_t fs_raw_value, int32_t fs_ref_nins_value, int32_t fs_ref_ins_value) {
     static MedianFilter filter;
     if (filter.filter(fs_raw_value)) { // fs_raw_value is rewritten - passed by reference ... WTF?
-        return evaluate_state(fs_raw_value, fs_ref_nins_value, fs_ref_ins_value, fs_value_span);
+        return evaluate_state(fs_raw_value, fs_ref_nins_value, fs_ref_ins_value, FilamentSensorState::NotConnected, 0);
     } else {
-        return evaluate_state(filtered_value_not_ready, fs_ref_nins_value, fs_ref_ins_value, fs_value_span);
+        return evaluate_state(filtered_value_not_ready, fs_ref_nins_value, fs_ref_ins_value, FilamentSensorState::NotConnected, 0);
     }
 }
 
-void FSBasicTest(int32_t fsRefNins, int32_t fsRefIns, int32_t fsSpan, int32_t noFil, int32_t hasFil) {
-    CHECK(evaluate_state(noFil, fsRefNins, fsRefIns, fsSpan) == FilamentSensorState::NoFilament);
-    CHECK(evaluate_state(hasFil, fsRefNins, fsRefIns, fsSpan) == FilamentSensorState::HasFilament);
-    CHECK(evaluate_state(filtered_value_not_ready, fsRefNins, fsRefIns, fsSpan) == FilamentSensorState::NotInitialized);
-    CHECK(evaluate_state(noFil, ref_value_not_calibrated, fsRefIns, fsSpan) == FilamentSensorState::NotCalibrated);
-    CHECK(evaluate_state(lower_limit - 1, fsRefNins, fsRefIns, fsSpan) == FilamentSensorState::NotConnected);
+void FSBasicTest(int32_t fsRefNins, int32_t fsRefIns, int32_t noFil, int32_t hasFil) {
+    CAPTURE(fsRefNins, fsRefIns, noFil, hasFil);
+
+    CHECK(evaluate_state(noFil, fsRefNins, fsRefIns, FilamentSensorState::HasFilament, 0) == FilamentSensorState::NoFilament);
+    CHECK(evaluate_state(hasFil, fsRefNins, fsRefIns, FilamentSensorState::NoFilament, 0) == FilamentSensorState::HasFilament);
+
+    CHECK(evaluate_state(noFil, fsRefNins, fsRefIns, FilamentSensorState::NoFilament, 0) == FilamentSensorState::NoFilament);
+    CHECK(evaluate_state(hasFil, fsRefNins, fsRefIns, FilamentSensorState::HasFilament, 0) == FilamentSensorState::HasFilament);
+
+    CHECK(evaluate_state(filtered_value_not_ready, fsRefNins, fsRefIns, FilamentSensorState::HasFilament, 0) == FilamentSensorState::NotInitialized);
+    CHECK(evaluate_state(noFil, ref_value_not_calibrated, fsRefIns, FilamentSensorState::HasFilament, 0) == FilamentSensorState::NotCalibrated);
+    CHECK(evaluate_state(lower_limit - 1, fsRefNins, fsRefIns, FilamentSensorState::HasFilament, 0) == FilamentSensorState::NotConnected);
 }
 
 TEST_CASE("FilamentSensor basic test", "[filament_sensor]") {
     // using values observed on real printers
-    FSBasicTest(1'800'000, ref_value_not_calibrated, 350'000, 1'700'000, 240'000);
-    FSBasicTest(1'800'000, 240'000, 350'000, 1'700'000, 240'000);
+    FSBasicTest(1'800'000, 180'000, 1'700'000, 240'000);
+    FSBasicTest(1'800'000, 500'000, 1'700'000, 240'000);
 }
 
 TEST_CASE("FilamentSensor basic test inverted", "[filament_sensor]") {
     // using values observed on real printers
-    FSBasicTest(27'000, ref_value_not_calibrated, 350'000, 240'000, 1'700'000);
-    FSBasicTest(27'000, 1'700'000, 350'000, 240'000, 1'700'000);
+    FSBasicTest(27'000, 150'000, 40'000, 1'700'000);
+    FSBasicTest(27'000, 1'700'000, 240'000, 1'700'000);
 }
 
 TEST_CASE("FilamentSensor flipped", "[filament_sensor]") {
     // false positive check - this needed to be fixed
     // filtered value out of interval range, but in the "correct" direction
-    CHECK(evaluate_state(200'000, 240'000, 400'000, 10'000) == FilamentSensorState::NoFilament);
+    CHECK(evaluate_state(200'000, 240'000, 400'000, FilamentSensorState::NotInitialized, 0) == FilamentSensorState::NoFilament);
 }
 
 TEST_CASE("FilamentSensor flipped dataset1", "[filament_sensor]") {
@@ -121,7 +125,7 @@ TEST_CASE("FilamentSensor flipped dataset1", "[filament_sensor]") {
     //
     // The incoming value may get out of the supported (calibrated) +-value span accidentally - and if this happens, we may get a flipped fsensor state
     // like in this example:
-    std::for_each(dataPoints.begin(), dataPoints.end(), [&](auto dp) { expectedResult = FilterAndEvaluate(dp.second, 440'000, 800'000, 200'000); });
+    std::for_each(dataPoints.begin(), dataPoints.end(), [&](auto dp) { expectedResult = FilterAndEvaluate(dp.second, 440'000, 800'000); });
 
     // In the end of the data we must end in filament NOT present
     CHECK(expectedResult == FilamentSensorState::NoFilament);

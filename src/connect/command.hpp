@@ -4,10 +4,12 @@
 
 #include <common/shared_buffer.hpp>
 #include <option/has_side_leds.h>
+#include <option/xbuddy_extension_variant_standard.h>
 
 #include <cstdint>
 #include <string_view>
 #include <variant>
+#include <custom_uint31_t.hpp>
 
 namespace connect_client {
 
@@ -87,7 +89,7 @@ struct SetToken {
 struct ResetPrinter {};
 struct SendStateInfo {};
 struct DialogAction {
-    uint32_t dialog_id;
+    printer_state::DialogId dialog_id;
     Response response;
 };
 
@@ -107,7 +109,7 @@ enum class PropertyName {
     NozzleDiameter,
     NozzleHighFlow,
     NozzleHardened,
-#if PRINTER_IS_PRUSA_COREONE() || defined(UNITTESTS)
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     // Note: for now we only want to support the chamber features on Core One.
     // Therefore option HAS_CHAMBER_API is NOT used yet.
     ChamberTargetTemp,
@@ -128,10 +130,10 @@ struct SetValue {
     std::variant<bool, uint32_t, float, int8_t, SharedBorrow> value;
 };
 struct CancelObject {
-    uint8_t id;
+    uint16_t id;
 };
 struct UncancelObject {
-    uint8_t id;
+    uint16_t id;
 };
 
 using CommandData = std::variant<UnknownCommand, BrokenCommand, GcodeTooLarge, ProcessingOtherCommand, ProcessingThisCommand, Gcode, SendInfo, SendJobInfo, SendFileInfo, SendTransferInfo, PausePrint, ResumePrint, StopPrint, StartPrint, SetPrinterReady, CancelPrinterReady, SetPrinterIdle, StartEncryptedDownload, StartInlineDownload, DeleteFile, DeleteFolder, CreateFolder, StopTransfer, SetToken, ResetPrinter, SendStateInfo, DialogAction, SetValue, CancelObject, UncancelObject>;

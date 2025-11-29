@@ -1,6 +1,6 @@
 #include <bootloader/bootloader.hpp>
 #include <logging/log.hpp>
-#include <sys.h>
+#include <common/sys.hpp>
 #include <data_exchange.hpp>
 #include <device/hal.h>
 #include <bsod.h>
@@ -57,8 +57,6 @@ bool buddy::bootloader::fw_invalidate(void) {
     if (sector > FLASH_SECTOR_11) {
         sector += 4U; // Need to add offset of 4 when sector higher than FLASH_SECTOR_11
     }
-
-    log_critical(Bootloader, "!!! Bricking itself !!! Erasing sector %i", sector);
 
     // Disable RTOS and interrupts, the following cannot be interrupted
     osThreadSuspendAll();

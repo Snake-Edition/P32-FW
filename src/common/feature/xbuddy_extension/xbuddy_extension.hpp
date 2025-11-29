@@ -4,13 +4,14 @@
 
 #include <optional>
 
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 #include <freertos/mutex.hpp>
 #include <leds/color.hpp>
 #include <temperature.hpp>
 #include <pwm_utils.hpp>
 
 #include <xbuddy_extension_shared/xbuddy_extension_shared_enums.hpp>
+#include <option/xbuddy_extension_variant_standard.h>
 
 namespace buddy {
 
@@ -25,14 +26,18 @@ public: // General things, status
         ready,
     };
 
-    using Fan = xbuddy_extension_shared::Fan;
     using FilamentSensorState = xbuddy_extension_shared::FilamentSensorState;
+
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     using FanRPM = uint16_t;
     using FanPWM = PWM255;
+    using Fan = xbuddy_extension_shared::Fan;
     using FanPWMOrAuto = PWM255OrAuto;
+#endif
 
     Status status() const;
 
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     void step();
 
 public: // Fans
@@ -79,6 +84,29 @@ public: // LEDs
     /// Sets PWM for the led strip that is under the bed
     void set_bed_leds_color(leds::ColorRGBW set);
 
+    /// Sets the white led strobe mode.
+    ///
+    /// * If set to nullopt, strobe mode is disabled. Led goes to shining
+    ///   according to the requested amount of light inside the chamber and PWM
+    ///   frequencies return to default.
+    /// * If set to a value, it'll blink at that frequency (configures PWM with
+    ///   the given frequency and some small-ish duty cycle to provide a
+    ///   stroboscopic effect). In Hz.
+    ///
+    /// Notes:
+    /// * 0 as a frequency doesn't make sense and is asserted against.
+    /// * Values 1, 2 and 3 were observed to act "weird". The prescaler in the
+    ///   HW is only 16 bits and we overflow at that case. Starting at 4Hz, it
+    ///   seems to act OK.
+    /// * We use the same hardware timer for controlling some fans. As
+    ///   controlling goes, it seems to work fine even with lower frequencies
+    ///   (tested even with the 4Hz) - they just do some tiny audible clicks.
+    ///   So while we don't expect them to be running at the time (we are using
+    ///   the strobe at specific wizard, with open door and no heating at the
+    ///   time), they _could_ be and everything would be likely fine. And the
+    ///   actual frequency will be in around the 100Hz range.
+    void set_strobe(std::optional<uint16_t> frequency);
+
     /// @returns percentage 0-100% converted from PWM value (0-max_pwm)
     /// @note in the future, non-linear mapping between intensity pct and PWM shall be implemented here
     static constexpr uint8_t led_pwm2pct(uint8_t pwm) {
@@ -91,21 +119,24 @@ public: // LEDs
         return static_cast<uint8_t>(((uint16_t)pct) * 255U / 100U);
     }
 
-public: // Other
-    /// \returns chamber temperature measured through the thermistor connected to the board, in degrees Celsius
-    std::optional<Temperature> chamber_temperature();
-
-    /// \returns state of the filament sensor
-    std::optional<FilamentSensorState> filament_sensor();
-
 public: // USB
     void set_usb_power(bool enabled);
     bool usb_power() const;
 
+public: // Other
+    /// \returns chamber temperature measured through the thermistor connected to the board, in degrees Celsius
+    std::optional<Temperature> chamber_temperature();
+#endif
+
+    /// \returns state of the filament sensor
+    std::optional<FilamentSensorState> filament_sensor();
+
 private:
     mutable freertos::Mutex mutex_;
 
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     leds::ColorRGBW bed_leds_color_;
+    std::optional<uint16_t> strobe_freq_ = std::nullopt;
 
     FanCooling chamber_cooling;
 
@@ -124,6 +155,7 @@ private:
     bool can_auto_cool_ = false;
     bool overheating_warning_shown = false;
     bool critical_warning_shown = false;
+#endif
 };
 
 XBuddyExtension &xbuddy_extension();

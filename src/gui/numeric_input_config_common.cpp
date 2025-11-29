@@ -24,6 +24,14 @@ const NumericInputConfig numeric_input_config::bed_temperature = {
     .unit = Unit::celsius,
 };
 
+#if HAS_HEATBREAK_TEMP()
+const NumericInputConfig numeric_input_config::heatbreak_temperature = {
+    .min_value = HEATBREAK_MINTEMP,
+    .max_value = HEATBREAK_MAXTEMP,
+    .unit = Unit::celsius,
+};
+#endif
+
 const NumericInputConfig numeric_input_config::percent_with_off = {
     .max_value = 100,
     .special_value = 0,

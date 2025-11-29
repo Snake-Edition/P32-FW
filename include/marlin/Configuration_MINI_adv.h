@@ -24,6 +24,9 @@
 // clang-format off
 
 #include <buddy/filename_defs.h>
+#include <option/has_crash_detection.h>
+#include <option/has_pause.h>
+#include <option/has_power_panic.h>
 
 /**
  * Configuration_adv.h
@@ -37,39 +40,11 @@
  */
 #define CONFIGURATION_ADV_H_VERSION 020000
 
-/**
- * Cancel Objects
- *
- * Implement M486 to allow Marlin to skip objects
- */
-#define CANCEL_OBJECTS
-#ifdef CANCEL_OBJECTS
-  #define CANCEL_OBJECTS_REPORTING // Emit the current object as a status message
-#endif
-
 // @section temperature
 
 //===========================================================================
 //=============================Thermal Settings  ============================
 //===========================================================================
-
-//
-// Hephestos 2 24V heated bed upgrade kit.
-// https://store.bq.com/en/heated-bed-kit-hephestos2
-//
-//#define HEPHESTOS2_HEATED_BED_KIT
-#if ENABLED(HEPHESTOS2_HEATED_BED_KIT)
-    #undef TEMP_SENSOR_BED
-    #define TEMP_SENSOR_BED 70
-    #define HEATER_BED_INVERTING true
-#endif
-
-#if DISABLED(PIDTEMPBED)
-    #define BED_CHECK_INTERVAL 5000 // ms between checks in bang-bang control
-    #if ENABLED(BED_LIMIT_SWITCHING)
-        #define BED_HYSTERESIS 2 // Only disable heating if T>target+BED_HYSTERESIS and enable heating if T>target-BED_HYSTERESIS
-    #endif
-#endif
 
 /**
  * Thermal Protection provides additional protection to your printer from damage
@@ -88,29 +63,23 @@
  * THERMAL_PROTECTION_HYSTERESIS and/or THERMAL_PROTECTION_PERIOD
  */
 #if ENABLED(THERMAL_PROTECTION_HOTENDS)
-	#ifdef MINI_I3_MK33
-	    #define THERMAL_PROTECTION_PERIOD 60 //40        // Seconds
-    	#define THERMAL_PROTECTION_HYSTERESIS 12 //4     // Degrees Celsius
-	#else
-
-	    #define THERMAL_PROTECTION_PERIOD 20        // Seconds
-	    #define THERMAL_PROTECTION_HYSTERESIS 6 //4     // Degrees Celsius
-	    #if ENABLED(MODEL_DETECT_STUCK_THERMISTOR)
-	        /**
-	         * Do not allow hotend PWM value to be THERMAL_PROTECTION_MODEL_DISCREPANCY
-	         * above PWM expected by the model for more than THERMAL_PROTECTION_MODEL_PERIOD seconds
-	         */
-	        #define THERMAL_PROTECTION_MODEL_PERIOD 40
-	        /**
-	         * 26.6% of PWM max.
-	         * 14% is needed to cover minimum heater power at minimum supply voltage.
-	         * 12.6% is real reserve.
-	         * It can never trigger at 100% fan if the temperature set is above 215degC
-	         * and at 290degC if fan is above 26%.
-	         */
-	        #define THERMAL_PROTECTION_MODEL_DISCREPANCY 68
-	    #endif
-	#endif
+    #define THERMAL_PROTECTION_PERIOD 20        // Seconds
+    #define THERMAL_PROTECTION_HYSTERESIS 6 //4     // Degrees Celsius
+    #if ENABLED(MODEL_DETECT_STUCK_THERMISTOR)
+        /**
+         * Do not allow hotend PWM value to be THERMAL_PROTECTION_MODEL_DISCREPANCY
+         * above PWM expected by the model for more than THERMAL_PROTECTION_MODEL_PERIOD seconds
+         */
+        #define THERMAL_PROTECTION_MODEL_PERIOD 40
+        /**
+         * 26.6% of PWM max.
+         * 14% is needed to cover minimum heater power at minimum supply voltage.
+         * 12.6% is real reserve.
+         * It can never trigger at 100% fan if the temperature set is above 215degC
+         * and at 290degC if fan is above 26%.
+         */
+        #define THERMAL_PROTECTION_MODEL_DISCREPANCY 68
+    #endif
 
     //#define ADAPTIVE_FAN_SLOWING              // Slow part cooling fan if temperature drops
     #if BOTH(ADAPTIVE_FAN_SLOWING, PIDTEMP)
@@ -137,23 +106,13 @@
  * Thermal Protection parameters for the bed are just as above for hotends.
  */
 #if ENABLED(THERMAL_PROTECTION_BED)
-    #ifdef MINI_I3_MK33
-        #define THERMAL_PROTECTION_BED_PERIOD 60 // Seconds
-        #define THERMAL_PROTECTION_BED_HYSTERESIS 10 // Degrees Celsius
-    #else
-        #define THERMAL_PROTECTION_BED_PERIOD 45 // Seconds
-        #define THERMAL_PROTECTION_BED_HYSTERESIS 25 // Degrees Celsius
-    #endif
+    #define THERMAL_PROTECTION_BED_PERIOD 45 // Seconds
+    #define THERMAL_PROTECTION_BED_HYSTERESIS 25 // Degrees Celsius
 
     /**
    * As described above, except for the bed (M140/M190/M303).
    */
-    #ifdef MINI_I3_MK33
-        #define WATCH_BED_TEMP_PERIOD 60 // Seconds
-    #else
-        #define WATCH_BED_TEMP_PERIOD 240 // Seconds
-    #endif
-
+    #define WATCH_BED_TEMP_PERIOD 240 // Seconds
     #define WATCH_BED_TEMP_INCREASE 2 // Degrees Celsius
 #endif
 
@@ -174,10 +133,7 @@
 #if ENABLED(PIDTEMP)
     // this adds an experimental additional term to the heating power, proportional to the extrusion speed.
     // if Kc is chosen well, the additional required power due to increased melting should be compensated.
-    #ifdef MINI_I3_MK33
-	#else
-	    #define PID_EXTRUSION_SCALING
-	#endif
+    #define PID_EXTRUSION_SCALING
     #if ENABLED(PID_EXTRUSION_SCALING)
         /**
          * Increase in PWM duty cycle needed to to extrude 1 mm^2 per second
@@ -203,123 +159,6 @@
 //#define AUTOTEMP
 #if ENABLED(AUTOTEMP)
     #define AUTOTEMP_OLDWEIGHT 0.98
-#endif
-
-// Show extra position information in M114
-//#define M114_DETAIL
-
-// Show Temperature ADC value
-// Enable for M105 to include ADC values read from temperature sensors.
-//#define SHOW_TEMP_ADC_VALUES
-
-/**
- * High Temperature Thermistor Support
- *
- * Thermistors able to support high temperature tend to have a hard time getting
- * good readings at room and lower temperatures. This means HEATER_X_RAW_LO_TEMP
- * will probably be caught when the heating element first turns on during the
- * preheating process, which will trigger a min_temp_error as a safety measure
- * and force stop everything.
- * To circumvent this limitation, we allow for a preheat time (during which,
- * min_temp_error won't be triggered) and add a min_temp buffer to handle
- * aberrant readings.
- *
- * If you want to enable this feature for your hotend thermistor(s)
- * uncomment and set values > 0 in the constants below
- */
-
-// The number of consecutive low temperature errors that can occur
-// before a min_temp_error is triggered. (Shouldn't be more than 10.)
-//#define MAX_CONSECUTIVE_LOW_TEMPERATURE_ERROR_ALLOWED 0
-
-// The number of milliseconds a hotend will preheat before starting to check
-// the temperature. This value should NOT be set to the time it takes the
-// hot end to reach the target temperature, but the time it takes to reach
-// the minimum temperature your thermistor can read. The lower the better/safer.
-// This shouldn't need to be more than 30 seconds (30000)
-//#define MILLISECONDS_PREHEAT_TIME 0
-
-// @section extruder
-
-// Extruder runout prevention.
-// If the machine is idle and the temperature over MINTEMP
-// then extrude some filament every couple of SECONDS.
-//#define EXTRUDER_RUNOUT_PREVENT
-#if ENABLED(EXTRUDER_RUNOUT_PREVENT)
-    #define EXTRUDER_RUNOUT_MINTEMP 190
-    #define EXTRUDER_RUNOUT_SECONDS 30
-    #define EXTRUDER_RUNOUT_SPEED 1500 // (mm/m)
-    #define EXTRUDER_RUNOUT_EXTRUDE 5 // (mm)
-#endif
-
-// @section temperature
-
-// Calibration for AD595 / AD8495 sensor to adjust temperature measurements.
-// The final temperature is calculated as (measuredTemp * GAIN) + OFFSET.
-#define TEMP_SENSOR_AD595_OFFSET 0.0
-#define TEMP_SENSOR_AD595_GAIN 1.0
-#define TEMP_SENSOR_AD8495_OFFSET 0.0
-#define TEMP_SENSOR_AD8495_GAIN 1.0
-
-/**
- * Controller Fan
- * To cool down the stepper drivers and MOSFETs.
- *
- * The fan will turn on automatically whenever any stepper is enabled
- * and turn off after a set period after all steppers are turned off.
- */
-//#define USE_CONTROLLER_FAN
-#if ENABLED(USE_CONTROLLER_FAN)
-    //#define CONTROLLER_FAN_PIN -1        // Set a custom pin for the controller fan
-    #define CONTROLLERFAN_SECS 60 // Duration in seconds for the fan to run after all motors are disabled
-    #define CONTROLLERFAN_SPEED 255 // 255 == full speed
-#endif
-
-// When first starting the main fan, run it at full speed for the
-// given number of milliseconds.  This gets the fan spinning reliably
-// before setting a PWM value. (Does not work with software PWM for fan on Sanguinololu)
-//#define FAN_KICKSTART_TIME 100
-
-/**
- * PWM Fan Scaling
- *
- * Define the min/max speeds for PWM fans (as set with M106).
- *
- * With these options the M106 0-255 value range is scaled to a subset
- * to ensure that the fan has enough power to spin, or to run lower
- * current fans with higher current. (e.g., 5V/12V fans with 12V/24V)
- * Value 0 always turns off the fan.
- *
- * Define one or both of these to override the default 0-255 range.
- */
-//#define FAN_MIN_PWM 50
-//#define FAN_MAX_PWM 128
-
-/**
- * FAST PWM FAN Settings
- *
- * Use to change the FAST FAN PWM frequency (if enabled in Configuration.h)
- * Combinations of PWM Modes, prescale values and TOP resolutions are used internally to produce a
- * frequency as close as possible to the desired frequency.
- *
- * FAST_PWM_FAN_FREQUENCY [undefined by default]
- *   Set this to your desired frequency.
- *   If left undefined this defaults to F = F_CPU/(2*255*1)
- *   ie F = 31.4 Khz on 16 MHz microcontrollers or F = 39.2 KHz on 20 MHz microcontrollers
- *   These defaults are the same as with the old FAST_PWM_FAN implementation - no migration is required
- *   NOTE: Setting very low frequencies (< 10 Hz) may result in unexpected timer behaviour.
- *
- * USE_OCR2A_AS_TOP [undefined by default]
- *   Boards that use TIMER2 for PWM have limitations resulting in only a few possible frequencies on TIMER2:
- *   16MHz MCUs: [62.5KHz, 31.4KHz (default), 7.8KHz, 3.92KHz, 1.95KHz, 977Hz, 488Hz, 244Hz, 60Hz, 122Hz, 30Hz]
- *   20MHz MCUs: [78.1KHz, 39.2KHz (default), 9.77KHz, 4.9KHz, 2.44KHz, 1.22KHz, 610Hz, 305Hz, 153Hz, 76Hz, 38Hz]
- *   A greater range can be achieved by enabling USE_OCR2A_AS_TOP. But note that this option blocks the use of
- *   PWM on pin OC2A. Only use this option if you don't need PWM on 0C2A. (Check your schematic.)
- *   USE_OCR2A_AS_TOP sacrifices duty cycle control resolution to achieve this broader range of frequencies.
- */
-#if ENABLED(FAST_PWM_FAN)
-//#define FAST_PWM_FAN_FREQUENCY 31400
-//#define USE_OCR2A_AS_TOP
 #endif
 
 // @section extruder
@@ -367,11 +206,6 @@
     #define CASE_LIGHT_DEFAULT_ON true // Set default power-up state on
     #define CASE_LIGHT_DEFAULT_BRIGHTNESS 105 // Set default power-up brightness (0-255, requires PWM pin)
     //#define MENU_ITEM_CASE_LIGHT              // Add a Case Light option to the LCD main menu
-    //#define CASE_LIGHT_USE_NEOPIXEL           // Use Neopixel LED as case light, requires NEOPIXEL_LED.
-    #if ENABLED(CASE_LIGHT_USE_NEOPIXEL)
-        #define CASE_LIGHT_NEOPIXEL_COLOR \
-            { 255, 255, 255, 255 } // { Red, Green, Blue, White }
-    #endif
 #endif
 
 //===========================================================================
@@ -511,38 +345,14 @@
 #define HOMING_MAX_ATTEMPTS 10
 
 // Homing hits each endstop, retracts by these distances, then does a slower bump.
-#ifdef MINI_I3_MK33
-	#define X_HOME_BUMP_MM 10
-	#define Y_HOME_BUMP_MM 10
-	#define Z_HOME_BUMP_MM 3
-	#define HOMING_BUMP_DIVISOR \
-	    { 1, 1, 1 } // Re-Bump Speed Divisor (Divides the Homing Feedrate)
-	#define HOMING_BUMP_DIVISOR_MAX \
-	    { 1.09f, 1.09f, 1 }
-	#define HOMING_BUMP_DIVISOR_MIN \
-	    { 0.96f, 0.96f, 1 }
-#else
-	#define X_HOME_BUMP_MM 0
-	#define Y_HOME_BUMP_MM 0
-	#define Z_HOME_BUMP_MM 2
-	#define HOMING_BUMP_DIVISOR \
-	    { 1, 1, 4 } // Re-Bump Speed Divisor (Divides the Homing Feedrate)
-	#define HOMING_BUMP_DIVISOR_MAX HOMING_BUMP_DIVISOR
-	#define HOMING_BUMP_DIVISOR_MIN HOMING_BUMP_DIVISOR
-#endif
-
-#ifdef MINI_I3_MK33
-	// If homing includes X and Y, do a diagonal move initially
-	#define QUICK_HOME
-
-	// Move away from the endstops after homing
-	#define HOMING_BACKOFF_POST_MM { 2, 2, 0 }
-#else
-	//#define QUICK_HOME                     // If homing includes X and Y, do a diagonal move initially
-
-	// Move away from the endstops after homing
-	#define HOMING_BACKOFF_POST_MM { 20, 0, 2 }
-#endif
+#define X_HOME_BUMP_MM 0
+#define Y_HOME_BUMP_MM 0
+#define Z_HOME_BUMP_MM 2
+#define HOMING_BUMP_DIVISOR \
+    { 1, 1, 4 } // Re-Bump Speed Divisor (Divides the Homing Feedrate)
+#define HOMING_BUMP_DIVISOR_MAX HOMING_BUMP_DIVISOR
+#define HOMING_BUMP_DIVISOR_MIN HOMING_BUMP_DIVISOR
+//#define QUICK_HOME                     // If homing includes X and Y, do a diagonal move initially
 
 // When G28 is called, this option will make Y home before X
 //#define HOME_Y_BEFORE_X
@@ -593,16 +403,8 @@
 #define DEFAULT_STEPPER_DEACTIVE_TIME 120
 #define DISABLE_INACTIVE_X true
 #define DISABLE_INACTIVE_Y true
-#ifdef MINI_I3_MK33
-	#define DISABLE_INACTIVE_Z false // set to false if the nozzle will fall down on your printed part when print has finished.
-#else
-	#define DISABLE_INACTIVE_Z true // set to false if the nozzle will fall down on your printed part when print has finished.
-#endif
+#define DISABLE_INACTIVE_Z true // set to false if the nozzle will fall down on your printed part when print has finished.
 #define DISABLE_INACTIVE_E true
-
-#ifdef MINI_I3_MK33
-	#define Z_ALWAYS_ON // Keep Z motors enabled all the time (Calls enable_Z(); in Marlin.cpp in setup)
-#endif
 
 #define DEFAULT_MINIMUMFEEDRATE 0.0 // minimum feedrate
 #define DEFAULT_MINTRAVELFEEDRATE 0.0
@@ -611,19 +413,8 @@
 
 // @section lcd
 
-#ifdef MINI_I3_MK33
-    #define MANUAL_FEEDRATE \
-        { 50 * 60, 50 * 60, 12 * 60, 4 * 60 } // Feedrates for manual moves along X, Y, Z, E from panel
-#else
-    #define MANUAL_FEEDRATE \
-        { 50 * 60, 50 * 60, 6 * 60, 3 * 60 } // Feedrates for manual moves along X, Y, Z, E from panel
-#endif
-
-
-#if ENABLED(ULTIPANEL)
-    #define MANUAL_E_MOVES_RELATIVE // Show LCD extruder moves as relative rather than absolute positions
-    #define ULTIPANEL_FEEDMULTIPLY // Comment to disable setting feedrate multiplier via encoder
-#endif
+#define MANUAL_FEEDRATE \
+    { 50 * 60, 50 * 60, 6 * 60, 3 * 60 } // Feedrates for manual moves along X, Y, Z, E from panel
 
 // @section extras
 
@@ -836,242 +627,6 @@
 // Add an 'M73' G-code to set the current percentage
 //#define LCD_SET_PROGRESS_MANUALLY
 
-#if HAS_CHARACTER_LCD && HAS_PRINT_PROGRESS
-    //#define LCD_PROGRESS_BAR              // Show a progress bar on HD44780 LCDs for SD printing
-    #if ENABLED(LCD_PROGRESS_BAR)
-        #define PROGRESS_BAR_BAR_TIME 2000 // (ms) Amount of time to show the bar
-        #define PROGRESS_BAR_MSG_TIME 3000 // (ms) Amount of time to show the status message
-        #define PROGRESS_MSG_EXPIRE 0 // (ms) Amount of time to retain the status message (0=forever)
-    //#define PROGRESS_MSG_ONCE           // Show the message for MSG_TIME then clear it
-    //#define LCD_PROGRESS_BAR_TEST       // Add a menu item to test the progress bar
-    #endif
-#endif
-
-/**
- * LED Control Menu
- * Enable this feature to add LED Control to the LCD menu
- */
-//#define LED_CONTROL_MENU
-#if ENABLED(LED_CONTROL_MENU)
-    #define LED_COLOR_PRESETS // Enable the Preset Color menu option
-    #if ENABLED(LED_COLOR_PRESETS)
-        #define LED_USER_PRESET_RED 255 // User defined RED value
-        #define LED_USER_PRESET_GREEN 128 // User defined GREEN value
-        #define LED_USER_PRESET_BLUE 0 // User defined BLUE value
-        #define LED_USER_PRESET_WHITE 255 // User defined WHITE value
-        #define LED_USER_PRESET_BRIGHTNESS 255 // User defined intensity
-    //#define LED_USER_PRESET_STARTUP       // Have the printer display the user preset color on startup
-    #endif
-#endif // LED_CONTROL_MENU
-
-#if ENABLED(SDSUPPORT)
-
-    // Some RAMPS and other boards don't detect when an SD card is inserted. You can work
-    // around this by connecting a push button or single throw switch to the pin defined
-    // as SD_DETECT_PIN in your board's pins definitions.
-    // This setting should be disabled unless you are using a push button, pulling the pin to ground.
-    // Note: This is always disabled for ULTIPANEL (except ELB_FULL_GRAPHIC_CONTROLLER).
-    #define SD_DETECT_INVERTED
-
-    #define SD_FINISHED_STEPPERRELEASE true // Disable steppers when SD Print is finished
-    #define SD_FINISHED_RELEASECOMMAND "M84 X Y Z E" // You might want to keep the Z enabled so your bed stays in place.
-
-    // Reverse SD sort to show "more recent" files first, according to the card's FAT.
-    // Since the FAT gets out of order with usage, SDCARD_SORT_ALPHA is recommended.
-    #define SDCARD_RATHERRECENTFIRST
-
-    // Add an option in the menu to run all auto#.g files
-    //#define MENU_ADDAUTOSTART
-
-    /**
-   * Continue after Power-Loss (Creality3D)
-   *
-   * Store the current state to the SD Card at the start of each layer
-   * during SD printing. If the recovery file is found at boot time, present
-   * an option on the LCD screen to continue the print from the last-known
-   * point in the file.
-   */
-    //#define POWER_LOSS_RECOVERY
-    #if ENABLED(POWER_LOSS_RECOVERY)
-    //#define POWER_LOSS_PIN   44     // Pin to detect power loss
-    //#define POWER_LOSS_STATE HIGH   // State of pin indicating power loss
-    #endif
-
-    /**
-   * Sort SD file listings in alphabetical order.
-   *
-   * With this option enabled, items on SD cards will be sorted
-   * by name for easier navigation.
-   *
-   * By default...
-   *
-   *  - Use the slowest -but safest- method for sorting.
-   *  - Folders are sorted to the top.
-   *  - The sort key is statically allocated.
-   *  - No added G-code (M34) support.
-   *  - 40 item sorting limit. (Items after the first 40 are unsorted.)
-   *
-   * SD sorting uses static allocation (as set by SDSORT_LIMIT), allowing the
-   * compiler to calculate the worst-case usage and throw an error if the SRAM
-   * limit is exceeded.
-   *
-   *  - SDSORT_USES_RAM provides faster sorting via a static directory buffer.
-   *  - SDSORT_USES_STACK does the same, but uses a local stack-based buffer.
-   *  - SDSORT_CACHE_NAMES will retain the sorted file listing in RAM. (Expensive!)
-   *  - SDSORT_DYNAMIC_RAM only uses RAM when the SD menu is visible. (Use with caution!)
-   */
-    //#define SDCARD_SORT_ALPHA
-
-    // SD Card Sorting options
-    #if ENABLED(SDCARD_SORT_ALPHA)
-        #define SDSORT_LIMIT 40 // Maximum number of sorted items (10-256). Costs 27 bytes each.
-        #define FOLDER_SORTING -1 // -1=above  0=none  1=below
-        #define SDSORT_GCODE false // Allow turning sorting on/off with LCD and M34 g-code.
-        #define SDSORT_USES_RAM false // Pre-allocate a static array for faster pre-sorting.
-        #define SDSORT_USES_STACK false // Prefer the stack for pre-sorting to give back some SRAM. (Negated by next 2 options.)
-        #define SDSORT_CACHE_NAMES false // Keep sorted items in RAM longer for speedy performance. Most expensive option.
-        #define SDSORT_DYNAMIC_RAM false // Use dynamic allocation (within SD menus). Least expensive option. Set SDSORT_LIMIT before use!
-        #define SDSORT_CACHE_VFATS 2 // Maximum number of 13-byte VFAT entries to use for sorting.
-    // Note: Only affects SCROLL_LONG_FILENAMES with SDSORT_CACHE_NAMES but not SDSORT_DYNAMIC_RAM.
-    #endif
-
-    // This allows hosts to request long names for files and folders with M33
-    //#define LONG_FILENAME_HOST_SUPPORT
-
-    // Enable this option to scroll long filenames in the SD card menu
-    //#define SCROLL_LONG_FILENAMES
-
-    /**
-   * This option allows you to abort SD printing when any endstop is triggered.
-   * This feature must be enabled with "M540 S1" or from the LCD menu.
-   * To have any effect, endstops must be enabled during SD printing.
-   */
-    //#define ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED
-
-    /**
-   * This option makes it easier to print the same SD Card file again.
-   * On print completion the LCD Menu will open with the file selected.
-   * You can just click to start the print, or navigate elsewhere.
-   */
-    //#define SD_REPRINT_LAST_SELECTED_FILE
-
-    /**
-   * Auto-report SdCard status with M27 S<seconds>
-   */
-    //#define AUTO_REPORT_SD_STATUS
-
-    /**
-   * Support for USB thumb drives using an Arduino USB Host Shield or
-   * equivalent MAX3421E breakout board. The USB thumb drive will appear
-   * to Marlin as an SD card.
-   *
-   * The MAX3421E must be assigned the same pins as the SD card reader, with
-   * the following pin mapping:
-   *
-   *    SCLK, MOSI, MISO --> SCLK, MOSI, MISO
-   *    INT              --> SD_DETECT_PIN
-   *    SS               --> SDSS
-   */
-    #define USB_FLASH_DRIVE_SUPPORT
-    #if ENABLED(USB_FLASH_DRIVE_SUPPORT)
-        #define USB_CS_PIN SDSS
-        #define USB_INTR_PIN SD_DETECT_PIN
-    #endif
-
-    /**
-   * When using a bootloader that supports SD-Firmware-Flashing,
-   * add a menu item to activate SD-FW-Update on the next reboot.
-   *
-   * Requires ATMEGA2560 (Arduino Mega)
-   *
-   * Tested with this bootloader:
-   *   https://github.com/FleetProbe/MicroBridge-Arduino-ATMega2560
-   */
-    //#define SD_FIRMWARE_UPDATE
-    #if ENABLED(SD_FIRMWARE_UPDATE)
-        #define SD_FIRMWARE_UPDATE_EEPROM_ADDR 0x1FF
-        #define SD_FIRMWARE_UPDATE_ACTIVE_VALUE 0xF0
-        #define SD_FIRMWARE_UPDATE_INACTIVE_VALUE 0xFF
-    #endif
-
-// Add an optimized binary file transfer mode, initiated with 'M28 B1'
-//#define BINARY_FILE_TRANSFER
-
-#endif // SDSUPPORT
-
-/**
- * Additional options for Graphical Displays
- *
- * Use the optimizations here to improve printing performance,
- * which can be adversely affected by graphical display drawing,
- * especially when doing several short moves, and when printing
- * on DELTA and SCARA machines.
- *
- * Some of these options may result in the display lagging behind
- * controller events, as there is a trade-off between reliable
- * printing performance versus fast display updates.
- */
-#if HAS_GRAPHICAL_LCD
-    // Show SD percentage next to the progress bar
-    //#define DOGM_SD_PERCENT
-
-    // Enable to save many cycles by drawing a hollow frame on the Info Screen
-    #define XYZ_HOLLOW_FRAME
-
-    // Enable to save many cycles by drawing a hollow frame on Menu Screens
-    #define MENU_HOLLOW_FRAME
-
-    // A bigger font is available for edit items. Costs 3120 bytes of PROGMEM.
-    // Western only. Not available for Cyrillic, Kana, Turkish, Greek, or Chinese.
-    //#define USE_BIG_EDIT_FONT
-
-    // A smaller font may be used on the Info Screen. Costs 2300 bytes of PROGMEM.
-    // Western only. Not available for Cyrillic, Kana, Turkish, Greek, or Chinese.
-    //#define USE_SMALL_INFOFONT
-
-    // Enable this option and reduce the value to optimize screen updates.
-    // The normal delay is 10µs. Use the lowest value that still gives a reliable display.
-    //#define DOGM_SPI_DELAY_US 5
-
-    // Swap the CW/CCW indicators in the graphics overlay
-    //#define OVERLAY_GFX_REVERSE
-
-    /**
-   * ST7920-based LCDs can emulate a 16 x 4 character display using
-   * the ST7920 character-generator for very fast screen updates.
-   * Enable LIGHTWEIGHT_UI to use this special display mode.
-   *
-   * Since LIGHTWEIGHT_UI has limited space, the position and status
-   * message occupy the same line. Set STATUS_EXPIRE_SECONDS to the
-   * length of time to display the status message before clearing.
-   *
-   * Set STATUS_EXPIRE_SECONDS to zero to never clear the status.
-   * This will prevent position updates from being displayed.
-   */
-    #if ENABLED(U8GLIB_ST7920)
-        //#define LIGHTWEIGHT_UI
-        #if ENABLED(LIGHTWEIGHT_UI)
-            #define STATUS_EXPIRE_SECONDS 20
-        #endif
-    #endif
-
-    /**
-   * Status (Info) Screen customizations
-   * These options may affect code size and screen render time.
-   * Custom status screens can forcibly override these settings.
-   */
-    //#define STATUS_COMBINE_HEATERS    // Use combined heater images instead of separate ones
-    //#define STATUS_HOTEND_NUMBERLESS  // Use plain hotend icons instead of numbered ones (with 2+ hotends)
-    #define STATUS_HOTEND_INVERTED // Show solid nozzle bitmaps when heating (Requires STATUS_HOTEND_ANIM)
-    #define STATUS_HOTEND_ANIM // Use a second bitmap to indicate hotend heating
-    #define STATUS_BED_ANIM // Use a second bitmap to indicate bed heating
-//#define STATUS_ALT_BED_BITMAP     // Use the alternative bed bitmap
-//#define STATUS_ALT_FAN_BITMAP     // Use the alternative fan bitmap
-//#define STATUS_FAN_FRAMES 3       // :[0,1,2,3,4] Number of fan animation frames
-//#define STATUS_HEAT_PERCENT       // Show heating in a progress bar
-
-#endif // HAS_GRAPHICAL_LCD
-
 // @section safety
 
 // The hardware watchdog should reset the microcontroller disabling all outputs,
@@ -1121,45 +676,14 @@
     #endif
 #endif
 
-// @section extruder
-
-/**
- * Linear Pressure Control v1.5
- *
- * Assumption: advance [steps] = k * (delta velocity [steps/s])
- * K=0 means advance disabled.
- *
- * NOTE: K values for LIN_ADVANCE 1.5 differ from earlier versions!
- *
- * Set K around 0.22 for 3mm PLA Direct Drive with ~6.5cm between the drive gear and heatbreak.
- * Larger K values will be needed for flexible filament and greater distances.
- * If this algorithm produces a higher speed offset than the extruder can handle (compared to E jerk)
- * print acceleration will be reduced during the affected moves to keep within the limit.
- *
- * See http://marlinfw.org/docs/features/lin_advance.html for full instructions.
- * Mention @Sebastianv650 on GitHub to alert the author of any issues.
- */
-//#define LIN_ADVANCE
-#if ENABLED(LIN_ADVANCE)
-    #define LIN_ADVANCE_K 0 // Unit: mm compression per 1mm/s extruder speed
-//#define LA_DEBUG          // If enabled, this will generate debug information output over USB.
-#endif
-
 // @section leveling
 
-#if EITHER(MESH_BED_LEVELING, AUTO_BED_LEVELING_UBL)
+#if ENABLED(AUTO_BED_LEVELING_UBL)
 // Override the mesh area if the automatic (max) area is too large
-	#ifdef MINI_I3_MK33
-		#define MESH_MIN_X (10.5f)
-		#define MESH_MIN_Y (-10.5f)
-		#define MESH_MAX_X (X_BED_SIZE + MESH_MIN_X)
-		#define MESH_MAX_Y (Y_BED_SIZE - MESH_MIN_Y)
-	#else
-		#define MESH_MIN_X (-41)
-		#define MESH_MIN_Y (-48)
-		#define MESH_MAX_X (X_BED_SIZE + 15)
-		#define MESH_MAX_Y (Y_BED_SIZE + 46)
-	#endif
+#define MESH_MIN_X (-41)
+#define MESH_MIN_Y (-48)
+#define MESH_MAX_X (X_BED_SIZE + 15)
+#define MESH_MAX_Y (Y_BED_SIZE + 46)
 #endif
 
 /**
@@ -1316,16 +840,6 @@
 //#define SERIAL_XON_XOFF
 #endif
 
-#if ENABLED(SDSUPPORT)
-// Enable this option to collect and display the maximum
-// RX queue usage after transferring a file to SD.
-//#define SERIAL_STATS_MAX_RX_QUEUED
-
-// Enable this option to collect and display the number
-// of dropped bytes after a file transfer to SD.
-//#define SERIAL_STATS_DROPPED_RX
-#endif
-
 // Enable an emergency-command parser to intercept certain commands as they
 // enter the serial receive buffer, so they cannot be blocked.
 // Currently handles M108, M112, M410
@@ -1355,41 +869,6 @@
  *   'M106 P<fan> T1'     : Restore the previous fan speed
  */
 //#define EXTRA_FAN_SPEED
-
-/**
- * Firmware-based and LCD-controlled retract
- *
- * Add G10 / G11 commands for automatic firmware-based retract / recover.
- * Use M207 and M208 to define parameters for retract / recover.
- *
- * Use M209 to enable or disable auto-retract.
- * With auto-retract enabled, all G1 E moves within the set range
- * will be converted to firmware-based retract/recover moves.
- *
- * Be sure to turn off auto-retract during filament change.
- *
- * Note that M207 / M208 / M209 settings are saved to EEPROM.
- *
- */
-//#define FWRETRACT
-#if ENABLED(FWRETRACT)
-    #define FWRETRACT_AUTORETRACT // costs ~500 bytes of PROGMEM
-    #if ENABLED(FWRETRACT_AUTORETRACT)
-        #define MIN_AUTORETRACT 0.1 // When auto-retract is on, convert E moves of this length and over
-        #define MAX_AUTORETRACT 10.0 // Upper limit for auto-retract conversion
-    #endif
-    #define RETRACT_LENGTH 3 // Default retract length (positive mm)
-    #define RETRACT_LENGTH_SWAP 13 // Default swap retract length (positive mm), for extruder change
-    #define RETRACT_FEEDRATE 45 // Default feedrate for retracting (mm/s)
-    #define RETRACT_ZRAISE 0 // Default retract Z-raise (mm)
-    #define RETRACT_RECOVER_LENGTH 0 // Default additional recover length (mm, added to retract length when recovering)
-    #define RETRACT_RECOVER_LENGTH_SWAP 0 // Default additional swap recover length (mm, added to retract length when recovering from extruder change)
-    #define RETRACT_RECOVER_FEEDRATE 8 // Default feedrate for recovering from retraction (mm/s)
-    #define RETRACT_RECOVER_FEEDRATE_SWAP 8 // Default feedrate for recovering from swap retraction (mm/s)
-    #if ENABLED(MIXING_EXTRUDER)
-    //#define RETRACT_SYNC_MIXING         // Retract and restore all mixing steppers simultaneously
-    #endif
-#endif
 
 /**
  * Universal tool change settings.
@@ -1424,13 +903,11 @@
  * Advanced Pause
  * Experimental feature for filament change support and for parking the nozzle when paused.
  * Adds the GCode M600 for initiating filament change.
- * If PARK_HEAD_ON_PAUSE enabled, adds the GCode M125 to pause printing and park the nozzle.
  *
  * Requires an LCD display.
- * Requires NOZZLE_PARK_FEATURE.
  * This feature is required for the default FILAMENT_RUNOUT_SCRIPT.
  */
-#define ADVANCED_PAUSE_FEATURE
+#define ADVANCED_PAUSE_FEATURE HAS_PAUSE()
 #if ENABLED(ADVANCED_PAUSE_FEATURE)
     #define FILAMENT_UNLOAD_RAMMING_SEQUENCE \
         { \
@@ -1439,16 +916,6 @@
             { -5, 50 }, \
             { -50, 1500 }, \
         }
-	#ifdef MINI_I3_MK33
-	    #define FILAMENT_RUNOUT_RAMMING_SEQUENCE \
-	           { \
-	                { 7, 1500 }, \
-	                { -50, 2700 }, \
-	                { -5, 50 }, \
-	                { -50, 1500 }, \
-	            }
-	#endif
-
     // TODO remove after mmu is not mandatory for the build
     #define FILAMENT_MMU2_RAMMING_SEQUENCE \
        { \
@@ -1457,82 +924,43 @@
             { -5, 50 / 60.F}, \
             { -50, 1500 / 60.F}, \
         }
+    #define PAUSE_PARK_RETRACT_FEEDRATE 66 // (mm/s) Initial retract feedrate.
+    #define PAUSE_PARK_RETRACT_LENGTH 5 // (mm) Initial retract.
+// This short retract is done immediately, before parking the nozzle.
+    #define FILAMENT_CHANGE_UNLOAD_FEEDRATE 80 // (mm/s) Unload filament feedrate. This can be pretty fast.
+    #define FILAMENT_CHANGE_UNLOAD_ACCEL 1250 // (mm/s^2) Lower acceleration may allow a faster feedrate.
+    #define FILAMENT_CHANGE_UNLOAD_LENGTH 400 // (mm) The length of filament for a complete unload.
+//   For Bowden, the full length of the tube and nozzle.
+//   For direct drive, the full length of the nozzle.
+//   Set to 0 for manual unloading.
+    #define FILAMENT_CHANGE_SLOW_LOAD_FEEDRATE 10 // (mm/s) Slow move when starting load.
+    #define FILAMENT_CHANGE_SLOW_LOAD_LENGTH 40 // (mm) Slow length, to allow time to insert material.
+// 0 to disable start loading and skip to fast load only
+    #define FILAMENT_CHANGE_FAST_LOAD_FEEDRATE 80 // (mm/s) Load filament feedrate. This can be pretty fast.
+    #define FILAMENT_CHANGE_FAST_LOAD_ACCEL 625 // (mm/s^2) Lower acceleration may allow a faster feedrate.
+    #define FILAMENT_CHANGE_FAST_LOAD_LENGTH 320 // (mm) Load length of filament, from extruder gear to nozzle.
+//   For Bowden, the full length of the tube and nozzle.
+//   For direct drive, the full length of the nozzle.
+//#define ADVANCED_PAUSE_CONTINUOUS_PURGE       // Purge continuously up to the purge length until interrupted.
+    #define ADVANCED_PAUSE_PURGE_FEEDRATE 3 // (mm/s) Extrude feedrate (after loading). Should be slower than load feedrate.
+    #define ADVANCED_PAUSE_PURGE_LENGTH 50 // (mm) Length to extrude after loading.
+//   Set to 0 for manual extrusion.
+//   Filament can be extruded repeatedly from the Filament Change menu
+//   until extrusion is consistent, and to purge old filament.
+    #define ADVANCED_PAUSE_RESUME_PRIME 0 // (mm) Extra distance to prime nozzle after returning from park.
 
-extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
-
-	#ifdef MINI_I3_MK33
-	    #define PAUSE_PARK_RETRACT_FEEDRATE 10.8 // (mm/s) Initial retract feedrate.
-	    #define PAUSE_PARK_RETRACT_LENGTH 1 // (mm) Initial retract.
-	        // This short retract is done immediately, before parking the nozzle.
-	    #define FILAMENT_CHANGE_UNLOAD_FEEDRATE 27 // (mm/s) Unload filament feedrate. This can be pretty fast.
-	    #define FILAMENT_CHANGE_UNLOAD_ACCEL 1100 // (mm/s^2) Lower acceleration may allow a faster feedrate.
-	    #define FILAMENT_CHANGE_UNLOAD_LENGTH 105 // (mm) The length of filament for a complete unload.
-	        //   For Bowden, the full length of the tube and nozzle.
-	        //   For direct drive, the full length of the nozzle.
-	        //   Set to 0 for manual unloading.
-	    #define FILAMENT_CHANGE_SLOW_LOAD_FEEDRATE 5.4 // (mm/s) Slow move when starting load.
-	    #define FILAMENT_CHANGE_SLOW_LOAD_LENGTH 30 // (mm) Slow length, to allow time to insert material. //60
-	        // 0 to disable start loading and skip to fast load only
-	    #define FILAMENT_CHANGE_FAST_LOAD_FEEDRATE 18 // (mm/s) Load filament feedrate. This can be pretty fast. //40
-	    #define FILAMENT_CHANGE_FAST_LOAD_ACCEL 100 // (mm/s^2) Lower acceleration may allow a faster feedrate.  //200
-	    // #define FILAMENT_CHANGE_FAST_LOAD_LENGTH 50 // (mm) Load length of filament, from extruder gear to nozzle. //75
-	        //   For Bowden, the full length of the tube and nozzle.
-	        //   For direct drive, the full length of the nozzle.
-	    //#define ADVANCED_PAUSE_CONTINUOUS_PURGE       // Purge continuously up to the purge length until interrupted.
-	    #define ADVANCED_PAUSE_PURGE_FEEDRATE 2.7 // (mm/s) Extrude feedrate (after loading). Should be slower than load feedrate.
-	    #define ADVANCED_PAUSE_PURGE_LENGTH 21 // (mm) Length to extrude after loading. //50
-	        //   Set to 0 for manual extrusion.
-	        //   Filament can be extruded repeatedly from the Filament Change menu
-	        //   until extrusion is consistent, and to purge old filament.
-	    #define ADVANCED_PAUSE_RESUME_PRIME 0 // (mm) Extra distance to prime nozzle after returning from park.
-
-	// Filament Unload does a Retract, Delay, and Purge first:
-	    #define FILAMENT_UNLOAD_RETRACT_LENGTH 0 // (mm) Unload initial retract length.
-	    #define FILAMENT_UNLOAD_DELAY 0 // (ms) Delay for the filament to cool after retract.
-	    #define FILAMENT_UNLOAD_PURGE_LENGTH 15 // (mm) An unretract is done, then this length is purged.
-	    #define FILAMENT_UNLOAD_PURGE_FEEDRATE 24 // (mm/s)
-		#define FILAMENT_UNLOAD_PHASE1_LENGHT       20  // (mm)fast phase
-		#define FILAMENT_UNLOAD_PHASE2_LENGHT       30  // (mm)slow phase
-	#else
-	    #define PAUSE_PARK_RETRACT_FEEDRATE 66 // (mm/s) Initial retract feedrate.
-	    #define PAUSE_PARK_RETRACT_LENGTH 5 // (mm) Initial retract.
-	// This short retract is done immediately, before parking the nozzle.
-	    #define FILAMENT_CHANGE_UNLOAD_FEEDRATE 80 // (mm/s) Unload filament feedrate. This can be pretty fast.
-	    #define FILAMENT_CHANGE_UNLOAD_ACCEL 1250 // (mm/s^2) Lower acceleration may allow a faster feedrate.
-	    #define FILAMENT_CHANGE_UNLOAD_LENGTH 400 // (mm) The length of filament for a complete unload.
-	//   For Bowden, the full length of the tube and nozzle.
-	//   For direct drive, the full length of the nozzle.
-	//   Set to 0 for manual unloading.
-	    #define FILAMENT_CHANGE_SLOW_LOAD_FEEDRATE 10 // (mm/s) Slow move when starting load.
-	    #define FILAMENT_CHANGE_SLOW_LOAD_LENGTH 40 // (mm) Slow length, to allow time to insert material.
-	// 0 to disable start loading and skip to fast load only
-	    #define FILAMENT_CHANGE_FAST_LOAD_FEEDRATE 80 // (mm/s) Load filament feedrate. This can be pretty fast.
-	    #define FILAMENT_CHANGE_FAST_LOAD_ACCEL 625 // (mm/s^2) Lower acceleration may allow a faster feedrate.
-	    // #define FILAMENT_CHANGE_FAST_LOAD_LENGTH 320 // (mm) Load length of filament, from extruder gear to nozzle.
-	//   For Bowden, the full length of the tube and nozzle.
-	//   For direct drive, the full length of the nozzle.
-	//#define ADVANCED_PAUSE_CONTINUOUS_PURGE       // Purge continuously up to the purge length until interrupted.
-	    #define ADVANCED_PAUSE_PURGE_FEEDRATE 3 // (mm/s) Extrude feedrate (after loading). Should be slower than load feedrate.
-	    #define ADVANCED_PAUSE_PURGE_LENGTH 50 // (mm) Length to extrude after loading.
-	//   Set to 0 for manual extrusion.
-	//   Filament can be extruded repeatedly from the Filament Change menu
-	//   until extrusion is consistent, and to purge old filament.
-	    #define ADVANCED_PAUSE_RESUME_PRIME 0 // (mm) Extra distance to prime nozzle after returning from park.
-
-	// Filament Unload does a Retract, Delay, and Purge first:
-	    #define FILAMENT_UNLOAD_RETRACT_LENGTH 30 // (mm) Unload initial retract length.
-	    #define FILAMENT_UNLOAD_DELAY 5000 // (ms) Delay for the filament to cool after retract.
-	    #define FILAMENT_UNLOAD_PURGE_LENGTH 16 // (mm) An unretract is done, then this length is purged.
-	    #define FILAMENT_UNLOAD_PURGE_FEEDRATE 66 // (mm/s)
-	    #define FILAMENT_UNLOAD_PHASE1_LENGHT 35 // (mm)fast phase
-	    #define FILAMENT_UNLOAD_PHASE2_LENGHT 45 // (mm)slow phase
-	#endif
+// Filament Unload does a Retract, Delay, and Purge first:
+    #define FILAMENT_UNLOAD_RETRACT_LENGTH 30 // (mm) Unload initial retract length.
+    #define FILAMENT_UNLOAD_DELAY 5000 // (ms) Delay for the filament to cool after retract.
+    #define FILAMENT_UNLOAD_PURGE_LENGTH 16 // (mm) An unretract is done, then this length is purged.
+    #define FILAMENT_UNLOAD_PURGE_FEEDRATE 66 // (mm/s)
+    #define FILAMENT_UNLOAD_PHASE1_LENGHT 35 // (mm)fast phase
+    #define FILAMENT_UNLOAD_PHASE2_LENGHT 45 // (mm)slow phase
 
     #define PAUSE_PARK_NOZZLE_TIMEOUT 45 // (seconds) Time limit before the nozzle is turned off for safety.
     #define FILAMENT_CHANGE_ALERT_BEEPS 10 // Number of alert beeps to play when a response is needed.
     #define PAUSE_PARK_NO_STEPPER_TIMEOUT // Enable for XYZ steppers to stay powered on during filament change.
 
-//    #define PARK_HEAD_ON_PAUSE // Park the nozzle during pause and filament change.
 //#define HOME_BEFORE_FILAMENT_CHANGE           // Ensure homing has been completed prior to parking for filament change
 
     #define FILAMENT_LOAD_UNLOAD_GCODES // Add M701/M702 Load/Unload G-codes, plus Load/Unload in the LCD Prepare menu.
@@ -1653,13 +1081,7 @@ extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
     #define INTERPOLATE true // Interpolate X/Y/Z_MICROSTEPS to 256
 
     #if AXIS_IS_TMC(X)
-		#ifdef MINI_I3_MK33
-	        #define X_CURRENT 300 // (mA) RMS current.  MK3 motors
-		#elif MINI_COREXY
-            #define X_CURRENT 400 // (mA) RMS current. Multiply by 1.414 for peak current.
-		#else
-    	    #define X_CURRENT 350 // (mA) RMS current. Multiply by 1.414 for peak current.
-		#endif
+        #define X_CURRENT 350 // (mA) RMS current. Multiply by 1.414 for peak current.
         #define X_MICROSTEPS 16 // 0..256
         #define X_RSENSE 0.22
     #endif
@@ -1671,13 +1093,7 @@ extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
     #endif
 
     #if AXIS_IS_TMC(Y)
-		#ifdef MINI_I3_MK33
-			#define Y_CURRENT 370 // (mA) RMS current.  MK3 motors
-		#elif MINI_COREXY
-	        #define Y_CURRENT 400
-		#else
-	        #define Y_CURRENT 350
-		#endif
+        #define Y_CURRENT 350
         #define Y_MICROSTEPS 16
         #define Y_RSENSE 0.22
     #endif
@@ -1689,13 +1105,8 @@ extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
     #endif
 
     #if AXIS_IS_TMC(Z)
-		#ifdef MINI_I3_MK33
-	        #define Z_CURRENT 600
-	        #define Z_MICROSTEPS 16
-		#else
-	        #define Z_CURRENT 350 //530//650
-	        #define Z_MICROSTEPS 8 //16
-		#endif
+        #define Z_CURRENT 350 //530//650
+        #define Z_MICROSTEPS 8 //16
         #define Z_RSENSE 0.22
     #endif
 
@@ -1712,13 +1123,8 @@ extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
     #endif
 
     #if AXIS_IS_TMC(E0)
-		#ifdef MINI_I3_MK33
-	        #define E0_CURRENT 490
-	        #define E0_MICROSTEPS 32
-		#else
-	        #define E0_CURRENT 400 //520
-	        #define E0_MICROSTEPS 16 //32
-		#endif
+        #define E0_CURRENT 400 //520
+        #define E0_MICROSTEPS 16 //32
         #define E0_RSENSE 0.22
     #endif
 
@@ -1794,11 +1200,7 @@ extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
    * Use Trinamic's ultra quiet stepping mode.
    * When disabled, Marlin will use spreadCycle stepping mode.
    */
-    #ifdef MINI_I3_MK33
-    #elif MINI_COREXY
-    #else
     #define STEALTHCHOP_XY
-    #endif
     #define STEALTHCHOP_Z
 //  #define STEALTHCHOP_E
 
@@ -1864,8 +1266,8 @@ extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
      * Provides crash detection during printing and proper crash recovery.
      * Sensorless homing must be turned on and sensitivities set accordingly.
      */
-//    #define CRASH_RECOVERY
-    #ifdef CRASH_RECOVERY
+    #define CRASH_RECOVERY HAS_CRASH_DETECTION()
+    #if ENABLED(CRASH_RECOVERY)
         #define CRASH_STALL_GUARD { 50, 40 }  // internal value representing sensitivity
         #define CRASH_MAX_PERIOD { 381, 381 } // (steps per tick) - reciprocal value of minimal speed
         #define CRASH_FILTER (false)          // Stallguard filtering for crash detection
@@ -1886,9 +1288,8 @@ extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
  * Recovery from power failure. This is a distinct implementation from
  * POWER_LOSS_RECOVERY specific to Prusa printers.
  */
-//#define POWER_PANIC
-
-#ifdef POWER_PANIC
+#define POWER_PANIC HAS_POWER_PANIC()
+#if ENABLED(POWER_PANIC)
     #define POWER_PANIC_Z_LIFT_CYCLES 4 // 4xFullStep cycles = ~0.64mm
     #define POWER_PANIC_MAX_BED_DIFF 10 // Maximum bed temperature (C) difference for auto-recovery
 
@@ -1904,8 +1305,6 @@ extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
 
     #define POWER_PANIC_E_CURRENT 300 // (mA) RMS current
 #endif
-
-//#define REBOOT_RESTORE_Z
 
 /**
    * TMC2130, TMC2160, TMC2660, TMC5130, and TMC5160 only
@@ -1934,11 +1333,11 @@ extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
 
     #if EITHER(SENSORLESS_HOMING, SENSORLESS_PROBING)
         #if X_DRIVER_TYPE == TMC2209
-            #define X_STALL_SENSITIVITY config_store().homing_sens_x.get()
+            #define X_STALL_SENSITIVITY 130
         #endif
 
         #if Y_DRIVER_TYPE == TMC2209
-            #define Y_STALL_SENSITIVITY config_store().homing_sens_y.get()
+            #define Y_STALL_SENSITIVITY 130
         #endif
 
         #if Z_DRIVER_TYPE == TMC2209
@@ -1974,154 +1373,6 @@ extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
         {}
 
 #endif // HAS_TRINAMIC
-
-// @section L6470
-
-/**
- * L6470 Stepper Driver options
- *
- * Arduino-L6470 library (0.7.0 or higher) is required for this stepper driver.
- * https://github.com/ameyer/Arduino-L6470
- *
- * Requires the following to be defined in your pins_YOUR_BOARD file
- *     L6470_CHAIN_SCK_PIN
- *     L6470_CHAIN_MISO_PIN
- *     L6470_CHAIN_MOSI_PIN
- *     L6470_CHAIN_SS_PIN
- *     L6470_RESET_CHAIN_PIN  (optional)
- */
-#if HAS_DRIVER(L6470)
-
-//#define L6470_CHITCHAT        // Display additional status info
-
-    #if AXIS_DRIVER_TYPE_X(L6470)
-        #define X_MICROSTEPS 128 // Number of microsteps (VALID: 1, 2, 4, 8, 16, 32, 128)
-        #define X_OVERCURRENT 2000 // (mA) Current where the driver detects an over current (VALID: 375 x (1 - 16) - 6A max - rounds down)
-        #define X_STALLCURRENT 1500 // (mA) Current where the driver detects a stall (VALID: 31.25 * (1-128) -  4A max - rounds down)
-        #define X_MAX_VOLTAGE 127 // 0-255, Maximum effective voltage seen by stepper
-        #define X_CHAIN_POS 0 // Position in SPI chain, 0=Not in chain, 1=Nearest MOSI
-    #endif
-
-    #if AXIS_DRIVER_TYPE_X2(L6470)
-        #define X2_MICROSTEPS 128
-        #define X2_OVERCURRENT 2000
-        #define X2_STALLCURRENT 1500
-        #define X2_MAX_VOLTAGE 127
-        #define X2_CHAIN_POS 0
-    #endif
-
-    #if AXIS_DRIVER_TYPE_Y(L6470)
-        #define Y_MICROSTEPS 128
-        #define Y_OVERCURRENT 2000
-        #define Y_STALLCURRENT 1500
-        #define Y_MAX_VOLTAGE 127
-        #define Y_CHAIN_POS 0
-    #endif
-
-    #if AXIS_DRIVER_TYPE_Y2(L6470)
-        #define Y2_MICROSTEPS 128
-        #define Y2_OVERCURRENT 2000
-        #define Y2_STALLCURRENT 1500
-        #define Y2_MAX_VOLTAGE 127
-        #define Y2_CHAIN_POS 0
-    #endif
-
-    #if AXIS_DRIVER_TYPE_Z(L6470)
-        #define Z_MICROSTEPS 128
-        #define Z_OVERCURRENT 2000
-        #define Z_STALLCURRENT 1500
-        #define Z_MAX_VOLTAGE 127
-        #define Z_CHAIN_POS 0
-    #endif
-
-    #if AXIS_DRIVER_TYPE_Z2(L6470)
-        #define Z2_MICROSTEPS 128
-        #define Z2_OVERCURRENT 2000
-        #define Z2_STALLCURRENT 1500
-        #define Z2_MAX_VOLTAGE 127
-        #define Z2_CHAIN_POS 0
-    #endif
-
-    #if AXIS_DRIVER_TYPE_Z3(L6470)
-        #define Z3_MICROSTEPS 128
-        #define Z3_OVERCURRENT 2000
-        #define Z3_STALLCURRENT 1500
-        #define Z3_MAX_VOLTAGE 127
-        #define Z3_CHAIN_POS 0
-    #endif
-
-    #if AXIS_DRIVER_TYPE_E0(L6470)
-        #define E0_MICROSTEPS 128
-        #define E0_OVERCURRENT 2000
-        #define E0_STALLCURRENT 1500
-        #define E0_MAX_VOLTAGE 127
-        #define E0_CHAIN_POS 0
-    #endif
-
-    #if AXIS_DRIVER_TYPE_E1(L6470)
-        #define E1_MICROSTEPS 128
-        #define E1_OVERCURRENT 2000
-        #define E1_STALLCURRENT 1500
-        #define E1_MAX_VOLTAGE 127
-        #define E1_CHAIN_POS 0
-    #endif
-
-    #if AXIS_DRIVER_TYPE_E2(L6470)
-        #define E2_MICROSTEPS 128
-        #define E2_OVERCURRENT 2000
-        #define E2_STALLCURRENT 1500
-        #define E2_MAX_VOLTAGE 127
-        #define E2_CHAIN_POS 0
-    #endif
-
-    #if AXIS_DRIVER_TYPE_E3(L6470)
-        #define E3_MICROSTEPS 128
-        #define E3_OVERCURRENT 2000
-        #define E3_STALLCURRENT 1500
-        #define E3_MAX_VOLTAGE 127
-        #define E3_CHAIN_POS 0
-    #endif
-
-    #if AXIS_DRIVER_TYPE_E4(L6470)
-        #define E4_MICROSTEPS 128
-        #define E4_OVERCURRENT 2000
-        #define E4_STALLCURRENT 1500
-        #define E4_MAX_VOLTAGE 127
-        #define E4_CHAIN_POS 0
-    #endif
-
-    #if AXIS_DRIVER_TYPE_E5(L6470)
-        #define E5_MICROSTEPS 128
-        #define E5_OVERCURRENT 2000
-        #define E5_STALLCURRENT 1500
-        #define E5_MAX_VOLTAGE 127
-        #define E5_CHAIN_POS 0
-    #endif
-
-/**
-   * Monitor L6470 drivers for error conditions like over temperature and over current.
-   * In the case of over temperature Marlin can decrease the drive until the error condition clears.
-   * Other detected conditions can be used to stop the current print.
-   * Relevant g-codes:
-   * M906 - I1/2/3/4/5  Set or get motor drive level using axis codes X, Y, Z, E. Report values if no axis codes given.
-   *         I not present or I0 or I1 - X, Y, Z or E0
-   *         I2 - X2, Y2, Z2 or E1
-   *         I3 - Z3 or E3
-   *         I4 - E4
-   *         I5 - E5
-   * M916 - Increase drive level until get thermal warning
-   * M917 - Find minimum current thresholds
-   * M918 - Increase speed until max or error
-   * M122 S0/1 - Report driver parameters
-   */
-//#define MONITOR_L6470_DRIVER_STATUS
-
-    #if ENABLED(MONITOR_L6470_DRIVER_STATUS)
-        #define KVAL_HOLD_STEP_DOWN 1
-    //#define L6470_STOP_ON_ERROR
-    #endif
-
-#endif // L6470
 
 // @section extras
 
@@ -2200,39 +1451,6 @@ extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
 #endif
 
 /**
- * Filament Width Sensor
- *
- * Measures the filament width in real-time and adjusts
- * flow rate to compensate for any irregularities.
- *
- * Also allows the measured filament diameter to set the
- * extrusion rate, so the slicer only has to specify the
- * volume.
- *
- * Only a single extruder is supported at this time.
- *
- *  34 RAMPS_14    : Analog input 5 on the AUX2 connector
- *  81 PRINTRBOARD : Analog input 2 on the Exp1 connector (version B,C,D,E)
- * 301 RAMBO       : Analog input 3
- *
- * Note: May require analog pins to be defined for other boards.
- */
-//#define FILAMENT_WIDTH_SENSOR
-
-#if ENABLED(FILAMENT_WIDTH_SENSOR)
-    #define FILAMENT_SENSOR_EXTRUDER_NUM 0 // Index of the extruder that has the filament sensor. :[0,1,2,3,4]
-    #define MEASUREMENT_DELAY_CM 14 // (cm) The distance from the filament sensor to the melting chamber
-
-    #define FILWIDTH_ERROR_MARGIN 1.0 // (mm) If a measurement differs too much from nominal width ignore it
-    #define MAX_MEASUREMENT_DELAY 20 // (bytes) Buffer size for stored measurements (1 byte per cm). Must be larger than MEASUREMENT_DELAY_CM.
-
-    #define DEFAULT_MEASURED_FILAMENT_DIA DEFAULT_NOMINAL_FILAMENT_DIA // Set measured to nominal initially
-
-// Display filament width on the LCD status line. Status messages will expire after 5 seconds.
-//#define FILAMENT_LCD_DISPLAY
-#endif
-
-/**
  * CNC Coordinate Systems
  *
  * Enables G53 and G54-G59.3 commands to select coordinate systems
@@ -2244,11 +1462,6 @@ extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
  * Auto-report temperatures with M155 S<seconds>
  */
 #define AUTO_REPORT_TEMPERATURES
-
-/**
- * Include capabilities in M115 output
- */
-#define EXTENDED_CAPABILITIES_REPORT
 
 /**
  * Disable all Volumetric extrusion options
@@ -2446,38 +1659,6 @@ extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
 #endif // I2C_POSITION_ENCODERS
 
 /**
- * MAX7219 Debug Matrix
- *
- * Add support for a low-cost 8x8 LED Matrix based on the Max7219 chip as a realtime status display.
- * Requires 3 signal wires. Some useful debug options are included to demonstrate its usage.
- */
-//#define MAX7219_DEBUG
-#if ENABLED(MAX7219_DEBUG)
-    #define MAX7219_CLK_PIN 64
-    #define MAX7219_DIN_PIN 57
-    #define MAX7219_LOAD_PIN 44
-
-    //#define MAX7219_GCODE          // Add the M7219 G-code to control the LED matrix
-    #define MAX7219_INIT_TEST 2 // Do a test pattern at initialization (Set to 2 for spiral)
-    #define MAX7219_NUMBER_UNITS 1 // Number of Max7219 units in chain.
-    #define MAX7219_ROTATE 0 // Rotate the display clockwise (in multiples of +/- 90°)
-// connector at:  right=0   bottom=-90  top=90  left=180
-//#define MAX7219_REVERSE_ORDER  // The individual LED matrix units may be in reversed order
-
-    /**
-   * Sample debug features
-   * If you add more debug displays, be careful to avoid conflicts!
-   */
-    #define MAX7219_DEBUG_PRINTER_ALIVE // Blink corner LED of 8x8 matrix to show that the firmware is functioning
-    #define MAX7219_DEBUG_PLANNER_HEAD 3 // Show the planner queue head position on this and the next LED matrix row
-    #define MAX7219_DEBUG_PLANNER_TAIL 5 // Show the planner queue tail position on this and the next LED matrix row
-
-    #define MAX7219_DEBUG_PLANNER_QUEUE 0 // Show the current planner queue depth on this and the next LED matrix row
-// If you experience stuttering, reboots, etc. this option can reveal how
-// tweaks made to the configuration are affecting the printer in real-time.
-#endif
-
-/**
  * NanoDLP Sync support
  *
  * Add support for Synchronized Z moves when using with NanoDLP. G0/G1 axis moves will output "Z_move_comp"
@@ -2593,4 +1774,4 @@ extern uint16_t FILAMENT_CHANGE_FAST_LOAD_LENGTH;
 /**
  * Enable PID autotune
  **/
-#define PID_AUTOTUNE
+//#define PID_AUTOTUNE

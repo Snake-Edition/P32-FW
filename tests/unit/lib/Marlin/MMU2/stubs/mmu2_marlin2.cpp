@@ -9,6 +9,7 @@ void SetMarlinIsPrinting(bool p) {
 
 static uint16_t hotendTargetTemp = 0;
 static uint16_t hotendTemp = 0;
+static uint16_t extrudeMinTemp = 170;
 
 #define mockLog_RecordFnTemp(t) mockLog.Record(std::string { mockLog.MethodName(__PRETTY_FUNCTION__) } + "(" + std::to_string(t) + ")")
 
@@ -112,8 +113,11 @@ int16_t thermal_degHotend() {
     return hotendTemp;
 }
 
-void thermal_setExtrudeMintemp(int16_t t) {
+int16_t thermal_setExtrudeMintemp(int16_t t) {
+    int16_t rv = extrudeMinTemp;
+    extrudeMinTemp = t;
     mockLog_RecordFnTemp(t);
+    return rv;
 }
 
 void thermal_setTargetHotend(int16_t t) {
@@ -139,6 +143,10 @@ void gcode_reset_stepper_timeout() {
 }
 
 void enqueue_gcode(const char *gcode) {
+}
+
+bool marlin_is_retracted() {
+    return false; // @@TODO probably also subject to set/reset for unit tests in the future
 }
 
 } // namespace MMU2

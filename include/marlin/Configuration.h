@@ -26,6 +26,3 @@
 #ifndef MOTHERBOARD
     #error "Undefined MOTHERBOARD"
 #endif
-
-#define EXTENSIBLE_UI
-#define NO_LCD_MENUS

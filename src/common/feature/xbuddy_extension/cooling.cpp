@@ -9,8 +9,8 @@ FanCooling::FanPWM FanCooling::compute_auto_regulation_step(Temperature current_
 
     const float error = current_temperature - target_temperature;
 
-    // Simple P-regulation calculation
-    float regulation_output = last_regulation_output + (proportional_constant * error);
+    // Simple Feedback Regulator calculation - PID regulator, but only Integration part is used
+    float regulation_output = last_regulation_output + (integration_constant * error);
 
     regulation_output = std::clamp<float>(regulation_output, 0.0f, static_cast<float>(max_auto_pwm.value));
 

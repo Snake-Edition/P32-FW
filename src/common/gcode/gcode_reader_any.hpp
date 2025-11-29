@@ -20,6 +20,10 @@ public:
     AnyGcodeFormatReader &operator=(AnyGcodeFormatReader &&);
     ~AnyGcodeFormatReader();
 
+    bool open(const char *filename);
+
+    void close();
+
     IGcodeReader *get(); // never returns nullptr
     IGcodeReader &operator*() { return *get(); }
     IGcodeReader *operator->() { return get(); }

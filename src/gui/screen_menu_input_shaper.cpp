@@ -49,7 +49,7 @@ void ScreenMenuInputShaper::update_gui() {
 
 void ScreenMenuInputShaper::windowEvent(window_t *sender, GUI_event_t event, void *param) {
     if (event == GUI_event_t::CHILD_CLICK) {
-        switch (ftrstd::bit_cast<InputShaperMenuItemChildClickParam>(param)) {
+        switch (std::bit_cast<InputShaperMenuItemChildClickParam>(param)) {
 
         case InputShaperMenuItemChildClickParam::request_gui_update:
             update_gui();

@@ -1,7 +1,7 @@
 #include "lut.hpp"
 #include "common.hpp"
+#include "round_fixed.hpp"
 
-#include <hwio_pindef.h>
 #include <buddy/phase_stepping_opts.h>
 
 #include <array>
@@ -33,28 +33,6 @@ static const auto sin_lut_values = []() consteval {
 }();
 
 // Function definitions
-
-// Round a fixed point number to the nearest integer assuming given number of
-// fractional bits.
-template <typename T>
-static T round_fixed(T value, int frac_bits) {
-    // There is a catch: bit shifting for signed values as a mean to divide is
-    // implementation specific. On Cortex ARM it rounds down to negative
-    // infinity which is exactly what we **DON'T** want.
-    //
-    // You might wonder - if there such a fuss, why not just use integral
-    // division? By doing bit shifts, we still save time as we cannot avoid the
-    // branching as we need to either add or subtract the rounding value. With
-    // the bit shifts we are at 4 cycles, with division we are at 4-16 cycles.
-    if (value < 0) {
-        value = -value + (1 << (frac_bits - 1));
-        value = value >> frac_bits;
-        return -value;
-    } else {
-        value = value + (1 << (frac_bits - 1));
-        return value >> frac_bits;
-    }
-}
 
 int phase_stepping::sin_lut(int x, int range) {
     x = normalize_sin_phase(x);
@@ -112,14 +90,14 @@ void CorrectedCurrentLut::_update_phase_shift() {
         int phase_shift = 0;
         for (size_t n = 0; n != fixed_spectrum.size(); n++) {
             const auto &s = fixed_spectrum[n];
-            phase_shift += SIN_FRACTION * s.mag * sin_lut(n * item_phase + s.pha);
+            phase_shift += s.mag * sin_lut(n * item_phase + s.pha);
         }
         _phase_shift[i] = round_fixed(phase_shift, SIN_LUT_FRACTIONAL + MAG_FRACTIONAL);
     }
 }
 
 int CorrectedCurrentLut::_phase_shift_for_harmonic(int idx, int harmonic, int phase, int mag) {
-    int raw_phase_shift = SIN_FRACTION * mag * sin_lut(harmonic * idx * SIN_FRACTION + phase);
+    int raw_phase_shift = mag * sin_lut(harmonic * idx * SIN_FRACTION + phase);
     return round_fixed(raw_phase_shift, SIN_LUT_FRACTIONAL + MAG_FRACTIONAL);
 }
 

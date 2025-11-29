@@ -19,20 +19,10 @@ public:
     WI_ICON_SWITCH_OFF_ON_t(bool value, const string_view_utf8 &label, const img::Resource *id_icon = nullptr, is_enabled_t enabled = is_enabled_t::yes, is_hidden_t hidden = is_hidden_t::no);
 
 public:
-    void set_value(bool set, bool emit_change);
+    void set_value(bool set);
 
     inline bool value() const {
         return value_;
-    }
-
-    // TODO: Remove this legacy function
-    inline size_t GetIndex() const {
-        return value_;
-    }
-
-    // TODO: Remove this legacy function
-    inline void SetIndex(size_t index) {
-        set_value(index > 0, false);
     }
 
 protected:
@@ -41,9 +31,6 @@ protected:
 
     virtual void click(IWindowMenu &window_menu) override;
     virtual void printExtension(Rect16 extension_rect, Color color_text, Color color_back, ropfn raster_op) const override;
-
-    /// Legacy reference to value_
-    const bool &index; // TODO: Remove this legacy variable
 
 private:
     bool value_ = false;

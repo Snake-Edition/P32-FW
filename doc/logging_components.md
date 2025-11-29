@@ -21,7 +21,6 @@ This file is generated automatically so don't edit it directly
 - FileSystem: logging::Severity::info, src/buddy/filesystem.cpp
 - Fsm: logging::Severity::debug, src/common/fsm_states.cpp
 - GUI: logging::Severity::debug, src/gui/logger.cpp
-- Led: logging::Severity::info, src/gui/led_animations/printer_animation_state.cpp
 - Loadcell: logging::Severity::info, src/common/loadcell.cpp
 - MMU2: logging::Severity::info, src/common/appmain.cpp
 - Marlin: logging::Severity::info, src/common/marlin_log_component.cpp
@@ -49,7 +48,6 @@ This file is generated automatically so don't edit it directly
 - Touch: logging::Severity::info, src/hw/touchscreen/touchscreen_common.cpp
 - USBDevice: logging::Severity::info, src/buddy/usb_device.cpp
 - USBHost: logging::Severity::info, src/buddy/usbh_conf.cpp
-- USBMSC: logging::Severity::debug, src/buddy/usb_device_msc.cpp
 - W25X: logging::Severity::debug, src/common/w25x.cpp
 - WUI: logging::Severity::debug, lib/WUI/wui.cpp
 - connect: logging::Severity::debug, src/connect/connect.cpp

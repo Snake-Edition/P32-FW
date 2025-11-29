@@ -13,6 +13,6 @@ public:
         return &i;
     }
     virtual string_view_utf8 GetText(const char *src) const {
-        return string_view_utf8::MakeCPUFLASH((const uint8_t *)src);
+        return string_view_utf8::MakeCPUFLASH(src);
     }
 };

@@ -20,6 +20,20 @@ public:
         flags.multiline = set;
     }
 
+    bool checks_overflow() const {
+        return flags.check_overflow;
+    }
+
+    void set_check_overflow(bool set) {
+        flags.check_overflow = set;
+    }
+
+    /// \returns whether the text would overflow the rectangle
+    bool check_text_overflow() const;
+
+    /// Automatically selects the largest font that would not case overflow of the text
+    void auto_select_font(Font largest = Font::largest_available, Font smallest = Font::small);
+
 protected:
     virtual void unconditionalDraw() override;
 

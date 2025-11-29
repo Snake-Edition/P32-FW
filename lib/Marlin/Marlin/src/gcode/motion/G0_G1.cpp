@@ -25,12 +25,6 @@
 
 #include "../../MarlinCore.h"
 
-#if ALL(FWRETRACT, FWRETRACT_AUTORETRACT)
-  #include "../../feature/fwretract.h"
-#endif
-
-#include "../../sd/cardreader.h"
-
 #if ENABLED(NANODLP_Z_SYNC)
   #include "../../module/planner.h"
 #endif
@@ -98,29 +92,10 @@ void GcodeSuite::G0_G1(TERN_(HAS_FAST_MOVES, const bool fast_move/*=false*/)) {
     }
   #endif
 
-  #if ALL(FWRETRACT, FWRETRACT_AUTORETRACT)
-
-    if (MIN_AUTORETRACT <= MAX_AUTORETRACT) {
-      // When M209 Autoretract is enabled, convert E-only moves to firmware retract/recover moves
-      if (fwretract.autoretract_enabled && parser.seen_test('E')
-        && !parser.seen(STR_AXES_MAIN)
-      ) {
-        const float echange = destination.e - current_position.e;
-        // Is this a retract or recover move?
-        if (WITHIN(ABS(echange), MIN_AUTORETRACT, MAX_AUTORETRACT) && fwretract.retracted[active_extruder] == (echange > 0.0)) {
-          current_position.e = destination.e;       // Hide a G1-based retract/recover from calculations
-          sync_plan_position_e();                   // AND from the planner
-          return fwretract.retract(echange < 0.0);  // Firmware-based retract/recover (double-retract ignored)
-        }
-      }
-    }
-
-  #endif // FWRETRACT
-
   #if ANY(IS_SCARA, POLAR)
-    fast_move ? prepare_fast_move_to_destination() : prepare_move_to_destination({.is_printing_move = true});
+    fast_move ? prepare_fast_move_to_destination() : prepare_move_to_destination({ .move = { .is_printing_move = true } });
   #else
-    prepare_move_to_destination({.is_printing_move = true});
+    prepare_move_to_destination({ .move = { .is_printing_move = true } });
   #endif
 
   #ifdef G0_FEEDRATE

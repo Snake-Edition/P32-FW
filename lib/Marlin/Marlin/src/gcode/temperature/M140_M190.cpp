@@ -33,10 +33,6 @@
   #include "../../module/printcounter.h"
 #endif
 
-#if ENABLED(PRINTER_EVENT_LEDS)
-  #include "../../feature/leds/leds.h"
-#endif
-
 #include "../../Marlin.h" // for wait_for_heatup and idle()
 
 /** \addtogroup G-Codes
@@ -83,8 +79,6 @@ void GcodeSuite::M190() {
     #endif
   }
   else return;
-
-  ui.set_status_P(thermalManager.isHeatingBed() ? GET_TEXT(MSG_BED_HEATING) : GET_TEXT(MSG_BED_COOLING));
 
   thermalManager.wait_for_bed(no_wait_for_cooling);
 }

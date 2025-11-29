@@ -38,9 +38,9 @@ struct SelftestTool_pre_23 {
     TestResult sideFsensor : 2;
     TestResult dockoffset : 2;
     TestResult tooloffset : 2;
-};
 
-bool operator==(SelftestTool_pre_23 lhs, SelftestTool_pre_23 rhs);
+    bool operator==(const SelftestTool_pre_23 &rhs) const = default;
+};
 
 /**
  * @brief Test results compacted in eeprom.
@@ -55,9 +55,9 @@ struct SelftestResult_pre_23 {
     TestResultNet wifi : 3;
     TestResult zalign : 2;
     SelftestTool_pre_23 tools[config_store_ns::old_eeprom::EEPROM_MAX_TOOL_COUNT];
-};
 
-bool operator==(SelftestResult_pre_23 lhs, SelftestResult_pre_23 rhs);
+    bool operator==(const SelftestResult_pre_23 &rhs) const = default;
+};
 
 /**
  * @brief Results for selftests of one tool.
@@ -72,13 +72,15 @@ struct SelftestTool {
     TestResult sideFsensor : 2;
     TestResult dockoffset : 2;
     TestResult tooloffset : 2;
+    TestResult gears : 2;
 
     bool has_heatbreak_fan_passed();
     TestResult evaluate_fans();
     void reset_fan_tests();
-};
 
-bool operator==(SelftestTool lhs, SelftestTool rhs);
+    bool operator==(const SelftestTool &rhs) const = default;
+};
+static_assert(sizeof(SelftestTool) == 3);
 
 /**
  * @brief Test results compacted in eeprom. This struct cannot have constructors because it's part of old eeprom implementation.
@@ -92,6 +94,8 @@ struct SelftestResultV23 {
     TestResultNet wifi : 3;
     TestResult zalign : 2;
     SelftestTool tools[config_store_ns::old_eeprom::EEPROM_MAX_TOOL_COUNT];
+
+    bool operator==(const SelftestResultV23 &rhs) const = default;
 };
 
 /**
@@ -108,12 +112,12 @@ struct SelftestResult_pre_gears {
     TestResultNet wifi : 3 {};
     TestResult zalign : 2 {};
     SelftestTool tools[config_store_ns::max_tool_count] {};
+
+    bool operator==(const SelftestResult_pre_gears &rhs) const = default;
 };
 
-bool operator==(SelftestResult_pre_gears lhs, SelftestResult_pre_gears rhs);
-
 /**
- * @brief Test results compacted in eeprom. Added gears calibration result to eeprom for snake selftest compatibility
+ * @brief Test results compacted in eeprom. Added gearbox alignment result to eeprom for snake selftest compatibility
  */
 struct SelftestResult {
     SelftestResult() = default;
@@ -125,10 +129,13 @@ struct SelftestResult {
     TestResultNet eth : 3 {};
     TestResultNet wifi : 3 {};
     TestResult zalign : 2 {};
-    TestResult gears : 2 {};
+    // This member is no longer used and is kept to allow backwards compatibility with config store
+    // It was replaced by a result supporting more than one toolhead, that can
+    // be found in SelftTool class
+    TestResult deprecated_gears : 2 {};
     SelftestTool tools[config_store_ns::max_tool_count] {};
-};
 
-bool operator==(SelftestResult lhs, SelftestResult rhs);
+    bool operator==(const SelftestResult &) const = default;
+};
 
 #pragma pack(pop)

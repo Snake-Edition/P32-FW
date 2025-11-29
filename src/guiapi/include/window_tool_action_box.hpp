@@ -261,7 +261,7 @@ public:
 
                 // Only disable items that are related to specific tools (exclude return, etc)
                 if constexpr (requires { menu_item.TOOL; } && menu_item.TOOL != Tool::None_Any) {
-                    if (!is_tool_enabled(ftrstd::to_underlying(menu_item.TOOL))) {
+                    if (!is_tool_enabled(std::to_underlying(menu_item.TOOL))) {
                         // if is_tool_enabled returns false for this particular tool, hide this menu item
                         menu_item.set_enabled(false);
                     }

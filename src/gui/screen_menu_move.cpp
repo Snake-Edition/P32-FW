@@ -6,6 +6,7 @@
 #include <option/has_toolchanger.h>
 #include <gui/menu_vars.h>
 #include <img_resources.hpp>
+#include <utils/string_builder.hpp>
 
 using namespace screen_menu_move;
 

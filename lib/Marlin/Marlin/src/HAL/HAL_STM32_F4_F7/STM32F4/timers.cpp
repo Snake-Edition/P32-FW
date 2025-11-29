@@ -60,6 +60,7 @@ void HAL_timer_start(const uint8_t timer_num, const uint32_t frequency) {
     switch (timer_num) {
       case STEP_TIMER_NUM:
         __HAL_RCC_TIM12_CLK_ENABLE();
+        __HAL_DBGMCU_FREEZE_TIM12();
         TimerHandle[timer_num].handle.Instance               = TIM12;
         TimerHandle[timer_num].handle.Init.Period            = 65535;
         TimerHandle[timer_num].handle.Init.Prescaler         = step_prescaler; // Frequency of timer ticks should be 1MHz, based on 168000000 / (167 + 1).
@@ -73,9 +74,10 @@ void HAL_timer_start(const uint8_t timer_num, const uint32_t frequency) {
       case MOVE_TIMER_NUM:
         // MOVE TIMER TIM6 - any available 16bit Timer
         __HAL_RCC_TIM6_CLK_ENABLE();
+        __HAL_DBGMCU_FREEZE_TIM6();
         TimerHandle[timer_num].handle.Instance            = TIM6;
         TimerHandle[timer_num].handle.Init.Prescaler      = move_prescaler;
-        TimerHandle[timer_num].handle.Init.CounterMode    = TIM_COUNTERMODE_UP;
+        TimerHandle[timer_num].handle.Init.CounterMode    = TIM_COUNTERMODE_DOWN;
         TimerHandle[timer_num].handle.Init.ClockDivision  = TIM_CLOCKDIVISION_DIV1;
         TimerHandle[timer_num].callback = (uint32_t)TC6_Handler;
         HAL_NVIC_SetPriority(MOVE_TIMER_IRQ_ID, ISR_PRIORITY_MOVE_TIMER, 0);

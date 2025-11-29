@@ -1,18 +1,21 @@
 #include "chamber.hpp"
 
-#include <cmath>
-
-#include <marlin_server_shared.h>
-#include <option/has_xbuddy_extension.h>
 #include <buddy/unreachable.hpp>
+#include <cmath>
+#include <config_store/store_instance.hpp>
+#include <marlin_server.hpp>
+#include <marlin_server_shared.h>
+#include <option/has_chamber_vents.h>
+#include <option/has_xbuddy_extension.h>
+#include <feature/safety_timer/safety_timer.hpp>
+#include "chamber_enums.hpp"
+
+#if HAS_CHAMBER_VENTS()
+    #include <marlin_stubs/feature/automatic_chamber_vents/automatic_chamber_vents.hpp>
+#endif
 
 #if XL_ENCLOSURE_SUPPORT()
     #include <hw/xl/xl_enclosure.hpp>
-#endif
-
-#if PRINTER_IS_PRUSA_COREONE()
-    #include <marlin_server.hpp>
-    #include <config_store/store_instance.hpp>
 #endif
 
 #if HAS_XBUDDY_EXTENSION()
@@ -148,6 +151,9 @@ std::optional<Temperature> Chamber::target_temperature() const {
 }
 
 std::optional<Temperature> Chamber::set_target_temperature(std::optional<Temperature> target) {
+    // Wake up heaters if they are timed out
+    buddy::safety_timer().reset_restore_nonblocking();
+
     std::lock_guard _lg(mutex_);
     target_temperature_ = target;
 
@@ -168,22 +174,45 @@ void Chamber::reset() {
 
 #if HAS_XBUDDY_EXTENSION()
     xbuddy_extension().set_fan_target_pwm(XBuddyExtension::Fan::cooling_fan_1, pwm_auto);
+    xbuddy_extension().set_fan_target_pwm(XBuddyExtension::Fan::filtration_fan, pwm_auto);
 #endif
 }
 
-#if PRINTER_IS_PRUSA_COREONE()
-void Chamber::check_vent_state() {
+#if HAS_CHAMBER_VENTS()
+void Chamber::manage_ventilation_state() {
+
+    const auto control_state = config_store().get_vent_control();
+    if (control_state == VentControl::off) {
+        return;
+    }
+
     const auto fil_target = config_store().get_filament_type(0).parameters().chamber_target_temperature;
     constexpr uint8_t temp_limit = 45; // Limit for closed grills is chamber max temperature of PETG
 
-    // Don't show any vent dialog if filament doesn't support chamber temperature control
-    if (fil_target.has_value()) {
-        if (fil_target.value() > temp_limit && vent_state_ != Chamber::VentState::closed) {
-            marlin_server::set_warning(WarningType::CloseChamberVents);
-            vent_state_ = Chamber::VentState::closed;
-        } else if (fil_target.value() <= temp_limit && vent_state_ != Chamber::VentState::open) {
+    auto open = [&]() {
+        if (control_state == VentControl::automatic) {
+            automatic_chamber_vents::open();
+        } else {
             marlin_server::set_warning(WarningType::OpenChamberVents);
             vent_state_ = Chamber::VentState::open;
+        }
+    };
+
+    auto close = [&]() {
+        if (control_state == VentControl::automatic) {
+            automatic_chamber_vents::close();
+        } else {
+            marlin_server::set_warning(WarningType::CloseChamberVents);
+            vent_state_ = Chamber::VentState::closed;
+        }
+    };
+
+    // Don't show any vent dialog/manipulate grilles if filament doesn't support chamber temperature control
+    if (fil_target.has_value()) {
+        if (fil_target.value() > temp_limit && vent_state_ != Chamber::VentState::closed) {
+            close();
+        } else if (fil_target.value() <= temp_limit && vent_state_ != Chamber::VentState::open) {
+            open();
         }
     }
 }

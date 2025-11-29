@@ -60,7 +60,7 @@ def main():
 
                 if (filtered_pngs is None or name + ".png" in filtered_pngs):
                     resources_file.write(
-                        f'inline constexpr Resource {name}({offset}, {size}, {width}, {height});\n'
+                        f'inline constexpr Resource {name}({offset}, {width}, {height});\n'
                     )
                     data_file.write(data)
                     offset = offset + size

@@ -5,25 +5,8 @@
 using namespace ToolBox;
 
 namespace {
-void wait_until_done() {
-    static constexpr int wait_duration { 10 }; // ms
-    static constexpr int show_in_progress_after_cnt { 50 / wait_duration }; // ms / ms
-
-    for (int cnt = 0; queue.has_commands_queued() || planner.processing(); cnt++) {
-        osDelay(wait_duration);
-        if (cnt > show_in_progress_after_cnt) { // show in progress notification after waiting for a while
-            gui_dlg_wait([] {
-                if (!(queue.has_commands_queued() || planner.processing())) {
-                    Screens::Access()->Close();
-                }
-            });
-            break;
-        }
-    }
-}
-
 is_hidden_t get_hidden_state(Tool tool, Action action, bool hidden_if_inactive) {
-    const auto idx { ftrstd::to_underlying(tool) };
+    const auto idx { std::to_underlying(tool) };
     switch (action) {
     case Action::Park:
     case Action::PickCurrent:
@@ -75,17 +58,17 @@ void ToolBox::I_MI_TOOL::do_click(IWindowMenu &window_menu, Tool tool, Action ac
     switch (action) {
     case Action::PickInactive:
         marlin_client::gcode("G27 P0 Z5"); // Lift Z if not high enough
-        marlin_client::gcode_printf("T%d S1 L0 D0", ftrstd::to_underlying(tool));
-        wait_until_done();
+        marlin_client::gcode_printf("T%d S1 L0 D0", std::to_underlying(tool));
+        window_dlg_wait_t::wait_for_gcodes_to_finish();
         break;
     case Action::Park:
         marlin_client::gcode("G27 P0 Z5"); // Lift Z if not high enough
         marlin_client::gcode_printf("T%d S1 L0 D0", PrusaToolChanger::MARLIN_NO_TOOL_PICKED);
-        wait_until_done();
+        window_dlg_wait_t::wait_for_gcodes_to_finish();
         break;
     case Action::CalibrateDock:
 #if HAS_SELFTEST()
-        marlin_client::test_start_with_data(stmDocks, static_cast<ToolMask>(1 << ftrstd::to_underlying(tool)));
+        marlin_client::test_start_with_data(stmDocks, static_cast<ToolMask>(1 << std::to_underlying(tool)));
 #endif
         break;
     case Action::PickCurrent: // do nothing (Pick what is already picked)
@@ -98,7 +81,7 @@ void ToolBox::I_MI_TOOL::do_click(IWindowMenu &window_menu, Tool tool, Action ac
         window_menu.Hide(); // Don't redraw the toolbox menu (Hide() works, Validate() doesn't)
         Screens::Access()->Close();
         if (parent) {
-            event_conversion_union un { .i_val = ftrstd::to_underlying(to_dialog_result(tool, action)) };
+            event_conversion_union un { .i_val = std::to_underlying(to_dialog_result(tool, action)) };
             parent->WindowEvent(nullptr, GUI_event_t::CHILD_CLICK, un.pvoid);
         }
     }

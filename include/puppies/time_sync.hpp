@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <limits>
 #include <array>
-#include <functional>
 
 #include <filters/kalman.hpp>
 #include "puppies/PuppyModbus.hpp"
@@ -33,8 +32,8 @@ private:
     int32_t average_puppy_offset_us;
     uint32_t average_roundtrip_us;
 
-    KalmanFilter drift_filter;
-    KalmanFilter offset_filter;
+    KalmanFilterCallback drift_filter;
+    KalmanFilterCallback offset_filter;
 
     int32_t correct_offset(const int32_t offset_us, const uint32_t now_us) const;
 };

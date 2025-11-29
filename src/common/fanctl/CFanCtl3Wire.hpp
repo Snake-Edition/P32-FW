@@ -122,13 +122,13 @@ public:
     virtual void tick() override; // tick callback from timer interrupt
 
     // getters
-    virtual uint16_t getMinPWM() const override // get minimum PWM, this should be safe value for self starting
+    virtual uint16_t get_min_pwm() const override // get minimum PWM, this should be safe value for self starting
     { return m_pwm.get_min_PWM(); }
-    virtual FanState getState() const override // get fan control state
+    virtual FanState get_state() const override // get fan control state
     { return m_State; }
-    virtual uint8_t getPWM() const override // get PWM value
+    virtual uint8_t get_pwm() const override // get PWM value
     { return unscalePWM(m_PWMValue); }
-    uint16_t getActualRPM() const final // get actual (measured) RPM
+    uint16_t get_actual_rpm() const final // get actual (measured) RPM
     {
 #if HAS_LOVE_BOARD() && !PRINTER_IS_PRUSA_iX()
         if (autocontrol_enabled) {
@@ -141,18 +141,18 @@ public:
     }
     CFanCtlPWM::PhaseShiftMode getPhaseShiftMode() const // get PhaseShiftMode
     { return m_pwm.get_PhaseShiftMode(); }
-    virtual bool getRPMIsOk() const override;
+    virtual bool get_rpm_is_ok() const override;
     inline bool isAutoFan() const // get fan type
     { return is_autofan == is_autofan_t::yes; }
 
-    virtual bool getRPMMeasured() const override { return m_tach.getValueReady(); }
+    virtual bool get_rpm_measured() const override { return m_tach.getValueReady(); }
     inline skip_tacho_t getSkipTacho() const { return m_skip_tacho; }
 
     uint16_t scalePWM(uint16_t pwm) const; // scale pwm from 0-255 to range used by this instance
     uint16_t unscalePWM(uint16_t pwm) const; // unscale pwm from range used by this instance to 0-255
 
     // setters
-    virtual bool setPWM(uint16_t pwm) override; // set PWM value - switch to non closed-loop mode
+    virtual bool set_pwm(uint16_t pwm) override; // set PWM value - switch to non closed-loop mode
     bool setPhaseShiftMode(CFanCtlPWM::PhaseShiftMode psm); // set phase shift mode (none/triangle/random)
     void safeState();
 
@@ -161,9 +161,9 @@ public:
         m_tach.setValueReady(false);
     }
 
-    virtual void enterSelftestMode() override;
-    virtual void exitSelftestMode() override;
-    virtual bool selftestSetPWM(uint8_t pwm) override; // sets pwm in selftest, doesn't work outside selftest
+    virtual void enter_selftest_mode() override;
+    virtual void exit_selftest_mode() override;
+    virtual bool selftest_set_pwm(uint8_t pwm) override; // sets pwm in selftest, doesn't work outside selftest
 
 protected:
     uint16_t m_Ticks; // tick counter - used for starting and measurement

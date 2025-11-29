@@ -2,7 +2,7 @@
 #include "i18n.h"
 #include "img_resources.hpp"
 #include <guiconfig/wizard_config.hpp>
-#include <str_utils.hpp>
+#include <logging/log.hpp>
 
 #include <algorithm>
 
@@ -25,7 +25,7 @@ SelftestFrameDock::SelftestFrameDock(window_t *parent, PhasesSelftest ph, fsm::P
     , text_info(this, get_info_text_rect(), is_multiline::yes)
     , text_estimate(this, get_estimate_text_rect(), is_multiline::no)
     , icon_warning(this, &img::printer_is_moving, point_i16(col_texts, row_4))
-    , text_warning(this, Rect16(col_texts + img::warning_48x48.w + 20, row_4, WizardDefaults::X_space - img::warning_48x48.w - 20, 3 * txt_h), is_multiline::yes)
+    , text_warning(this, Rect16(col_texts + img::warning_48x48.w + 20, row_4, WizardDefaults::X_space - img::warning_48x48.w - 20, 4 * txt_h), is_multiline::yes)
     , icon_info(this, &img::parking1, text_info.GetRect().TopRight())
     , qr(this, get_info_icon_rect() + Rect16::Left_t(25), Align_t::Center(), "prusa.io/dock-setup")
     , text_link(this, get_link_text_rect(), is_multiline::no) {

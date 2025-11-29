@@ -9,7 +9,8 @@
 #include "window_text.hpp"
 #include "knob_event.hpp"
 #include <memory>
-#include "str_utils.hpp"
+#include "display_helper.h"
+#include <str_utils.hpp>
 
 // 8 bit resolution 1px per row .. 1 byte per row
 uint8_t font_dot_data[] = {
@@ -18,7 +19,7 @@ uint8_t font_dot_data[] = {
 };
 
 // 1 px font
-font_t font_dot = { 1, 1, 1, (uint16_t *)font_dot_data, '0', FontCharacterSet::full };
+font_t font_dot = { 1, 1, 1, (uint16_t *)font_dot_data, '0', FontCharacterSet::latin };
 
 // 4 bit resolution 2 px per row .. 1 byte per row
 uint8_t font_2dot_data[] = {
@@ -32,7 +33,7 @@ uint8_t font_2dot_data[] = {
 };
 
 // 2x2 px font
-font_t font_2dot = { 2, 2, 1, (uint16_t *)font_2dot_data, '0', FontCharacterSet::full };
+font_t font_2dot = { 2, 2, 1, (uint16_t *)font_2dot_data, '0', FontCharacterSet::latin };
 
 // to be binded - static for easier debug
 static TMockDisplay<240, 320, 16> MockDispBasic;
@@ -138,7 +139,7 @@ TEST_CASE("Window layout tests", "[window]") {
         // default padding
         window_text_t txt(nullptr,
             Rect16(0, 0, 1 + GuiDefaults::Padding.left + GuiDefaults::Padding.right, 1 + GuiDefaults::Padding.top + GuiDefaults::Padding.bottom),
-            is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH((const uint8_t *)("1")));
+            is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH("1"));
         txt.Draw();
         TestRectDiffColor(DispRect(), Rect16(GuiDefaults::Padding.left, GuiDefaults::Padding.top, 1, 1), GuiDefaults::ColorBack, GuiDefaults::ColorText);
 
@@ -201,7 +202,7 @@ TEST_CASE("Window layout tests", "[window]") {
         MockDisplay::Bind(MockDisp8x4);
         MockDisplay::Instance().clear(COLOR_RED); // all display must be rewritten, no red pixel can remain
         TestRectColor(DispRect(), COLOR_RED);
-        window_text_t txt(nullptr, DispRect(), is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH((const uint8_t *)("1101")));
+        window_text_t txt(nullptr, DispRect(), is_multiline::no, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH("1101"));
         txt.SetPadding({ 0, 0, 0, 0 });
 
         txt.SetAlignment(Align_t::LeftTop());
@@ -216,11 +217,11 @@ TEST_CASE("Window layout tests", "[window]") {
         TestPixelMask(mask, GuiDefaults::ColorBack, GuiDefaults::ColorText);
     }
 
-    SECTION("Multiline Text") {
+    SECTION("Multiline Text: Alignments") {
         MockDisplay::Bind(MockDisp5x5);
         MockDisplay::Instance().clear(COLOR_RED); // all display must be rewritten, no red pixel can remain
         TestRectColor(DispRect(), COLOR_RED);
-        window_text_t txt(nullptr, DispRect(), is_multiline::yes, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH((const uint8_t *)("1\n0\n1")));
+        window_text_t txt(nullptr, DispRect(), is_multiline::yes, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH("1\n0\n1"));
         txt.SetPadding({ 0, 0, 0, 0 });
 
         txt.SetAlignment(Align_t::LeftTop());
@@ -234,7 +235,7 @@ TEST_CASE("Window layout tests", "[window]") {
         mask = { { { 0, 0, 0, 0, 0 }, { 0, 0, 1, 0, 0 }, { 0, 0, 0, 0, 0 }, { 0, 0, 1, 0, 0 }, { 0, 0, 0, 0, 0 } } };
         TestPixelMask(mask, GuiDefaults::ColorBack, GuiDefaults::ColorText);
 
-        txt.SetText(string_view_utf8::MakeCPUFLASH((const uint8_t *)("111\n101\n10001")));
+        txt.SetText(string_view_utf8::MakeCPUFLASH("111\n101\n10001"));
         MockDisplay::Instance().clear(COLOR_RED); // all display must be rewritten, no red pixel can remain
         txt.SetAlignment(Align_t::Center());
         txt.Draw();
@@ -242,12 +243,12 @@ TEST_CASE("Window layout tests", "[window]") {
         TestPixelMask(mask, GuiDefaults::ColorBack, GuiDefaults::ColorText);
     }
 
-    SECTION("Multiline Text, font 2x2") {
+    SECTION("Multiline Text: font 2x2") {
         g_use_font_2x2 = true;
         MockDisplay::Bind(MockDisp8x8);
         MockDisplay::Instance().clear(COLOR_RED); // all display must be rewritten, no red pixel can remain
         TestRectColor(DispRect(), COLOR_RED);
-        window_text_t txt(nullptr, DispRect(), is_multiline::yes, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH((const uint8_t *)("1\n0\n1")));
+        window_text_t txt(nullptr, DispRect(), is_multiline::yes, is_closed_on_click_t::no, string_view_utf8::MakeCPUFLASH("1\n0\n1"));
         txt.SetPadding({ 0, 0, 0, 0 });
 
         txt.SetAlignment(Align_t::LeftTop());
@@ -269,14 +270,328 @@ TEST_CASE("Window layout tests", "[window]") {
         mask = { { { 0, 0, 0, 0, 0 }, { 0, 0, 1, 0, 0 }, { 0, 0, 0, 0, 0 }, { 0, 0, 1, 0, 0 }, { 0, 0, 0, 0, 0 } } };
         TestPixelMask(mask, GuiDefaults::ColorBack, GuiDefaults::ColorText);
 
-        txt.SetText(string_view_utf8::MakeCPUFLASH((const uint8_t *)("111\n101\n10001")));
+        txt.SetText(string_view_utf8::MakeCPUFLASH("111\n101\n10001"));
         MockDisplay::Instance().clear(COLOR_RED); // all display must be rewritten, no red pixel can remain
         txt.SetAlignment(Align_t::Center());
         txt.Draw();
         mask = { { { 0, 0, 0, 0, 0 }, { 0, 1, 1, 1, 0 }, { 0, 1, 0, 1, 0 }, { 1, 0, 0, 0, 1 }, { 0, 0, 0, 0, 0 } } };
         TestPixelMask(mask, GuiDefaults::ColorBack, GuiDefaults::ColorText);*/
     }
-};
+}
+
+TEST_CASE("RectTextLayout: Basics", "[layout]") {
+
+    SECTION("Basic singleline") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("1111111111"));
+        auto layout = RectTextLayout(reader, 10, 1, is_multiline::no);
+        REQUIRE(layout.get_height_in_chars() == 1);
+        REQUIRE(layout.get_width_in_chars() == 10);
+        REQUIRE(layout.get_line_characters(0) == 10);
+        REQUIRE(layout.has_text_overflown() == false);
+    }
+
+    SECTION("Basic short singleline") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("11111"));
+        auto layout = RectTextLayout(reader, 10, 1, is_multiline::no);
+        REQUIRE(layout.get_height_in_chars() == 1);
+        REQUIRE(layout.get_width_in_chars() == 5);
+        REQUIRE(layout.get_line_characters(0) == 5);
+        REQUIRE(layout.has_text_overflown() == false);
+    }
+
+    SECTION("Basic singleline single char") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("1"));
+        auto layout = RectTextLayout(reader, 1, 1, is_multiline::no);
+        REQUIRE(layout.get_height_in_chars() == 1);
+        REQUIRE(layout.get_width_in_chars() == 1);
+        REQUIRE(layout.get_line_characters(0) == 1);
+        REQUIRE(layout.has_text_overflown() == false);
+    }
+
+    SECTION("Empty str") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH(""));
+        auto layout = RectTextLayout(reader, 5, 5, is_multiline::no);
+        REQUIRE(layout.get_height_in_chars() == 0);
+        REQUIRE(layout.get_width_in_chars() == 0);
+        REQUIRE(layout.get_line_characters(0) == 0);
+        REQUIRE(layout.has_text_overflown() == false);
+    }
+
+    SECTION("Empty space will always overflow") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH(""));
+        auto layout = RectTextLayout(reader, 0, 0, is_multiline::no);
+        REQUIRE(layout.has_text_overflown() == false);
+    }
+
+    SECTION("Not enough height") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("1"));
+        auto layout = RectTextLayout(reader, 0, 1, is_multiline::no);
+        REQUIRE(layout.get_height_in_chars() == 0);
+        REQUIRE(layout.get_width_in_chars() == 0);
+        REQUIRE(layout.get_line_characters(0) == 0);
+        REQUIRE(layout.has_text_overflown() == true);
+    }
+
+    SECTION("Not enough width") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("1"));
+        auto layout = RectTextLayout(reader, 1, 0, is_multiline::no);
+        REQUIRE(layout.get_height_in_chars() == 0);
+        REQUIRE(layout.get_width_in_chars() == 0);
+        REQUIRE(layout.get_line_characters(0) == 0);
+        REQUIRE(layout.has_text_overflown() == true);
+    }
+
+    SECTION("Basic singleline overflow") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("1111111111"));
+        auto layout = RectTextLayout(reader, 5, 1, is_multiline::no);
+        REQUIRE(layout.get_height_in_chars() == 1);
+        REQUIRE(layout.get_width_in_chars() == 5);
+        REQUIRE(layout.get_line_characters(0) == 5);
+        REQUIRE(layout.has_text_overflown() == true);
+    }
+
+    SECTION("Basic multiline") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("11111\n1111\n111\n11\n1"));
+        auto layout = RectTextLayout(reader, 5, 5, is_multiline::yes);
+        REQUIRE(layout.get_height_in_chars() == 5);
+        REQUIRE(layout.get_width_in_chars() == 5);
+        REQUIRE(layout.get_line_characters(0) == 5);
+        REQUIRE(layout.get_line_characters(1) == 4);
+        REQUIRE(layout.get_line_characters(2) == 3);
+        REQUIRE(layout.get_line_characters(3) == 2);
+        REQUIRE(layout.get_line_characters(4) == 1);
+    }
+
+    SECTION("Longest line test") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("111\n0\n11111\n000\n1"));
+        auto layout = RectTextLayout(reader, 5, 5, is_multiline::yes);
+        REQUIRE(layout.get_height_in_chars() == 5);
+        REQUIRE(layout.get_width_in_chars() == 5);
+        REQUIRE(layout.get_line_characters(0) == 3);
+        REQUIRE(layout.get_line_characters(1) == 1);
+        REQUIRE(layout.get_line_characters(2) == 5);
+        REQUIRE(layout.get_line_characters(3) == 3);
+        REQUIRE(layout.get_line_characters(4) == 1);
+    }
+
+    SECTION("Newline test") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("1\n0\n1\n1\n1"));
+        auto layout = RectTextLayout(reader, 5, 5, is_multiline::yes);
+        REQUIRE(layout.get_height_in_chars() == 5);
+        REQUIRE(layout.get_width_in_chars() == 1);
+        REQUIRE(layout.get_line_characters(0) == 1);
+        REQUIRE(layout.get_line_characters(1) == 1);
+        REQUIRE(layout.get_line_characters(2) == 1);
+        REQUIRE(layout.get_line_characters(3) == 1);
+        REQUIRE(layout.get_line_characters(4) == 1);
+    }
+}
+
+TEST_CASE("RectTextLayout: input misalignment", "[layout]") {
+
+    SECTION("Newline is last character") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("11111\n"));
+        auto layout = RectTextLayout(reader, 5, 5, is_multiline::yes);
+        REQUIRE(layout.get_height_in_chars() == 2); // Correctly its 2, because it is a newline text and new line character adds new line
+        REQUIRE(layout.get_width_in_chars() == 5);
+        REQUIRE(layout.get_line_characters(0) == 5);
+        REQUIRE(layout.get_line_characters(1) == 0);
+        REQUIRE(layout.get_line_characters(2) == 0);
+    }
+
+    SECTION("Multiline set to NO") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("1\n11\n111"));
+        auto layout = RectTextLayout(reader, 5, 5, is_multiline::no); // Multiline set to NO
+        REQUIRE(layout.get_height_in_chars() == 1);
+        REQUIRE(layout.get_width_in_chars() == 1);
+        REQUIRE(layout.get_line_characters(0) == 1);
+        REQUIRE(layout.get_line_characters(1) == 0);
+        REQUIRE(layout.get_line_characters(2) == 0);
+        REQUIRE(layout.get_line_characters(3) == 0);
+    }
+
+    SECTION("First line is too long") {
+        // It should return print out cropped word and the rest on the next row
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("111111\n11\n111"));
+        auto layout = RectTextLayout(reader, 5, 5, is_multiline::yes);
+        REQUIRE(layout.get_height_in_chars() == 4);
+        REQUIRE(layout.get_width_in_chars() == 5);
+        REQUIRE(layout.get_line_characters(0) == 5);
+        REQUIRE(layout.get_line_characters(1) == 1);
+        REQUIRE(layout.get_line_characters(2) == 2);
+        REQUIRE(layout.get_line_characters(3) == 3);
+        REQUIRE(layout.has_text_overflown() == true);
+    }
+
+    SECTION("Some line is too long") {
+        // It should return print out cropped word and the rest on the next row
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("111\n1 11\n1111111\n11"));
+        auto layout = RectTextLayout(reader, 5, 5, is_multiline::yes);
+        REQUIRE(layout.get_height_in_chars() == 5);
+        REQUIRE(layout.get_width_in_chars() == 5);
+        REQUIRE(layout.get_line_characters(0) == 3);
+        REQUIRE(layout.get_line_characters(1) == 4);
+        REQUIRE(layout.get_line_characters(2) == 5);
+        REQUIRE(layout.get_line_characters(3) == 2);
+        REQUIRE(layout.get_line_characters(4) == 2);
+        REQUIRE(layout.has_text_overflown() == true);
+    }
+
+    SECTION("Line too long with space at the end") {
+        // It should return print out cropped word and the rest on the next row
+        // In this case, space is handled like a newline character (skipped in the next row)
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("111\n11111 1111\n11"));
+        auto layout = RectTextLayout(reader, 5, 5, is_multiline::yes);
+        REQUIRE(layout.get_height_in_chars() == 4);
+        REQUIRE(layout.get_width_in_chars() == 5);
+        REQUIRE(layout.get_line_characters(0) == 3);
+        REQUIRE(layout.get_line_characters(1) == 5);
+        REQUIRE(layout.get_line_characters(2) == 4);
+        REQUIRE(layout.get_line_characters(3) == 2);
+        REQUIRE(layout.has_text_overflown() == false);
+    }
+
+    SECTION("Not enough height") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("111\n1 11\n1 11\n11"));
+        auto layout = RectTextLayout(reader, 5, 3, is_multiline::yes);
+        REQUIRE(layout.get_height_in_chars() == 3);
+        REQUIRE(layout.get_width_in_chars() == 4);
+        REQUIRE(layout.get_line_characters(0) == 3);
+        REQUIRE(layout.get_line_characters(1) == 4);
+        REQUIRE(layout.get_line_characters(2) == 4);
+        REQUIRE(layout.get_line_characters(3) == 0);
+        REQUIRE(layout.has_text_overflown() == true);
+    }
+}
+
+TEST_CASE("RextTextLayout: Word wrapping japanese", "[layout]") {
+
+    SECTION("Japanese comma & dot: text wrap #1") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("ロードセルキャリ。プリンタロードセルキャリ、ードセルキャリロードセルキャリ"));
+        auto layout = RectTextLayout(reader, 15, 3, is_multiline::yes);
+        CHECK(layout.get_height_in_chars() == 3);
+        CHECK(layout.get_width_in_chars() == 15);
+        CHECK(layout.get_line_characters(0) == 9);
+        CHECK(layout.get_line_characters(1) == 13);
+        CHECK(layout.get_line_characters(2) == 15);
+        CHECK(layout.has_text_overflown() == false);
+    }
+
+    SECTION("Japanese comma & dot: text wrap #2") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("ロードセルキャリリ リンタロードセルキャリ、ードセルキャリローー"));
+        auto layout = RectTextLayout(reader, 10, 4, is_multiline::yes);
+        CHECK(layout.get_height_in_chars() == 4);
+        CHECK(layout.get_width_in_chars() == 10);
+        CHECK(layout.get_line_characters(0) == 9);
+        CHECK(layout.get_line_characters(1) == 10);
+        CHECK(layout.get_line_characters(2) == 2);
+        CHECK(layout.get_line_characters(3) == 10);
+        CHECK(layout.has_text_overflown() == true);
+    }
+}
+
+TEST_CASE("RextTextLayout: Word wrapping", "[layout]") {
+
+    SECTION("Singleline texts do not wrap") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("1 1 111111"));
+        auto layout = RectTextLayout(reader, 6, 1, is_multiline::no);
+        REQUIRE(layout.get_height_in_chars() == 1);
+        REQUIRE(layout.get_width_in_chars() == 6);
+        REQUIRE(layout.get_line_characters(0) == 6); // '1 1 11'
+        REQUIRE(layout.get_line_characters(1) == 0);
+        REQUIRE(layout.has_text_overflown() == true);
+    }
+
+    SECTION("Complex wrap situation #1") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("111 00\n1\n11 000\n1111"));
+        auto layout = RectTextLayout(reader, 5, 6, is_multiline::yes);
+        REQUIRE(layout.get_height_in_chars() == 6);
+        REQUIRE(layout.get_width_in_chars() == 4);
+        REQUIRE(layout.get_line_characters(0) == 3); // 111
+        REQUIRE(layout.get_line_characters(1) == 2); // 00
+        REQUIRE(layout.get_line_characters(2) == 1); // 1
+        REQUIRE(layout.get_line_characters(3) == 2); // 11
+        REQUIRE(layout.get_line_characters(4) == 3); // 000
+        REQUIRE(layout.get_line_characters(5) == 4); // 1111
+        REQUIRE(layout.has_text_overflown() == false);
+    }
+
+    SECTION("Complex wrap situation #2") {
+        // Multiwrap of a single line
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("1111 00 111 1100 1 111"));
+        auto layout = RectTextLayout(reader, 5, 6, is_multiline::yes);
+        REQUIRE(layout.get_height_in_chars() == 5);
+        REQUIRE(layout.get_width_in_chars() == 5);
+        REQUIRE(layout.get_line_characters(0) == 4); // 1111
+        REQUIRE(layout.get_line_characters(1) == 2); // 00
+        REQUIRE(layout.get_line_characters(2) == 3); // 111
+        REQUIRE(layout.get_line_characters(3) == 4); // 1100
+        REQUIRE(layout.get_line_characters(4) == 5); // 1 111
+        REQUIRE(layout.get_line_characters(5) == 0);
+        REQUIRE(layout.has_text_overflown() == false);
+    }
+
+    SECTION("Complex wrap situation #3") {
+        // Only one whitespace is emitted on the end of the line (other whitespaces are intended)
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("111 222 000 111  000 111 \n 0000"));
+        auto layout = RectTextLayout(reader, 10, 4, is_multiline::yes);
+        REQUIRE(layout.get_height_in_chars() == 4);
+        REQUIRE(layout.get_width_in_chars() == 8);
+        REQUIRE(layout.get_line_characters(0) == 7); // '111 222'
+        REQUIRE(layout.get_line_characters(1) == 8); // '000 111 ' (space at the end)
+        REQUIRE(layout.get_line_characters(2) == 8); // '000 111 ' (space at the end)
+        REQUIRE(layout.get_line_characters(3) == 5); // ' 0000' (space at the beginning)
+        REQUIRE(layout.has_text_overflown() == false);
+    }
+
+    SECTION("Complex wrap situation #4") {
+        // Whitespace edge cases
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("1111 \n11111 \n      "));
+        auto layout = RectTextLayout(reader, 5, 4, is_multiline::yes);
+        REQUIRE(layout.get_height_in_chars() == 4);
+        REQUIRE(layout.get_width_in_chars() == 5);
+        REQUIRE(layout.get_line_characters(0) == 5); // '1111 ' (space at the end)
+        REQUIRE(layout.get_line_characters(1) == 5); // '11111'
+        REQUIRE(layout.get_line_characters(2) == 0); // '' (empty)
+        REQUIRE(layout.get_line_characters(3) == 5); // '     ' (5x space)
+        REQUIRE(layout.has_text_overflown() == true); // ther is no space for the last space
+    }
+
+    SECTION("Complex wrap situation #5") {
+        // Word is too long for a line
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("1 1 111111"));
+        auto layout = RectTextLayout(reader, 5, 3, is_multiline::yes);
+        REQUIRE(layout.get_height_in_chars() == 3);
+        REQUIRE(layout.get_width_in_chars() == 5);
+        REQUIRE(layout.get_line_characters(0) == 3); // '1 1'
+        REQUIRE(layout.get_line_characters(1) == 5); // '11111'
+        REQUIRE(layout.get_line_characters(2) == 1); // '1'
+        REQUIRE(layout.has_text_overflown() == true);
+    }
+
+    SECTION("Limited space 5x1") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("111111111"));
+        auto layout = RectTextLayout(reader, 5, 1, is_multiline::no);
+        REQUIRE(layout.get_height_in_chars() == 1);
+        REQUIRE(layout.get_width_in_chars() == 5);
+        REQUIRE(layout.get_line_characters(0) == 5);
+        REQUIRE(layout.get_line_characters(1) == 0);
+        REQUIRE(layout.has_text_overflown() == true);
+    }
+
+    SECTION("Limited space 1x5") {
+        StringReaderUtf8 reader(string_view_utf8::MakeCPUFLASH("1 1 1 1 1"));
+        auto layout = RectTextLayout(reader, 1, 5, is_multiline::yes);
+        REQUIRE(layout.get_height_in_chars() == 5);
+        REQUIRE(layout.get_width_in_chars() == 1);
+        REQUIRE(layout.get_line_characters(0) == 1);
+        REQUIRE(layout.get_line_characters(1) == 1);
+        REQUIRE(layout.get_line_characters(2) == 1);
+        REQUIRE(layout.get_line_characters(3) == 1);
+        REQUIRE(layout.get_line_characters(4) == 1);
+        REQUIRE(layout.has_text_overflown() == false);
+    }
+}
 
 // Frame is different than screen (cannot host subwindows)
 // also check if frame is notified about visibility changes

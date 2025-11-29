@@ -4,7 +4,7 @@
 struct Tristate {
 
 public:
-    enum Value {
+    enum Value : uint8_t {
         no = 0,
         yes = 1,
         other = 2
@@ -45,3 +45,4 @@ public:
 public:
     Value value = Value::other;
 };
+static_assert(sizeof(Tristate) == 1);

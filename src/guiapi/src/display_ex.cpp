@@ -1,11 +1,12 @@
 #include "display_helper.h"
 #include "display.hpp"
-#include <functional>
 #include <cmath>
 #include <guiconfig/guiconfig.h>
 #include <img_resources.hpp>
 #include "display_math_helper.h"
 #include <bsod.h>
+#include <sys/fcntl.h>
+#include <sys/unistd.h>
 
 #if HAS_ST7789_DISPLAY()
     #include "st7789v.hpp"
@@ -38,8 +39,8 @@ void clear(const Color clr) {
 
 } // namespace display
 
-static inline void draw_qoi_ex_C(FILE *pf, uint16_t point_x, uint16_t point_y, Color back_color, ropfn rop, Rect16 subrect) {
-    st7789v_draw_qoi_ex(pf, point_x, point_y, back_color, rop.ConvertToC(), subrect);
+static inline void draw_qoi_ex_C(point_ui16_t pt, AbstractByteReader &reader, Color back_color, ropfn rop) {
+    st7789v_draw_qoi_ex(pt, reader, back_color, rop.ConvertToC());
 }
 
 static inline void set_pixel_colorFormatNative(uint16_t point_x, uint16_t point_y, uint32_t nativeclr) {
@@ -83,8 +84,8 @@ void clear(const Color clr) {
 
 } // namespace display
 
-static inline void draw_qoi_ex_C(FILE *pf, uint16_t point_x, uint16_t point_y, Color back_color, ropfn rop, Rect16 subrect) {
-    ili9488_draw_qoi_ex(pf, point_x, point_y, back_color, rop.ConvertToC(), subrect);
+static inline void draw_qoi_ex_C(point_ui16_t pt, AbstractByteReader &reader, Color back_color, ropfn rop) {
+    ili9488_draw_qoi_ex(pt, reader, back_color, rop.ConvertToC());
 }
 
 static inline void set_pixel_colorFormatNative(uint16_t point_x, uint16_t point_y, uint32_t nativeclr) {
@@ -139,7 +140,7 @@ void clear(const Color clr) {
 
 } // namespace display
 
-static inline void draw_qoi_ex_C(FILE *pf, uint16_t point_x, uint16_t point_y, Color back_color, ropfn rop, Rect16 subrect) {
+static inline void draw_qoi_ex_C(point_ui16_t pt, AbstractByteReader &reader, Color back_color, ropfn rop) {
     // todo
 }
 
@@ -463,17 +464,29 @@ void set_pixel(point_ui16_t pt, Color clr) {
     set_pixel_colorFormatNative(pt.x, pt.y, native_color);
 }
 
-void draw_img(point_ui16_t pt, const img::Resource &qoi, Color back_color, ropfn rop, Rect16 subrect) {
-    FILE *file;
+static bool enabled = false;
 
-    // Use provided file or default resource file
-    if (!qoi.file) {
-        file = img::get_resource_file();
-    } else {
-        file = qoi.file;
+// We are using unbuffered API here, because we don't need the stdio buffer.
+// Reads are already buffered in QOI drawing routines.
+static int resource_fd = -1;
+
+void enable_resource_file() {
+    enabled = true;
+}
+
+class ResourceFileReader final : public AbstractByteReader {
+public:
+    std::span<std::byte> read(std::span<std::byte> buffer) final {
+        size_t nread = ::read(resource_fd, buffer.data(), buffer.size());
+        return { buffer.data(), nread };
     }
+};
 
-    if (!file) {
+void draw_img(point_ui16_t pt, const img::Resource &qoi, Color back_color, ropfn rop) {
+    if (resource_fd == -1 && enabled) {
+        resource_fd = ::open("/internal/res/qoi.data", 0);
+    }
+    if (resource_fd == -1) {
         return;
         /** we can actually get here if we draw img before bootstrap
          * so we must not call bsod. 3 reproducers:
@@ -487,13 +500,17 @@ void draw_img(point_ui16_t pt, const img::Resource &qoi, Color back_color, ropfn
     }
 
     // Seek to the beginning of the image and draw
-    fseek(file, qoi.offset, SEEK_SET);
-    draw_qoi_ex_C(file, pt.x, pt.y, back_color, rop, subrect);
+    ::lseek(resource_fd, qoi.offset, SEEK_SET);
+    ResourceFileReader reader;
+    draw_qoi_ex_C(pt, reader, back_color, rop);
 }
 
-void draw_text(Rect16 rc, const string_view_utf8 &str, const font_t *pf, Color clr_bg, Color clr_fg) {
-    StringReaderUtf8 reader(str);
-    render_text_singleline(rc, reader, pf, clr_bg, clr_fg);
+void draw_img(point_ui16_t pt, AbstractByteReader &reader) {
+    draw_qoi_ex_C(pt, reader, COLOR_BLACK, ropfn());
+}
+
+void draw_text(Rect16 rc, const string_view_utf8 &str, const Font font, Color clr_bg, Color clr_fg) {
+    render_text_align(rc, str, font, clr_bg, clr_fg);
 }
 
 } // namespace display

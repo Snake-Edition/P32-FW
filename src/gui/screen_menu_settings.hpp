@@ -12,14 +12,14 @@
 #include "Configuration_adv.h"
 #include <option/has_mmu2.h>
 #include <option/developer_mode.h>
-#include <option/has_xbuddy_extension.h>
+#include <option/xbuddy_extension_variant_standard.h>
 #include <option/has_phase_stepping.h>
 
 #if HAS_MMU2()
     #include "MItem_mmu.hpp"
 #endif
 
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     #include <gui/menu_item/specific/menu_items_xbuddy_extension.hpp>
 #endif
 
@@ -30,6 +30,11 @@
 #include <option/has_chamber_filtration_api.h>
 #if HAS_CHAMBER_FILTRATION_API()
     #include <gui/menu_item/specific/menu_items_chamber_filtration.hpp>
+#endif
+
+#include <option/has_auto_retract.h>
+#if HAS_AUTO_RETRACT()
+    #include <gui/menu_item/specific/menu_items_auto_retract.hpp>
 #endif
 
 class MI_HELP_FW_UPDATE : public IWindowMenuItem {
@@ -45,7 +50,6 @@ protected:
 /*****************************************************************************/
 
 using ScreenMenuSettings__ = ScreenMenu<GuiDefaults::MenuFooter, MI_RETURN,
-    MI_SNAKE_SETTINGS,
 #if HAS_FILAMENT_SENSORS_MENU()
     MI_FILAMENT_SENSORS,
 #else
@@ -54,12 +58,15 @@ using ScreenMenuSettings__ = ScreenMenu<GuiDefaults::MenuFooter, MI_RETURN,
 #if HAS_LOADCELL()
     MI_STUCK_FILAMENT_DETECTION,
 #endif
+#if HAS_AUTO_RETRACT()
+    MI_AUTO_RETRACT_ENABLE,
+#endif
 #if HAS_MMU2()
     MI_MMU_ENABLE,
     MI_MMU_BOOTLOADER_RESULT,
     MI_MMU_CUTTER,
 #endif
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     MI_CAM_USB_PWR,
 #endif
     MI_STEALTH_MODE,
@@ -82,7 +89,10 @@ using ScreenMenuSettings__ = ScreenMenu<GuiDefaults::MenuFooter, MI_RETURN,
 #if DEVELOPER_MODE()
     MI_ERROR_TEST,
 #endif
-    MI_USER_INTERFACE, MI_LANG_AND_TIME, MI_NETWORK, MI_HARDWARE, MI_HELP_FW_UPDATE, MI_EXPERIMENTAL_SETTINGS,
+    MI_USER_INTERFACE, MI_LANG_AND_TIME, MI_NETWORK, MI_HARDWARE, MI_HELP_FW_UPDATE,
+#if HAS_MANUAL_BELT_TUNING()
+    MI_MANUAL_BELT_TUNING,
+#endif
     // MI_SYSTEM needs to be last to ensure we can safely hit factory reset even in presence of unknown languages
     MI_SYSTEM>;
 

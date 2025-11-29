@@ -30,10 +30,6 @@
 
 #include "../../feature/bedlevel/bedlevel.h"
 
-#if HAS_SPI_LCD
-  #include "../../lcd/ultralcd.h"
-#endif
-
 #if HAS_LEVELING
   #include "../../module/planner.h"
 #endif
@@ -124,10 +120,6 @@ void GcodeSuite::M48() {
     randomSeed(millis());
 
     for (uint8_t n = 0; n < n_samples; n++) {
-      #if HAS_SPI_LCD
-        // Display M48 progress in the status bar
-        ui.status_printf_P(0, PSTR(S_FMT ": %d/%d"), GET_TEXT(MSG_M48_POINT), int(n + 1), int(n_samples));
-      #endif
       if (n_legs) {
         const int dir = (random(0, 10) > 5.0) ? -1 : 1;  // clockwise or counter clockwise
         float angle = random(0, 360);
@@ -248,12 +240,6 @@ void GcodeSuite::M48() {
 
     SERIAL_ECHOLNPAIR_F("Standard Deviation: ", sigma, 6);
     SERIAL_EOL();
-
-    #if HAS_SPI_LCD
-      // Display M48 results in the status bar
-      char sigma_str[8];
-      ui.status_printf_P(0, PSTR(S_FMT ": %s"), GET_TEXT(MSG_M48_DEVIATION), dtostrf(sigma, 2, 6, sigma_str));
-    #endif
   }
 
   restore_feedrate_and_scaling();

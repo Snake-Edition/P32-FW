@@ -94,7 +94,7 @@ MI_INFO_XBUDDY_EXTENSION_FAN2::MI_INFO_XBUDDY_EXTENSION_FAN2()
 // =============================================
 MI_INFO_XBUDDY_EXTENSION_FAN3::MI_INFO_XBUDDY_EXTENSION_FAN3()
     : WI_FAN_LABEL_t(_("Filtration fan"), fan_info_function<XBuddyExtension::Fan::filtration_fan>) {
-    set_is_hidden(!xbuddy_extension().using_filtration_fan_instead_of_cooling_fans());
+    set_is_hidden(xbuddy_extension().status() == XBuddyExtension::Status::disabled);
 }
 
 // MI_CAM_USB_PWR
@@ -108,6 +108,5 @@ void MI_CAM_USB_PWR::OnChange([[maybe_unused]] size_t old_index) {
 }
 
 void MI_CAM_USB_PWR::Loop() {
-    // What does this do?
-    set_value(buddy::xbuddy_extension().usb_power(), false);
+    set_value(xbuddy_extension().usb_power());
 };

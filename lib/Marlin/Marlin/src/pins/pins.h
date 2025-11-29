@@ -231,9 +231,6 @@
 #ifndef FAN2_PIN
   #define FAN2_PIN -1
 #endif
-#ifndef CONTROLLER_FAN_PIN
-  #define CONTROLLER_FAN_PIN  -1
-#endif
 
 #ifndef FANMUX0_PIN
   #define FANMUX0_PIN -1
@@ -263,9 +260,6 @@
 #ifndef HEATER_5_PIN
   #define HEATER_5_PIN -1
 #endif
-#ifndef HEATER_BED_PIN
-  #define HEATER_BED_PIN -1
-#endif
 
 #ifndef TEMP_0_PIN
   #define TEMP_0_PIN -1
@@ -285,19 +279,7 @@
 #ifndef TEMP_5_PIN
   #define TEMP_5_PIN -1
 #endif
-#ifndef TEMP_BED_PIN
-  #define TEMP_BED_PIN -1
-#endif
 
-#ifndef SD_DETECT_PIN
-  #define SD_DETECT_PIN -1
-#endif
-#ifndef SDPOWER_PIN
-  #define SDPOWER_PIN -1
-#endif
-#ifndef SDSS
-  #define SDSS -1
-#endif
 #ifndef LED_PIN
   #define LED_PIN -1
 #endif
@@ -450,22 +432,6 @@
 #if DISABLED(USE_ZMIN_PLUG)
   #undef Z_MIN_PIN
   #define Z_MIN_PIN          -1
-#endif
-
-#ifndef LCD_PINS_D4
-  #define LCD_PINS_D4 -1
-#endif
-
-#if HAS_CHARACTER_LCD
-  #ifndef LCD_PINS_D5
-    #define LCD_PINS_D5 -1
-  #endif
-  #ifndef LCD_PINS_D6
-    #define LCD_PINS_D6 -1
-  #endif
-  #ifndef LCD_PINS_D7
-    #define LCD_PINS_D7 -1
-  #endif
 #endif
 
 /**

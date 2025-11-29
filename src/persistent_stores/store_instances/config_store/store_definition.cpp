@@ -2,13 +2,13 @@
 #include <Marlin/src/inc/MarlinConfigPre.h>
 #include <module/prusa/dock_position.hpp>
 #include <module/prusa/tool_offset.hpp>
-#include <option/development_items.h>
 #include <option/has_adc_side_fsensor.h>
 #include <option/has_mmu2.h>
 #include <option/has_toolchanger.h>
 #include <option/has_config_store_wo_backend.h>
 #include <option/has_touch.h>
-#include <sys.h>
+#include <option/has_chamber_filtration_api.h>
+#include <common/sys.hpp>
 
 #include <option/has_auto_retract.h>
 #if HAS_AUTO_RETRACT()
@@ -19,21 +19,33 @@ namespace config_store_ns {
 #if not HAS_CONFIG_STORE_WO_BACKEND()
 static_assert((sizeof(CurrentStore) + aggregate_arity<CurrentStore>() * sizeof(journal::Backend::ItemHeader)) < (BANK_SIZE / 100) * 75, "EEPROM bank is almost full");
 static_assert(journal::has_unique_items<config_store_ns::CurrentStore>(), "Just added items are causing collisions with reserved backend IDs");
+static_assert(aggregate_arity<config_store_ns::CurrentStore>() > 10, "Config store sanity check failed");
+static_assert([] {
+    uint16_t problematic_item = 0;
+    CurrentStore s {};
+    visit_all_struct_fields(s, [&problematic_item]<typename T>(T &) {
+        if constexpr ((T::flags & ~(ItemFlag::dev_items | ItemFlag::common_misconfigurations)) == 0) {
+            if constexpr (std::is_base_of_v<journal::JournalItemArrayBase, T>) {
+                problematic_item = T::hashed_id_first;
+            } else {
+                problematic_item = T::hashed_id;
+            }
+        }
+    });
+    return problematic_item;
+}() == 0,
+    "All items must have a flag set (not counting dev_items/common_misconfigurations)");
 #endif
 
 void CurrentStore::perform_config_check() {
     /// Whether this is the first run of the printer after assembly/factory reset
     [[maybe_unused]] const bool is_first_run = (config_store_init_result() == InitResult::cold_start);
 
-    // Do not show pritner setup screen if the user has run any selftests
-    // This is for backwards compatibility - we don't want to show the screen after the firmware update introducing it for already configured printers
-    if (selftest_result.get() != selftest_result.default_val) {
-        printer_setup_done.set(true);
-    }
-
     // We cannot change a default value of config store items for backwards compatibility reasons.
     // So this is a place to instead set them to something for new installations
-    if (is_first_run) {
+    if (is_first_run || force_default_hw_config.get()) {
+        force_default_hw_config.set(false);
+
 #if HAS_TOUCH()
         touch_enabled.set(true);
 #endif
@@ -57,12 +69,24 @@ void CurrentStore::perform_config_check() {
 #endif
     }
 
-    // BFW-5486
-    // Auto-update is now enablablable only in develeoper mode
-    // There were some issues with people leaving this option on, then upgrading and having problems turning it off
-    if constexpr (!option::development_items) {
-        sys_fw_update_disable();
+#if HAS_CHAMBER_FILTRATION_API()
+    // Old API had disabling print filtration through setting pwm to 0
+    // Now we have dedicated config store for it
+    if (chamber_mid_print_filtration_pwm.get() <= PWM255(0)) {
+        chamber_mid_print_filtration_pwm.set_to_default();
+        chamber_print_filtration_enable.set(false);
     }
+#endif
+
+    // BFW-5486
+    // Older versions of the firmware had the ability to manually change this
+    // byte. Newer versions of the firmware removed that ability. This leads
+    // to a situation when, after manually changing the value and upgrading,
+    // the only way to revert the change is to downgrade the firmware.
+    // Therefore, we always set it to FwAutoUpdate::off on newer versions.
+    // We should update the bootloader to stop reading this byte altogether,
+    // then we can finally stop writing this and rely entirely on dataexchange.
+    EEPROMInstance().write_byte(0x040B, 0x00);
 
     // First run -> the config store is empty -> we don't need to do any migrations from older versions
     if (!is_first_run && config_version.get() != newest_config_version) {
@@ -94,6 +118,41 @@ void CurrentStore::perform_config_migrations() {
             // Bitset -> first and only nozzle
             nozzle_is_high_flow.set(1 << 0);
         }
+    }
+#endif
+
+#if HAS_SELFTEST() && (PRINTER_IS_PRUSA_MK4() || PRINTER_IS_PRUSA_COREONE())
+    if (should_migrate<2>()) {
+        // We've introduced a gearbox alignment for XL, this means that gear alignment test must exist for every toolhead available
+        // This created a need for gear test refactoring
+        // [[ BFW-5785 ]]
+
+        SelftestTool st = get_selftest_result_tool(0);
+        st.gears = selftest_result.get().deprecated_gears;
+        set_selftest_result_tool(0, st);
+    }
+#endif
+#if HAS_SELFTEST()
+    if (should_migrate<3>()) {
+        // BFW-7867
+        // Do not show pritner setup screen if the user has run any selftests
+        // This is for backwards compatibility - we don't want to show the screen after the firmware update introducing it for already configured printers
+        if (selftest_result.get() != selftest_result.default_val) {
+            printer_hw_config_done.set(true);
+            printer_network_setup_done.set(true);
+        }
+    }
+#endif
+    if (should_migrate<4>()) {
+        // Don't show "Happy Printing" screen when upgrading firmware
+        happy_printing_seen.set(true);
+    }
+#if PRINTER_IS_PRUSA_COREONE()
+    if (should_migrate<5>()) {
+        // Printers that are upgraded are most likely CoreOne without vent grille lever
+        // Those have to keep the manual open/close mechanism.
+        // On new CoreOne+ printers, this will be checked in HW config
+        auto_chamber_vent_enabled.set(false);
     }
 #endif
 
@@ -278,62 +337,6 @@ void CurrentStore::set_extruder_fs_ref_ins_value([[maybe_unused]] uint8_t index,
 #endif
 }
 
-uint32_t CurrentStore::get_extruder_fs_value_span([[maybe_unused]] uint8_t index) {
-#if HOTENDS <= 1
-    assert(index == 0);
-    return extruder_fs_value_span_0.get();
-#else
-    switch (index) {
-    case 0:
-        return extruder_fs_value_span_0.get();
-    case 1:
-        return extruder_fs_value_span_1.get();
-    case 2:
-        return extruder_fs_value_span_2.get();
-    case 3:
-        return extruder_fs_value_span_3.get();
-    case 4:
-        return extruder_fs_value_span_4.get();
-    case 5:
-        return extruder_fs_value_span_5.get();
-    default:
-        assert(false && "invalid index");
-        return 0;
-    }
-#endif
-}
-
-void CurrentStore::set_extruder_fs_value_span([[maybe_unused]] uint8_t index, uint32_t value) {
-#if HOTENDS <= 1
-    assert(index == 0);
-    extruder_fs_value_span_0.set(value);
-#else
-    switch (index) {
-    case 0:
-        extruder_fs_value_span_0.set(value);
-        break;
-    case 1:
-        extruder_fs_value_span_1.set(value);
-        break;
-    case 2:
-        extruder_fs_value_span_2.set(value);
-        break;
-    case 3:
-        extruder_fs_value_span_3.set(value);
-        break;
-    case 4:
-        extruder_fs_value_span_4.set(value);
-        break;
-    case 5:
-        extruder_fs_value_span_5.set(value);
-        break;
-    default:
-        assert(false && "invalid index");
-        return;
-    }
-#endif
-}
-
 #if HAS_ADC_SIDE_FSENSOR()
 int32_t CurrentStore::get_side_fs_ref_nins_value(uint8_t index) {
     switch (index) {
@@ -420,52 +423,6 @@ void CurrentStore::set_side_fs_ref_ins_value(uint8_t index, int32_t value) {
         break;
     case 5:
         side_fs_ref_ins_value_5.set(value);
-        break;
-    default:
-        assert(false && "invalid index");
-        return;
-    }
-}
-
-uint32_t CurrentStore::get_side_fs_value_span(uint8_t index) {
-    switch (index) {
-    case 0:
-        return side_fs_value_span_0.get();
-    case 1:
-        return side_fs_value_span_1.get();
-    case 2:
-        return side_fs_value_span_2.get();
-    case 3:
-        return side_fs_value_span_3.get();
-    case 4:
-        return side_fs_value_span_4.get();
-    case 5:
-        return side_fs_value_span_5.get();
-    default:
-        assert(false && "invalid index");
-        return 0;
-    }
-}
-
-void CurrentStore::set_side_fs_value_span(uint8_t index, uint32_t value) {
-    switch (index) {
-    case 0:
-        side_fs_value_span_0.set(value);
-        break;
-    case 1:
-        side_fs_value_span_1.set(value);
-        break;
-    case 2:
-        side_fs_value_span_2.set(value);
-        break;
-    case 3:
-        side_fs_value_span_3.set(value);
-        break;
-    case 4:
-        side_fs_value_span_4.set(value);
-        break;
-    case 5:
-        side_fs_value_span_5.set(value);
         break;
     default:
         assert(false && "invalid index");
@@ -580,8 +537,8 @@ void CurrentStore::set_filament_type(uint8_t index, FilamentType value) {
 
 #if HAS_AUTO_RETRACT()
     if (value == FilamentType::none) {
-        // On filadment removal, also mark the hotend as non-retracted (meaning does not need deretracting)
-        buddy::auto_retract().mark_as_retracted(HAS_TOOLCHANGER() ? index : 0, false);
+        // On filament removal, it invalidates retracted distance
+        buddy::auto_retract().set_retracted_distance(HAS_TOOLCHANGER() ? index : 0, std::nullopt);
     }
 #endif
 
@@ -962,6 +919,59 @@ void CurrentStore::set_phase_stepping_enabled(AxisEnum axis, bool new_state) {
     default:
         assert(false && "invalid index");
         return;
+    }
+}
+#endif
+
+#if HAS_AUTO_RETRACT()
+
+void CurrentStore::set_filament_retracted_distance(uint8_t tool_idx, std::optional<float> dist) {
+    assert(tool_idx < max_tool_count);
+    if (!dist.has_value()) {
+        filament_retracted_distances.set(tool_idx, invalid_retracted_distance);
+        return;
+    }
+
+    const float rounded_dist = std::round(dist.value());
+    const float clamped_dist = std::clamp<float>(rounded_dist, 0, invalid_retracted_distance - 1);
+    assert(clamped_dist == rounded_dist);
+    filament_retracted_distances.set(tool_idx, static_cast<uint8_t>(clamped_dist));
+}
+
+std::optional<float> CurrentStore::get_filament_retracted_distance(uint8_t tool_idx) {
+    assert(tool_idx < max_tool_count);
+
+    const auto distance = filament_retracted_distances.get(tool_idx);
+    if (distance == invalid_retracted_distance) {
+        return std::nullopt;
+    }
+    return distance;
+}
+
+#endif
+
+#if HAS_CHAMBER_VENTS()
+VentControl CurrentStore::get_vent_control() {
+    if (!check_chamber_vent_state.get()) {
+        return VentControl::off;
+    } else {
+        return auto_chamber_vent_enabled.get() ? VentControl::automatic : VentControl::manual;
+    }
+}
+
+void CurrentStore::set_vent_control(VentControl state) {
+    switch (state) {
+    case VentControl::off:
+        check_chamber_vent_state.set(false);
+        break;
+    case VentControl::automatic:
+        check_chamber_vent_state.set(true);
+        auto_chamber_vent_enabled.set(true);
+        break;
+    case VentControl::manual:
+        check_chamber_vent_state.set(true);
+        auto_chamber_vent_enabled.set(false);
+        break;
     }
 }
 #endif

@@ -18,7 +18,7 @@ if(HAS_DWARF)
   target_sources(firmware PUBLIC Dwarf.cpp)
 endif()
 
-if(HAS_MODULARBED)
+if(HAS_PUPPY_MODULARBED)
   target_sources(firmware PUBLIC modular_bed.cpp)
 endif()
 

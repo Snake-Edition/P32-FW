@@ -1,5 +1,5 @@
 #include "led.h"
-#include "disable_interrupts.h"
+#include "interrupt_disabler.hpp"
 #include "hwio_pindef.h"
 #include "timing_precise.hpp"
 #include "timing.h"
@@ -37,7 +37,7 @@ void set_rgb(uint8_t red, uint8_t green, uint8_t blue) {
     send_reset();
     const uint32_t col = (green << 16) | (red << 8) | blue; // concat the colors
     {
-        buddy::DisableInterrupts dis;
+        buddy::InterruptDisabler dis;
         for (int i = 0; i < 24; ++i) {
             if (col & (1 << (23 - i))) { // if bit set (from highest bit to lowest)
                 send_one();

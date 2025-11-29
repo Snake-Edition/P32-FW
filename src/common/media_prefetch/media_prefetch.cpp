@@ -4,7 +4,7 @@
 #include <cinttypes>
 
 #include <logging/log.hpp>
-#include <enum_array.hpp>
+#include <utils/enum_array.hpp>
 
 #include "prefetch_compression.hpp"
 
@@ -45,6 +45,8 @@ struct RecordHeader {
 #ifndef UNITTESTS
 /// Duration (in ms) of the just executed prefetch
 METRIC_DEF(metric_fetch_duration, "ftch_dur", METRIC_VALUE_INTEGER, 0, METRIC_ENABLED);
+
+METRIC_DEF(metric_fetch_sdpos, "ftch_sdpos", METRIC_VALUE_INTEGER, 0, METRIC_ENABLED);
 #endif
 
 } // namespace media_prefetch
@@ -245,6 +247,7 @@ MediaPrefetchManager::Metrics MediaPrefetchManager::get_metrics() const {
         .stream_size_estimate = s.stream_size_estimate,
         .buffer_occupancy_percent = static_cast<uint8_t>(((s.read_tail.buffer_pos - s.read_head.buffer_pos + buffer_size) % buffer_size * 100) / buffer_size),
         .tail_status = s.read_tail.status,
+        .is_fetching = worker_job.is_active(),
     };
 }
 
@@ -390,6 +393,10 @@ void MediaPrefetchManager::fetch_routine(AsyncJobExecutionControl &control) {
         }
     }
 
+#ifndef UNITTESTS
+    metric_record_integer(&metric_fetch_sdpos, s.gcode_reader_pos);
+#endif
+
     log_debug(MediaPrefetch, "Fetch stop at %" PRIu32 ", fetched %" PRIu32, s.gcode_reader_pos, s.gcode_reader_pos - initial_gcode_pos);
 }
 
@@ -510,6 +517,7 @@ bool MediaPrefetchManager::fetch_command(AsyncJobExecutionControl &control) {
 
     char ch;
     const auto getc_result = s.gcode_reader->stream_getc(ch);
+    const bool buffer_full = buf_pos >= s.command_buffer_data.size();
 
     if (getc_result == SR::RESULT_EOF && buf_pos > 0) {
         // EOF, but there is something in the buffer -> first flush the remaining command
@@ -523,12 +531,19 @@ bool MediaPrefetchManager::fetch_command(AsyncJobExecutionControl &control) {
         // We've fetched one byte, increase the offset in the stream
         s.gcode_reader_pos++;
     }
+    if (ch == ';' && !buffer_full) {
+        // Detect semicolon in the useful part of the gcode
+        s.command_buffer.contains_semicolon = true;
+    }
 
     if (ch == '\n') {
-        if (buf_pos == s.command_buffer_data.size()) {
-            log_warning(MediaPrefetch, "Warning: gcode didn't fit in the command buffer, cropped");
+        if (buffer_full) {
+            // If the line is too long and doesn't contain a semicolon, need to warn and set a flag [BFW-6396]
+            if (!s.command_buffer.contains_semicolon) {
+                log_warning(MediaPrefetch, "Warning: gcode didn't fit in the command buffer, cropped");
+                s.command_buffer.cropped = true;
+            }
             buf_pos--;
-            s.command_buffer.cropped = true;
         }
 
         s.command_buffer_data[buf_pos] = '\0';
@@ -554,7 +569,7 @@ bool MediaPrefetchManager::fetch_command(AsyncJobExecutionControl &control) {
     } else if (buf_pos == 0 && isspace(ch)) {
         // Skip whitespaces at the beginning of the line
 
-    } else if (!s.command_buffer.skip_rest_of_line && buf_pos < s.command_buffer_data.size()) {
+    } else if (!s.command_buffer.skip_rest_of_line && !buffer_full) {
         // If we get a gcode that's longer than our buffer, we do best-effort: crop it and try to execute it anyway (but show a warning)
         s.command_buffer_data[buf_pos++] = ch;
     }

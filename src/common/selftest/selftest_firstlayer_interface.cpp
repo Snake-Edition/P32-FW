@@ -29,7 +29,7 @@ bool phaseFirstLayer(IPartHandler *&pFirstLayer, const uint8_t previous_sheet) {
             &CSelftestPart_FirstLayer::stateInitialDistanceInit, &CSelftestPart_FirstLayer::stateInitialDistance,
             &CSelftestPart_FirstLayer::stateShowStartPrint, &CSelftestPart_FirstLayer::stateHandleNext,
             &CSelftestPart_FirstLayer::statePrintInit, &CSelftestPart_FirstLayer::stateWaitNozzle, &CSelftestPart_FirstLayer::stateWaitBed, &CSelftestPart_FirstLayer::stateHome, &CSelftestPart_FirstLayer::stateMbl,
-            &CSelftestPart_FirstLayer::statePrint, &CSelftestPart_FirstLayer::stateMblFinished, &CSelftestPart_FirstLayer::statePrintFinished,
+            &CSelftestPart_FirstLayer::statePrint,
             &CSelftestPart_FirstLayer::stateReprintInit, &CSelftestPart_FirstLayer::stateReprint,
             &CSelftestPart_FirstLayer::stateCleanSheetInit, &CSelftestPart_FirstLayer::stateCleanSheet,
             &CSelftestPart_FirstLayer::stateFinish);

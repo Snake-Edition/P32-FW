@@ -294,9 +294,6 @@ namespace Language_en {
   PROGMEM Language_Str MSG_FLOW_4                          = _UxGT("Flow ") LCD_STR_N4;
   PROGMEM Language_Str MSG_FLOW_5                          = _UxGT("Flow ") LCD_STR_N5;
   PROGMEM Language_Str MSG_CONTROL                         = _UxGT("Control");
-  PROGMEM Language_Str MSG_MIN                             = " " LCD_STR_THERMOMETER _UxGT(" Min");
-  PROGMEM Language_Str MSG_MAX                             = " " LCD_STR_THERMOMETER _UxGT(" Max");
-  PROGMEM Language_Str MSG_FACTOR                          = " " LCD_STR_THERMOMETER _UxGT(" Fact");
   PROGMEM Language_Str MSG_AUTOTEMP                        = _UxGT("Autotemp");
   PROGMEM Language_Str MSG_LCD_ON                          = _UxGT("On");
   PROGMEM Language_Str MSG_LCD_OFF                         = _UxGT("Off");
@@ -413,7 +410,6 @@ namespace Language_en {
   PROGMEM Language_Str MSG_INIT_EEPROM                     = _UxGT("Initialize EEPROM");
   PROGMEM Language_Str MSG_MEDIA_UPDATE                    = _UxGT("Media Update");
   PROGMEM Language_Str MSG_RESET_PRINTER                   = _UxGT("Reset Printer");
-  PROGMEM Language_Str MSG_REFRESH                         = LCD_STR_REFRESH  _UxGT("Refresh");
   PROGMEM Language_Str MSG_WATCH                           = _UxGT("Info Screen");
   PROGMEM Language_Str MSG_PREPARE                         = _UxGT("Prepare");
   PROGMEM Language_Str MSG_TUNE                            = _UxGT("Tune");
@@ -604,7 +600,6 @@ namespace Language_en {
   PROGMEM Language_Str MSG_RUNOUT_SENSOR                   = _UxGT("Runout Sensor");
   PROGMEM Language_Str MSG_RUNOUT_DISTANCE_MM              = _UxGT("Runout Dist mm");
   PROGMEM Language_Str MSG_LCD_HOMING_FAILED               = _UxGT("Homing Failed");
-  PROGMEM Language_Str MSG_LCD_PROBING_FAILED              = _UxGT("Probing Failed");
   PROGMEM Language_Str MSG_LCD_MISSING_SHEET               = _UxGT("Print sheet missing");
   PROGMEM Language_Str MSG_M600_TOO_COLD                   = _UxGT("M600: Too Cold");
 

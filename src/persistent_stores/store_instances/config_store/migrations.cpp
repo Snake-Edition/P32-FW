@@ -3,6 +3,9 @@
 #include <footer_def.hpp>
 #include <footer_eeprom.hpp>
 #include <config_store/defaults.hpp>
+#if HAS_AUTO_RETRACT()
+    #include <feature/auto_retract/auto_retract.hpp>
+#endif
 
 namespace config_store_ns {
 namespace migrations {
@@ -230,6 +233,7 @@ namespace migrations {
     }
 #endif
 
+#if HAS_HOTEND_TYPE_SUPPORT()
     void hotend_type(journal::Backend &backend) {
         using NewItem = decltype(CurrentStore::hotend_type);
         using OldItem = decltype(DeprecatedStore::hotend_type_single_hotend);
@@ -246,6 +250,136 @@ namespace migrations {
         for (uint8_t i = 0; i < HOTENDS; i++) {
             backend.save_migration_item<NewItem::value_type>(NewItem::hashed_id_first + i, saved_hotend_type);
         }
+    }
+#endif
+
+#if HAS_CHAMBER_FILTRATION_API() && XL_ENCLOSURE_SUPPORT()
+    void xl_enclosure_old_api(journal::Backend &backend) {
+        // Old flags
+        static constexpr uint8_t ENABLED = 0x01;
+        static constexpr uint8_t PRINT_FILTRATION = 0x02;
+        static constexpr uint8_t WARNING_SHOWN = 0x04;
+        // static constexpr uint8_t EXPIRATION_SHOWN = 0x08;
+        static constexpr uint8_t POST_PRINT_FILTRATION = 0x10;
+        static constexpr uint8_t REMINDER_5DAYS = 0x20;
+
+        using OldEnabled = decltype(DeprecatedStore::xl_enclosure_flags);
+        using NewEnabled = decltype(CurrentStore::xl_enclosure_enabled);
+        using NewPrintFiltrationEnabled = decltype(CurrentStore::chamber_post_print_filtration_enable);
+        using NewPostPrintFiltrationEnabled = decltype(CurrentStore::chamber_post_print_filtration_enable);
+        using NewWarningShown = decltype(CurrentStore::chamber_filter_early_expiration_warning_shown);
+        using NewExpirationTimestamp = decltype(CurrentStore::chamber_filter_expiration_postpone_timestamp_1024);
+
+        using OldFilterTimer = decltype(DeprecatedStore::xl_enclosure_filter_timer);
+        using NewFilterTimer = decltype(CurrentStore::chamber_filter_time_used_s);
+
+        using OldFanRPM = decltype(DeprecatedStore::xl_enclosure_fan_manual);
+        using NewFanRPMPrint = decltype(CurrentStore::chamber_mid_print_filtration_pwm);
+        using NewFanRPMPostPrint = decltype(CurrentStore::chamber_post_print_filtration_pwm);
+
+        using OldPostPrintDuration = decltype(DeprecatedStore::xl_enclosure_post_print_duration);
+        using NewPostPrintDuration = decltype(CurrentStore::chamber_post_print_filtration_duration_min);
+
+        struct old_variables {
+            OldEnabled::value_type saved_flags = OldEnabled::default_val;
+            OldFilterTimer::value_type saved_filter_timer = OldFilterTimer::default_val;
+            OldFanRPM::value_type saved_fan_manual = OldFilterTimer::default_val;
+            OldPostPrintDuration::value_type saved_post_print_dur = OldPostPrintDuration::default_val;
+        };
+
+        struct old_variables old_vals;
+
+        auto callback
+            = [&](journal::Backend::ItemHeader header, std::array<uint8_t, journal::Backend::MAX_ITEM_SIZE> &buffer) -> void {
+            if (header.id == OldEnabled::hashed_id) {
+                memcpy(&old_vals.saved_flags, buffer.data(), header.len);
+            } else if (header.id == OldFilterTimer::hashed_id) {
+                memcpy(&old_vals.saved_filter_timer, buffer.data(), header.len);
+            } else if (header.id == OldFanRPM::hashed_id) {
+                memcpy(&old_vals.saved_fan_manual, buffer.data(), header.len);
+            } else if (header.id == OldPostPrintDuration::hashed_id) {
+                memcpy(&old_vals.saved_post_print_dur, buffer.data(), header.len);
+            }
+        };
+        backend.read_items_for_migrations(callback);
+
+        backend.save_migration_item<NewFanRPMPrint::value_type>(NewFanRPMPrint::hashed_id, PWM255::from_percent(old_vals.saved_fan_manual));
+        backend.save_migration_item<NewFanRPMPostPrint::value_type>(NewFanRPMPostPrint::hashed_id, PWM255::from_percent(old_vals.saved_fan_manual));
+        backend.save_migration_item<NewPostPrintDuration::value_type>(NewPostPrintDuration::hashed_id, old_vals.saved_post_print_dur);
+        backend.save_migration_item<NewEnabled::value_type>(NewEnabled::hashed_id, old_vals.saved_flags & ENABLED);
+        backend.save_migration_item<NewPrintFiltrationEnabled::value_type>(NewPrintFiltrationEnabled::hashed_id, old_vals.saved_flags & PRINT_FILTRATION);
+        backend.save_migration_item<NewPostPrintFiltrationEnabled::value_type>(NewPostPrintFiltrationEnabled::hashed_id, old_vals.saved_flags & POST_PRINT_FILTRATION);
+        backend.save_migration_item<NewWarningShown::value_type>(NewWarningShown::hashed_id, old_vals.saved_flags & WARNING_SHOWN);
+
+        if (old_vals.saved_flags & REMINDER_5DAYS) {
+            // Old implementation saved start of the time period (reminder), new one saves end timestamp
+            backend.save_migration_item<NewExpirationTimestamp::value_type>(NewExpirationTimestamp::hashed_id, (old_vals.saved_filter_timer + 5 * 24 * 3600) / 1024);
+            backend.save_migration_item<NewFilterTimer::value_type>(NewFilterTimer::hashed_id, 600 * 3600);
+        } else {
+            // This means saved_filter_timer still holds filter usage time in seconds
+            backend.save_migration_item<NewExpirationTimestamp::value_type>(NewExpirationTimestamp::hashed_id, 0);
+            backend.save_migration_item<NewFilterTimer::value_type>(NewFilterTimer::hashed_id, old_vals.saved_filter_timer);
+        }
+    }
+#endif
+
+#if HAS_EMERGENCY_STOP()
+    void emergency_stop(journal::Backend &backend) {
+        using NewItem = decltype(CurrentStore::emergency_stop_enable);
+        using OldItem = decltype(DeprecatedStore::emergency_stop_enable);
+
+        OldItem::value_type saved_emergency_enable = NewItem::default_val;
+        auto callback = [&](journal::Backend::ItemHeader header, std::array<uint8_t, journal::Backend::MAX_ITEM_SIZE> &buffer) -> void {
+            if (header.id == OldItem::hashed_id) {
+                memcpy(&saved_emergency_enable, buffer.data(), header.len);
+            }
+        };
+        backend.read_items_for_migrations(callback);
+        backend.save_migration_item<NewItem::value_type>(NewItem::hashed_id, saved_emergency_enable);
+    }
+#endif
+
+#if HAS_AUTO_RETRACT()
+    void filament_auto_retract(journal::Backend &backend) {
+        using NewItem = decltype(CurrentStore::filament_retracted_distances);
+        using OldItem = decltype(DeprecatedStore::filament_auto_retracted_bitset);
+
+        OldItem::value_type old_byte = OldItem::default_val;
+
+        auto callback = [&](journal::Backend::ItemHeader header, std::array<uint8_t, journal::Backend::MAX_ITEM_SIZE> &buffer) {
+            if (header.id == OldItem::hashed_id) {
+                memcpy(&old_byte, buffer.data(), header.len);
+            }
+        };
+
+        backend.read_items_for_migrations(callback);
+
+        std::bitset<HOTENDS> old_bitset = old_byte;
+        static constexpr uint8_t standard_ramming_target_distance = 55;
+
+        for (uint8_t i = 0; i < HOTENDS; i++) {
+            backend.save_migration_item<NewItem::value_type>(NewItem::hashed_id_first + i, old_bitset.test(i) ? standard_ramming_target_distance : config_store_ns::invalid_retracted_distance);
+        }
+    }
+#endif
+
+    void printer_setup_done(journal::Backend &backend) {
+        using FirstNewItem = decltype(CurrentStore::printer_hw_config_done);
+        using SecondNewItem = decltype(CurrentStore::printer_network_setup_done);
+        using OldItem = decltype(DeprecatedStore::printer_setup_done);
+
+        OldItem::value_type old_value = OldItem::default_val;
+
+        auto callback = [&](journal::Backend::ItemHeader header, std::array<uint8_t, journal::Backend::MAX_ITEM_SIZE> &buffer) -> void {
+            if (header.id == OldItem::hashed_id) {
+                memcpy(&old_value, buffer.data(), header.len);
+            }
+        };
+
+        backend.read_items_for_migrations(callback);
+
+        backend.save_migration_item<FirstNewItem::value_type>(FirstNewItem::hashed_id, old_value);
+        backend.save_migration_item<SecondNewItem::value_type>(SecondNewItem::hashed_id, old_value);
     }
 } // namespace migrations
 } // namespace config_store_ns

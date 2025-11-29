@@ -7,6 +7,7 @@ add_executable(
   ${CMAKE_CURRENT_SOURCE_DIR}/mock_windows.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/i_window_text_stub.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/window_text_stub.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/freertos/mutex.cpp
   ${CMAKE_SOURCE_DIR}/src/guiapi/src/window.cpp
   ${CMAKE_SOURCE_DIR}/src/guiapi/src/knob_event.cpp
   ${CMAKE_SOURCE_DIR}/src/guiapi/src/window_frame.cpp
@@ -46,6 +47,7 @@ add_executable(
 target_include_directories(
   window_tests
   PUBLIC .
+         ${CMAKE_SOURCE_DIR}/src
          ${CMAKE_SOURCE_DIR}/src/guiapi/include
          ${CMAKE_SOURCE_DIR}/src/guiconfig
          ${CMAKE_SOURCE_DIR}/src/common
@@ -62,6 +64,7 @@ target_include_directories(
 target_include_directories(
   layout_tests
   PUBLIC .
+         ${CMAKE_SOURCE_DIR}/src
          ${CMAKE_SOURCE_DIR}/src/guiapi/include
          ${CMAKE_SOURCE_DIR}/src/guiconfig
          ${CMAKE_SOURCE_DIR}/src/common

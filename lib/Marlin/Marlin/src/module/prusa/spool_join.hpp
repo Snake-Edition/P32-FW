@@ -46,6 +46,8 @@ public:
     // gets the first spool that will be printed with in the spool join chain, returns spool_2 if not in chain
     uint8_t get_first_spool_1_from_chain(uint8_t spool_2) const;
 
+    uint8_t get_last_spool_2_from_chain(uint8_t spool_1) const;
+
     // gets the spool_2 of the given spool_1
     std::optional<uint8_t> get_spool_2(uint8_t spool_1) const;
 
@@ -74,6 +76,7 @@ public:
 
 private:
     bool remove_join_chain_containing_unlocked(uint8_t spool);
+    uint8_t get_last_spool_2_from_chain_unlocked(uint8_t spool_1) const;
     uint8_t get_first_spool_1_from_chain_unlocked(uint8_t spool_2) const;
     std::optional<uint8_t> get_spool_2_unlocked(uint8_t spool_1) const;
     /// Removes join at idx from joins array and moves the last element into the idx position, so that new element can be inserted at the end again

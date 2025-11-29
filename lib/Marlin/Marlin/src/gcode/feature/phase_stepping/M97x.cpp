@@ -5,13 +5,20 @@
 
 #include <feature/precise_stepping/precise_stepping.hpp>
 #include <feature/phase_stepping/phase_stepping.hpp>
-#include <feature/phase_stepping/calibration.hpp>
+
+#include <option/has_phase_stepping_calibration.h>
+#if HAS_PHASE_STEPPING_CALIBRATION()
+    #include <feature/phase_stepping/calibration.hpp>
+#endif
 
 #include <vector>
 #include <string_view>
 #include <config_store/store_instance.hpp>
 
-#include <USBSerial.h>
+#include <option/has_usb_device.h>
+#if HAS_USB_DEVICE()
+    #include <USBSerial.h>
+#endif
 
 using namespace std::literals;
 using phase_stepping::opts::SERIAL_DECIMALS;
@@ -59,7 +66,7 @@ static void report_state() {
 /**
  *### M970: Enable/Disable Phase Stepping <a href="https://reprap.org/wiki/G-code#M970:_Enable.2FDisable_Phase_Stepping">M970: Enable/Disable Phase Stepping</a>
  *
- * Only XL and iX
+ * Only XL/iX/COREONE
  *
  *#### Usage
  *
@@ -132,7 +139,7 @@ static void M971_reset(const OptionsM971 &options) {
 }
 
 static void M971_read_axis_direction(const phase_stepping::CorrectedCurrentLut &lut, char axis_letter, char direction_letter) {
-    const auto &table = lut.get_correction();
+    const auto &table = lut.get_correction_table();
     for (size_t index = 0; index != table.size(); index++) {
         const float magnitude = table[index].mag;
         const float phase = table[index].pha;
@@ -177,7 +184,7 @@ static void M971_write_axis_direction(const OptionsM971 &options, phase_stepping
     const auto magnitude = *options.magnitude;
     const auto phase = *options.phase;
 
-    lut.modify_correction([&](phase_stepping::MotorPhaseCorrection &table) {
+    lut.modify_correction_table([&](phase_stepping::MotorPhaseCorrection &table) {
         if (0 <= index && index < (int)table.size()) {
             table[index] = phase_stepping::SpectralItem { .mag = magnitude, .pha = phase };
         } else {
@@ -271,6 +278,7 @@ void GcodeSuite::M971() {
     }
 }
 
+#if HAS_PHASE_STEPPING_CALIBRATION()
 class CalibrateAxisHooks final : public phase_stepping::CalibrateAxisHooks {
     std::vector<std::tuple<float, float>> _calibration_results;
     std::size_t _current_calibration_phase = 0;
@@ -318,7 +326,7 @@ public:
 /**
  *### M972: Calibrate motor
  *
- * Only XL and iX
+ * Only XL/iX/COREONE
  *
  *#### Usage
  *
@@ -357,7 +365,7 @@ void GcodeSuite::M972() {
     SERIAL_ECHO("Axis: ");
     SERIAL_ECHOLN(axis);
 
-    G28_no_parser(true, true, false, { .only_if_needed = true, .z_raise = 3 });
+    G28_no_parser(true, true, false, { .only_if_needed = true, .z_raise = 3, .precise = false });
     do_blocking_move_to_z(50);
     Planner::synchronize();
 
@@ -365,7 +373,7 @@ void GcodeSuite::M972() {
     auto result = phase_stepping::calibrate_axis(axis, hooks);
 
     if (!result.has_value()) {
-        SERIAL_ECHO(result.error());
+        SERIAL_ECHO(to_string(result.error()));
         print_error("Calibration failed");
         return;
     }
@@ -487,11 +495,17 @@ void GcodeSuite::M973() {
         revs,
         harmonic,
         params,
-        [n = 0](float sample) mutable {
+        [n = 0](phase_stepping::AccelerometerSample raw_sample) mutable {
             char buff[64];
+            const float sample = PrusaAccelerometer::raw_to_accel(raw_sample.value);
             snprintf(buff, sizeof(buff), "%d, %.5f\n", n++, sample);
             int len = strlen(buff);
+    #if HAS_USB_DEVICE()
+            // bypass logging infrastructure when possible
             SerialUSB.cdc_write_sync(reinterpret_cast<uint8_t *>(buff), len);
+    #else
+        #error "Not implemented on boards without serial"
+    #endif
         });
     dump_samples_annotation(result);
 }
@@ -576,13 +590,15 @@ void GcodeSuite::M974() {
         start_speed,
         end_speed,
         revs,
-        [n = 0](float sample) mutable {
+        [n = 0](phase_stepping::AccelerometerSample raw_sample) mutable {
             char buff[64];
+            const float sample = PrusaAccelerometer::raw_to_accel(raw_sample.value);
             snprintf(buff, sizeof(buff), "%d, %.5f\n", n++, sample);
             int len = strlen(buff);
             SerialUSB.cdc_write_sync(reinterpret_cast<uint8_t *>(buff), len);
         });
     dump_samples_annotation(result);
 }
+#endif
 
 /** @}*/

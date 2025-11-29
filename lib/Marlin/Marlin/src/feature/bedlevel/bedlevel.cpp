@@ -27,7 +27,7 @@
 #include "bedlevel.h"
 #include "../../module/planner.h"
 
-#if EITHER(MESH_BED_LEVELING, PROBE_MANUALLY)
+#if ENABLED(PROBE_MANUALLY)
   #include "../../module/motion.h"
 #endif
 
@@ -48,11 +48,7 @@
 
 bool leveling_is_valid() {
   return
-    #if ENABLED(MESH_BED_LEVELING)
-      mbl.has_mesh()
-    #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
-      !!bilinear_grid_spacing.x
-    #elif ENABLED(AUTO_BED_LEVELING_UBL)
+    #if ENABLED(AUTO_BED_LEVELING_UBL)
       ubl.mesh_is_valid()
     #else // 3POINT, LINEAR
       true
@@ -69,21 +65,11 @@ bool leveling_is_valid() {
  */
 void set_bed_leveling_enabled(const bool enable/*=true*/) {
 
-  #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-    const bool can_change = (!enable || leveling_is_valid());
-  #else
-    constexpr bool can_change = true;
-  #endif
+  constexpr bool can_change = true;
 
   if (can_change && enable != planner.leveling_active) {
 
     planner.synchronize();
-
-    #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-      // Force bilinear_z_offset to re-calculate next time
-      const xyz_pos_t reset { -9999.999, -9999.999, 0 };
-      (void)bilinear_z_offset(reset);
-    #endif
 
     if (planner.leveling_active) {      // leveling from on to off
       // change unleveled current_position to physical current_position without moving steppers.
@@ -134,94 +120,10 @@ void reset_bed_level() {
     ubl.reset();
   #else
     set_bed_leveling_enabled(false);
-    #if ENABLED(MESH_BED_LEVELING)
-      mbl.reset();
-    #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
-      bilinear_start.reset();
-      bilinear_grid_spacing.reset();
-      for (uint8_t x = 0; x < GRID_MAX_POINTS_X; x++)
-        for (uint8_t y = 0; y < GRID_MAX_POINTS_Y; y++) {
-          z_values[x][y] = NAN;
-          #if ENABLED(EXTENSIBLE_UI)
-            ExtUI::onMeshUpdate(x, y, 0);
-          #endif
-        }
-    #elif ABL_PLANAR
-      planner.bed_level_matrix.set_to_identity();
-    #endif
   #endif
 }
 
-#if EITHER(AUTO_BED_LEVELING_BILINEAR, MESH_BED_LEVELING)
-
-  /**
-   * Enable to produce output in JSON format suitable
-   * for SCAD or JavaScript mesh visualizers.
-   *
-   * Visualize meshes in OpenSCAD using the included script.
-   *
-   *   buildroot/shared/scripts/MarlinMesh.scad
-   */
-  //#define SCAD_MESH_OUTPUT
-
-  /**
-   * Print calibration results for plotting or manual frame adjustment.
-   */
-  void print_2d_array(const uint8_t sx, const uint8_t sy, const uint8_t precision, element_2d_fn fn) {
-    #ifndef SCAD_MESH_OUTPUT
-      for (uint8_t x = 0; x < sx; x++) {
-        serial_spaces(precision + (x < 10 ? 3 : 2));
-        SERIAL_ECHO(int(x));
-      }
-      SERIAL_EOL();
-    #endif
-    #ifdef SCAD_MESH_OUTPUT
-      SERIAL_ECHOLNPGM("measured_z = ["); // open 2D array
-    #endif
-    for (uint8_t y = 0; y < sy; y++) {
-      #ifdef SCAD_MESH_OUTPUT
-        SERIAL_ECHOPGM(" [");           // open sub-array
-      #else
-        if (y < 10) SERIAL_CHAR(' ');
-        SERIAL_ECHO(int(y));
-      #endif
-      for (uint8_t x = 0; x < sx; x++) {
-        SERIAL_CHAR(' ');
-        const float offset = fn(x, y);
-        if (!isnan(offset)) {
-          if (offset >= 0) SERIAL_CHAR('+');
-          SERIAL_ECHO_F(offset, int(precision));
-        }
-        else {
-          #ifdef SCAD_MESH_OUTPUT
-            for (uint8_t i = 3; i < precision + 3; i++)
-              SERIAL_CHAR(' ');
-            SERIAL_ECHOPGM("NAN");
-          #else
-            for (uint8_t i = 0; i < precision + 3; i++)
-              SERIAL_CHAR(i ? '=' : ' ');
-          #endif
-        }
-        #ifdef SCAD_MESH_OUTPUT
-          if (x < sx - 1) SERIAL_CHAR(',');
-        #endif
-      }
-      #ifdef SCAD_MESH_OUTPUT
-        SERIAL_CHAR(' ');
-        SERIAL_CHAR(']');                     // close sub-array
-        if (y < sy - 1) SERIAL_CHAR(',');
-      #endif
-      SERIAL_EOL();
-    }
-    #ifdef SCAD_MESH_OUTPUT
-      SERIAL_ECHOPGM("];");                       // close 2D array
-    #endif
-    SERIAL_EOL();
-  }
-
-#endif // AUTO_BED_LEVELING_BILINEAR || MESH_BED_LEVELING
-
-#if EITHER(MESH_BED_LEVELING, PROBE_MANUALLY)
+#if ENABLED(PROBE_MANUALLY)
 
   void _manual_goto_xy(const xy_pos_t &pos) {
 

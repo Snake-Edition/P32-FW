@@ -9,7 +9,7 @@
     #include "puppies/Dwarf.hpp"
 #endif
 
-#include <option/has_modularbed.h>
+#include <option/has_remote_bed.h>
 
 class AdvancedPower {
 public:
@@ -102,7 +102,7 @@ public:
     }
 #endif
 
-#if HAS_MODULARBED()
+#if HAS_REMOTE_BED()
     // Get bed heater current [A]
     // Would be nice to have this inline, but it would drag a modbus includes.
     float get_bed_current();

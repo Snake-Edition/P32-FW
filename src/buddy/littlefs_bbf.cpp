@@ -241,14 +241,6 @@ lfs_t *littlefs_bbf_init(FILE *bbf, uint8_t bbf_tlv_entry) {
     return &lfs;
 }
 
-struct lfs_config *littlefs_internal_config_get() {
-    if (bbf_context.littlefs_config.block_count != 0) {
-        return &bbf_context.littlefs_config;
-    } else {
-        return NULL;
-    }
-}
-
 void littlefs_bbf_deinit(lfs_t *lfs) {
     // Free a large chunk of heap by destroying LRU cache
     bbf_context.block_cache = std::nullopt;

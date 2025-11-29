@@ -19,9 +19,12 @@
 #pragma once
 
 #include <array>
-#include <atomic>
 #include <cstddef>
 #include <freertos/config.hpp>
+
+#if FREERTOS_MUTEX_POWER_PANIC_MODE // REMOVEME BFW-6418
+    #include <atomic>
+#endif
 
 // As tempting as that may be, do not #include <mutex> here because it pulls in
 // a bunch of std::crap which breaks XL debug build due to FLASH inflation.
@@ -34,8 +37,9 @@ public:
     // The actual size and alignment are statically asserted in implementation file.
     using Storage = std::array<std::byte, mutex_storage_size>;
 
-    /// REMOVEME BFW-6418
+#if FREERTOS_MUTEX_POWER_PANIC_MODE // REMOVEME BFW-6418
     static std::atomic<bool> power_panic_mode_removeme;
+#endif
 
 private:
     void *handle;

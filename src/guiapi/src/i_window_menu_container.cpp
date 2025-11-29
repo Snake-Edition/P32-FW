@@ -68,7 +68,7 @@ int IWinMenuContainer::GetVisibleCount() const {
     return ret;
 }
 
-bool IWinMenuContainer::SetIndex(int visible_index) {
+bool IWinMenuContainer::set_index(int visible_index) {
     if (IWindowMenuItem *item = GetItemByVisibleIndex(visible_index)) {
         return item->move_focus();
     }
@@ -110,6 +110,10 @@ bool IWinMenuContainer::SwapVisibility(IWindowMenuItem &item0, IWindowMenuItem &
     if (!visible_item || !hidden_item) {
         return false; // both visible and hidden must be assigned
     }
+
+    // Invalidate both items to circumvent set_is_hidden assertion
+    visible_item->Invalidate();
+    hidden_item->Invalidate();
 
     bool is_dev_only = visible_item->IsDevOnly();
     bool should_transfer_focus = visible_item->is_focused();

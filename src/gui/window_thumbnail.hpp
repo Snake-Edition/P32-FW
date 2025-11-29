@@ -18,8 +18,6 @@ protected:
 };
 
 class WindowProgressThumbnail : public WindowThumbnail {
-    bool redraw_whole; /**< stores information if thumbnail have to be restored whole or not*/
-
     const size_t old_allowed_width; // Holds the width of an alternative 'old' thumbnail that is less wide than the previous one
 
     /**
@@ -38,7 +36,6 @@ public:
      */
     WindowProgressThumbnail(window_t *parent, Rect16 rect, size_t allowed_old_thumbnail_width = GuiDefaults::ScreenWidth + 1);
     bool updatePercentage(int8_t cmp);
-    void redrawWhole();
     void pauseDeinit();
     void pauseReinit();
 

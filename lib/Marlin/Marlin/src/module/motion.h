@@ -30,38 +30,96 @@
 
 #include "../inc/MarlinConfig.h"
 
-#include <functional>
+#include <inplace_function.hpp>
+#include <array>
+#include <span>
 
 #if HAS_BED_PROBE
   #include "probe.h"
 #endif
 #include <option/has_wastebin.h>
 
-#if IS_SCARA
-  #include "scara.h"
-#endif
+// Axis homed and known-position states
+static constexpr uint8_t xyz_bits = _BV(X_AXIS) | _BV(Y_AXIS) | _BV(Z_AXIS);
 
 struct MoveHints {
-  bool is_printing_move = false;      // The move is a printing move and should possibly count into max printed Z
+  /// The move is a printing move and should possibly count into max printed Z
+  bool is_printing_move : 1 = false;
 };
 
-// Axis homed and known-position states
-extern uint8_t axis_homed, axis_known_position;
-static constexpr uint8_t xyz_bits = _BV(X_AXIS) | _BV(Y_AXIS) | _BV(Z_AXIS);
-FORCE_INLINE bool all_axes_homed() { return (axis_homed & xyz_bits) == xyz_bits; }
-FORCE_INLINE bool all_axes_known() { return (axis_known_position & xyz_bits) == xyz_bits; }
-FORCE_INLINE void set_all_unhomed() { axis_homed = 0; }
-FORCE_INLINE void set_all_unknown() { axis_known_position = 0; }
+/** Holds flags related to configuration and segment generation
+ */
+struct PrepareMoveHints {
+  /// Apply modifiers (MBL, skew correction, ...)
+  bool apply_modifiers : 1 = true;
 
-FORCE_INLINE bool homing_needed() {
-  return !(
-    #if ENABLED(HOME_AFTER_DEACTIVATE)
-      all_axes_known()
-    #else
-      all_axes_homed()
-    #endif
-  );
-}
+  /// Apply feedrate scaling
+  bool scale_feedrate : 1 = true;
+
+  /// Segment the move to be able to append correct leveling values
+  bool do_segment : 1 = true;
+  
+  MoveHints move = {}; 
+
+};
+
+
+enum class AxisHomeLevel : uint8_t {
+  /// The axis it not homed at all, we could be anywhere
+  not_homed,
+
+  /// The axis is homed imprecisely (say +- 1mm). Good enough for some operations, not good enough for printing
+  imprecise,
+
+  /// The axis is homed as precisely as the printer allows
+  full
+};
+
+struct AxesHomeLevel : public std::array<AxisHomeLevel, 3> {
+
+public:
+  // Inherit parent constructors and assign operators
+  using array::array;
+  using array::operator=;
+  
+  AxesHomeLevel(const array &data) : array(data) {}
+
+  static constexpr array no_axes_homed{AxisHomeLevel::not_homed, AxisHomeLevel::not_homed, AxisHomeLevel::not_homed};
+
+  /// \returns whether a single axis is homed to the required level
+  constexpr bool is_homed(AxisEnum axis, AxisHomeLevel required_level) const {
+    return at(std::to_underlying(axis)) >= required_level;
+  }
+
+  /// \returns whether all axes in the list are homed to the required level
+  constexpr inline bool is_homed(std::span<const AxisEnum> axes, AxisHomeLevel required_level) const {
+    for(auto axis : axes) {
+      if(!is_homed(axis, required_level)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// \returns whether all axes in the list are homed to the required level
+  constexpr inline bool is_homed(std::initializer_list<AxisEnum> axes, AxisHomeLevel required_level) const {
+    return is_homed(std::span(axes), required_level);
+  }
+
+  /// \returns whether all axes are homed to a required level
+  constexpr bool is_homed(AxisHomeLevel required_level) const {
+    return is_homed({X_AXIS, Y_AXIS, Z_AXIS}, required_level);
+  }
+
+};
+
+/// To what degree are the individual axes homed
+extern AxesHomeLevel axes_home_level;
+
+inline bool all_axes_homed(AxisHomeLevel required_level = AxisHomeLevel::imprecise) { return axes_home_level.is_homed(required_level); }
+inline bool all_axes_known(AxisHomeLevel required_level = AxisHomeLevel::imprecise) { return axes_home_level.is_homed(required_level); }
+
+inline void set_all_unhomed() { axes_home_level = AxesHomeLevel::no_axes_homed; }
 
 // Error margin to work around float imprecision
 constexpr float slop = 0.0001;
@@ -74,15 +132,7 @@ extern xyze_pos_t current_position,  // High-level current tool position
 // Scratch space for a cartesian result
 extern xyz_pos_t cartes;
 
-// Until kinematics.cpp is created, declare this here
-#if IS_KINEMATIC
-  extern abc_pos_t delta;
-#endif
-
-#if HAS_ABL_NOT_UBL
-  extern float xy_probe_feedrate_mm_s;
-  #define XY_PROBE_FEEDRATE_MM_S xy_probe_feedrate_mm_s
-#elif defined(XY_PROBE_SPEED_INITIAL)
+#if defined(XY_PROBE_SPEED_INITIAL)
   #define XY_PROBE_FEEDRATE_MM_S MMM_TO_MMS(XY_PROBE_SPEED_INITIAL)
 #else
   #define XY_PROBE_FEEDRATE_MM_S PLANNER_XY_FEEDRATE()
@@ -116,6 +166,17 @@ extern int16_t feedrate_percentage;
 #else
   constexpr uint8_t active_extruder = 0;
 #endif
+
+/**
+ * Gets hotend index associated with a given extruder index.
+ */
+ inline uint8_t hotend_from_extruder([[maybe_unused]] const uint8_t e) {
+  #if HOTENDS > 1
+    return e;
+  #else
+    return 0;
+  #endif
+}
 
 FORCE_INLINE float pgm_read_any(const float *p) { return pgm_read_float(p); }
 FORCE_INLINE signed char pgm_read_any(const signed char *p) { return pgm_read_byte(p); }
@@ -197,30 +258,14 @@ void line_to_current_position(const feedRate_t &fr_mm_s=feedrate_mm_s);
 /// is suitable with UBL.
 void plan_move_by(const feedRate_t fr, const float dx, const float dy = 0, const float dz = 0, const float de = 0);
 
-void prepare_move_to_destination(const MoveHints &hints = {});
-
-void _internal_move_to_destination(const feedRate_t &fr_mm_s=0.0f
-  #if IS_KINEMATIC
-    , const bool is_fast=false
-  #endif
-);
-
-inline void prepare_internal_move_to_destination(const feedRate_t &fr_mm_s=0.0f) {
-  _internal_move_to_destination(fr_mm_s);
-}
-
-#if IS_KINEMATIC
-  void prepare_fast_move_to_destination(const feedRate_t &scaled_fr_mm_s=MMS_SCALED(feedrate_mm_s));
-
-  inline void prepare_internal_fast_move_to_destination(const feedRate_t &fr_mm_s=0.0f) {
-    _internal_move_to_destination(fr_mm_s, true);
-  }
-#endif
-
 enum class Segmented {
     yes,
     no,
 };
+
+void prepare_move_to_destination(const PrepareMoveHints &hints = {});
+
+void prepare_internal_move_to_destination(const feedRate_t &fr_mm_s=0.0f, const PrepareMoveHints &hints = {});
 
 /// Plans (non-blocking) Z-Manhattan fast (non-linear) move to the specified location
 /// Feedrate is in mm/s
@@ -259,17 +304,12 @@ void do_blocking_move_to_xy_z(const xy_pos_t &raw, const float &z, const feedRat
 FORCE_INLINE void do_blocking_move_to_xy_z(const xyz_pos_t &raw, const float &z, const feedRate_t &fr_mm_s=0.0f)  { do_blocking_move_to_xy_z(xy_pos_t(raw), z, fr_mm_s); }
 FORCE_INLINE void do_blocking_move_to_xy_z(const xyze_pos_t &raw, const float &z, const feedRate_t &fr_mm_s=0.0f) { do_blocking_move_to_xy_z(xy_pos_t(raw), z, fr_mm_s); }
 
-/**
- * Simple helper function doing blocking move so that it avoids nozzle cleaner. It should be used whenever there is a reasonably high probability of head moving closely around nozzle cleaner
- */
-void do_blocking_move_around_nozzle_cleaner_to_xy(const xy_pos_t& destination, const feedRate_t& feedrate);
-
 void remember_feedrate_and_scaling();
 void remember_feedrate_scaling_off();
 void restore_feedrate_and_scaling();
 
 #if HAS_Z_AXIS
-  uint8_t do_z_clearance(const_float_t zclear, const bool lower_allowed=false);
+  uint8_t do_z_clearance(const float zclear, const bool lower_allowed=false);
 #else
   inline uint8_t do_z_clearance(float, bool=false) { return 0; }
 #endif
@@ -278,10 +318,9 @@ void restore_feedrate_and_scaling();
 // Homing
 //
 
-uint8_t axes_need_homing(uint8_t axis_bits=0x07);
-bool axis_unhomed_error(uint8_t axis_bits=0x07);
+uint8_t axes_need_homing(uint8_t axis_bits=0x07, AxisHomeLevel required_level = AxisHomeLevel::imprecise);
+bool axis_unhomed_error(uint8_t axis_bits=0x07, AxisHomeLevel required_level = AxisHomeLevel::imprecise);
 
-static inline bool axes_should_home(uint8_t axis_bits=0x07) { return axes_need_homing(axis_bits); }
 static inline bool homing_needed_error(uint8_t axis_bits=0x07) { return axis_unhomed_error(axis_bits); }
 
 #if ENABLED(NO_MOTION_BEFORE_HOMING)
@@ -290,11 +329,11 @@ static inline bool homing_needed_error(uint8_t axis_bits=0x07) { return axis_unh
   #define MOTION_CONDITIONS IsRunning()
 #endif
 
-void set_axis_is_at_home(const AxisEnum axis, bool homing_z_with_probe = true);
+void set_axis_is_at_home(const AxisEnum axis, AxisHomeLevel level, bool homing_z_with_probe = true);
 
 void set_axis_is_not_at_home(const AxisEnum axis);
 
-void homing_failed(std::function<void()> fallback_error, bool crash_was_active = false, bool recover_z = false);
+void homing_failed(stdext::inplace_function<void()> fallback_error, bool crash_was_active = false, bool recover_z = false);
 
 // Home a single logical axis
 [[nodiscard]] bool homeaxis(const AxisEnum axis, const feedRate_t fr_mm_s=0.0, bool invert_home_dir = false,
@@ -304,8 +343,20 @@ void homing_failed(std::function<void()> fallback_error, bool crash_was_active =
 float homeaxis_single_run(const AxisEnum axis, const int axis_home_dir, const feedRate_t fr_mm_s = 0.0,
   bool invert_home_dir = false, bool homing_z_with_probe = true, const int attempt = 0);
 
+/**
+ * @brief Perform a blocking, relative move on the specified axis *without* position modifiers
+ * @param axis Axis to move
+ * @param distance Distance relative to current position
+ * @param fr_mm_s Move feedrate
+ * @warning Trashes the current axis position!
+ */
+void do_homing_move_axis_rel(const AxisEnum axis, const float distance, const feedRate_t fr_mm_s);
+
 // Perform a single homing move on a logical axis
 uint8_t do_homing_move(const AxisEnum axis, const float distance, const feedRate_t fr_mm_s=0.0, bool can_move_back_before_homing = false, bool homing_z_with_probe = true);
+
+/// Prepares the move to the target. Can apply segmentation based on MBL and other mechanisms requirements.
+void prepare_move_to(const xyze_pos_t &target, feedRate_t fr_mm_s, PrepareMoveHints hints);
 
 /**
  * Workspace offsets
@@ -365,40 +416,7 @@ uint8_t do_homing_move(const AxisEnum axis, const float distance, const feedRate
  * position_is_reachable family of functions
  */
 
-#if IS_KINEMATIC // (DELTA or SCARA)
-  #if HAS_SCARA_OFFSET
-    extern abc_pos_t scara_home_offset; // A and B angular offsets, Z mm offset
-  #endif
-
-  // Return true if the given point is within the printable area
-  inline bool position_is_reachable(const float &rx, const float &ry, const float inset=0) {
-    #if ENABLED(DELTA)
-      return HYPOT2(rx, ry) <= sq(DELTA_PRINTABLE_RADIUS - inset);
-    #elif IS_SCARA
-      const float R2 = HYPOT2(rx - SCARA_OFFSET_X, ry - SCARA_OFFSET_Y);
-      return (
-        R2 <= sq(L1 + L2) - inset
-        #if MIDDLE_DEAD_ZONE_R > 0
-          && R2 >= sq(float(MIDDLE_DEAD_ZONE_R))
-        #endif
-      );
-    #endif
-  }
-
-  inline bool position_is_reachable(const xy_pos_t &pos, const float inset=0) {
-    return position_is_reachable(pos.x, pos.y, inset);
-  }
-
-  #if HAS_BED_PROBE
-    // Return true if the both nozzle and the probe can reach the given point.
-    // Note: This won't work on SCARA since the probe offset rotates with the arm.
-    inline bool position_is_reachable_by_probe(const float &rx, const float &ry) {
-      return position_is_reachable(rx - probe_offset.x, ry - probe_offset.y)
-             && position_is_reachable(rx, ry, ABS(MIN_PROBE_EDGE));
-    }
-  #endif
-
-#else // CARTESIAN
+#if 1 // CARTESIAN
 
   // Return true if the given position is within the machine bounds.
   inline bool position_is_reachable(const float &rx, const float &ry) {

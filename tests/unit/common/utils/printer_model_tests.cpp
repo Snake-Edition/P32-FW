@@ -70,19 +70,30 @@ TEST_CASE("printer_model::compatibilities") {
     CHECK(!compatibility(PrinterModel::mk4, PrinterModel::mk4s).is_compatible);
 
     // But MK4S should be able to run MK4 gcode in fan compatibility
-    CHECK(compatibility(PrinterModel::mk4s, PrinterModel::mk4) == Compatibility { .is_compatible = true, .mk4s_fan_compatibility_mode = true });
-    CHECK(compatibility(PrinterModel::mk3_9s, PrinterModel::mk4) == Compatibility { .is_compatible = true, .mk4s_fan_compatibility_mode = true });
-    CHECK(compatibility(PrinterModel::mk3_9s, PrinterModel::mk3_9) == Compatibility { .is_compatible = true, .mk4s_fan_compatibility_mode = true });
+    CHECK(compatibility(PrinterModel::mk4s, PrinterModel::mk4) == Compatibility { .is_compatible = true, .mk4_compatibility_mode = true });
+    CHECK(compatibility(PrinterModel::mk3_9s, PrinterModel::mk4) == Compatibility { .is_compatible = true, .mk4_compatibility_mode = true });
+    CHECK(compatibility(PrinterModel::mk3_9s, PrinterModel::mk3_9) == Compatibility { .is_compatible = true, .mk4_compatibility_mode = true });
 
     // Also check MK3 compat mode, only for the MK4 family
     CHECK(!compatibility(PrinterModel::mini, PrinterModel::mk3).is_compatible);
     CHECK(!compatibility(PrinterModel::xl, PrinterModel::mk3s).is_compatible);
 
+    // COREONE tests
+    CHECK(compatibility(PrinterModel::coreone, PrinterModel::coreone) == fully_compatible);
+    CHECK(compatibility(PrinterModel::coreone, PrinterModel::mk3) == Compatibility { .is_compatible = true, .mk3_compatibility_mode = true, .mk4_compatibility_mode = true, .chamber_compatibility_mode = true });
+    CHECK(compatibility(PrinterModel::coreone, PrinterModel::mk4) == Compatibility { .is_compatible = true, .mk4_compatibility_mode = true, .chamber_compatibility_mode = true });
+    CHECK(compatibility(PrinterModel::coreone, PrinterModel::mk4s) == Compatibility { .is_compatible = true, .chamber_compatibility_mode = true });
+    CHECK(!compatibility(PrinterModel::coreone, PrinterModel::ix).is_compatible);
+    CHECK(!compatibility(PrinterModel::coreone, PrinterModel::xl).is_compatible);
+    CHECK(!compatibility(PrinterModel::coreone, PrinterModel::mk3_5).is_compatible);
+    CHECK(!compatibility(PrinterModel::mk3_5, PrinterModel::coreone).is_compatible);
+    CHECK(!compatibility(PrinterModel::mk4, PrinterModel::coreone).is_compatible);
+
     CHECK(compatibility(PrinterModel::mk3_5, PrinterModel::mk3) == Compatibility { .is_compatible = true, .mk3_compatibility_mode = true });
     CHECK(compatibility(PrinterModel::mk3_9, PrinterModel::mk3) == Compatibility { .is_compatible = true, .mk3_compatibility_mode = true });
     CHECK(compatibility(PrinterModel::mk4, PrinterModel::mk3) == Compatibility { .is_compatible = true, .mk3_compatibility_mode = true });
-    CHECK(compatibility(PrinterModel::mk3_9s, PrinterModel::mk3) == Compatibility { .is_compatible = true, .mk3_compatibility_mode = true, .mk4s_fan_compatibility_mode = true });
-    CHECK(compatibility(PrinterModel::mk4s, PrinterModel::mk3) == Compatibility { .is_compatible = true, .mk3_compatibility_mode = true, .mk4s_fan_compatibility_mode = true });
+    CHECK(compatibility(PrinterModel::mk3_9s, PrinterModel::mk3) == Compatibility { .is_compatible = true, .mk3_compatibility_mode = true, .mk4_compatibility_mode = true });
+    CHECK(compatibility(PrinterModel::mk4s, PrinterModel::mk3) == Compatibility { .is_compatible = true, .mk3_compatibility_mode = true, .mk4_compatibility_mode = true });
 
     static_assert(std::to_underlying(PrinterModel::_cnt) == 13);
 }

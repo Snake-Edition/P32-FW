@@ -7,10 +7,16 @@
 #include "config.h"
 #include "appmain.hpp"
 #include <device/board.h>
+#include <option/has_local_bed.h>
+#include <option/has_remote_bed.h>
 #include "printers.h"
 #include "fanctl.hpp"
 #include <option/has_dwarf.h>
 #include "CFanCtl3Wire.hpp"
+
+#if HAS_REMOTE_BED()
+    #include <common/feature/remote_bed/remote_bed.hpp>
+#endif
 
 using namespace buddy::hw;
 
@@ -46,10 +52,10 @@ void hwio_safe_state(void) {
     gpio_set(MARLIN_PIN(HEAT0), 0);
     #endif
     // Disable heated bed
-    #if HAS_MODULARBED()
-    // Set power panic for modular bed
-    modularBedReset.set();
-    #else
+    #if HAS_REMOTE_BED()
+    remote_bed::safe_state();
+    #endif
+    #if HAS_LOCAL_BED()
     // disable heatbed
     gpio_init(MARLIN_PIN(BED_HEAT), GPIO_MODE_OUTPUT_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW);
     gpio_set(MARLIN_PIN(BED_HEAT), 0);
@@ -107,7 +113,9 @@ void buddy_disable_heaters(void) {
 #if BOARD_IS_BUDDY() || BOARD_IS_XBUDDY()
     gpio_init(MARLIN_PIN(HEAT0), GPIO_MODE_OUTPUT_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW);
     gpio_set(MARLIN_PIN(HEAT0), 0);
+#endif
 
+#if HAS_LOCAL_BED()
     gpio_init(MARLIN_PIN(BED_HEAT), GPIO_MODE_OUTPUT_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW);
     gpio_set(MARLIN_PIN(BED_HEAT), 0);
 #endif

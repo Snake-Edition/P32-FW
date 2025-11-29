@@ -4,6 +4,7 @@
 #include "marlin_server_request.hpp"
 #include "marlin_events.h"
 #include "marlin_server.hpp"
+#include "marlin_server_shared.h"
 #include <cassert>
 #include <freertos/mutex.hpp>
 #include <stdio.h>
@@ -39,8 +40,6 @@ typedef struct _marlin_client_t {
     EventMask events; // event mask
 
     uint32_t ack; // cached ack value from last Acknowledge event
-    uint32_t command; // processed command (G28,G29,M701,M702,M600)
-    message_cb_t message_cb; // to register callback message
     uint8_t id; // client id (0..MARLIN_MAX_CLIENTS-1)
 } marlin_client_t;
 
@@ -90,8 +89,6 @@ void init() {
         client->id = client_id;
         client->events = 0;
         marlin_clients++;
-        client->command = ftrstd::to_underlying(Cmd::NONE);
-        client->message_cb = NULL;
         marlin_client_task[client_id] = osThreadGetId();
     }
 }
@@ -111,17 +108,6 @@ int get_id() {
     return 0;
 }
 
-// register callback to message
-// return success
-bool set_message_cb(message_cb_t cb) {
-    marlin_client_t *client = _client_ptr();
-    if (client && cb) {
-        client->message_cb = cb;
-        return true;
-    }
-    return false;
-}
-
 static bool try_send(Request &request) {
     marlin_client_t *client = _client_ptr();
     if (client == nullptr) {
@@ -131,7 +117,7 @@ static bool try_send(Request &request) {
     request.response_required = 1;
 
     client->events &= ~(make_mask(Event::Acknowledge) | make_mask(Event::NotAcknowledge));
-    server_queue.send(request);
+    request_queue.send(request);
     for (;;) {
         receive_and_process_client_message(client, 1000);
         if (client->events & make_mask(Event::Acknowledge)) {
@@ -171,7 +157,7 @@ static void _send_request_to_server_noreply(Request &request) {
     }
     request.client_id = client->id;
     request.response_required = 0;
-    server_queue.send(request);
+    request_queue.send(request);
 }
 
 void set_event_notify(uint64_t event_mask) {
@@ -181,18 +167,8 @@ void set_event_notify(uint64_t event_mask) {
     _send_request_to_server_and_wait(request);
 }
 
-marlin_server::Cmd get_command() {
-    marlin_client_t *client = _client_ptr();
-    if (client) {
-        return marlin_server::Cmd(client->command);
-    }
-    return Cmd::NONE;
-}
-
-void _send_request_id_to_server_and_wait(const Request::Type type) {
-    Request request;
-    request.type = type;
-    _send_request_to_server_and_wait(request);
+void _send_request_flag_to_server(const RequestFlag type) {
+    marlin_server::send_request_flag(type);
 }
 
 namespace {
@@ -256,7 +232,7 @@ void inject(InjectQueueRecord record) {
 int event(Event evt_id) {
     int ret = 0;
     marlin_client_t *client = _client_ptr();
-    uint64_t msk = (uint64_t)1 << ftrstd::to_underlying(evt_id);
+    uint64_t msk = (uint64_t)1 << std::to_underlying(evt_id);
     if (client) {
         ret = (client->events & msk) ? 1 : 0;
     }
@@ -266,7 +242,7 @@ int event(Event evt_id) {
 int event_clr(Event evt_id) {
     int ret = 0;
     marlin_client_t *client = _client_ptr();
-    uint64_t msk = (uint64_t)1 << ftrstd::to_underlying(evt_id);
+    uint64_t msk = (uint64_t)1 << std::to_underlying(evt_id);
     if (client) {
         ret = (client->events & msk) ? 1 : 0;
         client->events &= ~msk;
@@ -301,7 +277,7 @@ void test_start(const uint64_t test_mask) {
 }
 
 void test_abort() {
-    _send_request_id_to_server_and_wait(Request::Type::TestAbort);
+    _send_request_flag_to_server(RequestFlag::TestAbort);
 }
 #endif
 
@@ -377,39 +353,43 @@ bool is_print_exited() {
 }
 
 void marlin_gui_ready_to_print() {
-    _send_request_id_to_server_and_wait(Request::Type::PrintReady);
+    _send_request_flag_to_server(RequestFlag::PrintReady);
 }
 
 void marlin_gui_cant_print() {
-    _send_request_id_to_server_and_wait(Request::Type::GuiCantPrint);
+    _send_request_flag_to_server(RequestFlag::GuiCantPrint);
 }
 
 void print_abort() {
-    _send_request_id_to_server_and_wait(Request::Type::PrintAbort);
+    _send_request_flag_to_server(RequestFlag::PrintAbort);
 }
 
 void print_exit() {
-    _send_request_id_to_server_and_wait(Request::Type::PrintExit);
+    _send_request_flag_to_server(RequestFlag::PrintExit);
 }
 
 void print_pause() {
-    _send_request_id_to_server_and_wait(Request::Type::PrintPause);
+    _send_request_flag_to_server(RequestFlag::PrintPause);
 }
 
 void print_resume() {
-    _send_request_id_to_server_and_wait(Request::Type::PrintResume);
+    _send_request_flag_to_server(RequestFlag::PrintResume);
 }
 
 void try_recover_from_media_error() {
-    _send_request_id_to_server_and_wait(Request::Type::TryRecoverFromMediaError);
+    _send_request_flag_to_server(RequestFlag::TryRecoverFromMediaError);
 }
 
-void notify_server_about_encoder_move() {
-    marlin_server::increment_user_move_count();
+void notify_server_about_encoder_move_up() {
+    _send_request_flag_to_server(RequestFlag::KnobMoveUp);
+}
+
+void notify_server_about_encoder_move_down() {
+    _send_request_flag_to_server(RequestFlag::KnobMoveDown);
 }
 
 void notify_server_about_knob_click() {
-    marlin_server::increment_user_click_count();
+    _send_request_flag_to_server(RequestFlag::KnobClick);
 }
 
 void set_warning(WarningType type) {
@@ -421,11 +401,9 @@ void set_warning(WarningType type) {
 
 //-----------------------------------------------------------------------------
 // responses from client finite state machine (like button click)
-void FSM_encoded_response(EncodedFSMResponse encoded_fsm_response) {
-    Request request;
-    request.type = Request::Type::FSM;
-    request.encoded_fsm_response = encoded_fsm_response;
-    _send_request_to_server_and_wait(request);
+void FSM_encoded_response(const EncodedFSMResponse &encoded_fsm_response) {
+    // marlin_server::set_response is thread safe, just use that one
+    marlin_server::set_response(encoded_fsm_response);
 }
 
 bool is_printing() {
@@ -463,30 +441,15 @@ static bool receive_and_process_client_message(marlin_client_t *client, size_t m
 
     client->events |= make_mask(client_event.event);
     switch (client_event.event) {
-    case Event::CommandBegin:
-        client->command = client_event.usr32;
-        break;
-    case Event::CommandEnd:
-        client->command = ftrstd::to_underlying(Cmd::NONE);
-        break;
     case Event::NotAcknowledge:
     case Event::Acknowledge:
         client->ack = client_event.usr32;
         break;
-    case Event::Message: {
-        if (client->message_cb) {
-            client->message_cb(client_event.message); // callback takes ownership
-        } else {
-            free(client_event.message);
-        }
-        break;
-    }
         // not handled events
         // do not use default, i want all events listed here, so new event will generate warning, when not added
     case Event::MediaInserted:
     case Event::MediaError:
     case Event::MediaRemoved:
-    case Event::StatusChanged:
     case Event::RequestCalibrationsScreen:
         break;
     case Event::_count:
@@ -548,27 +511,17 @@ void set_z_offset(float val) {
 void set_fan_check(bool val) {
     return marlin_set_variable(marlin_vars().fan_check_enabled, static_cast<uint8_t>(val));
 }
-void set_fs_autoload(bool val) {
-    return marlin_set_variable(marlin_vars().fs_autoload_enabled, static_cast<uint8_t>(val));
-}
 
-#if ENABLED(CANCEL_OBJECTS)
-void cancel_object(int object_id) {
+#if HAS_CANCEL_OBJECT()
+void set_object_cancelled(int object_id, bool set) {
     Request request;
-    request.type = Request::Type::CancelObjectID;
+    request.type = (set ? Request::Type::CancelObjectID : Request::Type::UncancelObjectID);
     request.cancel_object_id = object_id;
     _send_request_to_server_and_wait(request);
 }
 
-void uncancel_object(int object_id) {
-    Request request;
-    request.type = Request::Type::UncancelObjectID;
-    request.uncancel_object_id = object_id;
-    _send_request_to_server_and_wait(request);
-}
-
 void cancel_current_object() {
-    _send_request_id_to_server_and_wait(Request::Type::CancelCurrentObject);
+    _send_request_flag_to_server(RequestFlag::CancelCurrentObject);
 }
 #endif
 

@@ -20,10 +20,29 @@
  */
 void PrusaGcodeSuite::M9140() {
     config_store().stealth_mode.set(false);
-    marlin_vars().stealth_mode = false;
+    planner.synchronize();
     planner.set_stealth_mode(false);
 
     SERIAL_ECHOLNPGM("Stealth mode disabled");
+}
+
+/**
+ *### M9141: Stealth mode status
+ *
+ * Internal GCode
+ *
+ *#### Usage
+ *
+ *    M9141
+ *
+ * Outputs the current status of stealth mode
+ */
+void PrusaGcodeSuite::M9141() {
+    if (config_store().stealth_mode.get()) {
+        SERIAL_ECHOLNPGM("Stealth mode is enabled");
+    } else {
+        SERIAL_ECHOLNPGM("Stealth mode is disabled");
+    }
 }
 
 /**
@@ -42,7 +61,7 @@ void PrusaGcodeSuite::M9140() {
  */
 void PrusaGcodeSuite::M9150() {
     config_store().stealth_mode.set(true);
-    marlin_vars().stealth_mode = true;
+    planner.synchronize();
     planner.set_stealth_mode(true);
 
     SERIAL_ECHOLNPGM("Stealth mode enabled");

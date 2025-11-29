@@ -3,9 +3,10 @@
 #include <string.h>
 #include <crash_dump/dump.hpp>
 #include <stdio.h>
-#include "disable_interrupts.h"
+#include "interrupt_disabler.hpp"
 #include "utility_extensions.hpp"
-#include "w25x.h"
+#include <common/sys.hpp>
+#include <common/w25x.hpp>
 #include "FreeRTOS.h"
 #include "task.h"
 #include <error_codes.hpp>
@@ -198,14 +199,14 @@ bool save_dump_to_usb(const char *fn) {
 }
 
 void save_message(MsgType type, uint16_t error_code, const char *error, const char *title) {
-    static_assert(ftrstd::to_underlying(ErrCode::ERR_UNDEF) == 0, "This uses 0 as undefined error");
+    static_assert(std::to_underlying(ErrCode::ERR_UNDEF) == 0, "This uses 0 as undefined error");
 
     // break in case debugger is attached and avoid saving message to eeprom
     crash_dump::before_dump();
 
-    buddy::DisableInterrupts disable_interrupts;
+    buddy::InterruptDisabler _;
     vTaskEndScheduler();
-    if (!w25x_init()) {
+    if (!w25x_reinit_before_crash_dump()) {
         return;
     }
 
@@ -213,7 +214,7 @@ void save_message(MsgType type, uint16_t error_code, const char *error, const ch
 }
 
 void force_save_message_without_dump(MsgType type, uint16_t error_code, const char *error, const char *title) {
-    static_assert(ftrstd::to_underlying(ErrCode::ERR_UNDEF) == 0, "This uses 0 as undefined error");
+    static_assert(std::to_underlying(ErrCode::ERR_UNDEF) == 0, "This uses 0 as undefined error");
 
     assert(error != nullptr);
 
@@ -303,14 +304,14 @@ uint16_t load_message_error_code() {
         reinterpret_cast<uint8_t *>(&error_code),
         sizeof(message_t::error_code));
     if (w25x_fetch_error()) {
-        return ftrstd::to_underlying(ErrCode::ERR_UNDEF);
+        return std::to_underlying(ErrCode::ERR_UNDEF);
     }
     return error_code;
 }
 
 static void dump_failed() {
     // nothing left to do here, when dump fails just restart
-    HAL_NVIC_SystemReset();
+    sys_reset();
 }
 
 static constexpr CrashCatcherMemoryRegion regions[] = {
@@ -326,8 +327,8 @@ void before_dump() {
     if (!dump_breakpoint_paused) {
         dump_breakpoint_paused = true;
         buddy_disable_heaters(); // put HW to safe state
-#ifdef _DEBUG
-        if (CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk) {
+#if defined(_DEBUG) || DEVELOPER_MODE()
+        if (sys_debugger_attached()) {
             // if case debugger is attached, issue breakpoint instead of crash dump.
             // If you still want to do crash dump, resume the processor
             CRASH_CATCHER_BREAKPOINT();
@@ -370,7 +371,7 @@ void CrashCatcher_DumpStart([[maybe_unused]] const CrashCatcherInfo *pInfo) {
 
     crash_dump::before_dump();
 
-    if (!w25x_init()) {
+    if (!w25x_reinit_before_crash_dump()) {
         crash_dump::dump_failed();
     }
 
@@ -385,28 +386,16 @@ void CrashCatcher_DumpStart([[maybe_unused]] const CrashCatcherInfo *pInfo) {
 }
 
 void CrashCatcher_DumpMemory(const void *pvMemory, CrashCatcherElementSizes element_size, size_t elementCount) {
-    if (element_size == CRASH_CATCHER_BYTE) {
-        if (crash_dump::dump_size + elementCount > crash_dump::dump_max_data_size) {
-            crash_dump::dump_failed();
-        }
-
-        w25x_program(crash_dump::dump_data_addr + crash_dump::dump_size, (uint8_t *)pvMemory, elementCount);
-        crash_dump::dump_size += elementCount;
-    } else if (element_size == CRASH_CATCHER_WORD) {
-        if (crash_dump::dump_size + elementCount * sizeof(uint32_t) > crash_dump::dump_max_data_size) {
-            crash_dump::dump_failed();
-        }
-
-        const uint32_t *ptr = reinterpret_cast<const uint32_t *>(pvMemory);
-        while (elementCount) {
-            uint32_t word = *ptr++;
-            w25x_program(crash_dump::dump_data_addr + crash_dump::dump_size, (uint8_t *)ptr, sizeof(word));
-            crash_dump::dump_size += sizeof(word);
-            elementCount--;
-        }
-    } else {
+    static_assert(CRASH_CATCHER_BYTE == 1);
+    static_assert(CRASH_CATCHER_HALFWORD == 2);
+    static_assert(CRASH_CATCHER_WORD == 4);
+    const size_t size_in_bytes = elementCount * element_size;
+    if (crash_dump::dump_size + size_in_bytes > crash_dump::dump_max_data_size) {
         crash_dump::dump_failed();
     }
+
+    w25x_program(crash_dump::dump_data_addr + crash_dump::dump_size, (uint8_t *)pvMemory, size_in_bytes);
+    crash_dump::dump_size += size_in_bytes;
 
     if (w25x_fetch_error()) {
         crash_dump::dump_failed();
@@ -426,7 +415,7 @@ CrashCatcherReturnCodes CrashCatcher_DumpEnd(void) {
     }
 
     // All done, now restart and display BSOD
-    HAL_NVIC_SystemReset();
+    sys_reset();
 
     // need to return something, but it should never get here.
     return CRASH_CATCHER_TRY_AGAIN;

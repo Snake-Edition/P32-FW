@@ -622,8 +622,6 @@ def cmake_cache_entry(arg):
 
 
 def main():
-    bootstrap.switch_to_venv_if_nedded()
-
     all_presets = load_presets()
     parser = argparse.ArgumentParser()
     # yapf: disable
@@ -731,6 +729,8 @@ def main():
     )
     args = parser.parse_args(sys.argv[1:])
     # yapf: enable
+
+    bootstrap.switch_to_venv_if_nedded()
 
     build_dir_root = args.build_dir or Path(
         __file__).resolve().parent.parent / 'build'

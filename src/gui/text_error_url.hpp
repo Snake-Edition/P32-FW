@@ -10,6 +10,7 @@ private:
 
 public:
     TextErrorUrlWindow(window_t *parent, Rect16 rect, ErrCode ec);
+    TextErrorUrlWindow(window_t *parent, Rect16 rect);
 
     void set_error_code(ErrCode ec);
 };

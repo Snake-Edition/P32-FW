@@ -17,7 +17,11 @@
 #include <filament_eeprom.hpp>
 
 #include "constants.hpp"
-#include <common/hotend_type.hpp>
+
+#include <option/has_hotend_type_support.h>
+#if HAS_HOTEND_TYPE_SUPPORT()
+    #include <hotend_type.hpp>
+#endif
 
 #include <option/has_sheet_support.h>
 #include <option/has_loadcell.h>
@@ -125,6 +129,7 @@ namespace defaults {
 
     inline constexpr std::array<char, connect_host_size + 1> connect_host { "buddy-a.\x01\x01" }; // "Compressed" - this means buddy-a.connect.prusa3d.com.
     inline constexpr std::array<char, connect_token_size + 1> connect_token { "" };
+    inline constexpr std::array<char, connect_proxy_size + 1> connect_proxy_host { "" };
     inline constexpr uint16_t connect_port { 443 };
 
     // Defaults for metrics
@@ -176,27 +181,12 @@ namespace defaults {
 
     inline constexpr time_tools::TimeFormat time_format { time_tools::TimeFormat::_24h };
 
-    inline constexpr float loadcell_scale { 0.0192f };
-    inline constexpr float loadcell_threshold_static { -125.f };
-    inline constexpr float loadcell_hysteresis { 80.f };
-    inline constexpr float loadcell_threshold_continuous { -40.f };
-
     // Filament sensor reference NOT INSERTED value
     inline constexpr int32_t extruder_fs_ref_nins_value { std::numeric_limits<int32_t>::min() }; // min == will require calibration
     // Filament sensor reference INSERTED value
     // min == invalid value
     // Note that previous FW versions didn't save this value during calibration, so fsensor has to work with this default value
     inline constexpr int32_t extruder_fs_ref_ins_value { std::numeric_limits<int32_t>::min() };
-
-    inline constexpr uint32_t extruder_fs_value_span {
-#if (BOARD_IS_XBUDDY() && defined LOVEBOARD_HAS_PT100)
-        100
-#elif (BOARD_IS_XLBUDDY())
-        1000
-#else
-        350000
-#endif
-    };
 
     // SIDE Filament sensor reference NOT INSERTED value
     // min == will require calibration
@@ -205,7 +195,6 @@ namespace defaults {
     // min == invalid value
     // Note that previous FW versions didn't save this value during calibration, so fsensor has to work with this default value
     inline constexpr int32_t side_fs_ref_ins_value { std::numeric_limits<int32_t>::min() };
-    inline constexpr uint32_t side_fs_value_span { 310 };
 
     inline constexpr bool fsensor_enabled {
 #if PRINTER_IS_PRUSA_MINI() || PRINTER_IS_PRUSA_MK3_5()
@@ -265,27 +254,8 @@ namespace defaults {
     inline constexpr float axis_steps_per_unit_e0 { default_axis_steps_flt[3] * ((DEFAULT_INVERT_E0_DIR == true) ? -1.f : 1.f) };
     inline constexpr uint16_t axis_microsteps_Z_ { Z_MICROSTEPS };
     inline constexpr uint16_t axis_microsteps_E0_ { E0_MICROSTEPS };
-    inline constexpr uint16_t axis_rms_current_ma_X_ { X_CURRENT };
-    inline constexpr uint16_t axis_rms_current_ma_Y_ { Y_CURRENT };
     inline constexpr uint16_t axis_rms_current_ma_Z_ { Z_CURRENT };
     inline constexpr uint16_t axis_rms_current_ma_E0_ { E0_CURRENT };
-
-    inline constexpr float axis_x_length_mm {
-#ifdef MINI_I3_MK33
-        250
-#else
-        180
-#endif
-    };
-
-    inline constexpr float axis_y_length_mm {
-#ifdef MINI_I3_MK33
-        210
-#else
-        180
-#endif
-    };
-
     inline constexpr float axis_z_max_pos_mm {
 #ifdef DEFAULT_Z_MAX_POS
         DEFAULT_Z_MAX_POS
@@ -294,85 +264,18 @@ namespace defaults {
 #endif
     };
 
-    // E fast load length
-    inline constexpr float axis_e_length_mm {
-#ifdef MINI_I3_MK33
-        50
-#else
-        320
-#endif
-    };
+    inline constexpr int16_t homing_sens_x { stallguard_sensitivity_unset };
+    inline constexpr int16_t homing_sens_y { stallguard_sensitivity_unset };
 
-    inline constexpr int16_t x_max_feedrate {
-#ifdef MINI_I3_MK33
-        200
-#else
-        180
-#endif
-    };
-
-    inline constexpr int16_t y_max_feedrate {
-#ifdef MINI_I3_MK33
-        200
-#else
-        180
-#endif
-    };
-
-    inline constexpr int16_t homing_sens_x {
-#if X_DRIVER_TYPE == TMC2209
-    #ifdef MINI_I3_MK33
-        145
-    #elif MINI_COREXY
-        112
-    #else
-        130
-    #endif
-#else
-        stallguard_sensitivity_unset
-#endif
-    };
-
-    inline constexpr int16_t homing_sens_y {
-
-#if X_DRIVER_TYPE == TMC2209
-        homing_sens_x
-#else
-        stallguard_sensitivity_unset
-#endif
-    };
-
-    inline constexpr int16_t stealth_chop_x {
-
-#ifdef MINI_I3_MK33
-        false
-#elif MINI_COREXY
-        false
-#else
-        true
-#endif
-    };
-
-    inline constexpr int16_t stealth_chop_y {
-        stealth_chop_x
-    };
-
-    inline constexpr int16_t stealth_chop_z {
-
-        true
-    };
-
-    inline constexpr int16_t stealth_chop_e {
-        false
-    };
-
+#if HAS_HOTEND_TYPE_SUPPORT()
     inline constexpr HotendType hotend_type {
-#if PRINTER_IS_PRUSA_iX() || PRINTER_IS_PRUSA_COREONE()
+    #if PRINTER_IS_PRUSA_iX() || PRINTER_IS_PRUSA_COREONE()
         HotendType::stock_with_sock
-#else
+    #else
         HotendType::stock
-#endif
+    #endif
     };
+#endif
     inline constexpr uint8_t uint8_percentage_80 { 80 };
     inline constexpr int64_t int64_zero { 0 };
 

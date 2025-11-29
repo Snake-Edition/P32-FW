@@ -1,4 +1,4 @@
-target_sources(firmware PRIVATE G27.cpp M125.cpp M603.cpp)
+target_sources(firmware PRIVATE G27.cpp M603.cpp)
 
 if(HAS_PAUSE)
   target_sources(

@@ -21,16 +21,22 @@ function(define_boolean_option name value)
 endfunction()
 
 function(to_pascal_case out_var str)
-  execute_process(
-    COMMAND
-      "${Python3_EXECUTABLE}" "-c"
-      "import string, sys; print(string.capwords(sys.argv[1].replace('_', ' ')).replace(' ', ''))"
-      "${str}"
-    OUTPUT_VARIABLE result
-    OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY
-    )
-  set(${out_var}
-      "${result}"
+  string(REPLACE "_" ";" words "${str}")
+  set("${out_var}"
+      "${intermidiate_result}"
+      PARENT_SCOPE
+      )
+  set(pascal_words "")
+  foreach(word IN LISTS words)
+    string(SUBSTRING "${word}" 0 1 first_char)
+    string(TOUPPER "${first_char}" first_char_upper)
+    string(SUBSTRING "${word}" 1 -1 rest_of_the_word)
+    set(pascal_word "${first_char_upper}${rest_of_the_word}")
+    list(APPEND pascal_words "${pascal_word}")
+  endforeach()
+  list(JOIN pascal_words "" pascal_result)
+  set("${out_var}"
+      "${pascal_result}"
       PARENT_SCOPE
       )
 endfunction()
@@ -77,6 +83,12 @@ function(define_enum_option)
       set(value_is_x "0")
     endif()
     file(APPEND "${input_file}" "#define ${option_name_upper}_IS_${value}() ${value_is_x}\n")
+
+    # also set cmake variable OPTION_IS_VALUE ON/OFF to allow usage in cmake
+    set(${option_name_upper}_IS_${value}
+        ${value_is_x}
+        PARENT_SCOPE
+        )
   endforeach()
   file(APPEND "${input_file}" "\n")
 

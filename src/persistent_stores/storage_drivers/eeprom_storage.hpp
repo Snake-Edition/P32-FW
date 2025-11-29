@@ -1,6 +1,9 @@
 #pragma once
+
+#include <atomic>
+#include <cstdint>
+
 #include "storage.hpp"
-#include "st25dv64k.h"
 
 class EEPROMStorage : public configuration_store::Storage {
     // TODO detect errors and return them

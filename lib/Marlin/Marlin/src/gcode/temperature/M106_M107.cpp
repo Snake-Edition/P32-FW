@@ -29,9 +29,9 @@
     #include "../../module/temperature.h"
     #include "fanctl.hpp"
     #include <device/board.h>
-    #include <option/has_xbuddy_extension.h>
+    #include <option/xbuddy_extension_variant_standard.h>
 
-    #if HAS_XBUDDY_EXTENSION()
+    #if XBUDDY_EXTENSION_VARIANT_STANDARD()
         #include <feature/xbuddy_extension/xbuddy_extension.hpp>
     #endif
 
@@ -50,12 +50,12 @@ static bool set_special_fan_speed(uint8_t fan, uint8_t speed, bool set_auto) {
     #if XL_ENCLOSURE_SUPPORT()
     static_assert(FAN_COUNT < 3, "Fan index 3 is reserved for Enclosure fan and should not be set by thermalManager");
     if (fan == 3) {
-        Fans::enclosure().setPWM(speed);
+        Fans::enclosure().set_pwm(speed);
         return true;
     }
     #endif
 
-    #if HAS_XBUDDY_EXTENSION()
+    #if XBUDDY_EXTENSION_VARIANT_STANDARD()
     using XBE = buddy::XBuddyExtension;
     static_assert(FAN_COUNT < 3, "Fan 3 is dedicated to extboard");
     if (fan == 3) {
@@ -113,8 +113,8 @@ void GcodeSuite::M106() {
         uint16_t d = parser.seen('A') ? thermalManager.fan_speed[0] : 255;
         uint16_t s = parser.ushortval('S', d);
         NOMORE(s, 255U);
-    #if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-        if (GcodeSuite::fan_compatibility_mode == GcodeSuite::FanCompatibilityMode::MK3_TO_MK4_NON_S) {
+    #if HAS_GCODE_COMPATIBILITY()
+        if (gcode.compatibility.mk4_compatibility_mode) {
             s = (s * 7) / 10; // Converts speed to 70% of its values
         }
     #endif

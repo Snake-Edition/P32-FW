@@ -131,11 +131,15 @@ public:
         abort();
     }
 
-    virtual const char *dialog_action(uint32_t dialog_id, Response response) override {
+    virtual const char *dialog_action(printer_state::DialogId dialog_id, Response response) override {
         return nullptr;
     }
 
     virtual void set_slot_info(size_t, const SlotInfo &) override {}
+
+#if HAS_CANCEL_OBJECT()
+    virtual void set_object_cancelled(uint16_t, bool) override {}
+#endif
 };
 
 } // namespace connect_client

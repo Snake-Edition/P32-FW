@@ -1,32 +1,6 @@
 #include "selftest_result.hpp"
 #include <option/has_switched_fan_test.h>
 
-bool operator==(SelftestTool_pre_23 lhs, SelftestTool_pre_23 rhs) {
-    return lhs.dockoffset == rhs.dockoffset
-        && lhs.fsensor == rhs.fsensor
-        && lhs.sideFsensor == rhs.sideFsensor
-        && lhs.heatBreakFan == rhs.heatBreakFan
-        && lhs.printFan == rhs.printFan
-        && lhs.loadcell == rhs.loadcell
-        && lhs.nozzle == rhs.nozzle
-        && lhs.tooloffset == rhs.tooloffset;
-}
-
-bool operator==(SelftestResult_pre_23 lhs, SelftestResult_pre_23 rhs) {
-    for (size_t i = 0; i < std::size(lhs.tools); ++i) {
-        if (lhs.tools[i] != rhs.tools[i]) {
-            return false;
-        }
-    }
-    return lhs.bed == rhs.bed
-        && lhs.eth == rhs.eth
-        && lhs.wifi == rhs.wifi
-        && lhs.xaxis == rhs.xaxis
-        && lhs.yaxis == rhs.yaxis
-        && lhs.zaxis == rhs.zaxis
-        && lhs.zalign == rhs.zalign;
-}
-
 SelftestResult_pre_gears::SelftestResult_pre_gears(const SelftestResult_pre_23 &sr_pre23)
     : xaxis(sr_pre23.xaxis)
     , yaxis(sr_pre23.yaxis)
@@ -90,35 +64,6 @@ void SelftestTool::reset_fan_tests() {
     fansSwitched = TestResult_Unknown;
 }
 
-bool operator==(SelftestTool lhs, SelftestTool rhs) {
-    return lhs.dockoffset == rhs.dockoffset
-        && lhs.fsensor == rhs.fsensor
-        && lhs.sideFsensor == rhs.sideFsensor
-        && lhs.heatBreakFan == rhs.heatBreakFan
-#if HAS_SWITCHED_FAN_TEST()
-        && lhs.fansSwitched == rhs.fansSwitched
-#endif /* HAS_SWITCHED_FAN_TEST() */
-        && lhs.printFan == rhs.printFan
-        && lhs.loadcell == rhs.loadcell
-        && lhs.nozzle == rhs.nozzle
-        && lhs.tooloffset == rhs.tooloffset;
-}
-
-bool operator==(SelftestResult_pre_gears lhs, SelftestResult_pre_gears rhs) {
-    for (size_t i = 0; i < std::size(lhs.tools); ++i) {
-        if (lhs.tools[i] != rhs.tools[i]) {
-            return false;
-        }
-    }
-    return lhs.bed == rhs.bed
-        && lhs.eth == rhs.eth
-        && lhs.wifi == rhs.wifi
-        && lhs.xaxis == rhs.xaxis
-        && lhs.yaxis == rhs.yaxis
-        && lhs.zaxis == rhs.zaxis
-        && lhs.zalign == rhs.zalign;
-}
-
 SelftestResult::SelftestResult(const SelftestResult_pre_gears &sr_pre_gears)
     : xaxis(sr_pre_gears.xaxis)
     , yaxis(sr_pre_gears.yaxis)
@@ -127,7 +72,7 @@ SelftestResult::SelftestResult(const SelftestResult_pre_gears &sr_pre_gears)
     , eth(sr_pre_gears.eth)
     , wifi(sr_pre_gears.wifi)
     , zalign(sr_pre_gears.zalign)
-    , gears(TestResult::TestResult_Unknown) {
+    , deprecated_gears(TestResult::TestResult_Unknown) {
     for (size_t i = 0; i < std::size(tools); ++i) {
         tools[i].printFan = sr_pre_gears.tools[i].printFan;
         tools[i].heatBreakFan = sr_pre_gears.tools[i].heatBreakFan;
@@ -140,21 +85,6 @@ SelftestResult::SelftestResult(const SelftestResult_pre_gears &sr_pre_gears)
         tools[i].sideFsensor = sr_pre_gears.tools[i].sideFsensor;
         tools[i].dockoffset = sr_pre_gears.tools[i].dockoffset;
         tools[i].tooloffset = sr_pre_gears.tools[i].tooloffset;
+        tools[i].gears = TestResult::TestResult_Unknown;
     }
-}
-
-bool operator==(SelftestResult lhs, SelftestResult rhs) {
-    for (size_t i = 0; i < std::size(lhs.tools); ++i) {
-        if (lhs.tools[i] != rhs.tools[i]) {
-            return false;
-        }
-    }
-    return lhs.bed == rhs.bed
-        && lhs.eth == rhs.eth
-        && lhs.wifi == rhs.wifi
-        && lhs.xaxis == rhs.xaxis
-        && lhs.yaxis == rhs.yaxis
-        && lhs.zaxis == rhs.zaxis
-        && lhs.zalign == rhs.zalign
-        && lhs.gears == rhs.gears;
 }

@@ -20,4 +20,8 @@ elseif(BOARD STREQUAL "XL_DEV_KIT_XLB")
   add_subdirectory(xlbuddy)
 endif()
 
+if(HAS_PRINT_FAN_TYPE)
+  target_sources(firmware PRIVATE print_fan_type.cpp)
+endif()
+
 target_include_directories(BuddyHeaders INTERFACE .)

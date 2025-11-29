@@ -1,18 +1,55 @@
 #include "homing_cart.hpp"
 
-#include <PersistentStorage.h>
 #include <config_store/store_instance.hpp>
 
-#include "Marlin.h" // for suspend_auto_report
 #include "../motion.h"
 #include "../stepper.h"
 #include "feature/prusa/crash_recovery.hpp"
+#include <lcd/ultralcd.h>
 #include "configuration.hpp"
+#include <feature/print_status_message/print_status_message_mgr.hpp>
+
+#include <marlin_server.hpp>
 
 inline constexpr float HOMING_BUMP_DIVISOR_STEP = 1.03f;
 inline constexpr float homing_bump_divisor_dflt[] = HOMING_BUMP_DIVISOR;
 inline constexpr float homing_bump_divisor_max[] = HOMING_BUMP_DIVISOR_MAX;
 inline constexpr float homing_bump_divisor_min[] = HOMING_BUMP_DIVISOR_MIN;
+
+static constexpr uint8_t homeSamplesCount = config_store_ns::CurrentStore::precise_homing_axis_sample_count;
+
+static void pushHomeSample(uint16_t mscnt, uint8_t axis) {
+    const auto index = config_store().precise_homing_sample_history_index.get(axis);
+    config_store().precise_homing_sample_history.set(axis * homeSamplesCount + index, mscnt);
+    config_store().precise_homing_sample_history_index.set(axis, (index + 1) % homeSamplesCount);
+}
+
+static bool isCalibratedHome(uint16_t (&mscnt)[homeSamplesCount], uint8_t axis) {
+    const auto offset = axis * homeSamplesCount;
+
+    bool is_calibrated = true;
+    auto &store_array = config_store().precise_homing_sample_history;
+
+    for (uint_fast8_t i = 0; i < homeSamplesCount; ++i) {
+        auto sample = store_array.get(i + offset);
+
+        if (sample == store_array.get_default_val(i + offset)) {
+            is_calibrated = false;
+            sample = 0;
+        }
+
+        mscnt[i] = sample;
+    }
+    return is_calibrated;
+}
+
+[[maybe_unused]] static void erase_axis(uint8_t axis) {
+    config_store().precise_homing_sample_history_index.set_to_default(axis);
+
+    for (int i = homeSamplesCount * axis, e = homeSamplesCount * axis + homeSamplesCount; i < e; i++) {
+        config_store().precise_homing_sample_history.set_to_default(i);
+    }
+}
 
 /**
  *  Move back and forth to endstop
@@ -29,9 +66,9 @@ static int32_t home_and_get_mscnt(AxisEnum axis, int axis_home_dir, feedRate_t f
  *          always 256 microsteps per step, range 0 to 1023
  */
 static int get_calibrated_home(const AxisEnum axis, bool &calibrated) {
-    uint16_t mscntRead[PersistentStorage::homeSamplesCount];
-    calibrated = PersistentStorage::isCalibratedHome(mscntRead, axis);
-    return home_modus(mscntRead, PersistentStorage::homeSamplesCount, 96);
+    uint16_t mscntRead[homeSamplesCount];
+    calibrated = isCalibratedHome(mscntRead, axis);
+    return home_modus(mscntRead, homeSamplesCount, 96);
 }
 
 /**
@@ -86,13 +123,15 @@ static int32_t home_and_get_calibration_offset(AxisEnum axis, int axis_home_dir,
     bool break_loop = false;
     fr_mm_s = fr_mm_s != 0.0f ? fr_mm_s : homing_feedrate_mm_s[axis];
 
+    PrintStatusMessageGuard status_guard;
+
     do {
         const int32_t mscnt = home_and_get_mscnt(axis, axis_home_dir, fr_mm_s / homing_bump_divisor[axis], probe_offset);
 
         if ((probe_offset >= axis_home_min_diff(axis))
             && (probe_offset <= axis_home_max_diff(axis))
             && store_samples) {
-            PersistentStorage::pushHomeSample(mscnt, axis);
+            pushHomeSample(mscnt, axis);
         } else {
             break_loop = true;
         }
@@ -109,7 +148,8 @@ static int32_t home_and_get_calibration_offset(AxisEnum axis, int axis_home_dir,
         if (calibrated) {
             SERIAL_ECHOLNPAIR(" calibration offset: ", calibration_offset);
         } else {
-            ui.status_printf_P(0, "Calibrating %c axis", axis_codes[axis]);
+            status_guard.update<PrintStatusMessage::calibrating_axis>({ .axis = axis });
+            marlin_server::fsm_change(PhaseWait::homing_calibration);
             // I _could_ use SERIAL_ECHOLN(), but that somehow cuts off the end
             // of the printed string. Very nice.
             SERIAL_ECHOLNPAIR(" Not yet", " calibrated.");
@@ -330,13 +370,16 @@ float home_axis_precise(AxisEnum axis, int axis_home_dir, bool can_calibrate, fl
 
     load_divisor_from_eeprom();
 
-    for (int try_nr = 0; try_nr < tries; ++try_nr) {
+    PrintStatusMessageGuard status_guard;
+
+    bool success = false;
+    int try_nr = 0;
+    for (; try_nr < tries; ++try_nr) {
         SERIAL_ECHO_START();
         SERIAL_ECHOPAIR("== Precise Homing axis ", axis_codes[axis]);
         SERIAL_ECHOPAIR(" try ", try_nr);
         SERIAL_ECHOLN(" ==");
 
-#if PRINTER_IS_PRUSA_MK4()
         // If homing is failing, try to recalibrate sensitivity. We do this
         // after we couldn't home perfectly, and increase the perfect only
         // tries so that we still try to home perfectly after recalibrating
@@ -351,7 +394,8 @@ float home_axis_precise(AxisEnum axis, int axis_home_dir, bool can_calibrate, fl
         SensitivityCalibration sens_calibration { axis, reset_sens_calibration };
 
         while (can_calibrate && !sens_calibration.is_calibrated()) {
-            ui.status_printf_P(0, "Recalibrating %c axis. Printer may vibrate and be noisier.", axis_codes[axis]);
+            marlin_server::fsm_change(PhaseWait::homing_calibration);
+            status_guard.update<PrintStatusMessage::calibrating_axis>({ .axis = axis });
             home_and_get_calibration_offset(axis, axis_home_dir, probe_offset, false, fr_mm_s);
             if (planner.draining()) {
                 // ensure we do not save aborted calibration probes
@@ -360,10 +404,9 @@ float home_axis_precise(AxisEnum axis, int axis_home_dir, bool can_calibrate, fl
             sens_calibration.update_probe_offset_avg(probe_offset);
 
             if (sens_calibration.is_calibrated()) {
-                PersistentStorage::erase_axis(axis);
+                erase_axis(axis);
             }
         }
-#endif
 
         const int32_t calibration_offset = home_and_get_calibration_offset(axis, axis_home_dir, probe_offset, can_calibrate, fr_mm_s);
         if (planner.draining()) {
@@ -377,33 +420,47 @@ float home_axis_precise(AxisEnum axis, int axis_home_dir, bool can_calibrate, fl
         if ((probe_offset < axis_home_min_diff(axis))
             || (probe_offset > axis_home_max_diff(axis))) {
             SERIAL_ECHOLN("failed.");
-            ui.status_printf_P(0, "%c axis homing failed, retrying", axis_codes[axis]);
+            status_guard.update<PrintStatusMessage::homing_retrying>({ .axis = axis });
             homing_failed_update_divisor(axis);
+
         } else if (std::abs(calibration_offset) <= perfect_offset) {
             SERIAL_ECHOLN("perfect.");
-            save_divisor_to_eeprom(try_nr, axis);
-            return probe_offset;
+            success = true;
+            break;
+
         } else if ((std::abs(calibration_offset) <= acceptable_offset)) {
             SERIAL_ECHOLN("acceptable.");
             if (try_nr >= accept_perfect_only_tries) {
-                save_divisor_to_eeprom(try_nr, axis);
-                return probe_offset;
+                success = true;
+                break;
             }
+
             if (first_acceptable) {
-                ui.status_printf_P(0, "Updating precise home point %c axis", axis_codes[axis]);
+                status_guard.update<PrintStatusMessage::homing_refining>({ .axis = axis });
                 homing_failed_update_divisor(axis);
             }
             first_acceptable = true;
+
         } else {
             SERIAL_ECHOLN("bad.");
             if (can_calibrate) {
-                ui.status_printf_P(0, "Updating precise home point %c axis", axis_codes[axis]);
+                status_guard.update<PrintStatusMessage::homing_refining>({ .axis = axis });
             } else {
-                ui.status_printf_P(0, "%c axis homing failed,retrying", axis_codes[axis]);
+                status_guard.update<PrintStatusMessage::homing_retrying>({ .axis = axis });
             }
         }
     }
 
-    SERIAL_ERROR_MSG("Precise homing runs out of tries to get acceptable probe.");
+    if (success) {
+        save_divisor_to_eeprom(try_nr, axis);
+
+        // Mark the axis as precisely homed
+        axes_home_level[axis] = AxisHomeLevel::full;
+
+    } else {
+        SERIAL_ERROR_MSG("Precise homing runs out of tries to get acceptable probe.");
+    }
+
+    // What about some failure reporting, hm?
     return probe_offset;
 }

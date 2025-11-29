@@ -8,14 +8,21 @@
 #include "filament_sensors_handler.hpp"
 #include "bsod.h"
 #include <tasks.hpp>
-#include "window_msgbox.hpp"
 #include <logging/log.hpp>
 #include <option/has_selftest.h>
 #include <option/has_mmu2.h>
 #include <option/has_toolchanger.h>
 #include <stdio.h>
 
-#if HAS_SELFTEST()
+#include "str_utils.hpp"
+#include "marlin_client.hpp"
+
+#include <option/has_gui.h>
+#if HAS_GUI()
+    #include <window_msgbox.hpp>
+#endif
+
+#if HAS_SELFTEST() && HAS_GUI()
     #include <ScreenHandler.hpp>
     #include "screen_menu_selftest_snake.hpp"
 #endif
@@ -55,6 +62,7 @@ void FilamentSensors::request_enable_state_update([[maybe_unused]] bool check_fs
     enable_state_update_pending = true;
 }
 
+#if HAS_GUI()
 bool FilamentSensors::gui_wait_for_init_with_msg() {
     enum : uint8_t {
         f_extruder = 1,
@@ -96,6 +104,7 @@ bool FilamentSensors::gui_wait_for_init_with_msg() {
 
     return true;
 }
+#endif
 
 void FilamentSensors::for_all_sensors(const stdext::inplace_function<void(IFSensor &sensor, uint8_t index, bool is_side)> &f) {
     HOTEND_LOOP() {
@@ -133,6 +142,7 @@ void FilamentSensors::task_cycle() {
     // Update states of filament sensors
     if (enable_state_update_pending) {
         process_enable_state_update();
+        reconfigure_sensors_if_needed(true); // Have to be done due to autoload logical sensor on COREONE
     }
 
     // Run cycle to evaluate state of all sensors (even those not active)
@@ -182,18 +192,12 @@ void FilamentSensors::reconfigure_sensors_if_needed(bool force) {
     const auto extruder_fs = GetExtruderFSensor(tool_index);
     const auto side_fs = GetSideFSensor(tool_index);
 
+    const bool side_fs_enabled = side_fs && side_fs->is_enabled();
+
     ls[LFS::extruder] = extruder_fs;
     ls[LFS::side] = side_fs;
-    ls[LFS::primary_runout] = side_fs ?: extruder_fs;
-    ls[LFS::secondary_runout] = side_fs ? extruder_fs : nullptr;
-#if PRINTER_IS_PRUSA_iX()
-    /**  iX can behave a little bit differently when autoloading thanks to it being outside of user's reach. The head will move during autohoming and could cause harm to person having hands within head's space.
-        If the autoload would be triggered by extruder fs it could mean that user is trying to insert filament while manipulating with head itself, an action that could cause harm.
-        This can change in the future but needs some thought on printer's behaviour in such case (e.g. filament is already in extruder, there is no need for parking movement) */
-    ls[LFS::autoload] = side_fs ?: nullptr;
-#else
-    ls[LFS::autoload] = has_mmu ? nullptr : extruder_fs;
-#endif
+    ls[LFS::primary_runout] = side_fs_enabled ? side_fs : extruder_fs;
+    ls[LFS::secondary_runout] = side_fs_enabled ? extruder_fs : nullptr;
 }
 
 void FilamentSensors::process_events() {
@@ -216,14 +220,25 @@ void FilamentSensors::process_events() {
     };
 
     const auto check_autoload = [&]() {
-        const auto event = sensor(LogicalFilamentSensor::autoload)->last_event();
+        const auto extruder_fs = sensor(LogicalFilamentSensor::extruder);
+        const auto side_fs = sensor(LogicalFilamentSensor::side);
 
-        if (event != IFSensor::Event::filament_inserted
+        const bool extruder_fs_inserted = extruder_fs && extruder_fs->last_event() == IFSensor::Event::filament_inserted;
+        const bool extruder_fs_no_filament = extruder_fs && extruder_fs->get_state() == FilamentSensorState::NoFilament;
+
+        const bool side_fs_enabled = side_fs && side_fs->is_enabled();
+        const bool side_fs_inserted = side_fs && side_fs->last_event() == IFSensor::Event::filament_inserted;
+        const bool side_fs_has_filament = side_fs && side_fs->get_state() == FilamentSensorState::HasFilament;
+
+        const bool trigger_autoload = (extruder_fs_inserted && (!side_fs_enabled || side_fs_has_filament))
+            || (side_fs_inserted && extruder_fs_no_filament);
+
+        if (!trigger_autoload
             || has_mmu
             || autoload_sent
             || isAutoloadLocked()
-            || !marlin_vars().fs_autoload_enabled
-#if HAS_SELFTEST()
+            || !config_store().fs_autoload_enabled.get()
+#if HAS_SELFTEST() && HAS_GUI()
             // We're accessing screens from the filamentsensors thread here. This looks quite unsafe.
             || Screens::Access()->IsScreenOnStack<ScreenMenuSTSWizard>()
             || Screens::Access()->IsScreenOnStack<ScreenMenuSTSCalibrations>()
@@ -344,4 +359,14 @@ FilamentState FilamentSensors::WhereIsFilament() {
 FilamentSensors &FSensors_instance() {
     static FilamentSensors ret;
     return ret;
+}
+
+bool hasActiveFilamentSensor(uint8_t index) {
+    const auto side_sensor = GetSideFSensor(index);
+    const auto ext_sensor = GetExtruderFSensor(index);
+
+    const auto side_ok = side_sensor && is_fsensor_working_state(side_sensor->get_state());
+    const auto ext_ok = ext_sensor && is_fsensor_working_state(ext_sensor->get_state());
+
+    return side_ok || ext_ok;
 }

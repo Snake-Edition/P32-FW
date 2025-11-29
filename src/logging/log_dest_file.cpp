@@ -6,7 +6,7 @@
 
 #include <common/freertos_shared_mutex.hpp>
 #include <logging/log_dest_shared.hpp>
-#include <libs/circularqueue.h>
+#include <utils/atomic_circular_queue.hpp>
 #include <unique_file_ptr.hpp>
 #include <async_job/async_job.hpp>
 
@@ -28,6 +28,19 @@ namespace file {
         unique_file_ptr file;
 
         BufferChunk wip_chunk;
+
+        void write_buffer() {
+            while (!buffer.isEmpty()) {
+                BufferChunk chunk = buffer.dequeue();
+                fwrite(chunk.data.data(), 1, chunk.size, file.get());
+            }
+        }
+
+        ~Data() {
+            if (file) {
+                write_buffer();
+            }
+        }
     };
 
     std::atomic_bool is_enabled = false;
@@ -50,10 +63,7 @@ static void file_log_write(AsyncJobExecutionControl &) {
 
     const bool was_overflow = data->buffer.isFull();
 
-    while (!data->buffer.isEmpty()) {
-        BufferChunk chunk = data->buffer.dequeue();
-        fwrite(chunk.data.data(), 1, chunk.size, data->file.get());
-    }
+    data->write_buffer();
 
     // If we fail writing, disable the logger
     if (ferror(data->file.get())) {
@@ -71,7 +81,7 @@ static void file_log_write(AsyncJobExecutionControl &) {
 static void flush_chunk() {
     assert(data->wip_chunk.size <= data->wip_chunk.data.size());
 
-    data->buffer.enqueue(data->wip_chunk);
+    (void)data->buffer.enqueue(data->wip_chunk);
     data->wip_chunk.size = 0;
 }
 

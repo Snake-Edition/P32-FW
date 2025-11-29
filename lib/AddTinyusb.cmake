@@ -7,7 +7,6 @@ add_library(
   tinyusb/src/class/cdc/cdc_device.c
   tinyusb/src/class/cdc/cdc_host.c
   tinyusb/src/class/cdc/cdc_rndis_host.c
-  tinyusb/src/class/msc/msc_device.c
   tinyusb/src/common/tusb_fifo.c
   tinyusb/src/device/usbd.c
   tinyusb/src/device/usbd_control.c

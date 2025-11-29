@@ -108,8 +108,6 @@ void GcodeSuite::M240() {
       feedRate_t sval = (
         #if ENABLED(ADVANCED_PAUSE_FEATURE)
           PAUSE_PARK_RETRACT_FEEDRATE
-        #elif ENABLED(FWRETRACT)
-          RETRACT_FEEDRATE
         #else
           45
         #endif

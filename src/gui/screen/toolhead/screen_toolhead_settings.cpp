@@ -6,6 +6,7 @@
 #include <gui/dialogs/window_dlg_wait.hpp>
 #include <gcode/queue.h>
 #include <module/planner.h>
+#include <utils/string_builder.hpp>
 
 #include "screen_toolhead_settings_fs.hpp"
 #include "screen_toolhead_settings_dock.hpp"
@@ -55,39 +56,42 @@ MI_HOTEND_TYPE::MI_HOTEND_TYPE(Toolhead toolhead)
 }
 
 int MI_HOTEND_TYPE::item_count() const {
-    // If has varying values, the 0th item is "-" (for differint values)
+    // If has varying values, the 0th item is "-" (for different values)
     return hotend_type_list.size() + (has_varying_values_ ? 1 : 0);
 }
 
 void MI_HOTEND_TYPE::build_item_text(int index, const std::span<char> &buffer) const {
     StringBuilder sb(buffer);
+    const int effective_index = index - (has_varying_values_ ? 1 : 0);
 
-    // If has varying values, the 0th item is "-" (for differint values)
-    if (has_varying_values_ && index == 0) {
+    // If has varying values, the 0th item is "-" (for different values)
+    if (effective_index == -1) {
         sb.append_string("-");
     } else {
-        sb.append_string_view(_(hotend_type_names[hotend_type_list[index - (has_varying_values_ ? 1 : 0)]]));
+        sb.append_string_view(_(hotend_type_name(hotend_type_list[effective_index])));
     }
 }
 
 bool MI_HOTEND_TYPE::on_item_selected([[maybe_unused]] int old_index, int new_index) {
-    if (has_varying_values_ && new_index == 0) {
+    const int effective_index = new_index - (has_varying_values_ ? 1 : 0);
+
+    if (effective_index == -1) {
         return false;
     }
 
-    if (!msgbox_confirm_change(this->toolhead(), this->user_already_confirmed_changes_)) {
+    if (!msgbox_confirm_change(toolhead(), user_already_confirmed_changes_)) {
         return false;
     }
 
-    this->template store_value(hotend_type_list[new_index - (has_varying_values_ ? 1 : 0)]);
+    store_value(hotend_type_list[effective_index]);
     return true;
 }
 
 void MI_HOTEND_TYPE::update() {
-    const auto val = this->template read_value();
+    const auto val = read_value();
     has_varying_values_ = !val.has_value();
 
-    // If has varying values, the 0th item is "-" (for differint values)
+    // If has varying values, the 0th item is "-" (for different values)
     // Force set - we might be changing item texts here
     force_set_current_item(has_varying_values_ ? 0 : stdext::index_of(hotend_type_list, *val));
 }
@@ -114,6 +118,62 @@ void MI_NOZZLE_SOCK::store_value_impl(ToolheadIndex ix, bool set) {
     config_store().hotend_type.set(ix, set ? HotendType::stock_with_sock : HotendType::stock);
 }
 #endif /* HAS_HOTEND_TYPE_SUPPORT() */
+
+#if HAS_PRINT_FAN_TYPE()
+MI_PRINT_FAN_TYPE::MI_PRINT_FAN_TYPE(Toolhead toolhead)
+    : MI_TOOLHEAD_SPECIFIC(toolhead, _("Print Fan Type")) {
+    update();
+}
+
+PrintFanType MI_PRINT_FAN_TYPE::read_value_impl(ToolheadIndex ix) {
+    return get_print_fan_type(ix);
+}
+
+void MI_PRINT_FAN_TYPE::store_value_impl(ToolheadIndex ix, PrintFanType set) {
+    set_print_fan_type(ix, set);
+}
+
+void MI_PRINT_FAN_TYPE::build_item_text(int index, const std::span<char> &buffer) const {
+    StringBuilder sb(buffer);
+    const int effective_index = index - (has_varying_values_ ? 1 : 0);
+
+    // If has varying values, the 0th item is "-" (for different values)
+    if (effective_index == -1) {
+        sb.append_string("-");
+    } else {
+        sb.append_string_view(_(print_fan_type_names[print_fan_type_list[effective_index]]));
+    }
+}
+
+bool MI_PRINT_FAN_TYPE::on_item_selected([[maybe_unused]] int old_index, int new_index) {
+    const int effective_index = new_index - (has_varying_values_ ? 1 : 0);
+
+    if (effective_index == -1) {
+        return false;
+    }
+
+    if (!msgbox_confirm_change(toolhead(), user_already_confirmed_changes_)) {
+        return false;
+    }
+
+    store_value(print_fan_type_list[effective_index]);
+    return true;
+}
+
+void MI_PRINT_FAN_TYPE::update() {
+    const auto val = read_value();
+    has_varying_values_ = !val.has_value();
+
+    // If has varying values, the 0th item is "-" (for different values)
+    // Force set - we might be changing item texts here
+    force_set_current_item(has_varying_values_ ? 0 : stdext::index_of(print_fan_type_list, *val));
+}
+
+int MI_PRINT_FAN_TYPE::item_count() const {
+    // If has varying values, the 0th item is "-" (for different values)
+    return print_fan_type_list.size() + (has_varying_values_ ? 1 : 0);
+}
+#endif /* HAS_PRINT_FAN_TYPE */
 
 // * MI_NOZZLE_HARDENED
 MI_NOZZLE_HARDENED::MI_NOZZLE_HARDENED(Toolhead toolhead)
@@ -152,7 +212,7 @@ void MI_NOZZLE_HIGH_FLOW::store_value_impl(ToolheadIndex ix, bool set) {
 #if HAS_TOOLCHANGER()
 // * MI_DOCK
 MI_DOCK::MI_DOCK(Toolhead toolhead)
-    : MI_TOOLHEAD_SPECIFIC(toolhead, _("Dock Position"), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {}
+    : MI_TOOLHEAD_SPECIFIC_BASE(toolhead, _("Dock Position"), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {}
 
 void MI_DOCK::click(IWindowMenu &) {
     Screens::Access()->Open(ScreenFactory::ScreenWithArg<ScreenToolheadDetailDock>(toolhead()));
@@ -160,11 +220,11 @@ void MI_DOCK::click(IWindowMenu &) {
 
 // * MI_PICK_PARK
 MI_PICK_PARK::MI_PICK_PARK(Toolhead toolhead)
-    : MI_TOOLHEAD_SPECIFIC(toolhead, string_view_utf8()) {
+    : MI_TOOLHEAD_SPECIFIC_BASE(toolhead, string_view_utf8()) {
     update();
 }
 
-void MI_PICK_PARK::update(bool) {
+void MI_PICK_PARK::update() {
     const auto picked_tool = prusa_toolchanger.detect_tool_nr();
     is_picked = (toolhead() == all_toolheads) ? (picked_tool != PrusaToolChanger::MARLIN_NO_TOOL_PICKED) : (picked_tool == std::get<ToolheadIndex>(toolhead()));
 
@@ -178,30 +238,24 @@ void MI_PICK_PARK::update(bool) {
 void MI_PICK_PARK::click(IWindowMenu &) {
     marlin_client::gcode("G27 P0 Z5"); // Lift Z if not high enough
     marlin_client::gcode_printf("T%d S1 L0 D0", (!is_picked && toolhead() != all_toolheads) ? std::get<ToolheadIndex>(toolhead()) : PrusaToolChanger::MARLIN_NO_TOOL_PICKED);
-
-    gui_dlg_wait([] {
-        if (!(queue.has_commands_queued() || planner.processing())) {
-            Screens::Access()->Close();
-        }
-    });
-
-    update(false);
+    window_dlg_wait_t::wait_for_gcodes_to_finish();
+    update();
 }
 
 #endif
 
 // * MI_FILAMENT_SENSORS
 MI_FILAMENT_SENSORS::MI_FILAMENT_SENSORS(Toolhead toolhead)
-    : MI_TOOLHEAD_SPECIFIC(toolhead, _("Filament Sensors Tuning"), nullptr, is_enabled_t::yes, is_hidden_t::dev, expands_t::yes) {}
+    : MI_TOOLHEAD_SPECIFIC_BASE(toolhead, _("Filament Sensors Tuning"), nullptr, is_enabled_t::yes, is_hidden_t::dev, expands_t::yes) {}
 
 void MI_FILAMENT_SENSORS::click(IWindowMenu &) {
     Screens::Access()->Open(ScreenFactory::ScreenWithArg<ScreenToolheadDetailFS>(toolhead()));
 }
 
-#if FILAMENT_SENSOR_IS_ADC()
+#if HAS_SELFTEST() && FILAMENT_SENSOR_IS_ADC()
 // * MI_CALIBRATE_FILAMENT_SENSORS
 MI_CALIBRATE_FILAMENT_SENSORS::MI_CALIBRATE_FILAMENT_SENSORS(Toolhead toolhead)
-    : MI_TOOLHEAD_SPECIFIC(toolhead, string_view_utf8()) {
+    : MI_TOOLHEAD_SPECIFIC_BASE(toolhead, string_view_utf8()) {
     update();
 }
 
@@ -220,7 +274,7 @@ void MI_CALIBRATE_FILAMENT_SENSORS::click(IWindowMenu &) {
 
 // * MI_NOZZLE_OFFSET
 MI_NOZZLE_OFFSET::MI_NOZZLE_OFFSET(Toolhead toolhead)
-    : MI_TOOLHEAD_SPECIFIC(toolhead, _("Nozzle Offset"), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {}
+    : MI_TOOLHEAD_SPECIFIC_BASE(toolhead, _("Nozzle Offset"), nullptr, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {}
 
 void MI_NOZZLE_OFFSET::click(IWindowMenu &) {
     Screens::Access()->Open(ScreenFactory::ScreenWithArg<ScreenToolheadDetailNozzleOffset>(toolhead()));
@@ -247,13 +301,13 @@ ScreenToolheadDetail::ScreenToolheadDetail(Toolhead toolhead)
     menu_set_toolhead(container, toolhead);
 
     // Do not show certain items until printer setup is done
-    if (!config_store().printer_setup_done.get()) {
+    if (!config_store().printer_hw_config_done.get()) {
 #if HAS_TOOLCHANGER()
         container.Item<MI_DOCK>().set_is_hidden();
         container.Item<MI_NOZZLE_OFFSET>().set_is_hidden();
         container.Item<MI_PICK_PARK>().set_is_hidden();
 #endif
-#if FILAMENT_SENSOR_IS_ADC()
+#if HAS_SELFTEST() && FILAMENT_SENSOR_IS_ADC()
         container.Item<MI_CALIBRATE_FILAMENT_SENSORS>().set_is_hidden();
 #endif
     }

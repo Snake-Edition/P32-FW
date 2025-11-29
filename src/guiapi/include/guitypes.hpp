@@ -4,7 +4,6 @@
 #include "marlin_server_types/general_response.hpp"
 
 #include <cstdint>
-#include <cstdio>
 #include <cstring>
 #include <optional>
 
@@ -26,32 +25,9 @@ enum {
 namespace img {
 
 struct Resource {
-    FILE *file; ///< Open file handle, nullptr to use default get_resource_file()
-    size_t offset; ///< Offset in file [byte]
-    size_t size; ///< Size of resource (informative) [byte]
-    uint16_t w; ///< Width (informative) [pixel]
-    uint16_t h; ///< Height (informative) [pixel]
-    constexpr Resource(size_t offset, size_t size, uint16_t w, uint16_t h)
-        : file(nullptr)
-        , offset(offset)
-        , size(size)
-        , w(w)
-        , h(h) {}
-    constexpr Resource(FILE *file)
-        : file(file)
-        , offset(0)
-        , size(0)
-        , w(0)
-        , h(0) {}
-};
-
-/**
- * @brief Child of Resource with non trivial destructor
- * designed to open file in ctor and close it in dtor
- */
-struct ResourceSingleFile : public Resource {
-    ResourceSingleFile(const char *name);
-    ~ResourceSingleFile();
+    size_t offset; ///< Offset in resource file [byte]
+    uint16_t w; ///< Width [pixel]
+    uint16_t h; ///< Height [pixel]
 };
 
 } // namespace img

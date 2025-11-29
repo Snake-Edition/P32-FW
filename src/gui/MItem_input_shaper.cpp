@@ -107,5 +107,5 @@ void MI_IS_RESTORE_DEFAULTS::click([[maybe_unused]] IWindowMenu &window_menu) {
     // Make the input shaper reload config from config_store
     gui_try_gcode_with_msg("M9200");
 
-    Screens::Access()->WindowEvent(GUI_event_t::CHILD_CLICK, ftrstd::bit_cast<void *>(InputShaperMenuItemChildClickParam::request_gui_update));
+    Screens::Access()->WindowEvent(GUI_event_t::CHILD_CLICK, std::bit_cast<void *>(InputShaperMenuItemChildClickParam::request_gui_update));
 }

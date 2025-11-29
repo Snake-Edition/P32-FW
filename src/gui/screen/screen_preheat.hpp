@@ -25,7 +25,6 @@ public:
     const FilamentType filament_type;
     const uint8_t target_extruder;
     FilamentTypeParameters::Name filament_name;
-    bool is_abrasive;
 };
 
 class WindowMenuPreheat : public WindowMenuVirtual<WindowMenuCallbackItem, MI_FILAMENT> {
@@ -39,6 +38,8 @@ public:
     int item_count() const final {
         return index_mapping.total_item_count();
     }
+
+    static bool handle_filament_selection(FilamentType filament_type, uint8_t target_extruder);
 
 protected:
     void update_list();
@@ -65,8 +66,7 @@ private:
     });
 
 private:
-    PreheatData preheat_data;
-    FilamentListStorage filament_list_storage;
+    FilamentList filament_list;
     DynamicIndexMapping<items> index_mapping;
     bool show_all_filaments_ = false;
 
@@ -76,7 +76,6 @@ private:
 
 class ScreenPreheat : public ScreenFSM {
     WindowExtendedMenu<WindowMenuPreheat> menu;
-    window_header_t header;
 
 public:
     ScreenPreheat();

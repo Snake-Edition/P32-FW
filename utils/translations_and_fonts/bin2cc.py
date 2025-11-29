@@ -56,7 +56,7 @@ def main():
         metavar='charset_enum',
         type=str,
         help=
-        "FontCharacterSet::full (standard + katakana) or FontCharacterSet::standard (full without katakana) or FontCharacterSet::digits (digits + '.' + '%' + '?' + '-' + ' ')"
+        "FontCharacterSet::full (latin + katakana + cyrillic) or FontCharacterSet::latin or FontCharacterSet::digits (digits + '.' + '%' + '?' + '-' + ' ') or FontCharacterSet::latin_and_katakana or FontCharacterSet::latin_and_cyrillic"
     )
 
     args = parser.parse_args()

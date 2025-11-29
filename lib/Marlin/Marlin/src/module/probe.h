@@ -45,18 +45,12 @@
   };
   float run_z_probe(float expected_trigger_z, bool single_only = false, bool *endstop_triggered = nullptr);
   float probe_here(float z_down_limit);
-  float probe_at_point(const float &rx, const float &ry, const ProbePtRaise raise_after=PROBE_PT_NONE, const uint8_t verbose_level=0, const bool probe_relative=true);
-  inline float probe_at_point(const xy_pos_t &pos, const ProbePtRaise raise_after=PROBE_PT_NONE, const uint8_t verbose_level=0, const bool probe_relative=true) {
-    return probe_at_point(pos.x, pos.y, raise_after, verbose_level, probe_relative);
-  }
+  float probe_at_point(const xy_pos_t &pos, const ProbePtRaise raise_after=PROBE_PT_NONE, const uint8_t verbose_level=0, const bool probe_relative=true);
   #if ENABLED(NOZZLE_LOAD_CELL) && ENABLED(PROBE_CLEANUP_SUPPORT)
-    void cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max);
+    bool cleanup_probe(const xy_pos_t &rect_min, const xy_pos_t &rect_max);
   #endif
   #define DEPLOY_PROBE() set_probe_deployed(true)
   #define STOW_PROBE() set_probe_deployed(false)
-  #if HAS_HEATED_BED && ENABLED(WAIT_FOR_BED_HEATER)
-    extern const char msg_wait_for_bed_heating[25];
-  #endif
 
 #else
 

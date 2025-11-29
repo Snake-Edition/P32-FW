@@ -6,7 +6,6 @@
 #include <find_error.hpp>
 #include <connect/connect.hpp>
 #include <guiconfig/guiconfig.h>
-#include <str_utils.hpp>
 
 using connect_client::ConnectionStatus;
 using connect_client::OnlineStatus;
@@ -133,6 +132,7 @@ void DialogConnectRegister::windowEvent(window_t *sender, GUI_event_t event, voi
             }
             case ConnectionStatus::RegistrationDone: {
                 hideDetails();
+                text_state.SetRect(Positioner::textRectState());
                 text_state.SetText(_("Registration successful, continue at connect.prusa3d.com"));
                 connect_client::leave_registration();
                 left_registration = true;
@@ -175,14 +175,14 @@ void DialogConnectRegister::windowEvent(window_t *sender, GUI_event_t event, voi
                 auto error = find_error(ErrCode::ERR_CONNECT_CONNECT_REGISTRATION_FAILED);
                 _(error.err_text).copyToRAM(error_help_buffer, sizeof(error_help_buffer)); // Translation
                 snprintf(error_buffer, sizeof(error_buffer), "%s %s", error_help_buffer, err_buffer);
-                text_state.SetText(string_view_utf8::MakeRAM((const uint8_t *)error_buffer));
+                text_state.SetText(string_view_utf8::MakeRAM(error_buffer));
                 text_state.Invalidate();
 
                 showQR(qr_error);
 
                 _(moreDetailTxt).copyToRAM(error_detail_buffer, sizeof(error_detail_buffer)); // Translation
                 snprintf(detail_buffer, sizeof(detail_buffer), "%s:\nprusa.io/%d", error_detail_buffer, static_cast<int>(error.err_code));
-                text_detail.SetText(string_view_utf8::MakeRAM((const uint8_t *)detail_buffer));
+                text_detail.SetText(string_view_utf8::MakeRAM(detail_buffer));
                 text_detail.Invalidate();
                 break;
             }

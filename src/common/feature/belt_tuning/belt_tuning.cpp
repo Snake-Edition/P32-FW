@@ -1,10 +1,14 @@
 #include "belt_tuning.hpp"
 #include "printer_belt_parameters.hpp"
 
+#include <Marlin/src/Marlin.h>
 #include <Marlin/src/gcode/calibrate/M958.hpp>
 #include <Marlin/src/gcode/gcode.h>
 #include <logging/log.hpp>
 #include <option/has_toolchanger.h>
+#include <feature/motordriver_util.h>
+#include <feature/phase_stepping/phase_stepping.hpp>
+#include <module/motion.h>
 
 #if HAS_TOOLCHANGER()
     #include <Marlin/src/module/prusa/toolchanger.h>
@@ -43,7 +47,12 @@ std::optional<MeasureBeltTensionResult> measure_belt_tension(const MeasureBeltTe
         };
 
         // Make sure we're homed
-        if (!GcodeSuite::G28_no_parser(true, true, true, { .only_if_needed = true, .z_raise = 5 })) {
+        if (!GcodeSuite::G28_no_parser(true, true, true,
+                {
+                    .only_if_needed = true,
+                    .z_raise = 5,
+                    .precise = false, // We don't need precise position for this procedure
+                })) {
             return std::nullopt;
         }
 
@@ -110,7 +119,7 @@ std::optional<MeasureBeltTensionResult> measure_belt_tension(const MeasureBeltTe
         }
 
         const auto measure_result = vibrate_measure_repeat(measure_params, frequency, [&](auto) {
-            idle(true, true);
+            idle(true);
 
             return !config.progress_callback || config.progress_callback(progress_args);
         });

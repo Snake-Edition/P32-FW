@@ -10,6 +10,7 @@
 #include <option/enable_translation_it.h>
 #include <option/enable_translation_pl.h>
 #include <option/enable_translation_ja.h>
+#include <option/enable_translation_uk.h>
 
 #if HAS_TRANSLATIONS()
     #include <option/translations_in_extflash.h>
@@ -171,7 +172,26 @@ const CPUFLASHTranslationProviderJA::RawData CPUFLASHTranslationProviderJA::rawD
 namespace {
 static const CPUFLASHTranslationProviderJA ja;
 ProviderRegistrator jaReg("ja", &ja);
+} // namespace
+        #endif
 
+        #if ENABLE_TRANSLATION_UK()
+struct StringTableUK {
+    static const uint32_t stringBegins[]; ///< this will get statically precomputed for each translation language separately
+    static const uint8_t utf8Raw[]; ///< a piece of memory where the null-terminated strings are situated
+};
+
+using CPUFLASHTranslationProviderUK = CPUFLASHTranslationProvider<StringTableUK>;
+
+            // precomputed indices and strings for the UK language
+            #include "stringBegins.uk.hpp"
+            #include "utf8Raw.uk.hpp"
+template <>
+const CPUFLASHTranslationProviderUK::RawData CPUFLASHTranslationProviderUK::rawData;
+
+namespace {
+static const CPUFLASHTranslationProviderUK uk;
+ProviderRegistrator ukReg("uk", &uk);
 } // namespace
         #endif
     #endif

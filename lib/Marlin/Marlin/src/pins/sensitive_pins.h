@@ -21,6 +21,8 @@
  */
 #pragma once
 
+#include <option/has_local_bed.h>
+
 //
 // Prepare a list of protected pins for M42/M43
 //
@@ -56,7 +58,11 @@
   #define _X_MS3
 #endif
 
-#define _X_PINS X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, _X_MIN _X_MAX _X_MS1 _X_MS2 _X_MS3 _X_CS
+#if !PIN_EXISTS(X_STEP_PIN)
+  #define _X_PINS
+#else
+  #define _X_PINS X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, _X_MIN _X_MAX _X_MS1 _X_MS2 _X_MS3 _X_CS
+#endif
 
 #if PIN_EXISTS(Y_MIN)
   #define _Y_MIN Y_MIN_PIN,
@@ -89,10 +95,14 @@
   #define _Y_MS3
 #endif
 
-#ifdef Y_ENABLE_PIN
-#define _Y_PINS Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, _Y_MIN _Y_MAX _Y_MS1 _Y_MS2 _Y_MS3 _Y_CS
+#if !PIN_EXISTS(Y_STEP_PIN)
+  #define _Y_PINS
 #else
-#define _Y_PINS Y_STEP_PIN, Y_DIR_PIN, _Y_MIN _Y_MAX _Y_MS1 _Y_MS2 _Y_MS3 _Y_CS
+  #ifdef Y_ENABLE_PIN
+    #define _Y_PINS Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, _Y_MIN _Y_MAX _Y_MS1 _Y_MS2 _Y_MS3 _Y_CS
+  #else
+    #define _Y_PINS Y_STEP_PIN, Y_DIR_PIN, _Y_MIN _Y_MAX _Y_MS1 _Y_MS2 _Y_MS3 _Y_CS
+  #endif
 #endif
 
 #if PIN_EXISTS(Z_MIN)
@@ -126,16 +136,19 @@
   #define _Z_MS3
 #endif
 
-#define _Z_PINS Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, _Z_MIN _Z_MAX _Z_MS1 _Z_MS2 _Z_MS3 _Z_CS
+#if !PIN_EXISTS(Z_STEP_PIN)
+  #define _Z_PINS
+#else
+  #define _Z_PINS Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, _Z_MIN _Z_MAX _Z_MS1 _Z_MS2 _Z_MS3 _Z_CS
+#endif
 
 //
 // Extruder Chip Select, Digital Micro-steps
 //
 
 // Mixing stepper, Switching stepper, or regular stepper
-#define E_NEEDED(N) (ENABLED(MIXING_EXTRUDER) && MIXING_STEPPERS > N) \
-                 || (ENABLED(SWITCHING_EXTRUDER) && E_STEPPERS > N) \
-                 || (NONE(SWITCHING_EXTRUDER, MIXING_EXTRUDER) && EXTRUDERS > N)
+#define E_NEEDED(N) (ENABLED(SWITCHING_EXTRUDER) && E_STEPPERS > N) \
+                 || (NONE(SWITCHING_EXTRUDER) && EXTRUDERS > N)
 
 #define _E0_CS
 #define _E0_MS1
@@ -297,36 +310,26 @@
   #define _E0_PINS E0_STEP_PIN, E0_DIR_PIN, E0_ENABLE_PIN, _E0_CS _E0_MS1 _E0_MS2 _E0_MS3
 #endif
 
-#if ENABLED(SWITCHING_EXTRUDER)
-                      // Tools 0 and 1 use E0
-  #if EXTRUDERS > 2   // Tools 2 and 3 use E1
-    #undef _E1_PINS
-    #define _E1_PINS E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN, _E1_CS _E1_MS1 _E1_MS2 _E1_MS3
-    #if EXTRUDERS > 4 // Tools 4 and 5 use E2
-      #undef _E2_PINS
-      #define _E2_PINS E2_STEP_PIN, E2_DIR_PIN, E2_ENABLE_PIN, _E2_CS _E2_MS1 _E2_MS2 _E2_MS3
-    #endif
-  #endif
-#elif EXTRUDERS > 1 || ENABLED(MIXING_EXTRUDER)
+#if EXTRUDERS > 1
   #undef _E1_PINS
   #define _E1_PINS E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN, _E1_CS _E1_MS1 _E1_MS2 _E1_MS3
-  #if EXTRUDERS > 2 || (ENABLED(MIXING_EXTRUDER) && MIXING_STEPPERS > 2)
+  #if EXTRUDERS > 2
     #undef _E2_PINS
     #define _E2_PINS E2_STEP_PIN, E2_DIR_PIN, E2_ENABLE_PIN, _E2_CS _E2_MS1 _E2_MS2 _E2_MS3
-    #if EXTRUDERS > 3 || (ENABLED(MIXING_EXTRUDER) && MIXING_STEPPERS > 3)
+    #if EXTRUDERS > 3
       #undef _E3_PINS
       #define _E3_PINS E3_STEP_PIN, E3_DIR_PIN, E3_ENABLE_PIN, _E3_CS _E3_MS1 _E3_MS2 _E3_MS3
-      #if EXTRUDERS > 4 || (ENABLED(MIXING_EXTRUDER) && MIXING_STEPPERS > 4)
+      #if EXTRUDERS > 4
         #undef _E4_PINS
         #define _E4_PINS E4_STEP_PIN, E4_DIR_PIN, E4_ENABLE_PIN, _E4_CS _E4_MS1 _E4_MS2 _E4_MS3
-        #if EXTRUDERS > 5 || (ENABLED(MIXING_EXTRUDER) && MIXING_STEPPERS > 5)
+        #if EXTRUDERS > 5
           #undef _E5_PINS
           #define _E5_PINS E5_STEP_PIN, E5_DIR_PIN, E5_ENABLE_PIN, _E5_CS _E5_MS1 _E5_MS2 _E5_MS3
-        #endif // EXTRUDERS > 5 || MIXING_EXTRUDER > 5
-      #endif // EXTRUDERS > 4 || MIXING_EXTRUDER > 4
-    #endif // EXTRUDERS > 3 || MIXING_EXTRUDER > 3
-  #endif // EXTRUDERS > 2 || MIXING_EXTRUDER > 2
-#endif // EXTRUDERS > 1 || MIXING_EXTRUDER
+        #endif // EXTRUDERS > 5
+      #endif // EXTRUDERS > 4
+    #endif // EXTRUDERS > 3
+  #endif // EXTRUDERS > 2
+#endif // EXTRUDERS > 1
 
 //
 // Heaters, Fans, Temp Sensors
@@ -364,7 +367,11 @@
   #endif // HOTENDS > 1
 #endif // HOTENDS
 
-#define _BED_PINS HEATER_BED_PIN, analogInputToDigitalPin(TEMP_BED_PIN),
+#if HAS_LOCAL_BED()
+#define _BED_PINS MARLIN_PIN(BED_HEAT), MARLIN_PIN(TEMP_BED),
+#else
+#define _BED_PINS
+#endif
 
 //
 // Dual X, Dual Y, Multi-Z
@@ -492,8 +499,8 @@
   #define _Z_PROBE
 #endif
 
-#if TEMP_SENSOR_BED && PIN_EXISTS(HEATER_BED)
-  #define _HEATER_BED HEATER_BED_PIN,
+#if TEMP_SENSOR_BED && HAS_LOCAL_BED()
+  #define _HEATER_BED MARLIN_PIN(BED_HEAT),
 #else
   #define _HEATER_BED
 #endif
@@ -513,11 +520,6 @@
 #else
   #define _FAN2
 #endif
-#if PIN_EXISTS(CONTROLLER_FAN)
-  #define _FANC CONTROLLER_FAN_PIN,
-#else
-  #define _FANC
-#endif
 
 #ifndef HAL_SENSITIVE_PINS
   #define HAL_SENSITIVE_PINS
@@ -527,6 +529,6 @@
   _X_PINS _Y_PINS _Z_PINS _X2_PINS _Y2_PINS _Z2_PINS _Z3_PINS _Z_PROBE \
   _E0_PINS _E1_PINS _E2_PINS _E3_PINS _E4_PINS _E5_PINS _BED_PINS \
   _H0_PINS _H1_PINS _H2_PINS _H3_PINS _H4_PINS _H5_PINS \
-  _PS_ON _HEATER_BED _FAN0 _FAN1 _FAN2 _FANC \
+  _PS_ON _HEATER_BED _FAN0 _FAN1 _FAN2 \
   HAL_SENSITIVE_PINS \
 }

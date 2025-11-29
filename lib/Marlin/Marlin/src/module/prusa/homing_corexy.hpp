@@ -46,6 +46,8 @@ bool corexy_home_is_calibrated();
  */
 bool corexy_home_is_unstable();
 
+void corexy_clear_homing_calibration();
+
 #if HAS_TRINAMIC && defined(XY_HOMING_MEASURE_SENS_MIN)
 /**
  * @brief Calibrate homing sensitivity on TMC

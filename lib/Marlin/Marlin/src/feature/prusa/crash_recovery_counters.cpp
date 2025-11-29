@@ -30,7 +30,7 @@ void Crash_s_Counters::increment(Counter counter) {
         reset();
     }
 
-    data_[ftrstd::to_underlying(counter)]++;
+    data_[std::to_underlying(counter)]++;
 }
 
 void Crash_s_Counters::save_to_eeprom() {
@@ -42,7 +42,7 @@ void Crash_s_Counters::save_to_eeprom() {
 
     // Save & report axis crashes
     for (int i = 0; i < 2; i++) {
-        const auto counter_var = data_[i + ftrstd::to_underlying(Counter::axis_crash_x)];
+        const auto counter_var = data_[i + std::to_underlying(Counter::axis_crash_x)];
         if (counter_var == 0) {
             return;
         }

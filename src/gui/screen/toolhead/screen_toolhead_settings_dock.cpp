@@ -45,14 +45,16 @@ void MI_DOCK_Y::store_value_impl(ToolheadIndex ix, float set) {
     prusa_toolchanger.save_tool_info();
 }
 
+#if HAS_SELFTEST()
 // * MI_DOCK_CALIBRATE
 MI_DOCK_CALIBRATE::MI_DOCK_CALIBRATE(Toolhead toolhead)
-    : MI_TOOLHEAD_SPECIFIC(toolhead, _("Calibrate Dock Position")) {
+    : MI_TOOLHEAD_SPECIFIC_BASE(toolhead, _("Calibrate Dock Position")) {
 }
 
 void MI_DOCK_CALIBRATE::click(IWindowMenu &) {
     marlin_client::test_start_with_data(stmDocks, static_cast<ToolMask>(1 << std::get<ToolheadIndex>(toolhead())));
 }
+#endif
 
 // * ScreenToolheadDetailDock
 ScreenToolheadDetailDock::ScreenToolheadDetailDock(Toolhead toolhead)

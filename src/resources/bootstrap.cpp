@@ -9,11 +9,11 @@
 
 #include "bsod.h"
 #include "bbf.hpp"
+#include <common/sys.hpp>
 #include <logging/log.hpp>
 #include <freertos/critical_section.hpp>
 #include "timing.h"
 #include "cmsis_os.h"
-#include "stm32f4xx.h"
 
 #include <unique_file_ptr.hpp>
 
@@ -387,7 +387,7 @@ static bool bootstrap_over_debugger_possible() {
     static uint32_t debugger_flag __attribute__((__section__(".ccmram_beginning"), used));
 
     bool flag_set = debugger_flag == 0xABCDABCD;
-    bool debugger_connected = DBGMCU->CR != 0;
+    bool debugger_connected = sys_debugger_attached();
 
     return debugger_connected && flag_set;
 }

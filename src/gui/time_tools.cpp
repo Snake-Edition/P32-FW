@@ -27,8 +27,8 @@ int32_t calculate_total_timezone_offset_minutes() {
     const int8_t timezone = config_store().timezone.get();
     const TimezoneOffsetMinutes timezone_minutes = config_store().timezone_minutes.get();
 
-    static_assert(ftrstd::to_underlying(TimezoneOffsetSummerTime::no_summertime) == 0);
-    static_assert(ftrstd::to_underlying(TimezoneOffsetSummerTime::summertime) == 1);
+    static_assert(std::to_underlying(TimezoneOffsetSummerTime::no_summertime) == 0);
+    static_assert(std::to_underlying(TimezoneOffsetSummerTime::summertime) == 1);
 
     return //
         static_cast<int32_t>(timezone) * 60
@@ -41,9 +41,16 @@ int32_t calculate_total_timezone_offset_minutes() {
 }
 
 namespace {
+    struct CachedTime {
+        uint8_t hour = 0;
+        uint8_t minute = 0;
+        TimeFormat format = TimeFormat::_cnt; // Invalid value for initial update force
+
+        auto operator<=>(const CachedTime &) const = default;
+    };
+
     char text_buffer[] = "--:-- --"; ///< Buffer for time string, needs to fit "01:23 am"
-    struct tm last_time = {}; ///< Last time used to print to text_buffer
-    TimeFormat last_format = TimeFormat::_12h; ///< Last time format used to print to text_buffer
+    CachedTime cached_time;
 } // namespace
 
 time_t get_local_time() {
@@ -60,26 +67,31 @@ time_t get_local_time() {
 }
 
 bool update_time() {
+    CachedTime new_time {
+        .format = config_store().time_format.get()
+    };
+
     time_t t = get_local_time();
-    if (t == invalid_time) {
-        return false;
-    }
-
     struct tm now;
-    localtime_r(&t, &now);
+    if (t != invalid_time) {
+        localtime_r(&t, &now);
+        new_time.hour = now.tm_hour;
+        new_time.minute = now.tm_min;
+    }
 
-    const TimeFormat current_format = config_store().time_format.get();
-
-    // Check if anything has changed from the previous call
-    if (last_time.tm_hour == now.tm_hour && last_time.tm_min == now.tm_min && current_format == last_format) {
+    if (new_time == cached_time) {
         return false;
     }
 
-    last_time = now;
-    last_format = current_format;
+    cached_time = new_time;
 
-    const char *format_str = (current_format == TimeFormat::_24h) ? "%H:%M" : "%I:%M %p";
-    strftime(text_buffer, std::size(text_buffer), format_str, &now);
+    if (t == invalid_time) {
+        const char *fmt = cached_time.format == TimeFormat::_12h ? "--:-- --" : "--:--";
+        strlcpy(text_buffer, fmt, sizeof(text_buffer));
+    } else {
+        const char *format_str = (cached_time.format == TimeFormat::_24h) ? "%H:%M" : "%I:%M %p";
+        strftime(text_buffer, std::size(text_buffer), format_str, &now);
+    }
 
     // Time changed and was printed
     return true;

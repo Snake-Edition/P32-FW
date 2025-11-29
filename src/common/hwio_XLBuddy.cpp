@@ -29,7 +29,6 @@
 #include <option/has_loadcell.h>
 #include <option/has_gui.h>
 #include <option/debug_with_beeps.h>
-#include <option/is_knoblet.h>
 #include "Marlin/src/module/motion.h" // for active_extruder
 #include "puppies/modular_bed.hpp"
 #include "otp.hpp"
@@ -39,9 +38,6 @@ LOG_COMPONENT_REF(Buddy);
 
 #if ENABLED(PRUSA_TOOLCHANGER)
     #include "Marlin/src/module/prusa/toolchanger.h"
-#endif
-#if ENABLED(MODULAR_HEATBED)
-    #include "Marlin/src/module/modular_heatbed.h"
 #endif
 
 #if !BOARD_IS_XLBUDDY()
@@ -80,11 +76,19 @@ const OutputPin *SideLed_LcdSelector = nullptr;
 uint8_t board_bom_id;
 
 static float hwio_beeper_vol = 1.0F;
+static uint32_t hwio_beeper_duration_ms = 0;
+// Needed for older XL boards, where SW buzzer control must be used
 static std::atomic<uint32_t> hwio_beeper_pulses = 0;
 static uint32_t hwio_beeper_period = 0;
 
 //--------------------------------------
 // Beeper
+
+bool board_revisions_9_and_higher() {
+    // board revision 4 should not be distributed to customers
+    // so they are not important, check is kept only for legacy reason
+    return (board_bom_id >= 9 || board_bom_id == 4);
+}
 
 float hwio_beeper_get_vol(void) {
     return hwio_beeper_vol;
@@ -100,51 +104,97 @@ void hwio_beeper_set_vol(float vol) {
     hwio_beeper_vol = vol;
 }
 
-void hwio_beeper_tone(float frq, uint32_t del) {
-    if (frq && del && hwio_beeper_vol) {
+void hwio_beeper_set_pwm(uint32_t per, uint32_t pul) {
+    TIM_OC_InitTypeDef sConfigOC {};
+    if (per) {
+        htim2.Init.Prescaler = 0;
+        htim2.Init.CounterMode = TIM_COUNTERMODE_DOWN;
+        htim2.Init.Period = per;
+        htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+        HAL_TIM_Base_Init(&htim2);
+        sConfigOC.OCMode = TIM_OCMODE_PWM1;
+        if (pul) {
+            sConfigOC.Pulse = pul;
+            sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+        } else {
+            sConfigOC.Pulse = per;
+            sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
+        }
+        sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+        HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1);
+        HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+    } else {
+        HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);
+    }
+}
+
+void hwio_beeper_tone(float frq, uint32_t duration_ms) {
+    if (frq && duration_ms && hwio_beeper_vol) {
         if (frq < 0) {
             frq *= -1;
         }
         if (frq > 100000) {
             frq = 100000;
         }
-        // Note: The frequency here is still too low for playing some common
-        //       tunes with M300. We will have to find a free timer to use for
-        //       updating buzzer pin, or hijack some already existing timer.
-        constexpr const float hwio_beeper_frequency_hz = 1000.0f;
-        hwio_beeper_pulses = del * frq / hwio_beeper_frequency_hz;
-        hwio_beeper_period = hwio_beeper_frequency_hz / frq;
+
+        if (board_revisions_9_and_higher()) {
+#if HAS_GUI() && (DEBUG_WITH_BEEPS() || !_DEBUG)
+            uint32_t per = (uint32_t)(84000000.0F / frq);
+            uint32_t pul = (uint32_t)(per * hwio_beeper_vol / 2);
+            hwio_beeper_set_pwm(per, pul);
+#endif
+            hwio_beeper_duration_ms = duration_ms;
+        } else {
+            // SW control for older board revisions Buzzer PD5 pin
+            // Note: The frequency here is still too low for playing some common
+            //       tunes with M300. On PD5 pin there is no timer connected
+            constexpr const float hwio_beeper_frequency_hz = 1000.0f;
+            hwio_beeper_pulses = duration_ms * frq / hwio_beeper_frequency_hz;
+            hwio_beeper_period = hwio_beeper_frequency_hz / frq;
+        }
     } else {
+        hwio_beeper_notone();
+    }
+}
+
+void hwio_beeper_tone2(float frq, uint32_t duration_ms, float vol) {
+    hwio_beeper_set_vol(vol);
+    hwio_beeper_tone(frq, duration_ms);
+}
+
+void hwio_beeper_notone(void) {
+    if (board_revisions_9_and_higher()) {
+        hwio_beeper_set_pwm(0, 0);
+    } else {
+        // SW control for older board revisions Buzzer PD5 pin
         hwio_beeper_pulses = 0;
     }
 }
 
-void hwio_beeper_tone2(float frq, uint32_t del, float vol) {
-    hwio_beeper_set_vol(vol);
-    hwio_beeper_tone(frq, del);
-}
-
-void hwio_beeper_notone(void) {
-    hwio_beeper_pulses = 0;
-}
-
 void hwio_update_1ms(void) {
 #if HAS_GUI() && (DEBUG_WITH_BEEPS() || !_DEBUG)
-    static uint32_t skips = 0;
-    if (skips < hwio_beeper_period - 1) {
-        skips++;
-        return;
-    } else {
-        skips = 0;
-    }
-
-    if (hwio_beeper_pulses > 0) {
-        if (hwio_beeper_pulses % 2) {
-            buddy::hw::Buzzer->reset();
-        } else {
-            buddy::hw::Buzzer->set();
+    if (board_revisions_9_and_higher()) {
+        if ((hwio_beeper_duration_ms) && ((--hwio_beeper_duration_ms) == 0)) {
+            hwio_beeper_set_pwm(0, 0);
         }
-        hwio_beeper_pulses -= 1;
+    } else {
+        // SW control for older board revisions Buzzer PD5 pin
+        static uint32_t skips = 0;
+        if (skips < hwio_beeper_period - 1) {
+            skips++;
+            return;
+        } else {
+            skips = 0;
+        }
+
+        if (hwio_beeper_pulses > 0) {
+            if (hwio_beeper_pulses % 2) {
+                buddy::hw::Buzzer->reset();
+            } else {
+                buddy::hw::Buzzer->set();
+            }
+            hwio_beeper_pulses -= 1;
+        }
     }
 #endif
 }
@@ -345,12 +395,14 @@ void analogWrite(uint32_t ulPin, uint32_t ulValue) {
     if (HAL_PWM_Initialized) {
         switch (ulPin) {
         case MARLIN_PIN(FAN): // print fan
-            Fans::print(active_extruder).setPWM(ulValue);
+            Fans::print(active_extruder).set_pwm(ulValue);
             buddy::puppies::modular_bed.set_print_fan_active(ulValue > 0);
             return;
-        case MARLIN_PIN(FAN1):
+        case MARLIN_PIN(FAN1): {
+            static_assert(!HAS_FILAMENT_HEATBREAK_PARAM());
             // heatbreak fan, any writes to it are ignored, its controlled by dwarf
             return;
+        }
         default:
             hwio_arduino_error(HWIO_ERR_UNDEF_ANA_WR, ulPin); // error: undefined pin analog write
         }
@@ -367,16 +419,12 @@ void buddy::hw::hwio_configure_board_revision_changed_pins() {
     auto otp_bom_id = otp_get_bom_id();
 
     if (!otp_bom_id || (board_bom_id = *otp_bom_id) < 4) {
-        if constexpr (option::is_knoblet) {
-            board_bom_id = BOARD_VERSION_MINOR; // Knoblets can be without OTP (buzzer might not work)
-        } else {
-            bsod("Unable to determine board BOM ID");
-        }
+        bsod("Unable to determine board BOM ID");
     }
     log_info(Buddy, "Detected bom ID %d", board_bom_id);
 
     // Different HW revisions have different pins connections, figure it out here
-    if (board_bom_id >= 9 || board_bom_id == 4) {
+    if (board_revisions_9_and_higher()) {
         Buzzer = &buzzer_pin_a0;
         XStep = &xStep_pin_d7;
         YStep = &yStep_pin_d5;
@@ -393,6 +441,10 @@ void buddy::hw::hwio_configure_board_revision_changed_pins() {
         SideLed_LcdSelector = &sideLed_LcdSelector_pin_e9;
         SideLed_LcdSelector->configure();
     }
+
+    if (board_revisions_9_and_higher()) {
+        hw_tim2_init(); // TIM2 is used to generate buzzer PWM, except on older board revisions
+    }
 }
 
 void hw_init_spi_side_leds() {
@@ -402,7 +454,7 @@ void hw_init_spi_side_leds() {
     }
 }
 SPI_HandleTypeDef *hw_get_spi_side_strip() {
-    if (board_bom_id >= 9 || board_bom_id == 4) {
+    if (board_revisions_9_and_higher()) {
         return &SPI_HANDLE_FOR(lcd);
     } else {
         return &SPI_HANDLE_FOR(led);

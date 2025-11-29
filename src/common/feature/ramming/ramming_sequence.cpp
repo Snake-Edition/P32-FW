@@ -22,8 +22,8 @@ bool RammingSequence::execute(const InterruptCallback &callback) const {
     return !planner.draining();
 }
 
-bool RammingSequence::undo() const {
-    mapi::extruder_move(retracted_distance(), PAUSE_PARK_RETRACT_FEEDRATE);
+bool RammingSequence::undo(float feedrate_mm_s) const {
+    mapi::extruder_move(retracted_distance(), feedrate_mm_s);
     planner.synchronize();
     return !planner.draining();
 }

@@ -37,9 +37,12 @@ class Screens {
     ScreenFactory::UniquePtr current; // pointer obtained by screen creation
     screen_node creator_node; // set by Open
 
-    bool close;
-    bool close_all;
-    bool close_printing;
+    bool is_dialog_open = false;
+
+    bool close_dialog = false;
+    bool close = false;
+    bool close_all = false;
+    bool close_printing = false;
 
     uint32_t timeout_tick;
 
@@ -59,11 +62,9 @@ public:
 
     bool IsOpenPending() const { return creator_node.creator.func != nullptr; }
 
-    void PushBeforeCurrent(const ScreenFactory::Creator screen_creator);
     void PushBeforeCurrent(screen_node screen_creator);
-    void PushBeforeCurrent(const screen_node *begin, const screen_node *end); // push in normal order, skips nullptr
 
-    /// Closes currently open screen on the stack
+    /// Closes currently open screen on the stack (or dialog, if we're waiting on one)
     void Close();
 
     /// Closes the specific screen anywhere on the stack
@@ -109,7 +110,6 @@ public:
     bool GetFanChceck();
 
     static void Init(screen_node screen_creator);
-    static void Init(const screen_node *begin, const screen_node *end); // init in normal order, skips nullptr
 
     static Screens *Access();
 
@@ -164,8 +164,4 @@ private:
     void InnerLoop(); // call inside Loop of this class
 
     bool menu_timeout_enabled = true;
-    using r_iter = std::reverse_iterator<const screen_node *>;
-    static r_iter rfind_enabled_node(r_iter begin, r_iter end); // reverse find method
-    using iter = const screen_node *;
-    static iter find_enabled_node(iter begin, iter end); // normal find method
 };

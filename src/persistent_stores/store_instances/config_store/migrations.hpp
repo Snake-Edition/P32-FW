@@ -5,6 +5,10 @@
 #include <option/has_selftest.h>
 #include <option/has_gui.h>
 #include <option/has_side_leds.h>
+#include <option/has_chamber_filtration_api.h>
+#include <option/xl_enclosure_support.h>
+#include <option/has_emergency_stop.h>
+#include <option/has_auto_retract.h>
 
 namespace config_store_ns {
 namespace deprecated_ids {
@@ -59,8 +63,36 @@ namespace deprecated_ids {
         decltype(DeprecatedStore::side_leds_enabled)::hashed_id,
     };
 #endif
+#if HAS_HOTEND_TYPE_SUPPORT()
     inline constexpr uint16_t hotend_type_single_hotend[] {
         decltype(DeprecatedStore::hotend_type_single_hotend)::hashed_id,
+    };
+#endif
+
+#if HAS_CHAMBER_FILTRATION_API() && XL_ENCLOSURE_SUPPORT()
+    inline constexpr uint16_t xl_enclosure_old_api_ids[] {
+        decltype(DeprecatedStore::xl_enclosure_flags)::hashed_id,
+        decltype(DeprecatedStore::xl_enclosure_fan_manual)::hashed_id,
+        decltype(DeprecatedStore::xl_enclosure_filter_timer)::hashed_id,
+        decltype(DeprecatedStore::xl_enclosure_post_print_duration)::hashed_id,
+        decltype(DeprecatedStore::xl_enclosure_fan_manual)::hashed_id,
+        decltype(DeprecatedStore::xl_enclosure_post_print_duration)::hashed_id,
+    };
+#endif
+
+#if HAS_EMERGENCY_STOP()
+    inline constexpr uint16_t emergency_stop_enable[] {
+        decltype(DeprecatedStore::emergency_stop_enable)::hashed_id,
+    };
+#endif
+
+#if HAS_AUTO_RETRACT()
+    inline constexpr uint16_t filament_auto_retracted_bitset[] {
+        decltype(DeprecatedStore::filament_auto_retracted_bitset)::hashed_id,
+    };
+#endif
+    inline constexpr uint16_t printer_setup_done[] {
+        decltype(DeprecatedStore::printer_setup_done)::hashed_id,
     };
 } // namespace deprecated_ids
 
@@ -87,6 +119,21 @@ namespace migrations {
     void side_leds_enable(journal::Backend &backend);
 #endif
     void hotend_type(journal::Backend &backend);
+
+#if HAS_CHAMBER_FILTRATION_API() && XL_ENCLOSURE_SUPPORT()
+    void xl_enclosure_old_api(journal::Backend &backend);
+#endif
+
+#if HAS_EMERGENCY_STOP()
+    void
+    emergency_stop(journal::Backend &backend);
+#endif
+
+#if HAS_AUTO_RETRACT()
+    void filament_auto_retract(journal::Backend &backend);
+#endif
+
+    void printer_setup_done(journal::Backend &backend);
 } // namespace migrations
 
 /**
@@ -115,7 +162,22 @@ inline constexpr journal::Backend::MigrationFunction migration_functions[] {
 #if HAS_SIDE_LEDS()
         { migrations::side_leds_enable, deprecated_ids::side_leds_enable },
 #endif
+#if HAS_HOTEND_TYPE_SUPPORT()
         { migrations::hotend_type, deprecated_ids::hotend_type_single_hotend },
+
+#endif
+#if HAS_CHAMBER_FILTRATION_API() && XL_ENCLOSURE_SUPPORT()
+        { migrations::xl_enclosure_old_api, deprecated_ids::xl_enclosure_old_api_ids },
+#endif
+#if HAS_EMERGENCY_STOP()
+        { migrations::emergency_stop, deprecated_ids::emergency_stop_enable },
+#endif
+#if HAS_AUTO_RETRACT()
+        { migrations::filament_auto_retract, deprecated_ids::filament_auto_retracted_bitset },
+#endif
+    {
+        migrations::printer_setup_done, deprecated_ids::printer_setup_done,
+    }
 };
 
 // Span of migration versions to simplify passing it around

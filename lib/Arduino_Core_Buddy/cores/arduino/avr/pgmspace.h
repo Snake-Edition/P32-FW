@@ -25,7 +25,6 @@
 
 #include <inttypes.h>
 
-#define PROGMEM_EMULATED 1
 #define PROGMEM
 #define PGM_P     const char *
 #define PSTR(str) (str)

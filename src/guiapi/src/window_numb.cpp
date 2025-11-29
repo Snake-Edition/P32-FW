@@ -44,7 +44,7 @@ void window_numb_t::unconditionalDraw() {
 
     render_text_align(GetRect(),
         // this MakeRAM is safe - render_text finishes its work and the local string text[] is then no longer needed
-        string_view_utf8::MakeRAM((const uint8_t *)text),
+        string_view_utf8::MakeRAM(text),
         get_font(),
         clr_back,
         clr_text,
@@ -58,8 +58,10 @@ void window_numb_t::SetFormat(const char *frmt) {
 }
 
 void window_numb_t::SetValue(float val) {
-    setValue(val);
-    Invalidate();
+    if (value != val) {
+        setValue(val);
+        Invalidate();
+    }
 }
 
 void window_numb_t::setValue(float val) {

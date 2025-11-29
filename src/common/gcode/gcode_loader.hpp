@@ -24,6 +24,9 @@ public:
 
     void reset();
 
+    // This buffer can be used by other variants of gcode storage in inject queue (e.g. ParametrizedGcodeLiteral) to save memory
+    std::span<char> share_buffer();
+
 private:
     void load_gcode_callback(AsyncJobExecutionControl &control);
 

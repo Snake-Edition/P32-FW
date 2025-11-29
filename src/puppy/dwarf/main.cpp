@@ -12,6 +12,7 @@
 #include "bsod.h"
 #include <logging/log.hpp>
 #include "buddy/priorities_config.h"
+#include <common/interrupt_disabler.hpp>
 
 LOG_COMPONENT_REF(Marlin);
 
@@ -57,6 +58,21 @@ extern "C" __attribute__((noreturn)) void fatal_error(const char *error, [[maybe
 extern "C" void Error_Handler(void) {
     bsod("Error_Handler");
 }
+
+#if MCU_IS_STM32G0()
+// provide a CAS replacement on the STM32G0 series without CPU support
+extern "C" bool __atomic_compare_exchange_4(volatile void *ptr, void *expected, unsigned int desired,
+    bool /*weak*/, int /*success_memorder*/, int /*failure_memorder*/) {
+    buddy::InterruptDisabler guard;
+    const unsigned int cur = *(volatile unsigned int *)ptr;
+    if (cur != *(unsigned int *)expected) {
+        *(unsigned int *)expected = cur;
+        return false;
+    }
+    *(volatile unsigned int *)ptr = desired;
+    return true;
+}
+#endif
 
 // general
 void _bsod([[maybe_unused]] const char *fmt, [[maybe_unused]] const char *file_name, [[maybe_unused]] int line_number, ...) {

@@ -50,6 +50,7 @@ namespace {
         case State::CrashRecovery_XY_HOME:
         case State::CrashRecovery_HOMEFAIL:
         case State::CrashRecovery_Repeated_Crash:
+        case State::Resuming_BufferData:
         case State::Resuming_Begin:
         case State::Resuming_Reheating:
         case State::Resuming_UnparkHead_XY:
@@ -65,6 +66,7 @@ namespace {
             break;
 
         case State::Paused:
+        case State::MediaErrorRecovery_BufferData:
             simple_state = SimplePrintState::Paused;
             break;
 

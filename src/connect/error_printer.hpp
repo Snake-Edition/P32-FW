@@ -17,7 +17,7 @@ private:
     char title[crash_dump::MSG_TITLE_MAX_LEN + 1];
     char text[crash_dump::MSG_MAX_LEN + 1];
     uint16_t error_code;
-    uint32_t dialog_id;
+    printer_state::DialogId dialog_id;
     virtual void renew(std::optional<SharedBuffer::Borrow> paths) override;
     virtual void drop_paths() override;
     virtual Params params() const override;
@@ -37,13 +37,11 @@ private:
     virtual bool is_idle() const override;
     virtual void init_connect(const char *token) override;
     virtual uint32_t cancelable_fingerprint() const override;
-#if ENABLED(CANCEL_OBJECTS)
-    virtual void cancel_object(uint8_t) override;
-    virtual void uncancel_object(uint8_t) override;
-    virtual const char *get_cancel_object_name(char *buffer, size_t size, size_t index) const override;
+#if HAS_CANCEL_OBJECT()
+    virtual void set_object_cancelled(uint16_t, bool) override;
 #endif
     virtual void reset_printer() override;
-    virtual const char *dialog_action(uint32_t dialog_id, Response response) override;
+    virtual const char *dialog_action(printer_state::DialogId dialog_id, Response response) override;
     virtual std::optional<FinishedJobResult> get_prior_job_result(uint16_t job_id) const override;
     virtual void set_slot_info(size_t, const SlotInfo &);
 

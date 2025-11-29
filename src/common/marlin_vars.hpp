@@ -7,12 +7,16 @@
 #include <atomic>
 #include "file_list_defs.h"
 #include "fsm_states.hpp"
-
+#include <freertos/mutex.hpp>
 #include <cstring>
 #include <charconv>
 #include "inc/MarlinConfig.h"
 #include <assert.h>
 #include <tuple>
+#include <marlin_events.h>
+#include <marlin_server_types/marlin_server_state.h>
+
+#include <option/has_cancel_object.h>
 
 #if BOARD_IS_DWARF()
     #error "You're trying to add marlin_vars to Dwarf. Don't!"
@@ -295,8 +299,6 @@ private:
     friend marlin_vars_t &marlin_vars();
 
 public:
-    void init();
-
     /**
      * @brief Printer position.
      * @note Not using structures to not lock Marlin too often.
@@ -310,6 +312,7 @@ public:
     MarlinVariable<float> logical_pos[4]; ///< immediate position XYZE (logical coordinates) [mm]
     MarlinVariable<float> native_curr_pos[4]; ///< current position XYZE (native coordinates) [mm]
     MarlinVariable<float> logical_curr_pos[4]; ///< current position XYZE (logical coordinates) [mm]
+    MarlinVariable<float> max_printed_z;
 
     MarlinVariable<float> temp_bed; // bed temperature [C]
     MarlinVariable<float> target_bed; // bed target temperature [C]
@@ -336,25 +339,14 @@ public:
     /// Marlin variable for passing string data from the running gcode/FSM to the UI thread/whatever
     MarlinVariableString<64> generic_param_string;
 
-#if ENABLED(CANCEL_OBJECTS)
-    void set_cancel_object_mask(uint64_t mask) {
-        if (osThreadGetId() != marlin_server::server_task) {
-            bsod("set_cancel_object_mask");
-        }
-        auto guard = MarlinVarsLockGuard();
-        cancel_object_mask = mask;
-    }
-    uint64_t get_cancel_object_mask() {
-        auto guard = MarlinVarsLockGuard();
-        return cancel_object_mask;
-    }; ///< Copy of mask of canceled objects
-    MarlinVariable<int8_t> cancel_object_count; ///< Number of objects that can be canceled
+    MarlinVariable<marlin_server::Cmd> gcode_command; // Currently executed command, encoded as marlin_server::Cmd
 
+#if HAS_CANCEL_OBJECT()
     static constexpr size_t CANCEL_OBJECT_NAME_LEN = 32; ///< Maximal length of cancel_object_names strings
     static constexpr size_t CANCEL_OBJECTS_NAME_COUNT = 16; ///< Maximal number of cancel objects
     /// Names of cancelable objects
     MarlinVariableString<CANCEL_OBJECT_NAME_LEN> cancel_object_names[CANCEL_OBJECTS_NAME_COUNT];
-#endif /*ENABLED(CANCEL_OBJECTS)*/
+#endif
 
     // 2B base types
     MarlinVariable<uint16_t> print_speed; // printing speed factor [%]
@@ -364,11 +356,12 @@ public:
 
     // 1B base types
     MarlinVariable<uint8_t> gqueue; // number of commands in gcode queue
-    MarlinVariable<uint8_t> pqueue; // number of commands in planner queue
+    MarlinVariable<bool> inject_queue_empty; // is inject queue empty
+    MarlinVariable<bool> is_processing; ///< true if any gcode being executed or in the queue
+
     MarlinVariable<uint8_t> sd_percent_done; // card.percentDone() [%]
     MarlinVariable<uint8_t> media_inserted; // media_is_inserted()
     MarlinVariable<uint8_t> fan_check_enabled; // fan_check [on/off]
-    MarlinVariable<uint8_t> fs_autoload_enabled; // fs_autoload [on/off]
     MarlinVariable<uint8_t> mmu2_state; // Corresponds to MMU2::xState
     MarlinVariable<uint8_t> mmu2_finda; // FINDA pressed = 1, FINDA not pressed = 0 - shall be used as the main fsensor in case of mmu2State
     MarlinVariable<uint8_t> active_extruder; // See marlin's active_extruder. It will contain currently selected extruder (tool in case of XL, loaded filament nr in case of MMU2)
@@ -376,8 +369,6 @@ public:
 
     // TODO: prints fans should be in extruder struct, but we are not able to control multiple print fans yet
     MarlinVariable<uint8_t> print_fan_speed; // print fan speed [0..255]
-
-    MarlinVariable<uint8_t> stealth_mode; // stealth = 1, normal = 0
 
     // PER-Hotend variables (access via hotend(num) or active_hotend())
     struct Hotend {
@@ -497,13 +488,12 @@ public:
     void unlock();
 
 private:
-    osMutexDef(mutex); // Declare mutex
-    osMutexId mutex_id; // Mutex ID
+    freertos::Mutex mutex;
     std::atomic<osThreadId> current_mutex_owner; // current mutex owner -> to check for recursive locking
     std::array<Hotend, HOTENDS> hotends; // array of hotends (use hotend()/active_hotend() getter)
     std::array<std::optional<JobInfo>, 2> job_history;
     fsm::States fsm_states;
-#if ENABLED(CANCEL_OBJECTS)
+#if HAS_CANCEL_OBJECT()
     uint64_t cancel_object_mask;
 #endif
     // disable copy constructor

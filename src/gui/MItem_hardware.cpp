@@ -7,6 +7,10 @@
 #include <screen_menu_hardware_checks.hpp>
 #include <common/printer_model_data.hpp>
 
+#if HAS_CHAMBER_VENTS()
+    #include <feature/chamber/chamber_enums.hpp>
+#endif
+
 #if HAS_TOOLCHANGER()
     #include <module/prusa/toolchanger.h>
     #if HAS_SIDE_FSENSOR()
@@ -26,7 +30,7 @@ MI_HARDWARE_CHECK::MI_HARDWARE_CHECK(HWCheckType check_type)
 {}
 
 void MI_HARDWARE_CHECK::OnChange([[maybe_unused]] size_t old_index) {
-    config_store().visit_hw_check(check_type, [set = static_cast<HWCheckSeverity>(index)](auto &item) { item.set(set); });
+    config_store().visit_hw_check(check_type, [set = static_cast<HWCheckSeverity>(this->get_index())](auto &item) { item.set(set); });
 }
 
 MI_HARDWARE_G_CODE_CHECKS::MI_HARDWARE_G_CODE_CHECKS()
@@ -47,14 +51,16 @@ void MI_SIDE_FSENSOR_REMAP::OnChange([[maybe_unused]] size_t old_index) {
         Screens::Access()->Get()->Validate(); // Do not redraw this menu yet
 
         // Change index by what user selected)
-        set_value(side_fsensor_remap::is_remapped(), false);
+        set_value(side_fsensor_remap::is_remapped());
 
+    #if HAS_SELFTEST()
         Validate(); // Do not redraw this switch yet
         marlin_client::test_start_with_data(stmFSensor, static_cast<ToolMask>(mask)); // Start filament sensor calibration for moved tools
+    #endif
 
     } else {
         // Change index by what user selected)
-        set_value(side_fsensor_remap::is_remapped(), false);
+        set_value(side_fsensor_remap::is_remapped());
     }
 }
 #endif /*HAS_TOOLCHANGER() && HAS_SIDE_FSENSOR()*/
@@ -88,7 +94,7 @@ bool MI_EXTENDED_PRINTER_TYPE::on_item_selected([[maybe_unused]] int old_index, 
             store.homing_bump_divisor_x.set_to_default();
             store.homing_bump_divisor_y.set_to_default();
 
-        #if ENABLED(PRECISE_HOMING)
+        #if HAS_PRECISE_HOMING()
             store.precise_homing_sample_history.set_all_to_default();
             store.precise_homing_sample_history_index.set_all_to_default();
         #endif
@@ -132,8 +138,41 @@ void MI_EMERGENCY_STOP_ENABLE::OnChange([[maybe_unused]] size_t old_index) {
             config_store().emergency_stop_enable.set(false);
         } else {
             // revert the change in GUI and keep config store intact
-            set_value(true, false);
+            set_value(true);
         }
     }
+}
+#endif
+
+#if HAS_CHAMBER_VENTS()
+static constexpr const char *chamber_vent_control_items[] = {
+    N_("Off"),
+    N_("Auto"),
+    N_("Manual"),
+};
+
+static_assert(VentControl(0) == VentControl::off && VentControl(1) == VentControl::automatic && VentControl(2) == VentControl::manual, "menu item misalignment");
+
+MI_SWITCH_VENT_MECHANISM::MI_SWITCH_VENT_MECHANISM()
+    : MenuItemSwitch(_("Chamber Vent Control"), chamber_vent_control_items, std::to_underlying(config_store().get_vent_control())) {}
+
+void MI_SWITCH_VENT_MECHANISM::OnChange([[maybe_unused]] size_t old_index) {
+    config_store().set_vent_control(VentControl(get_index()));
+}
+#endif
+
+#if HAS_PRECISE_HOMING_COREXY()
+constexpr const EnumArray<Tristate::Value, const char *, 3> ask_always_never_texts {
+    { Tristate::no, N_("Never") },
+    { Tristate::yes, N_("Auto") },
+    { Tristate::other, N_("Ask") },
+};
+
+MI_AUTO_PRECISE_HOMING_CALIBRATION::MI_AUTO_PRECISE_HOMING_CALIBRATION()
+    : MenuItemSwitch(_("Homing Calibration"), ask_always_never_texts, config_store().auto_recalibrate_precise_homing.get().value) {
+}
+
+void MI_AUTO_PRECISE_HOMING_CALIBRATION::OnChange(size_t) {
+    config_store().auto_recalibrate_precise_homing.set(static_cast<Tristate::Value>(get_index()));
 }
 #endif

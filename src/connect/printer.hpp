@@ -25,6 +25,9 @@
     #include <Marlin/src/feature/prusa/MMU2/mmu2_mk4.h>
 #endif
 
+#include <option/has_cancel_object.h>
+#include <option/xbuddy_extension_variant_standard.h>
+
 namespace connect_client {
 
 // NOTE: if you are changing this, change also the one in command.hpp,
@@ -77,7 +80,7 @@ public:
     };
 #endif
 
-#if PRINTER_IS_PRUSA_COREONE() || defined(UNITTESTS)
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     struct ChamberInfo {
         static constexpr int target_temp_unset = 0U; // agreed with the Connect team, that 0 maps to unset values
         uint32_t target_temp = target_temp_unset;
@@ -100,11 +103,6 @@ public:
     static constexpr size_t NUMBER_OF_SLOTS = 1;
 #endif
 
-#if ENABLED(CANCEL_OBJECTS)
-    static constexpr size_t CANCEL_OBJECT_NAME_LEN = 32;
-    static constexpr size_t CANCEL_OBJECT_NAME_COUNT = 16;
-#endif
-
     class Params {
     private:
         // Living in the Printer we come from
@@ -116,7 +114,7 @@ public:
 #if XL_ENCLOSURE_SUPPORT()
         EnclosureInfo enclosure_info;
 #endif
-#if PRINTER_IS_PRUSA_COREONE() || defined(UNITTESTS)
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
         ChamberInfo chamber_info;
         bool addon_power;
 #endif
@@ -163,10 +161,6 @@ public:
         uint64_t usb_space_free = 0;
         PrinterVersion version = { 0, 0, 0 };
         printer_state::StateWithDialog state = printer_state::DeviceState::Unknown;
-#if ENABLED(CANCEL_OBJECTS)
-        size_t cancel_object_count = 0;
-        uint64_t cancel_object_mask = 0;
-#endif
 
         uint32_t telemetry_fingerprint(bool include_xy_axes) const;
         uint32_t state_fingerprint() const;
@@ -189,10 +183,14 @@ public:
         static constexpr size_t CONNECT_URL_BUF_LEN = (CONNECT_URL_LEN + 1);
         static constexpr size_t CONNECT_TOKEN_LEN = 20;
         static constexpr size_t CONNECT_TOKEN_BUF_LEN = (CONNECT_TOKEN_LEN + 1);
+        static constexpr size_t CONNECT_PROXY_SIZE = 30;
+        static constexpr size_t CONNECT_PROXY_BUF_LEN = CONNECT_PROXY_SIZE + 1;
 
         char host[CONNECT_URL_BUF_LEN] = "";
+        char proxy_host[CONNECT_PROXY_BUF_LEN] = "";
         char token[CONNECT_TOKEN_BUF_LEN] = "";
         uint16_t port = 0;
+        uint16_t proxy_port = 0;
         bool tls = true;
         bool enabled = false;
         bool custom_cert = false;
@@ -200,6 +198,9 @@ public:
         bool loaded = false;
 
         uint32_t crc() const;
+        bool has_proxy() const {
+            return proxy_host[0] != '\0' && proxy_port != 0;
+        }
     };
 
     enum class Iface {
@@ -278,10 +279,8 @@ public:
     virtual bool is_in_error() const = 0;
     virtual bool is_idle() const = 0;
     virtual uint32_t cancelable_fingerprint() const = 0;
-#if ENABLED(CANCEL_OBJECTS)
-    virtual void cancel_object(uint8_t id) = 0;
-    virtual void uncancel_object(uint8_t id) = 0;
-    virtual const char *get_cancel_object_name(char *buffer, size_t size, size_t index) const = 0;
+#if HAS_CANCEL_OBJECT()
+    virtual void set_object_cancelled(uint16_t id, bool set) = 0;
 #endif
     // Turn connect on and set the token.
     //
@@ -295,7 +294,7 @@ public:
     // Does not return if successful
     virtual void reset_printer() = 0;
 
-    virtual const char *dialog_action(uint32_t dialog_id, Response response) = 0;
+    virtual const char *dialog_action(printer_state::DialogId dialog_id, Response response) = 0;
     virtual std::optional<FinishedJobResult> get_prior_job_result(uint16_t job_id) const = 0;
 
     // Returns a newly reloaded config and a flag if it changed since last load

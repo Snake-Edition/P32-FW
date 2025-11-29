@@ -5,7 +5,6 @@
 #include <stddef.h>
 #include <atomic>
 #include <cmath>
-#include <functional>
 
 namespace buddy {
 

@@ -4,8 +4,13 @@
 
 #include <device/hal.h>
 #include <freertos/mutex.hpp>
-#include <option/developer_mode.h>
 #include <device/peripherals.h>
+#include <mutex>
+
+#include <option/developer_mode.h>
+#if DEVELOPER_MODE()
+    #include <bsod.h>
+#endif
 
 static freertos::Mutex rand_strong_mutex;
 
@@ -28,7 +33,7 @@ RAND_DECL uint32_t rand_u() {
 static volatile uint32_t rng_ctx = 0x2a57ead0; // Chosen by fair dice roll. Guaranteed to be random.
 
 RAND_DECL uint32_t rand_u_sw() {
-    rng_ctx = (rng_ctx * 1103515245 + 12345) & 0x7fffffff; // glibc LCG constants, much bad, don't use for anything important
+    rng_ctx = (rng_ctx * 1103515245 + 12345); // glibc LCG constants, much bad, don't use for anything important
     return rng_ctx;
 }
 
@@ -44,6 +49,6 @@ RAND_DECL bool rand_u_secure(uint32_t *result) {
 }
 
 /// Replacement of the original std::rand that was using a software RNG and dynamic allocation
-RAND_DECL int __wrap_rand() {
+RAND_DECL __attribute__((used)) int __wrap_rand() {
     return int(rand_u() & INT_MAX);
 }

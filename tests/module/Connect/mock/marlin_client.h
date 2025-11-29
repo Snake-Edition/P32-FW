@@ -8,6 +8,8 @@ enum class State {
     Pausing_WaitIdle,
     Pausing_ParkHead,
     Paused,
+    MediaErrorRecovery_BufferData,
+    Resuming_BufferData,
     Resuming_Begin,
     Resuming_Reheating,
     Resuming_UnparkHead_XY,
@@ -52,7 +54,7 @@ typedef struct _marlin_vars_t {
     float z_offset; // probe z-offset [mm]
     float display_nozzle; // nozzle temperature to display [C]
     float travel_acceleration; // travel acceleration from planner
-    uint32_t print_duration; // print_job_timer.duration() [ms]
+    uint32_t print_duration; // print_job_timer.duration() [s]
     uint32_t time_to_end; // oProgressData.oTime2End.mGetValue() [s]
     char *media_LFN; // Long-File-Name of the currently selected file - a pointer to a global static buffer
     char *media_SFN_path; // Short-File-Name path to currently selected file - a pointer to a global static buffer
@@ -69,14 +71,12 @@ typedef struct _marlin_vars_t {
     // 1B base types
     uint8_t motion; // motion (bit0-X, bit1-Y, bit2-Z, bit3-E)
     uint8_t gqueue; // number of commands in gcode queue
-    uint8_t pqueue; // number of commands in planner queue
     uint8_t print_fan_speed; // print fan speed [0..255]
     uint8_t wait_heat; // wait_for_heatup
     uint8_t wait_user; // wait_for_user
     uint8_t sd_percent_done; // card.percentDone() [%]
     uint8_t media_inserted; // media_is_inserted()
     uint8_t fan_check_enabled; // fan_check [on/off]
-    uint8_t fs_autoload_enabled; // fs_autoload [on/off]
     uint8_t mmu2_active; // 1 if MMU2 is on and works, 0 otherwise - clients may use this variable to change behavior - with/without the MMU
     uint8_t mmu2_finda; // FINDA pressed = 1, FINDA not pressed = 0 - shall be used as the main fsensor in case of mmu2Active
     uint8_t curr_tool; // currently active filament slot/tool (0-4 in case of the MMU or XL, 0xff if there is no filament slot active)

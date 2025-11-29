@@ -13,11 +13,15 @@ void ProbeAnalysisBase::SetSamplingIntervalMs(float interval) {
     samplingInterval = interval / 1000;
 }
 
-void ProbeAnalysisBase::StoreSample(float currentZ, float currentLoad) {
+void ProbeAnalysisBase::StoreSample([[maybe_unused]] uint32_t time_us, float currentZ, float currentLoad) {
     if (analysisInProgress) {
         return;
     }
-    window.push_back({ ticks_us(), currentZ, currentLoad });
+    window.push_back({ currentZ, currentLoad });
+
+#if !defined(UNITTESTS)
+    lastSampleTimestamp = ticks_us();
+#endif
 }
 
 ProbeAnalysisBase::Result ProbeAnalysisBase::Analyse() {
@@ -74,7 +78,7 @@ ProbeAnalysisBase::Result ProbeAnalysisBase::Analyse() {
         std::array<std::tuple<uint32_t, float>, 6> load_line_points;
 
         auto timestamp_for_time = [this](Time time) -> uint32_t {
-            return ClosestSample(time, SearchDirection::Both)->timestamp;
+            return TimeOfSample(ClosestSample(time, SearchDirection::Both));
         };
 
         // analysis start
@@ -140,8 +144,10 @@ ProbeAnalysisBase::Result ProbeAnalysisBase::Analyse() {
     bool isGood = Classify(features);
     if (isGood) {
         float zCoordinate = InterpolateFinalZCoordinate(features);
+        log_features_metrics(features, zCoordinate);
         return Result::Good(zCoordinate);
     } else {
+        log_features_metrics(features, std::nullopt);
         return Result::Bad("low-precision");
     }
 }
@@ -198,11 +204,11 @@ ProbeAnalysisBase::Sample ProbeAnalysisBase::ClosestSample(Time time, SearchDire
     return std::max(std::min(sample, window.end() - 1), window.begin());
 }
 
-std::tuple<float, ProbeAnalysisBase::Line, ProbeAnalysisBase::Line> ProbeAnalysisBase::CalculateErrorWhenLoadRepresentedAsLines(SamplesRange samples, Sample split) {
+std::tuple<float, ProbeAnalysisBase::Line, ProbeAnalysisBase::Line> ProbeAnalysisBase::CalculateErrorWhenLoadRepresentedAsLines(SamplesRange samples, Sample split, size_t gap) {
     // linear regression
     auto getLoad = [](Sample s) { return s->load; };
     Line leftLine = LinearRegression(SamplesRange(samples.first, split - 1), getLoad);
-    Line rightLine = LinearRegression(SamplesRange(split, samples.last), getLoad);
+    Line rightLine = LinearRegression(SamplesRange(split + gap, samples.last), getLoad);
 
     // early exit if something went wrong
     if (!leftLine.IsValid() || !rightLine.IsValid()) {
@@ -223,8 +229,9 @@ std::tuple<float, ProbeAnalysisBase::Line, ProbeAnalysisBase::Line> ProbeAnalysi
     return std::make_tuple(error, leftLine, rightLine);
 }
 
-std::tuple<ProbeAnalysisBase::Sample, ProbeAnalysisBase::Line, ProbeAnalysisBase::Line> ProbeAnalysisBase::FindBestTwoLinesApproximation(SamplesRange samples) {
-    if (samples.Size() < 3) {
+std::tuple<ProbeAnalysisBase::Sample, ProbeAnalysisBase::Line, ProbeAnalysisBase::Line> ProbeAnalysisBase::FindBestTwoLinesApproximation(SamplesRange samples, size_t sampleGap) {
+    // Ensure we have at least 2 samples per segment + gap
+    if (samples.Size() < (3 + sampleGap)) {
         return std::make_tuple(window.end(), Line::Invalid(), Line::Invalid());
     }
 
@@ -232,8 +239,8 @@ std::tuple<ProbeAnalysisBase::Sample, ProbeAnalysisBase::Line, ProbeAnalysisBase
     Sample bestSplit = window.end();
     Line leftLine, rightLine;
 
-    for (auto split = samples.first + 1; split < samples.last; ++split) {
-        auto result = CalculateErrorWhenLoadRepresentedAsLines(samples, split);
+    for (auto split = samples.first + 1; split < (samples.last - sampleGap); ++split) {
+        auto result = CalculateErrorWhenLoadRepresentedAsLines(samples, split, sampleGap);
         float error = std::get<0>(result);
         if (!std::isnan(error) && error < bestError) {
             bestSplit = split;
@@ -266,29 +273,43 @@ bool ProbeAnalysisBase::CompensateForSystemDelay() {
 }
 
 void ProbeAnalysisBase::CalculateHaltSpan(Features &features) {
-    Sample fallEnd = window.end() - 1;
-    Sample riseStart = fallEnd;
-    bool extendingHalt = true;
+    // find the start of the fall line
+    Sample fallStart = window.begin();
+    for (auto it = fallStart + 1; it < window.end(); ++it) {
+        if (fallStart->z != it->z) {
+            break;
+        }
+        fallStart = it;
+    }
 
-    const auto to_forward_iterator = [](auto rit) {
-        auto r = rit.base();
-        return --r;
-    };
+    // find the end of the raise line
+    Sample riseEnd = window.end() - 1;
+    for (auto it = riseEnd; it > fallStart; --it) {
+        if (riseEnd->z != it->z) {
+            break;
+        }
+        riseEnd = it;
+    }
 
     // iterate backwards and find range of the first global minimum
-    for (auto it = window.rbegin(), e = window.rend(); it != e; ++it) {
+    Sample fallEnd = riseEnd;
+    Sample riseStart = fallStart;
+    bool extendingHalt = true;
+    for (auto it = riseEnd; it > fallStart; --it) {
         if (it->z < fallEnd->z) {
-            fallEnd = riseStart = to_forward_iterator(it);
+            fallEnd = riseStart = it;
             extendingHalt = true;
         } else if (extendingHalt && it->z == fallEnd->z) {
-            fallEnd = to_forward_iterator(it);
+            fallEnd = it;
         } else {
             extendingHalt = false;
         }
     }
 
+    features.fallStart = fallStart;
     features.fallEnd = fallEnd;
     features.riseStart = riseStart;
+    features.riseEnd = riseEnd;
 }
 
 bool ProbeAnalysisBase::CalculateAnalysisRange(Features &features) {
@@ -309,10 +330,12 @@ bool ProbeAnalysisBase::CalculateAnalysisRange(Features &features) {
 
 bool ProbeAnalysisBase::CalculateLoadLineApproximationFeatures(Features &features) {
     auto getLoad = [](Sample s) { return s->load; };
+    size_t compressionGapSamples = static_cast<size_t>(analysisCompressionGap / samplingInterval);
+    size_t decompressionGapSamples = static_cast<size_t>(analysisDecompressionGap / samplingInterval);
 
-    std::tie(std::ignore, features.beforeCompressionLine, features.compressionLine) = FindBestTwoLinesApproximation(SamplesRange(features.analysisStart, features.fallEnd - skipBorderSamples));
+    std::tie(std::ignore, features.beforeCompressionLine, features.compressionLine) = FindBestTwoLinesApproximation(SamplesRange(features.analysisStart, features.fallEnd - skipBorderSamples), compressionGapSamples);
     features.compressedLine = LinearRegression(SamplesRange(features.fallEnd + skipBorderSamples, features.riseStart - skipBorderSamples), getLoad);
-    std::tie(std::ignore, features.decompressionLine, features.afterDecompressionLine) = FindBestTwoLinesApproximation(SamplesRange(features.riseStart + skipBorderSamples, features.analysisEnd));
+    std::tie(std::ignore, features.decompressionLine, features.afterDecompressionLine) = FindBestTwoLinesApproximation(SamplesRange(features.riseStart + skipBorderSamples, features.analysisEnd), decompressionGapSamples);
 
     features.compressionStartTime = features.beforeCompressionLine.FindIntersection(features.compressionLine);
     features.compressionEndTime = features.compressionLine.FindIntersection(features.compressedLine);
@@ -325,9 +348,9 @@ bool ProbeAnalysisBase::CalculateLoadLineApproximationFeatures(Features &feature
 bool ProbeAnalysisBase::CalculateZLineApproximationFeatures(Features &features) {
     auto getZ = [](Sample s) { return s->z; };
 
-    features.fallLine = LinearRegression(SamplesRange(features.analysisStart, features.fallEnd - skipBorderSamples), getZ);
+    features.fallLine = LinearRegression(SamplesRange(features.fallStart + skipBorderSamples, features.fallEnd - skipBorderSamples), getZ);
     features.haltLine = LinearRegression(SamplesRange(features.fallEnd + skipBorderSamples, features.riseStart - skipBorderSamples), getZ);
-    features.riseLine = LinearRegression(SamplesRange(features.riseStart + skipBorderSamples, features.analysisEnd), getZ);
+    features.riseLine = LinearRegression(SamplesRange(features.riseStart + skipBorderSamples, features.riseEnd - skipBorderSamples), getZ);
 
     return features.fallLine.IsValid() && features.haltLine.IsValid() && features.riseLine.IsValid();
 }
@@ -353,10 +376,10 @@ void ProbeAnalysisBase::CalculateLoadMeans(Features &features) {
         }) / static_cast<float>(samples.Size());
     };
 
-    SamplesRange beforeCompressionSamples(features.analysisStart, ClosestSample(features.compressionStartTime, SearchDirection::Backward));
+    SamplesRange beforeCompressionSamples(features.analysisStart, ClosestSample(features.compressionStartTime - analysisCompressionGap, SearchDirection::Backward));
     features.loadMeanBeforeCompression = calcLoadMean(beforeCompressionSamples);
 
-    SamplesRange afterDecompressionSamples(ClosestSample(features.decompressionEndTime, SearchDirection::Forward), features.analysisEnd);
+    SamplesRange afterDecompressionSamples(ClosestSample(features.decompressionEndTime + analysisDecompressionGap, SearchDirection::Forward), features.analysisEnd);
     features.loadMeanAfterDecompression = calcLoadMean(afterDecompressionSamples);
 }
 
@@ -603,4 +626,59 @@ bool ProbeAnalysisBase::HasOutOfRangeFeature(Features &features, const char **fe
         return true;
     }
     return false;
+}
+
+void ProbeAnalysisBase::log_features_metrics(const Features &features, std::optional<float> detected_z) const {
+#if !defined(UNITTESTS)
+    // There are fall-, halt- and rise line in Z and before compression-,
+    // compression-, compressed-, decompression- and afterdecompression lines in
+    // load.
+
+    uint32_t window_start_ts = lastSampleTimestamp - window.size() * samplingInterval * 1e6f;
+
+    float analysis_start = samplingInterval * std::distance(window.begin(), features.analysisStart);
+    float fall_start = samplingInterval * std::distance(window.begin(), features.fallStart);
+    float fall_end = samplingInterval * std::distance(window.begin(), features.fallEnd);
+    float rise_start = samplingInterval * std::distance(window.begin(), features.riseStart);
+    float rise_end = samplingInterval * std::distance(window.begin(), features.riseEnd);
+    float analysis_end = samplingInterval * std::distance(window.begin(), features.analysisEnd);
+
+    auto record_line = [&](metric_t &metric, const Line &line, float start_t, float end_t) {
+        metric_record_float_at_time(&metric,
+            window_start_ts + uint32_t(start_t * 1e6f),
+            line.a * start_t + line.b);
+        metric_record_float_at_time(&metric,
+            window_start_ts + uint32_t(end_t * 1e6f),
+            line.a * end_t + line.b);
+    };
+
+    METRIC_DEF(mbl_fall_line_m, "mbl_fl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    record_line(mbl_fall_line_m, features.fallLine, fall_start, fall_end);
+
+    METRIC_DEF(mbl_halt_line_m, "mbl_hl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    record_line(mbl_halt_line_m, features.haltLine, fall_end, rise_start);
+
+    METRIC_DEF(mbl_rise_line_m, "mbl_rl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    record_line(mbl_rise_line_m, features.riseLine, rise_start, rise_end);
+
+    METRIC_DEF(mbl_detected_z_m, "mbl_dz", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    if (detected_z.has_value()) {
+        record_line(mbl_detected_z_m, Line(0, *detected_z), analysis_start, analysis_end);
+    }
+
+    METRIC_DEF(mbl_before_compr_line_m, "mbl_bcl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    record_line(mbl_before_compr_line_m, features.beforeCompressionLine, analysis_start, features.compressionStartTime);
+
+    METRIC_DEF(mbl_compressing_line_m, "mbl_cl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    record_line(mbl_compressing_line_m, features.compressionLine, features.compressionStartTime, features.compressionEndTime);
+
+    METRIC_DEF(mbl_compressed_line_m, "mbl_cpl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    record_line(mbl_compressed_line_m, features.compressedLine, features.compressionEndTime, features.decompressionStartTime);
+
+    METRIC_DEF(mbl_decompression_line_m, "mbl_dcl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    record_line(mbl_decompression_line_m, features.decompressionLine, features.decompressionStartTime, features.decompressionEndTime);
+
+    METRIC_DEF(mbl_after_decompr_line_m, "mbl_adl", METRIC_VALUE_FLOAT, 0, METRIC_DISABLED);
+    record_line(mbl_after_decompr_line_m, features.afterDecompressionLine, features.decompressionEndTime, analysis_end);
+#endif
 }

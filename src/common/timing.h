@@ -63,6 +63,22 @@ typedef struct {
 /// Overflows every ~136 years.
 timestamp_t get_timestamp();
 
+/// Low-level system time
+typedef struct {
+    uint32_t sec; ///< Seconds since the start of the system overflows every ~136 years
+    uint32_t subsec; ///< subseconds in TIM_BASE_CLK_MHZ, overflows every 1 second
+} sys_timestamp_t;
+
+/// Sample the current low-level system time
+sys_timestamp_t get_sys_timestamp();
+
+/// Extract the nanosecond fraction from a system timestamp
+uint32_t get_sys_timestamp_ns(const sys_timestamp_t *);
+
+/// Calculate the nanosecond difference a-b, or return a random number in the range >= 1e9
+/// if the time difference is equal or greater than 1s. The sign is preserved.
+int32_t sys_timestamp_ns_diff(const sys_timestamp_t *a, const sys_timestamp_t *b);
+
 /// Sys timer's overflow interrupt callback
 ///
 void app_tick_timer_overflow();

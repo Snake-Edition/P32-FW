@@ -5,7 +5,7 @@
 #include "marlin_server.hpp"
 #include <usb_host.h>
 #include "marlin_vars.hpp"
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 
 /** \addtogroup G-Codes
  * @{
@@ -42,7 +42,12 @@ void GcodeSuite::M20() {
  *
  */
 void GcodeSuite::M21() {
-    // not necessary - empty implementation
+    // required for Octoprint / third party tools to simulate an inserted SD card when using USB
+    if (marlin_vars().media_inserted.get()) {
+        SERIAL_ECHOLNPGM(MSG_SD_CARD_OK);
+    } else {
+        SERIAL_ECHOLNPGM(MSG_SD_CARD_FAIL);
+    }
 }
 
 /**

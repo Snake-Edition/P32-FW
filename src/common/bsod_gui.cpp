@@ -12,7 +12,6 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
-#include "led_animations/animation.hpp"
 
 #include <iterator>
 #include <stdarg.h>
@@ -20,7 +19,7 @@
 #include "sound.hpp"
 #include "gui.hpp"
 #include "Jogwheel.hpp"
-#include "sys.h"
+#include <common/sys.hpp>
 #include "hwio.h"
 #include <version/version.hpp>
 #include "support_utils.h"
@@ -29,7 +28,7 @@
 #include "power_panic.hpp"
 #include "crash_dump/dump_parse.hpp"
 
-#include "str_utils.hpp"
+#include <utils/string_builder.hpp>
 
 // this is private struct definition from FreeRTOS
 /*
@@ -116,8 +115,8 @@ typedef tskTCB TCB_t;
 // current thread from FreeRTOS
 extern PRIVILEGED_DATA TCB_t *volatile pxCurrentTCB;
 
-void raise_redscreen(ErrCode error_code, const char *error, const char *module) {
-    crash_dump::save_message(crash_dump::MsgType::RSOD, ftrstd::to_underlying(error_code), error, module);
+[[noreturn]] void raise_redscreen(ErrCode error_code, const char *error, const char *module) {
+    crash_dump::save_message(crash_dump::MsgType::RSOD, std::to_underlying(error_code), error, module);
     sys_reset();
 }
 
@@ -132,7 +131,7 @@ void raise_redscreen(ErrCode error_code, const char *error, const char *module) 
 }
 
 //! Fatal error that causes Redscreen
-void fatal_error(const char *error, const char *module) {
+[[noreturn]] void fatal_error(const char *error, const char *module) {
     // Unknown error code = we don't have prusa.io/###### site support for this error
     // In this case we have to dump error message and error title
     ErrCode error_code = ErrCode::ERR_UNDEF;
@@ -226,7 +225,7 @@ static void fallback_bsod(const char *fmt, const char *file_name, int line_numbe
 
     // Draw buffer
     render_text_align(Rect16(8, 10, 230, 290),
-        string_view_utf8::MakeRAM((const uint8_t *)fallback_bsod_text), Font::small, COLOR_NAVY, COLOR_WHITE,
+        string_view_utf8::MakeRAM(fallback_bsod_text), Font::small, COLOR_NAVY, COLOR_WHITE,
         { 0, 0, 0, 0 }, { Align_t::LeftTop(), is_multiline::yes });
 
     // Endless loop
@@ -260,7 +259,7 @@ void _bsod(const char *fmt, const char *file_name, int line_number, ...) {
     va_end(args);
 
     // Save file, line and meessage
-    crash_dump::save_message(crash_dump::MsgType::BSOD, ftrstd::to_underlying(ErrCode::ERR_UNDEF), msg, title);
+    crash_dump::save_message(crash_dump::MsgType::BSOD, std::to_underlying(ErrCode::ERR_UNDEF), msg, title);
 
     crash_dump::trigger_crash_dump();
 }

@@ -12,3 +12,5 @@ struct mbedtls_net_context {
     mbedtls_net_context &operator=(const mbedtls_net_context &other) = delete;
     mbedtls_net_context &operator=(mbedtls_net_context &&other) = delete;
 };
+
+int mbedtls_plain_connect(mbedtls_net_context *ctx, const char *host, uint16_t port);

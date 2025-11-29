@@ -22,6 +22,8 @@
 
 #include "../../inc/MarlinConfigPre.h"
 
+#include "M104_M109.hpp"
+
 #if EXTRUDERS
 
 #include "../gcode.h"
@@ -64,8 +66,6 @@ void GcodeSuite::M104() {
 
   #if ENABLED(PRUSA_MMU2) // MMU2 doesn't handle different temps per slot, sayonara! (TODO?)
 	  constexpr int8_t target_extruder = 0;
-  #elif ENABLED(MIXING_EXTRUDER) && MIXING_VIRTUAL_TOOLS > 1
-    constexpr int8_t target_extruder = 0;
   #else
     const int8_t target_extruder = get_target_extruder_from_command();
     if (target_extruder < 0) return;
@@ -93,7 +93,6 @@ void GcodeSuite::M104() {
        */
       if (temp <= (EXTRUDE_MINTEMP) / 2) {
         print_job_timer.pause();
-        ui.reset_status();
       }
     #endif
   }
@@ -121,22 +120,31 @@ void GcodeSuite::M104() {
  * - `T` - Tool
  */
 void GcodeSuite::M109() {
-
-  if (DEBUGGING(DRYRUN)) return;
-
-  #if ENABLED(PRUSA_MMU2) // MMU2 doesn't handle different temps per slot, sayonara! (TODO?)
-	  constexpr int8_t target_extruder = 0;
-  #elif ENABLED(MIXING_EXTRUDER) && MIXING_VIRTUAL_TOOLS > 1
+   #if ENABLED(PRUSA_MMU2) // MMU2 doesn't handle different temps per slot, sayonara! (TODO?)
     constexpr int8_t target_extruder = 0;
   #else
     const int8_t target_extruder = get_target_extruder_from_command();
     if (target_extruder < 0) return;
   #endif
+  M109Flags flags {
+    .target_temp = parser.seenval('S') ? parser.value_celsius() :
+                   parser.seenval('R') ? parser.value_celsius() : 0,
+    .wait_heat = parser.seenval('S'),
+    .wait_heat_or_cool = parser.seenval('R'),
+    .autotemp = parser.boolval('F'),
+    .display_temp = parser.seenval('D') ? std::optional<float>(parser.value_celsius()) : std::nullopt
+  };
+  M109_no_parser(target_extruder, flags);
+}
 
-  const bool no_wait_for_cooling = parser.seenval('S'),
-             set_temp = no_wait_for_cooling || parser.seenval('R');
+void M109_no_parser(uint8_t target_extruder, const M109Flags& flags) {
+
+  if (DEBUGGING(DRYRUN)) return;
+
+  const bool no_wait_for_cooling = flags.wait_heat && !flags.wait_heat_or_cool;
+  const bool set_temp = no_wait_for_cooling || flags.wait_heat_or_cool;
   if (set_temp) {
-    const int16_t temp = parser.value_celsius();
+    const int16_t temp = flags.target_temp;
     #if ENABLED(SINGLENOZZLE)
       singlenozzle_temp[target_extruder] = temp;
       if (target_extruder != active_extruder) return;
@@ -149,7 +157,7 @@ void GcodeSuite::M109() {
     #endif
 
     #if ENABLED(PRINTJOB_TIMER_AUTOSTART)
-      // TODO: this doesn't work properly for multitool, temperature of last tool decides whenever printjob timer is started or not
+    // TODO: this doesn't work properly for multitool, temperature of last tool decides whenever printjob timer is started or not
       /*
        * Use half EXTRUDE_MINTEMP to allow nozzles to be put into hot
        * standby mode, (e.g., in a dual extruder setup) without affecting
@@ -157,28 +165,22 @@ void GcodeSuite::M109() {
        */
       if (temp <= (EXTRUDE_MINTEMP) / 2) {
         print_job_timer.pause();
-        ui.reset_status();
       }
       else
         print_job_timer.start();
     #endif
-
-    #if HAS_DISPLAY
-      if (thermalManager.isHeatingHotend(target_extruder) || !no_wait_for_cooling)
-        thermalManager.set_heating_message(target_extruder);
-    #endif
-  }
+    }
 
   #if ENABLED(AUTOTEMP)
     planner.autotemp_M104_M109();
   #endif
-
   if (set_temp) {
-    marlin_server::set_temp_to_display(parser.seenval('D') ? parser.value_celsius() : thermalManager.degTargetHotend(target_extruder), target_extruder);
-    (void)thermalManager.wait_for_hotend(target_extruder, no_wait_for_cooling, parser.seen('C'));
+    marlin_server::set_temp_to_display(flags.display_temp.value_or(flags.target_temp), target_extruder);
+    (void)thermalManager.wait_for_hotend(target_extruder, no_wait_for_cooling, flags.autotemp);
   }
-}
 
+  return;
+}
 /** @}*/
 
 #endif // EXTRUDERS

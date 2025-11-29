@@ -21,6 +21,8 @@
  * @file
  */
 
+#include "G425.hpp"
+
 #include <algorithm>
 #include <array>
 #include <span>
@@ -46,6 +48,7 @@
 #include "../../module/endstops.h"
 #include "../../module/prusa/homing_corexy.hpp"
 #include "../../feature/bedlevel/bedlevel.h"
+#include "../../feature/pressure_advance/pressure_advance_config.hpp"
 #include "Marlin/src/gcode/gcode.h"
 #include "../../module/stepper.h"
 
@@ -59,6 +62,7 @@
     #include "src/feature/prusa/crash_recovery.hpp"
 #endif
 
+#include <common/mapi/parking.hpp>
 #include <bsod_gui.hpp>
 #include <marlin_server.hpp>
 #include <center_approx.hpp>
@@ -271,7 +275,8 @@ void go_to_initial(const xyz_pos_t center, const float angle, const float radius
 }
 
 xy_pos_t probe_xy(const xyz_pos_t center, const float angle, const uint8_t tool, const Phase phase) {
-    // Wait for movements to finish
+    // As we perform measurements, we need to ensure the current position has been reached first
+    planner.buffer_line(current_position, PROBE_FEEDRATE_MMS, active_extruder, { .raw_block = true });
     planner.synchronize();
 
     // Mark initial position
@@ -328,7 +333,7 @@ xy_pos_t probe_xy(const xyz_pos_t center, const float angle, const uint8_t tool,
     }
 
     // Return to initial
-    planner._buffer_msteps_raw(initial_pos_msteps, initial_mm, INTERPROBE_FEEDRATE_MMS, active_extruder);
+    planner._buffer_msteps(initial_pos_msteps, initial_mm, INTERPROBE_FEEDRATE_MMS, active_extruder, { .raw_block = true });
     planner.synchronize();
     current_position = initial_mm;
 
@@ -336,7 +341,7 @@ xy_pos_t probe_xy(const xyz_pos_t center, const float angle, const uint8_t tool,
         &metric_xy_raw_hit,
         ",t=%u,p=%u,a=%.3f x=%.3f,y=%.3f",
         tool,
-        ftrstd::to_underlying(phase),
+        std::to_underlying(phase),
         static_cast<double>(angle),
         static_cast<double>(hit_mm.x),
         static_cast<double>(hit_mm.y));
@@ -391,7 +396,7 @@ xy_pos_t probe_xy_verify(const xyz_pos_t center, const float angle, const float 
             &metric_xy_hit,
             ",t=%u,p=%u,a=%.3f x=%.3f,y=%.3f",
             tool,
-            ftrstd::to_underlying(phase),
+            std::to_underlying(phase),
             static_cast<double>(angle),
             static_cast<double>(pos.x),
             static_cast<double>(pos.y));
@@ -443,7 +448,7 @@ float probe_z(const xyz_pos_t position, float uncertainty, const int num_measure
             &metric_z_raw_hit,
             ",t=%u,p=%u x=%.3f,y=%.3f,z=%.3f",
             tool,
-            ftrstd::to_underlying(phase),
+            std::to_underlying(phase),
             static_cast<double>(current_position.x),
             static_cast<double>(current_position.y),
             static_cast<double>(measurement));
@@ -472,7 +477,7 @@ float probe_z(const xyz_pos_t position, float uncertainty, const int num_measure
 }
 
 /// Issue a warning if a point deviates too much from the circle
-void check_deviation(const xy_pos_t &center, std::span<const xy_pos_t> points) {
+bool check_deviation(const xy_pos_t &center, std::span<const xy_pos_t> points) {
     // Compute average radius
     float radius = 0;
     for (const xy_pos_t &p : points) {
@@ -488,27 +493,28 @@ void check_deviation(const xy_pos_t &center, std::span<const xy_pos_t> points) {
 
     // Issue warning if maximum deviation is above threshold
     if (max_dev > MAX_DEVIATION_MM) {
-        marlin_server::set_warning(WarningType::NozzleDoesNotHaveRoundSection);
+        return false;
     }
     metric_record_float(&metric_xy_dev, max_dev);
+    return true;
 }
 
-const xyz_pos_t get_single_xyz_center(const xyz_pos_t initial, const uint8_t tool, const Phase phase) {
-    static constexpr uint8_t PHASE_XY_HITS[ftrstd::to_underlying(Phase::_count)] = { 3, 3, 12 };
-    static constexpr uint8_t PHASE_Z_HITS[ftrstd::to_underlying(Phase::_count)] = { 1, 0, NUM_Z_MEASUREMENTS };
-    static constexpr float PHASE_Z_UNCERTAINTY[ftrstd::to_underlying(Phase::_count)] = { PROBE_XY_UNCERTAIN_DIST_MM, PROBE_Z_UNCERTAIN_DIST_MM, PROBE_Z_CERTAIN_DIST_MM };
+const std::optional<xyz_pos_t> get_single_xyz_center(const xyz_pos_t initial, const uint8_t tool, const Phase phase) {
+    static constexpr uint8_t PHASE_XY_HITS[std::to_underlying(Phase::_count)] = { 3, 3, 12 };
+    static constexpr uint8_t PHASE_Z_HITS[std::to_underlying(Phase::_count)] = { 1, 0, NUM_Z_MEASUREMENTS };
+    static constexpr float PHASE_Z_UNCERTAINTY[std::to_underlying(Phase::_count)] = { PROBE_XY_UNCERTAIN_DIST_MM, PROBE_Z_UNCERTAIN_DIST_MM, PROBE_Z_CERTAIN_DIST_MM };
     xyz_pos_t start = initial;
 
     // Get Z
-    if (PHASE_Z_HITS[ftrstd::to_underlying(phase)]) {
-        start.z = probe_z(initial, PHASE_Z_UNCERTAINTY[ftrstd::to_underlying(phase)], PHASE_Z_HITS[ftrstd::to_underlying(phase)], tool, phase);
+    if (PHASE_Z_HITS[std::to_underlying(phase)]) {
+        start.z = probe_z(initial, PHASE_Z_UNCERTAINTY[std::to_underlying(phase)], PHASE_Z_HITS[std::to_underlying(phase)], tool, phase);
     }
 
     // Get XY
     AccelerationLimiter al(XY_ACCELERATION_MMSS);
     static constexpr uint8_t MAX_HITS = *std::max_element(std::begin(PHASE_XY_HITS), std::end(PHASE_XY_HITS));
     std::array<xy_pos_t, MAX_HITS> max_hits;
-    std::span<xy_pos_t> hits(max_hits.begin(), PHASE_XY_HITS[ftrstd::to_underlying(phase)]);
+    std::span<xy_pos_t> hits(max_hits.begin(), PHASE_XY_HITS[std::to_underlying(phase)]);
     for (uint hit_no = 0; xy_pos_t & hit : hits) {
         hit = probe_xy_verify(start, 2 * PI / hits.size() * hit_no++, PROBE_XY_UNCERTAIN_DIST_MM, tool, phase);
     }
@@ -516,20 +522,25 @@ const xyz_pos_t get_single_xyz_center(const xyz_pos_t initial, const uint8_t too
     center.z = start.z;
 
     if (phase == Phase::final) {
-        check_deviation(center, hits);
+        if (!check_deviation(center, hits)) {
+            return std::nullopt;
+        }
     }
 
     return center;
 }
 
-const xyz_pos_t get_xyz_center(const uint8_t tool) {
+const std::optional<xyz_pos_t> get_xyz_center(const uint8_t tool) {
 
     // Enable loadcell high precision across the entire procedure to prime the noise filters
     auto loadcellPrecisionEnabler = Loadcell::HighPrecisionEnabler(loadcell);
 
-    xyz_pos_t center = true_top_center;
-    for (Phase phase = Phase::first; phase != Phase::_count; phase = Phase(ftrstd::to_underlying(phase) + 1)) {
-        center = get_single_xyz_center(center, tool, phase);
+    std::optional<xyz_pos_t> center = true_top_center;
+    for (Phase phase = Phase::first; phase != Phase::_count; phase = Phase(std::to_underlying(phase) + 1)) {
+        if (!center.has_value()) {
+            return std::nullopt;
+        }
+        center = get_single_xyz_center(center.value(), tool, phase);
     }
 
     go_to_safe_height();
@@ -555,9 +566,12 @@ inline void update_measurements(measurements_t &m, const AxisEnum axis) {
  * Prerequisites:
  *    - Call calibrate_backlash() beforehand for best accuracy
  */
-inline void calibrate_toolhead(measurements_t &m, const uint8_t extruder) {
+inline bool calibrate_toolhead(measurements_t &m, const uint8_t extruder) {
     TEMPORARY_BACKLASH_CORRECTION(all_on);
     TEMPORARY_BACKLASH_SMOOTHING(0.0f);
+
+    // Disable PA to reduce filter delay during probe analysis
+    pressure_advance::PressureAdvanceDisabler pa_disabler;
 
 #if HOTENDS > 1
     set_nozzle(m, extruder);
@@ -565,9 +579,14 @@ inline void calibrate_toolhead(measurements_t &m, const uint8_t extruder) {
     UNUSED(extruder);
 #endif
 
-    const xyz_pos_t center = get_xyz_center(extruder);
-    m.obj_center = center;
-    m.pos_error = true_top_center - center;
+    const std::optional<xyz_pos_t> center = get_xyz_center(extruder);
+    if (!center.has_value()) {
+        // TODO:
+        SERIAL_ECHOLNPAIR("G425: Tool ", extruder, " center not found.");
+        return false;
+    }
+    m.obj_center = center.value();
+    m.pos_error = true_top_center - center.value();
 
 // Adjust the hotend offset
 #if HAS_HOTEND_OFFSET
@@ -589,6 +608,7 @@ inline void calibrate_toolhead(measurements_t &m, const uint8_t extruder) {
     update_measurements(m, Y_AXIS);
 #endif
     update_measurements(m, Z_AXIS);
+    return true;
 }
 
 /**
@@ -655,7 +675,7 @@ inline void calibrate_all() {
  * - measures pin centers for all the pins
  * - computes new offsets
  */
-inline void calibrate_all_simple() {
+inline bool calibrate_all_simple() {
     // Disable E steppers to reduce noise on loadcell
     disable_e_steppers();
 
@@ -668,10 +688,14 @@ inline void calibrate_all_simple() {
     planner.synchronize();
     planner.reset_position();
 
+    // Disable PA to reduce filter delay during probe analysis
+    pressure_advance::PressureAdvanceDisabler pa_disabler;
+
     // Zero hotend offsets
     reset_hotend_offsets();
     hotend_currently_applied_offset = 0.f;
 
+    bool failed = false;
     // Measure centers
     std::array<xyz_pos_t, HOTENDS> centers;
     HOTEND_LOOP() {
@@ -681,7 +705,13 @@ inline void calibrate_all_simple() {
         }
 #endif
         tool_change(e, tool_return_t::no_return);
-        centers[e] = get_xyz_center(e);
+        std::optional<xyz_pos_t> center = get_xyz_center(e);
+        if (!center.has_value()) {
+            SERIAL_ECHOLNPAIR("G425: Tool ", e, " center not found.");
+            failed = true;
+            break; // Do not continue with the next tool
+        }
+        centers[e] = center.value();
         metric_record_custom(
             &metric_center,
             ",t=%u x=%.3f,y=%.3f,z=%.3f",
@@ -689,6 +719,12 @@ inline void calibrate_all_simple() {
             static_cast<double>(centers[e].x),
             static_cast<double>(centers[e].y),
             static_cast<double>(centers[e].z));
+    }
+
+    if (failed) {
+        mapi::park(mapi::ZAction::absolute_move, mapi::ParkingPosition::from_xyz_pos({ { XYZ_NOZZLE_PARK_POINT_M600 } }));
+        marlin_server::set_warning(WarningType::NozzleDoesNotHaveRoundSection);
+        return false;
     }
 
     // Pick zero offset tool to be sure no offset is applied on toolchange
@@ -739,9 +775,23 @@ inline void calibrate_all_simple() {
             static_cast<double>(hotend_offset[e].y),
             static_cast<double>(hotend_offset[e].z));
     }
+    return true;
 }
 
 } // anonymous namespace
+
+bool full_calibration() {
+    TEMPORARY_SOFT_ENDSTOP_STATE(false);
+    TEMPORARY_BED_LEVELING_STATE(false);
+
+    phase_stepping::EnsureDisabled ps_disabler {};
+
+    if (axis_unhomed_error()) {
+        return false;
+    }
+
+    return calibrate_all_simple();
+}
 
 /**
  * \addtogroup G-Codes
@@ -754,34 +804,10 @@ inline void calibrate_all_simple() {
  *
  *#### Usage
  *
- *    G425 [ B | T | V | U ]
+ *    G425
  *
- *#### Parameters
- *
- * - `B` - Perform calibration of backlash only.
- * - `T` - Toolhead only.
- * - `V` - Probe object and print position, error, backlash and hotend offset.
- * - `U` - Uncertainty, how far to start probe away from the object (mm)
- *
- *   no args     - Perform entire calibration sequence (backlash + position on all toolheads)
  */
 void GcodeSuite::G425() {
-    TEMPORARY_SOFT_ENDSTOP_STATE(false);
-    TEMPORARY_BED_LEVELING_STATE(false);
-
-    phase_stepping::EnsureDisabled ps_disabler {};
-
-    if (axis_unhomed_error()) {
-        return;
-    }
-
-    measurements_t m;
-
-    if (parser.seen('T')) {
-        calibrate_toolhead(m, parser.has_value() ? parser.value_int() : active_extruder);
-    } else {
-        // calibrate_all();
-        calibrate_all_simple();
-    }
+    full_calibration();
 }
 /** @}*/

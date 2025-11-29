@@ -9,7 +9,7 @@
 #include <option/has_side_leds.h>
 
 #if HAS_SIDE_LEDS()
-    #include <leds/side_strip_control.hpp>
+    #include <leds/side_strip_handler.hpp>
 #endif
 
 using namespace gui::knob;
@@ -66,13 +66,17 @@ bool gui::knob::EventEncoder(int diff) {
     if (diff == 0) {
         return false;
     }
+    if (diff > 0) {
+        marlin_client::notify_server_about_encoder_move_up();
+    } else {
+        marlin_client::notify_server_about_encoder_move_down();
+    }
 
-    marlin_client::notify_server_about_encoder_move();
     window_t *capture_ptr = Screens::Access()->Get()->GetCapturedWindow();
     Screens::Access()->ScreenEvent(nullptr, GUI_event_t::ENC_CHANGE, (void *)(intptr_t)diff);
 
 #if HAS_SIDE_LEDS()
-    leds::side_strip_control.ActivityPing();
+    leds::SideStripHandler::instance().activity_ping();
 #endif
 
     if (!capture_ptr) {
@@ -94,7 +98,7 @@ bool gui::knob::EventClick(BtnState_t state) {
     window_t *capture_ptr = Screens::Access()->Get()->GetCapturedWindow();
 
 #if HAS_SIDE_LEDS()
-    leds::side_strip_control.ActivityPing();
+    leds::SideStripHandler::instance().activity_ping();
 #endif
 
     switch (state) {

@@ -3,7 +3,6 @@
 #include <inplace_function.hpp>
 #include <limits>
 #include <stdint.h>
-#include <functional>
 #include <module/prusa/tool_mapper.hpp>
 #include <module/prusa/spool_join.hpp>
 

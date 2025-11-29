@@ -10,40 +10,44 @@
 #include "window_dlg_wait.hpp"
 #include "window_dlg_warning.hpp"
 #include <screen_network_setup.hpp>
-#include <screen_fan_selftest.hpp>
-#include <option/has_phase_stepping.h>
+#include <option/has_gearbox_alignment.h>
+#include <option/has_phase_stepping_calibration.h>
 #include <option/has_input_shaper_calibration.h>
 #include <option/has_coldpull.h>
 #include <option/has_door_sensor_calibration.h>
+#include <option/has_manual_belt_tuning.h>
+#include <option/has_loadcell.h>
 #include <gui/screen/screen_preheat.hpp>
+#include <gui/screen/dialog_safety_timer.hpp>
+
+#if HAS_LOADCELL()
+    #include <gui/screen/screen_nozzle_cleaning_failed.hpp>
+#endif
+
+#if HAS_MANUAL_BELT_TUNING()
+    #include <screen/selftest/screen_manual_belt_tuning.hpp>
+#endif
 
 #if HAS_COLDPULL()
     #include "screen_cold_pull.hpp"
 #endif
 
 #if HAS_SELFTEST()
+    #include <screen_fan_selftest.hpp>
     #include "ScreenSelftest.hpp"
 #endif
 
 #if ENABLED(CRASH_RECOVERY)
     #include "screen_crash_recovery.hpp"
-using CrashRecovery = ScreenCrashRecovery;
-#else
-    #include "screen_dialog_does_not_exist.hpp"
-using CrashRecovery = ScreenDialogDoesNotExist;
 #endif
 
 #include <option/has_serial_print.h>
 #if HAS_SERIAL_PRINT()
     #include "screen_printing_serial.hpp"
-using SerialPrint = screen_printing_serial_data_t;
-#else
-    #include "screen_dialog_does_not_exist.hpp"
-using SerialPrint = ScreenDialogDoesNotExist;
 #endif
 
-#if HAS_PHASE_STEPPING()
-    #include "screen_phase_stepping.hpp"
+#if HAS_PHASE_STEPPING_CALIBRATION()
+    #include "screen_phase_stepping_calibration.hpp"
 #endif
 
 #if HAS_INPUT_SHAPER_CALIBRATION()
@@ -54,11 +58,15 @@ using SerialPrint = ScreenDialogDoesNotExist;
     #include <gui/wizard/screen_belt_tuning_wizard.hpp>
 #endif
 
+#if HAS_GEARBOX_ALIGNMENT()
+    #include "feature/gearbox_alignment/screen_gearbox_alignment.hpp"
+#endif
+
 #if HAS_DOOR_SENSOR_CALIBRATION()
     #include <feature/door_sensor_calibration/screen_door_sensor_calibration.hpp>
 #endif
 
-alignas(std::max_align_t) static std::array<uint8_t, 2560> mem_space;
+alignas(std::max_align_t) static std::array<uint8_t, 1800> mem_space;
 
 // safer than make_static_unique_ptr, checks storage size
 template <class T, class... Args>
@@ -113,27 +121,6 @@ struct FSMDialogDef {
     }
 };
 
-struct FSMWaitDef {
-    static constexpr ClientFSM fsm = ClientFSM::Wait;
-
-    static constexpr EnumArray<PhaseWait, const char *, PhaseWait::_cnt> phase_texts {
-        { PhaseWait::generic, nullptr },
-        { PhaseWait::homing, N_("Printer may vibrate and be noisier during homing.") },
-    };
-
-    static void open(fsm::BaseData data) {
-        DialogHandler::Access().ptr = make_dialog_ptr<window_dlg_wait_t>(_(phase_texts[data.GetPhase()]));
-    }
-
-    static void close() {
-        // Do nothing, is handled elsewhere
-    }
-
-    static void change(fsm::BaseData) {
-        // No changes supported
-    }
-};
-
 template <ClientFSM fsm_>
 struct FSMPrintDef {
     static constexpr ClientFSM fsm = fsm_;
@@ -146,7 +133,7 @@ struct FSMPrintDef {
 
         if constexpr (fsm == ClientFSM::Serial_printing) {
             Screens::Access()->ClosePrinting();
-            Screens::Access()->Open(ScreenFactory::Screen<SerialPrint>);
+            Screens::Access()->Open(ScreenFactory::Screen<screen_printing_serial_data_t>);
 
         } else if constexpr (fsm == ClientFSM::Printing) {
             Screens::Access()->CloseAll();
@@ -180,14 +167,15 @@ struct FSMDisplayConfigDef {
 };
 
 using FSMDisplayConfig = FSMDisplayConfigDef<
-    FSMWaitDef,
+    FSMDialogDef<ClientFSM::Wait, window_dlg_wait_t>,
+    FSMDialogDef<ClientFSM::SafetyTimer, DialogSafetyTimer>,
     FSMPrintDef<ClientFSM::Serial_printing>,
     FSMDialogDef<ClientFSM::Load_unload, DialogLoadUnload>,
     FSMScreenDef<ClientFSM::Preheat, ScreenPreheat>,
 #if HAS_SELFTEST()
     FSMScreenDef<ClientFSM::Selftest, ScreenSelftest>,
-#endif
     FSMScreenDef<ClientFSM::FansSelftest, ScreenFanSelftest>,
+#endif
     FSMScreenDef<ClientFSM::NetworkSetup, ScreenNetworkSetup>,
     FSMPrintDef<ClientFSM::Printing>,
 #if ENABLED(CRASH_RECOVERY)
@@ -199,8 +187,8 @@ using FSMDisplayConfig = FSMDisplayConfigDef<
 #if HAS_COLDPULL()
     FSMScreenDef<ClientFSM::ColdPull, ScreenColdPull>,
 #endif
-#if HAS_PHASE_STEPPING()
-    FSMScreenDef<ClientFSM::PhaseStepping, ScreenPhaseStepping>,
+#if HAS_PHASE_STEPPING_CALIBRATION()
+    FSMScreenDef<ClientFSM::PhaseSteppingCalibration, ScreenPhaseSteppingCalibration>,
 #endif
 #if HAS_INPUT_SHAPER_CALIBRATION()
     FSMScreenDef<ClientFSM::InputShaperCalibration, ScreenInputShaperCalibration>,
@@ -208,10 +196,18 @@ using FSMDisplayConfig = FSMDisplayConfigDef<
 #if HAS_BELT_TUNING()
     FSMScreenDef<ClientFSM::BeltTuning, ScreenBeltTuningWizard>,
 #endif
+#if HAS_GEARBOX_ALIGNMENT()
+    FSMScreenDef<ClientFSM::GearboxAlignment, ScreenGearboxAlignment>,
+#endif
 #if HAS_DOOR_SENSOR_CALIBRATION()
     FSMScreenDef<ClientFSM::DoorSensorCalibration, ScreenDoorSensorCalibration>,
 #endif
-
+#if HAS_MANUAL_BELT_TUNING()
+    FSMScreenDef<ClientFSM::ManualBeltTuning, ScreenManualBeltTuning>,
+#endif
+#if HAS_LOADCELL()
+    FSMScreenDef<ClientFSM::NozzleCleaningFailed, ScreenNozzleCleaningFailed>,
+#endif
     // This is here so that we can worry-free write commas at the end of each argument
     FSMEndDef>;
 
@@ -222,7 +218,7 @@ void visit_display_config(ClientFSM fsm, auto f) {
 };
 
 static constexpr size_t fsm_display_config_size = []<class... T>(FSMDisplayConfigDef<T...>) { return sizeof...(T); }(FSMDisplayConfig());
-static_assert(fsm_display_config_size == ftrstd::to_underlying(ClientFSM::_count) + 1);
+static_assert(fsm_display_config_size == std::to_underlying(ClientFSM::_count) + 1);
 
 //*****************************************************************************
 // method definitions

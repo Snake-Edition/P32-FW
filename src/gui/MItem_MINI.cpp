@@ -6,7 +6,6 @@
 #include "img_resources.hpp"
 #include "filament_sensors_handler.hpp"
 #include "filament_sensor.hpp"
-#include "str_utils.hpp"
 #include "fonts.hpp"
 
 MI_MINDA::MI_MINDA()

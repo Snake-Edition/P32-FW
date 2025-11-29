@@ -10,9 +10,13 @@
 #include <common/marlin_server_types/marlin_server_state.h>
 #include <common/marlin_server_types/warning_type.hpp>
 
+#include <custom_uint31_t.hpp>
+
 enum class Response : uint8_t;
 
 namespace printer_state {
+
+using DialogId = fsm::StateId;
 
 enum class DeviceState {
     Unknown,
@@ -28,7 +32,7 @@ enum class DeviceState {
 };
 
 struct Dialog {
-    uint32_t dialog_id = 0;
+    DialogId dialog_id = 0;
     std::optional<ErrCode> code = std::nullopt;
     const char *title = nullptr;
     const char *text = nullptr;
@@ -50,7 +54,7 @@ struct StateWithDialog {
     std::optional<Dialog> dialog = std::nullopt;
     StateWithDialog(DeviceState state)
         : device_state(state) {}
-    StateWithDialog(DeviceState state, std::optional<ErrCode> code, std::optional<uint32_t> dialog_id, const Response *buttons = nullptr)
+    StateWithDialog(DeviceState state, std::optional<ErrCode> code, const std::optional<DialogId> &dialog_id, const Response *buttons = nullptr)
         : device_state(state) {
         if (dialog_id.has_value()) {
             dialog = Dialog {
@@ -60,7 +64,7 @@ struct StateWithDialog {
             dialog->buttons = buttons;
         }
     }
-    static StateWithDialog attention(ErrCode code, uint32_t dialog_id, const Response *buttons = nullptr) {
+    static StateWithDialog attention(ErrCode code, DialogId dialog_id, const Response *buttons = nullptr) {
         return StateWithDialog(DeviceState::Attention, code, dialog_id, buttons);
     }
     // If there's a dialog with code

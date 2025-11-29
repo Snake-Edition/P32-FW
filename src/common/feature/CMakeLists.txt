@@ -1,5 +1,15 @@
+add_subdirectory(factory_reset)
+
+if(HAS_CANCEL_OBJECT)
+  add_subdirectory(cancel_object)
+endif()
+
 if(HAS_BELT_TUNING)
   add_subdirectory(belt_tuning)
+endif()
+
+if(HAS_MANUAL_BELT_TUNING)
+  add_subdirectory(manual_belt_tuning)
 endif()
 
 if(HAS_XBUDDY_EXTENSION)
@@ -18,8 +28,26 @@ if(HAS_EMERGENCY_STOP)
   add_subdirectory(emergency_stop)
 endif()
 
+if(HAS_CEILING_CLEARANCE)
+  add_subdirectory(ceiling_clearance)
+endif()
+
+add_subdirectory(print_status_message)
+
 if(HAS_AUTO_RETRACT)
+  add_subdirectory(retract_tracker)
   add_subdirectory(auto_retract)
 endif()
 
+if(HAS_REMOTE_BED)
+  add_subdirectory(remote_bed)
+endif()
+
+if(HAS_LOADCELL)
+  add_subdirectory(nozzle_cleaning_failed)
+endif()
+
 add_subdirectory(ramming)
+add_subdirectory(cork)
+add_subdirectory(safety_timer)
+add_subdirectory(stepper_timeout)

@@ -22,7 +22,8 @@
 
 #include "../gcode.h"
 #include "../../module/planner.h"
-#include "../../lcd/marlinui.h"
+#include "../../lcd/ultralcd.h"
+#include <feature/print_status_message/print_status_message_guard.hpp>
 
 /** \addtogroup G-Codes
  * @{
@@ -52,9 +53,14 @@ void GcodeSuite::G4() {
     SERIAL_ECHOLNPGM(STR_Z_MOVE_COMP);
   #endif
 
-  if (!ui.has_status()) LCD_MESSAGE(MSG_DWELL);
+  PrintStatusMessageGuard psmg(false);
 
-  dwell(dwell_ms);
+  while(dwell_ms > 0) {
+    psmg.update<PrintStatusMessage::dwelling>({.current = static_cast<float>(dwell_ms / 1000), .target = 0});
+    const auto step = std::min<millis_t>(dwell_ms, 1000);
+    dwell(step);
+    dwell_ms -= step;
+  }
 }
 
 /** @}*/

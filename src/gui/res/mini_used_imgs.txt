@@ -3,6 +3,8 @@ info_16x16.png
 arrow_right_10x16.png
 question_16x16.png
 wifi_16x16.png
+wifi_low_16x16.png
+wifi_mid_16x16.png
 wifi_insecure_16x16.png
 lan_16x16.png
 speed_16x16.png
@@ -91,6 +93,7 @@ move_16x16.png
 nok_16x16.png
 no_stream_48x48.png
 nozzle_34x32.png
+nozzle_crash_101x64.png
 nozzle_shape_48x48.png
 pepa_92x140.png
 pepa_42x64.png
@@ -122,6 +125,7 @@ flag_fr_16x11.png
 flag_it_16x11.png
 flag_pl_16x11.png
 flag_ja_16x11.png
+flag_uk_16x11.png
 language_white_16x16.png
 ok_color_16x16.png
 na_color_16x16.png
@@ -140,3 +144,4 @@ set_ready_64x64.png
 set_ready_64x64_focused.png
 set_ready_64x64_disabled.png
 connect_16x16.png
+connect_orange_16x16.png

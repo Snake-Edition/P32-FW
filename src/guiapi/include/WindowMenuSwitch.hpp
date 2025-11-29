@@ -27,13 +27,8 @@ public:
 
     string_view_utf8 current_item_text() const;
 
-    inline size_t GetIndex() const {
-        return index;
-    }
-
-    /// DEPRECATED
-    inline void SetIndex(size_t set) {
-        set_index(set);
+    inline size_t get_index() const {
+        return index_;
     }
 
 protected:
@@ -49,10 +44,8 @@ protected:
     virtual void click(IWindowMenu &window_menu) final;
     virtual void printExtension(Rect16 extension_rect, Color color_text, Color color_back, ropfn raster_op) const override;
 
-protected:
-    size_t index = 0;
-
 private:
+    size_t index_ = 0;
     std::span<const char *const> items_;
     bool translate_items_ = true;
 };

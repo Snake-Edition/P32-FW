@@ -14,7 +14,7 @@
 class window_roll_text_t : public window_text_t {
     txtroll_t roll;
 
-    void rollInit() { roll.Init(GetRect(), text, get_font(), padding, GetAlignment()); }
+    void rollInit() { roll.Init(GetRect(), text, get_font(), padding); }
 
 public:
     window_roll_text_t(window_t *parent, Rect16 rect, const string_view_utf8 &txt = string_view_utf8::MakeNULLSTR(), Align_t align = GuiDefaults::Align());

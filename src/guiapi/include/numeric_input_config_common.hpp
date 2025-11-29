@@ -1,6 +1,7 @@
 #include "numeric_input_config.hpp"
 
 #include <option/has_chamber_api.h>
+#include <option/has_heatbreak_temp.h>
 
 namespace numeric_input_config {
 
@@ -17,6 +18,10 @@ extern const NumericInputConfig nozzle_temperature;
 extern const NumericInputConfig filament_nozzle_temperature;
 
 extern const NumericInputConfig bed_temperature;
+
+#if HAS_HEATBREAK_TEMP()
+extern const NumericInputConfig heatbreak_temperature;
+#endif
 
 /// 0-100 %, 0 % = off
 extern const NumericInputConfig percent_with_off;

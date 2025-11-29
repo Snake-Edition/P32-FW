@@ -28,7 +28,7 @@ SelftestFrameFirstLayer::SelftestFrameFirstLayer(window_t *parent, PhasesSelftes
     , progress(this, Rect16(WizardDefaults::MarginLeft, 190 + 30, GuiDefaults::RectScreen.Width() - 2 * WizardDefaults::MarginLeft, 8))
     , live_z(this, { int16_t(WizardDefaults::MarginLeft), 190 }, Width() - WizardDefaults::MarginLeft * 2) {
     CaptureNormalWindow(live_z);
-    live_z.Idle();
+    set_live_z_enable(false);
     progress.SetColor(COLOR_LIME);
 }
 
@@ -37,10 +37,10 @@ void SelftestFrameFirstLayer::change() {
 
     switch (phase_current) {
     case PhasesSelftest::FirstLayer_mbl:
-        live_z.Idle();
+        set_live_z_enable(false);
         break;
     case PhasesSelftest::FirstLayer_print:
-        live_z.Activate();
+        set_live_z_enable(true);
         break;
     default:
         break;

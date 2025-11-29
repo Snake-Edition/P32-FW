@@ -2,6 +2,14 @@
 #include "client_fsm_types.h"
 #include "client_response.hpp"
 #include <warning_type.hpp>
+#include "magic_enum.hpp"
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/array.h>
+
 #include <option/has_selftest.h>
 #if HAS_SELFTEST()
     #include "selftest_types.hpp"
@@ -9,22 +17,18 @@
     #include "selftest/selftest_sub_state.hpp"
     #include "selftest_heaters_type.hpp"
 #endif
-#include "magic_enum.hpp"
-#include <nanobind/nanobind.h>
-#include <nanobind/stl/map.h>
-#include <nanobind/stl/string.h>
-#include <nanobind/stl/vector.h>
-#include <nanobind/stl/array.h>
 
 namespace nb = nanobind;
 using namespace nb::literals;
 
+#if HAS_SELFTEST()
 // Change exported range for some types
 template <>
 struct magic_enum::customize::enum_range<ToolMask> {
     static constexpr int min = 0;
     static constexpr int max = 256;
 };
+#endif
 
 template <typename enum_T>
 void export_enum(::nanobind::module_ &m, char const *name) {
@@ -39,7 +43,7 @@ void export_phase_responses(::nanobind::module_ &m, char const *name) {
     std::map<int, std::vector<int>> responses_map;
     for (const auto &entry : magic_enum::enum_entries<enum_T>()) {
         std::vector<int> responses;
-        for (const auto response : ClientResponses::GetResponses(entry.first)) {
+        for (const auto response : ClientResponses::get_available_responses(entry.first)) {
             if (static_cast<int>(response) != 0) {
                 responses.push_back(static_cast<int>(response));
             }
@@ -50,6 +54,7 @@ void export_phase_responses(::nanobind::module_ &m, char const *name) {
     m.attr(name) = responses_map;
 }
 
+#if HAS_SELFTEST()
 SelftestHeaters_t deserialize(nb::bytes &data) {
     if (data.size() != sizeof(SelftestHeaters_t)) {
         throw std::runtime_error("Invalid data size");
@@ -76,6 +81,7 @@ void export_selftest_heaters_result(::nanobind::module_ &m) {
                                 })
                                 .def_rw("bed", &SelftestHeaters_t::bed);
 }
+#endif
 
 NB_MODULE(marlin_server_types_python_module_impl, m) {
     m.doc() = "Python library exposing types used in marlin server and FSM";
@@ -109,8 +115,10 @@ NB_MODULE(marlin_server_types_python_module_impl, m) {
     export_enum<PhasesPrintPreview>(m, "PhasesPrintPreview");
     export_phase_responses<PhasesPrintPreview>(m, "phases_print_preview_responses_data");
 
+#if HAS_SELFTEST()
     export_enum<PhasesSelftest>(m, "PhasesSelftest");
     export_phase_responses<PhasesSelftest>(m, "phases_selftest_responses_data");
+#endif
 
     export_enum<PhasesCrashRecovery>(m, "PhasesCrashRecovery");
     export_phase_responses<PhasesCrashRecovery>(m, "phases_crash_recovery_responses_data");
@@ -129,7 +137,7 @@ NB_MODULE(marlin_server_types_python_module_impl, m) {
 
     export_enum<Response>(m, "FSMResponse");
 
-#if HAS_PHASE_STEPPING()
+#if HAS_PHASE_STEPPING_CALIBRATION()
     export_enum<PhasesPhaseStepping>(m, "PhasesPhaseStepping");
     export_phase_responses<PhasesPhaseStepping>(m, "phases_phase_stepping_responses_data");
 #endif

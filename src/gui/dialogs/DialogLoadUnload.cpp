@@ -1,5 +1,6 @@
 #include "DialogLoadUnload.hpp"
 
+#include <buddy/unreachable.hpp>
 #include "gui.hpp" //resource_font
 #include "sound.hpp"
 #include "i18n.h"
@@ -14,7 +15,7 @@
 #include <option/has_mmu2.h>
 #include <find_error.hpp>
 #include <filament_to_load.hpp>
-#include <common/enum_array.hpp>
+#include <utils/enum_array.hpp>
 
 RadioButtonNotice::RadioButtonNotice(window_t *parent, Rect16 rect)
     : RadioButton(parent, rect) {}
@@ -41,7 +42,6 @@ static constexpr const char *txt_tool = N_("Changing tool");
 static constexpr const char *txt_parking = N_("Parking");
 static constexpr const char *txt_unparking = N_("Unparking");
 static constexpr const char *txt_wait_temp = N_("Waiting for temperature");
-static constexpr const char *txt_prep_ram = N_("Preparing to ram");
 static constexpr const char *txt_ram = N_("Ramming");
 static constexpr const char *txt_unload = N_("Unloading");
 static constexpr const char *txt_unload_confirm = N_("Was filament unload successful?");
@@ -57,6 +57,9 @@ static constexpr const char *txt_purging = N_("Purging");
 static constexpr const char *txt_is_color = N_("Is color correct?");
 #if HAS_LOADCELL()
 static constexpr const char *txt_filament_stuck = ""; // Empty here, set from the error description
+#endif
+#if HAS_NOZZLE_CLEANER()
+static constexpr const char *txt_nozzle_cleaning = N_("Cleaning nozzle");
 #endif
 #if HAS_MMU2()
 // MMU-related
@@ -115,17 +118,14 @@ static constexpr EnumArray<PhasesLoadUnload, State, CountPhases<PhasesLoadUnload
     { PhasesLoadUnload::Parking_unstoppable, { txt_parking } },
     { PhasesLoadUnload::WaitingTemp_stoppable, { txt_wait_temp } },
     { PhasesLoadUnload::WaitingTemp_unstoppable, { txt_wait_temp } },
-    { PhasesLoadUnload::PreparingToRam_stoppable, { txt_prep_ram } },
-    { PhasesLoadUnload::PreparingToRam_unstoppable, { txt_prep_ram } },
     { PhasesLoadUnload::Ramming_stoppable, { txt_ram } },
     { PhasesLoadUnload::Ramming_unstoppable, { txt_ram } },
     { PhasesLoadUnload::Unloading_stoppable, { txt_unload } },
     { PhasesLoadUnload::Unloading_unstoppable, { txt_unload } },
-    { PhasesLoadUnload::RemoveFilament, { txt_unload } },
     { PhasesLoadUnload::IsFilamentUnloaded, { txt_unload_confirm, DialogLoadUnload::phaseWaitSound } },
     { PhasesLoadUnload::FilamentNotInFS, { txt_filament_not_in_fs, DialogLoadUnload::phaseAlertSound } },
-    { PhasesLoadUnload::ManualUnload_continuable, { txt_manual_unload, DialogLoadUnload::phaseStopSound } },
-    { PhasesLoadUnload::ManualUnload_uncontinuable, { txt_manual_unload, DialogLoadUnload::phaseStopSound } },
+    { PhasesLoadUnload::ManualUnload_continuable, { txt_manual_unload } },
+    { PhasesLoadUnload::ManualUnload_uncontinuable, { txt_manual_unload } },
     { PhasesLoadUnload::UserPush_stoppable, { txt_push_fil, DialogLoadUnload::phaseAlertSound } },
     { PhasesLoadUnload::UserPush_unstoppable, { txt_push_fil, DialogLoadUnload::phaseAlertSound } },
     { PhasesLoadUnload::MakeSureInserted_stoppable, { txt_make_sure_inserted, DialogLoadUnload::phaseAlertSound } },
@@ -137,11 +137,19 @@ static constexpr EnumArray<PhasesLoadUnload, State, CountPhases<PhasesLoadUnload
     { PhasesLoadUnload::Ejecting_unstoppable, { txt_ejecting } },
     { PhasesLoadUnload::Loading_stoppable, { txt_loading } },
     { PhasesLoadUnload::Loading_unstoppable, { txt_loading } },
+    { PhasesLoadUnload::LoadingToGears_stoppable, { txt_inserting } },
+    { PhasesLoadUnload::LoadingToGears_unstoppable, { txt_inserting } },
     { PhasesLoadUnload::Purging_stoppable, { txt_purging } },
     { PhasesLoadUnload::Purging_unstoppable, { txt_purging } },
+    { PhasesLoadUnload::AwaitingFilament_stoppable, { txt_make_sure_inserted } },
+    { PhasesLoadUnload::AwaitingFilament_unstoppable, { txt_make_sure_inserted } },
     { PhasesLoadUnload::IsColor, { txt_is_color, DialogLoadUnload::phaseAlertSound } },
     { PhasesLoadUnload::IsColorPurge, { txt_is_color, DialogLoadUnload::phaseAlertSound } },
     { PhasesLoadUnload::Unparking, { txt_unparking } },
+#if HAS_NOZZLE_CLEANER()
+    { PhasesLoadUnload::UnloadNozzleCleaning, { txt_nozzle_cleaning } },
+    { PhasesLoadUnload::LoadNozzleCleaning, { txt_nozzle_cleaning } },
+#endif
 #if HAS_LOADCELL()
     { PhasesLoadUnload::FilamentStuck, { txt_filament_stuck, DialogLoadUnload::phaseAlertSound } },
 #endif
@@ -266,17 +274,10 @@ static Rect16 get_progress_number_rect(const Rect16 parent_rect) {
     };
 }
 
-void DialogLoadUnload::set_progress_percent(uint8_t val) {
-    if (val != progress_number.GetValue()) {
-        progress_bar.SetProgressPercent(val);
-        progress_number.SetValue(val);
-    }
-}
-
 DialogLoadUnload::DialogLoadUnload(fsm::BaseData data)
     : IDialogMarlin(GuiDefaults::RectScreenNoHeader)
     , progress_frame(this, get_frame_rect(GetRect()))
-    , title(&progress_frame, get_title_rect(GetRect()), is_multiline::no, is_closed_on_click_t::no, get_name(ProgressSerializerLoadUnload(data.GetData()).mode))
+    , title(&progress_frame, get_title_rect(GetRect()), is_multiline::no, is_closed_on_click_t::no, string_view_utf8 {})
     , progress_bar(&progress_frame, get_progress_bar_rect(GetRect()), COLOR_ORANGE, GuiDefaults::EnableDialogBigLayout ? COLOR_DARK_GRAY : COLOR_GRAY, PROGRESS_BAR_CORNER_RADIUS)
     , progress_number(&progress_frame, get_progress_number_rect(GetRect()), 0, "%.0f%%", Font::big)
     , label(&progress_frame, get_label_rect(GetRect()), is_multiline::yes)
@@ -301,16 +302,15 @@ DialogLoadUnload::DialogLoadUnload(fsm::BaseData data)
 #endif
               )
     , notice_frame(this, get_frame_rect(GetRect()))
-    , notice_title(&notice_frame, notice_title_rect, is_multiline::no)
-    , notice_text(&notice_frame, notice_text_rect, is_multiline::yes)
+    , notice_title(&notice_frame, GuiDefaults::MMUNoticeTitleRect, is_multiline::no)
+    , notice_text(&notice_frame, GuiDefaults::MMUNoticeTextRect, is_multiline::yes)
     , notice_link(&notice_frame, notice_link_rect, ErrCode::ERR_UNDEF)
     , notice_icon_hand(&notice_frame, notice_icon_rect, &img::hand_qr_59x72)
     , notice_icon_type(&notice_frame, notice_icon_type_rect, &img::warning_48x48)
     , notice_qr(&notice_frame, notice_qr_rect, ErrCode::ERR_UNDEF)
     , notice_radio_button(&notice_frame, GuiDefaults::GetButtonRect_AvoidFooter(GetRect()))
     , filament_type_text(&progress_frame, filament_type_text_rect, is_multiline::no)
-    , filament_color_icon(&progress_frame, filament_color_icon_rect)
-    , mode(ProgressSerializerLoadUnload(data.GetData()).mode) {
+    , filament_color_icon(&progress_frame, filament_color_icon_rect) {
     title.set_font(GuiDefaults::FontBig);
     title.SetAlignment(Align_t::Center());
     progress_number.SetAlignment(Align_t::Center());
@@ -338,6 +338,7 @@ DialogLoadUnload::DialogLoadUnload(fsm::BaseData data)
 }
 
 DialogLoadUnload::~DialogLoadUnload() {
+    Sound_Stop();
     // Dtor only resets the header to black.
     // The header could not be red before the screen opened.
     // And even if it were, this behavior would only cause the header to appear in the wrong color.
@@ -355,7 +356,6 @@ DialogLoadUnload *DialogLoadUnload::instance = nullptr;
 // Phase callbacks to play a sound in specific moment at the start/end of
 // specified phase
 void DialogLoadUnload::phaseAlertSound() {
-    Sound_Stop();
     Sound_Play(eSOUND_TYPE::SingleBeep);
 }
 void DialogLoadUnload::phaseWaitSound() {
@@ -363,7 +363,6 @@ void DialogLoadUnload::phaseWaitSound() {
         Sound_Play(eSOUND_TYPE::WaitingBeep);
     }
 }
-void DialogLoadUnload::phaseStopSound() { Sound_Stop(); }
 
 static constexpr bool is_notice_mmu([[maybe_unused]] PhasesLoadUnload phase) {
 #if HAS_MMU2()
@@ -388,11 +387,6 @@ static constexpr bool is_notice(PhasesLoadUnload phase) {
 void DialogLoadUnload::Change(fsm::BaseData base_data) {
     PhasesLoadUnload phase = GetEnumFromPhaseIndex<PhasesLoadUnload>(base_data.GetPhase());
     fsm::PhaseData data = base_data.GetData();
-    LoadUnloadMode new_mode = ProgressSerializerLoadUnload(data).mode;
-    if (new_mode != mode) {
-        mode = new_mode;
-        title.SetText(get_name(mode));
-    }
 
 #if HAS_MMU2() || HAS_LOADCELL()
     // was normal (or uninitialized), is notice
@@ -415,7 +409,7 @@ void DialogLoadUnload::Change(fsm::BaseData base_data) {
 
             notice_radio_button.set_fixed_width_buttons_count(3);
             notice_radio_button.ChangePhase(phase, responses);
-            notice_update(ftrstd::to_underlying(ptr_desc->err_code), ptr_desc->err_title, ptr_desc->err_text, ptr_desc->type);
+            notice_update(std::to_underlying(ptr_desc->err_code), ptr_desc->err_title, ptr_desc->err_text, ptr_desc->type);
         }
     #endif
     #if HAS_LOADCELL()
@@ -427,11 +421,13 @@ void DialogLoadUnload::Change(fsm::BaseData base_data) {
 
             notice_radio_button.set_fixed_width_buttons_count(0);
             notice_radio_button.ChangePhase(phase, { Response::Unload });
-            notice_update(ftrstd::to_underlying(err_desc.err_code), err_desc.err_title, err_desc.err_text, ErrType::WARNING);
+            notice_update(std::to_underlying(err_desc.err_code), err_desc.err_title, err_desc.err_text, ErrType::WARNING);
         }
     #endif
         current_phase = phase;
 
+        // This early return is important. MMU notice uses a custom data structure, not FSMLoadUnloadData
+        // So if we don't return, the following FSMLoadUnloadData will return garbage
         return;
     }
 
@@ -443,13 +439,18 @@ void DialogLoadUnload::Change(fsm::BaseData base_data) {
     }
 #endif
 
+    // Must be after the notice code, some phases do not use FSMLoadUnloadData
+    auto deserialized_data = fsm::deserialize_data<FSMLoadUnloadData>(data);
+    title.SetText(_(get_name(deserialized_data.mode)));
+    progress_bar.SetProgressPercent(deserialized_data.progress);
+    progress_number.SetValue(deserialized_data.progress);
+    mode = deserialized_data.mode;
+
     // is normal
     if ((!current_phase) || (current_phase != phase)) {
         current_phase = phase;
         phaseEnter();
     }
-
-    set_progress_percent(deserialize_progress(data));
 }
 
 void DialogLoadUnload::notice_update(uint16_t errCode, const char *errTitle, const char *errDesc, ErrType type) {
@@ -476,38 +477,33 @@ void DialogLoadUnload::notice_update(uint16_t errCode, const char *errTitle, con
     notice_qr.set_error_code(ErrCode(errCode));
 }
 
-string_view_utf8 DialogLoadUnload::get_name(LoadUnloadMode mode) {
+const char *DialogLoadUnload::get_name(LoadUnloadMode mode) {
     switch (mode) {
     case LoadUnloadMode::Change:
-        return _("Changing filament");
+        return N_("Changing filament");
     case LoadUnloadMode::Load:
-        return _("Loading filament");
+        return N_("Loading filament");
     case LoadUnloadMode::Unload:
-        return _("Unloading filament");
+        return N_("Unloading filament");
     case LoadUnloadMode::FilamentStuck:
-        return _("Reloading filament");
+        return N_("Reloading filament");
     case LoadUnloadMode::Purge:
-        return _("Purging filament");
+        return N_("Purging filament");
     case LoadUnloadMode::Test:
-        return _("Testing filament");
+        return N_("Testing filament");
     case LoadUnloadMode::Cut:
-        return _("Cutting filament");
+        return N_("Cutting filament");
     case LoadUnloadMode::Eject:
-        return _("Ejecting filament");
+        return N_("Ejecting filament");
     }
-
-    // In case we get some invalid data
-    return string_view_utf8::MakeCPUFLASH((const uint8_t *)"Index error");
-}
-
-float DialogLoadUnload::deserialize_progress(fsm::PhaseData data) const {
-    return ProgressSerializerLoadUnload(data).progress;
+    BUDDY_UNREACHABLE();
 }
 
 void DialogLoadUnload::phaseEnter() {
     if (!current_phase) {
         return;
     }
+    Sound_Stop();
     {
         radio.Change(*current_phase /*, states[phase].btn_resp, &states[phase].btn_labels*/); // TODO alternative button label support
         label.SetText(_(get_current_state(*current_phase).label));

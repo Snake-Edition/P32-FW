@@ -11,7 +11,6 @@
 
 #if ENABLED(AXIS_MEASURE)
 static bool axis_length_ok([[maybe_unused]] AxisEnum axis, [[maybe_unused]] float length) {
-    #if HAS_SELFTEST()
     switch (axis) {
     case X_AXIS:
         return ((length <= selftest::Config_XAxis.length_max) && (length >= selftest::Config_XAxis.length_min));
@@ -20,9 +19,6 @@ static bool axis_length_ok([[maybe_unused]] AxisEnum axis, [[maybe_unused]] floa
     default:;
     }
     return false;
-    #else
-    return true;
-    #endif // HAS_SELFTEST
 }
 
 static SelftestSubtestState_t axis_length_ok_fsm(AxisEnum axis, float length) {

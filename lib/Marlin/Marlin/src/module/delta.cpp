@@ -43,6 +43,7 @@
 
 #if ENABLED(SENSORLESS_HOMING)
   #include "../feature/tmc_util.h"
+  #include "../motordriver_util.h"
   #include "stepper/indirection.h"
 #endif
 
@@ -221,9 +222,9 @@ void home_delta() {
   // Disable stealthChop if used. Enable diag1 pin on driver.
   #if ENABLED(SENSORLESS_HOMING)
     sensorless_t stealth_states {
-      tmc_enable_stallguard(stepperX),
-      tmc_enable_stallguard(stepperY),
-      tmc_enable_stallguard(stepperZ)
+      enable_crash_detection(X_AXIS),
+      enable_crash_detection(Y_AXIS),
+      enable_crash_detection(Z_AXIS)
     };
   #endif
 
@@ -238,9 +239,9 @@ void home_delta() {
 
   // Re-enable stealthChop if used. Disable diag1 pin on driver.
   #if ENABLED(SENSORLESS_HOMING)
-    tmc_disable_stallguard(stepperX, stealth_states.x);
-    tmc_disable_stallguard(stepperY, stealth_states.y);
-    tmc_disable_stallguard(stepperZ, stealth_states.z);
+    disable_crash_detection(X_AXIS, stealth_states.x);
+    disable_crash_detection(Y_AXIS, stealth_states.y);
+    disable_crash_detection(Z_AXIS, stealth_states.z);
   #endif
 
   endstops.validate_homing_move();

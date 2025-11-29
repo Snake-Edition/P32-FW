@@ -20,6 +20,8 @@ size_t description_line_t::value_width(const string_view_utf8 &title_str) {
 description_line_t::description_line_t(window_frame_t *frame)
     : title(frame, Rect16(0, 0, 0, 0), is_multiline::no)
     , value(frame, Rect16(0, 0, 0, 0), is_multiline::no) {
+    title.Hide();
+    value.Hide();
 }
 
 void description_line_t::update(bool has_preview_thumbnail, size_t row, const string_view_utf8 &title_str, stdext::inplace_function<void(std::span<char> buffer)> make_value) {
@@ -39,7 +41,7 @@ void description_line_t::update(bool has_preview_thumbnail, size_t row, const st
     title.SetTextColor(COLOR_GRAY);
 
     make_value({ value_buffer, sizeof(value_buffer) });
-    value.SetText(string_view_utf8::MakeRAM((uint8_t *)value_buffer));
+    value.SetText(string_view_utf8::MakeRAM(value_buffer));
     value.SetAlignment(Align_t::RightBottom());
     value.SetPadding({ 0, 0, 0, 0 });
     value.set_font(Font::small);
@@ -178,12 +180,18 @@ void GCodeInfoWithDescription::update(GCodeInfo &gcode) {
         has_filament_used_info |= gcode.get_extruder_info(e).filament_used_g.has_value();
     }
 
-    if (gcode.has_preview_thumbnail() || !has_filament_used_info) {
-        for (int i = 2; i <= 3; i++) {
-            description_lines[i].value.Hide();
-            description_lines[i].title.Hide();
-            description_lines[i].value.Validate(); // == do not redraw
-            description_lines[i].title.Validate(); // == do not redraw
-        }
+    uint8_t visible_lines = 4;
+    if (!has_filament_used_info) {
+        visible_lines = 2;
+    }
+#if HAS_LARGE_DISPLAY()
+    else if (gcode.has_preview_thumbnail()) {
+        visible_lines = 2;
+    }
+#endif
+
+    for (int i = 0; i < visible_lines; i++) {
+        description_lines[i].value.Show();
+        description_lines[i].title.Show();
     }
 }

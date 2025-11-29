@@ -1,5 +1,6 @@
 #pragma once
 
+#include <common/abstract_byte_reader.hpp>
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -22,15 +23,13 @@ extern void ili9488_wr(uint8_t *pdata, uint16_t size);
 extern void ili9488_fill_rect_colorFormat666(uint16_t rect_x, uint16_t rect_y, uint16_t rect_w, uint16_t rect_h, uint32_t clr666);
 
 /**
- * @brief Draw QOI image from file.
- * @param pf pointer to file, it has to be open and pointing to the qoi header
- * @param point_x x coordinate of the top left corner of the image
- * @param point_y y coordinate of the top left corner of the image
+ * @brief Draw QOI.
+ * @param pt coordinate of the top left corner of the image
+ * @param reader A reader for reading QOI bytestream
  * @param back_color background color, (back_color >> 16) & 0xff is blue, (back_color >> 8) & 0xff is green, back_color & 0xff is red
  * @param rop raster operations as defined in display_math_helper.h and qoi_decoder.h
- * @param subrect subrectangle of the image to draw
  */
-void ili9488_draw_qoi_ex(FILE *pf, uint16_t point_x, uint16_t point_y, Color back_color, uint8_t rop, Rect16 subrect);
+void ili9488_draw_qoi_ex(point_ui16_t pt, AbstractByteReader &reader, Color back_color, uint8_t rop);
 
 extern void ili9488_inversion_on(void);
 extern void ili9488_inversion_off(void);

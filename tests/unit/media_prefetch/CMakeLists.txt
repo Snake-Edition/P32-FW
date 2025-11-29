@@ -26,4 +26,6 @@ foreach(filename ${DATA_FILES})
     )
 endforeach(filename)
 
+target_link_libraries(media_prefetch_tests buddy_utils)
+
 add_catch_test(media_prefetch_tests)

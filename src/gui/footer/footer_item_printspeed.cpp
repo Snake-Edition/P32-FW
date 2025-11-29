@@ -20,5 +20,5 @@ string_view_utf8 FooterItemSpeed::static_makeView(int value) {
     static char buff[5]; // max 999%
     int value_to_print = std::clamp(value, 1, 999);
     snprintf(buff, sizeof(buff), "%d%%", value_to_print);
-    return string_view_utf8::MakeRAM((const uint8_t *)buff);
+    return string_view_utf8::MakeRAM(buff);
 }

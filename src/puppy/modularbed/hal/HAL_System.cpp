@@ -1,5 +1,6 @@
 #include "hal/HAL_System.hpp"
 #include "hal/HAL_Common.hpp"
+#include <interrupt_disabler.hpp>
 
 #include "stm32g0xx_hal.h"
 
@@ -62,7 +63,7 @@ void SystemClock_Config() {
 }
 
 uint32_t GetMicroeconds() {
-    CRITICAL_SECTION_START;
+    buddy::InterruptDisabler _;
 
     uint32_t micros;
     uint32_t cnt = TIM1->CNT;
@@ -72,8 +73,6 @@ uint32_t GetMicroeconds() {
     } else {
         micros = s_SystemMicroseconds + cnt;
     }
-
-    CRITICAL_SECTION_END;
 
     return micros;
 }

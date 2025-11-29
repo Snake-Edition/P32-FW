@@ -4,7 +4,6 @@
 #include "../../lib/Marlin/Marlin/src/gcode/queue.h"
 
 #include "M919-M920.h"
-#include "trinamic.h"
 
 #include <stdint.h>
 #include <string>

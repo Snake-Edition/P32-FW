@@ -5,31 +5,41 @@
 
 #include "M330.h"
 #include "M340.h"
-#include "M919-M920.h"
 #include <stdint.h>
 #include <device/board.h>
 #include "printers.h"
 #include "MarlinPin.h"
 #include "metric.h"
+#include <option/has_gearbox_alignment.h>
 #include <option/has_loadcell.h>
 #include <option/has_toolchanger.h>
 #include <option/has_side_leds.h>
 #include <option/has_leds.h>
-#include <option/has_phase_stepping.h>
-#include <option/has_input_shaper_calibration.h>
 #include <option/has_belt_tuning.h>
+#include <option/has_manual_belt_tuning.h>
 #include <option/has_door_sensor_calibration.h>
+#include <option/has_chamber_vents.h>
 
 #if HAS_LOADCELL()
     #include "loadcell.hpp"
 #endif
 
-#if HAS_PHASE_STEPPING()
+#if HAS_TRINAMIC
+    #include "M919-M920.h"
+#endif
+
+#include <option/has_phase_stepping_calibration.h>
+#if HAS_PHASE_STEPPING_CALIBRATION()
     #include "M1977.hpp"
 #endif
 
+#include <option/has_input_shaper_calibration.h>
 #if HAS_INPUT_SHAPER_CALIBRATION()
     #include "M1959.hpp"
+#endif
+
+#if HAS_GEARBOX_ALIGNMENT()
+    #include <feature/gearbox_alignment/gcode_gearbox_alignment.hpp>
 #endif
 
 #include <logging/log.hpp>
@@ -39,23 +49,10 @@ LOG_COMPONENT_DEF(PRUSA_GCODE, logging::Severity::info);
 static void record_pre_gcode_metrics();
 
 int8_t PrusaGcodeSuite::get_target_extruder_from_command(const GCodeParser2 &p) {
-    return GcodeSuite::get_target_extruder_from_option_value(p.option<uint8_t>('T'));
+    return GcodeSuite::get_target_extruder_from_option_value(p.option<uint8_t>('T'), false);
 }
-
-void save_bed_pid(void) {
-#if ENABLED(PIDTEMPBED)
-    config_store().pid_bed_p.set(thermalManager.temp_bed.pid.Kp);
-    config_store().pid_bed_i.set(thermalManager.temp_bed.pid.Ki);
-    config_store().pid_bed_d.set(thermalManager.temp_bed.pid.Kd);
-#endif
-}
-
-void save_noz_pid(void) {
-#if ENABLED(PIDTEMP)
-    config_store().pid_nozzle_p.set(Temperature::temp_hotend[0].pid.Kp);
-    config_store().pid_nozzle_i.set(Temperature::temp_hotend[0].pid.Ki);
-    config_store().pid_nozzle_d.set(Temperature::temp_hotend[0].pid.Kd);
-#endif
+int8_t PrusaGcodeSuite::get_target_extruder_from_command_p(const GCodeParser2 &p) {
+    return GcodeSuite::get_target_extruder_from_option_value(p.option<uint8_t>('T'), p.option<bool>('P').value_or(false));
 }
 
 bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
@@ -89,6 +86,13 @@ bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
 #if HAS_CHAMBER_API()
         case 141:
             PrusaGcodeSuite::M141();
+            break;
+#endif
+
+#if HAS_CHAMBER_FILTRATION_API()
+        case 147:
+        case 148:
+            PrusaGcodeSuite::M147_148();
             break;
 #endif
 
@@ -131,27 +135,6 @@ bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
 #endif // HAS_I2C_EXPANDER()
         case 300:
             PrusaGcodeSuite::M300();
-            break;
-        case 301:
-            M301();
-            save_noz_pid();
-            break;
-        case 303: {
-            M303();
-            const int16_t e = parser.intval('E');
-            const bool u = parser.boolval('U');
-            if (u) {
-                if (e == -1) {
-                    save_bed_pid();
-                } else if (e == 0) {
-                    save_noz_pid();
-                }
-            }
-            break;
-        }
-        case 304:
-            M304();
-            save_bed_pid();
             break;
         case 330:
             // Metrics handler selection deprecated. We only really have one handler. Let's not pretend otherwise.
@@ -240,15 +223,28 @@ bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
             PrusaGcodeSuite::M865();
             break;
 
+#if HAS_CHAMBER_VENTS()
+        case 870:
+            PrusaGcodeSuite::M870();
+            break;
+#endif
+
+#if HAS_TRINAMIC
         case 919:
             PrusaGcodeSuite::M919();
             break;
         case 920:
             PrusaGcodeSuite::M920();
             break;
+#endif
 #if HAS_BELT_TUNING()
         case 960:
             PrusaGcodeSuite::M960();
+            break;
+#endif
+#if HAS_MANUAL_BELT_TUNING()
+        case 961:
+            PrusaGcodeSuite::M961();
             break;
 #endif
         case 997:
@@ -286,21 +282,26 @@ bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
         case 1703:
             PrusaGcodeSuite::M1703();
             break;
-
 #if HAS_INPUT_SHAPER_CALIBRATION()
         case 1959:
             PrusaGcodeSuite::M1959();
             break;
 #endif
-
-#if HAS_PHASE_STEPPING()
+#if HAS_PHASE_STEPPING_CALIBRATION()
         case 1977:
             PrusaGcodeSuite::M1977();
             break;
 #endif
+#if HAS_SELFTEST()
         case 1978:
             PrusaGcodeSuite::M1978();
             break;
+#endif
+#if HAS_GEARBOX_ALIGNMENT()
+        case 1979:
+            PrusaGcodeSuite::M1979();
+            break;
+#endif
 #if HAS_DOOR_SENSOR_CALIBRATION()
         case 1980:
             PrusaGcodeSuite::M1980();
@@ -308,6 +309,9 @@ bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
 #endif
         case 9140:
             PrusaGcodeSuite::M9140();
+            break;
+        case 9141:
+            PrusaGcodeSuite::M9141();
             break;
         case 9150:
             PrusaGcodeSuite::M9150();
@@ -319,6 +323,16 @@ bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
 
         case 9201:
             PrusaGcodeSuite::M9201();
+            break;
+
+#if HAS_PRECISE_HOMING_COREXY()
+        case 9202:
+            PrusaGcodeSuite::M9202();
+            break;
+#endif
+
+        case 9933:
+            PrusaGcodeSuite::M9933();
             break;
 
         default:
@@ -342,12 +356,14 @@ bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
         case 64:
             PrusaGcodeSuite::G64();
             break;
+#if HAS_SELFTEST()
         case 162:
             PrusaGcodeSuite::G162();
             break;
         case 163:
             PrusaGcodeSuite::G163();
             break;
+#endif
         default:
             processed = false;
             break;

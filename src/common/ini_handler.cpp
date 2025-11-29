@@ -2,7 +2,6 @@
 
 #include "ini_handler.h"
 #include "settings_ini.hpp"
-#include "wui_api.h"
 #include <string.h>
 #include "ff.h"
 #include "string.h"

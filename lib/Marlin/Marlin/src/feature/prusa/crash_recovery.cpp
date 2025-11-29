@@ -3,6 +3,7 @@
 #if ENABLED(CRASH_RECOVERY)
 
     #include "../../module/stepper.h"
+    #include "../../feature/motordriver_util.h"
     #include "crash_recovery.hpp"
     #include "bsod.h"
     #include "../../module/printcounter.h"
@@ -35,7 +36,7 @@ Crash_s::Crash_s()
 // Called from ISR
 void Crash_s::stop_and_save() {
     // freeze motion first
-    stepper.suspend();
+    planner.quick_stop();
     needs_stack_unwind = true;
 
     // get the current live block
@@ -57,9 +58,6 @@ void Crash_s::stop_and_save() {
         segments_finished = crash_block.segment_idx;
         recover_flags = crash_block.recover_flags;
         fr_mm_s = crash_block.fr_mm_s;
-    #if ENABLED(LIN_ADVANCE)
-        advance_mm = stepper.get_LA_steps() * Planner::mm_per_step[E_AXIS];
-    #endif
         start_current_position = crash_block.start_current_position;
 
         // recover delta E position
@@ -72,9 +70,6 @@ void Crash_s::stop_and_save() {
         segments_finished = 0;
         recover_flags = gcode_state.recover_flags;
         fr_mm_s = feedrate_mm_s;
-    #if ENABLED(LIN_ADVANCE)
-        advance_mm = 0;
-    #endif
         start_current_position = current_position;
         e_position = current_position[E_AXIS];
     }
@@ -85,13 +80,12 @@ void Crash_s::stop_and_save() {
     } else {
         leveling_active = planner.leveling_active;
     }
-    crash_axis_known_position = axis_known_position;
+    crash_axes_home_level = axes_home_level;
     // TODO: this is incomplete, as some of the planner state is ahead of the stepper state
     //       marlin state is also not saved, notably: absolute/relative axis state
     // marlin_server.motion_param.save();
 
-    // stop any movement: this will discard any planner state!
-    planner.quick_stop();
+    // reset current position
     planner.reset_position();
     crash_position = planner.get_machine_position_mm();
 
@@ -111,7 +105,7 @@ void Crash_s::stop_and_save() {
         true
         #endif
     );
-    #endif
+    #endif /*HAS_POSITION_MODIFIERS*/
 }
 
 void check_stack_unwound() {
@@ -226,7 +220,7 @@ void Crash_s::set_state(state_t new_state) {
         }
 
         toolchange_event = true;
-        crash_axis_known_position = axis_known_position; // Needed for powerpanic
+        crash_axes_home_level = axes_home_level; // Needed for powerpanic
         check_and_set_sdpos(queue.get_current_sdpos());
         break;
 
@@ -236,7 +230,7 @@ void Crash_s::set_state(state_t new_state) {
         }
 
         toolchange_event = false;
-        crash_axis_known_position = axis_known_position; // Needed for powerpanic
+        crash_axes_home_level = axes_home_level; // Needed for powerpanic
         check_and_set_sdpos(queue.get_current_sdpos());
         break;
 
@@ -293,7 +287,7 @@ void Crash_s::update_machine() {
             stepperX.stall_sensitivity(crash_s.sensitivity.x);
             stepperX.stall_max_period(crash_s.max_period.x);
         } else {
-            tmc_disable_stallguard(stepperX, m_enable_stealth[0]);
+            disable_crash_detection(X_AXIS, m_enable_stealth[0]);
         }
     }
     if (!m_axis_is_homing[1] && TERN1(CORE_IS_XY, !m_axis_is_homing[0])) {
@@ -306,7 +300,7 @@ void Crash_s::update_machine() {
             stepperY.stall_sensitivity(crash_s.sensitivity.y);
             stepperY.stall_max_period(crash_s.max_period.y);
         } else {
-            tmc_disable_stallguard(stepperY, m_enable_stealth[1]);
+            disable_crash_detection(Y_AXIS, m_enable_stealth[1]);
         }
     }
 }
@@ -335,6 +329,7 @@ void Crash_s::set_sensitivity(xy_long_t sens) {
 }
 
 void Crash_s::send_reports() {
+    #if AXIS_IS_TMC(X) && AXIS_IS_TMC(Y)
     if (axis_hit != X_AXIS && axis_hit != Y_AXIS) {
         return;
     }
@@ -351,6 +346,7 @@ void Crash_s::send_reports() {
     metric_record_custom(&crash_metric, ",axis=%c sens=%ldi,period=%ldi,speed=%.3f",
         axis_codes[axis_hit], sensitivity.pos[axis_hit], max_period.pos[axis_hit],
         static_cast<double>(speed));
+    #endif
 }
 
 void Crash_s::set_max_period(xy_long_t mp) {
@@ -429,11 +425,11 @@ void Crash_s::set_homing_sensitivity(const AxisEnum axis) {
     auto sensitivity_fallback = [](int16_t s) {
         return s == config_store_ns::stallguard_sensitivity_unset ? XY_STALL_SENSITIVITY_MIN : s;
     };
-    #else
+    #else /*defined(XY_STALL_SENSITIVITY_MIN)*/
     auto sensitivity_fallback = [](int16_t s) {
         return s;
     };
-    #endif
+    #endif /*defined(XY_STALL_SENSITIVITY_MIN)*/
 
     if (axis == X_AXIS) {
         stepperX.stall_sensitivity(sensitivity_fallback(crash_s.home_sensitivity[0]));
@@ -451,7 +447,7 @@ void Crash_s::start_sensorless_homing_per_axis(const AxisEnum axis) {
             set_homing_sensitivity(Y_AXIS);
     #else
             set_homing_sensitivity(axis);
-    #endif
+    #endif /*ENABLED(CORE_IS_XY)*/
         }
     }
 }
@@ -475,5 +471,5 @@ void Crash_s::set_filter(bool on) {
     config_store().crash_filter.set(on);
     update_machine();
 }
-    #endif
+    #endif /*HAS_DRIVER(TMC2130)*/
 #endif // ENABLED(CRASH_RECOVERY)

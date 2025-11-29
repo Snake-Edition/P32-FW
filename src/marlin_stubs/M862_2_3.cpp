@@ -4,10 +4,21 @@
 #include "PrusaGcodeSuite.hpp"
 #include "Marlin/src/gcode/parser.h"
 #include "gcode/gcode.h"
-#include "gcode_info.hpp"
 #include "common/printer_model.hpp"
+#include <gcode_info.hpp>
+#include <scope_guard.hpp>
+#include <module/planner.h>
+#include <option/has_gcode_compatibility.h>
+
+#include <option/has_chamber_api.h>
+#if HAS_CHAMBER_API()
+    #include <feature/chamber/chamber.hpp>
+    #include <marlin_stubs/feature/chamber/M141_M191.hpp>
+#endif
 
 #ifdef PRINT_CHECKING_Q_CMDS
+
+using namespace buddy;
 
 static void setup_gcode_compatibility(const PrinterModelInfo *gcode_printer) {
     // Failed to identify the printer -> do nothing
@@ -15,17 +26,48 @@ static void setup_gcode_compatibility(const PrinterModelInfo *gcode_printer) {
         return;
     }
 
-    [[maybe_unused]] const PrinterGCodeCompatibilityReport compatibility = PrinterModelInfo::current().gcode_compatibility_report(*gcode_printer);
+    gcode.compatibility = PrinterModelInfo::current().gcode_compatibility_report(*gcode_printer);
 
-    #if ENABLED(GCODE_COMPATIBILITY_MK3)
-    if (compatibility.mk3_compatibility_mode) {
-        GcodeSuite::gcode_compatibility_mode = GcodeSuite::GcodeCompatibilityMode::MK3;
-    }
-    #endif
+    #if HAS_CHAMBER_API() && HAS_GCODE_COMPATIBILITY()
+    if (gcode.compatibility.chamber_compatibility_mode) {
+        FilamentTypeParameters params;
 
-    #if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-    if (compatibility.mk4s_fan_compatibility_mode) {
-        GcodeSuite::fan_compatibility_mode = GcodeSuite::FanCompatibilityMode::MK3_TO_MK4_NON_S;
+        // Try to somewhat deduce chamber temperature from the loaded filaments from whatever extruder is used
+        GCodeInfo::getInstance().for_each_used_extruder([&]([[maybe_unused]] uint8_t logical_ix, uint8_t physical_ix, const GCodeInfo::ExtruderInfo &) {
+            params = config_store().get_filament_type(physical_ix).parameters();
+        });
+
+        // If the maximum chamber temperature is specified, enqueue cooling
+        if (const auto &t = params.chamber_max_temperature; t.has_value() && chamber().current_temperature() > *t) {
+            PrusaGcodeSuite::M141_no_parser({ .target_temp = (buddy::Temperature)*t, .wait_for_cooling = true });
+        }
+
+        if (const auto &t = params.chamber_min_temperature; t.has_value() && chamber().current_temperature() < *t) {
+        #if PRINTER_IS_PRUSA_COREONE()
+            ScopeGuard restore_bed_temp = [temp = thermalManager.degTargetBed()] {
+                thermalManager.setTargetBed(temp);
+            };
+
+            // C1 does heating using the bed -> set the bed temp to a decently high value
+            thermalManager.setTargetBed(100);
+
+            // Home so that we can set the bed to correct postion
+            GcodeSuite::G28_no_parser(true, true, true,
+                {
+                    .only_if_needed = true,
+                    .precise = false, // We don't need to be precisely homed for this
+                });
+
+            // Move the bed up to reduce chamber volume
+            do_blocking_move_to_z(10);
+        #else
+            #error Please implement heating logic for this printer
+        #endif
+
+            PrusaGcodeSuite::M141_no_parser({ .target_temp = (buddy::Temperature)*t, .wait_for_heating = true });
+        }
+
+        chamber().set_target_temperature(params.chamber_target_temperature);
     }
     #endif
 }

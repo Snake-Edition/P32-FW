@@ -10,7 +10,6 @@
     #include "Jogwheel.hpp"
 #endif
 #include "hwio.h"
-#include "sys.h"
 #include "gpio.h"
 #include "metric.h"
 #include "cpu_utils.hpp"
@@ -31,7 +30,6 @@
 #include <crash_dump/dump.hpp>
 #include "hwio_pindef.h"
 #include <Arduino.h>
-#include "trinamic.h"
 #include "../Marlin/src/module/configuration_store.h"
 #include <buddy/main.h>
 #include <stdint.h>
@@ -43,7 +41,10 @@
 #include "Marlin/src/module/planner.h"
 #include <option/filament_sensor.h>
 
-#include <tusb.h>
+#include <option/has_usb_device.h>
+#if HAS_USB_DEVICE()
+    #include <tusb.h>
+#endif
 
 #if BOARD_IS_XLBUDDY()
     #include <puppies/Dwarf.hpp>
@@ -82,7 +83,6 @@ LOG_COMPONENT_REF(Marlin);
 
 #include "probe_position_lookback.hpp"
 #include <config_store/store_instance.hpp>
-#include <option/init_trinamic_from_marlin_only.h>
 
 LOG_COMPONENT_DEF(Buddy, logging::Severity::debug);
 LOG_COMPONENT_DEF(Core, logging::Severity::info);
@@ -125,6 +125,7 @@ void app_marlin_serial_output_write_hook(const uint8_t *buffer, int size) {
     }
 }
 
+#if HAS_USB_DEVICE()
 static void app_setup_marlin_logging() {
     SerialUSB.lineBufferHook = app_marlin_serial_output_write_hook;
 }
@@ -148,13 +149,27 @@ static void wait_for_serial() {
         osDelay(10);
     }
 }
+#endif
+
+#if HAS_TOUCH()
+extern "C" void touchscreen_timer_callback(TimerHandle_t) {
+    if (touchscreen.is_enabled()) {
+        touchscreen.update();
+    }
+}
+
+static StaticTimer_t touchscreen_timer_buffer;
+static auto touchscreen_timer = xTimerCreateStatic("touchscreen", pdMS_TO_TICKS(1), pdTRUE, 0, touchscreen_timer_callback, &touchscreen_timer_buffer);
+#endif
 
 static void app_startup() {
+#if HAS_USB_DEVICE()
     // Attempt to wait for CDC to initialize to get the full Marlin startup output
     wait_for_serial();
 
     // Finally link SerialUSB/marlin
     app_setup_marlin_logging();
+#endif
 
     log_info(Buddy, "marlin task waiting for dependencies");
     TaskDeps::wait(TaskDeps::Tasks::default_start);
@@ -164,19 +179,7 @@ static void app_startup() {
 static void app_setup(void) {
     metric_record_event(&metric_app_start);
 
-    if constexpr (!INIT_TRINAMIC_FROM_MARLIN_ONLY()) {
-        init_tmc();
-    } else {
-        init_tmc_bare_minimum();
-    }
-
 #if HAS_LOADCELL()
-    // loadcell configuration
-    loadcell.SetScale(config_store().loadcell_scale.get());
-    loadcell.SetThreshold(config_store().loadcell_threshold_static.get(), Loadcell::TareMode::Static);
-    loadcell.SetThreshold(config_store().loadcell_threshold_continuous.get(), Loadcell::TareMode::Continuous);
-    loadcell.SetHysteresis(config_store().loadcell_hysteresis.get());
-
     if (config_store().stuck_filament_detection.get()) {
         EMotorStallDetector::Instance().SetEnabled();
     } // else keep it disabled (which is the default)
@@ -202,16 +205,15 @@ void app_run(void) {
     app_setup();
     marlin_server::init();
 
-#if HAS_ADVANCED_POWER()
-    advancedpower.ResetOvercurrentFault();
-#endif
-
     TaskDeps::provide(TaskDeps::Dependency::default_task_ready);
+
+#if HAS_TOUCH()
+    xTimerStart(touchscreen_timer, portMAX_DELAY);
+#endif
 
     while (1) {
         metric_record_event(&metric_maintask_event);
         metric_record_integer(&metric_cpu_usage, osGetCPUUsage());
-        loop();
         marlin_server::loop();
     }
 }
@@ -230,7 +232,6 @@ static uint8_t cnt_advanced_power_update = 0;
 void advanced_power_irq() {
     if (++cnt_advanced_power_update >= 40) { // update Advanced power variables = 25Hz
         advancedpower.Update();
-        buddy::metrics::RecordPowerStats();
     #ifdef ADC_MULTIPLEXER
         PowerHWIDAndTempMux.switch_channel();
     #endif
@@ -252,12 +253,12 @@ static void filament_sensor_irq() {
             }
 
             // Main filament sensor
-            fs_process_sample(dwarf.get_tool_filament_sensor(), dwarf.get_dwarf_nr() - 1);
+            fs_process_sample(dwarf.get_tool_filament_sensor(), dwarf.dwarf_index());
 
             // Side filament sensor
             auto mapping = side_fsensor_remap::get_mapping();
-            assert(static_cast<size_t>(dwarf.get_dwarf_nr() - 1) < std::size(mapping));
-            const uint8_t remapped = mapping[dwarf.get_dwarf_nr() - 1];
+            assert(static_cast<size_t>(dwarf.dwarf_index()) < std::size(mapping));
+            const uint8_t remapped = mapping[dwarf.dwarf_index()];
             assert(remapped < HOTENDS);
 
             /**
@@ -285,7 +286,7 @@ static void filament_sensor_irq() {
             if (fs_raw_value == AdcGet::undefined_value) {
                 fs_raw_value = IFSensor::undefined_value;
             }
-            side_fs_process_sample(fs_raw_value, dwarf.get_dwarf_nr() - 1);
+            side_fs_process_sample(fs_raw_value, dwarf.dwarf_index());
         }
         cnt_filament_sensor_update = 0;
     }
@@ -314,12 +315,6 @@ void app_tim14_tick(void) {
 
 #if HAS_GUI()
     jogwheel.Update1msFromISR();
-#endif
-
-#if HAS_TOUCH()
-    if (touchscreen.is_enabled()) {
-        touchscreen.update();
-    }
 #endif
 
 #if HAS_EMERGENCY_STOP()

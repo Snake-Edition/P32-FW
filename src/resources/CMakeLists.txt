@@ -102,7 +102,7 @@ if(PUPPY_FLASH_FW)
   if(HAS_DWARF)
     add_resource("${DWARF_BINARY_PATH}" "/puppies/fw-dwarf.bin")
   endif()
-  if(HAS_MODULARBED)
+  if(HAS_PUPPY_MODULARBED)
     add_resource("${MODULARBED_BINARY_PATH}" "/puppies/fw-modularbed.bin")
   endif()
   if(HAS_XBUDDY_EXTENSION)
@@ -113,7 +113,7 @@ endif()
 # /web directory
 add_gzip_resource("web/favicon.ico" "/web/favicon.ico")
 add_gzip_resource("web/index.html" "/web/index.html")
-add_gzip_resource("web/main.c46deb79f6521856a45f.js" "/web/main.c46deb79f6521856a45f.js")
+add_gzip_resource("web/main.b41402ed4d6d019ca007.js" "/web/main.b41402ed4d6d019ca007.js")
 add_gzip_resource("web/main.71c989a4a290e5c10892.css" "/web/main.71c989a4a290e5c10892.css")
 
 # add languages
@@ -121,38 +121,19 @@ if(${TRANSLATIONS_IN_EXTFLASH})
   foreach(LANG ${LANGUAGES_AVAILABLE})
     if(${ENABLE_TRANSLATION_${LANG}})
       string(TOLOWER ${LANG} LANG)
-      add_resource(
-        "${CMAKE_SOURCE_DIR}/src/lang/po/${LANG}/Prusa-Firmware-Buddy_${LANG}.mo"
-        "/lang/${LANG}.mo"
+      set(PO_FILE "${CMAKE_SOURCE_DIR}/src/lang/po/${LANG}/Prusa-Firmware-Buddy_${LANG}.po")
+      set(MO_FILE "${CMAKE_CURRENT_BINARY_DIR}/${LANG}.mo")
+      add_custom_command(
+        OUTPUT ${MO_FILE}
+        COMMAND msgfmt ${PO_FILE} -o ${MO_FILE}
+        DEPENDS ${PO_FILE}
+        COMMENT "Generating ${MO_FILE} from ${PO_FILE}"
+        VERBATIM
         )
+      add_custom_target(generate_mo_${LANG} ALL DEPENDS ${MO_FILE})
+      add_resource("${MO_FILE}" "/lang/${LANG}.mo")
     endif()
   endforeach()
-endif()
-
-# non-packed images, set the list of images to process
-set(NONPACKED_PNG_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src/resources")
-
-# convert non-packed PNG->QOI, do all of them, even though not all will be used
-set(NONPACKED_PNGS
-    "pre_bootstrap_pngs/marlin_logo_79x61.png" "pre_bootstrap_pngs/prusa_mini_splash_207x47.png"
-    "pre_bootstrap_pngs/prusa_ix_splash_158x52.png" "pre_bootstrap_pngs/prusa_xl_splash_172x52.png"
-    )
-
-foreach(NONPACKED_PNG ${NONPACKED_PNGS})
-  get_filename_component(NONPACKED_NAME ${NONPACKED_PNG} NAME_WE)
-  add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${NONPACKED_NAME}.qoi
-    DEPENDS ${NONPACKED_PNG}
-    COMMAND
-      "${Python3_EXECUTABLE}" "${qoi_generator_py}" "${NONPACKED_PNG_SOURCE_DIR}/${NONPACKED_PNG}"
-      "${CMAKE_CURRENT_BINARY_DIR}/nonpacked.res"
-      "${CMAKE_CURRENT_BINARY_DIR}/${NONPACKED_NAME}.qoi"
-    )
-endforeach()
-
-add_resource("${CMAKE_CURRENT_BINARY_DIR}/marlin_logo_79x61.qoi" "marlin_logo_79x61.qoi")
-if(PRINTER STREQUAL "MINI")
-  add_resource("${CMAKE_CURRENT_BINARY_DIR}/prusa_mini_splash_207x47.qoi" "printer_logo.qoi")
 endif()
 
 # Quite OK images

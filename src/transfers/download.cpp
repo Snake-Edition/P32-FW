@@ -20,6 +20,7 @@
 #include <lwip/altcp.h>
 #include <lwip/altcp_tcp.h>
 #include <lwip/dns.h>
+#include <config_store/store_instance.hpp>
 
 using automata::ExecutionControl;
 using http::ContentEncryptionMode;
@@ -96,6 +97,7 @@ public:
         uint32_t start_range;
         optional<uint32_t> end_range;
         ip_addr_t ip;
+        uint16_t proxy_port = 0;
     };
 
     struct Splice final : public nhttp::splice::Transfer {
@@ -196,7 +198,12 @@ public:
             snprintf(range, sizeof range, "bytes=%" PRIu32 "-", request.start_range);
         }
         char req[MAX_REQ_SIZE + 1];
-        size_t len = snprintf(req, sizeof req, "GET %s HTTP/1.1\r\nHost: %s\r\nContent-Encryption-Mode: AES-CTR\r\nRange: %s\r\n\r\n", request.path, request.hostname, range);
+        size_t len = 0;
+        if (request.proxy_port) {
+            len = snprintf(req, sizeof req, "GET http://%s:%" PRIu16 "%s HTTP/1.1\r\nHost: %s\r\nContent-Encryption-Mode: AES-CTR\r\nRange: %s\r\n\r\n", request.hostname, request.port, request.path, request.hostname, range);
+        } else {
+            len = snprintf(req, sizeof req, "GET %s HTTP/1.1\r\nHost: %s\r\nContent-Encryption-Mode: AES-CTR\r\nRange: %s\r\n\r\n", request.path, request.hostname, range);
+        }
         if (len >= sizeof req) {
             done(DownloadStep::FailedRemote);
             return ERR_ABRT;
@@ -346,7 +353,8 @@ public:
         altcp_err(conn, err_wrap);
         altcp_poll(conn, timeout_check_wrap, 1);
         altcp_recv(conn, recv_wrap);
-        if (altcp_connect(conn, &request.ip, request.port, connected_wrap) != ERR_OK) {
+        if (altcp_connect(conn, &request.ip, request.proxy_port ? request.proxy_port : request.port, connected_wrap)
+            != ERR_OK) {
             done(DownloadStep::FailedNetwork);
         }
     }
@@ -378,7 +386,11 @@ public:
         assert(holds_alternative<Request>(phase_payload));
         auto &request = get<Request>(phase_payload);
         phase = Phase::Dns;
-        err_t dns_result = dns_gethostbyname(request.hostname, &request.ip, dns_found_wrap, this);
+        const auto proxy_host = config_store().connect_proxy_host.get();
+        const uint16_t proxy_port = config_store().connect_proxy_port.get();
+        const bool has_proxy = proxy_host.data()[0] != '\0' && proxy_port != 0;
+        request.proxy_port = has_proxy ? proxy_port : 0;
+        err_t dns_result = dns_gethostbyname(has_proxy ? proxy_host.data() : request.hostname, &request.ip, dns_found_wrap, this);
 
         switch (dns_result) {
         case ERR_OK:
@@ -443,6 +455,13 @@ void Download::AsyncDeleter::operator()(Async *a) {
     }
 }
 
+void Download::Request::set_transfer_id(TransferId id) {
+    if (auto *in = get_if<Inline>(&data); in != nullptr) {
+        in->transfer_id = id;
+    }
+    // else -> these don't need nor store the ID, so just ignore it in this case.
+}
+
 Download::Download(const Request &request, PartialFile::Ptr destination, uint32_t start_range, optional<uint32_t> end_range) {
     if (const auto *encrypted = get_if<Request::Encrypted>(&request.data); encrypted) {
         assert(encrypted->encryption);
@@ -465,6 +484,7 @@ Download::Download(const Request &request, PartialFile::Ptr destination, uint32_
             // the protocol anyway). The chance of accidentally hitting the
             // same ID being 1:2^32 is good enough.
             rand_u(),
+            in.transfer_id,
             start_range,
             end_range.value_or(in.orig_size - 1 /* End is inclusive */),
             0,
@@ -521,6 +541,7 @@ optional<Download::InlineRequest> Download::inline_request() {
         // We send the extended info only on the first request in the given download.
         if (!in->started) {
             request.details = InlineRequestDetails {
+                in->transfer_id,
                 in->team_id,
                 in->hash,
             };

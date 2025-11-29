@@ -10,7 +10,6 @@
 #include "marlin_client.hpp"
 #include <dialog_text_input.hpp>
 #include <wui.h>
-#include <str_utils.hpp>
 #include <window_msgbox.hpp>
 #include <marlin_client.hpp>
 
@@ -96,6 +95,23 @@ void MI_WIFI_STATUS_t::Loop() {
     ChangeInformation(_(state_str));
 }
 
+MI_WIFI_SIGNAL_t::MI_WIFI_SIGNAL_t()
+    : MenuItemAutoUpdatingLabel(
+        _("Signal"),
+        [this](std::span<char> buffer) {
+            const auto val = value();
+            if (val.has_value()) {
+                // For some reason, int8_t doesn't want to be printed in negative? :-O
+                int v = *val;
+                assert(v < 0);
+                snprintf(buffer.data(), buffer.size(), "%i dB", v);
+            } else {
+                snprintf(buffer.data(), buffer.size(), "---");
+            }
+        },
+        [](auto) -> std::optional<int8_t> { return esp_signal_strength(); } //
+    ) {}
+
 // ===================================================
 // MI_WIFI_SSID
 // ===================================================
@@ -127,7 +143,7 @@ MI_NET_INTERFACE_t::MI_NET_INTERFACE_t()
 }
 
 void MI_NET_INTERFACE_t::OnChange([[maybe_unused]] size_t old_index) {
-    netdev_set_active_id(this->index);
+    netdev_set_active_id(this->get_index());
 }
 
 MI_HOSTNAME::MI_HOSTNAME()
@@ -186,12 +202,12 @@ MI_NET_IP::MI_NET_IP(NetDeviceID device_id)
     , device_id(device_id) //
 {
     set_translate_items(false);
-    this->SetIndex(netdev_get_ip_obtained_type(this->device_id()));
+    this->set_index(netdev_get_ip_obtained_type(this->device_id()));
 }
 
 void MI_NET_IP::OnChange([[maybe_unused]] size_t old_index) {
     const auto dev_id = device_id();
-    if (this->GetIndex() == NETDEV_STATIC) {
+    if (this->get_index() == NETDEV_STATIC) {
         netdev_set_static(dev_id);
     } else {
         netdev_set_dhcp(dev_id);

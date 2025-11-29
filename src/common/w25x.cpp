@@ -1,12 +1,13 @@
-#include "w25x.h"
-#include "w25x_communication.h"
+#include <common/w25x.hpp>
+
+#include "buddy/unreachable.hpp"
+#include <common/w25x_communication.hpp>
 #include "timing_precise.hpp"
 #include <logging/log.hpp>
-#include "FreeRTOS.h"
-#include "task.h"
 #include "cmsis_os.h"
 #include "bsod.h"
-#include "hwio_pindef.h"
+#include <device/peripherals.h>
+#include <hwio_pindef.h>
 #include <stdlib.h>
 
 LOG_COMPONENT_DEF(W25X, logging::Severity::debug);
@@ -157,6 +158,8 @@ osMutexId erase_mutex = NULL;
 osMutexDef(communication_mutex_resource);
 osMutexId communication_mutex = NULL;
 
+bool w25x_was_initialized = false;
+
 /**@}*/
 
 /**
@@ -231,12 +234,15 @@ bool is_suspended() {
     return (read_status2_reg() & W25X_STATUS2_SUS);
 }
 
-bool w25x_wait_busy(void) {
+bool w25x_wait_busy(void (*wait_callback)() = NULL) {
     uint32_t loop_counter = 0;
     while (read_status1_reg() & W25X_STATUS_BUSY) {
         ++loop_counter;
         if (loop_counter > max_wait_loops()) {
             return false;
+        }
+        if (wait_callback) {
+            wait_callback();
         }
     }
     return true;
@@ -371,29 +377,8 @@ int mfrid_devid(uint8_t *devid) {
 
 } // end anonymous namespace
 
-bool w25x_init() {
-    const bool os_running = xTaskGetSchedulerState() == taskSCHEDULER_RUNNING;
-
-    erase_mutex = os_running ? osMutexCreate(osMutex(erase_mutex_resource)) : NULL;
-    communication_mutex = os_running ? osMutexCreate(osMutex(communication_mutex_resource)) : NULL;
-
-    static_assert(!NULL, "All the code expects NULL in condition to evaluate as false.");
-    if (os_running && (!erase_mutex || !communication_mutex)) {
-        return false;
-    }
-
-    OptionalMutex eraseMutex(erase_mutex);
-    OptionalMutex communicationMutex(communication_mutex);
-
-    if (!w25x_communication_abort()) {
-        return false;
-    }
-
+static bool w25x_init_internal() {
     w25x_deselect();
-
-    if (!w25x_communication_init(os_running)) {
-        return false;
-    }
 
     if (!w25x_wait_busy()) {
         return false;
@@ -413,6 +398,53 @@ bool w25x_init() {
     }
 
     return true;
+}
+
+bool w25x_reinit_before_crash_dump() {
+    // BFW-6813
+    // This may potentially leak everything but we are about to reset the MCU anyway
+    // and NULL checks are necessary for other functions in this module to perform
+    // correctly; assigning NULL to mutex means OptionalMutex turns into nop.
+    // Will be fixed in other commit as part of BFW-6813
+    erase_mutex = NULL;
+    communication_mutex = NULL;
+
+    if (w25x_was_initialized) {
+        // abort ongoing transactions if there were any, ignoring errors
+        (void)HAL_SPI_Abort(&SPI_HANDLE_FOR(flash));
+        (void)w25x_fetch_error();
+    } else {
+        SPI_INIT(flash);
+    }
+    return w25x_init_internal();
+}
+
+void w25x_init() {
+    if (w25x_was_initialized) {
+        // must only be called once
+        BUDDY_UNREACHABLE();
+    }
+
+    // BFW-6813
+    // These should be allocated statically.
+    erase_mutex = osMutexCreate(osMutex(erase_mutex_resource));
+    communication_mutex = osMutexCreate(osMutex(communication_mutex_resource));
+    if (!(erase_mutex && communication_mutex)) {
+        // if resource allocation fails, we are severely screwed anyway
+        BUDDY_UNREACHABLE();
+    }
+
+    SPI_INIT(flash);
+    if (w25x_init_internal()) {
+        w25x_was_initialized = true;
+        return;
+    }
+
+    // BFW-6813
+    // Actually, there is no point in calling bsod() here since it writes the message
+    // to the external FLASH to show after the reboot 🫠
+    // I am keeping the original code here, but we should think about it a bit...
+    bsod("failed to initialize ext flash");
 }
 
 uint32_t w25x_get_sector_count() {
@@ -471,7 +503,7 @@ void w25x_block64_erase(uint32_t addr) {
     w25x_erase(CMD_BLOCK64_ERASE, addr);
 }
 
-void w25x_chip_erase(void) {
+void w25x_chip_erase(void (*wait_callback)()) {
     OptionalMutex eraseMutex(erase_mutex);
     OptionalMutex communicationMutex(communication_mutex);
 
@@ -479,7 +511,7 @@ void w25x_chip_erase(void) {
     w25x_select();
     w25x_send_byte(CMD_CHIP_ERASE); // send command 0xc7
     w25x_deselect();
-    if (!w25x_wait_busy()) {
+    if (!w25x_wait_busy(wait_callback)) {
         w25x_set_error(HAL_TIMEOUT);
     }
 }

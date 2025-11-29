@@ -16,17 +16,25 @@
 #include "../precise_stepping/fwdecl.hpp"
 #include "../../core/types.h"
 
-constexpr const uint8_t MAX_INPUT_SHAPER_PULSES = 5;
+#ifdef COREXY
+constexpr const uint8_t INPUT_SHAPER_MAX_LOGICAL_AXES = 2;
+#else
+constexpr const uint8_t INPUT_SHAPER_MAX_LOGICAL_AXES = 1;
+#endif
+
+constexpr const uint8_t INPUT_SHAPER_MAX_LENGTH = 5;
+constexpr const uint8_t INPUT_SHAPER_MAX_PULSES = INPUT_SHAPER_MAX_LENGTH * INPUT_SHAPER_MAX_LOGICAL_AXES;
 
 constexpr const double INPUT_SHAPER_VELOCITY_EPSILON = 0.0001;
 constexpr const double INPUT_SHAPER_ACCELERATION_EPSILON = 0.1;
+constexpr const double INPUT_SHAPER_PULSES_MIN_TIME_DIFF = 0.00001;
 
 namespace input_shaper {
 
 struct Shaper {
     Shaper(const float par_a[], const float par_t[], int par_num_pulses)
         : num_pulses(par_num_pulses) {
-        for (int i = 0; i < MAX_INPUT_SHAPER_PULSES; ++i) {
+        for (int i = 0; i < INPUT_SHAPER_MAX_PULSES; ++i) {
             if (i < num_pulses) {
                 a[i] = par_a[i];
                 t[i] = par_t[i];
@@ -37,8 +45,8 @@ struct Shaper {
         }
     }
 
-    float a[MAX_INPUT_SHAPER_PULSES] = {};
-    float t[MAX_INPUT_SHAPER_PULSES] = {};
+    float a[INPUT_SHAPER_MAX_PULSES] = {};
+    float t[INPUT_SHAPER_MAX_PULSES] = {};
     int num_pulses;
 };
 
@@ -47,64 +55,56 @@ Shaper get(float damping_ratio, float shaper_freq, float vibration_reduction, in
 
 typedef struct pulse_t {
     double t;
-    double a;
+    float a;
 } pulse_t;
+
+typedef struct micro_move_segment_t {
+    float start_pos = 0.f;
+    float start_v = 0.f;
+    float half_accel = 0.f;
+} micro_move_segment_t;
 
 typedef struct input_shaper_pulses_t {
     uint8_t num_pulses;
-    std::array<pulse_t, MAX_INPUT_SHAPER_PULSES> pulses;
+    std::array<pulse_t, INPUT_SHAPER_MAX_PULSES> pulses;
+
+    micro_move_segment_t calc_micro_move_segment(const std::array<const move_t *, INPUT_SHAPER_MAX_PULSES> &moves, double nearest_next_change, uint8_t logical_axis) const;
 } input_shaper_pulses_t;
 
-typedef struct logical_axis_input_shaper_t {
-    std::array<const move_t *, MAX_INPUT_SHAPER_PULSES> m_move;
-    std::array<double, MAX_INPUT_SHAPER_PULSES> m_next_change;
-
-    const input_shaper_pulses_t *m_pulses;
+typedef struct input_shaper_state_t {
+    std::array<const input_shaper_pulses_t *, INPUT_SHAPER_MAX_LOGICAL_AXES> m_logical_axis_pulses = {};
+    std::array<const move_t *, INPUT_SHAPER_MAX_PULSES> m_move = {};
 
     // The largest index corresponds to the pointer to the rightmost time point (on the time axis).
     // And index zero corresponds to the pointer to the leftmost time point (on the time axis).
-    double m_start_pos;
-    double m_start_v;
-    double m_half_accel;
-    double m_print_time;
-    uint8_t m_axis;
-    uint8_t m_nearest_next_change_idx;
+    std::array<double, INPUT_SHAPER_MAX_PULSES> m_next_change = {};
 
-    void init(const move_t &move, uint8_t axis);
+    uint8_t m_logical_axis_pulses_cnt = 0;
+    uint8_t m_nearest_next_change_idx = 0;
 
-    bool update(const input_shaper_state_t &axis_is);
+    uint8_t m_physical_axis = 0;
+
+    // Indicates if the current micro move segment is crossing zero velocity (needed change of a stepper motor direction).
+    bool m_is_crossing_zero_velocity = false;
+
+    bool step_dir = false;
+    float start_v = 0.f;
+    float half_accel = 0.f;
+    float start_pos = 0.f;
+
+    double print_time = 0.;
+    double nearest_next_change = 0.;
 
     void set_nearest_next_change(double new_nearest_next_change);
 
     uint8_t calc_nearest_next_change_idx() const;
-
-    double calc_half_accel() const;
 
     double get_nearest_next_change() const {
         return m_next_change[m_nearest_next_change_idx];
     }
 
     const move_t *load_next_move_segment(uint8_t m_idx);
-} logical_axis_input_shaper_t;
 
-typedef struct input_shaper_state_t {
-#ifdef COREXY
-    std::array<logical_axis_input_shaper_t, 2> m_axis_shaper;
-#else
-    std::array<logical_axis_input_shaper_t, 1> m_axis_shaper;
-#endif
-
-    double start_pos;
-    double start_v;
-    double half_accel;
-
-    double nearest_next_change;
-    double print_time;
-
-    bool step_dir;
-
-    // Indicates if the current micro move segment is crossing zero velocity (needed change of stepper motor direction).
-    bool is_crossing_zero_velocity;
 } input_shaper_state_t;
 
 input_shaper_pulses_t create_null_input_shaper_pulses();
@@ -136,6 +136,6 @@ void input_shaper_step_generator_init(const move_t &move, input_shaper_step_gene
 
 FORCE_INLINE void input_shaper_step_generator_update(input_shaper_step_generator_t &step_generator);
 
-void input_shaper_state_init(input_shaper_state_t &is_state, const move_t &move, uint8_t axis);
+void input_shaper_state_init(input_shaper_state_t &is_state, const move_t &move, uint8_t physical_axis);
 
-bool input_shaper_state_update(input_shaper_state_t &is_state, const int axis);
+bool input_shaper_state_update(input_shaper_state_t &is_state, uint8_t physical_axis);

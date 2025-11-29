@@ -50,10 +50,6 @@ set(BOARD
       STRING
       "Select the board for which you want to compile the project (valid values are ${BOARD_VALID_OPTS})."
     )
-set(BOARD_VERSION
-    "<invalid>"
-    CACHE STRING "Specify the version of the board to comiple the project for (e.g. 1.2.3)"
-    )
 set(MCU
     "<default>"
     CACHE
@@ -121,16 +117,10 @@ set(TOUCH_ENABLED
     CACHE STRING "Enable touch (valid values are ${TOUCH_ENABLED_VALID_OPTS})."
     )
 set(DEVELOPMENT_ITEMS_ENABLED
-    "NO"
+    "YES"
     CACHE BOOL "Show development (green) items in menus and enable other devel features"
     )
 define_boolean_option(DEVELOPMENT_ITEMS ${DEVELOPMENT_ITEMS_ENABLED})
-
-set(IS_KNOBLET
-    "FALSE"
-    CACHE BOOL "Knoblet version of FW"
-    )
-define_boolean_option(IS_KNOBLET ${IS_KNOBLET})
 
 set(ENABLE_BURST
     "NO"
@@ -153,6 +143,7 @@ if(BOARD IN_LIST BUDDY_BOARDS OR BOARD STREQUAL "XL_DEV_KIT_XLB")
 else()
   set(BOARD_IS_MASTER_BOARD false)
 endif()
+define_boolean_option(BOARD_IS_MASTER_BOARD ${BOARD_IS_MASTER_BOARD})
 
 # set MCU to its default if not specified
 if(${MCU} STREQUAL "<default>")
@@ -200,12 +191,6 @@ else()
 endif()
 define_boolean_option(BUDDY_ENABLE_CONNECT ${CONNECT})
 
-# parse board version into its components
-string(REGEX MATCH "^([0-9]+)\\.([0-9]+)\\.([0-9]+)" BOARD_VERSION_MATCH ${BOARD_VERSION})
-set(BOARD_VERSION_MAJOR ${CMAKE_MATCH_1})
-set(BOARD_VERSION_MINOR ${CMAKE_MATCH_2})
-set(BOARD_VERSION_PATCH ${CMAKE_MATCH_3})
-
 # Resolve BUILD_NUMBER and PROJECT_VERSION_* variables
 resolve_version_variables()
 
@@ -219,9 +204,6 @@ message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}.")
 message(STATUS "Bootloader: ${BOOTLOADER}")
 message(STATUS "Printer: ${PRINTER}")
 message(STATUS "Board: ${BOARD}")
-message(
-  STATUS "Board Version: ${BOARD_VERSION_MAJOR}.${BOARD_VERSION_MINOR}.${BOARD_VERSION_PATCH}"
-  )
 message(STATUS "MCU: ${MCU}")
 message(STATUS "Custom Compile Options (C/C++ flags): ${CUSTOM_COMPILE_OPTIONS}")
 message(STATUS "Web User Interface: ${WUI}")
@@ -232,7 +214,11 @@ message(STATUS "Resources: ${RESOURCES}")
 function(set_feature_for_printers FEATURE_NAME)
   set(FEATURE_PRINTER_LIST ${ARGV})
   list(REMOVE_AT FEATURE_PRINTER_LIST 0) # First argument is the feature name
-  if(${PRINTER} IN_LIST FEATURE_PRINTER_LIST)
+  if(DEFINED ${FEATURE_NAME})
+    # override from manual configuration
+    set(FEATURE_VALUE ${${FEATURE_NAME}})
+  elseif(${PRINTER} IN_LIST FEATURE_PRINTER_LIST)
+    # set from feature list
     set(FEATURE_VALUE YES)
   else()
     set(FEATURE_VALUE NO)
@@ -247,8 +233,16 @@ endfunction()
 function(set_feature_for_printers_master_board FEATURE_NAME)
   set(FEATURE_PRINTER_LIST ${ARGV})
   list(REMOVE_AT FEATURE_PRINTER_LIST 0) # First argument is the feature name
-  if(BOARD_IS_MASTER_BOARD AND ${PRINTER} IN_LIST FEATURE_PRINTER_LIST)
-    set(FEATURE_VALUE YES)
+  if(BOARD_IS_MASTER_BOARD)
+    if(DEFINED ${FEATURE_NAME})
+      # override from manual configuration
+      set(FEATURE_VALUE ${${FEATURE_NAME}})
+    elseif(${PRINTER} IN_LIST FEATURE_PRINTER_LIST)
+      # set from feature list
+      set(FEATURE_VALUE YES)
+    else()
+      set(FEATURE_VALUE NO)
+    endif()
   else()
     set(FEATURE_VALUE NO)
   endif()
@@ -263,15 +257,16 @@ set(PRINTERS_WITH_FILAMENT_SENSOR_BINARY "MINI" "MK3.5")
 set(PRINTERS_WITH_FILAMENT_SENSOR_ADC "MK4" "XL" "iX" "XL_DEV_KIT" "COREONE")
 
 set_feature_for_printers(
-  INIT_TRINAMIC_FROM_MARLIN_ONLY
+  HAS_TRINAMIC
   "MINI"
   "MK4"
   "MK3.5"
-  "XL"
   "iX"
+  "XL"
+  "XL_DEV_KIT"
   "COREONE"
   )
-set_feature_for_printers(
+set_feature_for_printers_master_board(
   HAS_PAUSE
   "MINI"
   "MK4"
@@ -281,7 +276,8 @@ set_feature_for_printers(
   "XL_DEV_KIT"
   "COREONE"
   )
-set_feature_for_printers(
+# CRASH_DETECTION requires SELFTEST to work
+set_feature_for_printers_master_board(
   HAS_CRASH_DETECTION
   "MINI"
   "MK4"
@@ -289,15 +285,17 @@ set_feature_for_printers(
   "iX"
   "XL"
   "COREONE"
-  ) # this does require
-# selftest to work
-set_feature_for_printers(HAS_POWER_PANIC "MK4" "MK3.5" "iX" "XL" "COREONE") # this does require
-# selftest and crash detection to work
+  )
+# POWER_PANIC requires SELFTEST and CRASH_DETECTION to work
+set_feature_for_printers_master_board(HAS_POWER_PANIC "MK4" "MK3.5" "iX" "XL" "COREONE")
+define_enum_option(NAME POWER_PANIC_STORAGE VALUE FLASH ALL_VALUES "FLASH;BKPSRAM")
+
 set_feature_for_printers(HAS_PRECISE_HOMING "MK4" "MK3.5")
 set_feature_for_printers(HAS_PRECISE_HOMING_COREXY "iX" "XL" "XL_DEV_KIT" "COREONE")
-set_feature_for_printers_master_board(HAS_PHASE_STEPPING "XL" "iX" "COREONE" "MK4")
+set_feature_for_printers_master_board(HAS_PHASE_STEPPING "XL" "iX" "COREONE")
 set_feature_for_printers_master_board(HAS_PHASE_STEPPING_TOGGLE "XL")
 set_feature_for_printers_master_board(HAS_PHASE_STEPPING_SELFTEST "iX" "XL")
+set_feature_for_printers_master_board(HAS_PHASE_STEPPING_CALIBRATION "XL" "iX" "COREONE")
 set(PRINTERS_WITH_BURST_STEPPING "XL" "MK4" "iX" "COREONE")
 set_feature_for_printers_master_board(
   HAS_INPUT_SHAPER_CALIBRATION "MK4" "MK3.5" "XL" "XL_DEV_KIT" "COREONE"
@@ -315,20 +313,34 @@ set_feature_for_printers(HAS_HUMAN_INTERACTIONS "MINI" "MK4" "MK3.5" "XL" "COREO
 set_feature_for_printers_master_board(HAS_LOADCELL "MK4" "iX" "XL" "XL_DEV_KIT" "COREONE")
 set_feature_for_printers_master_board(HAS_SHEET_PROFILES "MK3.5" "MINI")
 set_feature_for_printers_master_board(HAS_HEATBREAK_TEMP "MK4" "iX" "XL" "XL_DEV_KIT" "COREONE")
+set_feature_for_printers_master_board(HAS_FILAMENT_HEATBREAK_PARAM "iX")
 set(PRINTERS_WITH_RESOURCES "MINI" "MK4" "MK3.5" "XL" "iX" "COREONE")
 set_feature_for_printers(HAS_BOWDEN "MINI")
 set(PRINTERS_WITH_PUPPIES_BOOTLOADER "XL" "iX" "XL_DEV_KIT" "COREONE")
 set(PRINTERS_WITH_DWARF "XL" "XL_DEV_KIT")
-set_feature_for_printers_master_board(HAS_MODULARBED "iX" "XL" "XL_DEV_KIT")
+
+# MODULAR_BED is a bed consisting of several bedlets
+set_feature_for_printers_master_board(HAS_MODULAR_BED "iX" "XL" "XL_DEV_KIT")
+# REMOTE_BED means there is a daughterboard controlling the bed
+set_feature_for_printers_master_board(HAS_REMOTE_BED "iX" "XL" "XL_DEV_KIT")
+# LOCAL_BED means the motherboard is directly controlling the bed
+set_feature_for_printers_master_board(HAS_LOCAL_BED "COREONE" "MINI" "MK4" "MK3.5")
+# PUPPY_MODULARBED is remote modular bed implemented as a puppy, i.e. communicating over modbus
+set_feature_for_printers_master_board(HAS_PUPPY_MODULARBED "iX" "XL" "XL_DEV_KIT")
+
 set_feature_for_printers_master_board(HAS_XBUDDY_EXTENSION "COREONE")
-set_feature_for_printers_master_board(HAS_DOOR_SENSOR "COREONE" "MK4") # MK4: check valid FW-HW
+set_feature_for_printers_master_board(XBUDDY_EXTENSION_VARIANT_STANDARD "COREONE")
+
+# MK4 technically doesn't have door sensor but needs to check valid FW-HW
+set_feature_for_printers_master_board(HAS_DOOR_SENSOR "COREONE" "MK4")
 set_feature_for_printers(HAS_TOOLCHANGER "XL" "XL_DEV_KIT")
 set_feature_for_printers(HAS_SIDE_FSENSOR "iX" "XL" "COREONE")
 set_feature_for_printers(HAS_ADC_SIDE_FSENSOR "XL")
 set_feature_for_printers(HAS_FILAMENT_SENSORS_MENU "XL" "COREONE")
-set_feature_for_printers(HAS_ESP_FLASH_TASK "MK4" "MK3.5" "XL" "MINI" "COREONE") # iX does not need
-                                                                                 # ESP
-# flashing
+
+# iX does not need ESP flashing
+set_feature_for_printers(HAS_ESP_FLASH_TASK "MK4" "MK3.5" "XL" "MINI" "COREONE")
+
 set_feature_for_printers(HAS_EMBEDDED_ESP32 "XL")
 set(PRINTERS_WITH_SIDE_LEDS "XL" "iX" "COREONE")
 set(PRINTERS_WITH_TRANSLATIONS "COREONE" "MK4" "MK3.5" "XL" "MINI")
@@ -339,14 +351,28 @@ set_feature_for_printers(HAS_XLCD "MK4" "MK3.5" "iX" "XL" "COREONE")
 set_feature_for_printers(HAS_MMU2 "MK4" "MK3.5" "COREONE")
 set_feature_for_printers(HAS_CONFIG_STORE_WO_BACKEND "XL_DEV_KIT")
 set_feature_for_printers_master_board(HAS_CHAMBER_API "XL" "COREONE")
-set_feature_for_printers_master_board(HAS_CHAMBER_FILTRATION_API "COREONE")
+set_feature_for_printers_master_board(HAS_CHAMBER_FILTRATION_API "COREONE" "XL")
 set_feature_for_printers_master_board(XL_ENCLOSURE_SUPPORT "XL")
 set_feature_for_printers(HAS_SWITCHED_FAN_TEST "MK4" "MK3.5" "COREONE")
-set_feature_for_printers(HAS_HOTEND_TYPE_SUPPORT "MK4" "MK3.5" "iX" "COREONE" "XL")
+set_feature_for_printers_master_board(HAS_HOTEND_TYPE_SUPPORT "MK4" "MK3.5" "iX" "COREONE" "XL")
 set_feature_for_printers(HAS_EMERGENCY_STOP "COREONE")
-set_feature_for_printers(HAS_AUTO_RETRACT "COREONE")
+set_feature_for_printers(HAS_CEILING_CLEARANCE "COREONE")
+set_feature_for_printers(
+  HAS_CANCEL_OBJECT
+  "MK4"
+  "MK3.5"
+  "iX"
+  "COREONE"
+  "XL"
+  "MINI"
+  )
+set_feature_for_printers(HAS_AUTO_RETRACT "COREONE" "MK4" "XL")
 
-# Checks for bed evenness during G29 and if it's too uneven, offers Z alignment calibration
+# Printers that support any form of backwards gcode compatibility modes
+set_feature_for_printers(HAS_GCODE_COMPATIBILITY "MK3.5" "MK4" "COREONE")
+
+# Checks for bed evenness during G29 and if it's too uneven, offers Z alignment calibration.
+# Requires SELFTEST to work
 set_feature_for_printers(HAS_UNEVEN_BED_PROMPT "COREONE")
 
 set_feature_for_printers(HAS_DOOR_SENSOR_CALIBRATION "COREONE")
@@ -374,7 +400,7 @@ set_feature_for_printers(HAS_REMOTE_ACCELEROMETER "XL" "XL_DEV_KIT")
 # Some printers require manual mounting of accelerometer to the board, nozzle or bed
 set_feature_for_printers(HAS_ATTACHABLE_ACCELEROMETER "MK3.5" "MK4" "COREONE")
 
-set_feature_for_printers(HAS_COLDPULL "MK3.5" "MK4" "XL")
+set_feature_for_printers(HAS_COLDPULL "MK3.5" "MK4" "XL" "COREONE")
 
 set_feature_for_printers(HAS_BED_LEVEL_CORRECTION "MK3.5" "MINI")
 
@@ -383,17 +409,22 @@ set_feature_for_printers(HAS_SHEET_SUPPORT "MINI" "MK3.5")
 set_feature_for_printers(HAS_NFC "MK3.5" "MK4" "COREONE")
 
 set_feature_for_printers(HAS_NOZZLE_CLEANER "iX")
+# BELT_TUNING requires SELFTEST
 set_feature_for_printers(HAS_BELT_TUNING "iX")
+set_feature_for_printers(HAS_MANUAL_BELT_TUNING "COREONE")
 set_feature_for_printers_master_board(HAS_I2C_EXPANDER "MK3.5" "MK4" "COREONE")
 set_feature_for_printers(HAS_WASTEBIN "iX")
-set_feature_for_printers(HAS_GEARS_CALIBRATION "MK4" "COREONE")
+set_feature_for_printers_master_board(HAS_PRINT_FAN_TYPE "XL")
+# GEARBOX_ALIGNMENT requires SELFTEST
+set_feature_for_printers_master_board(HAS_GEARBOX_ALIGNMENT "MK4" "COREONE" "XL")
+set_feature_for_printers_master_board(HAS_CHAMBER_VENTS "COREONE")
 
 # Set printer board
 set(BOARDS_WITH_ADVANCED_POWER "XBUDDY" "XLBUDDY" "DWARF")
 set(BOARDS_WITH_ILI9488 "XBUDDY" "XLBUDDY")
 set(BOARDS_WITH_ST7789V "BUDDY")
 set(BOARDS_WITH_ACCELEROMETER "XBUDDY" "DWARF")
-set(BOARDS_WITH_ARDUINO_USB_SERIAL "BUDDY" "XBUDDY" "XLBUDDY")
+set(BOARDS_WITH_USB_DEVICE "BUDDY" "XBUDDY" "XLBUDDY")
 
 if(${TRANSLATIONS_ENABLED} STREQUAL "<default>")
   if(${PRINTER} IN_LIST PRINTERS_WITH_TRANSLATIONS)
@@ -420,6 +451,7 @@ set(LANGUAGES_AVAILABLE
     IT
     JA
     PL
+    UK
     )
 if("${TRANSLATIONS_LIST}" STREQUAL "<default>")
   if(PRINTER STREQUAL "MINI"
@@ -498,7 +530,7 @@ if(${PRINTER} IN_LIST PRINTERS_WITH_GUI AND BOARD_IS_MASTER_BOARD)
     set(RESOLUTION W480H320)
   elseif(${PRINTER} IN_LIST PRINTERS_WITH_GUI_W240H320)
     set(RESOLUTION W240H320)
-  elseif()
+  else()
     message(FATAL_ERROR "Printer with GUI must have resolution set")
   endif()
   message(STATUS "RESOLUTION: ${RESOLUTION}")
@@ -507,6 +539,13 @@ else()
 endif()
 message(STATUS "Graphical User Interface: ${GUI}")
 define_boolean_option(HAS_GUI ${GUI})
+
+if(BOARD_IS_MASTER_BOARD)
+  set(HAS_PLANNER true)
+else()
+  set(HAS_PLANNER false)
+endif()
+define_boolean_option(HAS_PLANNER ${HAS_PLANNER})
 
 if(ENABLE_BURST
    AND ${PRINTER} IN_LIST PRINTERS_WITH_BURST_STEPPING
@@ -546,8 +585,15 @@ else()
 endif()
 message(STATUS "XLCD_TOUCH_DRIVER: ${HAS_XLCD_TOUCH_DRIVER}")
 
+if(${PRINTER} IN_LIST PRINTERS_WITH_DWARF AND BOARD_IS_MASTER_BOARD)
+  set(HAS_DWARF YES)
+else()
+  set(HAS_DWARF NO)
+endif()
+define_boolean_option(HAS_DWARF ${HAS_DWARF})
+
 if(HAS_DWARF
-   OR HAS_MODULARBED
+   OR HAS_PUPPY_MODULARBED
    OR HAS_XBUDDY_EXTENSION
    )
   set(HAS_PUPPIES YES)
@@ -556,12 +602,12 @@ else()
 endif()
 define_boolean_option(HAS_PUPPIES ${HAS_PUPPIES})
 
-if(${PRINTER} IN_LIST PRINTERS_WITH_DWARF AND BOARD_IS_MASTER_BOARD)
-  set(HAS_DWARF YES)
+if(${BOARD} IN_LIST BOARDS_WITH_USB_DEVICE)
+  set(HAS_USB_DEVICE YES)
 else()
-  set(HAS_DWARF NO)
+  set(HAS_USB_DEVICE NO)
 endif()
-define_boolean_option(HAS_DWARF ${HAS_DWARF})
+define_boolean_option(HAS_USB_DEVICE ${HAS_USB_DEVICE})
 
 if(${BOARD} STREQUAL "XBUDDY" AND HAS_MMU2)
   # for XBUDDY based printers, UART6 is being used either for puppies/MODBUS or directly for the MMU
@@ -669,7 +715,7 @@ else()
 endif()
 define_boolean_option(PUPPY_FLASH_FW ${PUPPY_FLASH_FW})
 
-if(${PRINTER} IN_LIST PRINTERS_WITH_SIDE_LEDS AND NOT IS_KNOBLET)
+if(${PRINTER} IN_LIST PRINTERS_WITH_SIDE_LEDS)
   define_boolean_option(HAS_SIDE_LEDS YES)
 else()
   define_boolean_option(HAS_SIDE_LEDS NO)
@@ -677,11 +723,19 @@ endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(DEBUG YES)
-  define_boolean_option(NETWORKING_BENCHMARK_ENABLED YES)
 else()
   set(DEBUG NO)
-  define_boolean_option(NETWORKING_BENCHMARK_ENABLED NO)
 endif()
+
+if(HAS_LEDS
+   OR HAS_SIDE_LEDS
+   OR HAS_TOOLCHANGER
+   )
+  set(HAS_LEDS_MENU YES)
+else()
+  set(HAS_LEDS_MENU NO)
+endif()
+define_boolean_option(HAS_LEDS_MENU ${HAS_LEDS_MENU})
 
 # define enabled features
 
@@ -699,6 +753,18 @@ else()
   set(BOOTLOADER_UPDATE NO)
 endif()
 define_boolean_option(BOOTLOADER_UPDATE ${BOOTLOADER_UPDATE})
+
+set(NETWORKING_BENCHMARK_ENABLED
+    ${DEBUG}
+    CACHE BOOL "Enable network benchmarking instrumentation"
+    )
+define_boolean_option(NETWORKING_BENCHMARK_ENABLED ${NETWORKING_BENCHMARK_ENABLED})
+
+set(HEAP_INSTRUMENTATION_ENABLED
+    "OFF"
+    CACHE BOOL "Enable heap profiling instrumentation"
+    )
+define_boolean_option(HEAP_INSTRUMENTATION_ENABLED ${HEAP_INSTRUMENTATION_ENABLED})
 
 set(DEVELOPER_MODE
     "OFF"
@@ -721,7 +787,7 @@ define_boolean_option(DEBUG_WITH_BEEPS ${DEBUG_WITH_BEEPS})
 # Eventually, this'll become the only used and supported way to talk to Connect. At that point, both
 # this option and the "old" code will be removed.
 set(WEBSOCKET
-    "OFF"
+    "ON"
     CACHE BOOL "Use websocket to talk to connect. In development"
     )
 define_boolean_option(WEBSOCKET ${WEBSOCKET})

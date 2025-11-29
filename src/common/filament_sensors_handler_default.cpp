@@ -29,6 +29,10 @@
     #include <feature/xbuddy_extension/xbuddy_extension.hpp>
 #endif
 
+#if PRINTER_IS_PRUSA_iX()
+    #include "filament_sensor_ix_side.hpp"
+#endif
+
 using namespace buddy;
 
 static auto *extruder_filament_sensor(uint8_t index) {
@@ -61,6 +65,11 @@ IFSensor *GetSideFSensor([[maybe_unused]] uint8_t index) {
         static FSensorXBuddyExtension xbe_filament_sensor;
         return &xbe_filament_sensor;
     }
+#elif PRINTER_IS_PRUSA_iX()
+    if (index == 0) {
+        static FSensor_iXSide sensor;
+        return &sensor;
+    }
 #endif
 
     return nullptr;
@@ -74,7 +83,6 @@ void fs_process_sample(int32_t fs_raw_value, uint8_t tool_index) {
     FSensorADC *sensor = extruder_filament_sensor(tool_index);
     assert(sensor);
 
-    sensor->record_raw(fs_raw_value);
     sensor->set_filtered_value_from_IRQ(filter.filter(fs_raw_value) ? fs_raw_value : FSensorADCEval::filtered_value_not_ready);
 }
 #endif

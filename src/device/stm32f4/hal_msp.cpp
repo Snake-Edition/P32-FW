@@ -900,6 +900,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim_base) {
     } else if (htim_base->Instance == TIM13) {
         /* Peripheral clock enable */
         __HAL_RCC_TIM13_CLK_ENABLE();
+        __HAL_DBGMCU_FREEZE_TIM13();
 
         HAL_NVIC_SetPriority(TIM8_UP_TIM13_IRQn, ISR_PRIORITY_PHASE_TIMER, 1);
         HAL_NVIC_EnableIRQ(TIM8_UP_TIM13_IRQn);

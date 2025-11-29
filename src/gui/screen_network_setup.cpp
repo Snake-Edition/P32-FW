@@ -5,7 +5,6 @@
 #include <window_menu_virtual.hpp>
 #include <window_menu_adv.hpp>
 #include <i_window_menu_item.hpp>
-#include <str_utils.hpp>
 #include <img_resources.hpp>
 #include <dialog_text_input.hpp>
 #include <scope_guard.hpp>
@@ -18,6 +17,7 @@
 #include "timing.h"
 #include <DialogConnectReg.hpp>
 #include <gui/standard_frame/frame_prompt.hpp>
+#include <gui/standard_frame/frame_qr_prompt.hpp>
 
 #if HAS_NFC()
     #include <nfc.hpp>
@@ -151,7 +151,7 @@ public:
         , wifi_index_(wifi_index)
         , needs_password_(needs_password) {
         strlcpy(ssid_.data(), ssid, ssid_.size());
-        SetLabel(string_view_utf8::MakeCPUFLASH(ssid_.data()));
+        SetLabel(string_view_utf8::MakeRAM(ssid_.data()));
     }
 
     inline int wifi_index() const {
@@ -382,7 +382,6 @@ public:
     {
         this->text.SetText(text);
         link.SetText(string_view_utf8::MakeCPUFLASH(text_url));
-
         static_cast<window_frame_t *>(parent)->CaptureNormalWindow(radio);
     }
 
@@ -394,29 +393,7 @@ private:
     RadioButtonFSM radio;
 };
 
-class FrameHelpQR : public FrameRadioQR {
-
-public:
-#if BOARD_IS_BUDDY()
-    static constexpr const char *qr_addr = "prusa.io/wifiminiqr";
-    static constexpr const char *text_addr = "prusa.io/wifimini";
-
-#elif BOARD_IS_XBUDDY()
-    static constexpr const char *qr_addr = "prusa.io/wifimk4qr";
-    static constexpr const char *text_addr = "prusa.io/wifimk4";
-
-#elif BOARD_IS_XLBUDDY()
-    static constexpr const char *qr_addr = "prusa.io/wifixlqr";
-    static constexpr const char *text_addr = "prusa.io/wifixl";
-
-#else
-    #error "not supported"
-#endif
-
-public:
-    FrameHelpQR(window_t *parent)
-        : FrameRadioQR(parent, Phase::help_qr, _("To setup or troubleshoot your Wi-Fi, please visit:"), text_addr, qr_addr) {}
-};
+using FrameHelpQR = WithConstructorArgs<FrameQRPrompt, Phase::help_qr, N_("To setup or troubleshoot your Wi-Fi, please visit:"), "wifi"_tstr>;
 
 #if HAS_NFC()
 class FrameAskUsePrusaApp : public FrameRadioQR {
@@ -509,7 +486,6 @@ using namespace network_wizard;
 ScreenNetworkSetup::ScreenNetworkSetup()
     : ScreenFSM(N_("NETWORK SETUP"), GuiDefaults::RectScreenNoHeader) {
     header.SetIcon(&img::wizard_16x16);
-    CaptureNormalWindow(inner_frame);
     create_frame();
 }
 

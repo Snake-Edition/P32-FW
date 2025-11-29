@@ -9,6 +9,7 @@
 
 #include <gui/event/focus_event.hpp>
 #include <gui/event/touch_event.hpp>
+#include <option/development_items.h>
 
 namespace window_menu_item_private {
 
@@ -241,7 +242,7 @@ void IWindowMenuItem::Print(Rect16 rect) {
     const auto label_rect = getLabelRect(rect);
 
     if (is_focused() && focused_menu_item_roll.NeedInit()) {
-        focused_menu_item_roll.Init(label_rect, label, label_font, GuiDefaults::MenuPaddingItems, GuiDefaults::MenuAlignment());
+        focused_menu_item_roll.Init(label_rect, label, label_font, GuiDefaults::MenuPaddingItems);
     }
 
     if (IsLabelInvalid()) {
@@ -251,7 +252,7 @@ void IWindowMenuItem::Print(Rect16 rect) {
 
         } else {
             // Not focused -> render without roll
-            render_text_align(label_rect, label, label_font, mi_color_back, mi_color_text, GuiDefaults::MenuPaddingItems, GuiDefaults::MenuAlignment(), true);
+            render_text_align(label_rect, label, label_font, mi_color_back, mi_color_text, GuiDefaults::MenuPaddingItems, text_flags(GuiDefaults::MenuAlignment(), is_multiline::no, check_overflow::no), true);
         }
     }
 
@@ -338,11 +339,11 @@ void IWindowMenuItem::Touch([[maybe_unused]] IWindowMenu &window_menu, [[maybe_u
 }
 
 bool IWindowMenuItem::IsHidden() const {
-    return (hidden == (uint8_t)is_hidden_t::yes) || (hidden == (uint8_t)is_hidden_t::dev && !GuiDefaults::ShowDevelopmentTools);
+    return (hidden == (uint8_t)is_hidden_t::yes) || (hidden == (uint8_t)is_hidden_t::dev && !option::development_items);
 }
 
 bool IWindowMenuItem::IsDevOnly() const {
-    return hidden == (uint8_t)is_hidden_t::dev && GuiDefaults::ShowDevelopmentTools;
+    return hidden == (uint8_t)is_hidden_t::dev && option::development_items;
 }
 
 void IWindowMenuItem::SetIconId(const img::Resource *id) {
@@ -463,4 +464,17 @@ void IWindowMenuItem::event(WindowMenuItemEventContext &ctx) {
         ctx.accept();
     }
 #endif
+}
+
+void IWindowMenuItem::set_is_hidden(is_hidden_t set) {
+    // set_is_hidden should only be called before the items are first rendered
+    // the WindowMenu is not equipped to handle items appearing and disappearing (except for SwapVisibility)
+    assert(invalid_extension && invalid_icon && invalid_label);
+
+    const bool wasHidden = IsHidden();
+    hidden = static_cast<uint8_t>(set);
+
+    if (!IsHidden() && wasHidden) {
+        Invalidate();
+    }
 }

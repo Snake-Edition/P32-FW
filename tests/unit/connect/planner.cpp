@@ -191,17 +191,24 @@ TEST_CASE("Submit gcode") {
     REQUIRE(test.printer.submitted_gcodes.size() == 0);
 
     // The gcode is processed as part of sleep.
-    //
-    // The sleep doesn't get around to sleeping in fact.
-    REQUIRE(test.consume_sleep() == 0);
+    REQUIRE(test.consume_sleep() == 500);
 
     // Processed as part of the short-circuited sleep.
-    test.event_type(EventType::Finished);
-    REQUIRE(test.printer.submitted_gcodes.size() == 3);
+    REQUIRE(test.printer.submitted_gcodes.size() == 4);
 
     REQUIRE(test.printer.submitted_gcodes[0] == "M100");
     REQUIRE(test.printer.submitted_gcodes[1] == "M200 X10 Y20");
     REQUIRE(test.printer.submitted_gcodes[2] == "M300");
+    // The "Cork" added for waiting
+    REQUIRE(strncmp(test.printer.submitted_gcodes[3].c_str(), "M9933 C", 7) == 0);
+
+    uint16_t cookie;
+    REQUIRE(sscanf(test.printer.submitted_gcodes[3].c_str() + 7, "%" SCNu16, &cookie) == 1 /* Number of items parsed */);
+
+    buddy::cork::tracker.mark_done(cookie);
+
+    REQUIRE(test.consume_sleep() == 0);
+    test.event_type(EventType::Finished);
 }
 
 TEST_CASE("Background command resubmit") {
@@ -275,12 +282,15 @@ TEST_CASE("Transport ended") {
     REQUIRE(event != nullptr);
     REQUIRE(event->type == EventType::TransferFinished);
     REQUIRE(event->transfer_id == id);
+
+    // Check the id is never using 32nd bit - should be always 0
+    REQUIRE(((*event->transfer_id).to_uint32_t() & ~0x7FFFFFFF) == 0);
 }
 
 TEST_CASE("Transport ended and started") {
     Test test;
 
-    auto slot = Monitor::instance.allocate(Monitor::Type::Connect, "/usb/stuff.gcode", 1024);
+    auto slot = Monitor::instance.allocate(Monitor::Type::Connect, "/usb/stuff.gcode", false, 1024);
     REQUIRE(slot.has_value());
     auto id = Monitor::instance.id();
     REQUIRE(id.has_value());
@@ -296,7 +306,7 @@ TEST_CASE("Transport ended and started") {
     slot.reset();
 
     // Start a new one.
-    slot = Monitor::instance.allocate(Monitor::Type::Link, "/usb/stuff.gcode", 1024);
+    slot = Monitor::instance.allocate(Monitor::Type::Link, "/usb/stuff.gcode", false, 1024);
 
     // The info/notification that the previous one ended is still available.
     auto action2 = test.planner.next_action(buffer, nullptr);
@@ -304,13 +314,16 @@ TEST_CASE("Transport ended and started") {
     REQUIRE(event != nullptr);
     REQUIRE(event->type == EventType::TransferFinished);
     REQUIRE(event->transfer_id == id);
+
+    // Check the id is never using 32nd bit - should be always 0
+    REQUIRE(((*event->transfer_id).to_uint32_t() & ~0x7FFFFFFF) == 0);
 }
 
 // When lost in history, we lose the notification, but doesn't crash or do anything extra weird.
 TEST_CASE("Transport ended, lost in history") {
     Test test;
 
-    auto slot = Monitor::instance.allocate(Monitor::Type::Connect, "/usb/stuff.gcode", 1024);
+    auto slot = Monitor::instance.allocate(Monitor::Type::Connect, "/usb/stuff.gcode", false, 1024);
     REQUIRE(slot.has_value());
 
     test.consume_telemetry();
@@ -325,7 +338,7 @@ TEST_CASE("Transport ended, lost in history") {
 
     // Start many new ones, to push the old one from the history.
     for (size_t i = 0; i < 5; i++) {
-        slot = Monitor::instance.allocate(Monitor::Type::Link, "/usb/stuff.gcode", 1024);
+        slot = Monitor::instance.allocate(Monitor::Type::Link, "/usb/stuff.gcode", false, 1024);
         slot.reset();
     }
 
@@ -444,6 +457,34 @@ TEST_CASE("Command Set value - chamber.target_temp set/unset logic") {
     }
 }
 
+TEST_CASE("Test ID limited to 31bits only") {
+    Test test;
+
+    // Create ID at the end of 31bit range and increment
+    auto slot1 = Monitor::instance.allocate(Monitor::Type::Connect, "/usb/stuff.gcode", false, 0x7FFFFFFF);
+    REQUIRE(slot1.has_value());
+    auto id1 = Monitor::instance.id();
+    REQUIRE(id1.has_value());
+    if (id1.has_value()) {
+        REQUIRE(((*id1).to_uint32_t() & ~0x7FFFFFFF) == 0);
+    }
+
+    auto slot2 = Monitor::instance.allocate(Monitor::Type::Link, "/usb/stuff.gcode", false);
+    auto id2 = Monitor::instance.id();
+    REQUIRE(id2.has_value());
+    if (id2.has_value()) {
+        REQUIRE(((*id2).to_uint32_t() & ~0x7FFFFFFF) == 0);
+    }
+
+    // Create ID with 32bit set
+    auto slot3 = Monitor::instance.allocate(Monitor::Type::Connect, "/usb/stuff.gcode", false, 0x80000001);
+    auto id3 = Monitor::instance.id();
+    REQUIRE(id3.has_value());
+    if (id3.has_value()) {
+        REQUIRE(((*id3).to_uint32_t() & ~0x7FFFFFFF) == 0);
+    }
+}
+
 namespace buddy {
 extern PWM255OrAuto cооling_fans_pwm;
 } // namespace buddy
@@ -509,4 +550,21 @@ TEST_CASE("Command Set value - xbuddy_extension usb addon power logic") {
         test.planner.command(command);
         REQUIRE_FALSE(buddy::usbpower);
     }
+}
+
+TEST_CASE("Connect duplicates command") {
+    Test test;
+
+    auto command = Command { CommandId(42), SetValue { PropertyName::ChamberFanPwmTarget, 0, int8_t(-1) } };
+    test.planner.command(command);
+    test.event_type(EventType::Finished);
+    test.planner.action_done(ActionResult::Ok);
+    // Once more... we don't do it again.
+    test.planner.command(command);
+    test.event_type(EventType::Rejected);
+    test.planner.action_done(ActionResult::Ok);
+    // A different command (by it's ID) is accepted again.
+    command.id = CommandId(43);
+    test.planner.command(command);
+    test.event_type(EventType::Finished);
 }

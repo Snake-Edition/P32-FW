@@ -14,6 +14,7 @@
 #include <array>
 #include <window_progress.hpp>
 #include "screen_printing_end_result.hpp"
+#include <feature/print_status_message/print_status_message_guard.hpp>
 
 enum class printing_state_t : uint8_t {
     INITIAL,
@@ -24,11 +25,8 @@ enum class printing_state_t : uint8_t {
     RESUMING,
     ABORTING,
     REHEATING,
-    REHEATING_DONE,
-    MBL_FAILED,
     STOPPED,
     PRINTED,
-    COUNT // setting this state == forced update
 };
 
 inline constexpr size_t POPUP_MSG_DUR_MS = 5000;
@@ -75,15 +73,18 @@ class screen_printing_data_t : public ScreenPrintingModel {
     window_text_t w_etime_value;
 
     /**
-     * @brief Shows fields related to time (eg remaining time label + value)
+     * @brief Sets visibility to fields related to remaining time (eg remaining time label + value)
      *
      */
-    void show_time_information();
+    void set_remaining_time_visible(bool visible);
+
+#if HAS_MINI_DISPLAY()
     /**
-     * @brief Hides fields related to time (eg remaining time label + value)
+     * @brief Sets visibility to fields related to end time (eg end time label + value)
      *
      */
-    void hide_time_information();
+    void set_print_time_visible(bool visible);
+#endif
 
     std::array<char, 5> text_filament; // 999m\0 | 1.2m\0
     std::array<char, FILE_NAME_BUFFER_LEN> text_filename;
@@ -111,14 +112,24 @@ class screen_printing_data_t : public ScreenPrintingModel {
     };
 
     static constexpr size_t rotation_time_s { 4 }; // time how often there should be a change between what's currently shown
+    size_t valid_count { std::to_underlying(CurrentlyShowing::_count) }; // how many fields are currently valid
 
     CurrentlyShowing currently_showing { CurrentlyShowing::remaining_time }; // what item is currently shown
     uint32_t last_update_time_s { 0 }; // helper needed to properly rotate
+
+    EnumArray<CurrentlyShowing, std::pair<bool, size_t>, CurrentlyShowing::_count> currently_showing_valid {
+        {
+            { CurrentlyShowing::remaining_time, { true, 0 } },
+            { CurrentlyShowing::end_time, { true, 1 } },
+            { CurrentlyShowing::time_to_change, { true, 2 } },
+            { CurrentlyShowing::time_since_start, { true, 3 } },
+        }
+    };
 #endif
 
     window_text_t message_popup;
-    uint32_t message_popup_close_time = 0;
-    std::array<char, 64> message_buffer;
+    PrintStatusMessage current_message;
+    std::array<char, 256> message_text;
 
 public:
     screen_printing_data_t();
@@ -127,7 +138,6 @@ protected:
     virtual void windowEvent(window_t *sender, GUI_event_t event, void *param) override;
 
 private:
-    void invalidate_print_state();
     void updateTimes();
 
 #if HAS_MINI_DISPLAY()
@@ -138,13 +148,24 @@ private:
     void set_tune_icon_and_label();
     void set_stop_icon_and_label();
     void change_print_state();
-
+#if HAS_LARGE_DISPLAY()
+    /**
+     * @brief Updates the validity of the time fields
+     *
+     * @return true if any of the fields changed validity
+     */
+    bool update_validities();
+    /**
+     * @brief Reindexes the rotating circles
+     *
+     * @return number of valid fields
+     */
+    size_t reindex_rotating_circles();
+#endif
     virtual void stopAction() override;
     virtual void pauseAction() override;
     virtual void tuneAction() override;
 
 public:
     printing_state_t GetState() const;
-
-    virtual void on_message(const char *msg) override;
 };

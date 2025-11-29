@@ -13,10 +13,7 @@
                 "set bbf_over_debugger_path ./build-vscode-buddy/firmware.bbf"
             ],
             "configFiles": [
-                "${workspaceRoot}/utils/debug/00_common.cfg",
-                "${workspaceRoot}/utils/debug/10_custom_config_defaults.cfg",
-                "${workspaceRoot}/utils/debug/20_board_buddy.cfg",
-                "${workspaceRoot}/utils/debug/30_rtt_workaround.cfg"
+                "${workspaceRoot}/utils/debug/buddy.cfg",
             ],
             "toolchainPrefix": "arm-none-eabi",
             "device": "STM32F427ZI",
@@ -41,6 +38,13 @@
                         "port": 0,
                         "noprompt": true,
                         "type": "console"
+                    },
+                    {
+                        "label": "Heap instrumentation",
+                        "port": 1,
+                        "noprompt": true,
+                        "type": "console",
+                        "logfile": "heap_instrumentation.txt"
                     }
                 ]
             }
@@ -57,10 +61,7 @@
                 "set bbf_over_debugger_path ./build-vscode-buddy/firmware.bbf"
             ],
             "configFiles": [
-                "${workspaceRoot}/utils/debug/00_common.cfg",
-                "${workspaceRoot}/utils/debug/10_custom_config_defaults.cfg",
-                "${workspaceRoot}/utils/debug/20_board_buddy.cfg",
-                "${workspaceRoot}/utils/debug/30_rtt_workaround.cfg"
+                "${workspaceRoot}/utils/debug/buddy.cfg",
             ],
             "toolchainPrefix": "arm-none-eabi",
             "device": "STM32F427ZI",
@@ -95,14 +96,8 @@
             "type": "cortex-debug",
             "servertype": "openocd",
             "armToolchainPath": "${workspaceRoot}/.dependencies/gcc-arm-none-eabi-13.2.1/bin",
-            "openOCDPreConfigLaunchCommands": [
-                "set PUPPY_TYPE dwarf"
-            ],
             "configFiles": [
-                "${workspaceRoot}/utils/debug/00_common.cfg",
-                "${workspaceRoot}/utils/debug/10_custom_config_defaults.cfg",
-                "${workspaceRoot}/utils/debug/20_board_puppy.cfg",
-                "${workspaceRoot}/utils/debug/30_rtt_workaround.cfg"
+                "${workspaceRoot}/utils/debug/dwarf.cfg",
             ],
             "toolchainPrefix": "arm-none-eabi",
             "device": "STM32G07",
@@ -137,14 +132,8 @@
             "type": "cortex-debug",
             "servertype": "openocd",
             "armToolchainPath": "${workspaceRoot}/.dependencies/gcc-arm-none-eabi-13.2.1/bin",
-            "openOCDPreConfigLaunchCommands": [
-                "set PUPPY_TYPE dwarf"
-            ],
             "configFiles": [
-                "${workspaceRoot}/utils/debug/00_common.cfg",
-                "${workspaceRoot}/utils/debug/10_custom_config_defaults.cfg",
-                "${workspaceRoot}/utils/debug/20_board_puppy.cfg",
-                "${workspaceRoot}/utils/debug/30_rtt_workaround.cfg"
+                "${workspaceRoot}/utils/debug/dwarf.cfg",
             ],
             "toolchainPrefix": "arm-none-eabi",
             "device": "STM32G07",
@@ -175,14 +164,8 @@
             "type": "cortex-debug",
             "servertype": "openocd",
             "armToolchainPath": "${workspaceRoot}/.dependencies/gcc-arm-none-eabi-13.2.1/bin",
-            "openOCDPreConfigLaunchCommands": [
-                "set PUPPY_TYPE modularbed"
-            ],
             "configFiles": [
-                "${workspaceRoot}/utils/debug/00_common.cfg",
-                "${workspaceRoot}/utils/debug/10_custom_config_defaults.cfg",
-                "${workspaceRoot}/utils/debug/20_board_puppy.cfg",
-                "${workspaceRoot}/utils/debug/30_rtt_workaround.cfg"
+                "${workspaceRoot}/utils/debug/modularbed.cfg",
             ],
             "toolchainPrefix": "arm-none-eabi",
             "device": "STM32G07",
@@ -201,14 +184,8 @@
             "type": "cortex-debug",
             "servertype": "openocd",
             "armToolchainPath": "${workspaceRoot}/.dependencies/gcc-arm-none-eabi-13.2.1/bin",
-            "openOCDPreConfigLaunchCommands": [
-                "set PUPPY_TYPE modularbed"
-            ],
             "configFiles": [
-                "${workspaceRoot}/utils/debug/00_common.cfg",
-                "${workspaceRoot}/utils/debug/10_custom_config_defaults.cfg",
-                "${workspaceRoot}/utils/debug/20_board_puppy.cfg",
-                "${workspaceRoot}/utils/debug/30_rtt_workaround.cfg"
+                "${workspaceRoot}/utils/debug/modularbed.cfg",
             ],
             "toolchainPrefix": "arm-none-eabi",
             "device": "STM32G07",
@@ -236,17 +213,11 @@
             "type": "cortex-debug",
             "servertype": "openocd",
             "armToolchainPath": "${workspaceRoot}/.dependencies/gcc-arm-none-eabi-13.2.1/bin",
-            "openOCDPreConfigLaunchCommands": [
-                "set PUPPY_TYPE xbuddy_extension"
-            ],
             "postLaunchCommands": [
                 "set $pc = &Reset_Handler"
             ],
             "configFiles": [
-                "${workspaceRoot}/utils/debug/00_common.cfg",
-                "${workspaceRoot}/utils/debug/10_custom_config_defaults.cfg",
-                "${workspaceRoot}/utils/debug/20_board_puppy.cfg",
-                "${workspaceRoot}/utils/debug/30_rtt_workaround.cfg"
+                "${workspaceRoot}/utils/debug/xbuddy_extension.cfg",
             ],
             "toolchainPrefix": "arm-none-eabi",
             "device": "STM32H503CBU7",
@@ -278,14 +249,8 @@
             "type": "cortex-debug",
             "servertype": "openocd",
             "armToolchainPath": "${workspaceRoot}/.dependencies/gcc-arm-none-eabi-13.2.1/bin",
-            "openOCDPreConfigLaunchCommands": [
-                "set PUPPY_TYPE xbuddy_extension"
-            ],
             "configFiles": [
-                "${workspaceRoot}/utils/debug/00_common.cfg",
-                "${workspaceRoot}/utils/debug/10_custom_config_defaults.cfg",
-                "${workspaceRoot}/utils/debug/20_board_puppy.cfg",
-                "${workspaceRoot}/utils/debug/30_rtt_workaround.cfg"
+                "${workspaceRoot}/utils/debug/xbuddy_extension.cfg",
             ],
             "toolchainPrefix": "arm-none-eabi",
             "device": "STM32H503CBU7",

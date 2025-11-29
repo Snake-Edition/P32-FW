@@ -1,7 +1,6 @@
 
 #include "screen_menu_filament_changeall.hpp"
 
-#include <str_utils.hpp>
 #include <algorithm_extensions.hpp>
 
 #include <ScreenHandler.hpp>
@@ -14,7 +13,7 @@
 #include <window_dlg_wait.hpp>
 #include "Marlin/src/gcode/queue.h"
 #include "Marlin/src/module/planner.h"
-#include <str_utils.hpp>
+#include <utils/string_builder.hpp>
 #include <algorithm_extensions.hpp>
 #include <filament_list.hpp>
 
@@ -27,13 +26,12 @@ MI_ActionSelect::MI_ActionSelect(uint8_t tool_ix)
     has_filament_loaded = (config_store().get_filament_type(tool_ix) != FilamentType::none);
     set_is_hidden(!is_tool_enabled(tool_ix));
     SetLabel(_(HAS_MMU2() ? N_("Tool %u Filament") : N_("Filament %u")).formatted(label_params, static_cast<unsigned>(tool_ix) + 1));
-    index_mapping.set_item_enabled<Action::unload>(has_filament_loaded);
 }
 
 void MI_ActionSelect::set_config(const ConfigItem &set) {
     // By using enforce_first_item, we make sure the target filament is in the list (it might be hidden otherwise) and that it's on the first place (which is a welcome bonus)
-    const size_t filament_list_size = generate_filament_list(filament_list, { .enforce_first_item = set.new_filament });
-    index_mapping.set_section_size<Action::change>(filament_list_size);
+    generate_filament_list(filament_list, { .enforce_first_item = set.new_filament });
+    index_mapping.set_section_size<Action::change>(filament_list.size());
 
     color = set.color;
     set_current_item([&] -> size_t {
@@ -45,7 +43,7 @@ void MI_ActionSelect::set_config(const ConfigItem &set) {
             return index_mapping.to_index<Action::unload>();
 
         case Action::change:
-            return index_mapping.to_index<Action::change>(std::find(filament_list.begin(), filament_list.begin() + filament_list_size, set.new_filament) - filament_list.begin());
+            return index_mapping.to_index<Action::change>(stdext::index_of(filament_list, set.new_filament));
         }
 
         std::abort();
@@ -162,12 +160,7 @@ void MenuMultiFilamentChange::carry_out_changes() {
     // Lift Z to prevent unparking and parking of each tool
     marlin_client::gcode("G27 P0 Z40");
 
-    // Wait for Z to finish
-    gui_dlg_wait([] {
-        if (!(queue.has_commands_queued() || planner.processing())) {
-            Screens::Access()->Close();
-        }
-    });
+    window_dlg_wait_t::wait_for_gcodes_to_finish();
 #endif
 
     /* MMU2 Reimplementation
@@ -227,7 +220,7 @@ void MenuMultiFilamentChange::carry_out_changes() {
     }
 
     // Wait for all changes to finish
-    while (queue.has_commands_queued() || planner.processing()) {
+    while (marlin_vars().is_processing.get()) {
         gui::TickLoop();
         DialogHandler::Access().Loop();
         gui_loop();

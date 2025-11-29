@@ -49,5 +49,5 @@ string_view_utf8 FooterItemCurrentTool::static_makeView(int value) {
     buff[0] = (value % 10) + '0'; // avoid rendering >1 characters
 #endif /*HAS_TOOLCHANGER()*/
 
-    return string_view_utf8::MakeRAM((const uint8_t *)buff);
+    return string_view_utf8::MakeRAM(buff);
 }

@@ -9,7 +9,6 @@
 #include <config_store/constants.hpp>
 #include <guiconfig/guiconfig.h>
 #include <MItem_network.hpp>
-#include <str_utils.hpp>
 #include <gui/qr.hpp>
 
 // ----------------------------------------------------------------
@@ -47,12 +46,6 @@ protected:
 };
 
 class MI_PL_PASSWORD_VALUE : public WiInfo<config_store_ns::pl_password_size> {
-#if HAS_MINI_DISPLAY()
-    constexpr static const char *const label = "";
-#else
-    constexpr static const char *const label = N_("Password");
-#endif
-
 public:
     MI_PL_PASSWORD_VALUE();
 

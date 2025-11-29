@@ -27,7 +27,7 @@ public:
 };
 
 /// Automatically lays out the windows in a vertical stack, based on the provided configuration
-void layout_vertical_stack(const Rect16 &rect, const std::initializer_list<window_t *> &windows, const std::initializer_list<StackLayoutItem> &items);
+void layout_vertical_stack(const Rect16 &rect, const std::span<window_t *> &windows, const std::span<const StackLayoutItem> &items);
 
 namespace standard_stack_layout {
 
@@ -42,6 +42,10 @@ static constexpr StackLayoutItem for_progress_bar {
     .margin_side = 32,
     .margin_top = 12,
     .margin_bottom = 8,
+};
+
+static constexpr StackLayoutItem for_footer {
+    .height = GuiDefaults::FooterHeight,
 };
 
 } // namespace standard_stack_layout

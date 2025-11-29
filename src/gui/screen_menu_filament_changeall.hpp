@@ -29,7 +29,7 @@ private:
     static constexpr auto items = std::to_array<DynamicIndexMappingRecord<Action>>({
         Action::keep,
         { Action::change, DynamicIndexMappingType::dynamic_section },
-        { Action::unload, DynamicIndexMappingType::optional_item },
+        Action::unload,
     });
 
 private:
@@ -39,7 +39,7 @@ private:
 
     StringViewUtf8Parameters<2> label_params;
     DynamicIndexMapping<items> index_mapping;
-    FilamentListStorage filament_list;
+    FilamentList filament_list;
 };
 
 class MI_ApplyChanges : public IWindowMenuItem {

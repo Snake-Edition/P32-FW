@@ -1,6 +1,5 @@
 #include <version/version.hpp>
 
-#include <algorithm>
 #include <cstring>
 #include <option/bootloader.h>
 #include <option/enable_translation_cs.h>
@@ -10,7 +9,7 @@
 #include <option/enable_translation_it.h>
 #include <option/enable_translation_ja.h>
 #include <option/enable_translation_pl.h>
-#include <printers.h>
+#include <option/enable_translation_uk.h>
 
 #define _STR(x) #x
 #define STR(x)  _STR(x)
@@ -31,22 +30,6 @@ const char project_version_suffix_short[] = STR(FW_VERSION_SUFFIX_SHORT);
 
 const int project_build_number = FW_BUILD_NUMBER;
 
-#if PRINTER_IS_PRUSA_MINI()
-const char project_firmware_name[] = "Buddy_MINI";
-#elif PRINTER_IS_PRUSA_XL()
-const char project_firmware_name[] = "Buddy_XL";
-#elif PRINTER_IS_PRUSA_MK4()
-const char project_firmware_name[] = "Buddy_MK4";
-#elif PRINTER_IS_PRUSA_MK3_5()
-const char project_firmware_name[] = "Buddy_MK3_5";
-#elif PRINTER_IS_PRUSA_iX()
-const char project_firmware_name[] = "Buddy_iX";
-#elif PRINTER_IS_PRUSA_COREONE()
-const char project_firmware_name[] = "Buddy_CORE_ONE";
-#else
-    #error "Unknown PRINTER_TYPE."
-#endif
-
 const BuildIdentification project_build_identification {
     .commit_hash = STR(FW_COMMIT_HASH),
     .project_version_full = STR(FW_VERSION_FULL),
@@ -58,6 +41,7 @@ const BuildIdentification project_build_identification {
         | ENABLE_TRANSLATION_IT() << 4
         | ENABLE_TRANSLATION_PL() << 5
         | ENABLE_TRANSLATION_JA() << 6
+        | ENABLE_TRANSLATION_UK() << 7
         //
         ),
     .printer_code = PRINTER_CODE,
@@ -78,22 +62,5 @@ void fill_project_version_no_dots(char *buffer, size_t buffer_size) {
         ++buffer_i;
     }
 }
-
-/* -===============================================(:>- */
-// convert version from 1.2.34 to 1.2.3.4 (or 1.2.3 to 1.2.3.0)
-void snake_version(char *version, int length) {
-    strncpy(version, version::project_version_full, length);
-    int project_length = strlen(version::project_version_full);
-    if (version::project_version_full[project_length - 2] == '.') {
-        version[project_length + 2] = 0;
-        version[project_length + 1] = '0';
-        version[project_length - 0] = '.';
-    } else {
-        version[project_length + 1] = 0;
-        version[project_length - 0] = version[project_length - 1];
-        version[project_length - 1] = '.';
-    }
-}
-/* -===============================================(:>- */
 
 } // namespace version

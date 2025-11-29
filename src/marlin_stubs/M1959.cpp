@@ -2,7 +2,6 @@
 
 #include <buddy/unreachable.hpp>
 #include <common/marlin_server.hpp>
-#include <common/str_utils.hpp>
 #include <Marlin/src/gcode/calibrate/M958.hpp>
 #include <Marlin/src/gcode/gcode.h>
 #include <Marlin/src/module/tool_change.h>
@@ -175,9 +174,12 @@ static PhasesInputShaperCalibration parking(Context &context) {
 #endif
 
     // Home if not homed
-    if (!all_axes_known()) {
-        GcodeSuite::G28_no_parser(true, true, true, { .only_if_needed = true, .z_raise = 0 });
-    }
+    GcodeSuite::G28_no_parser(true, true, true,
+        {
+            .only_if_needed = true,
+            .z_raise = 0,
+            .precise = false, // We don't need precise position for this procedure
+        });
 
 #if HAS_REMOTE_ACCELEROMETER()
     // Without tool being picked there is no accelerometer data
@@ -332,7 +334,7 @@ static PhasesInputShaperCalibration measuring_axis(
             progress_hook_data.prev_progress = params.progress;
         }
 
-        idle(true, true);
+        idle(true);
         return true;
     };
 
@@ -435,12 +437,12 @@ static PhasesInputShaperCalibration computing(Context &context) {
 
         fsm::PhaseData data {
             static_cast<uint8_t>(255 * progress),
-            ftrstd::to_underlying(type),
+            std::to_underlying(type),
             logicalAxis,
             0,
         };
         marlin_server::fsm_change(PhasesInputShaperCalibration::computing, data);
-        idle(true, true);
+        idle(true);
         return true;
     };
 

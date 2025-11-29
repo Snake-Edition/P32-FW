@@ -71,11 +71,11 @@ bool IPartHandler::Loop() {
         next();
         return true;
     default: {
-        auto loop_mark = ftrstd::to_underlying(current_loop_result);
+        auto loop_mark = std::to_underlying(current_loop_result);
 
         // LoopResult::MarkLoop0 also serves as flag, see enum definition
-        if (loop_mark & ftrstd::to_underlying(LoopResult::MarkLoop0)) {
-            loop_mark &= ~ftrstd::to_underlying(LoopResult::MarkLoop0);
+        if (loop_mark & std::to_underlying(LoopResult::MarkLoop0)) {
+            loop_mark &= ~std::to_underlying(LoopResult::MarkLoop0);
             if (loop_mark >= LoopMarkCount) {
                 bsod("MarkLoop out of range");
             }
@@ -85,8 +85,8 @@ bool IPartHandler::Loop() {
         }
 
         // LoopResult::GoToMark0 also serves as flag, see enum definition
-        if (loop_mark & ftrstd::to_underlying(LoopResult::GoToMark0)) {
-            loop_mark &= ~ftrstd::to_underlying(LoopResult::GoToMark0);
+        if (loop_mark & std::to_underlying(LoopResult::GoToMark0)) {
+            loop_mark &= ~std::to_underlying(LoopResult::GoToMark0);
             if (loop_mark >= LoopMarkCount) {
                 bsod("GoToMark out of range");
             }
@@ -171,7 +171,7 @@ void IPartHandler::Abort() {
     // Wait till all commands are processed before calling Abort
     // Abort might be restoring phase stepping config, which would trigger some asserts if quick_stop is not processed
     while (planner.processing()) {
-        idle(true, true);
+        idle(true);
     }
 }
 

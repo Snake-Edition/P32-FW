@@ -17,10 +17,10 @@ int FooterItemFSValue::static_readValue() {
 string_view_utf8 FooterItemFSValue::static_makeView(int value) {
     // Show --- if no tool is picked
     if (value == no_tool_value) {
-        return string_view_utf8::MakeCPUFLASH(reinterpret_cast<const uint8_t *>(no_tool_str));
+        return string_view_utf8::MakeCPUFLASH(no_tool_str);
     }
 
     static char buff[16];
     snprintf(buff, sizeof(buff), "%d", value);
-    return string_view_utf8::MakeRAM((const uint8_t *)buff);
+    return string_view_utf8::MakeRAM(buff);
 }

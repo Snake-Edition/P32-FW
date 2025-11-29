@@ -123,7 +123,7 @@ TEST_CASE("Render") {
         stringstream e;
         // clang-format off
         e << "{"
-            "\"transfer_id\":" << *id << ","
+            "\"transfer_id\":" << (*id).to_uint32_t() << ","
             "\"transfer_transferred\":0,"
             "\"transfer_time_remaining\":0,"
             "\"transfer_progress\":0.0,"
@@ -373,7 +373,7 @@ TEST_CASE("Render") {
             "},"
             "\"state\":\"IDLE\","
             "\"command_id\":11,"
-            "\"transfer_id\":" << *id << ","
+            "\"transfer_id\":" << (*id).to_uint32_t() << ","
             "\"event\":\"TRANSFER_INFO\""
         "}";
         // clang-format on
@@ -394,7 +394,7 @@ TEST_CASE("Render") {
         e << "{"
             "\"state\":\"IDLE\","
             "\"command_id\":11,"
-            "\"transfer_id\":" << *id << ","
+            "\"transfer_id\":" << (*id).to_uint32_t() << ","
             "\"event\":\"REJECTED\""
         "}";
         // clang-format on
@@ -425,7 +425,7 @@ TEST_CASE("Render") {
             "},"
             "\"state\":\"IDLE\","
             "\"command_id\":11,"
-            "\"transfer_id\":" << *id << ","
+            "\"transfer_id\":" << (*id).to_uint32_t() << ","
             "\"event\":\"TRANSFER_INFO\""
         "}";
         // clang-format on

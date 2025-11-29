@@ -29,6 +29,7 @@ target_sources(
           window_menu_bar.cpp
           window_menu_virtual.cpp
           window_msgbox.cpp
+          window_msgbox_happy_printing.cpp
           window_numb.cpp
           window_progress.cpp
           window_qr.cpp
@@ -44,7 +45,7 @@ target_sources(
 
 # has LEDS
 if(HAS_LEDS)
-  target_sources(firmware PRIVATE gui_leds.cpp led_lcd_cs_selector.cpp)
+  target_sources(firmware PRIVATE led_lcd_cs_selector.cpp)
 endif()
 
 if(HAS_TOOLCHANGER)

@@ -1,22 +1,17 @@
 #pragma once
 #include <inplace_function.hpp>
 #include <stdint.h>
-#include "crc32.h"
 #include <stdlib.h>
 #include <string.h>
 #include <optional>
-#include "st25dv64k.h"
-#include <algorithm>
-#include "bsod.h"
 #include <freertos/mutex.hpp>
 #include <mutex>
-#include <variant>
-#include "store_item.hpp"
 #include <span>
-#include <memory>
+#include <atomic>
 #include <storage_drivers/storage.hpp>
 #include <assert.h>
 #include <type_traits>
+#include <journal/concepts.hpp>
 
 namespace journal {
 
@@ -141,21 +136,26 @@ public:
         Backend &backend;
 
         Type type = Type::transaction;
-        Address last_item_address = type == Type::version_migration ? backend.current_next_address : backend.current_address;
+        Address last_item_address;
         CRCType crc = 0;
         CRCType last_item_crc = 0;
         ItemHeader last_item_header = { true, 0, 0 };
         uint16_t item_count = 0;
+        // The user transactions / non-migration ones can be initiated by
+        // multiple threads concurrently. We merge them in such case, as these
+        // transactions are mostly just optimizing the storage space on the
+        // eeprom.
+        //
+        // Ref count specifies how many there are concurrently. When dropping
+        // to 0, we destroy the object.
+        //
+        // Unused and not tracked for other types.
+        uint16_t ref_count = 1;
 
         Transaction(Type type, Backend &backend);
         ~Transaction();
         void calculate_crc(Id id, const std::span<const uint8_t> &data);
         void store_item(Id id, const std::span<const uint8_t> &data);
-
-        /// Called if bank migration happens during a transaction – that renders the transaction invalid.
-        /// Throws away the previous transaction data and reinitializes the transaction context, so that the transaction can continue.
-        /// In this case, we lose the atomicity of the transaction.
-        void reinitialize();
     };
 
     /**
@@ -253,6 +253,8 @@ public:
 
     Address current_address = 0; // current position of the main bank 'end' (where next item will be stored ie without end item transaction)
     Address current_next_address = 0; // current position of the next bank 'end' (needed for migrating_transaction)
+
+    /// Increases with each bank migration (persistent across restarts)
     uint32_t current_bank_id = 0;
 
     /**
@@ -365,6 +367,22 @@ public:
     Backend(Backend &&other) = delete;
     Backend &operator=(const Backend &other) = delete;
     Backend &operator=(Backend &&other) = delete;
+
+public:
+    auto item_write_count() const {
+        return item_write_count_.load(std::memory_order_relaxed);
+    }
+
+    auto bank_migration_count() const {
+        return bank_migration_count_.load(std::memory_order_relaxed);
+    }
+
+private:
+    /// Increases with every item write outside of bank migrations
+    std::atomic<uint32_t> item_write_count_ = 0;
+
+    /// Number of migrations done since printer start - metric
+    std::atomic<uint32_t> bank_migration_count_ = 0;
 };
 
 template <uint16_t ADDRESS, uint16_t SIZE, configuration_store::Storage &(storage)()>

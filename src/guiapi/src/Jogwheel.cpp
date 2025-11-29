@@ -153,7 +153,7 @@ bool Jogwheel::IsBtnPressed() {
 void Jogwheel::ChangeStateFromISR(BtnState_t new_state) {
     assert(initialized);
     btn_state = new_state;
-    std::ignore = queue.send_from_isr(btn_state);
+    (void)queue.send_from_isr(btn_state);
 }
 
 void Jogwheel::Update1msFromISR() {

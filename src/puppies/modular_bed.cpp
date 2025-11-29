@@ -11,7 +11,6 @@
 #include "printers.h"
 #include <utility_extensions.hpp>
 #include <i18n.h>
-#include <option/is_knoblet.h>
 #include <cassert>
 #include <limits>
 #include <numeric>
@@ -53,8 +52,8 @@ CommunicationStatus ModularBed::initial_scan() {
         log_info(ModularBed, "HwOtpTimestsamp: %" PRIu32, general_static.value.hw_otp_timestamp);
 
         serial_nr_t sn = {}; // Last byte has to be '\0'
-        static constexpr uint16_t raw_datamatrix_regsize = ftrstd::to_underlying(SystemInputRegister::hw_raw_datamatrix_last)
-            - ftrstd::to_underlying(SystemInputRegister::hw_raw_datamatrix_first) + 1;
+        static constexpr uint16_t raw_datamatrix_regsize = std::to_underlying(SystemInputRegister::hw_raw_datamatrix_last)
+            - std::to_underlying(SystemInputRegister::hw_raw_datamatrix_first) + 1;
         // Check size of text -1 as the terminating \0 is not sent
         static_assert((raw_datamatrix_regsize * sizeof(uint16_t)) == sn.size() - 1, "Size of raw datamatrix doesn't fit modbus registers");
 
@@ -199,32 +198,27 @@ CommunicationStatus ModularBed::read_bedlet_data() {
             bedlet_data.value.d_value[i],
             bedlet_data.value.tc_value[i]);
 
-        const auto fault_int { ftrstd::to_underlying(bedlet_data.value.fault_status[i]) };
+        const auto fault_int { std::to_underlying(bedlet_data.value.fault_status[i]) };
         if (fault_int > 0) {
             const auto bedlet_number { bedlet_idx_to_board_number(i) };
-            if constexpr (option::is_knoblet) {
-                log_debug(ModularBed, "Bedlet %d: Error %d", bedlet_number, fault_int);
-                break;
-            }
-
-            if (fault_int & ftrstd::to_underlying(HeatbedletError::HeaterDisconnected)) {
+            if (fault_int & std::to_underlying(HeatbedletError::HeaterDisconnected)) {
                 fatal_error(ErrCode::ERR_TEMPERATURE_MB_HEATER_DISCONNECTED, bedlet_number);
-            } else if (fault_int & ftrstd::to_underlying(HeatbedletError::HeaterShortCircuit)) {
+            } else if (fault_int & std::to_underlying(HeatbedletError::HeaterShortCircuit)) {
                 fatal_error(ErrCode::ERR_TEMPERATURE_MB_HEATER_SHORT, bedlet_number);
-            } else if (fault_int & ftrstd::to_underlying(HeatbedletError::TemperatureBelowMinimum)) {
+            } else if (fault_int & std::to_underlying(HeatbedletError::TemperatureBelowMinimum)) {
                 fatal_error(ErrCode::ERR_TEMPERATURE_MB_MINTEMP_ERR, bedlet_number);
-            } else if (fault_int & ftrstd::to_underlying(HeatbedletError::TemperatureAboveMaximum)) {
+            } else if (fault_int & std::to_underlying(HeatbedletError::TemperatureAboveMaximum)) {
                 fatal_error(ErrCode::ERR_TEMPERATURE_MB_MAXTEMP_ERR, bedlet_number);
-            } else if (fault_int & ftrstd::to_underlying(HeatbedletError::TemperatureDropDetected)) {
+            } else if (fault_int & std::to_underlying(HeatbedletError::TemperatureDropDetected)) {
                 fatal_error(ErrCode::ERR_TEMPERATURE_MB_DROP_TEMP, bedlet_number);
-            } else if (fault_int & ftrstd::to_underlying(HeatbedletError::TemperaturePeakDetected)) {
+            } else if (fault_int & std::to_underlying(HeatbedletError::TemperaturePeakDetected)) {
                 fatal_error(ErrCode::ERR_TEMPERATURE_MB_PEAK_TEMP, bedlet_number);
-            } else if (fault_int & ftrstd::to_underlying(HeatbedletError::PreheatError)) {
+            } else if (fault_int & std::to_underlying(HeatbedletError::PreheatError)) {
                 fatal_error(ErrCode::ERR_TEMPERATURE_MB_PREHEAT_ERR, bedlet_number);
-            } else if (fault_int & ftrstd::to_underlying(HeatbedletError::TestHeatingError)) {
+            } else if (fault_int & std::to_underlying(HeatbedletError::TestHeatingError)) {
                 fatal_error(ErrCode::ERR_TEMPERATURE_MB_TEST_HEATING_ERR, bedlet_number);
 #if PRINTER_IS_PRUSA_iX()
-            } else if (fault_int & ftrstd::to_underlying(HeatbedletError::HeaterConnected)) {
+            } else if (fault_int & std::to_underlying(HeatbedletError::HeaterConnected)) {
                 fatal_error(ErrCode::ERR_TEMPERATURE_MB_HEATER_CONNECTED, bedlet_number);
 #endif
             } else {
@@ -244,10 +238,10 @@ CommunicationStatus ModularBed::read_general_fault() {
     log_debug(ModularBed, "Fault status: %d", static_cast<int>(general_fault.value));
     metric_record_integer(&metric_state, static_cast<int>(general_fault.value));
 
-    const auto fault_int { ftrstd::to_underlying(general_fault.value) };
-    if (fault_int & ftrstd::to_underlying(SystemError::OverCurrent)) {
+    const auto fault_int { std::to_underlying(general_fault.value) };
+    if (fault_int & std::to_underlying(SystemError::OverCurrent)) {
         fatal_error(ErrCode::ERR_ELECTRO_MB_OVERCURRENT);
-    } else if (fault_int & ftrstd::to_underlying(SystemError::UnexpectedCurrent)) {
+    } else if (fault_int & std::to_underlying(SystemError::UnexpectedCurrent)) {
         fatal_error(ErrCode::ERR_ELECTRO_MB_INVALID_CURRENT);
     } // other errors are handled by heatbedlet
     return status;
@@ -293,7 +287,7 @@ CommunicationStatus ModularBed::read_mcu_temperature() {
 
     log_debug(ModularBed, "MCU Temperature: %d", mcu_temperature.value);
     metric_record_float(&metric_mcu_temperature, mcu_temperature.value);
-    sensor_data().mbedMCUTemperature = mcu_temperature.value;
+    sensor_data().bedMCUTemperature = mcu_temperature.value;
     return status;
 }
 
@@ -489,6 +483,10 @@ float ModularBed::get_heater_current() {
 uint16_t ModularBed::get_mcu_temperature() {
     Lock guard(mutex);
     return mcu_temperature.value;
+}
+
+void ModularBed::safe_state() {
+    buddy::hw::modularBedReset.set();
 }
 
 ModularBed modular_bed(puppyModbus, PuppyBootstrap::get_modbus_address_for_dock(Dock::MODULAR_BED));

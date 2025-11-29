@@ -114,6 +114,9 @@ public:
         /// The prefetch can possibly recover from the error states by itself.
         /// !!! To be used only for early warnings, for all other purposes, check result of read() !!!
         Status tail_status;
+
+        /// Is there an active fetch running?
+        bool is_fetching;
     };
 
     /// \returns various metrics regarding the media prefetch
@@ -263,6 +266,9 @@ private:
 
             /// If set, denotes that the gcode did not fit into the buffer and was cropped
             bool cropped = false;
+
+            /// If set, denotes that the buffer contains a ';' character
+            bool contains_semicolon = false;
 
         } command_buffer;
 

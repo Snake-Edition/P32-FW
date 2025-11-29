@@ -1,39 +1,46 @@
 #include "PrusaGcodeSuite.hpp"
+
+#include <option/has_filament_heatbreak_param.h>
+
 #include <filament.hpp>
 #include <temperature.hpp>
+#include <utils/string_builder.hpp>
 
 /** \addtogroup G-Codes
  * @{
  */
 
 /**
- *### M865: Configure filament parameters
+ *### M865: Manage filament parameters
+ *
+ * Utility G-Code that allows managing filament types and their parameters.
+ * Allows changing filament parameters and force-setting the currently loaded filament.
+ * Also print selected filament parameters to the serial.
  *
  *#### Parameters
- * - `I<ix>` - Configure parameters of a Custom filament currently loaded to the specified tool (indexed from 0)
- * - `U<ix>` - Configure parameters of a User filament (indexed from 0)
- * - `X` - Configure parameters of a Custom filament type that will be loaded using `M600 F"##"` (or similar filament change gcode)
- * - `F"<preset>"` - Configure parameters of User filament with this name  (or select Preset filament for `L`)
+ * - `S"<name>"` - Select filament with the specified name
+ * - `I<ix>` - Select filament currently loaded to the specified tool (indexed from 0)
+ * - `U<ix>` - Select User filament (indexed from 0)
+ * - `X` - Select (pending) Custom filament type that will be loaded using `M600 F"#"` (or similar filament change gcode)
  *
  * - `L<ix>` - Set currently loaded filament for the given tool to the selected filament
  *
  * - `R` - Reset parameters not specified in this gcode to defaults
  *
- * - `T` - Nozzle temperature
- * - `P` - Nozzle preheat temperature
- * - `B` - Bed temperature
- * - `A` - Is abrasive
- * - `G` - Is flexible
+ * - `T<val>` - Set nozzle temperature
+ * - `P<val>` - Set nozzle preheat temperature
+ * - `B<val>` - Set bed temperature
+ * - `H<val>` - Set heatbreak temperature
+ * - `A<val>` - Set is abrasive
+ * - `G<val>` - Set disable auto retract (1 = no retraction)
  *
- * - `C` - Target chamber temperature
- * - `D` - Minimum chamber temperature
- * - `E` - Maximum chamber temperature
- * - `F` - Requries filtration
+ * - `C<val>` - Set target chamber temperature
+ * - `D<val>` - Set minimum chamber temperature
+ * - `E<val>` - Set maximum chamber temperature
+ * - `F<val>` - Set requires filtration
  *
- * - `N"<string>"` - New filament name
+ * - `N"<name>"` - Set name
  *
- * Ad-hoc/custom filaments can the be referenced in other gcodes using adhoc_filament_gcode_prefix.
- * For example `M600 S"#0"` will load ad-hoc filament previously set with `M865 I0`.
  */
 void PrusaGcodeSuite::M865() {
     GCodeParser2 p;
@@ -43,11 +50,8 @@ void PrusaGcodeSuite::M865() {
 
     FilamentType filament_type;
 
-    if (const auto slot = p.option<uint8_t>('I', static_cast<uint8_t>(0), static_cast<uint8_t>(adhoc_filament_type_count - 1))) {
-        filament_type = AdHocFilamentType { .tool = *slot };
-        if (config_store().get_filament_type(*slot) != filament_type) {
-            SERIAL_ERROR_MSG("The selected tool does not have the ad-hoc filament loaded. Changes will have no effect.");
-        }
+    if (const auto slot = p.option<uint8_t>('I', static_cast<uint8_t>(0), static_cast<uint8_t>(EXTRUDERS - 1))) {
+        filament_type = config_store().get_filament_type(*slot);
 
     } else if (p.option<bool>('X').value_or(false)) {
         filament_type = PendingAdHocFilamentType {};
@@ -55,7 +59,7 @@ void PrusaGcodeSuite::M865() {
     } else if (const auto slot = p.option<uint8_t>('U', static_cast<uint8_t>(0), static_cast<uint8_t>(user_filament_type_count - 1))) {
         filament_type = UserFilamentType { .index = *slot };
 
-    } else if (const auto ft = p.option<FilamentType>('F')) {
+    } else if (const auto ft = p.option<FilamentType>('S')) {
         filament_type = *ft;
 
     } else {
@@ -69,38 +73,22 @@ void PrusaGcodeSuite::M865() {
         params = {};
     }
 
-    // We cannot use store_option here because FilamentTypeParameters is packed :(
-    if (const auto opt = p.option<decltype(FilamentTypeParameters::nozzle_temperature)>('T')) {
-        params.nozzle_temperature = *opt;
-    }
-    if (const auto opt = p.option<decltype(FilamentTypeParameters::nozzle_preheat_temperature)>('P')) {
-        params.nozzle_preheat_temperature = *opt;
-    }
-    if (const auto opt = p.option<decltype(FilamentTypeParameters::heatbed_temperature)>('B')) {
-        params.heatbed_temperature = *opt;
-    }
+    p.store_option('T', params.nozzle_temperature);
+    p.store_option('P', params.nozzle_preheat_temperature);
+    p.store_option('B', params.heatbed_temperature);
 
-    if (const auto opt = p.option<bool>('A')) {
-        params.is_abrasive = *opt;
-    }
-    if (const auto opt = p.option<bool>('G')) {
-        params.is_flexible = *opt;
-    }
+    p.store_option('A', params.is_abrasive);
+    p.store_option('G', params.do_not_auto_retract);
+
+#if HAS_FILAMENT_HEATBREAK_PARAM()
+    p.store_option('H', params.heatbreak_temperature);
+#endif
 
 #if HAS_CHAMBER_API()
-    if (const auto opt = p.option<uint8_t>('C')) {
-        params.chamber_target_temperature = *opt;
-    }
-    if (const auto opt = p.option<uint8_t>('D')) {
-        params.chamber_min_temperature = *opt;
-    }
-    if (const auto opt = p.option<uint8_t>('E')) {
-        params.chamber_max_temperature = *opt;
-    }
-
-    if (const auto opt = p.option<bool>('F')) {
-        params.requires_filtration = *opt;
-    }
+    p.store_option('C', params.chamber_target_temperature);
+    p.store_option('D', params.chamber_min_temperature);
+    p.store_option('E', params.chamber_max_temperature);
+    p.store_option('F', params.requires_filtration);
 #endif
 
     std::array<char, filament_name_buffer_size - 1> name_buf;
@@ -119,8 +107,18 @@ void PrusaGcodeSuite::M865() {
         filament_type.set_parameters(params);
     }
 
-    if (auto load = p.option<uint8_t>('L', static_cast<uint8_t>(0), static_cast<uint8_t>(EXTRUDERS))) {
+    if (auto load = p.option<uint8_t>('L', static_cast<uint8_t>(0), static_cast<uint8_t>(EXTRUDERS - 1))) {
         config_store().set_filament_type(*load, filament_type);
+    }
+
+    if (filament_type != FilamentType::none) {
+        SERIAL_ECHOLNPAIR("name:", params.name.data());
+        SERIAL_ECHOLNPAIR("nozzle_temperature:", params.nozzle_temperature);
+        SERIAL_ECHOLNPAIR("heatbed_temperature:", params.heatbed_temperature);
+        SERIAL_ECHOLNPAIR("is_abrasive:", params.is_abrasive);
+#if HAS_CHAMBER_API()
+        SERIAL_ECHOLNPAIR("requires_filtration:", params.requires_filtration);
+#endif
     }
 }
 

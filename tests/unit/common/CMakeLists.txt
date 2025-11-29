@@ -25,6 +25,18 @@ target_include_directories(
                          ${CMAKE_SOURCE_DIR}/src/lang
   )
 
+add_executable(
+  string_builder_tests
+  ${CMAKE_CURRENT_SOURCE_DIR}/string_builder_tests.cpp
+  ${CMAKE_SOURCE_DIR}/src/common/utils/string_builder.cpp
+  ${CMAKE_SOURCE_DIR}/src/lang/string_view_utf8.cpp
+  )
+target_include_directories(
+  string_builder_tests PUBLIC ${CMAKE_SOURCE_DIR}/src/common ${CMAKE_SOURCE_DIR}/src
+                              ${CMAKE_SOURCE_DIR}/src/lang
+  )
+add_catch_test(string_builder_tests)
+
 add_executable(timing_tests timing_tests.cpp)
 target_compile_definitions(timing_tests PRIVATE MCU=STM32F407VG)
 target_include_directories(
@@ -48,20 +60,12 @@ target_include_directories(
   weighted_modus_tests PUBLIC ${CMAKE_SOURCE_DIR}/lib/Marlin/Marlin/src/module/prusa/
   )
 
-add_executable(
-  algorithm_range_tests ${CMAKE_SOURCE_DIR}/src/common/filters/median_filter.cpp
-                        algorithm_range_tests.cpp
-  )
-target_include_directories(algorithm_range_tests PUBLIC ${CMAKE_SOURCE_DIR}/src/common)
-
 add_executable(algorithm_scale_tests algorithm_scale_tests.cpp)
 target_include_directories(algorithm_scale_tests PUBLIC ${CMAKE_SOURCE_DIR}/src/common)
 
-add_executable(
-  median_tests ${CMAKE_CURRENT_SOURCE_DIR}/median_test.cpp
-               ${CMAKE_SOURCE_DIR}/src/common/filters/median_filter.cpp
-  )
+add_executable(median_tests ${CMAKE_CURRENT_SOURCE_DIR}/median_test.cpp)
 target_include_directories(median_tests PUBLIC ${CMAKE_SOURCE_DIR}/src/common)
+target_link_libraries(median_tests buddy_utils)
 
 add_executable(
   otp_tests ${CMAKE_CURRENT_SOURCE_DIR}/otp_test.cpp ${CMAKE_SOURCE_DIR}/src/common/otp.cpp
@@ -110,13 +114,15 @@ target_include_directories(
          ${CMAKE_SOURCE_DIR}/src/common/marlin_server_types ${CMAKE_SOURCE_DIR}/tests/stubs
   )
 
+add_executable(exponential_backoff_tests ${CMAKE_CURRENT_SOURCE_DIR}/exponential_backoff_tests.cpp)
+target_include_directories(exponential_backoff_tests PUBLIC ${CMAKE_SOURCE_DIR}/src/common)
+
 add_catch_test(support_utils_tests)
 add_catch_test(str_utils_tests)
 add_catch_test(timing_tests)
 add_catch_test(circle_buffer_tests)
 add_catch_test(circular_buffer_tests)
 add_catch_test(weighted_modus_tests)
-add_catch_test(algorithm_range_tests)
 add_catch_test(algorithm_scale_tests)
 add_catch_test(median_tests)
 add_catch_test(otp_tests)
@@ -124,3 +130,4 @@ add_catch_test(url_decode_tests)
 add_catch_test(json_tests)
 add_catch_test(path_utils_tests)
 add_catch_test(selftest_test_data_serialization_tests)
+add_catch_test(exponential_backoff_tests)

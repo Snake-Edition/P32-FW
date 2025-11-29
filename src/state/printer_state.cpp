@@ -3,15 +3,27 @@
 #include <fsm_states.hpp>
 #include <client_response.hpp>
 #include <marlin_vars.hpp>
+#include <fsm/safety_timer_phases.hpp>
+#include <option/has_chamber_vents.h>
+#include <option/has_gearbox_alignment.h>
 #include <option/has_mmu2.h>
 #include <option/has_dwarf.h>
 #include <option/has_input_shaper_calibration.h>
+#include <option/has_phase_stepping_calibration.h>
 #include <option/xl_enclosure_support.h>
 #include <option/has_uneven_bed_prompt.h>
 #include <config_store/store_instance.hpp>
+#include <option/has_remote_bed.h>
 #include <option/has_chamber_filtration_api.h>
 #include <option/has_door_sensor_calibration.h>
-#include <printers.h>
+#include <option/xbuddy_extension_variant_standard.h>
+#include <option/has_side_fsensor.h>
+#include <option/has_belt_tuning.h>
+
+#if HAS_LOADCELL()
+    #include <fsm/nozzle_cleaning_failed_phases.hpp>
+    #include <fsm/nozzle_cleaning_failed_mapper.hpp>
+#endif
 
 using namespace marlin_server;
 using namespace printer_state;
@@ -89,6 +101,13 @@ bool is_warning_attention(const fsm::BaseData &data) {
 #if _DEBUG
     case ErrCode::CONNECT_STEPPERS_TIMEOUT:
 #endif
+#if HAS_SELFTEST()
+    case ErrCode::ERR_SYSTEM_ACTION_SELFTEST_REQUIRED:
+#endif
+#if HAS_ILI9488_DISPLAY()
+        // Local issue, do not report to connect
+    case ErrCode::ERR_ELECTRO_DISPLAY_PROBLEM_DETECTED:
+#endif
         return false;
     default:
         return true;
@@ -98,7 +117,7 @@ bool is_warning_attention(const fsm::BaseData &data) {
 tuple<ErrCode, const Response *> warning_dialog(const fsm::BaseData &data) {
     WarningType wtype = static_cast<WarningType>(*data.GetData().data());
     auto phase = GetEnumFromPhaseIndex<PhasesWarning>(data.GetPhase());
-    const Response *buttons = ClientResponses::GetResponses(phase).data();
+    const Response *buttons = ClientResponses::get_available_responses(phase).data();
     const ErrCode code(warning_type_to_error_code(wtype));
     return make_tuple(code, buttons);
 }
@@ -154,6 +173,10 @@ DeviceState get_state(bool ready) {
     const auto &fsm_states = marlin_vars().get_fsm_states();
     const auto &top = fsm_states.get_top();
     State state = marlin_vars().print_state;
+
+    const bool is_printing = fsm_states.is_active(ClientFSM::Printing);
+    const DeviceState busy_state = is_printing ? DeviceState::Printing : DeviceState::Busy;
+
     if (!top) {
         // No FSM present...
         return get_print_state(state, ready);
@@ -190,20 +213,35 @@ DeviceState get_state(bool ready) {
 #endif
     case ClientFSM::QuickPause:
         return DeviceState::Paused;
+#if HAS_LOADCELL()
+    case ClientFSM::NozzleCleaningFailed:
+        if (nozzle_cleaning_failed_phase_error_code_mapper(GetEnumFromPhaseIndex<PhaseNozzleCleaningFailed>(data.GetPhase()))) {
+            return DeviceState::Attention;
+        }
+        break;
+#endif
+#if HAS_SELFTEST()
     case ClientFSM::Selftest:
     case ClientFSM::FansSelftest:
+#endif
     case ClientFSM::NetworkSetup:
 #if HAS_COLDPULL()
     case ClientFSM::ColdPull:
 #endif
-#if HAS_PHASE_STEPPING()
-    case ClientFSM::PhaseStepping:
+#if HAS_MANUAL_BELT_TUNING()
+    case ClientFSM::ManualBeltTuning:
+#endif
+#if HAS_PHASE_STEPPING_CALIBRATION()
+    case ClientFSM::PhaseSteppingCalibration:
 #endif
 #if HAS_INPUT_SHAPER_CALIBRATION()
     case ClientFSM::InputShaperCalibration:
 #endif
 #if HAS_BELT_TUNING()
     case ClientFSM::BeltTuning:
+#endif
+#if HAS_GEARBOX_ALIGNMENT()
+    case ClientFSM::GearboxAlignment:
 #endif
 #if HAS_DOOR_SENSOR_CALIBRATION()
     case ClientFSM::DoorSensorCalibration:
@@ -217,7 +255,10 @@ DeviceState get_state(bool ready) {
         // preheat menu to be the only menu screen to not be Idle... :-(
     case ClientFSM::Preheat:
     case ClientFSM::Wait:
-        return DeviceState::Busy;
+        return busy_state;
+
+    case ClientFSM::SafetyTimer:
+        return safety_timer_is_phase_attention.test(data.GetPhase()) ? DeviceState::Attention : busy_state;
 
     case ClientFSM::Warning: {
         auto result = get_print_state(state, ready);
@@ -307,6 +348,8 @@ DeviceState get_print_state(State state, bool ready) {
     case State::Pausing_ParkHead:
     case State::Paused:
 
+    case State::Resuming_BufferData:
+    case State::MediaErrorRecovery_BufferData:
     case State::Resuming_Begin:
     case State::Resuming_Reheating:
     case State::Pausing_Failed_Code:
@@ -333,7 +376,7 @@ StateWithDialog get_state_with_dialog(bool ready) {
     // Get the state and slap top FSM dialog on top of it, if any
     DeviceState state = get_state(ready);
     const auto &fsm_states = marlin_vars().get_fsm_states();
-    const auto &fsm_gen = fsm_states.generation;
+    const auto &fsm_gen = fsm_states.get_state_id();
     const auto &top = fsm_states.get_top();
     if (!top) {
         return state;
@@ -344,21 +387,21 @@ StateWithDialog get_state_with_dialog(bool ready) {
     case ClientFSM::Load_unload:
         if (fsm_states.is_active(ClientFSM::Printing)) {
             if (auto attention_code = load_unload_attention_while_printing(*fsm_states[ClientFSM::Load_unload]); attention_code.has_value()) {
-                const Response *responses = ClientResponses::GetResponses(GetEnumFromPhaseIndex<PhasesLoadUnload>(data.GetPhase())).data();
-                return { state, attention_code, fsm_gen, responses };
+                const Response *buttons = ClientResponses::get_available_responses(GetEnumFromPhaseIndex<PhasesLoadUnload>(data.GetPhase())).data();
+                return { state, attention_code, fsm_gen, buttons };
             }
         } // TODO: handle normal load unload
         break;
     case ClientFSM::QuickPause: {
-        const Response *responses = ClientResponses::GetResponses(GetEnumFromPhaseIndex<PhasesQuickPause>(data.GetPhase())).data();
-        return { state, ErrCode::CONNECT_QUICK_PAUSE, fsm_gen, responses };
+        const Response *available_responses = ClientResponses::get_available_responses(GetEnumFromPhaseIndex<PhasesQuickPause>(data.GetPhase())).data();
+        return { state, ErrCode::CONNECT_QUICK_PAUSE, fsm_gen, available_responses };
         break;
     }
 #if ENABLED(CRASH_RECOVERY)
     case ClientFSM::CrashRecovery:
         if (auto attention_code = crash_recovery_attention(GetEnumFromPhaseIndex<PhasesCrashRecovery>(data.GetPhase())); attention_code.has_value()) {
-            const Response *responses = ClientResponses::GetResponses(GetEnumFromPhaseIndex<PhasesCrashRecovery>(data.GetPhase())).data();
-            return { state, attention_code, fsm_gen, responses };
+            const Response *available_responses = ClientResponses::get_available_responses(GetEnumFromPhaseIndex<PhasesCrashRecovery>(data.GetPhase())).data();
+            return { state, attention_code, fsm_gen, available_responses };
         }
         break;
 #endif
@@ -369,11 +412,21 @@ StateWithDialog get_state_with_dialog(bool ready) {
     case ClientFSM::PrintPreview: {
         auto phase = GetEnumFromPhaseIndex<PhasesPrintPreview>(data.GetPhase());
         if (auto attention_code = attention_while_printpreview(phase); attention_code.has_value()) {
-            const Response *responses = ClientResponses::GetResponses(phase).data();
-            return { state, attention_code, fsm_gen, responses };
+            const Response *available_responses = ClientResponses::get_available_responses(phase).data();
+            return { state, attention_code, fsm_gen, available_responses };
         }
         break;
     }
+#if HAS_LOADCELL()
+    case ClientFSM::NozzleCleaningFailed: {
+        auto phase = GetEnumFromPhaseIndex<PhaseNozzleCleaningFailed>(data.GetPhase());
+        if (auto attention_code = nozzle_cleaning_failed_phase_error_code_mapper(phase); attention_code.has_value()) {
+            const Response *available_responses = ClientResponses::get_available_responses(phase).data();
+            return { state, attention_code, fsm_gen, available_responses };
+        }
+        break;
+    }
+#endif
 
     // These have no buttons or phase
     case ClientFSM::Wait:
@@ -381,14 +434,19 @@ StateWithDialog get_state_with_dialog(bool ready) {
     case ClientFSM::Serial_printing:
         break;
 
+#if HAS_SELFTEST()
     case ClientFSM::Selftest:
     case ClientFSM::FansSelftest:
+#endif
     case ClientFSM::NetworkSetup:
 #if HAS_COLDPULL()
     case ClientFSM::ColdPull:
 #endif
-#if HAS_PHASE_STEPPING()
-    case ClientFSM::PhaseStepping:
+#if HAS_MANUAL_BELT_TUNING()
+    case ClientFSM::ManualBeltTuning:
+#endif
+#if HAS_PHASE_STEPPING_CALIBRATION()
+    case ClientFSM::PhaseSteppingCalibration:
 #endif
 #if HAS_INPUT_SHAPER_CALIBRATION()
     case ClientFSM::InputShaperCalibration:
@@ -396,19 +454,24 @@ StateWithDialog get_state_with_dialog(bool ready) {
 #if HAS_BELT_TUNING()
     case ClientFSM::BeltTuning:
 #endif
+#if HAS_GEARBOX_ALIGNMENT()
+    case ClientFSM::GearboxAlignment:
+#endif
 #if HAS_DOOR_SENSOR_CALIBRATION()
     case ClientFSM::DoorSensorCalibration:
 #endif
     case ClientFSM::Preheat:
-        // TODO: On some future sunny day, we want to cover all the selftests
+    case ClientFSM::SafetyTimer:
+        // TODO: On some future sunny day, we want to cover all of these
         // and ESP flashing with actual dialogs too; currently we only show a
         // possible warning dialog sitting _on top_ of these.
         //
         // But that's a lot of work, complex, etc, and may need some „special“
         // dialogs too. Leaving it out for now.
         break;
-        // Not possible, we would already return, if no FSM is set, here just to satisfy compiler, that it is handled
+
     case ClientFSM::_none:
+        // Not possible, we would already return, if no FSM is set, here just to satisfy compiler, that it is handled
         break;
     }
 
@@ -493,6 +556,10 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
         return ErrCode::WARNING_USB_DRIVE_UNSUPPORTED_FILE_SYSTEM;
     case WarningType::HeatBreakThermistorFail:
         return ErrCode::CONNECT_HEATBREAK_THERMISTOR_FAIL;
+#if HAS_SELFTEST()
+    case WarningType::ActionSelftestRequired:
+        return ErrCode::ERR_SYSTEM_ACTION_SELFTEST_REQUIRED;
+#endif
 #if ENABLED(POWER_PANIC)
     case WarningType::HeatbedColdAfterPP:
         return ErrCode::CONNECT_POWER_PANIC_COLD_BED;
@@ -505,18 +572,21 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
         return ErrCode::CONNECT_NOT_DOWNLOADED;
     case WarningType::BuddyMCUMaxTemp:
         return ErrCode::CONNECT_BUDDY_MCU_MAX_TEMP;
+#if HAS_ILI9488_DISPLAY()
+    case WarningType::DisplayProblemDetected:
+        return ErrCode::ERR_ELECTRO_DISPLAY_PROBLEM_DETECTED;
+#endif
 #if HAS_DWARF()
     case WarningType::DwarfMCUMaxTemp:
         return ErrCode::CONNECT_DWARF_MCU_MAX_TEMP;
 #endif
-#if HAS_MODULARBED()
-    case WarningType::ModBedMCUMaxTemp:
+#if HAS_REMOTE_BED()
+    case WarningType::BedMCUMaxTemp:
+        // TODO Rename this from "modular bed" to just "bed" in Prusa error codes.
         return ErrCode::CONNECT_MOD_BED_MCU_MAX_TEMP;
 #endif
-#if HAS_BED_PROBE
     case WarningType::ProbingFailed:
         return ErrCode::CONNECT_PROBING_FAILED;
-#endif
     case WarningType::FilamentSensorStuckHelp:
         return ErrCode::ERR_MECHANICAL_FILAMENT_SENSOR_STUCK_HELP;
 #if HAS_MMU2()
@@ -529,10 +599,6 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
 #endif
     case WarningType::FilamentSensorsDisabled:
         return ErrCode::ERR_MECHANICAL_FILAMENT_SENSORS_DISABLED;
-#if HAS_LOADCELL() && ENABLED(PROBE_CLEANUP_SUPPORT)
-    case WarningType::NozzleCleaningFailed:
-        return ErrCode::CONNECT_NOZZLE_CLEANING_FAILED;
-#endif
 #if _DEBUG
     case WarningType::SteppersTimeout:
         return ErrCode::CONNECT_STEPPERS_TIMEOUT;
@@ -540,11 +606,13 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
 #if XL_ENCLOSURE_SUPPORT()
     case WarningType::EnclosureFanError:
         return ErrCode::CONNECT_ENCLOSURE_FAN_ERROR;
+#endif
+#if HAS_CHAMBER_FILTRATION_API()
     case WarningType::EnclosureFilterExpirWarning:
         return ErrCode::CONNECT_ENCLOSURE_FILTER_EXPIRATION_WARNING;
     case WarningType::EnclosureFilterExpiration:
         return ErrCode::CONNECT_ENCLOSURE_FILTER_EXPIRATION;
-#endif // XL_ENCLOSURE_SUPPORT
+#endif
 
 #if ENABLED(DETECT_PRINT_SHEET)
     case WarningType::SteelSheetNotDetected:
@@ -583,22 +651,47 @@ ErrCode warning_type_to_error_code(WarningType wtype) {
         return ErrCode::ERR_TEMPERATURE_CHAMBER_CRITICAL_TEMP;
 #endif
 
-#if HAS_XBUDDY_EXTENSION() || XL_ENCLOSURE_SUPPORT()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD() || XL_ENCLOSURE_SUPPORT()
     case WarningType::ChamberFiltrationFanError:
         return ErrCode::CONNECT_CHAMBER_FILTRATION_FAN_ERROR;
 #endif
 
-#if HAS_XBUDDY_EXTENSION()
+#if XBUDDY_EXTENSION_VARIANT_STANDARD()
     case WarningType::ChamberCoolingFanError:
         return ErrCode::CONNECT_CHAMBER_COOLING_FAN_ERROR;
 #endif
 
-#if PRINTER_IS_PRUSA_COREONE()
+#if HAS_CHAMBER_VENTS()
     case WarningType::OpenChamberVents:
         return ErrCode::CONNECT_OPEN_CHAMBER_VENTS;
     case WarningType::CloseChamberVents:
         return ErrCode::CONNECT_CLOSE_CHAMBER_VENTS;
 #endif
+
+#if HAS_CEILING_CLEARANCE()
+    case WarningType::CeilingClearanceViolation:
+        return ErrCode::ERR_MECHANICAL_CEILING_CLEARANCE_VIOLATION;
+#endif
+
+#if HAS_PRECISE_HOMING_COREXY()
+    case WarningType::HomingCalibrationNeeded:
+        return ErrCode::ERR_MECHANICAL_HOMING_CALIBRATION_NEEDED;
+
+    case WarningType::HomingRefinementFailed:
+        return ErrCode::ERR_MECHANICAL_PRECISE_REFINEMENT_FAILED;
+
+    case WarningType::HomingCalibrationFromMenuNeeded:
+        return ErrCode::ERR_MECHANICAL_HOMING_CALIBRATION_FROM_MENU_NEEDED;
+#endif
+
+#if HAS_SELFTEST()
+    case WarningType::SelftestNotSuccessfullyCompleted:
+        return ErrCode::CONNECT_UNFINISHED_SELFTEST;
+#endif
+
+    case WarningType::_cnt:
+        // Fallthrough to unreachable
+        break;
     }
 
     assert(false);

@@ -8,6 +8,10 @@
 #include "client_response.hpp"
 #include <option/has_selftest.h>
 #include "Marlin/src/core/types.h"
+#include <option/has_selftest.h>
+#if HAS_SELFTEST()
+    #include "common/selftest/selftest_data.hpp"
+#endif
 #include "common/selftest/selftest_data.hpp"
 #include <gcode/inject_queue_actions.hpp>
 
@@ -29,14 +33,8 @@ void loop();
 // returns client_id for calling thread (-1 for unattached thread)
 int get_id();
 
-// sets dialog message, returns true on success
-bool set_message_cb(message_cb_t cb);
-
 // sets event notification mask
 void set_event_notify(uint64_t notify_events);
-
-// returns currently running command or marlin_server::Cmd::NONE
-marlin_server::Cmd get_command();
 
 // enqueue gcode - thread-safe version
 void gcode(const char *gcode);
@@ -86,24 +84,11 @@ void set_print_speed(uint16_t val);
 void set_flow_factor(uint16_t val, uint8_t hotend = marlin_server::CURRENT_TOOL);
 void set_z_offset(float val);
 void set_fan_check(bool val);
-void set_fs_autoload(bool val);
 
 void do_babysteps_Z(float offs);
 
-#if ENABLED(CANCEL_OBJECTS)
-/**
- * @brief Cancels object with given ID. Preferred over using a GCode to get immediate write-through without having to wait for current gcode (or all in queue) to finish (GCode queue size is limited, so it's better to go around it if it makes sense).
- *
- * @param object_id
- */
-void cancel_object(int object_id);
-
-/**
- * @brief Uncancels object with given ID. See cancel_object fnc why this is preferred over a gcode cancellation.
- *
- * @param object_id
- */
-void uncancel_object(int object_id);
+#if HAS_CANCEL_OBJECT()
+void set_object_cancelled(int object_id, bool set);
 
 /**
  * @brief Cancel currently printed object. See cancel_object fnc why this is preferred over a gcode cancellation.
@@ -146,7 +131,9 @@ void try_recover_from_media_error();
 
 void park_head();
 
-void notify_server_about_encoder_move();
+void notify_server_about_encoder_move_up();
+
+void notify_server_about_encoder_move_down();
 
 void notify_server_about_knob_click();
 
@@ -165,7 +152,7 @@ bool is_idle();
 //-----------------------------------------------------------------------------
 // client side functions (can be called from client thread only)
 
-void FSM_encoded_response(EncodedFSMResponse);
+void FSM_encoded_response(const EncodedFSMResponse &response);
 
 inline void FSM_response(FSMAndPhase fsm_and_phase, Response response) {
     FSM_encoded_response(EncodedFSMResponse { .response = FSMResponseVariant::make(response), .fsm_and_phase = fsm_and_phase });

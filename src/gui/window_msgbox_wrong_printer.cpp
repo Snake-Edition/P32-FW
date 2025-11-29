@@ -25,11 +25,8 @@ MsgBoxInvalidPrinter::MsgBoxInvalidPrinter(Rect16 rect, const string_view_utf8 &
             { this, _("Nozzle is not high-flow"), valid_printer_settings.nozzle_not_high_flow },
             { this, _("Printer model doesn't match"), valid_printer_settings.wrong_printer_model },
             { this, _("G-code version doesn't match"), valid_printer_settings.wrong_gcode_level },
-#if ENABLED(GCODE_COMPATIBILITY_MK3)
-            { this, _("MK3 compatibility mode"), valid_printer_settings.gcode_compatibility_mode },
-#endif
-#if ENABLED(FAN_COMPATIBILITY_MK4_MK3)
-            { this, _("Fan speeds will be adjusted"), valid_printer_settings.fan_compatibility_mode },
+#if HAS_GCODE_COMPATIBILITY()
+            { this, _("G-code compatibility mode"), valid_printer_settings.gcode_compatibility_mode },
 #endif
             { this,
                 (HAS_LARGE_DISPLAY() ? _("Newer firmware is required: %s") : _("Newer FW req.: %s"))
@@ -38,6 +35,7 @@ MsgBoxInvalidPrinter::MsgBoxInvalidPrinter(Rect16 rect, const string_view_utf8 &
 #if HAS_MMU2()
             { this, _("Nozzle flow rate doesn't match"), valid_printer_settings.nozzle_flow_mismatch },
 #endif
+            { this, _("G-code not sliced for input shaping"), valid_printer_settings.sliced_without_input_shaper },
     })
     , unsupported_features(this,
           (HAS_LARGE_DISPLAY() ? _("Following features are required:") : _("Features required:")),
@@ -90,7 +88,7 @@ MsgBoxInvalidPrinter::MsgBoxInvalidPrinter(Rect16 rect, const string_view_utf8 &
         unsupported_features.text.SetRect(text_rect);
         text_rect += Rect16::Top_t(item_h);
         text_rect += Rect16::Left_t(10);
-        unsupported_features_text.SetText(string_view_utf8::MakeRAM((uint8_t *)valid_printer_settings.unsupported_features_text));
+        unsupported_features_text.SetText(string_view_utf8::MakeRAM(valid_printer_settings.unsupported_features_text));
         unsupported_features_text.SetRect(text_rect);
     } else {
         unsupported_features_text.Hide();

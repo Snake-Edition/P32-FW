@@ -7,16 +7,13 @@
 #include "filament_sensors_handler.hpp"
 #include "filament.hpp"
 #include "Marlin/src/gcode/queue.h"
-#include "Marlin/src/gcode/lcd/M73_PE.h"
-#include "Marlin/src/gcode/gcode.h"
 #include "Marlin/src/module/probe.h"
 #include "Marlin/src/module/temperature.h"
 #include "marlin_stubs/G26.hpp"
 #include "M70X.hpp"
 #include "SteelSheets.hpp"
 #include <config_store/store_instance.hpp>
-
-#include <array>
+#include <gcode/gcode.h>
 
 using namespace selftest;
 LOG_COMPONENT_REF(Selftest);
@@ -52,6 +49,15 @@ static filament_status get_filament_status() {
     return static_cast<filament_status>(eeprom | sensor); // combine flags
 }
 
+void preheat() {
+    const auto filament_desc = config_store().get_filament_type(active_extruder).parameters();
+
+    // nozzle temperature preheat
+    thermalManager.setTargetHotend(filament_desc.nozzle_preheat_temperature, 0);
+    marlin_server::set_temp_to_display(filament_desc.nozzle_temperature, 0);
+    // bed temperature
+    thermalManager.setTargetBed(filament_desc.heatbed_temperature);
+}
 /**
  * @brief initialization for state which will ask user what to do with filament
  * behavior depends on eeprom and filament sensor
@@ -59,6 +65,7 @@ static filament_status get_filament_status() {
  * @return LoopResult
  */
 LoopResult CSelftestPart_FirstLayer::stateAskFilamentInit() {
+
     filament_status filament = get_filament_status();
     switch (filament) {
     case filament_status::TypeKnown_SensorValid: // do not allow load
@@ -87,6 +94,8 @@ LoopResult CSelftestPart_FirstLayer::stateAskFilament() {
         filament_status filament = get_filament_status();
         if (filament == filament_status::TypeKnown_SensorValid) {
             state_selected_by_user = StateSelectedByUser::Calib;
+            // Filament is known, preheat can be started
+            preheat();
         } else {
             state_selected_by_user = StateSelectedByUser::Preheat;
         }
@@ -280,66 +289,51 @@ LoopResult CSelftestPart_FirstLayer::stateShowStartPrint() {
 
 LoopResult CSelftestPart_FirstLayer::statePrintInit() {
     IPartHandler::SetFsmPhase(PhasesSelftest::FirstLayer_mbl);
-    const auto filament = config_store().get_filament_type(active_extruder);
-    const auto filament_desc = filament.parameters();
-    const int temp_nozzle = filament_desc.nozzle_temperature;
-    temp_nozzle_preheat = filament_desc.nozzle_preheat_temperature;
-    temp_bed = filament_desc.heatbed_temperature;
-
-    // nozzle temperature preheat
-    thermalManager.setTargetHotend(temp_nozzle_preheat, 0);
-    marlin_server::set_temp_to_display(temp_nozzle, 0);
-
-    // bed temperature
-    thermalManager.setTargetBed(temp_bed);
+    preheat();
     return LoopResult::RunNext;
 }
 
 LoopResult CSelftestPart_FirstLayer::stateWaitNozzle() {
-    std::array<char, sizeof("M109 R170")> gcode_buff; // safe to be local variable, it will copied
-    snprintf(gcode_buff.begin(), gcode_buff.size(), "M109 R%d", temp_nozzle_preheat);
-    return enqueueGcode(gcode_buff.begin()) ? LoopResult::RunNext : LoopResult::RunCurrent;
+    (void)thermalManager.wait_for_hotend(active_extruder, true, false);
+    return LoopResult::RunNext;
 }
 
 LoopResult CSelftestPart_FirstLayer::stateWaitBed() {
-    std::array<char, sizeof("M190 S100")> gcode_buff; // safe to be local variable, it will be copied
-    snprintf(gcode_buff.begin(), gcode_buff.size(), "M190 S%d", temp_bed);
-    return enqueueGcode(gcode_buff.begin()) ? LoopResult::RunNext : LoopResult::RunCurrent;
+    (void)thermalManager.wait_for_bed();
+    return LoopResult::RunNext;
 }
 
 LoopResult CSelftestPart_FirstLayer::stateHome() {
-    return enqueueGcode("G28") ? LoopResult::RunNext : LoopResult::RunCurrent;
+    // Make sure we're homed
+    if (!GcodeSuite::G28_no_parser(true, true, true,
+            {
+                .only_if_needed = true,
+                .precise = false, // We don't need precise position for this procedure
+            })) {
+        return LoopResult::Abort;
+    }
+    return LoopResult::RunNext;
 }
 
 LoopResult CSelftestPart_FirstLayer::stateMbl() {
+    // Note: I will not spend time trying to "inline" this gcode, since this selftest will probably be
+    //       rewritten in the near future
     return enqueueGcode("G29") ? LoopResult::RunNext : LoopResult::RunCurrent;
 }
 
 LoopResult CSelftestPart_FirstLayer::statePrint() {
-    return enqueueGcode("G26") ? LoopResult::RunNext : LoopResult::RunCurrent; // draw firstlay
-}
-
-LoopResult CSelftestPart_FirstLayer::stateMblFinished() {
-    // Wait for the G26 to start
-    if (!FirstLayer::instance()) {
-        return LoopResult::RunCurrent;
-    }
+    FirstLayer fli;
 
     IPartHandler::SetFsmPhase(PhasesSelftest::FirstLayer_print);
-    rResult.progress = 0;
+    CallbackHookGuard idle_subsrciber { marlin_server::idle_hook_point,
+        [&] {
+            rResult.progress = fli.progress_percent();
+            // We have to change state every cycle to track the progress
+            marlin_server::fsm_change(IPartHandler::GetFsmPhase(), rResult.Serialize());
+        } };
+
+    fli.run();
     return LoopResult::RunNext;
-}
-
-LoopResult CSelftestPart_FirstLayer::statePrintFinished() {
-    FirstLayer *fli = FirstLayer::instance();
-
-    // If the G26 finished, go to the next phase
-    if (!fli) {
-        return LoopResult::RunNext;
-    }
-
-    rResult.progress = fli->progress_percent();
-    return LoopResult::RunCurrent;
 }
 
 LoopResult CSelftestPart_FirstLayer::stateReprintInit() {

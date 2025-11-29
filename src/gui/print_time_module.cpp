@@ -19,7 +19,7 @@ PT_t PrintTime::update_loop(PT_t screen_format, window_text_t *out_print_end, [[
         const time_t rawtime = (time_t)marlin_vars().print_duration; // print_duration holds SECONDS
         if (rawtime != last_print_duration) {
             out_print_dur->SetTextColor(generate_duration(rawtime));
-            out_print_dur->SetText(string_view_utf8::MakeRAM((const uint8_t *)text_time_dur.data()));
+            out_print_dur->SetText(string_view_utf8::MakeRAM(text_time_dur.data()));
             out_print_dur->Invalidate();
         }
         last_print_duration = rawtime;
@@ -58,7 +58,7 @@ PT_t PrintTime::update_loop(PT_t screen_format, window_text_t *out_print_end, [[
         return GuiDefaults::COLOR_VALUE_VALID;
     }();
     out_print_end->SetTextColor(print_end_text_color);
-    out_print_end->SetText(string_view_utf8::MakeRAM((const uint8_t *)text_time_end.data()));
+    out_print_end->SetText(string_view_utf8::MakeRAM(text_time_end.data()));
     out_print_end->Invalidate();
     last_time_to_end = time_to_end;
 

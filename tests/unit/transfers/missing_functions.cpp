@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <transfers/transfer_file_check.hpp>
+#include <transfers/download.hpp>
 
 extern "C" {
 
@@ -32,6 +33,8 @@ namespace transfers {
 TransferCheckResult transfer_check(const MutablePath &, TransferCheckValidOnly) {
     return {};
 }
+
+void Download::Request::set_transfer_id(TransferId) {}
 } // namespace transfers
 
 bool random32bit(uint32_t *output) {

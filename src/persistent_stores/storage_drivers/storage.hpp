@@ -1,6 +1,7 @@
 #pragma once
 #include <span>
 #include <stdint.h>
+#include <atomic>
 
 namespace configuration_store {
 
@@ -17,5 +18,14 @@ public:
     Storage(Storage &&other) = delete;
     Storage &operator=(const Storage &other) = delete;
     Storage &operator=(Storage &&other) = delete;
+
+public:
+    auto bytes_written() const {
+        return bytes_written_.load(std::memory_order_relaxed);
+    }
+
+protected:
+    /// Number of bytes written to the EEPROM - metric
+    std::atomic<uint32_t> bytes_written_ = 0;
 };
 } // namespace configuration_store

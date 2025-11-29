@@ -102,27 +102,19 @@ constexpr float snake1[] = {
 };
 
 #if PRINTER_IS_PRUSA_MINI()
-    #define X_BED_SIZE_G26 (180)
-    #define Y_BED_SIZE_G26 (180)
-#else
-    #define X_BED_SIZE_G26 (X_BED_SIZE)
-    #define Y_BED_SIZE_G26 (Y_BED_SIZE)
-#endif
-
-#if PRINTER_IS_PRUSA_MINI()
 constexpr float y_step = 20;
 #else
 constexpr float y_step = 30;
 #endif
 constexpr float x_min = 10;
-constexpr float x_max = X_BED_SIZE_G26 - 10;
+constexpr float x_max = X_BED_SIZE - 10;
 constexpr float y_min = 30;
 constexpr float y1 = y_min + y_step;
 constexpr float y2 = y1 + y_step;
 constexpr float y3 = y2 + y_step;
 constexpr float y4 = y3 + y_step;
 constexpr float y5 = y4 + y_step;
-static_assert(Y_BED_SIZE_G26 > y5, "snake pattern out of bed");
+static_assert(Y_BED_SIZE > y5, "snake pattern out of bed");
 
 /// Path of Manhattan snake
 /// Alternate X and Y coordinates.
@@ -145,63 +137,63 @@ constexpr float snake2[] = {
     ///
     /// frame around
     9.5,
-    Y_BED_SIZE_G26 - 17,
+    Y_BED_SIZE - 17,
     30.5,
-    Y_BED_SIZE_G26 - 30.5,
+    Y_BED_SIZE - 30.5,
     x_min,
-    Y_BED_SIZE_G26 - 30,
+    Y_BED_SIZE - 30,
     ///
     /// infill
     30,
-    Y_BED_SIZE_G26 - 29.5,
+    Y_BED_SIZE - 29.5,
     x_min,
-    Y_BED_SIZE_G26 - 29,
+    Y_BED_SIZE - 29,
     30,
-    Y_BED_SIZE_G26 - 28.5,
+    Y_BED_SIZE - 28.5,
     x_min,
-    Y_BED_SIZE_G26 - 28,
+    Y_BED_SIZE - 28,
     30,
-    Y_BED_SIZE_G26 - 27.5,
+    Y_BED_SIZE - 27.5,
     x_min,
-    Y_BED_SIZE_G26 - 27,
+    Y_BED_SIZE - 27,
     30,
-    Y_BED_SIZE_G26 - 26.5,
+    Y_BED_SIZE - 26.5,
     x_min,
-    Y_BED_SIZE_G26 - 26,
+    Y_BED_SIZE - 26,
     30,
-    Y_BED_SIZE_G26 - 25.5,
+    Y_BED_SIZE - 25.5,
     x_min,
-    Y_BED_SIZE_G26 - 25,
+    Y_BED_SIZE - 25,
     30,
-    Y_BED_SIZE_G26 - 24.5,
+    Y_BED_SIZE - 24.5,
     x_min,
-    Y_BED_SIZE_G26 - 24,
+    Y_BED_SIZE - 24,
     30,
-    Y_BED_SIZE_G26 - 23.5,
+    Y_BED_SIZE - 23.5,
     x_min,
-    Y_BED_SIZE_G26 - 23,
+    Y_BED_SIZE - 23,
     30,
-    Y_BED_SIZE_G26 - 22.5,
+    Y_BED_SIZE - 22.5,
     x_min,
-    Y_BED_SIZE_G26 - 22,
+    Y_BED_SIZE - 22,
     30,
-    Y_BED_SIZE_G26 - 21.5,
+    Y_BED_SIZE - 21.5,
     x_min,
-    Y_BED_SIZE_G26 - 21,
+    Y_BED_SIZE - 21,
     30,
-    Y_BED_SIZE_G26 - 20.5,
+    Y_BED_SIZE - 20.5,
     x_min,
-    Y_BED_SIZE_G26 - 20,
+    Y_BED_SIZE - 20,
     30,
-    Y_BED_SIZE_G26 - 19.5,
+    Y_BED_SIZE - 19.5,
     x_min,
-    Y_BED_SIZE_G26 - 19,
+    Y_BED_SIZE - 19,
     30,
-    Y_BED_SIZE_G26 - 18.5,
+    Y_BED_SIZE - 18.5,
     x_min,
-    Y_BED_SIZE_G26 - 18,
+    Y_BED_SIZE - 18,
     30,
-    Y_BED_SIZE_G26 - 17.5,
+    Y_BED_SIZE - 17.5,
     x_min,
 };
 } // anonymous namespace
@@ -358,6 +350,28 @@ void FirstLayer::print_shape_2() {
     finish_printing();
 }
 
+void FirstLayer::run() {
+    // is filament selected
+    auto filament = config_store().get_filament_type(active_extruder);
+    if (filament == FilamentType::none) {
+        return;
+    }
+    auto filament_description = filament.parameters();
+    const int temp_nozzle = filament_description.nozzle_temperature;
+
+    // nozzle temperature print
+    thermalManager.setTargetHotend(temp_nozzle, 0);
+    marlin_server::set_temp_to_display(temp_nozzle, 0);
+    thermalManager.wait_for_hotend(0, false);
+
+    print_shape_2();
+
+    thermalManager.setTargetHotend(0, 0);
+    marlin_server::set_temp_to_display(0, 0);
+
+    thermalManager.setTargetBed(0);
+}
+
 /**
  * @brief gcode to draw a first layer on bed
  *
@@ -378,29 +392,8 @@ void FirstLayer::print_shape_2() {
  */
 
 void PrusaGcodeSuite::G26() {
-    // is filament selected
-    auto filament = config_store().get_filament_type(active_extruder);
-    if (filament == FilamentType::none) {
-        return;
-    }
-
     FirstLayer fl;
-
-    auto filament_description = filament.parameters();
-    const int temp_nozzle = filament_description.nozzle_temperature;
-
-    // nozzle temperature print
-    thermalManager.setTargetHotend(temp_nozzle, 0);
-    marlin_server::set_temp_to_display(temp_nozzle, 0);
-    thermalManager.wait_for_hotend(0, false);
-
-    // fl.print_shape_1();
-    fl.print_shape_2();
-
-    thermalManager.setTargetHotend(0, 0);
-    marlin_server::set_temp_to_display(0, 0);
-
-    thermalManager.setTargetBed(0);
+    fl.run();
 }
 
 /** @}*/

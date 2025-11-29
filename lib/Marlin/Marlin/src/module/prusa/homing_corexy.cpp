@@ -6,18 +6,22 @@
 #include "homing_corexy.hpp"
 
 // sanity checks
-#ifdef PRECISE_HOMING
-    #error "PRECISE_HOMING_COREXY is mutually exclusive with PRECISE_HOMING"
+#include <option/has_precise_homing.h>
+#if HAS_PRECISE_HOMING()
+    #error "HAS_PRECISE_HOMING_COREXY() is mutually exclusive with HAS_PRECISE_HOMING()"
 #endif
 #ifdef HAS_TMC_WAVETABLE
     // Wavetable restoration needs to happen after refinement succeeds, and
     // not per-axis as currently done. Ensure the setting is not enabled by mistake.
-    #error "PRECISE_HOMING_COREXY is not compatible with HAS_TMC_WAVETABLE"
+    #error "HAS_PRECISE_HOMING_COREXY() is not compatible with HAS_TMC_WAVETABLE"
 #endif
 
 #include "../planner.h"
 #include "../stepper.h"
 #include "../endstops.h"
+
+#include <feature/motordriver_util.h>
+#include <lcd/ultralcd.h>
 
 #if ENABLED(CRASH_RECOVERY)
     #include "feature/prusa/crash_recovery.hpp"
@@ -51,7 +55,7 @@ METRIC_DEF(metric_phxy_sens, "phxy_sens", METRIC_VALUE_CUSTOM, 0, METRIC_ENABLED
 METRIC_DEF(metric_phxy_home, "phxy_home", METRIC_VALUE_CUSTOM, 0, METRIC_ENABLED);
 METRIC_DEF(metric_phxy_orig, "phxy_orig", METRIC_VALUE_CUSTOM, 0, METRIC_ENABLED);
 
-// convert raw AB steps to XY mm
+/// Convert raw AB steps to XY mm
 void corexy_ab_to_xy(const xy_long_t &steps, xy_pos_t &mm) {
     const float x = static_cast<float>(steps.a + steps.b) / 2.f;
     const float y = static_cast<float>(CORESIGN(steps.a - steps.b)) / 2.f;
@@ -59,7 +63,7 @@ void corexy_ab_to_xy(const xy_long_t &steps, xy_pos_t &mm) {
     mm.y = y * planner.mm_per_step[Y_AXIS];
 }
 
-// convert raw AB steps to XY mm and position in mini-steps
+/// Convert raw AB steps to XY mm and position in mini-steps
 static void corexy_ab_to_xy(const xy_long_t &steps, xy_pos_t &mm, xy_long_t &pos_msteps) {
     const float x = static_cast<float>(steps.a + steps.b) / 2.f;
     const float y = static_cast<float>(CORESIGN(steps.a - steps.b)) / 2.f;
@@ -69,7 +73,7 @@ static void corexy_ab_to_xy(const xy_long_t &steps, xy_pos_t &mm, xy_long_t &pos
     pos_msteps.y = LROUND(y * PLANNER_STEPS_MULTIPLIER);
 }
 
-// convert raw AB steps to XY mm, filling others from current state
+/// Convert raw AB steps to XY mm, filling others from current state
 void corexy_ab_to_xyze(const xy_long_t &steps, xyze_pos_t &mm) {
     corexy_ab_to_xy(steps, mm);
     LOOP_S_L_N(i, C_AXIS, XYZE_N) {
@@ -77,7 +81,7 @@ void corexy_ab_to_xyze(const xy_long_t &steps, xyze_pos_t &mm) {
     }
 }
 
-// convert raw AB steps to XY mm and position in mini-steps, filling others from current state
+/// Convert raw AB steps to XY mm and position in mini-steps, filling others from current state
 static void corexy_ab_to_xyze(const xy_long_t &steps, xyze_pos_t &mm, xyze_long_t &pos_msteps) {
     pos_msteps = planner.get_position_msteps();
     corexy_ab_to_xy(steps, mm, pos_msteps);
@@ -87,7 +91,7 @@ static void corexy_ab_to_xyze(const xy_long_t &steps, xyze_pos_t &mm, xyze_long_
 }
 
 static void plan_raw_move(const xyze_pos_t target_mm, const xyze_long_t target_pos, const feedRate_t fr_mm_s) {
-    planner._buffer_msteps_raw(target_pos, target_mm, fr_mm_s, active_extruder);
+    planner._buffer_msteps(target_pos, target_mm, fr_mm_s, active_extruder, { .raw_block = true });
     planner.synchronize();
 }
 
@@ -100,7 +104,7 @@ static void plan_corexy_raw_move(const xy_long_t &target_steps_ab, const feedRat
     plan_raw_move(target_mm, target_pos_msteps, fr_mm_s);
 }
 
-// TMC µsteps(phase) per Marlin µsteps
+/// TMC µsteps(phase) per Marlin µsteps
 static constexpr int16_t phase_per_ustep(const AxisEnum axis) {
     // Originally, we read the microstep configuration from the driver; this no
     // longer make sense with 256 microsteps.
@@ -110,7 +114,7 @@ static constexpr int16_t phase_per_ustep(const AxisEnum axis) {
     return 256 / MICROSTEPS[axis];
 };
 
-// TMC full cycle µsteps per Marlin µsteps
+/// TMC full cycle µsteps per Marlin µsteps
 static constexpr int16_t phase_cycle_steps(const AxisEnum axis) {
     return 1024 / phase_per_ustep(axis);
 }
@@ -151,11 +155,14 @@ static bool phase_aligned(AxisEnum axis) {
     return (phase_cur <= ustep_max || phase_cur >= (1024 - ustep_max));
 }
 
-// Helper class to adjust machine settings for AB measurements using measure_axis_distance().
-// Only the non-measured axis stepper is adjusted: the measured stepper is setup within
-// measure_axis_distance() itself.
-class SetupForMeasurement {
-    static unsigned setup; // helper to ensure machine settings are set exactly once
+/**
+ * @brief Helper class to adjust machine settings for AB measurements using measure_axis_distance().
+ *
+ * Only the non-measured axis stepper is adjusted: the measured stepper is setup within
+ * measure_axis_distance() itself.
+ */
+class MeasurementGuard {
+    static inline unsigned nesting = 0; // helper to ensure machine settings are set exactly once
 
     // "other" stepper original settings
     decltype(stepperX) &other_stepper;
@@ -166,11 +173,13 @@ class SetupForMeasurement {
     std::optional<input_shaper::AxisConfig> is_config_orig[2];
 
 public:
-    [[nodiscard]] SetupForMeasurement(AxisEnum other_axis)
+    [[nodiscard]] MeasurementGuard(AxisEnum other_axis)
         : other_stepper(stepper_axis(other_axis)) {
-        ++setup;
-        assert(setup == 1);
+        // check for, but disallow nesting
+        ++nesting;
+        assert(nesting == 1);
 
+        planner.synchronize();
         other_orig_cur = other_stepper.rms_current();
         other_orig_hold = other_stepper.hold_multiplier();
 #ifdef XY_HOMING_HOLDING_CURRENT
@@ -183,21 +192,20 @@ public:
         input_shaper::set_axis_config(B_AXIS, std::nullopt);
     }
 
-    ~SetupForMeasurement() {
-        --setup;
+    ~MeasurementGuard() {
+        --nesting;
+        planner.synchronize();
         other_stepper.rms_current(other_orig_cur, other_orig_hold);
         input_shaper::set_axis_config(A_AXIS, is_config_orig[A_AXIS]);
         input_shaper::set_axis_config(B_AXIS, is_config_orig[B_AXIS]);
     }
 
-    static bool is_setup() {
-        return setup > 0;
+    static bool is_active() {
+        return nesting > 0;
     }
 };
 
-unsigned SetupForMeasurement::setup = 0;
-
-// Axis measurement settings
+/// Axis measurement settings
 struct measure_axis_params {
     float feedrate;
     uint16_t current;
@@ -213,10 +221,12 @@ struct measure_axis_params {
  * @param dist Maximum distance/direction to travel to hit an endstop
  * @param m_steps Measured steps
  * @param m_dist Measured distance
+ * @param fr_mm_s Service move feedrate
  * @param params Measured axis/stepper parameters
  * @return True on success
  */
-static bool measure_axis_distance(AxisEnum axis, xy_long_t origin_steps, int32_t dist, int32_t &m_steps, float &m_dist, const measure_axis_params &params) {
+static bool measure_axis_distance(AxisEnum axis, xy_long_t origin_steps, int32_t dist, int32_t &m_steps, float &m_dist,
+    const float fr_mm_s, const measure_axis_params &params) {
     // full initial position
     const xyze_long_t initial_steps = { origin_steps.a, origin_steps.b, stepper.position(C_AXIS), stepper.position(E_AXIS) };
     xyze_pos_t initial_mm;
@@ -238,7 +248,7 @@ static bool measure_axis_distance(AxisEnum axis, xy_long_t origin_steps, int32_t
     }
 
     // prepare stepper for the move
-    assert(SetupForMeasurement::is_setup());
+    assert(MeasurementGuard::is_active());
     const sensorless_t stealth_states = start_sensorless_homing_per_axis(axis);
     auto &axis_stepper = stepper_axis(axis);
     const int32_t axis_orig_cur = axis_stepper.rms_current();
@@ -276,7 +286,7 @@ static bool measure_axis_distance(AxisEnum axis, xy_long_t origin_steps, int32_t
     end_sensorless_homing_per_axis(axis, stealth_states);
 
     // move back to starting point
-    plan_raw_move(initial_mm, initial_pos_msteps, homing_feedrate(axis));
+    plan_raw_move(initial_mm, initial_pos_msteps, fr_mm_s);
     if (planner.draining()) {
         return false;
     }
@@ -300,7 +310,7 @@ static bool measure_axis_distance(AxisEnum axis, xy_long_t origin_steps, int32_t
     return hit;
 }
 
-// Return measure axis default parameters
+/// Return measure axis default parameters
 static measure_axis_params measure_axis_defaults(const AxisEnum axis) {
     measure_axis_params params;
 
@@ -327,7 +337,8 @@ static measure_axis_params measure_axis_defaults(const AxisEnum axis) {
 
 // Call measure_axis_distance() with calibrated parameters
 // (or defaults in printers without measurement calibration)
-static bool measure_axis_distance(AxisEnum axis, xy_long_t origin_steps, int32_t dist, int32_t &m_steps, float &m_dist) {
+static bool measure_axis_distance(AxisEnum axis, xy_long_t origin_steps, int32_t dist,
+    int32_t &m_steps, float &m_dist, const float fr_mm_s) {
     measure_axis_params params;
 
 #if HAS_TRINAMIC && defined(XY_HOMING_MEASURE_SENS_MIN)
@@ -345,13 +356,13 @@ static bool measure_axis_distance(AxisEnum axis, xy_long_t origin_steps, int32_t
     params = measure_axis_defaults(axis);
 #endif
 
-    return measure_axis_distance(axis, origin_steps, dist, m_steps, m_dist, params);
+    return measure_axis_distance(axis, origin_steps, dist, m_steps, m_dist, fr_mm_s, params);
 }
 
 /**
  * @brief Sum "axis" along the XY*val<> sequence "seq"
- * @tparam T Sequence type (normally deducted)
- * @tparam S sum type (normally deducted)
+ * @tparam T Sequence type (normally deduced)
+ * @tparam S sum type (normally deduced)
  * @param seq Sequence of XY*val
  * @param size Size of the sequence
  * @param axis Axis to sum
@@ -371,12 +382,13 @@ S sum_along(const T *seq, const size_t size, const size_t axis) {
  * @param axis Physical axis to measure
  * @param c_dist AB cycle distance from the endstop
  * @param m_dist 1/2 distance from the endstop (mm)
+ * @param fr_mm_s Service move feedrate
  * @return True on success
  */
-static bool measure_phase_cycles(AxisEnum axis, xy_pos_t &c_dist, xy_pos_t &m_dist) {
+static bool measure_phase_cycles(AxisEnum axis, xy_pos_t &c_dist, xy_pos_t &m_dist, const float fr_mm_s) {
     // prepare for repeated measurements
     const AxisEnum other_axis = (axis == B_AXIS ? A_AXIS : B_AXIS);
-    SetupForMeasurement setup_guard(other_axis);
+    MeasurementGuard setup_guard(other_axis);
     ++internal::probe_id;
 
     const int32_t measure_max_dist = (XY_HOMING_ORIGIN_OFFSET * 4) / planner.mm_per_step[axis];
@@ -392,8 +404,8 @@ static bool measure_phase_cycles(AxisEnum axis, xy_pos_t &c_dist, xy_pos_t &m_di
         const uint8_t slot1 = (retry + 1) % probe_n;
 
         // measure distance B+/B-
-        if (!measure_axis_distance(axis, origin_steps, measure_max_dist * measure_dir, p_steps[slot1][1], p_dist[slot1][1])
-            || !measure_axis_distance(axis, origin_steps, measure_max_dist * -measure_dir, p_steps[slot1][0], p_dist[slot1][0])) {
+        if (!measure_axis_distance(axis, origin_steps, measure_max_dist * measure_dir, p_steps[slot1][1], p_dist[slot1][1], fr_mm_s)
+            || !measure_axis_distance(axis, origin_steps, measure_max_dist * -measure_dir, p_steps[slot1][0], p_dist[slot1][0], fr_mm_s)) {
             if (!planner.draining()) {
                 ui.status_printf_P(0, "Endstop not reached");
             }
@@ -446,7 +458,7 @@ static bool measure_phase_cycles(AxisEnum axis, xy_pos_t &c_dist, xy_pos_t &m_di
     return true;
 }
 
-// return true if the point is too close to the phase grid halfway point
+/// Return true if the point is too close to the phase grid halfway point
 static bool point_is_unstable(const xy_pos_t &c_dist, const xy_pos_t &origin) {
     static constexpr float threshold = 1. / 4;
     LOOP_XY(axis) {
@@ -457,7 +469,7 @@ static bool point_is_unstable(const xy_pos_t &c_dist, const xy_pos_t &origin) {
     return false;
 }
 
-// translate fractional cycle distance by origin and round to final AB grid
+/// Translate fractional cycle distance by origin and round to final AB grid
 static xy_long_t cdist_translate(const xy_pos_t &c_dist, const xy_pos_t &origin) {
     xy_long_t c_ab;
     LOOP_XY(axis) {
@@ -533,7 +545,7 @@ static bool measure_origin_multipoint(AxisEnum axis, const xy_long_t &origin_ste
                     return false;
                 }
 
-                if (!measure_phase_cycles(axis, data.c_dist, data.m_dist)) {
+                if (!measure_phase_cycles(axis, data.c_dist, data.m_dist, fr_mm_s)) {
                     return false;
                 }
             }
@@ -566,7 +578,7 @@ static bool measure_origin_multipoint(AxisEnum axis, const xy_long_t &origin_ste
                 axis, internal::cal_id, i, (long)c_ab[0], (long)c_ab[1], c_unstable);
             metric_record_custom(&metric_phxy_orig, ",a=%u,t=\"p\" c=%u,p=%u,d0=%li,d1=%li,v=%u",
                 axis, internal::cal_id, i, (long)c_diff[0], (long)c_diff[1], c_invalid);
-            idle(true, true); // allow some time to flush the metrics buffer
+            idle(true); // allow some time to flush the metrics buffer
 
             if (c_invalid) {
                 internal::home_unstable = true;
@@ -645,11 +657,18 @@ static bool corexy_rehome_and_phase(xyze_pos_t &origin_pos, xy_long_t &origin_st
     }
 
     // reposition parallel to the origin
-    origin_pos = current_position;
-    origin_pos[X_AXIS] = (base_home_pos(X_AXIS) - XY_HOMING_ORIGIN_OFFSET * X_HOME_DIR);
-    origin_pos[Y_AXIS] = (base_home_pos(Y_AXIS) - XY_HOMING_ORIGIN_OFFSET * Y_HOME_DIR);
-    planner.buffer_line(origin_pos, fr_mm_s, active_extruder);
+    current_position[X_AXIS] = (base_home_pos(X_AXIS) - XY_HOMING_ORIGIN_OFFSET * X_HOME_DIR);
+    current_position[Y_AXIS] = (base_home_pos(Y_AXIS) - XY_HOMING_ORIGIN_OFFSET * Y_HOME_DIR);
+    planner.buffer_line(current_position, fr_mm_s, active_extruder);
     planner.synchronize();
+
+    // this position will become our reference for the rest of the home, and might not be exact or
+    // actually reached (due to the above move being discarded or optimized). We don't care however,
+    // as we additionally want to lose any current fractional step, so disregard the plan and
+    // reconstuct our current position
+    planner.reset_position();
+    origin_pos = planner.get_machine_position_mm();
+    PreciseStepping::reset_from_halt(false);
 
     // align both motors to a full phase
     stepper_wait_for_standstill(_BV(A_AXIS) | _BV(B_AXIS));
@@ -691,7 +710,7 @@ static bool measure_calibrate_walk(float &score, AxisEnum measured_axis,
     const xy_long_t origin_steps, const float fr_mm_s, const measure_axis_params &params) {
     // prepare for repeated measurements
     const AxisEnum other_axis = (measured_axis == B_AXIS ? A_AXIS : B_AXIS);
-    SetupForMeasurement setup_guard(other_axis);
+    MeasurementGuard setup_guard(other_axis);
     ++internal::probe_id;
 
     // calculate maximum reliable number of cycles to move towards the endstop
@@ -736,7 +755,7 @@ static bool measure_calibrate_walk(float &score, AxisEnum measured_axis,
             }
 
             const bool valid = measure_axis_distance(measured_axis, temp_origin,
-                measure_max_dist * measure_dir * a_dir, p_steps, p_dist, params);
+                measure_max_dist * measure_dir * a_dir, p_steps, p_dist, fr_mm_s, params);
             if (!valid) {
                 if (planner.draining()) {
                     return false;
@@ -848,7 +867,6 @@ bool corexy_sens_calibrate(const float fr_mm_s) {
     endstops.not_homing();
 
     SERIAL_ECHOLN("recalibrating homing sensitivity");
-    ui.status_printf_P(0, "Recalibrating home. Printer may vibrate and be noisier.");
 
     CoreXYHomeTMCSens calibrated_sens;
     if (!measure_calibrate_sens(calibrated_sens, measured_axis, fr_mm_s)) {
@@ -866,7 +884,7 @@ bool corexy_sens_is_calibrated() {
 }
 #endif
 
-// Refine home origin precisely on core-XY.
+/// Refine home origin precisely on core-XY.
 bool corexy_home_refine(float fr_mm_s, CoreXYCalibrationMode mode) {
     const AxisEnum measured_axis = (X_HOME_DIR == Y_HOME_DIR ? B_AXIS : A_AXIS);
 
@@ -915,10 +933,15 @@ bool corexy_home_refine(float fr_mm_s, CoreXYCalibrationMode mode) {
         }
         config_store().corexy_grid_origin.set(calibrated_origin);
     } else if (calibrated_origin.uninitialized()) {
-        // we have no origin, but calibration was explicitly disabled: continue without
-        SERIAL_ECHOLN("homing without calibrated origin");
+        // we have no origin, but calibration was explicitly disabled
+#if DISABLED(PRUSA_TOOLCHANGER)
+        bsod("homing precisely without calibrated origin");
+#else
+        // TODO[BFW-6527]: this is a temporary workaround until home calibration is enforced
+        SERIAL_ECHOLN("warning: homing without calibrated origin");
         calibrated_origin.origin[A_AXIS] = 0.f;
         calibrated_origin.origin[B_AXIS] = 0.f;
+#endif
     }
     const xy_pos_t calibrated_origin_xy = {
         calibrated_origin.origin[A_AXIS],
@@ -929,7 +952,7 @@ bool corexy_home_refine(float fr_mm_s, CoreXYCalibrationMode mode) {
 
     // measure from current origin
     xy_pos_t c_dist, _;
-    if (!measure_phase_cycles(measured_axis, c_dist, _)) {
+    if (!measure_phase_cycles(measured_axis, c_dist, _, fr_mm_s)) {
         return false;
     }
 
@@ -950,7 +973,7 @@ bool corexy_home_refine(float fr_mm_s, CoreXYCalibrationMode mode) {
         return false;
     }
     xy_pos_t v_c_dist;
-    if (!measure_phase_cycles(measured_axis, v_c_dist, _)) {
+    if (!measure_phase_cycles(measured_axis, v_c_dist, _, fr_mm_s)) {
         return false;
     }
 
@@ -1004,4 +1027,8 @@ bool corexy_home_is_calibrated() {
 bool corexy_home_is_unstable() {
     const CoreXYGridOrigin calibrated_origin = config_store().corexy_grid_origin.get();
     return calibrated_origin.uninitialized() || internal::home_unstable;
+}
+
+void corexy_clear_homing_calibration() {
+    config_store().corexy_grid_origin.set_to_default();
 }

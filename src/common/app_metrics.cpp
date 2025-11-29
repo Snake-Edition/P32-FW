@@ -10,6 +10,7 @@
 #include "heap.h"
 #include <adc.hpp>
 #include <option/has_door_sensor.h>
+#include <option/has_local_bed.h>
 #include <option/has_advanced_power.h>
 #if HAS_ADVANCED_POWER()
     #include "advanced_power.hpp"
@@ -25,6 +26,8 @@
 #include "marlin_vars.hpp"
 #include "config_features.h"
 #include <option/has_mmu2.h>
+#include <metric_handlers.h>
+#include <utils/timing/rate_limiter.hpp>
 
 #include "../Marlin/src/module/temperature.h"
 #include "../Marlin/src/module/planner.h"
@@ -49,16 +52,13 @@
     #define active_extruder_or_first 0
 #endif
 
+using namespace buddy::metrics;
+
 LOG_COMPONENT_REF(Metrics);
 
-/// This metric is defined in Marlin/src/module/probe.cpp, thus no interface
-#if HAS_BED_PROBE
-extern metric_t metric_probe_z;
-extern metric_t metric_probe_z_diff;
-extern metric_t metric_home_diff;
-#endif
+namespace {
 
-void buddy::metrics::RecordRuntimeStats() {
+void RecordRuntimeStats() {
     METRIC_DEF(fw_version, "fw_version", METRIC_VALUE_STRING, 65535, METRIC_ENABLED);
     metric_record_string(&fw_version, "%s", version::project_version_full);
 
@@ -79,8 +79,8 @@ void buddy::metrics::RecordRuntimeStats() {
     METRIC_DEF(stack, "stack", METRIC_VALUE_CUSTOM, 0, METRIC_ENABLED); // Thread stack usage
     METRIC_DEF(runtime, "runtime", METRIC_VALUE_CUSTOM, 0, METRIC_ENABLED); // Thread runtime usage
     constexpr const uint32_t STACK_RUNTIME_RECORD_INTERVAL_MS = 3000; // Sample stack and runtime this often
-    static auto should_record_stack_runtime = RunApproxEvery(STACK_RUNTIME_RECORD_INTERVAL_MS);
-    if (should_record_stack_runtime()) {
+    static auto should_record_stack_runtime = RateLimiter<uint32_t>(STACK_RUNTIME_RECORD_INTERVAL_MS);
+    if (should_record_stack_runtime.check(ticks_ms())) {
         static TaskStatus_t task_statuses[17] = {};
 
 #if configGENERATE_RUN_TIME_STATS
@@ -133,10 +133,29 @@ void buddy::metrics::RecordRuntimeStats() {
     }
 
     METRIC_DEF(heap, "heap", METRIC_VALUE_CUSTOM, 503, METRIC_ENABLED);
-    metric_record_custom(&heap, " free=%zui,total=%zui", xPortGetFreeHeapSize(), static_cast<size_t>(heap_total_size));
+    metric_record_custom(&heap, " free=%zui,total=%zui", xPortGetFreeHeapSize(), static_cast<size_t>(heap_total_size()));
+
+    // Config store metrics (BFW-7758)
+    {
+        // Should be same for all store metrics (so that we can get synchronized datapoints in Grafana)
+        // Should not be a "whole second" number to reduce metrics bursts when a lot of metrics get reported at the same time, overflowing buffers
+        static constexpr uint32_t store_metrics_interval_ms = 5051;
+
+        /// Cumulative count of config store migrations since printer start
+        METRIC_DEF(store_migrations, "store_migrations", METRIC_VALUE_INTEGER, store_metrics_interval_ms, METRIC_ENABLED);
+        metric_record_integer(&store_migrations, config_store().get_backend().bank_migration_count());
+
+        /// Cumulative count of bytes written to EEPROM by config_store since printer start
+        METRIC_DEF(store_bytes, "store_bytes", METRIC_VALUE_INTEGER, store_metrics_interval_ms, METRIC_ENABLED);
+        metric_record_integer(&store_bytes, EEPROMInstance().bytes_written());
+
+        /// Cumulative count of items written to EEPROM by config_store since printer start (outside of bank migrations)
+        METRIC_DEF(store_items, "store_items", METRIC_VALUE_INTEGER, store_metrics_interval_ms, METRIC_ENABLED);
+        metric_record_integer(&store_items, config_store().get_backend().item_write_count());
+    }
 }
 
-void buddy::metrics::RecordMarlinVariables() {
+void RecordMarlinVariables() {
     METRIC_DEF(is_printing, "is_printing", METRIC_VALUE_INTEGER, 5000, METRIC_ENABLED);
     metric_record_integer(&is_printing, printingIsActive() ? 1 : 0);
 
@@ -147,8 +166,8 @@ void buddy::metrics::RecordMarlinVariables() {
 
 #if HAS_TEMP_HEATBREAK
     METRIC_DEF(heatbreak, "temp_hbr", METRIC_VALUE_CUSTOM, 0, METRIC_DISABLED); // float value, tag "n": extruder index, tag "a": is active extruder
-    static auto heatbreak_should_record = RunApproxEvery(1000);
-    if (heatbreak_should_record()) {
+    static auto heatbreak_should_record = RateLimiter<uint32_t>(1000);
+    if (heatbreak_should_record.check(ticks_ms())) {
         FOREACH_EXTRUDER() {
             metric_record_custom(&heatbreak, ",n=%i,a=%i value=%.2f", e, e == active_extruder_or_first, static_cast<double>(thermalManager.degHeatbreak(e)));
         }
@@ -158,9 +177,7 @@ void buddy::metrics::RecordMarlinVariables() {
 #if HAS_TEMP_BOARD
     {
         METRIC_DEF(board, "temp_brd", METRIC_VALUE_FLOAT, 1000 - 9, METRIC_DISABLED);
-        const float value = thermalManager.degBoard();
-        metric_record_float(&board, value);
-        sensor_data().boardTemp = value;
+        metric_record_float(&board, sensor_data().boardTemp.load());
     }
 #endif
 
@@ -170,47 +187,26 @@ void buddy::metrics::RecordMarlinVariables() {
 #endif /*HAS_TEMP_CHAMBER*/
 
     // These temperature metrics go outside of Marlin and are filtered and converted here
-    static auto filtered_should_run = RunApproxEvery(1000 / OVERSAMPLENR);
-    if (filtered_should_run()) {
-        static uint8_t sample_nr = 0;
-
+    {
         METRIC_DEF(mcu, "temp_mcu", METRIC_VALUE_INTEGER, 0, METRIC_DISABLED);
-        static int32_t mcu_sum = 0;
-        mcu_sum += AdcGet::getMCUTemp();
-
-#if BOARD_IS_XLBUDDY()
-        METRIC_DEF(sandwich, "temp_sandwich", METRIC_VALUE_FLOAT, 1000 - 10, METRIC_DISABLED);
-        static int sandwich_sum = 0;
-        sandwich_sum += AdcGet::sandwichTemp();
-
-        METRIC_DEF(splitter, "temp_splitter", METRIC_VALUE_FLOAT, 1000 - 11, METRIC_DISABLED);
-        static int splitter_sum = 0;
-        splitter_sum += AdcGet::splitterTemp();
-#endif /*BOARD_IS_XLBUDDY()*/
-
-        if (++sample_nr >= OVERSAMPLENR) {
-            const float value = static_cast<float>(mcu_sum) / OVERSAMPLENR;
-            metric_record_integer(&mcu, value);
-            sensor_data().MCUTemp = value;
-            mcu_sum = 0;
-#if BOARD_IS_XLBUDDY()
-            // The same thermistor, use the same conversion as TEMP_BOARD
-            // The function takes downsampled ADC value multiplied by OVERSAMPLENR
-            metric_record_float(&sandwich, Temperature::analog_to_celsius_board(sandwich_sum));
-            sandwich_sum = 0;
-            if (prusa_toolchanger.is_splitter_enabled()) {
-                metric_record_float(&splitter, Temperature::analog_to_celsius_board(splitter_sum));
-            }
-            splitter_sum = 0;
-#endif /*BOARD_IS_XLBUDDY()*/
-            sample_nr = 0;
-        }
+        metric_record_integer(&mcu, sensor_data().MCUTemp.load());
     }
+
+#if BOARD_IS_XLBUDDY()
+    {
+        METRIC_DEF(sandwich, "temp_sandwich", METRIC_VALUE_FLOAT, 1000 - 10, METRIC_DISABLED);
+        metric_record_float(&sandwich, sensor_data().sandwichTemp.load());
+    }
+    if (prusa_toolchanger.is_splitter_enabled()) {
+        METRIC_DEF(splitter, "temp_splitter", METRIC_VALUE_FLOAT, 1000 - 11, METRIC_DISABLED);
+        metric_record_float(&splitter, sensor_data().splitterTemp.load());
+    }
+#endif
 
     METRIC_DEF(metric_nozzle_pwm, "nozzle_pwm", METRIC_VALUE_INTEGER, 1000, METRIC_DISABLED);
     metric_record_integer(&metric_nozzle_pwm, thermalManager.nozzle_pwm);
 
-#if !HAS_MODULARBED()
+#if HAS_LOCAL_BED()
     METRIC_DEF(metric_bed_pwm, "bed_pwm", METRIC_VALUE_INTEGER, 1000, METRIC_DISABLED);
     metric_record_integer(&metric_bed_pwm, thermalManager.bed_pwm);
 #endif
@@ -222,16 +218,16 @@ void buddy::metrics::RecordMarlinVariables() {
     metric_record_integer(&target_bed, thermalManager.degTargetBed());
 
     METRIC_DEF(nozzle, "temp_noz", METRIC_VALUE_CUSTOM, 0, METRIC_DISABLED);
-    static auto nozzle_should_record = RunApproxEvery(1000 - 10);
-    if (nozzle_should_record()) {
+    static auto nozzle_should_record = RateLimiter<uint32_t>(1000 - 10);
+    if (nozzle_should_record.check(ticks_ms())) {
         FOREACH_EXTRUDER() {
             metric_record_custom(&nozzle, ",n=%i,a=%i value=%.2f", e, e == active_extruder, static_cast<double>(thermalManager.degHotend(e)));
         }
     }
 
     METRIC_DEF(target_nozzle, "ttemp_noz", METRIC_VALUE_CUSTOM, 0, METRIC_DISABLED);
-    static auto target_nozzle_should_record = RunApproxEvery(1000 + 9);
-    if (target_nozzle_should_record()) {
+    static auto target_nozzle_should_record = RateLimiter<uint32_t>(1000 + 9);
+    if (target_nozzle_should_record.check(ticks_ms())) {
         FOREACH_EXTRUDER() {
             metric_record_custom(&target_nozzle, ",n=%i,a=%i value=%ii", e, e == active_extruder, thermalManager.degTargetHotend(e));
         }
@@ -248,9 +244,7 @@ void buddy::metrics::RecordMarlinVariables() {
 #if HAS_DOOR_SENSOR()
     {
         METRIC_DEF(door_sensor, "door_sensor", METRIC_VALUE_INTEGER, 1100, METRIC_ENABLED);
-        const auto door_sensor_detailed_state = buddy::door_sensor().detailed_state();
-        metric_record_integer(&door_sensor, door_sensor_detailed_state.raw_data);
-        sensor_data().door_sensor_detailed_state = door_sensor_detailed_state;
+        metric_record_integer(&door_sensor, sensor_data().door_sensor_detailed_state.load().raw_data);
     }
 #endif
 
@@ -262,9 +256,7 @@ void buddy::metrics::RecordMarlinVariables() {
 #if FAN_COUNT >= 2
     {
         METRIC_DEF(heatbreak_fan_speed, "fan_hbr_speed", METRIC_VALUE_INTEGER, 502, METRIC_DISABLED);
-        const float value = thermalManager.fan_speed[1];
-        metric_record_integer(&heatbreak_fan_speed, value);
-        sensor_data().hbrFan = value;
+        metric_record_integer(&heatbreak_fan_speed, sensor_data().hbrFan.load());
     }
 #endif
 
@@ -310,45 +302,35 @@ void buddy::metrics::RecordMarlinVariables() {
 
 #if HAS_ADVANCED_POWER()
     #if BOARD_IS_XBUDDY()
-void buddy::metrics::RecordPowerStats() {
+void RecordPowerStats() {
     METRIC_DEF(metric_bed_v_raw, "volt_bed_raw", METRIC_VALUE_INTEGER, 1000, METRIC_DISABLED);
     metric_record_integer(&metric_bed_v_raw, advancedpower.GetBedVoltageRaw());
     {
         METRIC_DEF(metric_bed_v, "volt_bed", METRIC_VALUE_FLOAT, 1001, METRIC_ENABLED);
-        const float value = advancedpower.GetBedVoltage();
-        metric_record_float(&metric_bed_v, value);
-        sensor_data().inputVoltage = value;
+        metric_record_float(&metric_bed_v, sensor_data().inputVoltage.load());
     }
     METRIC_DEF(metric_nozzle_v_raw, "volt_nozz_raw", METRIC_VALUE_INTEGER, 1002, METRIC_DISABLED);
     metric_record_integer(&metric_nozzle_v_raw, advancedpower.GetHeaterVoltageRaw());
     {
         METRIC_DEF(metric_nozzle_v, "volt_nozz", METRIC_VALUE_FLOAT, 1003, METRIC_ENABLED);
-        const float value = advancedpower.GetHeaterVoltage();
-        metric_record_float(&metric_nozzle_v, value);
-        sensor_data().heaterVoltage = value;
+        metric_record_float(&metric_nozzle_v, sensor_data().heaterVoltage.load());
     }
     METRIC_DEF(metric_nozzle_i_raw, "curr_nozz_raw", METRIC_VALUE_INTEGER, 1004, METRIC_DISABLED);
     metric_record_integer(&metric_nozzle_i_raw, advancedpower.GetHeaterCurrentRaw());
     {
         METRIC_DEF(metric_nozzle_i, "curr_nozz", METRIC_VALUE_FLOAT, 1005, METRIC_ENABLED);
-        const float value = advancedpower.GetHeaterCurrent();
-        metric_record_float(&metric_nozzle_i, value);
-        sensor_data().heaterCurrent = value;
+        metric_record_float(&metric_nozzle_i, sensor_data().heaterCurrent.load());
     }
     METRIC_DEF(metric_input_i_raw, "curr_inp_raw", METRIC_VALUE_INTEGER, 1006, METRIC_DISABLED);
     metric_record_integer(&metric_input_i_raw, advancedpower.GetInputCurrentRaw());
     {
         METRIC_DEF(metric_input_i, "curr_inp", METRIC_VALUE_FLOAT, 1007, METRIC_ENABLED);
-        const float value = advancedpower.GetInputCurrent();
-        metric_record_float(&metric_input_i, value);
-        sensor_data().inputCurrent = value;
+        metric_record_float(&metric_input_i, sensor_data().inputCurrent.load());
     }
         #if HAS_MMU2()
     {
         METRIC_DEF(metric_mmu_i, "cur_mmu_imp", METRIC_VALUE_FLOAT, 1008, METRIC_ENABLED);
-        const float value = advancedpower.GetMMUInputCurrent();
-        metric_record_float(&metric_mmu_i, value);
-        sensor_data().mmuCurrent = value;
+        metric_record_float(&metric_mmu_i, sensor_data().mmuCurrent.load());
     }
         #endif
     METRIC_DEF(metric_oc_nozzle_fault, "oc_nozz", METRIC_VALUE_INTEGER, 1010, METRIC_ENABLED);
@@ -357,33 +339,25 @@ void buddy::metrics::RecordPowerStats() {
     metric_record_integer(&metric_oc_input_fault, advancedpower.OvercurrentFaultDetected());
 }
     #elif BOARD_IS_XLBUDDY()
-void buddy::metrics::RecordPowerStats() {
+void RecordPowerStats() {
     METRIC_DEF(metric_splitter_5V_current, "splitter_5V_current", METRIC_VALUE_FLOAT, 1000, METRIC_ENABLED);
     metric_record_float(&metric_splitter_5V_current, advancedpower.GetDwarfSplitter5VCurrent());
 
     {
         METRIC_DEF(metric_24VVoltage, "24VVoltage", METRIC_VALUE_FLOAT, 1001, METRIC_ENABLED);
-        const float value = advancedpower.Get24VVoltage();
-        metric_record_float(&metric_24VVoltage, value);
-        sensor_data().inputVoltage = value;
+        metric_record_float(&metric_24VVoltage, sensor_data().inputVoltage.load());
     }
     {
         METRIC_DEF(metric_5VVoltage, "5VVoltage", METRIC_VALUE_FLOAT, 1002, METRIC_ENABLED);
-        const float value = advancedpower.Get5VVoltage();
-        metric_record_float(&metric_5VVoltage, value);
-        sensor_data().sandwich5VVoltage = value;
+        metric_record_float(&metric_5VVoltage, sensor_data().sandwich5VVoltage.load());
     }
     {
         METRIC_DEF(metric_Sandwitch5VCurrent, "Sandwitch5VCurrent", METRIC_VALUE_FLOAT, 1003, METRIC_ENABLED);
-        const float value = advancedpower.GetDwarfSandwitch5VCurrent();
-        metric_record_float(&metric_Sandwitch5VCurrent, value);
-        sensor_data().sandwich5VCurrent = value;
+        metric_record_float(&metric_Sandwitch5VCurrent, sensor_data().sandwich5VCurrent.load());
     }
     {
         METRIC_DEF(metric_xlbuddy5VCurrent, "xlbuddy5VCurrent", METRIC_VALUE_FLOAT, 1004, METRIC_ENABLED);
-        const float value = advancedpower.GetXLBuddy5VCurrent();
-        metric_record_float(&metric_xlbuddy5VCurrent, value);
-        sensor_data().buddy5VCurrent = value;
+        metric_record_float(&metric_xlbuddy5VCurrent, sensor_data().buddy5VCurrent.load());
     }
 }
     #else
@@ -392,7 +366,7 @@ void buddy::metrics::RecordPowerStats() {
 
 #endif // HAS_ADVANCED_POWER()
 
-void buddy::metrics::RecordPrintFilename() {
+void RecordPrintFilename() {
     METRIC_DEF(file_name, "print_filename", METRIC_VALUE_STRING, 5000, METRIC_ENABLED);
     if (marlin_vars().print_state != marlin_server::State::Idle) {
         // The docstring for media_print_filename() advises against using this function; however, there is currently no replacement for it.
@@ -403,28 +377,20 @@ void buddy::metrics::RecordPrintFilename() {
 }
 
 #if BOARD_IS_XLBUDDY()
-void buddy::metrics::record_dwarf_internal_temperatures() {
-    // Dwarf board and MCU temperature for sensor screen
-    buddy::puppies::Dwarf &dwarf = prusa_toolchanger.getActiveToolOrFirst();
-
-    METRIC_DEF(metric_dwarfBoardTemperature, "dwarf_board_temp", METRIC_VALUE_INTEGER, 1001, METRIC_ENABLED);
+void record_dwarf_internal_temperatures() {
     {
-        const float value = dwarf.get_board_temperature();
-        metric_record_integer(&metric_dwarfBoardTemperature, value);
-        sensor_data().dwarfBoardTemperature = value;
+        METRIC_DEF(metric_dwarfBoardTemperature, "dwarf_board_temp", METRIC_VALUE_INTEGER, 1001, METRIC_ENABLED);
+        metric_record_integer(&metric_dwarfBoardTemperature, sensor_data().dwarfBoardTemperature.load());
     }
-
-    METRIC_DEF(metric_dwarfMCUTemperature, "dwarf_mcu_temp", METRIC_VALUE_INTEGER, 1001, METRIC_DISABLED);
     {
-        const float value = dwarf.get_mcu_temperature();
-        metric_record_integer(&metric_dwarfMCUTemperature, value);
-        sensor_data().dwarfMCUTemperature = value;
+        METRIC_DEF(metric_dwarfMCUTemperature, "dwarf_mcu_temp", METRIC_VALUE_INTEGER, 1001, METRIC_DISABLED);
+        metric_record_integer(&metric_dwarfMCUTemperature, sensor_data().dwarfMCUTemperature.load());
     }
 
     // All MCU temperatures
     METRIC_DEF(mcu, "dwarfs_mcu_temp", METRIC_VALUE_CUSTOM, 0, METRIC_DISABLED); // float value, tag "n": extruder index, tag "a": is active extruder
-    static auto mcu_should_record = RunApproxEvery(1002);
-    if (mcu_should_record()) {
+    static auto mcu_should_record = RateLimiter<uint32_t>(1002);
+    if (mcu_should_record.check(ticks_ms())) {
         FOREACH_EXTRUDER() {
             metric_record_custom(&mcu, ",n=%i,a=%i value=%i", e, e == active_extruder_or_first, static_cast<int>(buddy::puppies::dwarfs[e].get_mcu_temperature()));
         }
@@ -432,11 +398,29 @@ void buddy::metrics::record_dwarf_internal_temperatures() {
 
     // All board temperatures
     METRIC_DEF(board, "dwarfs_board_temp", METRIC_VALUE_CUSTOM, 0, METRIC_DISABLED); // float value, tag "n": extruder index, tag "a": is active extruder
-    static auto board_should_record = RunApproxEvery(1003);
-    if (board_should_record()) {
+    static auto board_should_record = RateLimiter<uint32_t>(1003);
+    if (board_should_record.check(ticks_ms())) {
         FOREACH_EXTRUDER() {
             metric_record_custom(&board, ",n=%i,a=%i value=%i", e, e == active_extruder_or_first, static_cast<int>(buddy::puppies::dwarfs[e].get_board_temperature()));
         }
     }
 }
 #endif
+
+} // namespace
+
+void buddy::metrics::record() {
+    if (!are_metrics_enabled()) {
+        return;
+    }
+
+    RecordMarlinVariables();
+    RecordRuntimeStats();
+    RecordPrintFilename();
+#if HAS_ADVANCED_POWER()
+    RecordPowerStats();
+#endif
+#if BOARD_IS_XLBUDDY()
+    record_dwarf_internal_temperatures();
+#endif
+}

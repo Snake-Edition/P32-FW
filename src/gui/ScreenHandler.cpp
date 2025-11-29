@@ -2,6 +2,7 @@
 #include "bsod.h"
 
 #include <gui.hpp>
+#include <RAII.hpp>
 
 static const uint32_t MENU_TIMEOUT_MS = 30000;
 
@@ -11,44 +12,12 @@ Screens::Screens(screen_node screen_creator)
     : stack_iterator(stack.begin())
     , current(nullptr)
     , creator_node(screen_creator)
-    , close(false)
-    , close_all(false)
-    , close_printing(false)
     , timeout_tick(0) {
 }
 
 void Screens::Init(screen_node screen_creator) {
     static Screens s(screen_creator);
     instance = &s;
-}
-
-Screens::iter Screens::find_enabled_node(iter begin, iter end) {
-    return std::find_if(begin, end, [](const screen_node &node) { return node.creator != nullptr; });
-}
-
-Screens::r_iter Screens::rfind_enabled_node(r_iter begin, r_iter end) {
-    return std::find_if(r_iter(end), r_iter(begin), [](const screen_node &node) { return node.creator != nullptr; });
-}
-
-void Screens::Init(const screen_node *begin, const screen_node *end) {
-    if (size_t(end - begin) > MAX_SCREENS) {
-        return;
-    }
-    if (begin == end) {
-        return;
-    }
-
-    // find last enabled creator
-    iter node = find_enabled_node(begin, end);
-    if (node == end) {
-        return;
-    }
-
-    // have creator
-    Init(*node);
-
-    // Must push rest of enabled creators on stack
-    Access()->PushBeforeCurrent(node + 1, end); // node + 1 excludes node
 }
 
 void Screens::EnableMenuTimeout() {
@@ -59,29 +28,6 @@ void Screens::DisableMenuTimeout() {
     menu_timeout_enabled = false;
 }
 bool Screens::GetMenuTimeout() { return menu_timeout_enabled; }
-
-// Push enabled creators on stack - in reverted order
-// not a bug non reverting method must use reverse iterators
-void Screens::PushBeforeCurrent(const screen_node *begin, const screen_node *end) {
-    if (size_t(end - begin) > MAX_SCREENS) {
-        return;
-    }
-    if (begin == end) {
-        return;
-    }
-
-    // initialize reverse iterators
-    r_iter r_begin(begin);
-    r_iter r_node(end + 1); // point behind end, first call of "r_node + 1" will revert this
-
-    do {
-        r_node = rfind_enabled_node(r_begin, r_node + 1);
-        if (r_node != r_begin) {
-            (*stack_iterator) = *r_node;
-            ++stack_iterator;
-        }
-    } while (r_node != r_begin);
-}
 
 Screens *Screens::Access() {
     if (!instance) {
@@ -123,13 +69,13 @@ void Screens::Open(screen_node screen_creator) {
     creator_node = screen_creator;
 }
 
-/**
- * @brief close current screen
- * it sets flag to close current screen
- * it also clears creator_node, because order matters!
- * In case you want to replace current screen, you must call Close() first and Open() after
- */
 void Screens::Close() {
+    // If we're blockingly waiting on a dilog, close the dialog, not the screen
+    if (is_dialog_open) {
+        close_dialog = true;
+        return;
+    }
+
     close = true;
     creator_node.MakeEmpty();
 }
@@ -173,6 +119,7 @@ bool Screens::Close(const ScreenFactory::Creator &creator) {
  */
 void Screens::CloseAll() {
     close_all = true;
+    close_dialog = true;
     creator_node.MakeEmpty();
 }
 
@@ -346,13 +293,11 @@ void Screens::InnerLoop() {
 }
 
 void Screens::gui_loop_until_dialog_closed(stdext::inplace_function<void()> callback) {
-    for (;;) {
-        const bool dialog_closed = close || close_all;
-        close = false; // Note: We reset close flag because it is reused for closing both dialogs and screens
-        if (dialog_closed) {
-            break;
-        }
+    // !!! Both AutoRestores are important, we might be in dialogception, in which case we don't want to alter the statte for the upper dialog
+    AutoRestore dialog_open_guard(is_dialog_open, true);
+    AutoRestore close_dialog_guard(close_dialog, false);
 
+    while (!close_dialog) {
         gui::TickLoop();
         gui_loop();
         if (callback) {

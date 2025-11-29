@@ -161,4 +161,12 @@ enum class EspLinkState {
 };
 
 EspLinkState esp_link_state();
+
+/// The current signal strength, if any.
+///
+/// If associated and the signal strength is known, this indicates the
+/// strength. In decibells. Usually negative, higher numbers (closer to zero)
+/// mean better signal.
+std::optional<int8_t> esp_signal_strength();
+
 #endif

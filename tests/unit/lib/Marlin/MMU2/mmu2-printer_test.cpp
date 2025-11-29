@@ -33,6 +33,11 @@
     #define constexpr_workaround /* */
 #endif
 
+// if anything chokes here, all the unit tests need their MakeRegistersCommand and MakeRegistersQuery updated, otherwise the unit tests may cycle indefinitely
+static_assert(MMU2::ProtocolLogic::regs8Count == 3);
+static_assert(MMU2::ProtocolLogic::regs16Count == 3);
+static_assert(MMU2::ProtocolLogic::initRegs8Count == 2);
+
 void SimulateCommStart(MMU2::MMU2 &mmu) {
     mmu.Start();
     // functions that were mandatory to execute
@@ -170,24 +175,26 @@ constexpr_workaround IOSimRec MakeCommandAccepted(const char *command, IOSimRec:
 
 uint8_t selectorSlot = 5, idlerSlot = 5;
 
-#define MakeRegistersQuery(finda, selector, idler, errors, pulley, timeout) \
-    MakeQueryResponseReadRegister(0x08, finda),                             \
-        MakeQueryResponseReadRegister(0x1b, selector),                      \
-        MakeQueryResponseReadRegister(0x1c, idler),                         \
-        MakeQueryResponseReadRegister(0x04, errors),                        \
-        MakeQueryResponseReadRegister(0x1a, pulley, timeout)
+#define MakeRegistersQuery(finda, selector, idler, errors, pulley, bowden, timeout) \
+    MakeQueryResponseReadRegister(0x08, finda),                                     \
+        MakeQueryResponseReadRegister(0x1b, selector),                              \
+        MakeQueryResponseReadRegister(0x1c, idler),                                 \
+        MakeQueryResponseReadRegister(0x04, errors),                                \
+        MakeQueryResponseReadRegister(0x1a, pulley),                                \
+        MakeQueryResponseReadRegister(0x22, bowden, timeout)
 
-#define MakeRegistersCommand(fsensor, finda, selector, idler, errors, pulley, timeout) \
-    MakeFSensorAccepted(fsensor),                                                      \
-        MakeQueryResponseReadRegister(0x08, finda),                                    \
-        MakeQueryResponseReadRegister(0x1b, selector),                                 \
-        MakeQueryResponseReadRegister(0x1c, idler),                                    \
-        MakeQueryResponseReadRegister(0x04, errors),                                   \
-        MakeQueryResponseReadRegister(0x1a, pulley, timeout)
+#define MakeRegistersCommand(fsensor, finda, selector, idler, errors, pulley, bowden, timeout) \
+    MakeFSensorAccepted(fsensor),                                                              \
+        MakeQueryResponseReadRegister(0x08, finda),                                            \
+        MakeQueryResponseReadRegister(0x1b, selector),                                         \
+        MakeQueryResponseReadRegister(0x1c, idler),                                            \
+        MakeQueryResponseReadRegister(0x04, errors),                                           \
+        MakeQueryResponseReadRegister(0x1a, pulley),                                           \
+        MakeQueryResponseReadRegister(0x22, bowden, timeout)
 
 #define MakeInitialQuery(timeout) \
     { "Q0", {}, {}, "X0 F0", 1 }, \
-        MakeRegistersQuery(0, 5, 5, 0, 0, timeout)
+        MakeRegistersQuery(0, 5, 5, 0, 0, 360, timeout)
 
 void SimulateQuery(MMU2::MMU2 &mmu) {
     IOSimStart({ MakeInitialQuery(1) });
@@ -257,11 +264,11 @@ TEST_CASE("Marlin::MMU2::MMU2 preload", "[Marlin][MMU2]") {
 
         MakeCommandAccepted(cmd, "FullScreenMsgLoad"),
         MakeQueryResponseProgress(cmd, ProgressCode::EngagingIdler),
-        MakeRegistersCommand(0, 0, 5, 5, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 5, 5, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::FeedingToFinda),
-        MakeRegistersCommand(0, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::RetractingFromFinda),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseFinished(cmd),
     });
     MMU2::mmu2.load_filament(0);
@@ -279,15 +286,15 @@ TEST_CASE("Marlin::MMU2::MMU2 unload", "[Marlin][MMU2]") {
         MakeLogEntry("MakeSound"),
 
         MakeQueryResponseProgress(cmd, ProgressCode::EngagingIdler),
-        MakeRegistersCommand(1, 1, 5, 5, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(1, 1, 5, 5, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::UnloadingToFinda),
-        MakeRegistersCommand(1, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(1, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::UnloadingToFinda, []() { MMU2::fs = MMU2::FilamentState::NOT_PRESENT; }),
-        MakeRegistersCommand(0, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::RetractingFromFinda),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::DisengagingIdler),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseFinished(cmd),
     });
     MMU2::mmu2.unload();
@@ -310,35 +317,35 @@ TEST_CASE("Marlin::MMU2::MMU2 unload failed", "[Marlin][MMU2]") {
         MakeLogEntry("MakeSound"),
 
         MakeQueryResponseProgress(cmd, ProgressCode::EngagingIdler),
-        MakeRegistersQuery(1, 5, 5, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersQuery(1, 5, 5, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::UnloadingToFinda, []() { MMU2::fs = MMU2::FilamentState::NOT_PRESENT; }),
-        MakeRegistersCommand(0, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::UnloadingToFinda),
-        MakeRegistersCommand(0, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::ERRDisengagingIdler),
-        MakeRegistersCommand(0, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseErrorWithMaintenance(cmd, ErrorCode::FINDA_DIDNT_SWITCH_OFF),
-        MakeRegistersCommand(0, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
 
         // press middle button and resolve the error - we can fake it through MMU communication
         MakeQueryResponseErrorButton(cmd, ErrorCode::FINDA_DIDNT_SWITCH_OFF, 1),
         // after button gets received from the MMU, registers are queried
-        MakeRegistersCommand(0, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         // next, the button gets sent back to the MMU - need to ack-it
         MakeAcceptButton(1),
         // after the button, registers are queried again
-        MakeRegistersCommand(0, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
 
         MakeQueryResponseProgress(cmd, ProgressCode::ERREngagingIdler),
-        MakeRegistersCommand(0, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
 
         // let it finish normally
         MakeQueryResponseProgress(cmd, ProgressCode::UnloadingToFinda),
-        MakeRegistersCommand(0, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::RetractingFromFinda),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::DisengagingIdler),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseFinished(cmd),
     });
     MMU2::mmu2.unload();
@@ -358,23 +365,23 @@ TEST_CASE("Marlin::MMU2::MMU2 cut", "[Marlin][MMU2]") {
 
         MakeCommandAccepted(cmd, "FullScreenMsgCut"),
         MakeQueryResponseProgress(cmd, ProgressCode::SelectingFilamentSlot),
-        MakeRegistersCommand(0, 0, 5, 5, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 5, 5, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::FeedingToFinda),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::RetractingFromFinda),
-        MakeRegistersCommand(0, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::PreparingBlade),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::PushingFilament),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::DisengagingIdler),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::PerformingCut),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::Homing),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::ReturningSelector),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseFinished(cmd),
     });
     MMU2::mmu2.cut_filament(0, true);
@@ -393,22 +400,22 @@ TEST_CASE("Marlin::MMU2::MMU2 eject", "[Marlin][MMU2]") {
 
         MakeCommandAccepted(cmd, "FullScreenMsgEject"),
         MakeQueryResponseProgress(cmd, ProgressCode::ParkingSelector),
-        MakeRegistersCommand(0, 0, 5, 5, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 5, 5, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::EngagingIdler),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::EjectingFilament),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::ERRDisengagingIdler),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
 
         MakeQueryResponseErrorNoIncMMUFails(cmd, ErrorCode::FILAMENT_EJECTED),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
 
         // press middle button - filament eject has been completed
         MakeQueryResponseErrorButton(cmd, ErrorCode::FILAMENT_EJECTED, 1),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeAcceptButton(1),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
 
         MakeQueryResponseFinished(cmd),
     });
@@ -431,25 +438,25 @@ TEST_CASE("Marlin::MMU2::MMU2 toolchange", "[Marlin][MMU2]") {
 
         MakeCommandAccepted(cmd),
         MakeQueryResponseProgress(cmd, ProgressCode::EngagingIdler),
-        MakeRegistersCommand(0, 0, 5, 5, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 5, 5, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::FeedingToFinda),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::FeedingToBondtech),
-        MakeRegistersCommand(0, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::FeedingToFSensor, []() { MMU2::fs = MMU2::FilamentState::AT_FSENSOR; }),
-        MakeRegistersCommand(0, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::FeedingToNozzle),
-        MakeRegistersCommand(1, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(1, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::DisengagingIdler),
-        MakeRegistersCommand(1, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(1, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
 
         // several finished records
         MakeQueryResponseToolChangeFinished(cmd),
-        MakeRegistersCommand(1, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(1, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseFinished(cmd),
-        MakeRegistersCommand(1, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(1, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseFinished(cmd),
-        MakeRegistersCommand(1, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(1, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
     });
     MMU2::mmu2.tool_change(0);
     mockLog.DeduplicateExpected();
@@ -472,19 +479,19 @@ TEST_CASE("Marlin::MMU2::MMU2 unload with preheat", "[Marlin][MMU2]") {
         // heat up POC
         MakeLogEntry("ReportProgressHook(U, 37)"),
         MakeQueryResponseProgressM("X0", ProgressCode::OK, { "SetHotendCurrentTemp(50)" }, []() { SetHotendCurrentTemp(50); }),
-        MakeRegistersQuery(1, 5, 5, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersQuery(1, 5, 5, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeLogEntry("ReportProgressHook(U, 37)"),
         MakeQueryResponseProgressM("X0", ProgressCode::OK, { "SetHotendCurrentTemp(100)" }, []() { SetHotendCurrentTemp(100); }),
-        MakeRegistersQuery(1, 5, 5, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersQuery(1, 5, 5, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeLogEntry("ReportProgressHook(U, 37)"),
         MakeQueryResponseProgressM("X0", ProgressCode::OK, { "SetHotendCurrentTemp(150)" }, []() { SetHotendCurrentTemp(150); }),
-        MakeRegistersQuery(1, 5, 5, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersQuery(1, 5, 5, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeLogEntry("ReportProgressHook(U, 37)"),
         MakeQueryResponseProgressM("X0", ProgressCode::OK, { "SetHotendCurrentTemp(200)" }, []() { SetHotendCurrentTemp(200); }),
-        MakeRegistersQuery(1, 5, 5, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersQuery(1, 5, 5, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeLogEntry("ReportProgressHook(U, 37)"),
         MakeQueryResponseProgressM("X0", ProgressCode::OK, { "SetHotendCurrentTemp(215)" }, []() { SetHotendCurrentTemp(215); }),
-        MakeRegistersQuery(1, 5, 5, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersQuery(1, 5, 5, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeLogEntry("ReportProgressHook(U, 37)"),
 
         MakeCommandWithoutBeginReport(cmd),
@@ -492,15 +499,15 @@ TEST_CASE("Marlin::MMU2::MMU2 unload with preheat", "[Marlin][MMU2]") {
 
         //        MakeRegistersCommand(1, 1, 5, 5, 0, 0, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::EngagingIdler),
-        MakeRegistersCommand(1, 1, 5, 5, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(1, 1, 5, 5, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::UnloadingToFinda),
-        MakeRegistersCommand(1, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(1, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::UnloadingToFinda, []() { MMU2::fs = MMU2::FilamentState::NOT_PRESENT; }),
-        MakeRegistersCommand(0, 1, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 1, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::RetractingFromFinda),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseProgress(cmd, ProgressCode::DisengagingIdler),
-        MakeRegistersCommand(0, 0, 0, 0, 0, 0, MMU2::heartBeatPeriod + 1),
+        MakeRegistersCommand(0, 0, 0, 0, 0, 0, 360, MMU2::heartBeatPeriod + 1),
         MakeQueryResponseFinished(cmd),
     });
     MMU2::mmu2.unload();

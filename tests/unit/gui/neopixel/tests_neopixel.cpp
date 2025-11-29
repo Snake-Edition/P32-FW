@@ -24,13 +24,13 @@ void spi_wr_bytes(uint8_t *pb, uint16_t size) {
 }
 
 template <size_t T1H, size_t T1L, size_t T0H, size_t T0L, size_t RESET_TIME, size_t LED_COUNT> // LED_COUNT must be last to be deducted
-void led_test(typename Leds_base<LED_COUNT>::color_array colors, const std::vector<uint8_t> &result) {
+void led_test(typename LedsBase<LED_COUNT>::color_array colors, const std::vector<uint8_t> &result) {
     cmp_vector = result;
 
     neopixel::LedsSPI<LED_COUNT, spi_wr_bytes, T1H, T1L, T0H, T0L, RESET_TIME> led;
 
-    led.Set(colors);
-    led.Tick();
+    led.set(colors);
+    led.update();
 }
 
 static std::string cmp_string;
@@ -52,13 +52,13 @@ void spi_wr_bytes__string(uint8_t *pb, uint16_t size) {
 }
 
 template <size_t T1H, size_t T1L, size_t T0H, size_t T0L, size_t RESET_TIME, size_t LED_COUNT> // LED_COUNT must be last to be deducted
-void led_test(typename Leds_base<LED_COUNT>::color_array colors, const std::string &result) {
+void led_test(typename LedsBase<LED_COUNT>::color_array colors, const std::string &result) {
     cmp_string = result;
     static constexpr size_t SZ = (((T1H + T1L > T0H + T0L ? T1H + T1L : T0H + T0L) * LED_COUNT * 8 * 3 + RESET_TIME + 7) / 8) * 8; // 3 color 8 bit
     neopixel::LedsSPI<LED_COUNT, spi_wr_bytes__string<SZ>, T1H, T1L, T0H, T0L, RESET_TIME> led;
 
-    led.Set(colors);
-    led.Tick();
+    led.set(colors);
+    led.update();
 }
 
 // replace '1' with T1H * '1' and with T1L * '0'
@@ -108,11 +108,11 @@ std::string string_extend(std::string s, size_t T1H, size_t T1L, size_t T0H, siz
 TEST_CASE("LEDS") {
     cmp_vector.clear();
     SECTION("1 led") {
-        Leds_base<1>::color_array cl0 = { { 0 } };
+        LedsBase<1>::color_array cl0 = { { 0 } };
         led_test<1, 0, 0, 1, 0, 1>(cl0, std::vector<uint8_t>({ 0, 0, 0 }));
-        Leds_base<1>::color_array cl1 = { { 0x01 } };
+        LedsBase<1>::color_array cl1 = { { 0x01 } };
         led_test<1, 0, 0, 1, 0, 1>(cl1, std::vector<uint8_t>({ 0, 0, 0x01 }));
-        Leds_base<1>::color_array colors = { { 0x00123456 } };
+        LedsBase<1>::color_array colors = { { 0x00123456 } };
         led_test<1, 0, 0, 1, 0, 1>(colors, std::vector<uint8_t>({ 0x12, 0x34, 0x56 }));
         led_test<1, 0, 0, 1, 1, 1>(colors, std::vector<uint8_t>({ 0x12, 0x34, 0x56, 0 })); // add one bit (rounded up to bytes) and fill with zeroes
         led_test<1, 0, 0, 1, 16, 1>(colors, std::vector<uint8_t>({ 0x12, 0x34, 0x56, 0, 0 })); // add 16 bit (rounded up to bytes) and fill with zeroes
@@ -194,7 +194,7 @@ TEST_CASE("LEDS") {
     static constexpr size_t END_PULSE = uint32_t(51.f * 10.5f);
 
     SECTION("real format black") {
-        Leds_base<1>::color_array colors = { { 0x00000000 } };
+        LedsBase<1>::color_array colors = { { 0x00000000 } };
 
         static constexpr const char *input_data = "00000000 00000000 00000000"; // color .. TODO autoconvert
         std::string result_string = string_extend(input_data, T1H, T1L, T0H, T0L);
@@ -202,7 +202,7 @@ TEST_CASE("LEDS") {
     }
 
     SECTION("real format red") {
-        Leds_base<1>::color_array colors = { { 0x000000ff } };
+        LedsBase<1>::color_array colors = { { 0x000000ff } };
 
         static constexpr const char *input_data = "00000000 00000000 11111111";
         std::string result_string = string_extend(input_data, T1H, T1L, T0H, T0L);
@@ -210,7 +210,7 @@ TEST_CASE("LEDS") {
     }
 
     SECTION("real format green") {
-        Leds_base<1>::color_array colors = { { 0x0000ff00 } };
+        LedsBase<1>::color_array colors = { { 0x0000ff00 } };
 
         static constexpr const char *input_data = "00000000 11111111 00000000";
         std::string result_string = string_extend(input_data, T1H, T1L, T0H, T0L);
@@ -218,7 +218,7 @@ TEST_CASE("LEDS") {
     }
 
     SECTION("real format blue") {
-        Leds_base<1>::color_array colors = { { 0x00ff0000 } };
+        LedsBase<1>::color_array colors = { { 0x00ff0000 } };
 
         static constexpr const char *input_data = "11111111 00000000 00000000";
         std::string result_string = string_extend(input_data, T1H, T1L, T0H, T0L);
@@ -226,11 +226,11 @@ TEST_CASE("LEDS") {
     }
 
     SECTION("real format 4 leds") {
-        Leds_base<4>::color_array colors = { { 0x000000ff, 0x0000ff00, 0x00ff0000, 0x00000000 } };
+        LedsBase<4>::color_array colors = { { 0x000000ff, 0x0000ff00, 0x00ff0000, 0x00000000 } };
 
         // after neopixel receives 24 bits, they are stored, than rest is shifted out
         // this behavior mirrors order of LEDs
-        static constexpr const char *input_data = "00000000 00000000 00000000  11111111 00000000 00000000  00000000 11111111 00000000  00000000 00000000 11111111";
+        static constexpr const char *input_data = "00000000 00000000 11111111  00000000 11111111 00000000  11111111 00000000 00000000  00000000 00000000 00000000";
         std::string result_string = string_extend(input_data, T1H, T1L, T0H, T0L);
         led_test<T1H, T1L, T0H, T0L, END_PULSE, 4>(colors, result_string);
     }

@@ -16,3 +16,4 @@ set(LibBGCode_BUILD_COMPONENT_Binarize
     )
 
 add_subdirectory(libbgcode)
+set_property(TARGET bgcode_core PROPERTY CXX_STANDARD ${CMAKE_CXX_STANDARD})

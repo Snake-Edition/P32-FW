@@ -1,41 +1,17 @@
+/// @file
 #pragma once
 
-#include "shared_config.h"
-#include "otp_types.hpp"
+#include <common/otp_types.hpp>
 #include <option/has_xlcd.h>
 #include <option/has_love_board.h>
-
-FwAutoUpdate get_auto_update_flag(void);
 
 /**
  * Init the data_exchange struct in case of no-bootloader build.
  */
 void data_exchange_init();
 
-/// wrapper around get_auto_update_flag() == FwAutoUpdate::tester_mode_{1,2,3}
+/// @return true if firmware is running in tester mode
 bool running_in_tester_mode();
-
-/*!****************************************************************************
- * \brief Copy specified BBF's SFN from RAM
- *
- * \param [out] out_buff pointer to destination buffer
- *
- * \return	void
- *
- *****************************************************************************/
-void get_specified_SFN(char *out_buff);
-
-// This is important: we need to disable auto flashing of newer FW - in case auto-update-specified was a downgrade
-void set_fw_update_flag(FwAutoUpdate flag);
-
-// eeprom_write_byte() is temporarly removed (for new bootloader downgrade testing)
-void set_fw_signature(uint8_t fw_signature);
-
-void set_bootloader_valid();
-
-void set_bootloader_invalid();
-
-void clr_bbf_sfn();
 
 namespace data_exchange {
 
@@ -52,13 +28,9 @@ OtpStatus get_loveboard_status();
 LoveBoardEeprom get_loveboard_eeprom();
 #endif
 
-bool is_fw_update_on_restart();
-
 void fw_update_on_restart_enable();
 
 void fw_update_older_on_restart_enable();
-
-void fw_update_on_restart_disable();
 
 /// Return true if the preboot set the bootloader_valid flag to true
 ///

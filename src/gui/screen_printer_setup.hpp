@@ -8,6 +8,7 @@
 #include <WinMenuContainer.hpp>
 #include <screen_menu.hpp>
 #include <common/extended_printer_type.hpp>
+#include <option/has_chamber_vents.h>
 
 #include <MItem_menus.hpp>
 #include <option/has_mmu2.h>
@@ -18,6 +19,11 @@
 #include <option/has_chamber_filtration_api.h>
 #if HAS_CHAMBER_FILTRATION_API()
     #include <gui/menu_item/specific/menu_items_chamber_filtration.hpp>
+#endif
+
+#include <option/has_xbuddy_extension.h>
+#if HAS_XBUDDY_EXTENSION()
+    #include <gui/menu_item/specific/menu_items_xbuddy_extension.hpp>
 #endif
 
 namespace screen_printer_setup_private {
@@ -39,6 +45,12 @@ using ScreenBase
         // At least for C1, the filter addon is considered a hardware option, because it also affects the function of the cooling fans
         // BFW-6719
         MI_CHAMBER_FILTRATION_BACKEND,
+#endif
+#if HAS_XBUDDY_EXTENSION()
+        MI_CAM_USB_PWR,
+#endif
+#if HAS_CHAMBER_VENTS()
+        MI_SWITCH_VENT_MECHANISM,
 #endif
         MI_DONE>;
 

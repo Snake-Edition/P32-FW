@@ -61,10 +61,6 @@
   #include "../feature/snmm.h"
 #endif
 
-#if ENABLED(MIXING_EXTRUDER)
-  #include "../feature/mixing.h"
-#endif
-
 #if HAS_LEVELING
   #include "../feature/bedlevel/bedlevel.h"
 #endif
@@ -75,10 +71,6 @@
 
 #if ENABLED(PRUSA_MMU2)
   #include "../feature/prusa/MMU2/mmu2_mk4.h"
-#endif
-
-#if HAS_LCD_MENU
-  #include "../lcd/ultralcd.h"
 #endif
 
 #if ENABLED(ADVANCED_PAUSE_FEATURE)
@@ -777,19 +769,7 @@ void tool_change(const uint8_t new_tool,
     if (new_tool == active_extruder) return;
   #endif
 
-  #if ENABLED(MIXING_EXTRUDER)
-
-    UNUSED(return_type);
-
-    if (new_tool >= MIXING_VIRTUAL_TOOLS)
-      return invalid_extruder_error(new_tool);
-
-    #if MIXING_VIRTUAL_TOOLS > 1
-      // T0-Tnnn: Switch virtual tool by changing the index to the mix
-      mixer.T(new_tool);
-    #endif
-
-  #elif ENABLED(PRUSA_MMU2)
+  #if ENABLED(PRUSA_MMU2)
 
     UNUSED(return_type);
 
@@ -823,10 +803,6 @@ void tool_change(const uint8_t new_tool,
       return_type = tool_return_t::no_return;
       if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("No move (not homed)");
     }
-
-    #if HAS_LCD_MENU
-      ui.return_to_status();
-    #endif
 
     #if ENABLED(DUAL_X_CARRIAGE)
       const bool idex_full_control = dual_x_carriage_mode == DXC_FULL_CONTROL_MODE;
@@ -985,9 +961,6 @@ void tool_change(const uint8_t new_tool,
           singlenozzle_temp[old_tool] = thermalManager.temp_hotend[0].target;
           if (singlenozzle_temp[new_tool] && singlenozzle_temp[new_tool] != singlenozzle_temp[old_tool]) {
             thermalManager.setTargetHotend(singlenozzle_temp[new_tool], 0);
-            #if HAS_DISPLAY
-              thermalManager.set_heating_message(0);
-            #endif
             (void)thermalManager.wait_for_hotend(0, false);  // Wait for heating or cooling
           }
         #endif

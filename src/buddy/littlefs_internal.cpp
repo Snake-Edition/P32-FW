@@ -1,10 +1,10 @@
 #include <buddy/littlefs_internal.h>
-#include "w25x.h"
+#include <common/w25x.hpp>
 
-#define BLOCK_SIZE W25X_BLOCK_SIZE
+#define BLOCK_SIZE w25x_block_size
 
 // Address offset to skip area reserved for the dump
-#define ADDR_OFFSET W25X_FS_START_ADDRESS
+#define ADDR_OFFSET w25x_fs_start_address
 
 static lfs_t lfs;
 
@@ -29,6 +29,20 @@ static int erase(const struct lfs_config *c, lfs_block_t block);
 // are propagated to the user.
 static int sync(const struct lfs_config *c);
 
+struct LFSInternal {
+#if PRINTER_IS_PRUSA_MINI()
+    static constexpr lfs_size_t cache_size = 128; // need to save RAM on MINI, also PNG draw is faster due smaller and more efficient display
+#else
+    static constexpr lfs_size_t cache_size = 512; // PNG draws about 4% faster compared to cache_size 128
+#endif
+    static constexpr lfs_size_t lookahead_size = 16;
+
+    std::byte read_buffer[cache_size];
+    std::byte prog_buffer[cache_size];
+    std::byte lookahead_buffer[lookahead_size];
+};
+static LFSInternal lfs_internal;
+
 // configuration of the filesystem is provided by this struct
 static struct lfs_config littlefs_config = {
     // block device operations
@@ -44,15 +58,11 @@ static struct lfs_config littlefs_config = {
     .block_size = BLOCK_SIZE,
     .block_count = 0, // to be initialized at runtime
     .block_cycles = 500,
-#if PRINTER_IS_PRUSA_MINI()
-    .cache_size = 128, // need to save RAM on MINI, also PNG draw is faster due smaller and more efficient display
-#else
-    .cache_size = 512, // PNG draws about 4% faster compared to cache_size 128
-#endif
-    .lookahead_size = 16,
-    .read_buffer = nullptr,
-    .prog_buffer = nullptr,
-    .lookahead_buffer = nullptr,
+    .cache_size = lfs_internal.cache_size,
+    .lookahead_size = lfs_internal.lookahead_size,
+    .read_buffer = &lfs_internal.read_buffer,
+    .prog_buffer = &lfs_internal.prog_buffer,
+    .lookahead_buffer = &lfs_internal.lookahead_buffer,
     .name_max = 0,
     .file_max = 0,
     .attr_max = 0,
@@ -141,12 +151,4 @@ lfs_t *littlefs_internal_init() {
     }
 
     return &lfs;
-}
-
-struct lfs_config *littlefs_internal_config_get() {
-    if (littlefs_config.block_count != 0) {
-        return &littlefs_config;
-    } else {
-        return NULL;
-    }
 }

@@ -26,19 +26,19 @@ enum class MsgType : uint8_t {
 };
 
 inline DumpFlags operator|(const DumpFlags a, const DumpFlags b) {
-    return DumpFlags(ftrstd::to_underlying(a) | ftrstd::to_underlying(b));
+    return DumpFlags(std::to_underlying(a) | std::to_underlying(b));
 }
 
 inline DumpFlags operator&(const DumpFlags a, const DumpFlags b) {
-    return DumpFlags(ftrstd::to_underlying(a) & ftrstd::to_underlying(b));
+    return DumpFlags(std::to_underlying(a) & std::to_underlying(b));
 }
 
 inline DumpFlags operator~(const DumpFlags a) {
-    return DumpFlags(~ftrstd::to_underlying(a));
+    return DumpFlags(~std::to_underlying(a));
 }
 
 inline bool any(const DumpFlags a) {
-    return ftrstd::to_underlying(a);
+    return std::to_underlying(a);
 }
 
 // DUMP constants for error message
@@ -99,7 +99,7 @@ bool dump_read_data(size_t offset, size_t size, uint8_t *ptr);
  * This is used for redscreen error message and for BSOD error message.
  * @param invalid RSOD or BSOD, erased value means message invalid
  * @param error_code enum from the error list, not used for BSOD (use 0 or ERR_UNDEF instead)
- * @note This uses uint16_t to minimize dependencies. Include <error_codes.hpp> and use ftrstd::to_underlying(ERR_WHATEVER).
+ * @note This uses uint16_t to minimize dependencies. Include <error_codes.hpp> and use std::to_underlying(ERR_WHATEVER).
  * @param error longer error message
  * @param title shorter error title, or file and line for BSOD
  */

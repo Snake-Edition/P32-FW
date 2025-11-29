@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <freertos/config.hpp>
 
 namespace freertos {
@@ -34,9 +35,7 @@ public:
     void release();
 
     /// Just like release, but can be called from an interrupt.
-    ///
-    /// (Note: We cheat about the typedef here a bit to avoid include hell).
-    [[nodiscard]] long release_from_isr();
+    void release_from_isr();
 
     /// Same as \p release, but instead of raising a bsod when there's already
     /// a permit, it blocks for an acquire to consume it first before
@@ -46,6 +45,11 @@ public:
     /// Consumes one permit from the semaphore, blocking until it's available
     /// as necessary.
     void acquire();
+
+    /// Similar to acquire, but the task is blocked only for given timeout.
+    ///
+    /// Returns true if someone released it and false if it timeouted
+    bool try_acquire_for(uint32_t ms);
 };
 
 } // namespace freertos

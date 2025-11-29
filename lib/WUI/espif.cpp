@@ -10,6 +10,7 @@
 #include <cinttypes>
 #include <timing.h>
 #include <mutex>
+#include <memory>
 
 #include <FreeRTOS.h>
 #include <freertos/binary_semaphore.hpp>
@@ -17,6 +18,7 @@
 #include <common/metric.h>
 #include <common/crc32.h>
 #include <device/peripherals_uart.hpp>
+#include <device/peripherals.h>
 #include <freertos/queue.hpp>
 #include <task.h>
 #include <semphr.h>
@@ -89,6 +91,7 @@ enum ESPIFOperatingMode {
     ESPIF_WRONG_FW,
     ESPIF_FLASHING_ERROR_NOT_CONNECTED,
     ESPIF_FLASHING_ERROR_OTHER,
+    ESPIF_ERROR,
 };
 
 enum MessageType {
@@ -101,7 +104,7 @@ enum MessageType {
     MSG_SCAN_AP_GET = 11,
 };
 
-static constexpr uint8_t SUPPORTED_FW_VERSION = 12;
+static constexpr uint8_t SUPPORTED_FW_VERSION = 13;
 
 // NIC state
 static std::atomic<uint8_t> fw_version;
@@ -113,6 +116,8 @@ static std::atomic<uint8_t> init_countdown = 20;
 static std::atomic<bool> seen_intron = false;
 static std::atomic<bool> seen_pong = false;
 static std::atomic<bool> reset_parser = false;
+// 0 means "unknown" or "not associated"
+static std::atomic<int8_t> signal_strength = 0;
 
 // UART
 static std::atomic<bool> esp_detected;
@@ -190,6 +195,7 @@ static bool is_running(ESPIFOperatingMode mode) {
     case ESPIF_FLASHING_ERROR_OTHER:
     case ESPIF_WRONG_FW:
     case ESPIF_SCANNING_MODE:
+    case ESPIF_ERROR:
         return false;
     case ESPIF_WAIT_INIT:
     case ESPIF_NEED_AP:
@@ -207,6 +213,7 @@ static bool can_recieve_data(ESPIFOperatingMode mode) {
     case ESPIF_UNINITIALIZED_MODE:
     case ESPIF_FLASHING_ERROR_OTHER:
     case ESPIF_WRONG_FW:
+    case ESPIF_ERROR:
         return false;
     case ESPIF_FLASHING_ERROR_NOT_CONNECTED:
     case ESPIF_WAIT_INIT:
@@ -242,8 +249,7 @@ static pbuf_variant tx_pbuf = nullptr; // only valid when tx_waiting == true
 
 void espif_tx_callback() {
     if (auto *semaphore = tx_semaphore_active.exchange(nullptr); semaphore != nullptr) {
-        long woken = semaphore->release_from_isr();
-        portYIELD_FROM_ISR(woken);
+        semaphore->release_from_isr();
     }
 }
 
@@ -676,10 +682,18 @@ static void uart_input(uint8_t *data, size_t size, struct netif *netif) {
                 state = HeaderByte2;
                 c++;
                 break;
-            case MSG_PACKET_V2:
-                process_link_change(*c++, netif);
+            case MSG_PACKET_V2: {
+                // The byte holds both link status and the signal strength.
+                //
+                // * 1: (historically / backwards compatible mode) ‒ link up, unknown signal strength
+                // * 0: Link down
+                // * negative: Link up, number meaning the signal strength.
+                int8_t signal = static_cast<int8_t>(*c++);
+                signal_strength.store(signal > 0 ? 0 : signal);
+                process_link_change(signal, netif);
                 state = HeaderByte2;
                 break;
+            }
             default:
                 assert(false && "internal inconsistency");
                 state = Intron;
@@ -740,7 +754,7 @@ static void uart_input(uint8_t *data, size_t size, struct netif *netif) {
                     rx_read = 0;
                     state = PacketData;
                 } else {
-                    log_warning(ESPIF, "pbuf_alloc_rx() failed, dropping packet");
+                    log_warning(ESPIF, "pbuf_alloc_rx(%zu) failed, dropping packet", static_cast<size_t>(rx_len));
                     rx_read = 0;
                     state = PacketDataThrowaway;
                 }
@@ -771,6 +785,11 @@ static void uart_input(uint8_t *data, size_t size, struct netif *netif) {
                     rx_buff = nullptr;
                     state = Intron;
                     break;
+                } else {
+                    // We've passed the ownership to netif->input, it'll free
+                    // it. Forget about it on our side, so we never ever touch
+                    // it by accident.
+                    rx_buff = rx_buff_cur = nullptr;
                 }
                 seen_pong = true;
                 state = Intron;
@@ -876,8 +895,17 @@ err_t espif_join_ap(const char *ssid, const char *pass) {
 
     err_t err = espif_tx_msg_clientconfig_v2(ssid, pass);
 
-    if (err == ERR_OK) {
+    switch (err) {
+    case ERR_OK:
         esp_operating_mode = ESPIF_CONNECTING_AP;
+        break;
+    case ERR_MEM:
+        // Wait in error state for another reset, done by the wui.cpp on too
+        // long inactivity. Once it resets us, we'll try again from the start.
+        esp_operating_mode = ESPIF_ERROR;
+        break;
+    default:
+        break;
     }
 
     return err;
@@ -979,6 +1007,8 @@ EspFwState esp_fw_state() {
         return EspFwState::WrongVersion;
     case ESPIF_SCANNING_MODE:
         return EspFwState::Scanning;
+    case ESPIF_ERROR:
+        return EspFwState::Unknown;
     }
     assert(0);
     return EspFwState::NoEsp;
@@ -993,6 +1023,7 @@ EspLinkState esp_link_state() {
     case ESPIF_FLASHING_ERROR_NOT_CONNECTED:
     case ESPIF_FLASHING_ERROR_OTHER:
     case ESPIF_SCANNING_MODE:
+    case ESPIF_ERROR:
         return EspLinkState::Init;
     case ESPIF_NEED_AP:
     case ESPIF_CONNECTING_AP:
@@ -1011,4 +1042,13 @@ EspLinkState esp_link_state() {
     }
     assert(0);
     return EspLinkState::Init;
+}
+
+std::optional<int8_t> esp_signal_strength() {
+    int8_t result = signal_strength.load();
+    if (result == 0) {
+        return std::nullopt;
+    } else {
+        return result;
+    }
 }

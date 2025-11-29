@@ -7,7 +7,7 @@
 #include "assert.h"
 #include <cstdlib>
 #include <span>
-#include <bit>
+#include <type_traits>
 
 #define UTF8_IS_NONASCII(ch)    ((ch)&0x80)
 #define UTF8_IS_CONT(ch)        (((ch)&0xC0) == 0x80)
@@ -211,8 +211,14 @@ public:
     /// \param view string to be read (reader makes a copy, it does not need to exist during the reader existence)
     explicit StringReaderUtf8(const string_view_utf8 &view);
 
-    /// No copying, no moving, just reading :)
-    StringReaderUtf8(const StringReaderUtf8 &) = delete;
+    /// The reader is not supposed to be pass-by-value, use \p copy() if you really need a copy
+    StringReaderUtf8(StringReaderUtf8 &&) = delete;
+
+    /// Returns a copy of the reader in its current state.
+    /// Generally, you want to pass \p string_view_utf8 around, or pass the reader by reference, so in general, please tend to avoid this function.
+    StringReaderUtf8 copy() const {
+        return StringReaderUtf8(*this);
+    }
 
 public:
     /// Skip next \param num_of_chars UTF-8 characters
@@ -239,6 +245,9 @@ public:
     int read_format_specifier(char *target, uint8_t target_size);
 
 private:
+    /// The reader is not supposed to be pass-by-value, use \p copy() if you really need a copy
+    explicit StringReaderUtf8(const StringReaderUtf8 &) = default;
+
     /// \returns one byte from source media without advancing internal read ptr, implementation defined in derived classes
     /// The caller of this function makes sure it does not get called repeatedly after returning the end of input data.
     /// \returns 0 in case of end of input data or an error
@@ -278,6 +287,9 @@ private:
 
 template <typename... Args>
 string_view_utf8 string_view_utf8::formatted(StringViewUtf8ParamBase &params, Args... args) const {
+    // Check that we're not accidentally passing invalid types to the printf
+    static_assert(((std::is_arithmetic_v<Args> || std::is_same_v<Args, char *> || std::is_same_v<Args, const char *>)&&...));
+
     FormatBuilder fmt(*this, params);
     (fmt.add_param(0, args), ...);
     return fmt.finalize();

@@ -260,6 +260,8 @@ public:
         printerButtonOperation = Buttons::NoButton;
     }
 
+    inline uint16_t BowdenLength() const { return logic.BowdenLength(); }
+
     CommandInProgressManager commandInProgressManager;
 
 #ifndef UNITTEST
@@ -383,6 +385,7 @@ private:
         RelieveFilament,
         ExtraRelieveFilament, // longer retraction for E-stall enabled printers
     };
+    void UnloadObeyAutoRetracted();
     void UnloadInner(PreUnloadPolicy preUnloadPolicy);
     void CutFilamentInner(uint8_t slot);
 

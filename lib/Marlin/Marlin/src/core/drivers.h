@@ -21,11 +21,11 @@
  */
 #pragma once
 
+#define _NONE               0xFFFFFFFF // needs to be non-zero
 #define _A4988              0x001
 #define _A5984              0x002
 #define _DRV8825            0x003
 #define _LV8729             0x004
-#define _L6470              0x105
 #define _TB6560             0x006
 #define _TB6600             0x007
 #define _TMC2100            0x008
@@ -64,6 +64,7 @@
 #define AXIS_DRIVER_TYPE_E5(T) (E_STEPPERS > 5 && _AXIS_DRIVER_TYPE(E5,T))
 
 #define AXIS_DRIVER_TYPE(A,T) AXIS_DRIVER_TYPE_##A(T)
+#define SAME_DRIVER_ID(A,B) (_DRIVER_ID(A) == _DRIVER_ID(B))
 
 #define HAS_E_DRIVER(T) (  AXIS_DRIVER_TYPE_E0(T) || AXIS_DRIVER_TYPE_E1(T) \
                         || AXIS_DRIVER_TYPE_E2(T) || AXIS_DRIVER_TYPE_E3(T) \
@@ -118,12 +119,3 @@
                                    || AXIS_DRIVER_TYPE(A,TMC2209) \
                                    || AXIS_DRIVER_TYPE(A,TMC5130) \
                                    || AXIS_DRIVER_TYPE(A,TMC5160) )
-
-//
-// Stretching 'drivers.h' to include LPC/SAMD51 SD options
-//
-#define _SDCARD_LCD          1
-#define _SDCARD_ONBOARD      2
-#define _SDCARD_CUSTOM_CABLE 3
-#define _SDCARD_ID(V) _CAT(_SDCARD_, V)
-#define SD_CONNECTION_IS(V) (_SDCARD_ID(SDCARD_CONNECTION) == _SDCARD_ID(V))

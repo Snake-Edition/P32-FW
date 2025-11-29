@@ -24,8 +24,6 @@
 #include "selftest_heater_config.hpp"
 #include "selftest_loadcell_config.hpp"
 #include "selftest_fsensor_config.hpp"
-#include "selftest_gears_config.hpp"
-#include "selftest_gears.hpp"
 #include "selftest_revise_printer_setup.hpp"
 #include "calibration_z.hpp"
 #include "fanctl.hpp"
@@ -126,11 +124,6 @@ static constexpr HeaterConfig_t Config_HeaterNozzle[] = {
         .heater_full_load_max_W = 50,
         .pwm_100percent_equivalent_value = 127,
         .min_pwm_to_measure = 26,
-        .hotend_type_temp_offsets = EnumArray<HotendType, int8_t, HotendType::_cnt> {
-            { HotendType::stock, 0 },
-            { HotendType::stock_with_sock, -20 },
-            { HotendType::e3d_revo, -127 }, // Not supported on this printer
-        },
     }
 };
 
@@ -184,8 +177,6 @@ static constexpr std::array<const FSensorConfig_t, HOTENDS> Config_FSensorMMU = 
     { .extruder_id = 0 },
 } };
 
-static constexpr SelftestGearsConfig gears_config = { .feedrate = 8 };
-
 // class representing whole self-test
 class CSelftest : public ISelftest {
 public:
@@ -215,7 +206,6 @@ protected:
     selftest::IPartHandler *pHotendSpecify;
     std::array<selftest::IPartHandler *, HOTENDS> m_pLoadcell;
     std::array<selftest::IPartHandler *, HOTENDS> pFSensor;
-    selftest::IPartHandler *pGearsCalib;
 
     SelftestResult m_result;
 };
@@ -424,11 +414,6 @@ void CSelftest::Loop() {
 #endif
 
         break;
-    case stsGears:
-        if (selftest::phase_gears(pGearsCalib, gears_config)) {
-            return;
-        }
-        break;
     case stsSelftestStop:
         restoreAfterSelftest();
         break;
@@ -454,9 +439,7 @@ void CSelftest::phaseDidSelftestPass() {
 
     // dont run wizard again
     if (SelftestResult_Passed_All(m_result)) {
-        auto &store = config_store();
-        auto transaction = store.get_backend().transaction_guard();
-        store.run_selftest.set(false); // clear selftest flag
+        config_store().run_selftest.set(false);
     }
 }
 
@@ -475,7 +458,6 @@ bool CSelftest::Abort() {
         abort_part(&loadcell);
     }
     abort_part((selftest::IPartHandler **)&pFSensor);
-    abort_part(&pGearsCalib);
 
     m_State = stsAborted;
 
@@ -564,6 +546,7 @@ void CSelftest::next() {
 
     // current state cannot be run
     // call recursively: it is fine, this function is tiny and there will be few iterations
+    marlin_server::set_warning(WarningType::ActionSelftestRequired);
     next();
 }
 

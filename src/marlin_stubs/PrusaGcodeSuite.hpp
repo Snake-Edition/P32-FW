@@ -7,12 +7,14 @@
 #include <option/has_toolchanger.h>
 #include <option/has_side_leds.h>
 #include <option/has_belt_tuning.h>
+#include <option/has_manual_belt_tuning.h>
 #include <option/has_i2c_expander.h>
 #include <option/has_chamber_api.h>
 #include <option/has_nozzle_cleaner.h>
 #include <option/has_emergency_stop.h>
 #include <option/buddy_enable_connect.h>
 #include <option/has_door_sensor_calibration.h>
+#include <option/has_chamber_vents.h>
 
 #include <gcode/gcode_parser.hpp>
 
@@ -25,7 +27,7 @@
 namespace PrusaGcodeSuite {
 
 int8_t get_target_extruder_from_command(const GCodeParser2 &p);
-
+int8_t get_target_extruder_from_command_p(const GCodeParser2 &p);
 /** \defgroup G-Codes G-Code Commands
  * @{
  */
@@ -47,6 +49,10 @@ void M123(); //< Fan speed reporting
 
 #if HAS_CHAMBER_API()
 void M141(); ///< Set chamber temperature
+#endif
+
+#if HAS_CHAMBER_FILTRATION_API()
+void M147_148(); //< Enable/disable filtration
 #endif
 
 void M150();
@@ -112,10 +118,17 @@ void M864(); //< spool join control
 
 void M865(); //< Set up ad-hoc filament
 
+#if HAS_CHAMBER_VENTS()
+void M870(); ///< Open or close ventilation intake
+#endif
+
 void M591(); //< configure Filament stuck monitoring
 
 #if HAS_BELT_TUNING()
 void M960(); //< Belt tuning
+#endif
+#if HAS_MANUAL_BELT_TUNING()
+void M961(); //< Manual Belt tuning
 #endif
 
 void M997(); //< Update firmware. Prusa STM32 platform specific
@@ -139,10 +152,17 @@ void M1980(); //< Door sensor calibration
 #endif
 
 void M9140(); //< Set normal (non-stealth) mode
+void M9141(); //< Get stealth mode status
 void M9150(); //< Set stealth mode
 
 void M9200(); //< Re-load IS settings from config store
 void M9201(); //< Reset to default motion parameters (accelerations, feedrates, ...)
+
+#if HAS_PRECISE_HOMING_COREXY()
+void M9202(); //< Clear precise homing calibration
+#endif
+
+void M9933(); //< Cork for tracking when gcode finished executing
 
 #if HAS_TOOLCHANGER()
 void P0(); //< Tool park

@@ -5,9 +5,10 @@
 #include "module/modular_heatbed.h"
 #include <modular_bed_errors.hpp>
 #include <modular_bed_registers.hpp>
+#include <option/has_puppy_modularbed.h>
 #include <utility_extensions.hpp>
 
-#if HAS_MODULARBED()
+static_assert(HAS_PUPPY_MODULARBED());
 
 namespace buddy::puppies {
 
@@ -33,20 +34,20 @@ public:
     using HBHoldingRegister = modular_bed_shared::registers::HBHoldingRegister;
     using HBCoil = modular_bed_shared::registers::HBCoil;
 
-    static constexpr uint16_t GENERAL_DISCRETE_INPUTS_ADDR { ftrstd::to_underlying(SystemDiscreteInput::power_painc_status) };
-    static constexpr uint16_t BEDLET_DISCRETE_INPUTS_ADDR { ftrstd::to_underlying(HBDiscreteInput::is_ready) };
-    static constexpr uint16_t FAULT_STATUS_ADDR { ftrstd::to_underlying(SystemInputRegister::fault_status) };
-    static constexpr uint16_t STATIC_INPUT_REGISTERS_ADDR { ftrstd::to_underlying(SystemInputRegister::hw_bom_id) };
-    static constexpr uint16_t CURRENTS_ADDR { ftrstd::to_underlying(SystemInputRegister::adc_current_1) };
-    static constexpr uint16_t CLEAR_FAULT_ADDR { ftrstd::to_underlying(SystemCoil::clear_fault_status) };
-    static constexpr uint16_t RESET_OVECURRENT_FAULT_ADDR { ftrstd::to_underlying(SystemCoil::reset_overcurrent_fault) };
-    static constexpr uint16_t TEST_HEATING_ADDR { ftrstd::to_underlying(SystemCoil::test_hb_heating) };
-    static constexpr uint16_t PRINT_FAN_ACTIVE_ADDR { ftrstd::to_underlying(SystemCoil::print_fan_active) };
-    static constexpr uint16_t BEDLET_INPUT_REGISTERS_ADDR { ftrstd::to_underlying(HBInputRegister::fault_status) };
-    static constexpr uint16_t BEDLET_TARGET_TEMP_ADDR { ftrstd::to_underlying(HBHoldingRegister::target_temperature) };
-    static constexpr uint16_t BEDLET_MEASURED_MAX_CURRENT_ADDR { ftrstd::to_underlying(HBHoldingRegister::measured_max_current) };
-    static constexpr uint16_t BEDLET_CLEAR_FAULT_ADDR { ftrstd::to_underlying(HBCoil::clear_fault_status) };
-    static constexpr uint16_t MCU_TEMPERATURE_ADDR { ftrstd::to_underlying(SystemInputRegister::mcu_temperature) };
+    static constexpr uint16_t GENERAL_DISCRETE_INPUTS_ADDR { std::to_underlying(SystemDiscreteInput::power_painc_status) };
+    static constexpr uint16_t BEDLET_DISCRETE_INPUTS_ADDR { std::to_underlying(HBDiscreteInput::is_ready) };
+    static constexpr uint16_t FAULT_STATUS_ADDR { std::to_underlying(SystemInputRegister::fault_status) };
+    static constexpr uint16_t STATIC_INPUT_REGISTERS_ADDR { std::to_underlying(SystemInputRegister::hw_bom_id) };
+    static constexpr uint16_t CURRENTS_ADDR { std::to_underlying(SystemInputRegister::adc_current_1) };
+    static constexpr uint16_t CLEAR_FAULT_ADDR { std::to_underlying(SystemCoil::clear_fault_status) };
+    static constexpr uint16_t RESET_OVECURRENT_FAULT_ADDR { std::to_underlying(SystemCoil::reset_overcurrent_fault) };
+    static constexpr uint16_t TEST_HEATING_ADDR { std::to_underlying(SystemCoil::test_hb_heating) };
+    static constexpr uint16_t PRINT_FAN_ACTIVE_ADDR { std::to_underlying(SystemCoil::print_fan_active) };
+    static constexpr uint16_t BEDLET_INPUT_REGISTERS_ADDR { std::to_underlying(HBInputRegister::fault_status) };
+    static constexpr uint16_t BEDLET_TARGET_TEMP_ADDR { std::to_underlying(HBHoldingRegister::target_temperature) };
+    static constexpr uint16_t BEDLET_MEASURED_MAX_CURRENT_ADDR { std::to_underlying(HBHoldingRegister::measured_max_current) };
+    static constexpr uint16_t BEDLET_CLEAR_FAULT_ADDR { std::to_underlying(HBCoil::clear_fault_status) };
+    static constexpr uint16_t MCU_TEMPERATURE_ADDR { std::to_underlying(SystemInputRegister::mcu_temperature) };
 
     using SystemError = modular_bed_shared::errors::SystemError;
     using HeatbedletError = modular_bed_shared::errors::HeatbedletError;
@@ -83,6 +84,8 @@ public:
     float get_heater_current();
 
     uint16_t get_mcu_temperature();
+
+    void safe_state();
 
 private:
     MODBUS_DISCRETE GeneralStatus {
@@ -172,5 +175,3 @@ private:
 extern ModularBed modular_bed;
 
 } // namespace buddy::puppies
-
-#endif

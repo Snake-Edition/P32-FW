@@ -50,6 +50,16 @@ MEMORY
 /* Sections */
 SECTIONS
 {
+  /* Disable usage of some functions */
+  /DISCARD/ :
+  {
+    /* These functions dynamically allocate. Use their _r variant. */
+    *(.text.asctime)
+    *(.text.gmtime)
+    *(.text.localtime)
+    *(.text.ctime)
+  }
+
   /* The startup code into "FLASH" Rom type memory */
   .isr_vector :
   {
@@ -158,7 +168,7 @@ SECTIONS
     PROVIDE_HIDDEN (__end_log_components = .);
 
     PROVIDE_HIDDEN (__start_metric_definitions = .);
-    KEEP(*(.data.metric_definitions))
+    KEEP(*(SORT(.data.metric_definitions.*)))
     PROVIDE_HIDDEN (__end_metric_definitions = .);
 
     *(.data)           /* .data sections */

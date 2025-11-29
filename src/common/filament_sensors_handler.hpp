@@ -143,6 +143,7 @@ FilamentSensors &FSensors_instance();
 
 IFSensor *GetExtruderFSensor(uint8_t index);
 IFSensor *GetSideFSensor(uint8_t index);
+bool hasActiveFilamentSensor(uint8_t index);
 
 /**
  * @brief called from IRQ

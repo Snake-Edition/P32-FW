@@ -439,9 +439,7 @@ void CSelftest::phaseDidSelftestPass() {
 
     // dont run wizard again
     if (SelftestResult_Passed_All(m_result)) {
-        auto &store = config_store();
-        auto transaction = store.get_backend().transaction_guard();
-        store.run_selftest.set(false); // clear selftest flag
+        config_store().run_selftest.set(false);
     }
 }
 
@@ -517,8 +515,10 @@ void CSelftest::restoreAfterSelftest() {
     // disable heater target values - thermalManager.disable_all_heaters does not do that
     thermalManager.setTargetBed(0);
     HOTEND_LOOP() {
-        thermalManager.setTargetHotend(0, 0);
-        marlin_server::set_temp_to_display(0, 0);
+        if (buddy::puppies::dwarfs[e].is_enabled()) {
+            thermalManager.setTargetHotend(0, e);
+        }
+        marlin_server::set_temp_to_display(0, e);
     }
 
     thermalManager.disable_all_heaters();

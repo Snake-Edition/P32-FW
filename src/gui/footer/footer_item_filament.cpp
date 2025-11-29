@@ -43,10 +43,10 @@ int FooterItemFilament::static_readValue() {
 string_view_utf8 FooterItemFilament::static_makeView(int value) {
     // Show --- if no tool is picked
     if (value == no_tool_value) {
-        return string_view_utf8::MakeCPUFLASH(reinterpret_cast<const uint8_t *>(no_tool_str));
+        return string_view_utf8::MakeCPUFLASH(no_tool_str);
     }
 
     static FilamentTypeParameters filament;
     filament = EncodedFilamentType::from_data(value).decode().parameters();
-    return string_view_utf8::MakeCPUFLASH(filament.name.data());
+    return string_view_utf8::MakeRAM(filament.name.data());
 }

@@ -1,3 +1,4 @@
+#include "display.hpp"
 #include "gui_time.hpp"
 #include "gui.hpp"
 #include "img_resources.hpp"
@@ -39,18 +40,16 @@
 #endif
 
 #if HAS_SIDE_LEDS()
-    #include <leds/side_strip_control.hpp>
+    #include <leds/side_strip_handler.hpp>
 #endif
 
 #include "Jogwheel.hpp"
 #include <wdt.hpp>
 #include <crash_dump/dump.hpp>
-#include "gui_leds.hpp"
 #include <option/has_dwarf.h>
-#include <option/has_modularbed.h>
 #include <option/has_leds.h>
 #if HAS_LEDS()
-    #include "led_animations/printer_animation_state.hpp"
+    #include <leds/led_manager.hpp>
 #endif
 #include <printers.h>
 
@@ -62,22 +61,7 @@ Jogwheel jogwheel;
 
 inline constexpr size_t MSG_MAX_LENGTH = 63; // status message max length
 
-void MsgCircleBuffer_cb(char *txt) {
-    if (auto screen = IScreenPrinting::GetInstance()) {
-        screen->on_message(txt);
-    }
-    screen_messages_data_t::message_buffer.put(txt);
-}
-
 namespace {
-void led_animation_step() {
-#if HAS_LEDS()
-    PrinterStateAnimation::Update();
-    Animator_LCD_leds().Step();
-    leds::TickLoop();
-#endif
-}
-
 void make_gui_ready_to_print() {
     /**
      * This function is triggered because of marlin_server::State::WaitGui and it is checking if GUI thread is safe to start printing.
@@ -174,7 +158,7 @@ void gui_error_run(void) {
 
     // This is not safe, because resource file could be corrupted
     // gui_error_run executes before bootstrap so resources may not be up to date resulting in artefects
-    img::enable_resource_file();
+    display::enable_resource_file();
 
     screen_node screen_initializer { get_error_screen() };
     Screens::Init(screen_initializer);
@@ -184,7 +168,7 @@ void gui_error_run(void) {
     crash_dump::dump_set_displayed();
 
 #if HAS_LEDS()
-    leds::Init();
+    leds::LEDManager::instance().init();
 #endif
 
     LangEEPROM::getInstance(); // Initialize language EEPROM value
@@ -193,9 +177,7 @@ void gui_error_run(void) {
         gui::StartLoop();
 
 #if HAS_LEDS()
-        PrinterStateAnimation::Update();
-        Animator_LCD_leds().Step();
-        leds::TickLoop();
+        leds::LEDManager::instance().update();
 #endif
 
         Screens::Access()->Loop();
@@ -210,11 +192,8 @@ void gui_run(void) {
     gui::knob::RegisterHeldLeftAction(TakeAScreenshot);
     gui::knob::RegisterLongPressScreenAction([]() { Screens::Access()->Open(ScreenFactory::Screen<ScreenMoveZ>); });
 
-    screen_node screen_initializer[] {
-        ScreenFactory::Screen<screen_splash_data_t>, // splash
-        ScreenFactory::Screen<screen_home_data_t> // home
-    };
-    Screens::Init(screen_initializer, screen_initializer + (sizeof(screen_initializer) / sizeof(screen_initializer[0])));
+    Screens::Init(ScreenFactory::Screen<screen_splash_data_t>);
+    Screens::Access()->PushBeforeCurrent(ScreenFactory::Screen<screen_home_data_t>);
 
     // TIMEOUT variable getting value from EEPROM when EEPROM interface is initialized
     if (config_store().menu_timeout.get()) {
@@ -225,7 +204,7 @@ void gui_run(void) {
 
     Screens::Access()->Loop();
 #if HAS_LEDS()
-    leds::Init();
+    leds::LEDManager::instance().init();
 #endif
     // Show bootstrap screen untill firmware initializes
     gui_bootstrap_screen_run();
@@ -233,7 +212,6 @@ void gui_run(void) {
     marlin_client::init();
 
     DialogHandler::Access(); // to create class NOW, not at first call of one of callback
-    marlin_client::set_message_cb(MsgCircleBuffer_cb);
 
     marlin_client::set_event_notify(marlin_server::EVENT_MSK_DEF);
 
@@ -242,15 +220,8 @@ void gui_run(void) {
 
     Sound_Play(eSOUND_TYPE::Start);
 
-#if HAS_LEDS() && !HAS_SIDE_LEDS()
-    // we need to step the animator, to move the started animation to current to let it run for one cycle
-    auto guard = leds::start_animation(PrinterState::PowerUp, 10);
-    Animator_LCD_leds().Step();
-    guard.Stop();
-#endif
-
 #if HAS_SIDE_LEDS()
-    leds::side_strip_control.ActivityPing();
+    leds::SideStripHandler::instance().activity_ping();
 #endif
 
     TaskDeps::provide(TaskDeps::Dependency::gui_ready);
@@ -264,8 +235,6 @@ void gui_run(void) {
     // TODO make some kind of registration
     while (1) {
         gui::StartLoop();
-
-        led_animation_step();
 
         // I must do it before screen and dialog loops
         // do not use marlin_update_vars(MARLIN_VAR_MSK(MARLIN_VAR_PRNSTATE))->print_state, it can make gui freeze in case main thread is unresponsive
