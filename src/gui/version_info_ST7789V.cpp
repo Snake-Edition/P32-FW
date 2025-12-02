@@ -43,6 +43,25 @@ ScreenMenuVersionInfo::ScreenMenuVersionInfo()
     const int max_chars_per_line = 18;
     int project_version_full_len = strlen(version::project_version_full);
 
+    /* -===============================================(:>- */
+    // convert version from 1.2.34 to 1.2.3.4
+    char snake_version[18];
+    project_version_full_len = std::min(18, project_version_full_len);
+    strncpy(snake_version, version::project_version_full, project_version_full_len);
+    if (version::project_version_full[project_version_full_len - 2] == '.') {
+        snake_version[project_version_full_len + 2] = 0;
+        snake_version[project_version_full_len + 1] = snake_version[project_version_full_len - 1];
+        snake_version[project_version_full_len - 0] = '.';
+        snake_version[project_version_full_len - 1] = '0';
+        project_version_full_len += 2;
+    } else {
+        snake_version[project_version_full_len + 1] = 0;
+        snake_version[project_version_full_len - 0] = snake_version[project_version_full_len - 1];
+        snake_version[project_version_full_len - 1] = '.';
+        project_version_full_len += 1;
+    }
+    /* -===============================================(:>- */
+
     for (int i = 0; i < project_version_full_len; i += max_chars_per_line) {
         int line_length;
         if ((project_version_full_len - i) < max_chars_per_line) {
@@ -51,9 +70,17 @@ ScreenMenuVersionInfo::ScreenMenuVersionInfo()
             line_length = max_chars_per_line;
         }
         if (end > begin) {
-            begin += snprintf(begin, end - begin, "%.*s\n", line_length, version::project_version_full + i);
+            begin += snprintf(begin, end - begin, "%.*s\n", line_length, snake_version + i);
         }
     }
+#ifdef MINI_I3_MK33
+    begin += snprintf(begin, end - begin, "i3 MK3.3\n");
+#elif MINI_COREXY
+    begin += snprintf(begin, end - begin, "COREXY\n");
+#endif
+#ifdef MINI_LONG_BED
+    begin += snprintf(begin, end - begin, "long bed\n");
+#endif
 
     if (end > begin) {
         // c=20 r=4

@@ -3716,11 +3716,11 @@ msgstr "Aide"
 #: src/gui/screen_splash.cpp:144
 msgid ""
 "Hi, this is your\n"
-"Original Prusa MINI printer.\n"
+"Prusa MINI printer.\n"
 "I would like to guide you\n"
 "through the setup process."
 msgstr ""
-"Bonjour, je suis votre imprimante Original Prusa MINI.\n"
+"Bonjour, je suis votre imprimante Prusa MINI.\n"
 "J'aimerais vous guider tout au long du processus d'installation."
 
 #: src/gui/screen_splash.cpp:141

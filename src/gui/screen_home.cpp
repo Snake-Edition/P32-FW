@@ -227,7 +227,9 @@ screen_home_data_t::screen_home_data_t()
         sb.append_string("PRUSA ");
         sb.append_string(PrinterModelInfo::current().id_str);
         sb.append_string(" ");
-        sb.append_string(version::project_version);
+        char snake_ver[21];
+        version::snake_version(snake_ver, 21);
+        sb.append_string(snake_ver);
         sb.append_string(version::project_version_suffix_short);
 #if DEVELOPER_MODE()
         sb.append_string(" DEV");

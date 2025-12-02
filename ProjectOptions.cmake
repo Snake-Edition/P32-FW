@@ -117,7 +117,7 @@ set(TOUCH_ENABLED
     CACHE STRING "Enable touch (valid values are ${TOUCH_ENABLED_VALID_OPTS})."
     )
 set(DEVELOPMENT_ITEMS_ENABLED
-    "YES"
+    "NO"
     CACHE BOOL "Show development (green) items in menus and enable other devel features"
     )
 define_boolean_option(DEVELOPMENT_ITEMS ${DEVELOPMENT_ITEMS_ENABLED})

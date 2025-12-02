@@ -15,7 +15,7 @@
         },
         {
             "name": "mini",
-            "description": "Original Prusa MINI",
+            "description": "MINI",
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY"
@@ -23,7 +23,7 @@
         },
         {
             "name": "mini-en-cs",
-            "description": "Original Prusa MINI (EN & CS translation)",
+            "description": "Prusa MINI (EN & CS translation)",
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
@@ -32,7 +32,7 @@
         },
         {
             "name": "mini-en-de",
-            "description": "Original Prusa MINI (EN & DE translation)",
+            "description": "Prusa MINI (EN & DE translation)",
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
@@ -41,7 +41,7 @@
         },
         {
             "name": "mini-en-es",
-            "description": "Original Prusa MINI (EN & ES translation)",
+            "description": "Prusa MINI (EN & ES translation)",
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
@@ -50,7 +50,7 @@
         },
         {
             "name": "mini-en-fr",
-            "description": "Original Prusa MINI (EN & FR translation)",
+            "description": "Prusa MINI (EN & FR translation)",
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
@@ -59,7 +59,7 @@
         },
         {
             "name": "mini-en-it",
-            "description": "Original Prusa MINI (EN & IT translation)",
+            "description": "Prusa MINI (EN & IT translation)",
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
@@ -68,7 +68,7 @@
         },
         {
             "name": "mini-en-pl",
-            "description": "Original Prusa MINI (EN & PL translation)",
+            "description": "Prusa MINI (EN & PL translation)",
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
@@ -77,7 +77,7 @@
         },
         {
             "name": "mini-en-ja",
-            "description": "Original Prusa MINI (EN & JA translation)",
+            "description": "Prusa MINI (EN & JA translation)",
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
@@ -86,13 +86,14 @@
         },
         {
             "name": "mini-en-uk",
-            "description": "Original Prusa MINI (EN & UK translation)",
+            "description": "Prusa MINI (EN & UK translation)",
             "cacheVariables": {
                 "PRINTER": "MINI",
                 "BOARD": "BUDDY",
                 "TRANSLATIONS_LIST": "uk"
             }
         },
+
         {
             "name": "mk4",
             "description": "Original Prusa MK4 with xBuddy 0.2.7c or newer fw compatible, 400-step motors and planetary gearbox",
