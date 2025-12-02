@@ -188,6 +188,20 @@ using MI_LEDS_SETTINGS
     = MI_SCREEN<N_("Lights Settings"), class ScreenMenuLeds>;
 #endif
 
+/* -===============================================(:>- */
+
+class MI_SNAKE_SETTINGS : public IWindowMenuItem {
+    static constexpr const char *const label = N_("Snake Settings");
+
+public:
+    MI_SNAKE_SETTINGS();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+/* -===============================================(:>- */
+
 class MI_SERIAL_PRINTING_SCREEN_ENABLE : public WI_ICON_SWITCH_OFF_ON_t {
     static constexpr const char *const label = N_("Serial Printing Screen");
 

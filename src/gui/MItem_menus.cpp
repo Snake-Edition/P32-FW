@@ -22,6 +22,7 @@
 #include "screen_menu_lang_and_time.hpp"
 #include "screen_menu_hardware.hpp"
 #include "screen_menu_hardware_tune.hpp"
+#include "screen_menu_snake_settings.hpp"
 #include "screen_menu_system.hpp"
 #include "screen_menu_statistics.hpp"
 #include "screen_menu_error_test.hpp"
@@ -150,6 +151,18 @@ template struct MI_SCREEN_CTOR<ScreenMenuBedLevelCorrection>;
 #if HAS_LEDS_MENU()
 template struct MI_SCREEN_CTOR<ScreenMenuLeds>;
 #endif
+
+/* -===============================================(:>- */
+
+MI_SNAKE_SETTINGS::MI_SNAKE_SETTINGS()
+    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+}
+
+void MI_SNAKE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuSnakeSettings>);
+}
+
+/* -===============================================(:>- */
 
 /**********************************************************************************************/
 // MI_SERIAL_PRINTING_SCREEN_ENABLE

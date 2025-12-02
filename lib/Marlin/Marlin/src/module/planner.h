@@ -341,6 +341,9 @@ class Planner {
 
     static skew_factor_t skew_factor;
 
+    // FIXME remove once not needed
+    static skew_factor_t get_skew_factor() {return skew_factor;}
+
     #if ENABLED(SD_ABORT_ON_ENDSTOP_HIT)
       static bool abort_on_endstop_hit;
     #endif

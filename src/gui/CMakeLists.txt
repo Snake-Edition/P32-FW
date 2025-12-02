@@ -67,6 +67,7 @@ target_sources(
           screen_menu_odometer.cpp
           screen_menu_sensor_info.cpp
           screen_menu_settings.cpp
+          screen_menu_snake_settings.cpp
           screen_menu_statistics.cpp
           screen_menu_system.cpp
           screen_menu_temperature.cpp

@@ -50,6 +50,7 @@ protected:
 /*****************************************************************************/
 
 using ScreenMenuSettings__ = ScreenMenu<GuiDefaults::MenuFooter, MI_RETURN,
+    MI_SNAKE_SETTINGS,
 #if HAS_FILAMENT_SENSORS_MENU()
     MI_FILAMENT_SENSORS,
 #else
