@@ -144,6 +144,15 @@ template struct MI_SCREEN_CTOR<ScreenMenuFilamentSensors>;
 template struct MI_SCREEN_CTOR<ScreenMenuSTSCalibrations>;
 #endif
 
+MI_PID_SETTINGS::MI_PID_SETTINGS()
+    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no, expands_t::yes) {
+}
+
+void MI_PID_SETTINGS::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuPIDSettings>);
+}
+
+/**********************************************************************************************/
 #if PRINTER_IS_PRUSA_MK3_5() || PRINTER_IS_PRUSA_MINI()
 template struct MI_SCREEN_CTOR<ScreenMenuBedLevelCorrection>;
 #endif

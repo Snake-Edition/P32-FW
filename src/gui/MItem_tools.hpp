@@ -287,6 +287,89 @@ class MI_SKEW_YZ : public WiSpin {
 public:
     MI_SKEW_YZ();
 };
+/* -===============================================(:>- */
+
+/* -===============================================(:>- */
+
+class MI_NOZZLE_CALIBRATION_TEMP : public WiSpin {
+    constexpr static const char *const label = N_("Nozzle calibration temperature");
+
+public:
+    MI_NOZZLE_CALIBRATION_TEMP();
+    void OnClick() override;
+};
+
+class MI_CALIBRATE_NOZZLE_PID : public IWindowMenuItem {
+    constexpr static const char *const label = N_("Calibrate nozzle temperature");
+
+public:
+    MI_CALIBRATE_NOZZLE_PID();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_BED_CALIBRATION_TEMP : public WiSpin {
+    constexpr static const char *const label = N_("Bed calibration temperature");
+
+public:
+    MI_BED_CALIBRATION_TEMP();
+    void OnClick() override;
+};
+
+class MI_CALIBRATE_BED_PID : public IWindowMenuItem {
+    constexpr static const char *const label = N_("Calibrate bed temperature");
+
+public:
+    MI_CALIBRATE_BED_PID();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_PID_NOZZLE_P : public WiSpin {
+    constexpr static const char *const label = N_("PID nozzle P");
+
+public:
+    MI_PID_NOZZLE_P();
+};
+
+class MI_PID_NOZZLE_I : public WiSpin {
+    constexpr static const char *const label = N_("PID nozzle I");
+
+public:
+    MI_PID_NOZZLE_I();
+};
+
+class MI_PID_NOZZLE_D : public WiSpin {
+    constexpr static const char *const label = N_("PID nozzle D");
+
+public:
+    MI_PID_NOZZLE_D();
+};
+
+class MI_PID_BED_P : public WiSpin {
+    constexpr static const char *const label = N_("PID bed P");
+
+public:
+    MI_PID_BED_P();
+};
+
+class MI_PID_BED_I : public WiSpin {
+    constexpr static const char *const label = N_("PID bed I");
+
+public:
+    MI_PID_BED_I();
+};
+
+class MI_PID_BED_D : public WiSpin {
+    constexpr static const char *const label = N_("PID bed D");
+
+public:
+    MI_PID_BED_D();
+};
+
+/* -===============================================(:>- */
 
 class MI_INFO_BED_TEMP : public MenuItemAutoUpdatingLabel<float> {
 public:

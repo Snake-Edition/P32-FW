@@ -12,3 +12,12 @@ ScreenMenuSnakeSettings::ScreenMenuSnakeSettings()
 }
 
 void ScreenMenuSnakeSettings::windowEvent(window_t *, GUI_event_t, void *) {}
+
+/*********************************************************************************/
+constexpr static const char *snake_pid_settings_label = N_("SNAKE SETTINGS");
+
+ScreenMenuPIDSettings::ScreenMenuPIDSettings()
+    : ScreenMenuPIDSettings__(_(snake_pid_settings_label)) {
+}
+
+void ScreenMenuPIDSettings::windowEvent(window_t *, GUI_event_t, void *) {}

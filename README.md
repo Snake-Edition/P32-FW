@@ -14,7 +14,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 2. **Skew compensation**: Turns on skew compensation in Marlin and allows it to be configured with `M852`.
 3. ~~**OctoPrint screen**: Adds support for `M73` (print progress) and `M117`~~
   ~~(LCD messages).~~
-4. ~~**PID tuning**: Read nozzle and bed PID parameters and tune them automatically.~~
+4. **PID tuning**: Read nozzle and bed PID parameters and tune them automatically.
 5. ~~**Max Temps**: Raises the maximum bed temperature from 100C to 110C~~
   ~~and nozzle temperature from 275C to 285C (use with caution!).~~
 6. ~~**Settings during print**: You can change Snake settings, Control and Settings during printing.~~

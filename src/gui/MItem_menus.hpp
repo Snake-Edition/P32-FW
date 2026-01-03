@@ -200,6 +200,26 @@ protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
 
+class MI_PID_SETTINGS : public IWindowMenuItem {
+    static constexpr const char *const label = N_("PID Settings");
+
+public:
+    MI_PID_SETTINGS();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_SNAKE_TUNE_SETTINGS : public IWindowMenuItem {
+    static constexpr const char *const label = N_("Snake Settings");
+
+public:
+    MI_SNAKE_TUNE_SETTINGS();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
 /* -===============================================(:>- */
 
 class MI_SERIAL_PRINTING_SCREEN_ENABLE : public WI_ICON_SWITCH_OFF_ON_t {
