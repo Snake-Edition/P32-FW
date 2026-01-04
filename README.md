@@ -20,7 +20,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 6. **Settings during print**: You can change Snake settings, Control and Settings during printing.
 7. **Faster nozzle cooling**: If you wait for nozzle cooling before MBL, you can call `M109 R170 C`
   ~~which uses print fan to speed up cooling.~~
-8. ~~**Game**: Instead of printing you can enjoy simple game.~~
+8. **Game**: Instead of printing you can enjoy simple game.
 9. ~~**Bigger time**: Printing and remaining time is now bigger.~~
 10. ~~**Selftest check**: Now you can select `Ignore` to immediately pass all selftests.~~
 11.

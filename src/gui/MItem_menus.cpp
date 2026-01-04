@@ -27,6 +27,7 @@
 #include "screen_menu_statistics.hpp"
 #include "screen_menu_error_test.hpp"
 #include "screen_menu_input_shaper.hpp"
+#include "screen_snake.hpp"
 #include <screen_menu_languages.hpp>
 #include <screen_menu_info.hpp>
 #include <screen_menu_control.hpp>
@@ -169,6 +170,16 @@ MI_SNAKE_SETTINGS::MI_SNAKE_SETTINGS()
 
 void MI_SNAKE_SETTINGS::click(IWindowMenu & /*window_menu*/) {
     Screens::Access()->Open(ScreenFactory::Screen<ScreenMenuSnakeSettings>);
+}
+
+/* -===============================================(:>- */
+
+MI_SNAKE::MI_SNAKE()
+    : IWindowMenuItem(_(label), 0, is_enabled_t::yes, is_hidden_t::no) {
+}
+
+void MI_SNAKE::click(IWindowMenu & /*window_menu*/) {
+    Screens::Access()->Open(ScreenFactory::Screen<screen_snake_data_t>);
 }
 
 /* -===============================================(:>- */

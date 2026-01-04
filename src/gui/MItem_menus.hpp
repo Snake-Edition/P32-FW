@@ -102,6 +102,7 @@ using MI_FOOTER_SETTINGS_ADV
 using MI_EXPERIMENTAL_SETTINGS
     = MI_SCREEN<N_("Experimental Settings"), class ScreenMenuExperimentalSettings, nullptr, is_hidden_t::dev>;
 
+/**********************************************************************************************/
 using MI_USER_INTERFACE
     = MI_SCREEN<N_("User Interface"), class ScreenMenuUserInterface>;
 using MI_LANG_AND_TIME
@@ -215,6 +216,18 @@ class MI_SNAKE_TUNE_SETTINGS : public IWindowMenuItem {
 
 public:
     MI_SNAKE_TUNE_SETTINGS();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+/* -===============================================(:>- */
+
+class MI_SNAKE : public IWindowMenuItem {
+    static constexpr const char *const label = "Snake";
+
+public:
+    MI_SNAKE();
 
 protected:
     virtual void click(IWindowMenu &window_menu) override;

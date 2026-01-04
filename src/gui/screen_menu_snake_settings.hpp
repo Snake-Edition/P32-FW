@@ -54,7 +54,8 @@ using ScreenMenuSnakeTuneSettings__ = ScreenMenu<EFooter::On, MI_RETURN
     //,MI_X_MAX_FEEDRATE, MI_Y_MAX_FEEDRATE
     //,MI_X_STEALTH, MI_Y_STEALTH, MI_Z_STEALTH, MI_E_STEALTH
     //,MI_COLD_MODE
-    >;
+    ,
+    MI_SNAKE>;
 
 class ScreenMenuSnakeTuneSettings : public ScreenMenuSnakeTuneSettings__ {
 public:
