@@ -25,6 +25,7 @@
  * temperature.h - temperature controller
  */
 
+#include <optional>
 #include "thermistor/thermistors.h"
 
 #include "../inc/MarlinConfig.h"
@@ -415,6 +416,8 @@ class Temperature {
       static millis_t next_auto_fan_check_ms;
     #endif
 
+    static std::optional<uint8_t> previous_fan_speed[EXTRUDERS];
+
   public:
     #if ENABLED(PID_EXTRUSION_SCALING)
       static int16_t lpq_len;
@@ -479,6 +482,21 @@ class Temperature {
       }
 
       static void set_fan_speed(const uint8_t target, const uint16_t speed);
+      
+      /**
+       * Save current fan speed and turns fan to full blast for fast nozzle cooling
+       */
+      static void start_nozzle_cooling(const uint8_t target);
+      
+      /**
+       * Set fan speed to previous speed if fan was used for cooling the nozzle
+       */
+      static void reset_fan_speed(const uint8_t target);
+      
+      /**
+       * Reset fans if temperature is low enough
+       */
+      static void check_and_reset_fan_speeds();
 
       #if EITHER(PROBING_FANS_OFF, ADVANCED_PAUSE_FANS_PAUSE)
         static bool fans_paused;
@@ -575,6 +593,14 @@ class Temperature {
         static bool is_hotend_temperature_reached(uint8_t hotend);
 
         static bool are_hotend_temperatures_reached();
+
+        FORCE_INLINE static bool isHeatingHotend(const uint8_t E_NAME) {
+          return temp_hotend[HOTEND_INDEX].target > temp_hotend[HOTEND_INDEX].celsius;
+        }
+
+        FORCE_INLINE static bool isCoolingHotend(const uint8_t E_NAME) {
+          return temp_hotend[HOTEND_INDEX].target < temp_hotend[HOTEND_INDEX].celsius;
+        }
 
         static bool wait_for_hotend(const uint8_t target_extruder, const bool no_wait_for_cooling=true, bool fan_cooling=false);
       #endif
@@ -722,6 +748,9 @@ private:
   
     static void update_temp_residency_hotend(uint8_t hotend);
     
+	
+    static void set_fan_speed_(const uint8_t target, const uint16_t speed);
+
 public:
     /**
      * Switch off all heaters, set all target temperatures to 0

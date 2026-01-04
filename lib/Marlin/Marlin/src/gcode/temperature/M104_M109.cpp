@@ -78,6 +78,10 @@ void GcodeSuite::M104() {
       if (target_extruder != active_extruder) return;
     #endif
     thermalManager.setTargetHotend(temp, target_extruder);
+    if (parser.seen('C') && thermalManager.isCoolingHotend(target_extruder))
+      thermalManager.start_nozzle_cooling(target_extruder);
+    else
+      thermalManager.reset_fan_speed(target_extruder);
 
     #if ENABLED(DUAL_X_CARRIAGE)
       if (dxc_is_duplicating() && target_extruder == 0)
@@ -131,7 +135,7 @@ void GcodeSuite::M109() {
                    parser.seenval('R') ? parser.value_celsius() : 0,
     .wait_heat = parser.seenval('S'),
     .wait_heat_or_cool = parser.seenval('R'),
-    .autotemp = parser.boolval('F'),
+    .autotemp = parser.boolval('C'),
     .display_temp = parser.seenval('D') ? std::optional<float>(parser.value_celsius()) : std::nullopt
   };
   M109_no_parser(target_extruder, flags);

@@ -465,6 +465,7 @@ void idle(bool waiting) {
   manage_inactivity();
 
   thermalManager.manage_heater();
+  thermalManager.check_and_reset_fan_speeds();
 
 
   #if ENABLED(PRINTCOUNTER)
