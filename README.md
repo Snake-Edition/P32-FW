@@ -17,7 +17,7 @@ Alternative FW for the Prusa Mini. There's quite few improvements:
 4. **PID tuning**: Read nozzle and bed PID parameters and tune them automatically.
 5. ~~**Max Temps**: Raises the maximum bed temperature from 100C to 110C~~
   ~~and nozzle temperature from 275C to 285C (use with caution!).~~
-6. ~~**Settings during print**: You can change Snake settings, Control and Settings during printing.~~
+6. **Settings during print**: You can change Snake settings, Control and Settings during printing.
 7. ~~**Faster nozzle cooling**: If you wait for nozzle cooling before MBL, you can call `M109 R170 C`~~
   ~~which uses print fan to speed up cooling.~~
 8. ~~**Game**: Instead of printing you can enjoy simple game.~~
