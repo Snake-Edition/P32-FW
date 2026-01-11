@@ -76,7 +76,9 @@ void skew(float &cx, float &cy, const float cz) {
     }
 }
 
+#if PRINTER_IS_PRUSA_MINI()
 static void skew(xyz_pos_t &raw) { skew(raw.x, raw.y, raw.z); }
+#endif
 
 void enable_modifiers_if(bool condition, bool restore_leveling) {
     if (!condition) {

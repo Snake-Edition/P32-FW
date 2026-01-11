@@ -73,6 +73,7 @@ ScreenMenuVersionInfo::ScreenMenuVersionInfo()
             begin += snprintf(begin, end - begin, "%.*s\n", line_length, snake_version + i);
         }
     }
+
 #ifdef MINI_I3_MK33
     begin += snprintf(begin, end - begin, "i3 MK3.3\n");
 #elif MINI_COREXY

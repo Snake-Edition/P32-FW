@@ -542,7 +542,9 @@
 
 // Uncomment one of these options to enable CoreXY, CoreXZ, or CoreYZ kinematics
 // either in the usual order or reversed
-//#define COREXY
+#ifdef I3_COREXY
+    #define COREXY
+#endif
 //#define COREXZ
 //#define COREYZ
 //#define COREYX
@@ -1043,6 +1045,7 @@
 #define Z_MIN_POS 0
 #define X_MAX_POS (X_BED_SIZE + 1)
 #define Y_MAX_POS (Y_BED_SIZE + 1)
+#define Y_MAX_PRINT_POS Y_MAX_POS
 #ifdef USE_PRUSA_EEPROM_AS_SOURCE_OF_DEFAULT_VALUES
     #define DEFAULT_Z_MAX_POS (Z_SIZE + 1)
     #define Z_MIN_LEN_LIMIT 1

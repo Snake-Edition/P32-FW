@@ -267,6 +267,7 @@ public:
     virtual void OnChange(size_t old_index) override;
 };
 
+#if PRINTER_IS_PRUSA_MINI()
 /* -===============================================(:>- */
 class MI_BRIGHTNESS : public WiSpin {
     constexpr static const char *const label = N_("Brightness");
@@ -275,6 +276,7 @@ public:
     MI_BRIGHTNESS();
     virtual void OnClick() override;
 };
+#endif
 
 class MI_SKEW_XY : public WiSpin {
     constexpr static const char *const label = N_("Skew XY");
@@ -298,6 +300,7 @@ public:
 };
 /* -===============================================(:>- */
 
+#if PRINTER_IS_PRUSA_MINI()
 /* -===============================================(:>- */
 
 class MI_NOZZLE_CALIBRATION_TEMP : public WiSpin {
@@ -325,6 +328,7 @@ public:
     MI_BED_CALIBRATION_TEMP();
     void OnClick() override;
 };
+#endif
 
 class MI_CALIBRATE_BED_PID : public IWindowMenuItem {
     constexpr static const char *const label = N_("Calibrate bed temperature");

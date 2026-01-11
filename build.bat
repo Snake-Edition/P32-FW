@@ -21,6 +21,8 @@ python utils/build.py --bootloader empty --preset mini-en-pl --final
 move /Y build\mini-en-pl_release_emptyboot\firmware.bbf "build\Snake_MINI_en-pl_%version%.bbf"
 python utils/build.py --bootloader empty --preset mini-en-jp --final
 move /Y build\mini-en-jp_release_emptyboot\firmware.bbf "build\Snake_MINI_en-jp_%version%.bbf"
+python utils/build.py --bootloader empty --preset mini-en-uk --final
+move /Y build\mini-en-jp_release_emptyboot\firmware.bbf "build\Snake_MINI_en-uk_%version%.bbf"
 
 rem coreXY
 python utils/build.py --bootloader empty --preset minixy-en-cs --final
@@ -37,6 +39,8 @@ python utils/build.py --bootloader empty --preset minixy-en-pl --final
 move /Y "build\minixy-en-pl_release_emptyboot\firmware.bbf" "build\Snake_MINI_coreXY_en-pl_%version%.bbf"
 python utils/build.py --bootloader empty --preset minixy-en-jp --final
 move /Y "build\minixy-en-jp_release_emptyboot\firmware.bbf" "build\Snake_MINI_coreXY_en-jp_%version%.bbf"
+python utils/build.py --bootloader empty --preset minixy-en-uk --final
+move /Y "build\minixy-en-jp_release_emptyboot\firmware.bbf" "build\Snake_MINI_coreXY_en-uk_%version%.bbf"
 
 rem i3 MK3.3
 python utils/build.py --bootloader empty --preset mini_i3_mk33-en-cs --final
@@ -53,6 +57,8 @@ python utils/build.py --bootloader empty --preset mini_i3_mk33-en-pl --final
 move /Y build\mini_i3_mk33-en-pl_release_emptyboot\firmware.bbf "build\Snake_MINI_i3_MK33_en-pl_%version%.bbf"
 python utils/build.py --bootloader empty --preset mini_i3_mk33-en-jp --final
 move /Y build\mini_i3_mk33-en-jp_release_emptyboot\firmware.bbf "build\Snake_MINI_i3_MK33_en-jp_%version%.bbf"
+python utils/build.py --bootloader empty --preset mini_i3_mk33-en-uk --final
+move /Y build\mini_i3_mk33-en-jp_release_emptyboot\firmware.bbf "build\Snake_MINI_i3_MK33_en-uk_%version%.bbf"
 
 rem i3 MK3.5 coreXY
 python utils/build.py --bootloader empty --preset i3xy_mk3.5 --final

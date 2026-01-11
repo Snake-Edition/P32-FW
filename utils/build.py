@@ -16,6 +16,15 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from uuid import uuid4
 
+try:
+    # Try importing the 'requests' package
+    import requests
+except ImportError:
+    # If the package is not present, install it
+    print("The 'requests' package is not installed. Installing now...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "requests"])
+    import requests
+
 project_root = Path(__file__).resolve().parent.parent
 dependencies_dir = project_root / '.dependencies'
 utils_dir = project_root / 'utils'

@@ -430,6 +430,7 @@ MI_TIME_NOW::MI_TIME_NOW()
     ChangeInformation(time_tools::get_time());
 }
 
+#if PRINTER_IS_PRUSA_MINI()
 /* -===============================================(:>- */
 static const NumericInputConfig bright_spin_config = {
     .min_value = 30,
@@ -442,6 +443,7 @@ void MI_BRIGHTNESS::OnClick() {
     config_store().brightness.set(GetVal());
 }
 /* -===============================================(:>- */
+#endif
 
 /*****************************************************************************/
 static const NumericInputConfig skew_spin_config = {
