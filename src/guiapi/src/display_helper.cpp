@@ -173,6 +173,10 @@ void render_line(StringReaderUtf8 &reader, uint8_t chars_to_print, Rect16 rc, co
     }
 }
 
+void render_char_part(point_ui16_t pt, unichar c, const font_t *pf, Color clr_bg, Color clr_fg, uint16_t start_x, uint16_t end_x) {
+    display::draw_char_part(pt, c, pf, clr_bg, clr_fg, start_x, end_x);
+}
+
 void render_text_align(Rect16 rc, const string_view_utf8 &text, const Font f, Color clr_bg, Color clr_fg, padding_ui8_t padding, text_flags flags, bool fill_rect) {
     StringReaderUtf8 reader(text);
     render_text_align(rc, reader, f, clr_bg, clr_fg, padding, flags, fill_rect);
