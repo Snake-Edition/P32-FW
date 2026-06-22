@@ -307,7 +307,10 @@ float probe_at_skew_point(const xy_pos_t &pos) {
     // Move the probe to the starting XYZ
     do_blocking_move_to(npos);
 
+    // Enable endstop checking so the probe move can stop on trigger.
+    endstops.enable(true);
     float measured_z = run_z_probe();
+    endstops.not_homing();
 
     /// TODO: raise until untriggered
     do_blocking_move_to_z(npos.z + (Z_CLEARANCE_BETWEEN_PROBES), MMM_TO_MMS(Z_PROBE_SPEED_FAST));
@@ -398,28 +401,28 @@ void PrusaGcodeSuite::M45() {
                 continue;
             }
 
-            // /// scan 32x32 array
-            // for (int8_t y = 0; y < 32; ++y) {
-            //     for (int8_t x = 0; x < 32; ++x) {
-            //         probePos.x += x - 32 / 2 + .5f;
-            //         probePos.y += y - 32 / 2 + .5f;
-            //         /// FIXME: don't go too low
-            //         float measured_z = probe_at_skew_point(probePos);
-            //         z_grid[x][y] = isnan(measured_z) ? -100.f : measured_z;
-            //         idle(false);
-            //     }
-            // }
+            /// scan 32x32 array
+            for (int8_t y = 0; y < 32; ++y) {
+                for (int8_t x = 0; x < 32; ++x) {
+                    probePos.x += x - 32 / 2 + .5f;
+                    probePos.y += y - 32 / 2 + .5f;
+                    /// FIXME: don't go too low
+                    float measured_z = probe_at_skew_point(probePos);
+                    z_grid[x][y] = isnan(measured_z) ? -100.f : measured_z;
+                    idle(false);
+                }
+            }
 
-            // /// print point grid
-            // // print_2d_array(z_grid.size(), z_grid[0].size(), 3, [](const uint8_t ix, const uint8_t iy) { return z_grid[ix][iy]; });
+            /// print point grid
+            // print_2d_array(z_grid.size(), z_grid[0].size(), 3, [](const uint8_t ix, const uint8_t iy) { return z_grid[ix][iy]; });
 
-            // print_area(z_grid);
+            print_area(z_grid);
 
-            // //                 SERIAL_ECHO(int(x));
-            // //   SERIAL_EOL();
-            // //   SERIAL_ECHOLNPGM("measured_z = ["); // open 2D array
+            //                 SERIAL_ECHO(int(x));
+            //   SERIAL_EOL();
+            //   SERIAL_ECHOLNPGM("measured_z = ["); // open 2D array
 
-            // centers[px][py] = calculate_center(z_grid);
+            centers[px][py] = calculate_center(z_grid);
         }
     }
 
