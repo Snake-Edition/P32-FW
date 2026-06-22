@@ -499,15 +499,7 @@ protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
 
-class MI_XY_CALIBRATION : public WI_LABEL_t {
-    constexpr static const char *const label = N_("Calibrate XY");
-
-public:
-    MI_XY_CALIBRATION();
-
-protected:
-    virtual void click(IWindowMenu &window_menu) override;
-};
+/* -===============================================(:>- */
 
 class MI_NOZZLE_CALIBRATION_TEMP : public WiSpin {
     constexpr static const char *const label = N_("Nozzle calibration temperature");
@@ -741,6 +733,7 @@ public:
     MI_INFO_SANDWICH_5V_CURRENT();
 };
 
+<<<<<<< HEAD
 class MI_INFO_BUDDY_5V_CURRENT : public MenuItemAutoUpdatingLabel<float> {
 public:
     MI_INFO_BUDDY_5V_CURRENT();
@@ -751,6 +744,10 @@ class MI_INFO_INPUT_VOLTAGE : public MenuItemAutoUpdatingLabel<float> {
 public:
     MI_INFO_INPUT_VOLTAGE();
 };
+=======
+class MI_SKEW_XY : public WiSpinFlt {
+    constexpr static const char *const label = N_("Skew XY");
+>>>>>>> c4e0b76... Add M45 concept
 
 class MI_INFO_BOARD_TEMP : public MenuItemAutoUpdatingLabel<float> {
 public:
@@ -782,8 +779,23 @@ protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
 
+<<<<<<< HEAD
 class MI_CO_CANCEL_OBJECT : public IWindowMenuItem {
     static constexpr const char *const label = N_("Cancel Object");
+=======
+class MI_XY_CALIBRATION : public WI_LABEL_t {
+    constexpr static const char *const label = N_("Calibrate XY");
+
+public:
+    MI_XY_CALIBRATION();
+
+protected:
+    virtual void click(IWindowMenu &window_menu) override;
+};
+
+class MI_NOZZLE_CALIBRATION_TEMP : public WiSpinInt {
+    constexpr static const char *const label = N_("Nozzle calibration temperature");
+>>>>>>> c4e0b76... Add M45 concept
 
 public:
     MI_CO_CANCEL_OBJECT();

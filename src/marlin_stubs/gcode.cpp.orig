@@ -65,13 +65,10 @@ bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
     switch (parser.command_letter) {
     case 'M':
         switch (parser.codenum) {
+<<<<<<< HEAD
         case 0:
             PrusaGcodeSuite::M0();
             break;
-
-        case 45:
-            PrusaGcodeSuite::M45(); // XY calibration
-            return true;
 
         case 104:
             switch (parser.subcode) {
@@ -133,6 +130,19 @@ bool GcodeSuite::process_parsed_command_custom(bool no_ok) {
             PrusaGcodeSuite::M268();
             break;
 #endif // HAS_I2C_EXPANDER()
+=======
+        case 45:
+            PrusaGcodeSuite::M45(); // XY calibration
+            return true;
+        case 50:
+            PrusaGcodeSuite::M50(); //selftest
+            return true;
+        case 117:
+            PrusaGcodeSuite::M117();
+            if (!no_ok)
+                queue.ok_to_send();
+            return true;
+>>>>>>> c4e0b76... Add M45 concept
         case 300:
             PrusaGcodeSuite::M300();
             break;
