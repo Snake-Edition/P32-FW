@@ -499,7 +499,7 @@ protected:
     virtual void click(IWindowMenu &window_menu) override;
 };
 
-class MI_XY_CALIBRATION : public WI_LABEL_t {
+class MI_XY_CALIBRATION : public IWindowMenuItem {
     constexpr static const char *const label = N_("Calibrate XY");
 
 public:

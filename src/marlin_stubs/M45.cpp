@@ -16,8 +16,9 @@ xy_pos_t get_skew_point(int8_t ix, int8_t iy) {
     // std::array<xy_uint8_t, 9> skew_points = { { 14, 20 }, { 74, 20 }, { 146, 20 }, { 146, 89 }, { 74, 89 }, { 14, 99 }, { 14, 164 }, { 74, 164 }, { 146, 164 } };
     const xyz_pos_t probe = NOZZLE_TO_PROBE_OFFSET;
 
-    if (ix == 0 && iy == 1)
+    if (ix == 0 && iy == 1) {
         return xy_pos_t { 14 - probe.x, 99 - probe.y };
+    }
 
     xy_pos_t pos;
     switch (ix) {
@@ -60,7 +61,7 @@ void print_area(std::array<std::array<float, 32>, 32> z_grid) {
     SERIAL_EOL();
 }
 
-xy_pos_t calculate_center(std::array<std::array<float, 32>, 32> z_grid) {
+xy_pos_t calculate_center(std::array<std::array<float, 32>, 32> /*z_grid*/) {
     /// TODO:
     return {};
 }
@@ -152,8 +153,9 @@ float find_skew(std::array<xy_byte_t, 4> indexes, std::array<xy_pos_t, 4> points
             }
 
             int dir_new = (err3 < err1) ? 1 : -1;
-            if (dir_new != dir)
+            if (dir_new != dir) {
                 break;
+            }
 
             // continue in the same direction
             skew += dir * step;
@@ -227,8 +229,9 @@ void find_rotation_skew(std::array<xy_byte_t, 4> indexes, std::array<xy_pos_t, 4
             }
 
             int dir_new = (err3 < err1) ? 1 : -1;
-            if (dir_new != dir)
+            if (dir_new != dir) {
                 break;
+            }
 
             // continue in the same direction
             rotation += dir * rot_step;
@@ -271,8 +274,9 @@ void calculate_skews(std::array<std::array<xy_pos_t, 3>, 3> centers) {
                                     float l1 = sqrt(sq(x1 - x0) + sq(y1 - y0));
                                     float l2 = sqrt(sq(x3 - x2) + sq(y3 - y2));
                                     float cos_angle = ((x1 - x0) * (x3 - x2) + (y1 - y0) * (y3 - y2)) / (l1 * l2);
-                                    if (cos_angle >= 0.99f) //< nearly parallel vectors => unstable result
+                                    if (cos_angle >= 0.99f) { //< nearly parallel vectors => unstable result
                                         continue;
+                                    }
                                     ++pairs;
                                     std::array<xy_byte_t, 4> indexes = { xy_byte_t { x0, y0 }, xy_byte_t { x1, y1 }, xy_byte_t { x2, y2 }, xy_byte_t { x3, y3 } };
                                     std::array<xy_pos_t, 4> measured = { centers[x0][y0], centers[x1][y1], centers[x2][y2], centers[x3][y3] };
@@ -288,18 +292,19 @@ void calculate_skews(std::array<std::array<xy_pos_t, 3>, 3> centers) {
     }
 }
 
-static float run_z_probe(float min_z = -1) {
+static float run_z_probe_(float min_z = -1) {
     // Probe downward slowly to find the bed
-    if (do_probe_move(min_z, MMM_TO_MMS(Z_PROBE_SPEED_SLOW)))
+    if (do_probe_move(min_z, MMM_TO_MMS(Z_PROBE_SPEED_SLOW))) {
         return NAN;
+    }
     return current_position.z;
 }
 
 float probe_at_skew_point(const xy_pos_t &pos) {
-    xyz_pos_t npos = { pos.x, pos.y };
-    npos.z = current_position.z;
-    if (!position_is_reachable_by_probe(npos))
+    xyz_pos_t npos { pos.x, pos.y, current_position.z };
+    if (!position_is_reachable_by_probe(npos)) {
         return NAN; // The given position is in terms of the probe
+    }
 
     const float old_feedrate_mm_s = feedrate_mm_s;
     feedrate_mm_s = XY_PROBE_FEEDRATE_MM_S;
@@ -309,15 +314,16 @@ float probe_at_skew_point(const xy_pos_t &pos) {
 
     // Enable endstop checking so the probe move can stop on trigger.
     endstops.enable(true);
-    float measured_z = run_z_probe();
+    float measured_z = run_z_probe_();
     endstops.not_homing();
 
     /// TODO: raise until untriggered
     do_blocking_move_to_z(npos.z + (Z_CLEARANCE_BETWEEN_PROBES), MMM_TO_MMS(Z_PROBE_SPEED_FAST));
 
     feedrate_mm_s = old_feedrate_mm_s;
-    if (isnan(measured_z))
+    if (isnan(measured_z)) {
         return 0;
+    }
     return measured_z;
 }
 
@@ -341,13 +347,14 @@ bool find_safe_z() {
 
                 // probe down
                 endstops.enable(true);
-                measured_z = run_z_probe(z);
+                measured_z = run_z_probe_(z);
                 endstops.not_homing();
 
                 // Check to see if the probe was triggered
                 hit = TEST(endstops.trigger_state(), Z_MIN);
-                if (hit)
+                if (hit) {
                     break;
+                }
 
                 // move up
                 do_blocking_move_to_z(current_position.z + 1.5f, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
@@ -368,16 +375,17 @@ bool find_safe_z() {
 
 void PrusaGcodeSuite::M45() {
     // TODO G28 if needed
-    if (axis_unhomed_error())
+    if (axis_unhomed_error()) {
         return;
+    }
 
     planner.synchronize();
     set_bed_leveling_enabled(false);
     remember_feedrate_scaling_off();
 
     xy_pos_t probePos;
-    xy_probe_feedrate_mm_s = MMM_TO_MMS(XY_PROBE_SPEED);
-    // std::array<std::array<float, 32>, 32> z_grid;
+    feedRate_t xy_probe_feedrate_mm_s = MMM_TO_MMS(XY_PROBE_SPEED);
+    std::array<std::array<float, 32>, 32> z_grid;
     std::array<std::array<xy_pos_t, 3>, 3> centers;
 
     /// cycle over 9 points
@@ -428,11 +436,12 @@ void PrusaGcodeSuite::M45() {
 
     // print_centers(centers);
 
-    current_position.z -= bilinear_z_offset(current_position);
+    current_position.z -= ubl.get_z_correction(current_position);
     planner.leveling_active = true;
     restore_feedrate_and_scaling();
-    if (planner.leveling_active)
+    if (planner.leveling_active) {
         sync_plan_position();
+    }
     idle(false);
     /// TODO: convert to non-blocking move
     move_z_after_probing();

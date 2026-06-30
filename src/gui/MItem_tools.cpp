@@ -759,11 +759,11 @@ void MI_Y_HOME::click(IWindowMenu & /*window_menu*/) {
 
 /* -===============================================(:>- */
 MI_XY_CALIBRATION::MI_XY_CALIBRATION()
-    : WI_LABEL_t(_(label), 0, is_enabled_t::no, is_hidden_t::no) {
+    : IWindowMenuItem(_(label), nullptr, is_enabled_t::yes, is_hidden_t::no) {
 }
 
 void MI_XY_CALIBRATION::click(IWindowMenu & /*window_menu*/) {
-    marlin_gcode_printf("M45");
+    marlin_client::gcode_printf("M45");
 }
 
 static constexpr NumericInputConfig pid_param_spin_config {
