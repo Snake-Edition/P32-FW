@@ -82,6 +82,22 @@ void print_centers(std::array<std::array<xy_pos_t, 3>, 3> centers) {
     SERIAL_EOL();
 }
 
+void print_grid(std::array<std::array<float, 32>, 32> grid) {
+    SERIAL_EOL();
+    for (int8_t y = 0; y < 32; ++y) {
+        for (int8_t x = 0; x < 32; ++x) {
+            SERIAL_CHAR('[');
+            SERIAL_ECHO(grid[x][y]);
+            SERIAL_CHAR(',');
+            SERIAL_ECHO(grid[x][y]);
+            SERIAL_CHAR(']');
+            SERIAL_CHAR(' ');
+        }
+        SERIAL_EOL();
+    }
+    SERIAL_EOL();
+}
+
 void apply_transform(xy_pos_t &point, float co, float si, float skew) {
     xy_pos_t tmp;
     tmp.y = si * point.x + co * point.y;
@@ -421,12 +437,9 @@ void PrusaGcodeSuite::M45() {
                 }
             }
 
-            /// print point grid
-            print_2d_array(z_grid.size(), z_grid[0].size(), 3, [](const uint8_t ix, const uint8_t iy) { return z_grid[ix][iy]; });
+            print_grid(z_grid);
 
-            print_area(z_grid);
-
-            SERIAL_ECHO(int(x));
+            SERIAL_ECHO(int(px));
             SERIAL_EOL();
             SERIAL_ECHOLNPGM("measured_z = ["); // open 2D array
 
