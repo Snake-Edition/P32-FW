@@ -422,19 +422,19 @@ void PrusaGcodeSuite::M45() {
             }
 
             /// print point grid
-            // print_2d_array(z_grid.size(), z_grid[0].size(), 3, [](const uint8_t ix, const uint8_t iy) { return z_grid[ix][iy]; });
+            print_2d_array(z_grid.size(), z_grid[0].size(), 3, [](const uint8_t ix, const uint8_t iy) { return z_grid[ix][iy]; });
 
             print_area(z_grid);
 
-            //                 SERIAL_ECHO(int(x));
-            //   SERIAL_EOL();
-            //   SERIAL_ECHOLNPGM("measured_z = ["); // open 2D array
+            SERIAL_ECHO(int(x));
+            SERIAL_EOL();
+            SERIAL_ECHOLNPGM("measured_z = ["); // open 2D array
 
             centers[px][py] = calculate_center(z_grid);
         }
     }
 
-    // print_centers(centers);
+    print_centers(centers);
 
     current_position.z -= ubl.get_z_correction(current_position);
     planner.leveling_active = true;
