@@ -12,7 +12,7 @@
 
 const float radius_8 = 3.f;
 
-xy_pos_t get_skew_point(int8_t ix, int8_t iy) {
+xy_pos_t get_bed_point(int8_t ix, int8_t iy) {
     // std::array<xy_uint8_t, 9> skew_points = { { 14, 20 }, { 74, 20 }, { 146, 20 }, { 146, 89 }, { 74, 89 }, { 14, 99 }, { 14, 164 }, { 74, 164 }, { 146, 164 } };
     const xyz_pos_t probe = NOZZLE_TO_PROBE_OFFSET;
 
@@ -47,7 +47,7 @@ xy_pos_t get_skew_point(int8_t ix, int8_t iy) {
     return pos;
 }
 
-xy_pos_t get_skew_point(xy_byte_t index) { return get_skew_point(index.x, index.y); }
+xy_pos_t get_skew_point(xy_byte_t index) { return get_bed_point(index.x, index.y); }
 
 void print_area(std::array<std::array<float, 32>, 32> z_grid) {
     SERIAL_EOL();
@@ -399,21 +399,25 @@ void PrusaGcodeSuite::M45() {
     set_bed_leveling_enabled(false);
     remember_feedrate_scaling_off();
 
-    xy_pos_t probePos;
+    xy_pos_t bed_point;
+    xy_pos_t probe_at;
     feedRate_t xy_probe_feedrate_mm_s = MMM_TO_MMS(XY_PROBE_SPEED);
     std::array<std::array<float, 32>, 32> z_grid;
     std::array<std::array<xy_pos_t, 3>, 3> centers;
 
+    SERIAL_ECHOLNPGM("Starting M45: Skew calibration");
     /// cycle over 9 points
     for (int8_t py = 0; py < 3; ++py) {
         for (int8_t px = 0; px < 3; ++px) {
-            probePos = get_skew_point(px, py);
+            bed_point = get_bed_point(px, py);
             SERIAL_ECHO(current_position.z);
             SERIAL_EOL();
+            SERIAL_ECHOLNPGM("Move Z");
             do_blocking_move_to_z(2, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
             SERIAL_ECHO(current_position.z);
             SERIAL_EOL();
-            do_blocking_move_to(probePos, xy_probe_feedrate_mm_s);
+            SERIAL_ECHOLNPGM("Find bed");
+            do_blocking_move_to(bed_point, xy_probe_feedrate_mm_s);
             SERIAL_ECHO(current_position.z);
             SERIAL_EOL();
             bool is_z = find_safe_z();
@@ -428,10 +432,10 @@ void PrusaGcodeSuite::M45() {
             /// scan 32x32 array
             for (int8_t y = 0; y < 32; ++y) {
                 for (int8_t x = 0; x < 32; ++x) {
-                    probePos.x += x - 32 / 2 + .5f;
-                    probePos.y += y - 32 / 2 + .5f;
+                    probe_at.x = x - 32 / 2 + .5f;
+                    probe_at.y = y - 32 / 2 + .5f;
                     /// FIXME: don't go too low
-                    float measured_z = probe_at_skew_point(probePos);
+                    float measured_z = probe_at_skew_point(probe_at);
                     z_grid[x][y] = isnan(measured_z) ? -100.f : measured_z;
                     idle(false);
                 }
