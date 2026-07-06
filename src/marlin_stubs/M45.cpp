@@ -310,11 +310,14 @@ void calculate_skews(std::array<std::array<xy_pos_t, 3>, 3> centers) {
 }
 
 static float run_z_probe_(float min_z = -1) {
-    // Probe downward slowly to find the bed
-    if (do_probe_move(min_z, MMM_TO_MMS(Z_PROBE_SPEED_SLOW))) {
-        return NAN;
-    }
-    return current_position.z;
+    endstops.enable(true);
+    endstops.enable_z_probe(true);
+
+    float result = do_probe_move(min_z, MMM_TO_MMS(Z_PROBE_SPEED_SLOW)) ? NAN : current_position.z;
+
+    endstops.enable_z_probe(false);
+    endstops.not_homing();
+    return result;
 }
 
 float probe_at_skew_point(const xy_pos_t &pos) {
@@ -329,10 +332,7 @@ float probe_at_skew_point(const xy_pos_t &pos) {
     // Move the probe to the starting XYZ
     do_blocking_move_to(npos);
 
-    // Enable endstop checking so the probe move can stop on trigger.
-    endstops.enable(true);
     float measured_z = run_z_probe_();
-    endstops.not_homing();
 
     /// TODO: raise until untriggered
     do_blocking_move_to_z(npos.z + (Z_CLEARANCE_BETWEEN_PROBES), MMM_TO_MMS(Z_PROBE_SPEED_FAST));
@@ -359,10 +359,7 @@ bool find_safe_z() {
                 pos += ref_pos;
                 do_blocking_move_to(pos);
 
-                // probe down
-                endstops.enable(true);
                 measured_z = run_z_probe_(z);
-                endstops.not_homing();
 
                 // Check to see if the probe was triggered
                 hit = TEST(endstops.trigger_state(), Z_MIN);
