@@ -406,6 +406,44 @@ void PrusaGcodeSuite::M45() {
     std::array<std::array<xy_pos_t, 3>, 3> centers;
 
     SERIAL_ECHOLNPGM("Starting M45: Skew calibration");
+
+    // Move Z to a safe height (e.g. 10mm) first
+    do_blocking_move_to_z(10, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+    planner.synchronize();
+
+    /// cycle over 9 points
+    for (int8_t py = 0; py < 3; ++py) {
+        for (int8_t px = 0; px < 3; ++px) {
+            bed_point = get_bed_point(px, py);
+
+            SERIAL_ECHOPAIR("Moving to point PX:", (int)px);
+            SERIAL_ECHOPAIR(" PY:", (int)py);
+            SERIAL_ECHOPAIR(" -> X:", bed_point.x);
+            SERIAL_ECHOLNPAIR(" Y:", bed_point.y);
+
+            do_blocking_move_to_z(2, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+            do_blocking_move_to(bed_point, xy_probe_feedrate_mm_s);
+            planner.synchronize();
+
+            // Wait 1 second at the point to observe
+            safe_delay(1000);
+        }
+    }
+
+    // Move back to safe Z
+    do_blocking_move_to_z(10, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+    planner.synchronize();
+
+    (void)z_grid;
+    (void)centers;
+    (void)probe_at;
+
+    restore_feedrate_and_scaling();
+    planner.synchronize();
+    report_current_position();
+
+    /* ORIGINAL CALIBRATION LOGIC - COMMENTED OUT FOR DRY RUN
+    SERIAL_ECHOLNPGM("Starting M45: Skew calibration");
     /// cycle over 9 points
     for (int8_t py = 0; py < 3; ++py) {
         for (int8_t px = 0; px < 3; ++px) {
@@ -418,6 +456,8 @@ void PrusaGcodeSuite::M45() {
             SERIAL_EOL();
             SERIAL_ECHOLNPGM("Find bed");
             do_blocking_move_to(bed_point, xy_probe_feedrate_mm_s);
+            SERIAL_ECHO(current_position.z);
+            SERIAL_EOL();
             bool is_z = find_safe_z();
             if (!is_z) {
                 centers[px][py] = xy_pos_t { NAN, NAN };
@@ -429,13 +469,10 @@ void PrusaGcodeSuite::M45() {
                 for (int8_t x = 0; x < 32; ++x) {
                     probe_at.x = bed_point.x + x - 32 / 2 + .5f;
                     probe_at.y = bed_point.y + y - 32 / 2 + .5f;
-                    do_blocking_move_to(probe_at, xy_probe_feedrate_mm_s);
-                    do_blocking_move_to_z(1.5f, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
-                    do_blocking_move_to_z(2, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
                     /// FIXME: don't go too low
-                    // float measured_z = probe_at_skew_point(probe_at);
-                    // z_grid[x][y] = isnan(measured_z) ? -100.f : measured_z;
-                    // idle(false);
+                    float measured_z = probe_at_skew_point(probe_at);
+                    z_grid[x][y] = isnan(measured_z) ? -100.f : measured_z;
+                    idle(false);
                 }
             }
 
@@ -445,7 +482,7 @@ void PrusaGcodeSuite::M45() {
             SERIAL_EOL();
             SERIAL_ECHOLNPGM("measured_z = ["); // open 2D array
 
-            // centers[px][py] = calculate_center(z_grid);
+            centers[px][py] = calculate_center(z_grid);
         }
     }
 
