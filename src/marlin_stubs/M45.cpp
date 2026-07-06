@@ -408,7 +408,7 @@ void PrusaGcodeSuite::M45() {
     SERIAL_ECHOLNPGM("Starting M45: Skew calibration");
 
     // Move Z to a safe height (e.g. 10mm) first
-    do_blocking_move_to_z(10, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+    do_blocking_move_to_z(2, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
     planner.synchronize();
 
     /// cycle over 9 points
@@ -421,18 +421,19 @@ void PrusaGcodeSuite::M45() {
             SERIAL_ECHOPAIR(" -> X:", bed_point.x);
             SERIAL_ECHOLNPAIR(" Y:", bed_point.y);
 
-            do_blocking_move_to_z(2, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
-            do_blocking_move_to(bed_point, xy_probe_feedrate_mm_s);
-            planner.synchronize();
-
-            // Wait 1 second at the point to observe
-            safe_delay(1000);
+            /// scan 32x32 array
+            for (int8_t y = 0; y < 32; ++y) {
+                for (int8_t x = 0; x < 32; ++x) {
+                    probe_at.x = bed_point.x + x - 32 / 2 + .5f;
+                    probe_at.y = bed_point.y + y - 32 / 2 + .5f;
+                    do_blocking_move_to(probe_at, xy_probe_feedrate_mm_s);
+                    do_blocking_move_to_z(1.5f, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+                    do_blocking_move_to_z(2, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+                    planner.synchronize();
+                }
+            }
         }
     }
-
-    // Move back to safe Z
-    do_blocking_move_to_z(10, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
-    planner.synchronize();
 
     (void)z_grid;
     (void)centers;
@@ -504,6 +505,7 @@ void PrusaGcodeSuite::M45() {
 
     planner.synchronize();
     report_current_position();
+    */
 }
 
 /// Skew computation:
