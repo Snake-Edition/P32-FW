@@ -418,12 +418,7 @@ void PrusaGcodeSuite::M45() {
             SERIAL_EOL();
             SERIAL_ECHOLNPGM("Find bed");
             do_blocking_move_to(bed_point, xy_probe_feedrate_mm_s);
-            SERIAL_ECHO(current_position.z);
-            SERIAL_EOL();
             bool is_z = find_safe_z();
-            SERIAL_ECHO(current_position.z);
-            SERIAL_EOL();
-
             if (!is_z) {
                 centers[px][py] = xy_pos_t { NAN, NAN };
                 continue;
@@ -432,12 +427,15 @@ void PrusaGcodeSuite::M45() {
             /// scan 32x32 array
             for (int8_t y = 0; y < 32; ++y) {
                 for (int8_t x = 0; x < 32; ++x) {
-                    probe_at.x = x - 32 / 2 + .5f;
-                    probe_at.y = y - 32 / 2 + .5f;
+                    probe_at.x = bed_point.x + x - 32 / 2 + .5f;
+                    probe_at.y = bed_point.y + y - 32 / 2 + .5f;
+                    do_blocking_move_to(probe_at, xy_probe_feedrate_mm_s);
+                    do_blocking_move_to_z(1.5f, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+                    do_blocking_move_to_z(2, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
                     /// FIXME: don't go too low
-                    float measured_z = probe_at_skew_point(probe_at);
-                    z_grid[x][y] = isnan(measured_z) ? -100.f : measured_z;
-                    idle(false);
+                    // float measured_z = probe_at_skew_point(probe_at);
+                    // z_grid[x][y] = isnan(measured_z) ? -100.f : measured_z;
+                    // idle(false);
                 }
             }
 
@@ -447,7 +445,7 @@ void PrusaGcodeSuite::M45() {
             SERIAL_EOL();
             SERIAL_ECHOLNPGM("measured_z = ["); // open 2D array
 
-            centers[px][py] = calculate_center(z_grid);
+            // centers[px][py] = calculate_center(z_grid);
         }
     }
 
