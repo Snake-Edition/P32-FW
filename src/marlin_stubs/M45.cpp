@@ -424,10 +424,6 @@ void PrusaGcodeSuite::M45() {
                 for (int8_t x = 0; x < N_POINTS; ++x) {
                     probe_at.x = bed_point.x + x - N_POINTS / 2 + .5f;
                     probe_at.y = bed_point.y + y - N_POINTS / 2 + .5f;
-                    do_blocking_move_to(probe_at, xy_probe_feedrate_mm_s);
-                    do_blocking_move_to_z(1.5f, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
-                    do_blocking_move_to_z(2, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
-
                     float measured_z = probe_at_skew_point(probe_at);
                     z_grid[x][y] = isnan(measured_z) ? -100.f : measured_z;
                 }
