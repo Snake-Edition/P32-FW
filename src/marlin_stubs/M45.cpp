@@ -11,6 +11,7 @@
 #include "../../lib/Marlin/Marlin/src/module/endstops.h"
 
 const float radius_8 = 3.f;
+const uint8_t N_POINTS = 8; //< millimeters of scanning area
 
 xy_pos_t get_bed_point(int8_t ix, int8_t iy) {
     // std::array<xy_uint8_t, 9> skew_points = { { 14, 20 }, { 74, 20 }, { 146, 20 }, { 146, 89 }, { 74, 89 }, { 14, 99 }, { 14, 164 }, { 74, 164 }, { 146, 164 } };
@@ -337,9 +338,6 @@ float probe_at_skew_point(const xy_pos_t &pos) {
     do_blocking_move_to_z(npos.z + (Z_CLEARANCE_BETWEEN_PROBES), MMM_TO_MMS(Z_PROBE_SPEED_FAST));
 
     feedrate_mm_s = old_feedrate_mm_s;
-    if (isnan(measured_z)) {
-        return 0;
-    }
     return measured_z;
 }
 
@@ -422,14 +420,16 @@ void PrusaGcodeSuite::M45() {
             SERIAL_ECHOLNPAIR(" Y:", bed_point.y);
 
             /// scan 32x32 array
-            for (int8_t y = 0; y < 32; ++y) {
-                for (int8_t x = 0; x < 32; ++x) {
-                    probe_at.x = bed_point.x + x - 32 / 2 + .5f;
-                    probe_at.y = bed_point.y + y - 32 / 2 + .5f;
+            for (int8_t y = 0; y < N_POINTS; ++y) {
+                for (int8_t x = 0; x < N_POINTS; ++x) {
+                    probe_at.x = bed_point.x + x - N_POINTS / 2 + .5f;
+                    probe_at.y = bed_point.y + y - N_POINTS / 2 + .5f;
                     do_blocking_move_to(probe_at, xy_probe_feedrate_mm_s);
                     do_blocking_move_to_z(1.5f, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
                     do_blocking_move_to_z(2, MMM_TO_MMS(Z_PROBE_SPEED_FAST));
-                    planner.synchronize();
+
+                    float measured_z = probe_at_skew_point(probe_at);
+                    z_grid[x][y] = isnan(measured_z) ? -100.f : measured_z;
                 }
             }
         }
