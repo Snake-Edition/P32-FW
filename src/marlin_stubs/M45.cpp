@@ -11,7 +11,8 @@
 #include "../../lib/Marlin/Marlin/src/module/endstops.h"
 
 const float radius_8 = 3.f;
-const uint8_t N_POINTS = 8; //< millimeters of scanning area
+const uint8_t N_POINTS = 8; //< points in scanning line
+const uint8_t SCAN_STEP = 2; //< distance between points in scanning line
 
 xy_pos_t get_bed_point(int8_t ix, int8_t iy) {
     // std::array<xy_uint8_t, 9> skew_points = { { 14, 20 }, { 74, 20 }, { 146, 20 }, { 146, 89 }, { 74, 89 }, { 14, 99 }, { 14, 164 }, { 74, 164 }, { 146, 164 } };
@@ -330,12 +331,13 @@ float probe_at_skew_point(const xy_pos_t &pos) {
     feedrate_mm_s = XY_PROBE_FEEDRATE_MM_S;
 
     // Move the probe to the starting XYZ
-    do_blocking_move_to(npos);
+    do_blocking_move_to(npos, 9999.f);
 
     float measured_z = run_z_probe_();
 
     /// TODO: raise until untriggered
-    do_blocking_move_to_z(npos.z + (Z_CLEARANCE_BETWEEN_PROBES), MMM_TO_MMS(Z_PROBE_SPEED_FAST));
+    float return_z = isnan(measured_z) ? npos.z + 2.f : measured_z + 1.f;
+    do_blocking_move_to_z(return_z, MMM_TO_MMS(60 * 60));
 
     feedrate_mm_s = old_feedrate_mm_s;
     return measured_z;
@@ -416,11 +418,11 @@ void PrusaGcodeSuite::M45() {
             SERIAL_ECHOPAIR(" -> X:", bed_point.x);
             SERIAL_ECHOLNPAIR(" Y:", bed_point.y);
 
-            /// scan 32x32 array
-            for (int8_t y = 0; y < N_POINTS; ++y) {
-                for (int8_t x = 0; x < N_POINTS; ++x) {
-                    probe_at.x = bed_point.x + x - N_POINTS / 2 + .5f;
-                    probe_at.y = bed_point.y + y - N_POINTS / 2 + .5f;
+            /// scan array
+            for (int8_t y = 0; y < N_POINTS * SCAN_STEP; y += SCAN_STEP) {
+                for (int8_t x = 0; x < N_POINTS * SCAN_STEP; x += SCAN_STEP) {
+                    probe_at.x = bed_point.x + x - N_POINTS * SCAN_STEP / 2 + .5f;
+                    probe_at.y = bed_point.y + y - N_POINTS * SCAN_STEP / 2 + .5f;
                     float measured_z = probe_at_skew_point(probe_at);
                     z_grid[x][y] = isnan(measured_z) ? -100.f : measured_z;
                 }
